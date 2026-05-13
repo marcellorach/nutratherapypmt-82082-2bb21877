@@ -223,7 +223,7 @@ User Query → Entity Extraction (Gemini 3) →
   → Combine contexts → Gemini 3 Pro Preview synthesis → Answer + Graph
 ```
 
-### Modelo de Dados Neo4j - VetGraphRAG (5 Camadas Hierárquicas)
+### Modelo de Dados Neo4j - Senex AI (5 Camadas Hierárquicas)
 
 O sistema utiliza um modelo hierárquico de 5 camadas inspirado no **MedGraphRAG** e **Biolink Model**:
 
@@ -303,7 +303,7 @@ Curcumin [L0] -[:INHIBITS {IC50: "10 μM"}]-> NF-κB pathway [L1]
 | `hierarchical_edges` | Relações entre layers | `source_id`, `target_id`, `relationship`, `intensity`, `evidence_level` |
 | `triplet_extractions` | Triplets extraídos com layers | `subject_layer`, `object_layer`, `mechanism_path`, `synergy_data` |
 
-### Status de Implementação VetGraphRAG
+### Status de Implementação Senex AI
 
 | Componente | Status | Documentação |
 |------------|--------|--------------|

@@ -35,7 +35,7 @@ export interface KgMissingTripletsResult {
 }
 
 /** Admin-only. Returns the (condition × compound) gaps that prevent the
- * VetGraphRAG protocol from generating measurable years_gained for this pet. */
+ * Senex AI protocol from generating measurable years_gained for this pet. */
 export function useKgMissingTriplets(
   petId: string | null | undefined,
   recommendedCompounds: string[] | null,

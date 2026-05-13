@@ -399,7 +399,7 @@ const TutorPage: React.FC = () => {
                                   : '-'}
                               </p>
                               <p className="text-muted-foreground text-sm">
-                                {recommendations[0]?.recommendation_source || 'VetGraphRAG'}
+                                {recommendations[0]?.recommendation_source || 'Senex AI'}
                               </p>
                             </CardContent>
                           </Card>
@@ -416,7 +416,7 @@ const TutorPage: React.FC = () => {
                                 <CardHeader>
                                   <CardTitle>{data.title || data.condition || 'Recomendação'}</CardTitle>
                                   <CardDescription>
-                                    {rec.rationale || 'Baseado na análise VetGraphRAG do Knowledge Graph'}
+                                    {rec.rationale || 'Baseado na análise Senex AI do Knowledge Graph'}
                                   </CardDescription>
                                 </CardHeader>
                                 <CardContent>

@@ -288,7 +288,7 @@ const EnhancedStudyVisualization: React.FC<EnhancedStudyVisualizationProps> = ({
                 {t('viz.neo4jGraph.title', 'Knowledge Graph (Neo4j)')}
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                {t('viz.neo4jGraph.description', 'Grafo hierárquico VetGraphRAG com relações reais sincronizadas')}
+                {t('viz.neo4jGraph.description', 'Grafo hierárquico Senex AI com relações reais sincronizadas')}
               </p>
             </CardHeader>
             <CardContent>

@@ -1,9 +1,9 @@
 
 import { useState, useEffect } from 'react';
 import { VetGraphRAGAnalysisResult } from '@/types/vetgraphrag';
-import { useVetGraphRAGQueue } from './ntai/useVetGraphRAGQueue';
-import { useVetGraphRAGLogs } from './ntai/useVetGraphRAGLogs';
-import { useVetGraphRAGConfig } from './ntai/useVetGraphRAGConfig';
+import { useVetGraphRAGQueue } from './ntai/useSenex AIQueue';
+import { useVetGraphRAGLogs } from './ntai/useSenex AILogs';
+import { useVetGraphRAGConfig } from './ntai/useSenex AIConfig';
 import { useAvailableStudies } from './ntai/useAvailableStudies';
 import { useSelectionHandling } from './ntai/useSelectionHandling';
 import { useProcessingLogic } from './ntai/useProcessingLogic';

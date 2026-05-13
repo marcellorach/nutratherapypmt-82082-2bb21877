@@ -144,10 +144,10 @@ const RecommendationsList: React.FC<RecommendationsListProps> = ({ selectedPet }
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="text-lg">
-                      {data.title || data.condition || 'Recomendação VetGraphRAG'}
+                      {data.title || data.condition || 'Recomendação Senex AI'}
                     </CardTitle>
                     <CardDescription>
-                      Fonte: {rec.recommendation_source || 'VetGraphRAG'} • 
+                      Fonte: {rec.recommendation_source || 'Senex AI'} • 
                       {rec.created_at ? ` ${new Date(rec.created_at).toLocaleDateString('pt-BR')}` : ''}
                     </CardDescription>
                   </div>

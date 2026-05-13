@@ -385,7 +385,7 @@
     },
     "neo4jGraph": {
       "title": "Knowledge Graph (Neo4j)",
-      "description": "VetGraphRAG hierarchical graph with real synchronized relations"
+      "description": "Senex AI hierarchical graph with real synchronized relations"
     },
     "distribution": {
       "title": "Efficacy Distribution"
@@ -565,7 +565,7 @@
       "curatedLibraryTab": "Library",
       "importsTab": "Imports",
       "title": "Scientific Studies Digestion",
-      "description": "Complete pipeline: from PDF upload to AI extraction and curation for VetGraphRAG",
+      "description": "Complete pipeline: from PDF upload to AI extraction and curation for Senex AI",
       "uploadTab": "Upload PDFs",
       "auditLogTab": "Upload Audit Log",
       "aiProcessingTab": "AI Processing",
@@ -610,7 +610,7 @@
       "useProcessButton": "Use the \"Process\" button in the pipeline to start extraction"
     },
     "vetGraphRAG": {
-      "title": "VetGraphRAG",
+      "title": "Senex AI",
       "subtitle": "Knowledge Extraction Pipeline",
       "description": "Hybrid system for extraction and construction of veterinary knowledge graph from scientific studies",
       "descriptionShort": "AI-powered veterinary knowledge extraction"
@@ -818,7 +818,7 @@
     "vetgraphrag": {
       "processing": {
         "title": "AI Processing",
-        "info": "VetGraphRAG Digestion Pipeline",
+        "info": "Senex AI Digestion Pipeline",
         "model": "Model",
         "status": "Status",
         "statusProcessing": "Processing",
@@ -828,7 +828,7 @@
         "step1Title": "PDF Parsing & OCR",
         "step1Desc": "Layout-aware full-text extraction with table recognition, figure detection, and structured metadata harvesting (authors, journal, year, DOI).",
         "step2Title": "Entity Extraction (NER)",
-        "step2Desc": "AI-powered Named Entity Recognition identifying nutraceuticals, health conditions, molecular mechanisms, dosages and species across the 5-layer VetGraphRAG ontology (L0–L4).",
+        "step2Desc": "AI-powered Named Entity Recognition identifying nutraceuticals, health conditions, molecular mechanisms, dosages and species across the 5-layer Senex AI ontology (L0–L4).",
         "step3Title": "Knowledge Triplet Generation",
         "step3Desc": "Causal relationship mapping: Compound → Molecular Target → Mechanism → Biological Effect → Clinical Outcome, with extraction confidence scores and evidence level classification.",
         "step4Title": "Vectorization & Semantic Indexing",
@@ -848,14 +848,14 @@
       "hideLog": "Hide Log",
       "showLog": "Show Log",
       "settings": "Settings",
-      "infoTitle": "VetGraphRAG Processing Information",
+      "infoTitle": "Senex AI Processing Information",
       "availableStudies": "Available Studies for Processing",
       "queueEmpty": "No items in processing queue",
-      "analysisResults": "VetGraphRAG Analysis Results",
+      "analysisResults": "Senex AI Analysis Results",
       "cardGenerated": "Card Generated for Kanban",
       "cardAdded": "Card added to kanban",
       "cardAddedDesc": "The study was successfully analyzed and a card was generated in the kanban in the \"New Studies\" column.",
-      "curationWarning": "⚠️ This study has been processed but will not be incorporated into VetGraphRAG until it is curated and approved in the Curation panel.",
+      "curationWarning": "⚠️ This study has been processed but will not be incorporated into Senex AI until it is curated and approved in the Curation panel.",
       "curationWarningTitle": "Pending Curation",
       "errorTitle": "Processing Error",
       "errorInvalidUuid": "Invalid study ID. Try reimporting the study.",
@@ -933,7 +933,7 @@
       },
       "vetGraphRAG": {
         "regenerate": "Regenerate",
-        "regenerateTooltip": "Regenerate VetGraphRAG hierarchical triplets for this study"
+        "regenerateTooltip": "Regenerate Senex AI hierarchical triplets for this study"
       },
       "analysis": {
         "stages": {
@@ -1013,7 +1013,7 @@
     },
     "card": {
       "ragAnalysis": "RAG Analysis",
-      "vetgraphragAnalysis": "VetGraphRAG Analysis",
+      "vetgraphragAnalysis": "Senex AI Analysis",
       "nutraceuticals": "Nutraceuticals",
       "conditions": "Conditions",
       "interactions": "Interactions",
@@ -1022,7 +1022,7 @@
       "deleteDescription": "The study will be moved to trash and can be restored later.",
       "deleteSuccess": "Study moved to trash",
       "deleteError": "Error moving study",
-      "ntaiAnalysis": "VetGraphRAG Analysis",
+      "ntaiAnalysis": "Senex AI Analysis",
       "awaitingAI": "Awaiting AI",
       "processingStatus": "Processing",
       "completed": "Completed",
@@ -1928,7 +1928,7 @@
     },
     "tabInfo": {
       "button": "Information about this tab",
-      "vetgraphragButton": "ℹ️ About VetGraphRAG",
+      "vetgraphragButton": "ℹ️ About Senex AI",
       "description": "Understand the methodology, scientific foundations and objectives of this feature",
       "lastUpdate": "Last Update",
       "keyExcerpts": {
@@ -5632,7 +5632,7 @@
     "profile": {
       "viewProfile": "View Profile",
       "years": "years",
-      "analyzeWithKG": "Analyze with VetGraphRAG",
+      "analyzeWithKG": "Analyze with Senex AI",
       "clinicalNotes": "Clinical Notes",
       "clinicalHistory": "Clinical History",
       "noNotes": "No clinical notes registered",
@@ -5641,7 +5641,7 @@
       "analysisComplete": "Analysis Complete",
       "analysisCompleteDesc": "Recommendations generated based on the Knowledge Graph.",
       "analysisError": "Analysis Error",
-      "kgAnalysisTitle": "VetGraphRAG Analysis",
+      "kgAnalysisTitle": "Senex AI Analysis",
       "conditionsAnalyzed": "Conditions analyzed",
       "kgFindings": "Knowledge Graph Findings",
       "entitiesFound": "entities",
@@ -5751,7 +5751,7 @@
     },
     "technology": {
       "badge": "The Brain Behind the Science",
-      "title": "VetGraphRAG",
+      "title": "Senex AI",
       "subtitle": "A MedGraphRAG purpose-built for veterinary geroscience. Five-layer causal knowledge model with machine learning feedback loop for continuous discovery.",
       "layersTitle": "Five-Layer Causal Knowledge Model",
       "layers": {
@@ -5858,7 +5858,7 @@
       },
       "moat3": {
         "title": "AI-Powered Geroscience",
-        "desc": "VetGraphRAG combines knowledge graph reasoning with LLM intelligence for explainable recommendations."
+        "desc": "Senex AI combines knowledge graph reasoning with LLM intelligence for explainable recommendations."
       },
       "moat4": {
         "title": "PAMEC Credibility",
@@ -6170,7 +6170,7 @@
     "assessmentDesc": "Instructions for methodological assessment and study scoring",
     "assessmentUserDesc": "Request to calculate quality, relevance and novelty scores",
     "tripletsDesc": "Instructions for triplet generation (Subject-Predicate-Object) for Knowledge Graph",
-    "tripletsUserDesc": "Request to extract structured semantic relations (VetGraphRAG)",
+    "tripletsUserDesc": "Request to extract structured semantic relations (Senex AI)",
     "promptPlaceholder": "{{type}} prompt for {{stage}}..."
   },
   "promptEditor": {
@@ -6959,14 +6959,14 @@
       "kgInference": "Inferred Biological Process"
     },
     "analysisByCondition": {
-      "title": "Analysis by Condition (VetGraphRAG)",
+      "title": "Analysis by Condition (Senex AI)",
       "description": "Treatments, biological mechanisms and causal connections identified by the Knowledge Graph for each patient condition."
     },
     "clinicalAlerts": {
       "title": "Alerts",
       "alertsFound": "{{count}} clinical alert(s) identified",
       "noAlerts": "No clinical alerts identified",
-      "noDataAvailable": "Run VetGraphRAG analysis to identify clinical alerts",
+      "noDataAvailable": "Run Senex AI analysis to identify clinical alerts",
       "breedPredispositions": "Breed Predispositions",
       "labAbnormalities": "Abnormal Lab Results",
       "interactions": "Drug Interactions",
@@ -6980,7 +6980,7 @@
       "discoveriesCount": "clinical discovery(ies)"
     },
     "insights": {
-      "title": "VetGraphRAG Analysis",
+      "title": "Senex AI Analysis",
       "subtitle": "Clinical intelligence from the Knowledge Graph — separated from medical record data",
       "currentConditions": "Confirmed Current Conditions",
       "currentConditionsDesc": "Diagnosed conditions enriched with Knowledge Graph data",
@@ -7160,8 +7160,8 @@
       "title": "Digital Twin",
       "description": "Anatomical condition mapping for {{name}} ({{breed}}, {{age}} years)",
       "silhouetteAlt": "Dog anatomical silhouette with condition markers",
-      "lockedTitle": "Awaiting VetGraphRAG analysis",
-      "lockedBody": "The temporal without-vs-with-protocol comparison is only generated after the VetGraphRAG analysis, so it reflects the stack actually recommended for this pet.",
+      "lockedTitle": "Awaiting Senex AI analysis",
+      "lockedBody": "The temporal without-vs-with-protocol comparison is only generated after the Senex AI analysis, so it reflects the stack actually recommended for this pet.",
       "aiLoading": "Computing digital twin trajectory...",
       "newRisk": "New",
       "protected": "protected",
@@ -7242,11 +7242,11 @@
         "protected": "protected",
         "systemic": "systemic load"
       },
-      "lockedTitle": "Awaiting VetGraphRAG analysis",
-      "lockedBody": "The biological trajectory projection is only generated after the VetGraphRAG analysis, so the \"with protocol\" scenario reflects the stack actually recommended for this pet.",
+      "lockedTitle": "Awaiting Senex AI analysis",
+      "lockedBody": "The biological trajectory projection is only generated after the Senex AI analysis, so the \"with protocol\" scenario reflects the stack actually recommended for this pet.",
       "noBenefitBanner": "For this pet, the geroprotector protocol does NOT change the trajectory: none of the conditions/predispositions have sufficient KG evidence in the current knowledge base.",
       "moreConditions": "more",
-      "basedOnAnalysis": "Based on VetGraphRAG analysis from {{when}}",
+      "basedOnAnalysis": "Based on Senex AI analysis from {{when}}",
       "evidencePanelTitle": "Clinical evidence",
       "scenarioWithout": "Without protocol",
       "scenarioWith": "With protocol",
@@ -7742,8 +7742,8 @@
   "machineSummary": {
     "title": "Automatic interpretation of this visit",
     "tags": "Clinical tags",
-    "canonical": "Canonical terms (VetGraphRAG)",
-    "disclaimer": "These data feed the VetGraphRAG analysis. The vet's original text is not altered."
+    "canonical": "Canonical terms (Senex AI)",
+    "disclaimer": "These data feed the Senex AI analysis. The vet's original text is not altered."
   },
   "geroscienceAttention": {
     "sectionTitle": "Geriatric / geroscience attention",

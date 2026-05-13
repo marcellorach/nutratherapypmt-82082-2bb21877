@@ -215,7 +215,7 @@ export const buildProposalPdfDocument = (
       React.createElement(
         Text,
         { style: styles.footer, fixed: true },
-        `Gerado em ${generatedAt.toLocaleString('pt-BR')} — VetGraphRAG · Lovable Cloud`,
+        `Gerado em ${generatedAt.toLocaleString('pt-BR')} — Senex AI · Lovable Cloud`,
       ),
     ),
   );

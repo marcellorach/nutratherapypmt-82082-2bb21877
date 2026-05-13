@@ -156,7 +156,7 @@ export const adminTabsInfo: Record<string, TabInfoContent> = {
       }
     ],
     overview: {
-      objective: 'VetGraphRAG: Sistema híbrido de GraphRAG que combina MedGraphRAG (Triple Graph + U-Retrieval) com KGARevion (ciclo GRRA), adaptado para medicina veterinária com foco em LONGEVIDADE CANINA. Objetivo final: varrer dados de pacientes (prontuário, histórico clínico, exames, biometria) e recomendar esquemas nutracêuticos e geroprotetores personalizados para prevenir doenças degenerativas associadas à idade e estender a vida saudável dos pets.',
+      objective: 'Senex AI: Sistema híbrido de GraphRAG que combina MedGraphRAG (Triple Graph + U-Retrieval) com KGARevion (ciclo GRRA), adaptado para medicina veterinária com foco em LONGEVIDADE CANINA. Objetivo final: varrer dados de pacientes (prontuário, histórico clínico, exames, biometria) e recomendar esquemas nutracêuticos e geroprotetores personalizados para prevenir doenças degenerativas associadas à idade e estender a vida saudável dos pets.',
       workflow: [
         '1. PDF Upload → Gemini File API extrai texto completo com estrutura hierárquica preservada',
         '2. Triple Graph Construction → 4 níveis: Document → Chunk → Entity → Mechanism (5 camadas hierárquicas)',
@@ -179,7 +179,7 @@ export const adminTabsInfo: Record<string, TabInfoContent> = {
     methodology: {
       description: 'Arquitetura híbrida combinando Triple Graph Construction (MedGraphRAG), GRRA Cycle (KGARevion), e TransE Embeddings para link prediction, com 5 camadas hierárquicas de entidades. Sistema projetado para evoluir em 4 fases: Knowledge Base → Patient System → Recommendation Engine → Longitudinal Follow-up.',
       comparisonTable: {
-        headers: ['Feature', 'MedGraphRAG', 'KGARevion', 'VetGraphRAG'],
+        headers: ['Feature', 'MedGraphRAG', 'KGARevion', 'Senex AI'],
         rows: [
           { feature: '1. Entity Extraction Stages', values: ['Single stage', 'Single stage', '3 stages (Entities → Mechanisms → Clinical)'] },
           { feature: '2. Hierarchical Layers', values: ['3 níveis', '2 níveis', '5 níveis (L0→L4: Compound→Target→Mechanism→Effect→Outcome)'] },
@@ -197,7 +197,7 @@ export const adminTabsInfo: Record<string, TabInfoContent> = {
       },
       architectureDiagram: `
 ╔═══════════════════════════════════════════════════════════════════════════════╗
-║                    VetGraphRAG Architecture v4.0                               ║
+║                    Senex AI Architecture v4.0                               ║
 ║        MedGraphRAG + KGARevion + Canine Longevity Focus                        ║
 ╚═══════════════════════════════════════════════════════════════════════════════╝
 
@@ -281,7 +281,7 @@ export const adminTabsInfo: Record<string, TabInfoContent> = {
 `,
       architectureRoadmap: {
         phase1: { 
-          name: 'Knowledge Base (VetGraphRAG)', 
+          name: 'Knowledge Base (Senex AI)', 
           status: 'implemented', 
           description: 'Extração de conhecimento de PDFs científicos para Knowledge Graph com 5 camadas hierárquicas, ciclo GRRA, e TransE link prediction.' 
         },
@@ -302,7 +302,7 @@ export const adminTabsInfo: Record<string, TabInfoContent> = {
         }
       },
       componentLinks: [
-        { name: 'VetGraphRAGProcessingSection', path: '/administrador?tab=estudos', type: 'component', description: 'Interface principal de processamento de estudos' },
+        { name: 'Senex AIProcessingSection', path: '/administrador?tab=estudos', type: 'component', description: 'Interface principal de processamento de estudos' },
         { name: 'TripletCurationBoard', path: '/administrador?tab=curadoria', type: 'component', description: 'Curadoria humana de triplets extraídos' },
         { name: 'KnowledgeGraphViewer', path: '/administrador?tab=knowledge-graph', type: 'component', description: 'Visualização 2D/3D do Knowledge Graph' },
         { name: 'parse-study', path: '', type: 'edge-function', description: 'Parsing de PDFs com Unstructured API' },
@@ -341,7 +341,7 @@ Confidence = (1.0 x 0.5) + (0.92 x 0.3) + (1.0 x 0.2) = 0.976
 Action: AUTO-APPROVE`
         },
         {
-          name: '2. Synergy Score (VetGraphRAG Original)',
+          name: '2. Synergy Score (Senex AI Original)',
           formula: `Synergy(A, B) = (Shared_Pathways x 0.35) + (Mechanism_Overlap x 0.25) 
              + (Evidence_Strength x 0.25) + (Interaction_Bonus x 0.15)
 
