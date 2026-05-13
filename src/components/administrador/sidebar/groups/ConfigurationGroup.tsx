@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bot, Database, Cpu, ChevronRight, Check, Languages, ListTree, ShieldCheck, FileSearch } from "lucide-react";
+import { Bot, Database, Cpu, ChevronRight, Check, Languages, ListTree, ShieldCheck, FileSearch, CheckCircle2 } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useTranslation } from 'react-i18next';
 
@@ -14,7 +14,11 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
   handleStepClick 
 }) => {
   const { t } = useTranslation();
-  
+
+  const ConfiguredCheck = () => (
+    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 ml-2 shrink-0" aria-label="Configurado" />
+  );
+
   return (
     <>
       <SidebarMenuItem>
@@ -28,9 +32,12 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
               <Database className={`h-4 w-4 mr-2 ${currentStep === "knowledge-base-settings" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.configuration.knowledgeBase')}</span>
             </div>
-            {currentStep === "knowledge-base-settings" && (
+            <div className="flex items-center ml-auto">
+              <ConfiguredCheck />
+              {currentStep === "knowledge-base-settings" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-            )}
+              )}
+            </div>
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -45,9 +52,12 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
               <Cpu className={`h-4 w-4 mr-2 ${currentStep === "config-ia" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.configuration.aiConfig')}</span>
             </div>
-            {currentStep === "config-ia" && (
+            <div className="flex items-center ml-auto">
+              <ConfiguredCheck />
+              {currentStep === "config-ia" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-            )}
+              )}
+            </div>
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -62,9 +72,12 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
               <Bot className={`h-4 w-4 mr-2 ${currentStep === "prompts" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.configuration.aiPrompts')}</span>
             </div>
-            {currentStep === "prompts" && (
+            <div className="flex items-center ml-auto">
+              <ConfiguredCheck />
+              {currentStep === "prompts" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-            )}
+              )}
+            </div>
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -79,9 +92,12 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
               <Check className={`h-4 w-4 mr-2 ${currentStep === "actions" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.actions.bulkActions')}</span>
             </div>
-            {currentStep === "actions" && (
+            <div className="flex items-center ml-auto">
+              <ConfiguredCheck />
+              {currentStep === "actions" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-            )}
+              )}
+            </div>
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -96,9 +112,12 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
               <Languages className={`h-4 w-4 mr-2 ${currentStep === "translation-audit" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.configuration.translationAudit')}</span>
             </div>
-            {currentStep === "translation-audit" && (
+            <div className="flex items-center ml-auto">
+              <ConfiguredCheck />
+              {currentStep === "translation-audit" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-            )}
+              )}
+            </div>
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -113,9 +132,12 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
               <ListTree className={`h-4 w-4 mr-2 ${currentStep === "organograma" ? "text-primary" : ""}`} />
               <span>Organograma</span>
             </div>
-            {currentStep === "organograma" && (
+            <div className="flex items-center ml-auto">
+              <ConfiguredCheck />
+              {currentStep === "organograma" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-            )}
+              )}
+            </div>
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -130,9 +152,12 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
               <ShieldCheck className={`h-4 w-4 mr-2 ${currentStep === "compliance-dashboard" ? "text-primary" : ""}`} />
               <span>Conformidade FDA/EMA/AVMA</span>
             </div>
-            {currentStep === "compliance-dashboard" && (
+            <div className="flex items-center ml-auto">
+              <ConfiguredCheck />
+              {currentStep === "compliance-dashboard" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-            )}
+              )}
+            </div>
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -147,9 +172,12 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
               <FileSearch className={`h-4 w-4 mr-2 ${currentStep === "technical-audits" ? "text-primary" : ""}`} />
               <span>Auditorias Técnicas</span>
             </div>
-            {currentStep === "technical-audits" && (
+            <div className="flex items-center ml-auto">
+              <ConfiguredCheck />
+              {currentStep === "technical-audits" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-            )}
+              )}
+            </div>
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
