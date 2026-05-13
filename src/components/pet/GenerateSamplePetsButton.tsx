@@ -476,9 +476,7 @@ const GenerateSamplePetsButton: React.FC = () => {
           if (/dor|rigidez|fraqueza|tosse|cansa|fadiga/i.test(c.chief_complaint)) tagSeeds.push('sintomatico');
           if (/reavaliação|controle|follow/i.test(c.chief_complaint)) tagSeeds.push('reavaliacao');
           const tags = Array.from(new Set(tagSeeds)).slice(0, 8);
-          const machine_summary = c.assessment
-            ? c.assessment.split(/\.\s/)[0] + (c.assessment.includes('.') ? '.' : '')
-            : null;
+          const machine_summary = buildMachineSummary(c, pet);
           const assessment_interpretation = {
             canonical_conditions: canonicalConditions,
             systems_affected: [],
