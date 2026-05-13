@@ -1,67 +1,75 @@
 ## Objetivo
 
-Propagar o rebrand **VetGraphRAG → Senex AI** nas camadas que ainda referenciam o nome antigo (Knowledge File, Auditorias Técnicas, Organograma, Conformidade FDA/EMA/AVMA), reforçando em pontos pertinentes que **Senex AI é um sistema proprietário desenvolvido e operado exclusivamente pela PetMoreTime desde 2025** (sucessor da nomenclatura interna VetGraphRAG/VetMedGraph). Identificadores internos de código permanecem intactos.
+Diferenciar claramente as duas vozes no card de consulta:
 
-## Mensagem de marca a reforçar (boilerplate curto)
+- **"Suspeita / Diagnóstico"** (`assessment`) → texto livre, coloquial, do veterinário. Em ~30% das consultas, **omite intencionalmente um diagnóstico** que aparecerá apenas na interpretação automática.
+- **"Interpretação automática desta consulta"** (`machine_summary`) → leitura sintética porém **rica**, montada pela "máquina" (Senex AI), cruzando queixa + exame clínico + exames + condições + plano. Sempre cobre todos os achados, inclusive os que o vet esqueceu.
 
-> *"Senex AI é o motor proprietário de inferência clínica veterinária desenvolvido e operado exclusivamente pela **PetMoreTime** (2025–presente). Sucessor da arquitetura interna VetGraphRAG/VetMedGraph."*
+Isso reforça a proposta de valor: a IA captura o que o olhar humano deixa passar.
 
-Esse boilerplate (ou variações curtas como "© PetMoreTime · Senex AI") será inserido em:
-- Header do Knowledge File do projeto
-- Cabeçalho da tab **Conformidade FDA/EMA/AVMA** (contexto regulatório → autoria importa)
-- Rodapé/intro de relatórios da tab **Auditorias Técnicas**
-- Nó raiz do **Organograma** (descrição do projeto)
-- Headers de `ARCHITECTURE.md`, `docs/TECHNICAL_DECISIONS.md`, `CHANGELOG.md`
+---
 
-## Escopo
+## Mudanças
 
-### 1. Knowledge File do projeto (custom instructions / `<project-knowledge>`)
-- Substituir menções a "VetGraphRAG" por "Senex AI" no texto descritivo
-- Adicionar bloco de marca no topo: autoria PetMoreTime, período 2025–presente, natureza proprietária
-- Nota técnica: *"Identificadores internos (`vetgraphrag-*`, `useVetGraphRAG*`, `VetGraphRAGAnalysisResult`, edge functions, colunas DB) foram preservados — não renomear em refactors."*
+### 1. `src/components/pet/GenerateSamplePetsButton.tsx`
 
-### 2. Organograma (`src/data/projectOrganograma.ts` + `OrganogramaTab.tsx` + `organogramaAreaMeta.ts`)
-- Renomear nós/labels/descrições visíveis: "VetGraphRAG" → "Senex AI"
-- Atualizar descrição do nó raiz / cabeçalho da tab para incluir: *"Senex AI · PetMoreTime · 2025–presente"*
-- Manter estrutura hierárquica e IDs internos
+#### 1.1 Reescrever campos `assessment` das consultas em SAMPLE_PETS
 
-### 3. Auditorias Técnicas (`src/components/administrador/audits/TechnicalAuditsTab.tsx`)
-- Substituir "VetGraphRAG" por "Senex AI" em títulos de auditoria, descrições de checks e relatórios
-- Adicionar linha de assinatura no header da tab: *"Auditoria do motor Senex AI · © PetMoreTime"*
-- Atualizar valores correspondentes em `pt/translation.json` e `en/translation.json` (chaves preservadas)
+Tornar a redação mais livre, em primeira pessoa do veterinário, com hesitações e abreviações típicas. Em consultas selecionadas, **remover propositalmente** uma das condições do texto (mas mantê-la em `conditions[]` para o KG).
 
-### 4. Conformidade FDA/EMA/AVMA
-- Localizar componente via `admin-tabs-info.ts` (provável `src/components/administrador/compliance/*`)
-- Substituir menções a "VetGraphRAG" no copy regulatório
-- Reforçar no header da tab: *"Sistema submetido à conformidade: **Senex AI** (PetMoreTime, 2025–presente). Sucessor da arquitetura interna VetGraphRAG."* — relevante para rastreabilidade regulatória
-- Atualizar `admin-tabs-info.ts` e `admin-tabs-info-bilingual.ts` (campos `objective`/`description`)
+Exemplos de reescrita (resumo — aplico em todas as consultas):
 
-### 5. Documentação técnica
-- `docs/TECHNICAL_DECISIONS.md`: renomear "Tabelas Hierárquicas VetGraphRAG" → "Tabelas Hierárquicas Senex AI"; adicionar entrada de histórico "2026-05-13 — Rebrand visível VetGraphRAG → Senex AI · autoria PetMoreTime reforçada"
-- `ARCHITECTURE.md`: nota de autoria no header
-- `.lovable/plan.md`: substituir o plano antigo (que ainda menciona "VetGraphRAG → Senex AI" com placeholder) por este
+- Buddy / check-up — atual: *"Pet hígido. Marcadores de estresse oxidativo discretamente elevados em painel preventivo."* → novo: *"Animal aparentemente bem, sem queixas. Painel mostrou alguma coisa no oxidativo, nada alarmante."* (omite "estresse oxidativo" como label — IA recupera)
+- Rex / 3ª consulta — atual: *"Tríade confirmada: obesidade controlada, OA moderada, displasia coxofemoral grau 3 bilateral."* → novo: *"Confirmou displasia bilateral grau 3, OA já mexendo bastante. Peso vem caindo bem."* (omite "obesidade")
+- Thor / 1ª consulta — atual: *"Osteoartrite incipiente associada à atividade física intensa."* → novo: *"Cão atlético, ainda sem queixa funcional, mas já apresenta rigidez pós-treino — provavelmente desgaste articular precoce de cão de trabalho."*
+- Thor / 3ª — manter PCR/ferritina, mas escrever solto: *"Marcadores inflamatórios e oxidativos vieram acima do esperado pra idade. Vou pedir reavaliação geroprotetora."* (omite o termo "Inflammaging" — IA recupera)
+- Luna / 5ª — atual cita CDS+HP. Nova versão: *"Tutor descreveu episódios de desorientação ao acordar, e o doppler mostrou pressão pulmonar elevada. Caso ficou bem complexo, vou somar suporte hepático e cardio."* (omite explicitamente "MMVD" como label, IA recupera)
 
-### 6. URLs e screenshots
-- Verificado: não há domínios, paths públicos ou assets de imagem com "vetgraphrag" — nada a renomear nessa camada
-- Paths internos de arquivos (`vetgraphrag-service.ts` etc.) ficam fora deste escopo (refactor à parte se desejado)
+Critério: omissão em **~1 a cada 3 consultas**, sempre uma condição que ainda assim está em `conditions[]` (o KG continua íntegro).
 
-### 7. i18n e changelog
-- Bump `I18N_VERSION` para `1.74.1` (patch — completa o rebrand anterior)
-- Entrada `[Unreleased]` em `CHANGELOG.md` com `<!-- area: branding · status: done · i18n: yes -->`, mencionando autoria PetMoreTime
-- Rodar `npm run sync:changelog`
+#### 1.2 Substituir geração trivial de `machine_summary`
 
-### 8. Memória
-- Atualizar/criar `mem://branding/senex-ai-rename` consolidando: marca pública = Senex AI; **autoria exclusiva = PetMoreTime (2025–presente)**; sucessor de VetGraphRAG/VetMedGraph; identificadores internos preservados; áreas cobertas
+Remover a lógica atual (linhas 479–481) que pega só a primeira frase do `assessment`. Em vez disso, montar 3–5 frases curtas a partir de:
 
-## O que NÃO muda
+1. Queixa principal traduzida em linguagem clínica.
+2. Achados-chave do exame físico (`clinical_exam`).
+3. Resultados anormais dos `exams` (usando `flags_abnormal` + `interpretation` quando presente).
+4. Lista canônica das `conditions` desta visita (todas, mesmo as que o vet omitiu no texto livre).
+5. Síntese do plano terapêutico em uma linha.
 
-- Arquivos: `vetgraphrag-service.ts`, `vetgraphrag.ts`, `vetgraphrag-enhanced.ts`
-- Tipos: `VetGraphRAGAnalysisResult`, `VetGraphRAGConditionTag`
-- Hooks: `useVetGraphRAG*`, `useNtai*`
-- Edge functions, colunas DB, chaves i18n (paths) — só os valores
+Função utilitária local `buildMachineSummary(c)` que retorna string PT-BR rica (~60–120 palavras), exemplo para Thor/1ª:
+
+> "Cão de trabalho, 7a, em avaliação ortopédica preventiva. Exame revelou rigidez bilateral pós-exercício com massa muscular preservada. Avaliação articular registrou osteoartrite leve em quadris. Quadro compatível com OA incipiente induzida por atividade física intensa, classicamente descrita em Pastor Alemão de trabalho. Plano: suporte articular preventivo e reavaliação em 6 meses."
+
+#### 1.3 Atualizar comentário (linhas 460–462)
+
+Refletir nova lógica: "Interpretação determinística rica para demo: cobre achados que o vet pode ter omitido. Em produção real, a edge function `extract-pet-clinical-data` produz a mesma estrutura via LLM."
+
+---
+
+### 2. Sem mudanças em UI / banco / edge functions
+
+- `ConsultationMachineSummary.tsx`: já renderiza `machineSummary` com `leading-relaxed` — texto longo cabe.
+- `PetConsultationsTimeline.tsx`: já mostra `assessment` separado.
+- Não toca em `i18n.ts` (não há chaves novas).
+- Sem migração de DB.
+
+---
+
+### 3. Changelog
+
+Adicionar entrada em `[Unreleased]` (`CHANGELOG.md`) com:
+
+`<!-- area: pet-consultations · status: entregue · i18n: no -->`
+
+E rodar `npm run sync:changelog` (regra core do projeto).
+
+---
 
 ## Validação
 
-- `grep -r "VetGraphRAG" src/locales src/data/admin-* src/components/administrador docs/` → zero ocorrências em strings visíveis
-- Tela `/administrador` → tabs **Organograma**, **Conformidade FDA/EMA/AVMA**, **Auditorias Técnicas** revisadas: nome "Senex AI" + assinatura PetMoreTime visível
-- Build limpo, sem quebra de imports
+1. Clicar "Gerar pets de exemplo" e abrir cada um dos 5 pets demo.
+2. Em cada consulta verificar:
+   - "Suspeita / Diagnóstico" soa como texto livre de veterinário.
+   - "Interpretação automática" tem 3–5 frases e inclui pelo menos uma condição que NÃO está escrita no `assessment` (quando aplicável).
+3. Confirmar que nada quebra na tabela `pet_consultations` (campos existentes, sem schema novo).

@@ -1,29 +1,35 @@
 # Project context briefing (auto)
-Generated: 2026-05-13T02:01:45.001Z
+Generated: 2026-05-13T11:03:50.822Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.74.1
+## Latest i18n version: no
 
 ## Changes by area (last 14 days)
-- **vet-ui**: 13
+- **vet-ui**: 14
 - **admin**: 11
 - **tutor-ui**: 7
 - **clinical-pipeline**: 6
 - **kg**: 6
 - **i18n**: 3
 - **curation**: 3
-- **branding**: 2
+- **meta**: 2
 - **infra**: 2
 
 ## Top 10 recent entries
-### 2026-05-13 · [branding] CHANGED — Reforço de marca: Senex AI · © PetMoreTime · 2025–presente
+### 2026-05-13 · [vet-ui] CHANGED — Diferenciação de vozes na consulta: vet livre vs. interpretação rica da IA
+- Reescritos todos os campos `assessment` das 15 consultas de demo (`SAMPLE_PETS`) com texto livre/coloquial em primeira pessoa do veterinário; em ~1 a cada 3 consultas, uma das condições é propositalmente omitida do texto (mas mantida em `conditions[]`) para demonstrar valor da camada Senex AI.
+- Substituída a geração trivial de `machine_summary` (antes: primeira frase do assessment) por nova função `buildMachineSummary()` que sintetiza queixa + exame físico + achados laboratoriais (com `flags_abnormal` e `interpretation`) + condições canônicas completas + medicações + plano. Resultado renderizado no callout amarelo "Interpretação automática desta consulta".
+- Reforço da proposta de valor: o texto livre do vet pode esquecer um diagnóstico — a interpretação automática (Senex AI · PetMoreTime) sempre cobre todas as condições registradas via base de conhecimento.
+_files: src/components/pet/GenerateSamplePetsButton.tsx_
+
+### 2026-05-13 · [meta] CHANGED — Reforço de marca: Senex AI · © PetMoreTime · 2025–presente
 - Adicionada linha de assinatura de marca nos headers das tabs administrativas: Organograma, Auditorias Técnicas e Conformidade FDA/EMA/AVMA, deixando explícito que Senex AI é o motor proprietário desenvolvido e operado exclusivamente pela PetMoreTime (2025–presente), sucessor da arquitetura interna VetGraphRAG/VetMedGraph.
 - Documentação técnica (`docs/TECHNICAL_DECISIONS.md`, `ARCHITECTURE.md`) recebeu nota de autoria/operação no header.
 - Knowledge File do projeto (project memory) atualizado com nova entrada `mem://branding/senex-ai-rename` consolidando: marca pública = Senex AI, autoria/operação exclusiva = PetMoreTime, identificadores internos preservados.
 _files: src/pages/administrador/OrganogramaTab.tsx, src/components/administrador/audits/TechnicalAuditsTab.tsx, src/components/administrador/compliance/ComplianceDashboard.tsx, src/i18n.ts_
 
-### 2026-05-13 · [branding] CHANGED — Rebrand: motor "VetGraphRAG" passa a se chamar "Senex AI" na camada visível
+### 2026-05-13 · [meta] CHANGED — Rebrand: motor "VetGraphRAG" passa a se chamar "Senex AI" na camada visível
 - Substituição em massa da marca exposta ao usuário: "VetGraphRAG" → Senex AI em todas as traduções (PT/EN, 27 ocorrências cada), strings JSX, descrições de tabs administrativas, organograma, taxonomia biomédica, exports de PDF e relatórios de confiança.
 - Identificadores internos preservados intencionalmente: tipos (`VetGraphRAGAnalysisResult`, `VetGraphRAGConditionTag`), hooks (`useVetGraphRAGConfig`, `useVetGraphRAGLogs`, `useVetGraphRAGQueue`, `useNtaiProcessing`), componentes (`VetGraphRAGInsightsPanel`), arquivos (`vetgraphrag-service.ts`, `vetgraphrag.ts`), edge functions e colunas de DB. Evita refactor estrutural.
 - I18N bumped para `1.74.0` para invalidar cache de traduções.
@@ -70,12 +76,6 @@ _files: src/components/pet/PetRegistrationForm.tsx, src/components/pet/PetPhotoU
 - Novo serviço `src/services/longitudinal-debug-service.ts` com 3 utilidades: `auditPetLongitudinalIntegrity(petId)` (verifica N consultas, `is_latest`, FK `consultation_id` em conditions/meds/exams e `is_current` em pet_nutrition); `fetchLongitudinalDebug(...)` (debug single-shot); `compareWithVsWithoutHistory(...)` (roda inferência 2× em paralelo e calcula diff: compostos adicionados/removidos, flags anormais consideradas, menções a lacunas nutricionais, delta de racional/precauções).
 - Novo componente `LongitudinalDebugPanel` com 3 abas (Auditoria · Blocos usados · Comparação) renderizado no perfil do pet, abaixo do Patient Knowledge Subgraph — acessível ao veterinário em um clique.
 _files: src/services/longitudinal-debug-service.ts, supabase/functions/hybrid-recommendation/index.ts, src/services/hybrid-recommendation-service.ts, src/components/pet/LongitudinalDebugPanel.tsx…_
-
-### 2026-05-11 · [vet-ui] ADDED — Aprovação e normalização de exames PDF
-- `pet_exams` ganha colunas `approved`, `approved_at`, `approved_by` para fluxo de revisão antes de entrar no histórico.
-- Edge function `parse-pet-exam-pdf`: normaliza unidades (mg/dL, U/L, 10^3/µL…), coerge valores numéricos, recalcula `flag` (high/low) a partir da faixa, normaliza datas (dd/mm/aaaa → ISO), e auto-vincula a uma `pet_consultation` quando a data do exame casa com uma visita (±3 dias).
-- Edge function `enrich-pet-food-product`: clamp de percentuais 0-100, normalização de kcal/kg (detecta kcal/100g), validação de enums (`species`, `life_stage`, `food_form`, `size_target`).
-_files: supabase/functions/parse-pet-exam-pdf/index.ts, supabase/functions/enrich-pet-food-product/index.ts, src/components/pet/PetExamPdfUploader.tsx, src/components/pet/PetExamReviewDialog.tsx_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
