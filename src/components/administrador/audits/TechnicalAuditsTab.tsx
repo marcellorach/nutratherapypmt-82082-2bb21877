@@ -178,6 +178,9 @@ export default function TechnicalAuditsTab() {
             Histórico versionado de auditorias internas do Senex AI. Cada auditoria está
             vinculada à versão do sistema auditada (i18n + última entrada do changelog).
           </p>
+          <p className="text-[11px] text-muted-foreground mt-2 italic">
+            Motor <strong>Senex AI</strong> · © <strong>PetMoreTime</strong> · 2025–presente · desenvolvimento e operação exclusivos · sucessor da arquitetura interna VetGraphRAG/VetMedGraph
+          </p>
         </div>
 
         <Dialog open={newOpen} onOpenChange={setNewOpen}>
