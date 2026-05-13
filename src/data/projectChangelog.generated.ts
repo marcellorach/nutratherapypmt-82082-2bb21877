@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-13T11:53:18.009Z
+// Última geração: 2026-05-13T12:27:45.583Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,28 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-13";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-13",
+    "kind": "added",
+    "area": "vet-ui",
+    "status": "entregue",
+    "title": "Subgrafo do paciente vira Digital Twin (Fase 1)",
+    "bullets": [
+      "`PatientKnowledgeSubgraph` agora renderiza um nó Pet central (estrela azul) com tooltip de raça/idade/peso/sexo, conectando-se via `HAS_CONDITION` a todas as condições ativas — antes condições e compostos flutuavam soltos sem dono clínico.",
+      "Novos tipos de nó: medicação ativa (caixa roxa, lida de `pet_medications`) ligada ao Pet por `TAKES`, e detratores geriátricos ocultos (diamante âmbar) ligados por `EXHIBITS_DETRACTOR`.",
+      "Novo tipo de aresta `INTERACTS_WITH` (vermelha, bidirecional) desenhada automaticamente entre composto recomendado e medicação atual sempre que o pipeline detecta um `InteractionAlert` — vet vê o conflito antes de aprovar.",
+      "Heurística geroscience exportada (`inferGeroscienceTriggers`) reutilizada pela página para listar detratores no grafo sem duplicar lógica.",
+      "Conformidade No-Mock: nó/aresta só aparece se houver registro real em `pet_profiles`/`pet_medications`/`InteractionAlert`. Próximas fases: histórico, proveniência `JUSTIFIED_BY` e projeções `EXPECTED_IMPROVEMENT`.",
+      "Files: src/components/pet/PatientKnowledgeSubgraph.tsx, src/components/pet/VetGraphRAGInsightsPanel.tsx, src/pages/veterinario/PetProfilePage.tsx, src/i18n.ts"
+    ],
+    "files": [
+      "src/components/pet/PatientKnowledgeSubgraph.tsx",
+      "src/components/pet/VetGraphRAGInsightsPanel.tsx",
+      "src/pages/veterinario/PetProfilePage.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.74.4"
+  },
   {
     "date": "2026-05-13",
     "kind": "changed",
