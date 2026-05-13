@@ -90,7 +90,7 @@ const SAMPLE_PETS: DemoPet[] = [
         clinical_exam: 'Animal alerta, hidratado, mucosas normocoradas. ECC 5/9. Linfonodos não reativos. Sem alterações cardiopulmonares.',
         weight_kg_at_visit: 12,
         body_condition_score: 5,
-        assessment: 'Pet hígido. Marcadores de estresse oxidativo discretamente elevados em painel preventivo.',
+        assessment: 'Animal aparentemente bem, sem queixa do tutor. Painel preventivo veio com algumas alterações sutis, nada que mereça intervenção pesada agora.',
         plan: 'Iniciar protocolo antioxidante geroprotetor leve. Reavaliar painel oxidativo em 6 meses.',
         conditions: [
           { condition_name: 'Oxidative Stress', severity: 'mild', status: 'active', origin: 'exam_suggested' },
@@ -129,7 +129,7 @@ const SAMPLE_PETS: DemoPet[] = [
         chief_complaint: 'Tutor relata episódios de desorientação noturna leves',
         clinical_exam: 'Animal alerta, responsivo. ECC 4/9 — leve perda de massa muscular paravertebral.',
         weight_kg_at_visit: 14.4, body_condition_score: 4,
-        assessment: 'Suspeita de síndrome cognitiva canina inicial. Sarcopenia age-related em avaliação.',
+        assessment: 'Tutor descreve confusão noturna esporádica. Acho que pode ser algo cognitivo começando, mas quero confirmar com painel formal.',
         plan: 'Avaliação cognitiva formal e painel geriátrico em 30 dias. Aumentar enriquecimento ambiental.',
         conditions: [
           { condition_name: 'Cognitive Dysfunction Syndrome', severity: 'mild', status: 'active', origin: 'vet_diagnosis' },
@@ -143,7 +143,7 @@ const SAMPLE_PETS: DemoPet[] = [
         chief_complaint: 'Reavaliação geriátrica — confirmar achados anteriores',
         clinical_exam: 'Massa muscular reduzida confirmada. Cognição estável (sem progressão).',
         weight_kg_at_visit: 14, body_condition_score: 4,
-        assessment: 'CDS leve estável. Sarcopenia leve confirmada. Função renal/hepática preservadas.',
+        assessment: 'CDS leve, estável. Massa muscular confirmadamente reduzida. Bioquímica tranquila.',
         plan: 'Iniciar protocolo geroprotetor (NMN + Omega-3 + antioxidantes). Reavaliar em 90 dias.',
         conditions: [
           { condition_name: 'Sarcopenia', severity: 'mild', status: 'active', origin: 'vet_diagnosis' },
@@ -182,7 +182,7 @@ const SAMPLE_PETS: DemoPet[] = [
         chief_complaint: 'Ganho de peso progressivo — tutor solicita orientação nutricional',
         clinical_exam: 'Sobrepeso evidente. ECC 7/9. Sem queixa locomotora.',
         weight_kg_at_visit: 36, body_condition_score: 7,
-        assessment: 'Obesidade moderada. Sem sinais articulares no momento.',
+        assessment: 'Cão acima do peso, ECC 7/9. Sem queixa locomotora ainda — janela boa pra agir antes de complicar.',
         plan: 'Iniciar dieta de controle de peso. Reduzir petiscos. Aumentar exercício gradual.',
         conditions: [
           { condition_name: 'Obesity', severity: 'moderate', status: 'active', origin: 'vet_diagnosis' },
@@ -196,7 +196,7 @@ const SAMPLE_PETS: DemoPet[] = [
         chief_complaint: 'Rigidez matinal e dificuldade para subir escadas',
         clinical_exam: 'Dor à manipulação de quadril direito. Crepitação articular bilateral. ECC 6/9 (melhora vs visita anterior).',
         weight_kg_at_visit: 33, body_condition_score: 6,
-        assessment: 'Osteoartrite secundária à obesidade — confirmação clínica. Investigar componente displásico.',
+        assessment: 'Já está com OA, dor evidente em quadril direito. Quero descartar displasia antes de fechar o quadro.',
         plan: 'Iniciar Meloxicam 0.1mg/kg SID. Solicitar raio-X de quadril.',
         conditions: [
           { condition_name: 'Osteoarthritis', severity: 'moderate', status: 'active', origin: 'vet_diagnosis' },
@@ -210,7 +210,7 @@ const SAMPLE_PETS: DemoPet[] = [
         chief_complaint: 'Reavaliação — controle de dor e exames de imagem',
         clinical_exam: 'Locomoção melhor com Meloxicam. Persistência de rigidez matinal leve.',
         weight_kg_at_visit: 32, body_condition_score: 6,
-        assessment: 'Tríade confirmada: obesidade controlada, OA moderada, displasia coxofemoral grau 3 bilateral.',
+        assessment: 'Confirmou displasia bilateral grau 3 e OA já mexendo bastante. Peso vem caindo bem com a dieta.',
         plan: 'Manter Meloxicam. Adicionar protocolo nutracêutico (glucosamina, condroitina, ômega-3, curcuma). Fisioterapia.',
         conditions: [
           { condition_name: 'Hip Dysplasia', severity: 'mild', status: 'active', origin: 'exam_suggested' },
@@ -251,7 +251,7 @@ const SAMPLE_PETS: DemoPet[] = [
         chief_complaint: 'Avaliação ortopédica preventiva — cão de trabalho',
         clinical_exam: 'Animal atlético. Leve rigidez bilateral em quadril após exercício intenso.',
         weight_kg_at_visit: 39, body_condition_score: 5,
-        assessment: 'Osteoartrite incipiente associada à atividade física intensa.',
+        assessment: 'Cão atlético, ainda sem queixa funcional, mas já apresenta rigidez pós-treino. Provavelmente desgaste articular precoce típico de cão de trabalho.',
         plan: 'Suporte articular preventivo. Reavaliar em 6 meses.',
         conditions: [
           { condition_name: 'Osteoarthritis', severity: 'mild', status: 'active', origin: 'vet_diagnosis' },
@@ -265,7 +265,7 @@ const SAMPLE_PETS: DemoPet[] = [
         chief_complaint: 'Progressão da rigidez articular e fadiga aumentada',
         clinical_exam: 'OA moderada bilateral. Massa muscular preservada.',
         weight_kg_at_visit: 38.5, body_condition_score: 5,
-        assessment: 'OA moderada bilateral. Considerar AINE de longo prazo + suporte articular.',
+        assessment: 'OA progrediu, agora moderada bilateral. Vou começar AINE de longo prazo e pedir um painel inflamatório mais amplo pra entender o cenário sistêmico.',
         plan: 'Iniciar Carprofen 2mg/kg BID. Solicitar perfil bioquímico ampliado e marcadores de inflamação sistêmica (PCR, ferritina).',
         conditions: [
           { condition_name: 'Osteoarthritis', severity: 'moderate', status: 'active', origin: 'vet_diagnosis' },
@@ -279,7 +279,7 @@ const SAMPLE_PETS: DemoPet[] = [
         chief_complaint: 'Reavaliação clínica e resultados laboratoriais',
         clinical_exam: 'Sem alterações neurológicas no momento.',
         weight_kg_at_visit: 38, body_condition_score: 5,
-        assessment: 'Marcadores laboratoriais (PCR elevada, ferritina elevada, perfil oxidativo alterado) compatíveis com envelhecimento acelerado para a idade.',
+        assessment: 'Marcadores inflamatórios e oxidativos vieram acima do esperado pra idade. Vou encaminhar pra reavaliação geroprotetora.',
         plan: 'Manter Carprofen. Encaminhar para avaliação nutracêutica de longevidade.',
         conditions: [
           { condition_name: 'Inflammaging', severity: 'moderate', status: 'active', origin: 'exam_suggested' },
@@ -293,7 +293,7 @@ const SAMPLE_PETS: DemoPet[] = [
         chief_complaint: 'Tutor nota leve fraqueza em membros pélvicos',
         clinical_exam: 'Propriocepção reduzida em pélvicos. Reflexos preservados. Sem dor à palpação espinhal.',
         weight_kg_at_visit: 38, body_condition_score: 5,
-        assessment: 'Suspeita clínica de mielopatia degenerativa em fase inicial — condição clássica de Pastor Alemão.',
+        assessment: 'Tutor notou fraqueza nos posteriores. Propriocepção reduzida, reflexos ok, sem dor. Tem cara de mielopatia degenerativa começando — clássico da raça.',
         plan: 'Monitoramento neurológico mensal. Manter protocolo atual + suporte neurológico (PEA, vitaminas B).',
         conditions: [
           { condition_name: 'Degenerative Myelopathy', severity: 'mild', status: 'monitoring', origin: 'vet_diagnosis' },
@@ -330,7 +330,7 @@ const SAMPLE_PETS: DemoPet[] = [
         chief_complaint: 'Sopro cardíaco detectado em check-up de rotina',
         clinical_exam: 'Sopro sistólico grau 3/6 em foco mitral. Sem sinais de insuficiência.',
         weight_kg_at_visit: 7.6, body_condition_score: 5,
-        assessment: 'MMVD estágio B1 (assintomático sem remodelamento).',
+        assessment: 'Sopro detectado no check-up, sem repercussão clínica. Eco confirma MMVD B1, ainda sem remodelamento.',
         plan: 'Monitoramento ecocardiográfico anual. Sem terapia farmacológica indicada.',
         conditions: [
           { condition_name: 'Myxomatous Mitral Valve Disease', severity: 'mild', status: 'active', origin: 'vet_diagnosis' },
@@ -344,7 +344,7 @@ const SAMPLE_PETS: DemoPet[] = [
         chief_complaint: 'Reavaliação cardiológica anual',
         clinical_exam: 'Sopro 4/6. Sem dispneia. Sem tosse.',
         weight_kg_at_visit: 7.7, body_condition_score: 5,
-        assessment: 'Progressão para MMVD B2 — remodelamento cardíaco identificado. Indicação de Pimobendan conforme EPIC.',
+        assessment: 'Progrediu pra B2, já com remodelamento. Indicação clara de Pimobendan conforme EPIC.',
         plan: 'Iniciar Pimobendan 0.25mg/kg BID. Reavaliação em 6 meses.',
         conditions: [],
         medications: [
@@ -360,7 +360,7 @@ const SAMPLE_PETS: DemoPet[] = [
         chief_complaint: 'Tosse noturna e cansaço fácil há 2 semanas',
         clinical_exam: 'Crepitações pulmonares basais. Taquipneia em repouso (40 mpm).',
         weight_kg_at_visit: 7.4, body_condition_score: 5,
-        assessment: 'Progressão para MMVD estágio C — primeiro episódio de descompensação congestiva.',
+        assessment: 'Tosse e taquipneia há 2 semanas, com crepitação basal. Primeiro episódio de descompensação — passou pra estágio C.',
         plan: 'Adicionar Furosemida 2mg/kg SID e Benazepril 0.5mg/kg SID. Reavaliar função renal em 30 dias.',
         conditions: [],
         medications: [
@@ -376,7 +376,7 @@ const SAMPLE_PETS: DemoPet[] = [
         chief_complaint: 'Reavaliação — função renal pós-diurético',
         clinical_exam: 'Cardiologicamente compensada. Tutor nota poliúria.',
         weight_kg_at_visit: 7.2, body_condition_score: 5,
-        assessment: 'DRC IRIS 2 — parcialmente associada à furosemida crônica. Necessária ração renal.',
+        assessment: 'Função renal piorou, IRIS 2 — provavelmente efeito da furosemida crônica. Hora de trocar pra ração renal.',
         plan: 'Trocar dieta para fórmula renal. Manter cardioterapia. Reavaliar SDMA em 60 dias.',
         conditions: [
           { condition_name: 'Chronic Kidney Disease', severity: 'mild', status: 'active', origin: 'exam_suggested' },
@@ -390,7 +390,7 @@ const SAMPLE_PETS: DemoPet[] = [
         chief_complaint: 'Avaliação geriátrica integrada — cognição e pressão pulmonar',
         clinical_exam: 'Episódios ocasionais de desorientação ao acordar. Doppler cardíaco mostra HP secundária leve a moderada.',
         weight_kg_at_visit: 7.5, body_condition_score: 5,
-        assessment: 'CDS leve em monitoramento + HP pulmonar secundária ao MMVD. Caso multissistêmico complexo.',
+        assessment: 'Tutor descreveu desorientação ao acordar, e o doppler mostrou pressão pulmonar elevada. Caso ficou bem complexo, vou somar suporte hepático e cardio.',
         plan: 'Adicionar SAMe (suporte hepático), ômega-3 e CoQ10 — compatíveis com cardioterapia. Encaminhar para avaliação nutracêutica de longevidade. Evitar compostos com efeito hipotensor adicional.',
         conditions: [
           { condition_name: 'Cognitive Dysfunction Syndrome', severity: 'mild', status: 'monitoring', origin: 'vet_diagnosis' },
