@@ -31,7 +31,7 @@ const isGeroscienceProcess = (name: string): boolean => {
  * idade avançada), mesmo sem triplets explícitos no KG. Reflete consenso
  * da literatura geroscience (López-Otín hallmarks, Franceschi inflammaging).
  */
-const inferGeroscienceTriggers = (
+export const inferGeroscienceTriggers = (
   conditions: any[],
   ageYears: number,
 ): Record<string, string[]> => {
