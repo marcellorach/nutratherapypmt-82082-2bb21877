@@ -7015,7 +7015,13 @@
         "condition": "Condição",
         "mechanism": "Mecanismo",
         "effect": "Efeito",
-        "outcome": "Desfecho"
+        "outcome": "Desfecho",
+        "pet": "Paciente",
+        "medication": "Medicação",
+        "detractor": "Detrator geriátrico",
+        "past_diagnosis": "Diagnóstico passado",
+        "trait": "Traço",
+        "lab": "Exame anormal"
       },
       "provisionalBadge": "+{{count}} provisórios",
       "provisionalLegend": "aresta provisória (gap-fill, aguardando curadoria)",
