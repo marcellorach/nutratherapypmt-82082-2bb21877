@@ -282,7 +282,7 @@ const SAMPLE_PETS: DemoPet[] = [
         assessment: 'Marcadores inflamatórios e oxidativos vieram acima do esperado pra idade. Vou encaminhar pra reavaliação geroprotetora.',
         plan: 'Manter Carprofen. Encaminhar para avaliação nutracêutica de longevidade.',
         conditions: [
-          { condition_name: 'Inflammaging', severity: 'moderate', status: 'active', origin: 'exam_suggested' },
+          { condition_name: 'Chronic Inflammation', severity: 'moderate', status: 'active', origin: 'exam_suggested' },
         ],
         exams: [
           { exam_type: 'Extended Inflammatory Panel', results: { crp_mg_l: 18.5, ferritin_ng_ml: 320, '8_ohdg_ng_ml': 9.2, mda_umol_l: 4.8, interpretation: 'Inflamação sistêmica leve a moderada + estresse oxidativo aumentado para a idade' }, flags_abnormal: ['crp_mg_l', 'ferritin_ng_ml', '8_ohdg_ng_ml', 'mda_umol_l'] },
