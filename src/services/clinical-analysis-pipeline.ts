@@ -1424,7 +1424,7 @@ async function attachStudiesToCompounds(
         };
       } catch (err) {
         console.warn(`[attachStudiesToCompounds] Failed for ${c.name}:`, err);
-        return { ...c, studies: [], kgTriplets: [], synergies: [] };
+        return { ...c, studies: buildPublicSearchStudies(c.name, c.condition), kgTriplets: [], synergies: [] };
       }
     })
   );
