@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-05-12T15:45:45.622Z",
+  "timestamp": "2026-05-13T00:20:39.599Z",
   "summary": {
-    "totalFiles": 857,
+    "totalFiles": 864,
     "totalIssues": 414,
     "hardcodedTexts": 40,
     "missingKeys": 374,
@@ -2370,28 +2370,7 @@
     {
       "type": "missing-key",
       "file": "src/components/pet/GenerateSamplePetsButton.tsx",
-      "line": 474,
-      "text": "id",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/components/pet/GenerateSamplePetsButton.tsx",
-      "line": 534,
-      "text": "T",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/components/pet/GenerateSamplePetsButton.tsx",
-      "line": 552,
-      "text": "id",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/components/pet/GenerateSamplePetsButton.tsx",
-      "line": 562,
+      "line": 505,
       "text": "id",
       "severity": "high"
     },
@@ -2399,6 +2378,27 @@
       "type": "missing-key",
       "file": "src/components/pet/GenerateSamplePetsButton.tsx",
       "line": 565,
+      "text": "T",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/GenerateSamplePetsButton.tsx",
+      "line": 583,
+      "text": "id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/GenerateSamplePetsButton.tsx",
+      "line": 593,
+      "text": "id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/pet/GenerateSamplePetsButton.tsx",
+      "line": 596,
       "text": "id",
       "severity": "high"
     },
@@ -2475,7 +2475,7 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2444,
+      "line": 2531,
       "text": "@",
       "severity": "high"
     },
