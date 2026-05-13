@@ -326,6 +326,9 @@ const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
 
     // Add triplet edges
     const seenEdges = new Set<string>();
+    const compoundSet = new Set(recommendedCompounds.map(c => c.toLowerCase().trim()));
+    const conditionSet = new Set(conditions.map(c => c.toLowerCase().trim()));
+    let justifiedCount = 0;
     for (const trip of kgTriplets) {
       const subjectKey = addNode(trip.subject, guessNodeType(trip.subject, conditions, recommendedCompounds));
       const objectKey = addNode(trip.object, guessNodeType(trip.object, conditions, recommendedCompounds));
@@ -334,18 +337,37 @@ const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
       seenEdges.add(edgeKey);
 
       const predLabel = trip.predicate?.replace(/_/g, ' ') || '';
+      // Phase 3 — JUSTIFIED_BY: if this triplet links a recommended compound to
+      // an active condition with a positive predicate, visually upgrade it as
+      // explicit provenance for the recommendation.
+      const isPositive = ['TREATS', 'PREVENTS', 'SUPPORTS', 'IMPROVES', 'MODULATES'].includes(trip.predicate);
+      const justifies = isPositive
+        && compoundSet.has(String(trip.subject || '').toLowerCase().trim())
+        && conditionSet.has(String(trip.object || '').toLowerCase().trim());
+      if (justifies) justifiedCount += 1;
       links.push({
         from: subjectKey,
         to: objectKey,
-        label: predLabel.length > 15 ? predLabel.slice(0, 12) + '...' : predLabel,
-        title: `${trip.subject} ${trip.predicate} ${trip.object}`,
+        label: justifies
+          ? `✓ ${t('petProfile.subgraph.justifiedBy', 'justifica')}`
+          : (predLabel.length > 15 ? predLabel.slice(0, 12) + '...' : predLabel),
+        title: justifies
+          ? `JUSTIFIED_BY · ${trip.subject} ${trip.predicate} ${trip.object}` +
+            (trip.confidence ? ` (conf ${(trip.confidence * 100).toFixed(0)}%)` : '')
+          : `${trip.subject} ${trip.predicate} ${trip.object}`,
         arrows: 'to',
-        color: trip.predicate === 'TREATS' || trip.predicate === 'PREVENTS' ? '#22c55e' :
-               trip.predicate === 'CONTRAINDICATES' || trip.predicate === 'AGGRAVATES' ? '#ef4444' :
-               '#94a3b8',
-        width: trip.confidence ? Math.max(1, trip.confidence * 3) : 2,
+        color: justifies ? '#15803d'
+               : trip.predicate === 'TREATS' || trip.predicate === 'PREVENTS' ? '#22c55e'
+               : trip.predicate === 'CONTRAINDICATES' || trip.predicate === 'AGGRAVATES' ? '#ef4444'
+               : '#94a3b8',
+        width: justifies
+          ? Math.max(3.5, (trip.confidence || 0.7) * 5)
+          : (trip.confidence ? Math.max(1, trip.confidence * 3) : 2),
+        ...(justifies ? { shadow: { enabled: true, color: 'rgba(21,128,61,0.35)', size: 6 } } : {}),
       });
     }
+    // Stash count for legend/footer.
+    (links as any).__justifiedCount = justifiedCount;
 
     // Add pathway steps as mechanism nodes
     for (const pathway of kgPathways) {
@@ -400,6 +422,7 @@ const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
   }, [kgTriplets, kgPathways, conditions, recommendedCompounds, pendingProvisional, petProfile, activeMedications, interactionAlerts, hiddenDetractors, pastDiagnoses, traits, abnormalLabs]);
 
   if (graphData.nodes.length === 0) return null;
+  const justifiedCount: number = (graphData.links as any).__justifiedCount || 0;
 
   const customOptions = {
     physics: {
@@ -476,6 +499,17 @@ const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
               </span>
             </div>
           ))}
+          {justifiedCount > 0 && (
+            <div className="flex items-center gap-1 ml-2 pl-2 border-l">
+              <span
+                className="inline-block"
+                style={{ width: 18, height: 0, borderTop: '3px solid #15803d' }}
+              />
+              <span className="text-[10px] text-emerald-700 dark:text-emerald-400">
+                {t('petProfile.subgraph.justifiedLegend', 'JUSTIFIED_BY (proveniência da recomendação)')}
+              </span>
+            </div>
+          )}
           {pendingProvisional.length > 0 && (
             <div className="flex items-center gap-1 ml-2 pl-2 border-l">
               <span
@@ -500,6 +534,11 @@ const PatientKnowledgeSubgraph: React.FC<PatientKnowledgeSubgraphProps> = ({
           <span>{graphData.nodes.length} {t('petProfile.subgraph.nodes', 'nós')}</span>
           <span>{graphData.links.length} {t('petProfile.subgraph.edges', 'conexões')}</span>
           <span>{kgTriplets.length} {t('petProfile.subgraph.triplets', 'triplets')}</span>
+          {justifiedCount > 0 && (
+            <span className="text-emerald-700 dark:text-emerald-400">
+              ✓ {justifiedCount} {t('petProfile.subgraph.justifiedCount', 'arestas JUSTIFIED_BY')}
+            </span>
+          )}
           {pendingProvisional.length > 0 && (
             <span className="text-amber-700 dark:text-amber-400">
               ⏳ {pendingProvisional.length} {t('petProfile.subgraph.provisionalCount', 'provisórios')}
