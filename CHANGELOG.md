@@ -23,6 +23,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed - 2026-05-13 — Rebrand: motor "VetGraphRAG" passa a se chamar "Senex AI" na camada visível
+<!-- area: branding · status: entregue · i18n: 1.74.0 -->
+- Substituição em massa da marca exposta ao usuário: "VetGraphRAG" → **Senex AI** em todas as traduções (PT/EN, 27 ocorrências cada), strings JSX, descrições de tabs administrativas, organograma, taxonomia biomédica, exports de PDF e relatórios de confiança.
+- Identificadores internos preservados intencionalmente: tipos (`VetGraphRAGAnalysisResult`, `VetGraphRAGConditionTag`), hooks (`useVetGraphRAGConfig`, `useVetGraphRAGLogs`, `useVetGraphRAGQueue`, `useNtaiProcessing`), componentes (`VetGraphRAGInsightsPanel`), arquivos (`vetgraphrag-service.ts`, `vetgraphrag.ts`), edge functions e colunas de DB. Evita refactor estrutural.
+- I18N bumped para `1.74.0` para invalidar cache de traduções.
+- Docs atualizadas: ARCHITECTURE.md, docs/TECHNICAL_DECISIONS.md, .lovable/plan.md.
+
 ### Changed - 2026-05-12 — Card de consulta: separa exame físico vs complementares, renomeia avaliação e adiciona quadro amarelo de interpretação automática
 <!-- area: vet-ui · status: entregue · i18n: 1.73.0 -->
 - Achados de "Neurological/Orthopedic/Cardiovascular Examination" gravados em `pet_exams` deixam de poluir a tabela de **Exames Complementares** e passam a ser fundidos em `physical_exam.specific.<área>` no `PhysicalExamBlock`. Lógica em novo `src/services/exam-classification.ts` (`partitionExams`, `mergePhysicalExamRows`).
