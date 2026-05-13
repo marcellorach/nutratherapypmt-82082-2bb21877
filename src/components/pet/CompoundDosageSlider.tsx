@@ -535,6 +535,11 @@ IMPORTANT: When explaining mechanisms, describe the biological pathways involved
                               {t('petProfile.recommendation.linkSource.generic', 'Geral')}
                             </span>
                           )}
+                          {(s as any).provenance === 'public-search' && (
+                            <span className="text-[9px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded shrink-0 mt-0.5 bg-slate-100 text-slate-700 dark:bg-slate-800/40 dark:text-slate-300">
+                              {t('petProfile.recommendation.linkSource.publicSearch', 'Busca pública')}
+                            </span>
+                          )}
                         </div>
                         {s.excerpt && (
                           <p
