@@ -7,6 +7,64 @@ import { AlertCircle, Dna, Shield, ChevronDown, ChevronRight, Activity, Zap, Bra
 import type { ClinicalDiscovery, BreedPredisposition, LabAlert } from '@/services/clinical-analysis-pipeline';
 import { localizeConditionName } from '@/services/condition-name-localizer';
 
+/**
+ * Rótulos de processos biológicos de envelhecimento (gerociência).
+ * NUNCA devem aparecer como "Condição Clínica Atual Confirmada" — são
+ * detratores geriátricos ocultos, mesmo que dados legados os tenham
+ * cadastrado em pet_conditions.
+ */
+const GEROSCIENCE_PROCESSES = [
+  'Cellular Senescence',
+  'Inflammaging',
+  'Oxidative Stress',
+  'Mitochondrial Dysfunction',
+];
+
+const isGeroscienceProcess = (name: string): boolean => {
+  const n = (name || '').toLowerCase();
+  return GEROSCIENCE_PROCESSES.some(p => n.includes(p.toLowerCase()));
+};
+
+/**
+ * Heurística clínica: dispara um detrator geriátrico oculto quando há
+ * "porta de entrada" no quadro do paciente (condição clínica âncora ou
+ * idade avançada), mesmo sem triplets explícitos no KG. Reflete consenso
+ * da literatura geroscience (López-Otín hallmarks, Franceschi inflammaging).
+ */
+const inferGeroscienceTriggers = (
+  conditions: any[],
+  ageYears: number,
+): Record<string, string[]> => {
+  const triggers: Record<string, string[]> = {
+    'Cellular Senescence': [],
+    'Inflammaging': [],
+    'Oxidative Stress': [],
+    'Mitochondrial Dysfunction': [],
+  };
+  const condNames = conditions.map(c => (c.condition_name || '').toLowerCase());
+  const has = (kw: string) => condNames.some(n => n.includes(kw));
+
+  if (has('osteoarthritis') || has('hip dysplasia') || has('sarcopenia')) {
+    triggers['Cellular Senescence'].push('Osteoartrite/displasia/sarcopenia → acúmulo de células senescentes em cartilagem e músculo');
+  }
+  if (has('chronic inflammation') || has('inflamm') || has('osteoarthritis') || has('obesity')) {
+    triggers['Inflammaging'].push('Inflamação sistêmica de baixo grau associada ao quadro clínico');
+  }
+  if (has('chronic kidney') || has('mmvd') || has('mitral') || has('cognitive')) {
+    triggers['Oxidative Stress'].push('Doença crônica órgão-alvo aumenta carga oxidativa');
+  }
+  if (has('cognitive') || has('myelopathy') || has('sarcopenia')) {
+    triggers['Mitochondrial Dysfunction'].push('Tecidos pós-mitóticos (neurônio, músculo) afetados → disfunção mitocondrial provável');
+  }
+
+  // Idade > 7 anos em cães (senior): senescência e inflammaging são pano de fundo.
+  if (ageYears >= 7) {
+    triggers['Cellular Senescence'].push(`Idade ${ageYears}a (faixa sênior): acúmulo basal de células senescentes`);
+    triggers['Inflammaging'].push(`Idade ${ageYears}a: estado inflamatório basal aumentado`);
+  }
+  return triggers;
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type TFunc = (...args: any[]) => any;
 
@@ -40,11 +98,16 @@ function classifyInsights(
   kgPathways: any[],
   locale: string,
   t: TFunc,
+  ageYears: number,
 ): ClassifiedInsight[] {
   const insights: ClassifiedInsight[] = [];
 
-  // 1. Current conditions — enriched with KG data
-  for (const c of conditions) {
+  // 1. Current conditions — enriched with KG data.
+  //    Rótulos de gerociência (Inflammaging, Cellular Senescence, ...) são
+  //    SEMPRE redirigidos para "Detratores Geriátricos Ocultos" — nunca
+  //    figuram como condição clínica atual.
+  const clinicalConditions = conditions.filter(c => !isGeroscienceProcess(c.condition_name || c.name || ''));
+  for (const c of clinicalConditions) {
     const rawName = c.condition_name || c.name || '';
     const name = localizeConditionName(rawName, locale);
     const relatedTriplets = kgTriplets.filter(
@@ -87,40 +150,50 @@ function classifyInsights(
     });
   }
 
-  // Infer biological processes from KG pathways (these are NOT clinical diagnoses)
-  const biologicalProcesses = ['Cellular Senescence', 'Inflammaging', 'Oxidative Stress', 'Mitochondrial Dysfunction'];
-  const conditionNamesLower = conditions.map((c: any) => (c.condition_name || '').toLowerCase());
-  for (const process of biologicalProcesses) {
-    // Skip if already present as a condition (legacy data)
-    const alreadyPresent = conditionNamesLower.some(cn => cn.includes(process.toLowerCase()));
-    if (alreadyPresent) continue;
-    const relatedTriplets = kgTriplets.filter(t =>
-      t.subject?.toLowerCase().includes(process.toLowerCase()) || t.object?.toLowerCase().includes(process.toLowerCase())
+  // Geroscience hidden detractors: combine triggers clínicos/idade
+  // (heurística sempre ativa) com triplets do KG quando disponíveis.
+  const triggers = inferGeroscienceTriggers(conditions, ageYears);
+  for (const process of GEROSCIENCE_PROCESSES) {
+    const reasons = triggers[process];
+    const relatedTriplets = kgTriplets.filter(tr =>
+      tr.subject?.toLowerCase().includes(process.toLowerCase()) ||
+      tr.object?.toLowerCase().includes(process.toLowerCase())
     );
-    if (relatedTriplets.length > 0) {
-      const connectedConditions = conditions.map((c: any) => c.condition_name).filter((cn: string) =>
-        kgTriplets.some(t =>
-          (t.subject?.toLowerCase().includes(cn.toLowerCase()) && t.object?.toLowerCase().includes(process.toLowerCase())) ||
-          (t.object?.toLowerCase().includes(cn.toLowerCase()) && t.subject?.toLowerCase().includes(process.toLowerCase()))
-        )
-      );
-      insights.push({
-        category: 'hidden_comorbidity',
-        title: process,
-        description: connectedConditions.length > 0
-          ? t('petProfile.insights.inferredProcessConnected', 'Inferred biological process: {{conditions}} share molecular pathways with {{process}} according to the Knowledge Graph.')
-              .replace('{{conditions}}', connectedConditions.map(cn => localizeConditionName(cn, locale)).join(', '))
-              .replace('{{process}}', process)
-          : t('petProfile.insights.inferredProcessRelevant', "Biological process {{process}} identified in the Knowledge Graph as relevant for this patient's profile.")
-              .replace('{{process}}', process),
-        confidence: Math.min(0.85, 0.5 + relatedTriplets.length * 0.05),
-        inferenceReason: connectedConditions.length > 0
-          ? `Via KG: ${connectedConditions.join(', ')} → ${process} (${relatedTriplets.length} triplets)`
-          : `${relatedTriplets.length} ${t('petProfile.insights.kgConnections', 'connections in the Knowledge Graph')}`,
-        relatedEntities: relatedTriplets.slice(0, 3).map((tr: any) => `${tr.subject} ${tr.predicate} ${tr.object}`),
-        source: 'kg_inference',
-      });
-    }
+    // Inclui também o caso em que o processo veio em pet_conditions por engano.
+    const cameFromConditions = conditions.some(c =>
+      (c.condition_name || '').toLowerCase().includes(process.toLowerCase())
+    );
+    if (reasons.length === 0 && relatedTriplets.length === 0 && !cameFromConditions) continue;
+
+    const connectedConditions = conditions
+      .map((c: any) => c.condition_name)
+      .filter((cn: string) => !isGeroscienceProcess(cn) && kgTriplets.some(tr =>
+        (tr.subject?.toLowerCase().includes(cn.toLowerCase()) && tr.object?.toLowerCase().includes(process.toLowerCase())) ||
+        (tr.object?.toLowerCase().includes(cn.toLowerCase()) && tr.subject?.toLowerCase().includes(process.toLowerCase()))
+      ));
+
+    const reasonText = reasons.length > 0
+      ? reasons.join(' • ')
+      : connectedConditions.length > 0
+        ? `Via KG: ${connectedConditions.join(', ')} → ${process} (${relatedTriplets.length} triplets)`
+        : `${relatedTriplets.length} ${t('petProfile.insights.kgConnections', 'conexões no Knowledge Graph')}`;
+
+    insights.push({
+      category: 'hidden_comorbidity',
+      title: process,
+      description: connectedConditions.length > 0
+        ? t('petProfile.insights.inferredProcessConnected', 'Processo biológico inferido: {{conditions}} compartilham vias moleculares com {{process}} segundo o Knowledge Graph.')
+            .replace('{{conditions}}', connectedConditions.map((cn: string) => localizeConditionName(cn, locale)).join(', '))
+            .replace('{{process}}', process)
+        : t('petProfile.insights.inferredProcessRelevant', "Processo biológico {{process}} identificado como relevante para o perfil deste paciente.")
+            .replace('{{process}}', process),
+      confidence: Math.min(0.9, 0.55 + reasons.length * 0.1 + relatedTriplets.length * 0.03),
+      inferenceReason: reasonText,
+      relatedEntities: relatedTriplets.length > 0
+        ? relatedTriplets.slice(0, 3).map((tr: any) => `${tr.subject} ${tr.predicate} ${tr.object}`)
+        : connectedConditions.slice(0, 3).map((cn: string) => localizeConditionName(cn, locale)),
+      source: 'kg_inference',
+    });
   }
 
   // 3. Future prevention from undiagnosed predispositions
@@ -201,7 +274,7 @@ const VetGraphRAGInsightsPanel: React.FC<VetGraphRAGInsightsPanelProps> = ({
     future_prevention: true,
   });
 
-  const insights = classifyInsights(conditions, clinicalDiscoveries, predispositions, kgTriplets, kgPathways, i18n.language, t);
+  const insights = classifyInsights(conditions, clinicalDiscoveries, predispositions, kgTriplets, kgPathways, i18n.language, t, ageYears);
 
   const currentInsights = insights.filter(i => i.category === 'current');
   const hiddenInsights = insights.filter(i => i.category === 'hidden_comorbidity');
@@ -220,9 +293,9 @@ const VetGraphRAGInsightsPanel: React.FC<VetGraphRAGInsightsPanelProps> = ({
     {
       key: 'hidden_comorbidity',
       titleKey: 'petProfile.insights.hiddenComorbidities',
-      titleFallback: 'Processos Biológicos Inferidos (Gerociência)',
+      titleFallback: 'Detratores Geriátricos Ocultos',
       descKey: 'petProfile.insights.hiddenComorbiditiesDesc',
-      descFallback: 'Processos moleculares inferidos pelo Knowledge Graph — não são diagnósticos clínicos',
+      descFallback: 'Processos moleculares de envelhecimento (senescência celular, inflammaging) inferidos pelo Knowledge Graph — aceleram doenças e reduzem healthspan.',
       items: hiddenInsights,
       config: categoryConfig.hidden_comorbidity,
     },
