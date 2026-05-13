@@ -870,6 +870,12 @@ const PetProfilePage: React.FC = () => {
                       a.clinical_significance.toLowerCase().includes(n.toLowerCase())
                     ),
                 }))}
+                kgProjections={(kgProjections || []).map((p: any) => ({
+                  condition: p.condition,
+                  baselineScore: p.baselineScore,
+                  projectedImprovement: p.projectedImprovement,
+                  confidenceLevel: p.confidenceLevel,
+                }))}
               />
             )}
 
