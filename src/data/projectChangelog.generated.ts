@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-13T12:27:45.583Z
+// Última geração: 2026-05-13T12:39:15.449Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,28 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-13";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-13",
+    "kind": "added",
+    "area": "vet-ui",
+    "status": "entregue",
+    "title": "Digital Twin do paciente (Fase 2 — histórico, traits, labs)",
+    "bullets": [
+      "`PatientKnowledgeSubgraph` ganha 3 novas camadas opcionais conectadas ao nó Pet central:",
+      "Diagnósticos passados (círculos cinza, aresta `HAS_HISTORY` tracejada) lidos de `pet_conditions` resolvidas + consultas anteriores em `pet_consultations`.",
+      "Traits (hexágonos azul-claro, aresta `HAS_TRAIT`) representando raça, faixa etária (filhote/adulto/sênior/geriátrico) e sexo. Traits de raça desenham `BREED_RISK_FOR` (tracejada azul-escura) apontando para condições predispostas vindas de `BreedPredisposition`.",
+      "Labs anormais (triângulo invertido amarelo, aresta `PRESENTS_LAB`) lidos de `LabAlert`s, com aresta `INDICATES` (tracejada amarela) ligando o exame às condições mencionadas em `clinical_significance`.",
+      "Legenda + i18n PT/EN atualizadas (`past_diagnosis`, `trait`, `lab`); `I18N_VERSION` → 1.74.5.",
+      "Conformidade No-Mock: cada nó só aparece quando há registro real (consulta, predisposição ou lab anormal); deduplicação por nome para histórico.",
+      "Files: src/components/pet/PatientKnowledgeSubgraph.tsx, src/pages/veterinario/PetProfilePage.tsx, src/locales/{pt,en}/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "src/components/pet/PatientKnowledgeSubgraph.tsx",
+      "src/pages/veterinario/PetProfilePage.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.74.5"
+  },
   {
     "date": "2026-05-13",
     "kind": "added",
