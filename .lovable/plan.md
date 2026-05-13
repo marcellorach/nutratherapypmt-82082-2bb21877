@@ -1,78 +1,136 @@
-## Objetivo
 
-Garantir que a seção **"Ver evidências e contexto"** de cada composto sempre exiba **2 a 3 links clicáveis para estudos**, mesmo quando o pipeline atual não consegue atrelar nenhum estudo curado ao par (composto × condição) — caso da tela enviada, em que aparecem 3 triplets KG-backed mas nenhum link em "Estudos científicos".
+## Resposta curta
 
-## Diagnóstico
+Sim — e a boa prática emergente em **Clinical Knowledge Graphs** (Stanford BIOS, Mayo Clinic Platform, OHDSI/OMOP-on-graph, PrimeKG) é exatamente o que você está intuindo: o grafo do paciente não deve ser **só evidência científica** nem **só prontuário**, mas um **Digital Twin Clínico Longitudinal** que une três camadas em um único subgrafo navegável:
 
-`src/services/clinical-analysis-pipeline.ts` já tenta atrelar até 3 estudos por composto (`MAX_STUDIES_PER_COMPOUND = 3`):
+1. **Quem é o paciente** (identidade + traços imutáveis)
+2. **O que está acontecendo agora** (estado clínico atual: dx, meds, labs, sintomas)
+3. **Por que recomendamos X** (proveniência: triplets do KG científico que justificam cada composto)
+4. **Para onde isso vai** (projeção temporal: exames futuros, melhoras esperadas, marcos de reavaliação)
 
-1. Estudos vindos de `triplet_extractions` aprovados para o par (composto, condição).
-2. Fallback: até 3 estudos do mesmo composto em qualquer condição (`provenance: 'compound-only'`).
+Hoje o `PatientKnowledgeSubgraph.tsx` só faz a camada 3. Falta 1, 2 e 4.
 
-Quando ambos retornam vazio (composto presente em KG mas sem `study_id` aprovado, ou composto ausente da base local), o componente `CompoundDosageSlider` simplesmente omite o bloco "Estudos científicos" — foi o que o usuário viu.
+---
 
-## Mudanças propostas
+## Modelo proposto: 4 camadas temporais em um grafo só
 
-### 1. Pipeline — segundo nível de fallback (`clinical-analysis-pipeline.ts`)
-
-Antes de devolver `studies: []`, gerar **2 referências de busca pública** determinísticas a partir do nome do composto + condição canônica, sem inventar título nem ano:
-
-```ts
-const publicSearchFallback = (compound, condition) => [
-  {
-    id: `pubmed:${compound}:${condition}`,
-    title: `PubMed — ${compound} + ${condition}`,
-    link: `https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(`${compound} ${condition}`)}`,
-    provenance: 'public-search',
-  },
-  {
-    id: `scholar:${compound}:${condition}`,
-    title: `Google Scholar — ${compound} + ${condition}`,
-    link: `https://scholar.google.com/scholar?q=${encodeURIComponent(`${compound} ${condition}`)}`,
-    provenance: 'public-search',
-  },
-];
+```text
+                    ┌─────────────────────────┐
+                    │   PET (núcleo azul)     │
+                    │  Rex · 11a · Labrador   │
+                    │  32kg · M castrado      │
+                    └───────────┬─────────────┘
+                                │
+        ┌───────────────────────┼────────────────────────┐
+        │                       │                        │
+   [PASSADO]               [PRESENTE]               [FUTURO]
+   HISTORY                 HAS_*                    PROJECTED_*
+        │                       │                        │
+   ┌────▼─────┐         ┌───────▼────────┐      ┌────────▼─────────┐
+   │ Dx 2023  │         │ Condição ativa │      │ Reexame 90d      │
+   │ Cirurgia │         │ Med atual      │      │ Δ severidade     │
+   │ Lab old  │         │ Lab anormal    │      │ Marco clínico    │
+   └──────────┘         │ Sintoma        │      │ Janela crítica   │
+                        │ Detrator oculto│      └──────────────────┘
+                        └────────┬───────┘
+                                 │ JUSTIFIED_BY
+                                 ▼
+                        ┌────────────────┐
+                        │ Composto reco  │ ← TREATS/PREVENTS ← Triplets KG
+                        │ (verde)        │ ← INTERACTS_WITH → Med atual
+                        └────────────────┘   (aresta vermelha = conflito)
 ```
 
-Regra: se `studiesWithExcerpts.length < 2`, completar até 2 com esses links; nunca ultrapassar `MAX_STUDIES_PER_COMPOUND = 3`. Mantém o No-Mock Policy: nada é simulado, são buscas reais rotuladas como tal.
+### Tipos de nó (8 grupos, todos no mesmo grafo)
 
-### 2. Tipo `StudyRef` (`CompoundDosageSlider.tsx`)
+| Grupo | Cor | Forma | Origem dos dados |
+|---|---|---|---|
+| **Pet** (1 nó central) | azul-escuro | star | `pets` table |
+| **Trait** (raça, idade-classe, sexo) | azul-claro | hexagon | `pets` + breed predispositions |
+| **Past Diagnosis** | cinza | circle | `pet_consultations` histórico |
+| **Active Condition** | laranja | diamond | snapshot atual (já existe) |
+| **Hidden Geriatric Detractor** | âmbar escuro | diamond outline | derivado (já existe) |
+| **Active Medication** | roxo | pill | `pet_consultations.medications` |
+| **Abnormal Lab** | amarelo | triangle invertido | `pet_exam_results` |
+| **Recommended Compound** | verde | dot | snapshot (já existe) |
+| **Mechanism / Pathway** | azul | triangle | KG (já existe) |
+| **Projected Milestone** | verde-água tracejado | diamond outline | `pet_clinical_analysis_snapshots.kg_projections` |
 
-Aceitar `provenance: 'paired' | 'compound-only' | 'public-search'`.
+### Tipos de aresta (semântica clínica explícita)
 
-### 3. UI — `CompoundDosageSlider.tsx` (linhas ~492-555)
+| Predicate | Cor | Estilo | Significado |
+|---|---|---|---|
+| `HAS_TRAIT` | azul claro | sólida fina | Pet → idade/raça/sexo |
+| `HAS_HISTORY` | cinza | tracejada | Pet → dx/cirurgia passada |
+| `HAS_CONDITION` | laranja | sólida grossa | Pet → condição ativa |
+| `EXHIBITS_DETRACTOR` | âmbar | sólida | Pet → senescência/inflammaging |
+| `TAKES` | roxo | sólida | Pet → medicação atual |
+| `PRESENTS_LAB` | amarelo | sólida | Pet → resultado anormal |
+| `INDICATES` | amarelo | tracejada | Lab → condição inferida |
+| `BREED_RISK_FOR` | azul-escuro | tracejada | Trait raça → condição predisposta |
+| `JUSTIFIED_BY` | verde | sólida grossa | Composto reco → triplet KG |
+| `TREATS / PREVENTS / AGGRAVATES` | verde / vermelho | (já existe) | Triplets do KG |
+| `INTERACTS_WITH` | **vermelho pulsante** | sólida grossa | Composto reco ↔ Med atual (alerta!) |
+| `PROJECTED_AT` | verde-água | tracejada | Composto → marco futuro (90d, 180d) |
+| `EXPECTED_IMPROVEMENT` | verde-água | tracejada com seta | Condição → Δ severidade projetada |
+| `SCHEDULED_EXAM` | cinza-claro | tracejada pontilhada | Pet → reexame futuro |
 
-- Renderizar entradas `public-search` no mesmo bloco "Estudos científicos", mas com badge diferenciado (cinza/azul claro: "Busca pública") para deixar transparente que é um atalho, não um estudo curado.
-- Não aplicar a barra lateral primária; usar `border-l-2 border-muted` para distinguir visualmente.
-- Sem `excerpt` (o link não traz excerto).
-- Reaproveitar `getLinkSource` já existente (`PubMed`, `Scholar`).
+---
 
-### 4. i18n (`pt`/`en`) + `I18N_VERSION`
+## Boas práticas que estamos adotando (referências)
 
-Novas chaves:
-- `petProfile.recommendation.linkSource.publicSearch` → "Busca pública" / "Public search"
-- `petProfile.recommendation.studiesPublicSearchHint` → "Sem estudos curados para este par; links de busca pública aproximada." / "No curated studies for this pair; approximate public-search links."
+1. **Temporal layering** (PrimeKG, Stanford SHEPHERD): separar passado / presente / futuro por **estilo de aresta**, não por subgrafos diferentes. Mantém uma única tela navegável.
+2. **Provenance edges** (W3C PROV-O adaptado): toda recomendação carrega `JUSTIFIED_BY` explícito apontando para o triplet do KG científico. Sem isso, a reco é "caixa-preta".
+3. **Patient as central hub** (OMOP-on-graph): um único nó Pet no centro, todos os outros pendurados. Evita o erro atual de mostrar conditions e compounds soltos sem dono.
+4. **Counterfactual / projection nodes** (Mayo Digital Twin): marcos futuros são nós de primeira classe (não tooltip), porque o veterinário precisa **clicar e ver a evidência da projeção**.
+5. **Interaction edges as red alerts**: conflitos farmacológicos viram arestas vermelhas pulsantes — o vet vê o risco antes de aprovar.
+6. **Traits ≠ conditions**: raça/idade são nós separados (`Trait`) que conectam a condições via `BREED_RISK_FOR`. Permite explicar "por que estamos vigiando displasia mesmo sem dx".
 
-Incrementar `I18N_VERSION` de 1.74.2 → 1.74.3.
+---
 
-### 5. CHANGELOG.md + sync
+## Plano de implementação (4 fases incrementais)
 
-Entrada `[Unreleased]` em **Added** e/ou **Changed**:
-- "Garantia de 2-3 links clicáveis em 'Ver evidências e contexto', com fallback determinístico para PubMed/Scholar quando não há estudo curado para o par (composto × condição)."
+### **Fase 1 — Núcleo Pet + Estado Atual** (alta prioridade)
+- Adicionar nó `Pet` central (azul, star) com tooltip mostrando idade/raça/peso/sexo
+- Conectar Pet → todas condições atuais via `HAS_CONDITION`
+- Conectar Pet → detratores ocultos via `EXHIBITS_DETRACTOR`
+- Adicionar nós `Active Medication` (roxo) lidos de `pet_consultations`
+- Adicionar arestas `INTERACTS_WITH` (vermelho) entre med atual e composto reco quando houver conflito detectado
+- Atualizar legenda + i18n (PT/EN), bump `I18N_VERSION`
 
-Rodar `npm run sync:changelog`.
+### **Fase 2 — Histórico clínico**
+- Adicionar nós `Past Diagnosis` (cinza, tracejado) das consultas anteriores
+- Adicionar nós `Trait` (raça, idade-classe) com `BREED_RISK_FOR` para predisposições
+- Conectar labs anormais como `Abnormal Lab` → `INDICATES` → condição inferida
 
-## Arquivos afetados
+### **Fase 3 — Proveniência reforçada**
+- Para cada composto recomendado, adicionar arestas `JUSTIFIED_BY` apontando para o(s) triplet(s) específico(s) do KG que o sustentam (já temos a info em `kg_triplets`, falta só desenhar a aresta dedicada com cor distinta)
 
-- `src/services/clinical-analysis-pipeline.ts` — fallback de busca pública.
-- `src/components/pet/CompoundDosageSlider.tsx` — render do badge "Busca pública".
-- `src/locales/pt/translation.json`, `src/locales/en/translation.json` — novas chaves.
-- `src/i18n.ts` — bump de versão.
-- `CHANGELOG.md` (+ regenerado `src/data/projectChangelog.generated.ts`).
+### **Fase 4 — Projeção temporal (Digital Twin)**
+- Adicionar nós `Projected Milestone` (90d, 180d, 365d) lidos de `kg_projections`
+- Arestas `EXPECTED_IMPROVEMENT` ligando condição atual → projeção futura
+- Nós `Scheduled Exam` para reexames recomendados pelo plano de tratamento
+- Toggle "Modo evidência científica pura" (volta ao subgrafo atual) vs "Modo Digital Twin" (default novo)
 
-## Validação
+### **Cross-cutting**
+- Toggle de visibilidade por camada (checkboxes: Histórico / Atual / Projeção / Evidência)
+- Atualizar memória `mem://features/patient-knowledge-subgraph-provenance` para refletir o modelo expandido
+- Atualizar `CHANGELOG.md` + `mem://principles/clinical-recommendation-transparency`
+- Conformidade com No-Mock Policy: tudo lido de `pets`, `pet_consultations`, `pet_exam_results`, `pet_clinical_analysis_snapshots` — zero dado inventado; nó/aresta só aparece se houver registro real
 
-1. Abrir o pet `85880f2f-…` (Quercetin / Sarcopenia da tela).
-2. Expandir "Ver evidências e contexto" — confirmar 2-3 links visíveis.
-3. Conferir que pelo menos um, quando existir estudo curado, aparece com badge "PubMed/DOI" e excerpt; e os de busca aparecem com badge "Busca pública".
-4. Verificar que pets com estudos curados (Buddy/Omega-3) continuam mostrando os curados primeiro.
+---
+
+## Arquivos que serão tocados (Fase 1, escopo mínimo viável)
+
+- `src/components/pet/PatientKnowledgeSubgraph.tsx` — nova lógica de montagem com camadas
+- `src/hooks/usePetClinicalAnalysisSnapshot.ts` — já tem snapshot, ok
+- novo hook: `src/hooks/usePetActiveMedications.ts` (lê `pet_consultations` mais recente)
+- `src/locales/{pt,en}/translation.json` — chaves para 8 grupos + 13 predicates
+- `src/i18n.ts` — bump `I18N_VERSION` → 1.74.4
+- `CHANGELOG.md` + sync
+
+---
+
+## Decisão que preciso de você
+
+Confirma a abordagem **Digital Twin com 4 camadas temporais em um único grafo** (com toggle para voltar ao modo "evidência científica pura")? Posso começar pela **Fase 1** (Pet central + medicações ativas + alertas de interação) que já entrega o salto de valor mais visível, e depois evoluir para histórico e projeção?
