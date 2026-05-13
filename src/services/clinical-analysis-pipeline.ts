@@ -1326,8 +1326,10 @@ async function attachStudiesToCompounds(
           }
         }
 
+        const publicSearchStudies = buildPublicSearchStudies(c.name, c.condition);
+
         if (effectiveStudyIds.length === 0) {
-          return { ...c, studies: [], mechanism, kgTriplets, synergies };
+          return { ...c, studies: publicSearchStudies, mechanism, kgTriplets, synergies };
         }
 
         const { data: studies } = await supabase
@@ -1383,10 +1385,15 @@ async function attachStudiesToCompounds(
           })
         );
 
+        // Top up to at least 2 references using public-search fallbacks when curated set is thin
+        const topped = studiesWithExcerpts.length >= 2
+          ? studiesWithExcerpts
+          : [...studiesWithExcerpts, ...publicSearchStudies].slice(0, MAX_STUDIES_PER_COMPOUND);
+
         return {
           ...c,
           mechanism,
-          studies: studiesWithExcerpts,
+          studies: topped,
           kgTriplets,
           synergies,
         };
