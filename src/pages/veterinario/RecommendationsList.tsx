@@ -94,7 +94,7 @@ const RecommendationsList: React.FC<RecommendationsListProps> = ({ selectedPet }
           {selectedPet.name} ainda não possui recomendações
         </h3>
         <p className="text-muted-foreground mb-6">
-          Execute a análise VetGraphRAG no perfil do pet para gerar recomendações baseadas em evidências.
+          Execute a análise Senex AI no perfil do pet para gerar recomendações baseadas em evidências.
         </p>
         <Button className="flex items-center gap-2 mx-auto">
           <Brain size={16} />

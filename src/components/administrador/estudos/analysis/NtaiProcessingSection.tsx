@@ -256,7 +256,7 @@ const NtaiProcessingSection: React.FC = () => {
         {/* Processing Pipeline - Compact Vertical */}
         <div className="bg-gradient-to-br from-blue-50/80 to-indigo-50/40 p-4 rounded-lg border border-blue-200/60">
           <div className="flex items-center justify-between mb-3">
-            <h4 className="text-xs font-semibold text-blue-900">🧬 VetGraphRAG Digestion Pipeline</h4>
+            <h4 className="text-xs font-semibold text-blue-900">🧬 Senex AI Digestion Pipeline</h4>
             <div className="flex items-center gap-3 text-[11px]">
               <span className="text-blue-500">Gemini 3 Pro Preview</span>
               <span className={processingActive ? "text-green-600 font-medium" : "text-gray-400"}>{processingActive ? '● Processing' : '● Idle'}</span>

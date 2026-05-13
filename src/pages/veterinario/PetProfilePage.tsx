@@ -20,7 +20,7 @@ import ClinicalPipelineWorkflow, { type PipelineState } from '@/components/pet/C
 import ClinicalPipelineLogPanel, { type ClinicalLogEntry } from '@/components/pet/ClinicalPipelineLogPanel';
 import ConditionInsightCard from '@/components/pet/ConditionInsightCard';
 import ComorbidityMap from '@/components/pet/ComorbidityMap';
-import VetGraphRAGInsightsPanel from '@/components/pet/Senex AIInsightsPanel';
+import VetGraphRAGInsightsPanel from '@/components/pet/VetGraphRAGInsightsPanel';
 import PatientKnowledgeSubgraph from '@/components/pet/PatientKnowledgeSubgraph';
 import BiologicalTimeline from '@/components/pet/BiologicalTimeline';
 import DigitalTwinDog from '@/components/pet/DigitalTwinDog';

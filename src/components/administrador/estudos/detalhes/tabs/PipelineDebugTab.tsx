@@ -322,7 +322,7 @@ const PipelineDebugTab: React.FC<PipelineDebugTabProps> = ({ estudo, onRefresh }
             >
               <CardTitle className="text-sm flex items-center gap-2">
                 <Network className="h-4 w-4" />
-                Stage 3: VetGraphRAG Triplets
+                Stage 3: Senex AI Triplets
                 <Button 
                   size="sm" 
                   variant="ghost" 
