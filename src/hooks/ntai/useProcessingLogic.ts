@@ -257,11 +257,11 @@ export const useProcessingLogic = (
           stage3: `${extractData?.dosages?.length || 0} dosagens`
         });
 
-        // Generate VetGraphRAG triplets
+        // Generate Senex AI triplets
         let tripletsGenerated = 0;
         let autoApproved = 0;
         try {
-          addLogEntry(`🔗 [TRIPLETS] Starting VetGraphRAG triplet generation...`);
+          addLogEntry(`🔗 [TRIPLETS] Starting Senex AI triplet generation...`);
           const { data: tripletData, error: tripletError } = await supabase.functions.invoke('generate-triplets', {
             body: { studyId: item.id }
           });
@@ -277,7 +277,7 @@ export const useProcessingLogic = (
             tripletsGenerated = tripletData?.tripletsGenerated || tripletData?.count || 0;
             autoApproved = tripletData?.autoApproved || 0;
             addLogEntry(`✅ [TRIPLETS] ${tripletsGenerated} triplets gerados (${autoApproved} auto-aprovados)`);
-            console.log('🔗 VetGraphRAG triplets:', { tripletsGenerated, autoApproved, rawData: tripletData });
+            console.log('🔗 Senex AI triplets:', { tripletsGenerated, autoApproved, rawData: tripletData });
           }
         } catch (tripletErr: any) {
           addLogEntry(`⚠️ [TRIPLETS] Erro ao gerar triplets: ${tripletErr.message} (não crítico)`);

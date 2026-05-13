@@ -246,8 +246,8 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
     ],
     overview: {
       objective: {
-        pt: 'VetGraphRAG é um sistema híbrido de GraphRAG especificamente projetado para medicina veterinária. Combina a construção de Triple Graph do MedGraphRAG (hierarquia Document→Chunk→Entity→Mechanism) com o ciclo de validação GRRA do KGARevion (Generate-Review-Revise-Answer). Adaptado para contexto veterinário com ontologias VeNom, diretrizes AAHA/WSAVA, e modelagem de predisposição por raça. O sistema processa estudos científicos, extrai conhecimento estruturado, e fornece recomendações clínicas fundamentadas em evidências.',
-        en: 'VetGraphRAG is a hybrid GraphRAG system specifically designed for veterinary medicine. It combines MedGraphRAG\'s Triple Graph Construction (Document→Chunk→Entity→Mechanism hierarchy) with KGARevion\'s GRRA validation cycle (Generate-Review-Revise-Answer). Adapted for veterinary context with VeNom ontologies, AAHA/WSAVA guidelines, and breed-specific predisposition modeling. The system processes scientific studies, extracts structured knowledge, and provides evidence-based clinical recommendations.'
+        pt: 'Senex AI é um sistema híbrido de GraphRAG especificamente projetado para medicina veterinária. Combina a construção de Triple Graph do MedGraphRAG (hierarquia Document→Chunk→Entity→Mechanism) com o ciclo de validação GRRA do KGARevion (Generate-Review-Revise-Answer). Adaptado para contexto veterinário com ontologias VeNom, diretrizes AAHA/WSAVA, e modelagem de predisposição por raça. O sistema processa estudos científicos, extrai conhecimento estruturado, e fornece recomendações clínicas fundamentadas em evidências.',
+        en: 'Senex AI is a hybrid GraphRAG system specifically designed for veterinary medicine. It combines MedGraphRAG\'s Triple Graph Construction (Document→Chunk→Entity→Mechanism hierarchy) with KGARevion\'s GRRA validation cycle (Generate-Review-Revise-Answer). Adapted for veterinary context with VeNom ontologies, AAHA/WSAVA guidelines, and breed-specific predisposition modeling. The system processes scientific studies, extracts structured knowledge, and provides evidence-based clinical recommendations.'
       },
       workflow: [
         {
@@ -320,7 +320,7 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
           { pt: 'Característica', en: 'Feature' },
           { pt: 'MedGraphRAG', en: 'MedGraphRAG' },
           { pt: 'KGARevion', en: 'KGARevion' },
-          { pt: 'VetGraphRAG (NTAI)', en: 'VetGraphRAG (NTAI)' }
+          { pt: 'Senex AI (NTAI)', en: 'Senex AI (NTAI)' }
         ],
         rows: [
           {
@@ -423,7 +423,7 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
       },
       architectureDiagram: `
 ╔═══════════════════════════════════════════════════════════════════════════════╗
-║                    VetGraphRAG Architecture v3.0                               ║
+║                    Senex AI Architecture v3.0                               ║
 ║                  MedGraphRAG + KGARevion Hybrid System                         ║
 ╚═══════════════════════════════════════════════════════════════════════════════╝
 
@@ -546,7 +546,7 @@ Action: AUTO-APPROVE`
           }
         },
         {
-          name: { pt: '2. Score de Sinergia (Original VetGraphRAG)', en: '2. Synergy Score (VetGraphRAG Original)' },
+          name: { pt: '2. Score de Sinergia (Original Senex AI)', en: '2. Synergy Score (Senex AI Original)' },
           formula: `Synergy(A, B) = (Shared_Pathways x 0.35) + (Mechanism_Overlap x 0.25) 
              + (Evidence_Strength x 0.25) + (Interaction_Bonus x 0.15)
 

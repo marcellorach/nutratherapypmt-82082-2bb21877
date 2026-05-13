@@ -75,7 +75,7 @@ const PipelineDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Pipeline VetGraphRAG</h3>
+        <h3 className="text-lg font-semibold">Pipeline Senex AI</h3>
         <Badge variant="outline">Atualizado automaticamente</Badge>
       </div>
 

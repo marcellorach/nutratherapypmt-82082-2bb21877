@@ -82,7 +82,7 @@ const MODEL_NAME = 'gemini-3-pro-preview'; // NUNCA gemini-2.x
 | **Edge Functions** | Deno runtime | Padrão Supabase |
 | **Autenticação** | Supabase Auth (email/password) | Nunca signup anônimo |
 
-### Tabelas Hierárquicas VetGraphRAG
+### Tabelas Hierárquicas Senex AI
 
 | Tabela | Camada | Propósito |
 |--------|--------|-----------|
@@ -232,7 +232,7 @@ verify_jwt = true  # Para funções autenticadas
 - **Motivo**: Multi-hop reasoning superior para extração de cadeias biológicas complexas
 - **Impacto**: 4 edge functions atualizadas (generate-triplets, gemini-file-search, document-chat, translate-and-categorize-conditions)
 
-### 2025-11-xx - Arquitetura VetGraphRAG Hierárquica
+### 2025-11-xx - Arquitetura Senex AI Hierárquica
 - **Decisão**: Modelo de 5 camadas (L0→L4) para Knowledge Graph
 - **Motivo**: Representação precisa de cadeias biológicas veterinárias
 - **Impacto**: Novas tabelas (pathway_nodes, mechanism_nodes, biological_effect_nodes, hierarchical_edges)

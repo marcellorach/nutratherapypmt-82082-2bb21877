@@ -242,7 +242,7 @@ const VetGraphRAGInsightsPanel: React.FC<VetGraphRAGInsightsPanelProps> = ({
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
           <Brain className="h-5 w-5 text-primary" />
-          {t('petProfile.insights.title', 'Análise VetGraphRAG')}
+          {t('petProfile.insights.title', 'Análise Senex AI')}
         </CardTitle>
         <p className="text-sm text-muted-foreground">
           {t('petProfile.insights.subtitle', 'Inteligência clínica gerada pelo Knowledge Graph — separada dos dados do prontuário')}

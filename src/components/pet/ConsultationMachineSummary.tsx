@@ -14,7 +14,7 @@ interface Props {
  * everything the system understood from the visit:
  *  - tags (PT clinical chips)
  *  - 1-2 sentence LLM synthesis (`machine_summary`)
- *  - canonical reference terms ready for VetGraphRAG
+ *  - canonical reference terms ready for Senex AI
  */
 const ConsultationMachineSummary: React.FC<Props> = ({ tags, machineSummary, interpretation }) => {
   const { t } = useTranslation();
@@ -51,7 +51,7 @@ const ConsultationMachineSummary: React.FC<Props> = ({ tags, machineSummary, int
       {canonical.length > 0 && (
         <div>
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
-            {t('machineSummary.canonical', { defaultValue: 'Termos canônicos (VetGraphRAG)' })}
+            {t('machineSummary.canonical', { defaultValue: 'Termos canônicos (Senex AI)' })}
           </p>
           <div className="flex flex-wrap gap-1">
             {canonical.map((c, i) => (
@@ -67,7 +67,7 @@ const ConsultationMachineSummary: React.FC<Props> = ({ tags, machineSummary, int
       )}
       <p className="text-[10px] text-muted-foreground italic">
         {t('machineSummary.disclaimer', {
-          defaultValue: 'Esses dados alimentam a análise VetGraphRAG. O texto original do veterinário não é alterado.',
+          defaultValue: 'Esses dados alimentam a análise Senex AI. O texto original do veterinário não é alterado.',
         })}
       </p>
     </div>

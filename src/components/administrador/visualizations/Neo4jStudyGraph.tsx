@@ -40,7 +40,7 @@ interface GraphData {
   textContext?: string;
 }
 
-// Layer colors for VetGraphRAG hierarchy
+// Layer colors for Senex AI hierarchy
 const LAYER_COLORS: Record<string, string> = {
   'layer_0_compound': '#3b82f6',     // Blue - Nutraceuticals
   'layer_1_target': '#8b5cf6',       // Purple - Targets/Receptors

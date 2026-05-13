@@ -39,7 +39,7 @@ const PROMPT_KEYS = [
 
 const MODEL_KEYS = [
   { key: 'ai_model_extraction', label: 'Extraction Model', description: 'Model for PDF extraction (Stage 1-3)' },
-  { key: 'ai_model_triplets', label: 'Triplet Model', description: 'Model for VetGraphRAG triplet generation' },
+  { key: 'ai_model_triplets', label: 'Triplet Model', description: 'Model for Senex AI triplet generation' },
   { key: 'ai_model_chat', label: 'Chat Model', description: 'Model for chat/conversational tasks' },
   { key: 'ai_model_embeddings', label: 'Embeddings Model', description: 'Model for vector embeddings' },
   { key: 'ai_model_translate', label: 'Translation Model', description: 'Model for translation tasks' },
@@ -183,7 +183,7 @@ const PromptManagementPanel: React.FC = () => {
       case 1: return 'Basic entity identification: nutraceuticals, conditions, species';
       case 2: return 'Mechanisms and relationships: pathways, enzymes, interactions';
       case 3: return 'Clinical outcomes: dosages, efficacy scores, biomarkers';
-      case 4: return 'VetGraphRAG triplet generation for knowledge graph';
+      case 4: return 'Senex AI triplet generation for knowledge graph';
       case 5: return 'Relations Auditor: conversational analysis of nutraceutical-condition relationships with Mermaid diagrams (gemini-3.1-pro-preview)';
       default: return '';
     }

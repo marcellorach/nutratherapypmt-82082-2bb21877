@@ -94,7 +94,7 @@ const RecommendationsList: React.FC<RecommendationsListProps> = ({ selectedPet }
           {selectedPet.name} ainda não possui recomendações
         </h3>
         <p className="text-muted-foreground mb-6">
-          Execute a análise VetGraphRAG no perfil do pet para gerar recomendações baseadas em evidências.
+          Execute a análise Senex AI no perfil do pet para gerar recomendações baseadas em evidências.
         </p>
         <Button className="flex items-center gap-2 mx-auto">
           <Brain size={16} />
@@ -144,10 +144,10 @@ const RecommendationsList: React.FC<RecommendationsListProps> = ({ selectedPet }
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="text-lg">
-                      {data.title || data.condition || 'Recomendação VetGraphRAG'}
+                      {data.title || data.condition || 'Recomendação Senex AI'}
                     </CardTitle>
                     <CardDescription>
-                      Fonte: {rec.recommendation_source || 'VetGraphRAG'} • 
+                      Fonte: {rec.recommendation_source || 'Senex AI'} • 
                       {rec.created_at ? ` ${new Date(rec.created_at).toLocaleDateString('pt-BR')}` : ''}
                     </CardDescription>
                   </div>

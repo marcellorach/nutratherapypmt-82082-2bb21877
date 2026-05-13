@@ -3,7 +3,7 @@
  * Based on UMLS (Unified Medical Language System) and Gene Ontology (GO)
  * 
  * This file contains curated dictionaries for accurate classification of
- * biomedical entities in the VetGraphRAG knowledge graph.
+ * biomedical entities in the Senex AI knowledge graph.
  * 
  * HIERARCHY:
  * - Layer 0: Compounds (Nutraceuticals, Drugs, Chemical Compounds)

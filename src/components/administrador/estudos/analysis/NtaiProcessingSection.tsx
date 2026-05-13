@@ -66,7 +66,7 @@ const NtaiProcessingSection: React.FC = () => {
   const [pipelineStages, setPipelineStages] = useState<PipelineStage[]>([
     { name: '📤 Upload', status: 'pending', description: 'File in Supabase storage' },
     { name: '🤖 Gemini AI', status: 'pending', description: 'Entity extraction with AI' },
-    { name: '🔗 Triplets', status: 'pending', description: 'VetGraphRAG triplet generation' },
+    { name: '🔗 Triplets', status: 'pending', description: 'Senex AI triplet generation' },
     { name: '✅ Complete', status: 'pending', description: 'Data extracted and saved' },
   ]);
   const { toast } = useToast();
@@ -133,7 +133,7 @@ const NtaiProcessingSection: React.FC = () => {
 
       if (extractError) throw new Error(`Extraction failed: ${extractError.message}`);
 
-      // Stage 3: Generate VetGraphRAG Triplets
+      // Stage 3: Generate Senex AI Triplets
       setPipelineStages(stages => stages.map((s, i) => 
         i === 2 ? { ...s, status: 'processing' as const } : s
       ));
@@ -162,7 +162,7 @@ const NtaiProcessingSection: React.FC = () => {
       const tripletCount = tripletData?.tripletsGenerated || 0;
       toast({
         title: 'Processing Complete',
-        description: `Extracted ${extractData.counts?.nutraceuticals || 0} nutraceuticals, ${extractData.counts?.conditions || 0} conditions, ${tripletCount} VetGraphRAG triplets`,
+        description: `Extracted ${extractData.counts?.nutraceuticals || 0} nutraceuticals, ${extractData.counts?.conditions || 0} conditions, ${tripletCount} Senex AI triplets`,
       });
 
     } catch (error) {
@@ -184,7 +184,7 @@ const NtaiProcessingSection: React.FC = () => {
     try {
       toast({
         title: 'Regenerating Triplets',
-        description: 'Starting VetGraphRAG triplet generation...',
+        description: 'Starting Senex AI triplet generation...',
       });
 
       // Step 1: Generate triplets
@@ -256,7 +256,7 @@ const NtaiProcessingSection: React.FC = () => {
         {/* Processing Pipeline - Compact Vertical */}
         <div className="bg-gradient-to-br from-blue-50/80 to-indigo-50/40 p-4 rounded-lg border border-blue-200/60">
           <div className="flex items-center justify-between mb-3">
-            <h4 className="text-xs font-semibold text-blue-900">🧬 VetGraphRAG Digestion Pipeline</h4>
+            <h4 className="text-xs font-semibold text-blue-900">🧬 Senex AI Digestion Pipeline</h4>
             <div className="flex items-center gap-3 text-[11px]">
               <span className="text-blue-500">Gemini 3 Pro Preview</span>
               <span className={processingActive ? "text-green-600 font-medium" : "text-gray-400"}>{processingActive ? '● Processing' : '● Idle'}</span>

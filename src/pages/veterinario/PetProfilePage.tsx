@@ -1,4 +1,4 @@
-// Pet Profile Page - VetGraphRAG Clinical Analysis Pipeline
+// Pet Profile Page - Senex AI Clinical Analysis Pipeline
 import React, { useState, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -628,7 +628,7 @@ const PetProfilePage: React.FC = () => {
                   ))}
                   {conditions.filter((c: any) => !isGeroscienceCondition(c.condition_name || c.name)).length === 0 && (
                     <p className="text-xs text-muted-foreground text-center py-4">
-                      {t('petRegistration.conditions.onlyGeroscience', 'Nenhuma condição clínica registrada pelo veterinário. Inferências de gerociência aparecem após a análise VetGraphRAG.')}
+                      {t('petRegistration.conditions.onlyGeroscience', 'Nenhuma condição clínica registrada pelo veterinário. Inferências de gerociência aparecem após a análise Senex AI.')}
                     </p>
                   )}
                 </div>
@@ -756,7 +756,7 @@ const PetProfilePage: React.FC = () => {
               onClear={() => setPipelineLog([])}
             />
 
-            {/* VetGraphRAG Insights Panel - 3 sections */}
+            {/* Senex AI Insights Panel - 3 sections */}
             {recommendationCompounds && (
               <VetGraphRAGInsightsPanel
                 conditions={conditions}
@@ -779,7 +779,7 @@ const PetProfilePage: React.FC = () => {
                     {t('geroscienceInference.title', 'Inferências de gerociência (sistema)')}
                   </CardTitle>
                   <p className="text-xs text-muted-foreground">
-                    {t('geroscienceInference.description', 'Hallmarks de envelhecimento inferidos pelo sistema a partir dos dados clínicos do veterinário. Não fazem parte do diagnóstico tradicional — alimentam a análise profunda VetGraphRAG.')}
+                    {t('geroscienceInference.description', 'Hallmarks de envelhecimento inferidos pelo sistema a partir dos dados clínicos do veterinário. Não fazem parte do diagnóstico tradicional — alimentam a análise profunda Senex AI.')}
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-2">
@@ -936,7 +936,7 @@ const PetProfilePage: React.FC = () => {
               </TabsContent>
             </Tabs>
 
-            {/* Treatability Chart - only after VetGraphRAG analysis */}
+            {/* Treatability Chart - only after Senex AI analysis */}
             {treatabilityData.length > 0 && (
               <TreatabilityChart data={treatabilityData} />
             )}

@@ -1,7 +1,7 @@
 /**
  * Recommendation Confidence Service
  * 
- * Calculates confidence scores for VetGraphRAG recommendations based on:
+ * Calculates confidence scores for Senex AI recommendations based on:
  * - Knowledge Graph coverage (triplet count, species match, breed specificity)
  * - Evidence quality (study types, replication, evidence levels)
  * - Data freshness (study recency)

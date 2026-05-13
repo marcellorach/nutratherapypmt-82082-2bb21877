@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-05-12T17:55:21.782Z
+Generated: 2026-05-13T00:46:05.338Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
@@ -9,7 +9,6 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **vet-ui**: 13
 - **admin**: 11
 - **tutor-ui**: 7
-- **meta**: 7
 - **clinical-pipeline**: 6
 - **kg**: 6
 - **i18n**: 3

@@ -348,17 +348,17 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
             <Lock className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
             <div className="space-y-1 flex-1">
               <p className="text-xs font-semibold text-amber-800 dark:text-amber-300">
-                {t('petProfile.digitalTwin.lockedTitle', 'Aguardando análise VetGraphRAG')}
+                {t('petProfile.digitalTwin.lockedTitle', 'Aguardando análise Senex AI')}
               </p>
               <p className="text-[11px] text-muted-foreground">
-                {t('petProfile.digitalTwin.lockedBody', 'A comparação temporal sem vs. com protocolo só é gerada após a análise VetGraphRAG, para refletir o stack realmente recomendado para este pet.')}
+                {t('petProfile.digitalTwin.lockedBody', 'A comparação temporal sem vs. com protocolo só é gerada após a análise Senex AI, para refletir o stack realmente recomendado para este pet.')}
               </p>
               {onRequestAnalysis && (
                 <Button size="sm" onClick={onRequestAnalysis} disabled={!!isAnalyzing} className="mt-2 h-7 text-xs">
                   {isAnalyzing ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <BrainCircuit className="h-3 w-3 mr-1" />}
                   {isAnalyzing
                     ? t('petRegistration.profile.analyzing', 'Analisando...')
-                    : t('petRegistration.profile.analyzeWithKG', 'Executar análise VetGraphRAG')}
+                    : t('petRegistration.profile.analyzeWithKG', 'Executar análise Senex AI')}
                 </Button>
               )}
             </div>

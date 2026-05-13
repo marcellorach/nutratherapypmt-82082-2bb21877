@@ -212,8 +212,8 @@ export const organograma: OrganogramaArea[] = [
   },
   {
     key: "clinical-pipeline",
-    title: "Pipeline Clínico VetGraphRAG",
-    title_en: "VetGraphRAG Clinical Pipeline",
+    title: "Pipeline Clínico Senex AI",
+    title_en: "Senex AI Clinical Pipeline",
     description: "7 estágios que transformam dados do pet em recomendações geroprotetoras justificadas.",
     description_en: "7 stages transforming pet data into justified geroprotector recommendations.",
     linksTo: ["vet-ui"],

@@ -175,7 +175,7 @@ export default function TechnicalAuditsTab() {
             Auditorias Técnicas Internas
           </h1>
           <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-            Histórico versionado de auditorias internas do VetGraphRAG. Cada auditoria está
+            Histórico versionado de auditorias internas do Senex AI. Cada auditoria está
             vinculada à versão do sistema auditada (i18n + última entrada do changelog).
           </p>
         </div>

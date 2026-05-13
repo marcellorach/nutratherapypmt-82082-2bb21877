@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-12T17:55:21.778Z
+// Última geração: 2026-05-13T00:46:05.335Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -33,7 +33,7 @@ export const changelog: ChangelogEntry[] = [
       "Tabela \"Exames Complementares\" agora mostra estado vazio explícito quando não há sangue/imagem/urina na consulta.",
       "Bloco \"Avaliação\" renomeado para \"Suspeita / Diagnóstico\" (`petTimeline.assessmentTitle`) e \"Conduta\" para \"Plano / Conduta\" (`petTimeline.planTitle`). Texto cru do veterinário permanece intacto.",
       "Novo `AssessmentInterpretation.tsx` exibe sob o texto cru as condições canônicas, sistemas afetados e refs ontológicas extraídas pelo LLM (`pet_consultations.assessment_interpretation`). Sem fallback mock.",
-      "Novo `ConsultationMachineSummary.tsx` — quadro amarelo no fim do card agregando: tags clínicas (movidas do rodapé antigo), `machine_summary` (1–2 frases) e termos canônicos prontos para o VetGraphRAG.",
+      "Novo `ConsultationMachineSummary.tsx` — quadro amarelo no fim do card agregando: tags clínicas (movidas do rodapé antigo), `machine_summary` (1–2 frases) e termos canônicos prontos para o Senex AI.",
       "Form `HistoricalConsultationsSection` alinhado ao card: \"Queixa principal\" → Motivo, \"Achados/Diagnóstico\" → Suspeita / Diagnóstico, \"Conduta\" → Plano / Conduta.",
       "Migration: `pet_consultations` ganha `assessment_interpretation jsonb` e `machine_summary text`.",
       "`GenerateSamplePetsButton` popula `tags`, `machine_summary` e `assessment_interpretation` determinísticos para os pets demo, derivados de `assessment` + `conditions`.",
@@ -305,7 +305,7 @@ export const changelog: ChangelogEntry[] = [
     "status": "entregue",
     "title": "Auditorias Técnicas Internas (aba admin versionada)",
     "bullets": [
-      "Nova aba `Auditorias Técnicas` em Configurações exibindo o histórico versionado de auditorias internas do VetGraphRAG, cada uma vinculada à versão do sistema auditada (i18n + última entrada do changelog)",
+      "Nova aba `Auditorias Técnicas` em Configurações exibindo o histórico versionado de auditorias internas do Senex AI, cada uma vinculada à versão do sistema auditada (i18n + última entrada do changelog)",
       "Auditoria v3 convertida para HTML navegável em `public/audits/v3/index.html` (com os 9 infográficos preservados em `public/audits/v3/media/`) e PDF/DOCX para download direto",
       "Botão \"Fazer nova auditoria\" abre dialog com escopo editável (pré-preenchido) e versão do sistema auto-detectada — registra o pedido em `audit_requests` para o agente Lovable gerar na próxima sessão dedicada",
       "Edição retroativa do escopo de auditorias passadas com histórico preservado em `scope_history`",
@@ -506,7 +506,7 @@ export const changelog: ChangelogEntry[] = [
     "kind": "changed",
     "area": "vet-ui",
     "status": "entregue",
-    "title": "Pets demo agora usam condições com forte cobertura no VetGraphRAG",
+    "title": "Pets demo agora usam condições com forte cobertura no Senex AI",
     "bullets": [
       "Reformuladas as condições dos 5 pets de exemplo (`GenerateSamplePetsButton`) para usar exclusivamente outcomes com ≥15 compostos no KG (layer_4_outcome aprovado)",
       "Substituições: `Mild Periodontal Disease` → `Oxidative Stress` (Buddy); `Hip Dysplasia`+`Overweight` → `Obesity`+`Oxidative Stress` (Rex); `Hip Dysplasia`+`Degenerative Myelopathy` → `Neuroinflammation`+`Cellular Senescence` (Thor); `Pulmonary Hypertension` → `Cardiovascular Disease` e label MMVD canonicalizado para `Myxomatous Mitral Valve Disease` (Luna)",
@@ -1040,7 +1040,7 @@ export const changelog: ChangelogEntry[] = [
       "`DigitalTwinDog` reescrito para consumir `usePetTrajectoryProjection` (mesma fonte do `BiologicalTimeline`): renderiza duas silhuetas lado a lado (Sem protocolo × Com protocolo) e um slider 0–8 anos. Antes só mostrava o estado atual, sem variação temporal nem cenário comparativo.",
       "Para cada ano projetado, os marcadores anatômicos refletem severidade real (`existing_conditions[].projected_severity_label`), risco emergente (`new_conditions[].probability` ≥ 20% com anel tracejado âmbar) e cobertura do stack (`coverage_by_condition[].kg_covered` → estrela ★ verde no marcador).",
       "KPIs alinhados com o `BiologicalTimeline`: idade biológica, cronológica, anos restantes e ganho com protocolo (`years_gained` da edge function `project-pet-trajectory`).",
-      "Estados `locked` (sem snapshot VetGraphRAG), `loading` (projeção rodando) e `noKgBenefit` (cobertura zero) mostram banners coerentes com o resto do perfil — nenhuma simulação, nada de mock.",
+      "Estados `locked` (sem snapshot Senex AI), `loading` (projeção rodando) e `noKgBenefit` (cobertura zero) mostram banners coerentes com o resto do perfil — nenhuma simulação, nada de mock.",
       "`PetProfilePage` passa `petId`, `onRequestAnalysis` e `isAnalyzing` para o componente.",
       "I18N_VERSION 1.41.0 → 1.41.1; novas chaves em `petProfile.digitalTwin.{lockedTitle,lockedBody,aiLoading,newRisk,protected,markersLabel,protectedLabel}` (PT+EN).",
       "Files: src/components/pet/DigitalTwinDog.tsx, src/pages/veterinario/PetProfilePage.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json"
@@ -1252,7 +1252,7 @@ export const changelog: ChangelogEntry[] = [
     "status": "entregue",
     "title": "Consolidação de Alertas + Cards com Evidência Profunda",
     "bullets": [
-      "Aba \"Alertas Clínicos\" removida: predisposições não-diagnosticadas já aparecem em \"Análise VetGraphRAG → Alvos para Prevenção\" — fim da duplicação",
+      "Aba \"Alertas Clínicos\" removida: predisposições não-diagnosticadas já aparecem em \"Análise Senex AI → Alvos para Prevenção\" — fim da duplicação",
       "Reordenação de tabs: Recomendações (default) → Caminho Biológico → Evidência Científica → Projeção → Chat por Composto",
       "CompoundDosageSlider — bloco \"Ver evidências e contexto\": novo dropdown por card mostrando",
       "Mecanismo molecular (mechanism_path da triplet de maior confiança)",
@@ -1286,9 +1286,9 @@ export const changelog: ChangelogEntry[] = [
     "title": "Taxonomia de Condições: Separação Clínica vs Molecular",
     "bullets": [
       "Coluna `origin` em pet_conditions: Rastreamento real de origem (vet_diagnosis, exam_suggested, breed_predisposition, kg_inference) — substituiu inferência por string matching",
-      "Dados de exemplo corrigidos: Removidos \"Cellular Senescence\", \"Inflammaging\" e \"Inflammation\" dos dados seed — processos moleculares agora são inferidos exclusivamente pelo VetGraphRAG",
+      "Dados de exemplo corrigidos: Removidos \"Cellular Senescence\", \"Inflammaging\" e \"Inflammation\" dos dados seed — processos moleculares agora são inferidos exclusivamente pelo Senex AI",
       "inferOrigin() reescrita: Lê coluna `origin` do banco em vez de adivinhar pelo nome da condição",
-      "VetGraphRAG panel: Renomeado \"Comorbidades Ocultas\" → \"Processos Biológicos Inferidos\" com descrições contextuais explicando a via molecular",
+      "Senex AI panel: Renomeado \"Comorbidades Ocultas\" → \"Processos Biológicos Inferidos\" com descrições contextuais explicando a via molecular",
       "Nova badge \"kg_inference\": Processo Biológico Inferido (roxo) distinto de Comorbidade Inferida",
       "i18n v1.22.0: Novas chaves PT/EN para taxonomia de origem"
     ],
@@ -1335,11 +1335,11 @@ export const changelog: ChangelogEntry[] = [
     "kind": "added",
     "area": "meta",
     "status": "entregue",
-    "title": "Separação Clara: Dados Clínicos vs Análise VetGraphRAG",
+    "title": "Separação Clara: Dados Clínicos vs Análise Senex AI",
     "bullets": [
       "ConditionInsightCard modo \"simple\": Tab Conditions mostra apenas dados clínicos puros (nome, severidade, status) sem KG",
       "Badges de origem: 🩺 Diagnóstico Veterinário, 🧪 Sugerida por Exames, 🧬 Predisposição Racial, 🔬 Comorbidade Inferida",
-      "Análise por Condição (pós-VetGraphRAG): ComorbidityMap + ConditionInsightCards completos movidos para após análise",
+      "Análise por Condição (pós-Senex AI): ComorbidityMap + ConditionInsightCards completos movidos para após análise",
       "i18n v1.19.0: Novas chaves PT/EN para badges de origem e seção de análise"
     ],
     "i18nVersion": "1.19.0"
@@ -1349,9 +1349,9 @@ export const changelog: ChangelogEntry[] = [
     "kind": "added",
     "area": "meta",
     "status": "entregue",
-    "title": "Reorganização do Perfil do Pet — Separação Dados vs Análise VetGraphRAG",
+    "title": "Reorganização do Perfil do Pet — Separação Dados vs Análise Senex AI",
     "bullets": [
-      "VetGraphRAGInsightsPanel: Novo painel de 3 seções (Condições Atuais, Comorbidades Ocultas, Prevenção Futura)",
+      "Senex AIInsightsPanel: Novo painel de 3 seções (Condições Atuais, Comorbidades Ocultas, Prevenção Futura)",
       "PatientKnowledgeSubgraph: Subgrafo interativo do KG utilizado nas recomendações do paciente",
       "Inferência de gerociência: Detecção automática de comorbidades ocultas via KG",
       "Razões de inferência: Cada insight mostra \"por que inferimos isso\"",
@@ -1466,7 +1466,7 @@ export const changelog: ChangelogEntry[] = [
     "status": "entregue",
     "title": "Auditoria e Limpeza do Sistema (Fases 1–4)",
     "bullets": [
-      "Fase 1 — Código morto removido: `active-ingredients-service.ts`, `nutraceutical-outcomes-service.ts`, `scientific-studies-service.ts`, `useVetGraphRAGProcessing.tsx`, `useVetGraphRAGProcessingLegacy.ts`, aggregador `nutraceuticals/index.ts`",
+      "Fase 1 — Código morto removido: `active-ingredients-service.ts`, `nutraceutical-outcomes-service.ts`, `scientific-studies-service.ts`, `useSenex AIProcessing.tsx`, `useSenex AIProcessingLegacy.ts`, aggregador `nutraceuticals/index.ts`",
       "Fase 2 — Simulações perigosas eliminadas: `ntai/simulation.ts` (Math.random) removido; `vetgraphrag-service.ts` reescrito para usar edge function `process-study`; `openai.ts` reescrito para usar edge function `chat` via Lovable AI (sem mais respostas hardcoded)",
       "Fase 3 — Duplicações consolidadas: `examEnhancer.ts` refatorado para consultar `lab_reference_ranges` do banco em vez de valores hardcoded locais",
       "Fase 4 — Páginas conectadas a dados reais: `RecommendationsList.tsx` e `TutorPage.tsx` migrados de mock (`@/data`) para queries reais (`pet_profiles`, `recommendation_logs`); `useNutraceuticalsData.ts` sem mais fallback mock"
@@ -1691,7 +1691,7 @@ export const changelog: ChangelogEntry[] = [
       "Kanban integrado como 4ª aba: Curadoria movida de tab separada para dentro do fluxo sequencial",
       "\"Imports\" movido para dialog: Histórico de importações acessível via botão discreto no header, fora do fluxo principal",
       "EstudosTab simplificado: Removidas abas superiores redundantes (\"Import & Process\" / \"Manage Studies\")",
-      "Warning de curadoria: Card verde de sucesso substituído por alerta âmbar informando que estudo não será incorporado ao VetGraphRAG sem curadoria",
+      "Warning de curadoria: Card verde de sucesso substituído por alerta âmbar informando que estudo não será incorporado ao Senex AI sem curadoria",
       "i18n completo em NtaiProcessCard: ~15 textos hardcoded em português migrados para sistema de tradução bilíngue",
       "Correção de namespace i18n: `studies.ntai.*` corrigido para `studies.vetgraphrag.*` (namespace correto)"
     ]
@@ -1768,7 +1768,7 @@ export const changelog: ChangelogEntry[] = [
     "kind": "fixed",
     "area": "meta",
     "status": "entregue",
-    "title": "Correção de Tradução NTAI → VetGraphRAG",
+    "title": "Correção de Tradução NTAI → Senex AI",
     "bullets": [
       "Corrigido problema de chaves de tradução literais - 8 componentes atualizados para usar `studies.vetgraphrag.*` ao invés de `studies.ntai.*`",
       "Arquivos corrigidos: `NtaiActiveProcessingCard.tsx`, `NtaiAnalysisResults.tsx`, `NtaiProcessingSection.tsx`, `NtaiProcessingLog.tsx`, `NtaiTripletsStatsTab.tsx`, `NtaiStudySelectionTable.tsx`",
@@ -1823,7 +1823,7 @@ export const changelog: ChangelogEntry[] = [
     "kind": "added",
     "area": "meta",
     "status": "entregue",
-    "title": "Fase 4: Documentação VetGraphRAG Enriquecida",
+    "title": "Fase 4: Documentação Senex AI Enriquecida",
     "bullets": [
       "Novas Referências Científicas no TabInfo da tab \"Estudos\":",
       "AgeXtend (Ahuja et al., Nature Aging 2024) - Plataforma AI para predição de geroprotetores",
@@ -1832,13 +1832,13 @@ export const changelog: ChangelogEntry[] = [
       "PrimeKG (Chandak et al., Nature Sci Data 2023) - Knowledge Graph de medicina de precisão",
       "Canine Cognitive Nutraceuticals (Yarborough et al., 2025) - Revisão de nutracêuticos cognitivos",
       "Roadmap Arquitetural de 4 Fases adicionado à metodologia:",
-      "Fase 1: Knowledge Base (VetGraphRAG) - Implementado",
+      "Fase 1: Knowledge Base (Senex AI) - Implementado",
       "Fase 2: Patient System - Planejado",
       "Fase 3: Recommendation Engine - Planejado",
       "Fase 4: Longitudinal Follow-up - Planejado",
       "Component Links com links internos para componentes e edge functions",
       "Objetivo atualizado com foco em LONGEVIDADE CANINA e recomendação de geroprotetores",
-      "Botão renomeado para \"ℹ️ About VetGraphRAG\" na tab estudos"
+      "Botão renomeado para \"ℹ️ About Senex AI\" na tab estudos"
     ]
   },
   {
@@ -1846,11 +1846,11 @@ export const changelog: ChangelogEntry[] = [
     "kind": "changed",
     "area": "meta",
     "status": "entregue",
-    "title": "Renomeação NTAI → VetGraphRAG",
+    "title": "Renomeação NTAI → Senex AI",
     "bullets": [
-      "Renomeação completa de NTAI para VetGraphRAG em todo o código",
+      "Renomeação completa de NTAI para Senex AI em todo o código",
       "Tipos: `ntai.ts` → `vetgraphrag.ts` (com aliases de compatibilidade)",
-      "Hooks: `useNtaiProcessing` → `useVetGraphRAGProcessing`",
+      "Hooks: `useNtaiProcessing` → `useSenex AIProcessing`",
       "Serviços: `ntai-service.ts` → `vetgraphrag-service.ts`",
       "Traduções: chave `ntai` → `vetgraphrag` em PT e EN",
       "i18n version: Incrementado para 1.9.27"
@@ -1900,7 +1900,7 @@ export const changelog: ChangelogEntry[] = [
     "kind": "added",
     "area": "meta",
     "status": "entregue",
-    "title": "VetGraphRAG Hierarchical Model Migration",
+    "title": "Senex AI Hierarchical Model Migration",
     "bullets": [
       "FASE 1: SQL Migrations - Expansão completa do modelo de dados",
       "Criado ENUM `entity_layer` com 5 camadas hierárquicas (layer_0_compound → layer_4_outcome)",
@@ -1929,7 +1929,7 @@ export const changelog: ChangelogEntry[] = [
       "5 queries hierárquicas de referência para traversal",
       "Queries de validação de dados",
       "FASE 3: generate-triplets Edge Function - Extração hierárquica",
-      "Atualizado prompt sistema com modelo VetGraphRAG de 5 camadas",
+      "Atualizado prompt sistema com modelo Senex AI de 5 camadas",
       "Suporte a 20+ relationship types com validação",
       "Extração de `mechanism_path` - cadeia completa L0→L1→L2→L3→L4",
       "Extração de `synergy_data` - dados estruturados para sinergias/antagonismos",
@@ -1947,11 +1947,11 @@ export const changelog: ChangelogEntry[] = [
       "Auto-criação de schema Neo4j (constraints e índices)",
       "Estatísticas detalhadas: nodeTypes, relationshipTypes, mechanismPathsCreated",
       "Inferência de tipo para nós não tipados baseado em posição na cadeia",
-      "FASE 5: Integração Frontend VetGraphRAG - Pipeline completo",
+      "FASE 5: Integração Frontend Senex AI - Pipeline completo",
       "`NtaiProcessingSection.tsx`: Pipeline expandido de 3→4 stages (Upload → Gemini AI → Triplets → Complete)",
       "`handleProcessWithAI`: Chama `generate-triplets` automaticamente após `extract-study-entities`",
-      "`handleRegenerateVetGraphRAG`: Nova função para regenerar triplets de estudos existentes",
-      "`NtaiStudySelectionTable.tsx`: Nova coluna \"VetGraphRAG\" com botão de regeneração por estudo",
+      "`handleRegenerateSenex AI`: Nova função para regenerar triplets de estudos existentes",
+      "`NtaiStudySelectionTable.tsx`: Nova coluna \"Senex AI\" com botão de regeneração por estudo",
       "`TripletCurationBoard.tsx`: Exibição completa de campos hierárquicos:",
       "Badges coloridas para `subject_layer` e `object_layer` (L0-L4)",
       "Badge de `evidence_level` (high/moderate/low/very_low)",
@@ -1968,9 +1968,9 @@ export const changelog: ChangelogEntry[] = [
     "status": "entregue",
     "title": "",
     "bullets": [
-      "📝 ARCHITECTURE.md v1.9.0: Seção GraphRAG completamente reescrita com modelo VetGraphRAG de 5 camadas",
+      "📝 ARCHITECTURE.md v1.9.0: Seção GraphRAG completamente reescrita com modelo Senex AI de 5 camadas",
       "📝 Diagrama Mermaid: Novo diagrama mostrando hierarquia L0→L4 com tipos de relacionamento",
-      "📝 Tabela de Status: Atualizada com 4 fases concluídas do VetGraphRAG"
+      "📝 Tabela de Status: Atualizada com 4 fases concluídas do Senex AI"
     ]
   },
   {

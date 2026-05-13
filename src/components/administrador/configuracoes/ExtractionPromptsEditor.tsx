@@ -47,7 +47,7 @@ const ExtractionPromptsEditor: React.FC = () => {
     prompt_extraction_assessment_system: '',
     prompt_extraction_assessment_user: '',
     
-    // Triplets: VetGraphRAG
+    // Triplets: Senex AI
     prompt_triplet_extraction_system: '',
     prompt_triplet_extraction_user: ''
   });
@@ -125,7 +125,7 @@ const ExtractionPromptsEditor: React.FC = () => {
       type: 'user'
     },
     
-    // Triplets: VetGraphRAG Knowledge Graph
+    // Triplets: Senex AI Knowledge Graph
     {
       key: 'prompt_triplet_extraction_system',
       value: prompts.prompt_triplet_extraction_system,

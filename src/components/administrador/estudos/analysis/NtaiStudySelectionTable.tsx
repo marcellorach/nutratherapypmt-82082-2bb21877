@@ -77,7 +77,7 @@ const NtaiStudySelectionTable: React.FC<NtaiStudySelectionTableProps> = ({
             <TableHead>{t('studies.vetgraphrag.table.source')}</TableHead>
             <TableHead>{t('studies.vetgraphrag.table.imported')}</TableHead>
             <TableHead>{t('studies.vetgraphrag.table.status')}</TableHead>
-            <TableHead className="w-[120px]">VetGraphRAG</TableHead>
+            <TableHead className="w-[120px]">Senex AI</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
