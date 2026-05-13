@@ -417,6 +417,70 @@ const SAMPLE_PETS: DemoPet[] = [
   },
 ];
 
+/**
+ * Deterministic rich machine interpretation for demo data. Cobre achados que o
+ * vet pode ter omitido no texto livre (chief complaint + exame físico + exames
+ * + condições + plano). Em produção real, a edge function
+ * `extract-pet-clinical-data` produz a mesma estrutura via LLM (Senex AI).
+ */
+function buildMachineSummary(c: DemoConsultation, pet: DemoPet): string {
+  const parts: string[] = [];
+  const breed = pet.breed;
+  const age = pet.age_years;
+
+  // 1) Contexto + queixa
+  parts.push(`${breed}, ${age}a, atendido(a) por: ${c.chief_complaint.toLowerCase()}.`);
+
+  // 2) Exame físico
+  if (c.clinical_exam) {
+    parts.push(`Ao exame: ${c.clinical_exam.replace(/\s+/g, ' ').trim()}`);
+  }
+
+  // 3) Achados laboratoriais / imagem relevantes
+  const examFindings: string[] = [];
+  (c.exams ?? []).forEach((e) => {
+    const interp = (e.results as any)?.interpretation;
+    const flags = e.flags_abnormal ?? [];
+    if (interp) {
+      examFindings.push(`${e.exam_type} → ${interp}`);
+    } else if (flags.length) {
+      const vals = flags
+        .map((f) => `${f}=${(e.results as any)?.[f] ?? '?'}`)
+        .join(', ');
+      examFindings.push(`${e.exam_type} com alterações (${vals})`);
+    }
+  });
+  if (examFindings.length) {
+    parts.push(`Exames: ${examFindings.join('; ')}.`);
+  }
+
+  // 4) Condições canônicas (sempre TODAS — captura o que o vet omitiu)
+  if (c.conditions?.length) {
+    const condStr = c.conditions
+      .map((cond) => {
+        const sev = (cond as any).severity ? ` (${(cond as any).severity})` : '';
+        return `${cond.condition_name}${sev}`;
+      })
+      .join(', ');
+    parts.push(`Condições identificadas pela base de conhecimento: ${condStr}.`);
+  }
+
+  // 5) Medicações iniciadas/ajustadas
+  if (c.medications?.length) {
+    const medStr = c.medications
+      .map((m) => `${m.medication_name} ${m.dosage} ${m.frequency}`)
+      .join('; ');
+    parts.push(`Terapia farmacológica: ${medStr}.`);
+  }
+
+  // 6) Plano
+  if (c.plan) {
+    parts.push(`Plano: ${c.plan.replace(/\s+/g, ' ').trim()}`);
+  }
+
+  return parts.join(' ');
+}
+
 const GenerateSamplePetsButton: React.FC = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
