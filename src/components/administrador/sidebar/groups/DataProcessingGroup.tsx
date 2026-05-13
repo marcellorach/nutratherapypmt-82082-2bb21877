@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Import, Brain, BarChart3, Settings, ChevronRight, PawPrint, CircleCheck } from "lucide-react";
+import { Import, BarChart3, Settings, ChevronRight, PawPrint, CircleCheck } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from 'react-i18next';
@@ -30,23 +30,6 @@ const DataProcessingGroup: React.FC<DataProcessingGroupProps> = ({
               <span>{t('admin.sidebar.dataProcessing.import')}</span>
             </div>
             {currentStep === "import" && (
-              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-            )}
-          </div>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          isActive={currentStep === "analysis"} 
-          onClick={() => handleStepClick("analysis")}
-          className={currentStep === "analysis" ? "bg-primary/10 text-primary" : ""}
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <Brain className={`h-4 w-4 mr-2 ${currentStep === "analysis" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.dataProcessing.multiAgentSimulation')}</span>
-            </div>
-            {currentStep === "analysis" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
             )}
           </div>
