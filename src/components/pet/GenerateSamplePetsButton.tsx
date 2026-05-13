@@ -521,9 +521,10 @@ const GenerateSamplePetsButton: React.FC = () => {
           const date = new Date(Date.now() - c.daysAgo * 24 * 60 * 60 * 1000)
             .toISOString().split('T')[0];
 
-          // Deterministic machine interpretation for demo: derived from
-          // existing assessment + linked conditions. Real visits get this
-          // populated by the extract-pet-clinical-data edge function.
+          // Interpretação determinística rica para demo: cobre achados que o
+          // vet pode ter omitido no `assessment`. Em produção real, a edge
+          // function `extract-pet-clinical-data` produz a mesma estrutura via
+          // LLM (Senex AI / PetMoreTime).
           const canonicalConditions = (c.conditions ?? []).map((cond) => ({
             name: cond.condition_name,
             stage: (cond as any).severity ?? null,
