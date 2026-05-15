@@ -5724,6 +5724,7 @@
     },
     "opportunity": {
       "badge": "Uma Vantagem Sem Precedentes",
+      "_partnershipNote": "soft note injected via 'partnership.inDevelopment'",
       "title": "O Maior Coorte Veterinário Acessível da América Latina",
       "subtitle": "Uma parceria única de compartilhamento de dados nos dá acesso a 1,4 milhão de cães com registros veterinários completos — e crescendo.",
       "petlove": {
