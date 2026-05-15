@@ -100,6 +100,12 @@ const MarketSection: React.FC = () => {
           <motion.p variants={fadeUp} custom={1} className="text-center text-sm text-gray-500 max-w-2xl mx-auto mb-10">
             {t('landing.market.monetizationDesc')}
           </motion.p>
+          {isPetlove && (
+            <motion.p variants={fadeUp} custom={2} className="text-center text-xs text-gray-400 italic max-w-2xl mx-auto -mt-6 mb-10 flex items-center justify-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400/70" />
+              {t('landing.partnership.inDevelopment')}
+            </motion.p>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-4xl mx-auto">
             {winCards.map((card, i) => (
