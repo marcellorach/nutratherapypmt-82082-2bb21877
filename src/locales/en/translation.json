@@ -2782,15 +2782,15 @@
     }
   },
   "footer": {
-    "copyright": "Senex AI Pet © 2025",
-    "sloganLine1": "Extending Lives Through Precision Geroscience",
+    "copyright": "Senex AI Pet © 2025 — a PetMoreTime platform",
+    "sloganLine1": "Extending Lives & Preventing Degenerative Disease Through Precision Geroscience",
     "sloganLine2": "1.4 Million Dogs. Unlimited Discoveries.",
     "poweredBy": "Powered by",
     "comingSoon": "coming soon"
   },
   "header": {
-    "platformSubtitleLine1": "Extending Lives Through Precision Geroscience",
-    "platformSubtitleLine2": "1.4 Million Dogs. Unlimited Discoveries.",
+    "platformSubtitleLine1": "Extending Lives & Preventing Degenerative Disease",
+    "platformSubtitleLine2": "a PetMoreTime platform",
     "administrator": "Administrator",
     "veterinarian": "Veterinarian",
     "tutor": "Tutor",
@@ -5675,7 +5675,7 @@
     },
     "vision": {
       "badge": "Longevity Science for Veterinary Medicine",
-      "slogan1": "Extending Lives Through Precision Geroscience.",
+      "slogan1": "Extending Lives & Preventing Degenerative Disease Through Precision Geroscience.",
       "slogan2": "1.4 Million Dogs. Unlimited Discoveries.",
       "subtitle": "Dogs age 7× faster than humans — the perfect translational model for longevity science. By targeting root causes of aging, we prevent degenerative diseases before they manifest.",
       "translational": {
