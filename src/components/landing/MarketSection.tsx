@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ExternalLink, Heart, PawPrint, FlaskConical, Rocket } from 'lucide-react';
 import tamSamSomChart from '@/assets/tam-sam-som.png';
 import petMoreTimeLogo from '@/assets/petmoretime-logo.png';
+import { useIsPetloveVariant } from '@/contexts/SiteVariantContext';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -15,13 +16,15 @@ const fadeUp = {
 
 const MarketSection: React.FC = () => {
   const { t } = useTranslation();
+  const isPetlove = useIsPetloveVariant();
 
-  const winCards = [
+  const allWinCards = [
     { icon: Heart, titleKey: 'landing.market.winPetloveTitle', descKey: 'landing.market.winPetlove' },
     { icon: PawPrint, titleKey: 'landing.market.winTutorsTitle', descKey: 'landing.market.winTutors' },
     { icon: FlaskConical, titleKey: 'landing.market.winScienceTitle', descKey: 'landing.market.winScience' },
     { icon: Rocket, titleKey: 'landing.market.winPlatformTitle', descKey: 'landing.market.winPlatform' },
   ];
+  const winCards = isPetlove ? allWinCards : allWinCards.filter(c => c.titleKey !== 'landing.market.winPetloveTitle');
 
   return (
     <section id="market" className="py-24 px-4 bg-gradient-to-b from-gray-50 to-white">
