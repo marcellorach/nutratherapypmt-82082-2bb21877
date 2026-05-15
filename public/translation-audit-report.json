@@ -1,9 +1,9 @@
 {
-  "timestamp": "2026-05-13T13:35:03.982Z",
+  "timestamp": "2026-05-15T15:35:57.896Z",
   "summary": {
     "totalFiles": 864,
-    "totalIssues": 416,
-    "hardcodedTexts": 42,
+    "totalIssues": 415,
+    "hardcodedTexts": 41,
     "missingKeys": 374,
     "incompleteTranslations": 0
   },
@@ -2862,13 +2862,6 @@
       "file": "src/components/landing/InvestmentSection.tsx",
       "line": 159,
       "text": "Contact Marcello Rachlyn",
-      "severity": "medium"
-    },
-    {
-      "type": "hardcoded",
-      "file": "src/components/landing/OpportunitySection.tsx",
-      "line": 51,
-      "text": "PetLove",
       "severity": "medium"
     },
     {
