@@ -6,7 +6,7 @@ const AdminFooter: React.FC = () => {
       <div className="px-6 py-4">
         {/* Copyright e descrição principal */}
         <div className="text-center text-sm mb-3">
-          Senex AI PET © {new Date().getFullYear()} - Sistema inteligente de recomendação de nutracêuticos para pets
+          Senex AI PET © {new Date().getFullYear()} — uma plataforma PetMoreTime · Sistema inteligente de recomendação de nutracêuticos para pets
         </div>
         
         {/* Seção Powered by com logos */}
@@ -16,15 +16,15 @@ const AdminFooter: React.FC = () => {
           </div>
           
           <div className="flex items-center justify-center space-x-6 flex-wrap gap-y-2">
-            {/* Google Cloud */}
+            {/* Gemini */}
             <div className="flex items-center opacity-80 hover:opacity-100 transition-opacity">
               <div className="flex items-center space-x-2">
                 <img 
-                  src="/images/google-cloud-logo.svg" 
-                  alt="Google Cloud" 
+                  src="/images/gemini-logo.png" 
+                  alt="Gemini" 
                   className="h-6 w-auto transition-all"
                 />
-                <span className="text-xs text-gray-600 font-medium">Google Cloud</span>
+                <span className="text-xs text-gray-600 font-medium">Gemini</span>
               </div>
             </div>
             
