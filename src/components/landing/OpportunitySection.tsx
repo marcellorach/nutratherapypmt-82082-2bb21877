@@ -1,7 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { Users, Microscope, TrendingUp, FlaskConical } from 'lucide-react';
+import { Users, TrendingUp, FlaskConical, Heart, Shield } from 'lucide-react';
+import { useIsPetloveVariant } from '@/contexts/SiteVariantContext';
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
   visible: (i: number) => ({
@@ -12,6 +13,7 @@ const fadeUp = {
 
 const OpportunitySection: React.FC = () => {
   const { t } = useTranslation();
+  const isPetlove = useIsPetloveVariant();
 
   const pillars = [
     { icon: FlaskConical, key: 'pillar1' },
@@ -22,6 +24,46 @@ const OpportunitySection: React.FC = () => {
   return (
     <section id="opportunity" className="py-24 px-4 bg-white">
       <div className="max-w-6xl mx-auto">
+        {isPetlove && (
+          <motion.div
+            className="text-center mb-16"
+            initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }}
+          >
+            <motion.p variants={fadeUp} custom={0} className="text-sm font-semibold tracking-widest uppercase text-gray-500 mb-4">
+              {t('landing.opportunity.badge')}
+            </motion.p>
+            <motion.h2 variants={fadeUp} custom={1} className="text-4xl font-bold text-gray-900 mb-4">
+              {t('landing.opportunity.title')}
+            </motion.h2>
+            <motion.p variants={fadeUp} custom={2} className="text-lg text-gray-600 max-w-3xl mx-auto">
+              {t('landing.opportunity.subtitle')}
+            </motion.p>
+            <motion.div variants={fadeUp} custom={3} className="mt-4 inline-flex items-center gap-2 text-xs text-gray-400 italic">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400/70" />
+              {t('landing.partnership.inDevelopment')}
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10 max-w-4xl mx-auto text-left">
+              <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                <div className="flex items-center gap-3 mb-3">
+                  <Heart className="w-5 h-5 text-gray-700" />
+                  <h3 className="font-semibold text-gray-900">1.4M</h3>
+                </div>
+                <p className="text-sm text-gray-600 mb-1">{t('landing.opportunity.petlove.dogs')}</p>
+                <p className="text-xs text-gray-500">{t('landing.opportunity.petlove.desc')}</p>
+              </div>
+              <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                <div className="flex items-center gap-3 mb-3">
+                  <Shield className="w-5 h-5 text-gray-700" />
+                  <h3 className="font-semibold text-gray-900">PAMEC · 11</h3>
+                </div>
+                <p className="text-sm text-gray-600 mb-1">{t('landing.opportunity.pamec.forces')}</p>
+                <p className="text-xs text-gray-500">{t('landing.opportunity.pamec.desc')}</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {/* 3 Strategic Pillars */}
         <motion.div
           initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-80px' }}
