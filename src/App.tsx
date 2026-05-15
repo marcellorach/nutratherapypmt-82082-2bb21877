@@ -15,6 +15,7 @@ import { Toaster } from './components/ui/toaster';
 import { TooltipProvider } from './components/ui/tooltip';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import { SiteVariantProvider } from './contexts/SiteVariantContext';
 
 // Criar instância do QueryClient
 const queryClient = new QueryClient({
@@ -33,6 +34,7 @@ function App() {
         <TooltipProvider>
           <Router>
             <AuthProvider>
+              <SiteVariantProvider>
               <Routes>
                 {/* Public auth routes */}
                 <Route path="/auth" element={<AuthPage />} />
@@ -49,6 +51,7 @@ function App() {
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              </SiteVariantProvider>
             </AuthProvider>
           </Router>
         </TooltipProvider>

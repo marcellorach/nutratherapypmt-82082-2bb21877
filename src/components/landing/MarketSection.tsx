@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ExternalLink, Heart, PawPrint, FlaskConical, Rocket } from 'lucide-react';
 import tamSamSomChart from '@/assets/tam-sam-som.png';
 import petMoreTimeLogo from '@/assets/petmoretime-logo.png';
+import { useIsPetloveVariant } from '@/contexts/SiteVariantContext';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -15,13 +16,15 @@ const fadeUp = {
 
 const MarketSection: React.FC = () => {
   const { t } = useTranslation();
+  const isPetlove = useIsPetloveVariant();
 
-  const winCards = [
+  const allWinCards = [
     { icon: Heart, titleKey: 'landing.market.winPetloveTitle', descKey: 'landing.market.winPetlove' },
     { icon: PawPrint, titleKey: 'landing.market.winTutorsTitle', descKey: 'landing.market.winTutors' },
     { icon: FlaskConical, titleKey: 'landing.market.winScienceTitle', descKey: 'landing.market.winScience' },
     { icon: Rocket, titleKey: 'landing.market.winPlatformTitle', descKey: 'landing.market.winPlatform' },
   ];
+  const winCards = isPetlove ? allWinCards : allWinCards.filter(c => c.titleKey !== 'landing.market.winPetloveTitle');
 
   return (
     <section id="market" className="py-24 px-4 bg-gradient-to-b from-gray-50 to-white">
@@ -97,6 +100,12 @@ const MarketSection: React.FC = () => {
           <motion.p variants={fadeUp} custom={1} className="text-center text-sm text-gray-500 max-w-2xl mx-auto mb-10">
             {t('landing.market.monetizationDesc')}
           </motion.p>
+          {isPetlove && (
+            <motion.p variants={fadeUp} custom={2} className="text-center text-xs text-gray-400 italic max-w-2xl mx-auto -mt-6 mb-10 flex items-center justify-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400/70" />
+              {t('landing.partnership.inDevelopment')}
+            </motion.p>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-4xl mx-auto">
             {winCards.map((card, i) => (
