@@ -20,7 +20,7 @@ const AdminFooter: React.FC = () => {
             <div className="flex items-center opacity-80 hover:opacity-100 transition-opacity">
               <div className="flex items-center space-x-2">
                 <img 
-                  src="/images/gemini-logo.png" 
+                  src="/images/gemini-logo.svg" 
                   alt="Gemini" 
                   className="h-6 w-auto transition-all"
                 />
