@@ -1,13 +1,13 @@
 # Project context briefing (auto)
-Generated: 2026-05-17T15:17:07.313Z
+Generated: 2026-05-17T17:08:50.355Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.77.1
+## Latest i18n version: 1.78.0
 
 ## Changes by area (last 14 days)
 - **vet-ui**: 13
-- **tutor-ui**: 7
+- **tutor-ui**: 8
 - **admin**: 6
 - **clinical-pipeline**: 3
 - **meta**: 2
@@ -15,6 +15,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **curation**: 1
 
 ## Top 10 recent entries
+### 2026-05-17 · [tutor-ui] CHANGED — Home: destaque Painel de Controle + footer/header rebranding
+- Home autenticada: Painel de Controle agora usa botão primário com seta vermelha "visite aqui!" (bilingual); cards Vet Portal e Owner Portal mostram badge "Em breve / Coming soon" e botão desabilitado "Em desenvolvimento / In development".
+- Footer: copyright atualizado para "Senex AI © 2025–2026 — developed by PetMoreTime. All rights reserved by PetMoreTime." em Footer.tsx e AdminFooter.tsx.
+- Tagline "Veterinary Geroscience" adicionada sob a referência PetMoreTime no header e em ambos os footers.
+_files: src/pages/Index.tsx, src/components/layout/Header.tsx, src/components/layout/Footer.tsx, src/components/administrador/layout/AdminFooter.tsx…_
+
 ### 2026-05-17 · [admin] FIXED — Links quebrados e duplicatas em predisposições raciais
 - Removidas 26 duplicatas em `breed_predispositions` (mesmo par raça×condição inserido 2x pelo seed v2).
 - Adicionada constraint única `(breed_id, condition_id)` para impedir reincidência.
@@ -66,12 +72,6 @@ _files: src/components/pet/GenerateSamplePetsButton.tsx_
 - Documentação técnica (`docs/TECHNICAL_DECISIONS.md`, `ARCHITECTURE.md`) recebeu nota de autoria/operação no header.
 - Knowledge File do projeto (project memory) atualizado com nova entrada `mem://branding/senex-ai-rename` consolidando: marca pública = Senex AI, autoria/operação exclusiva = PetMoreTime, identificadores internos preservados.
 _files: src/pages/administrador/OrganogramaTab.tsx, src/components/administrador/audits/TechnicalAuditsTab.tsx, src/components/administrador/compliance/ComplianceDashboard.tsx, src/i18n.ts_
-
-### 2026-05-13 · [meta] CHANGED — Rebrand: motor "VetGraphRAG" passa a se chamar "Senex AI" na camada visível
-- Substituição em massa da marca exposta ao usuário: "VetGraphRAG" → Senex AI em todas as traduções (PT/EN, 27 ocorrências cada), strings JSX, descrições de tabs administrativas, organograma, taxonomia biomédica, exports de PDF e relatórios de confiança.
-- Identificadores internos preservados intencionalmente: tipos (`VetGraphRAGAnalysisResult`, `VetGraphRAGConditionTag`), hooks (`useVetGraphRAGConfig`, `useVetGraphRAGLogs`, `useVetGraphRAGQueue`, `useNtaiProcessing`), componentes (`VetGraphRAGInsightsPanel`), arquivos (`vetgraphrag-service.ts`, `vetgraphrag.ts`), edge functions e colunas de DB. Evita refactor estrutural.
-- I18N bumped para `1.74.0` para invalidar cache de traduções.
-_files: .lovable/plan.md_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
