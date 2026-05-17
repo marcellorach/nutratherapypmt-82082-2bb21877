@@ -65,23 +65,6 @@ const ActionsGroup: React.FC<ActionsGroupProps> = ({
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton 
-          isActive={currentStep === "acompanhamento"} 
-          onClick={() => handleStepClick("acompanhamento")}
-          className={currentStep === "acompanhamento" ? "bg-primary/10 text-primary" : ""}
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <Activity className={`h-4 w-4 mr-2 ${currentStep === "acompanhamento" ? "text-primary" : ""}`} />
-              <span>{t('campaignManagement')}</span>
-            </div>
-            {currentStep === "acompanhamento" && (
-              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-            )}
-          </div>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton 
           isActive={currentStep === "clinical-monitoring"} 
           onClick={() => handleStepClick("clinical-monitoring")}
           className={currentStep === "clinical-monitoring" ? "bg-primary/10 text-primary" : ""}
