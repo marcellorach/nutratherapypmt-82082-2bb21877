@@ -2808,7 +2808,7 @@
   },
   "footer": {
     "copyright": "Senex AI Pet © 2025 — uma plataforma PetMoreTime",
-    "sloganLine1": "Estendendo Vidas Pet e Prevenindo Doenças Degenerativas Pet com Gerociência de Precisão",
+    "sloganLine1": "Estendendo vidas Pet e prevenindo doenças degenerativas Pet com gerociência de precisão",
     "sloganLine2": "1,4 Milhão de Cães. Descobertas Ilimitadas.",
     "poweredBy": "Powered by",
     "comingSoon": "em breve",
@@ -2824,8 +2824,8 @@
     "login": "Entrar",
     "pendingRequests": "Solicitações de acesso pendentes",
     "pendingRequestsCount": "{{count}} solicitação(ões) pendente(s)",
-    "platformSubtitleLine1a": "Prolongando Vidas Pet",
-    "platformSubtitleLine1b": "& Prevenindo Doenças Degenerativas Pet"
+    "platformSubtitleLine1a": "Prolongando vidas Pet",
+    "platformSubtitleLine1b": "& prevenindo doenças degenerativas Pet"
   },
   "messages": {
     "success": "Operação realizada com sucesso",
@@ -5707,7 +5707,7 @@
     },
     "vision": {
       "badge": "Ciência da Longevidade para Medicina Veterinária",
-      "slogan1": "Estendendo Vidas Pet e Prevenindo Doenças Degenerativas Pet com Gerociência de Precisão.",
+      "slogan1": "Estendendo vidas Pet e prevenindo doenças degenerativas Pet com gerociência de precisão.",
       "slogan2": "1,4 Milhão de Cães. Descobertas Ilimitadas.",
       "subtitle": "Cães envelhecem 7× mais rápido que humanos — o modelo translacional perfeito para a ciência da longevidade. Ao tratar as causas-raiz do envelhecimento, prevenimos doenças degenerativas antes que se manifestem.",
       "translational": {
