@@ -1,74 +1,141 @@
-## Objetivo
+## Visão geral
 
-Criar duas páginas de entrada distintas baseadas no hostname, mantendo todo o restante da plataforma (painel admin, portal vet, portal tutor) **idêntico**, mas respeitando o idioma default e o "voltar" para a home correta.
+Quatro frentes integradas:
 
----
+1. **(a) Auditoria** — confirmar/registrar onde predisposições efetivamente influenciam KG e análises.
+2. **(b) Expansão de raças** — seed manual de ~120 raças com predisposições enriquecidas (perfil genético, fontes com link direto).
+3. **(c) Revisão de condições** — expandir `health_conditions` com novas entradas bem documentadas + fontes.
+4. **(d) Contadores reais na home** — substituir números fixos da landing por contagens reais + sufixo "(em contínua expansão)".
 
-## a) Duas páginas de entrada
-
-### a.1) `longevidade.ai` — variante "PetLove"
-- Default em **inglês** (`en`)
-- Mantém referências à PetLove e ao plano de saúde animal, **mas suavizadas**: nos cards/seções da `OpportunitySection` e `MarketSection`, adicionar um selo discreto "in development / parceria em construção" ao lado das menções à PetLove/plano de saúde, sem destaque visual.
-- Reexibir o que está hoje escondido em `OpportunitySection` (header + card "1.4M" + card PAMEC) **somente nesta variante**.
-
-### a.2) `pet.longevidade.ai` — variante pública
-- Default em **português** (`pt`)
-- **Sem** referências à PetLove/plano de saúde (mantém o estado atual, já limpo).
-- O card "Plano de Saúde Animal Ganha" em `MarketSection` é ocultado nesta variante (ou substituído por um genérico).
-
-### Implementação técnica
-- Criar `src/lib/site-variant.ts` com `getSiteVariant()`:
-  - Lê `window.location.hostname`.
-  - Retorna `'petlove'` para `longevidade.ai` (e domínio de preview com query/flag), `'public'` para `pet.longevidade.ai`.
-  - Fallback: `'public'` em previews lovable.app, com possibilidade de override via `?variant=petlove` para QA.
-- Criar `src/contexts/SiteVariantContext.tsx` que:
-  - Detecta variante uma vez no boot.
-  - Define o idioma default via `i18n.changeLanguage()` **somente se** o usuário ainda não tiver preferência salva em `localStorage('language')`.
-  - Persiste a variante de entrada em `sessionStorage('entry-variant')` para que o link "voltar à home" no Header/Footer aponte ao hostname certo.
-- Atualizar `OpportunitySection`, `MarketSection`, `OutcomesSection` para consumir o contexto e renderizar condicionalmente os blocos PetLove/PAMEC + selo "em construção".
-- Header/Footer: o `<Link to="/">` continua interno (mesma SPA), mas exibe o conteúdo da variante correta automaticamente, então nenhum redirect cross-domain é necessário em uso normal. Caso a sessão tenha entrado por um hostname e o usuário esteja em outro (raro), o link usa `window.location.origin` da variante salva.
-
-### DNS / hospedagem
-- Requer apontar `pet.longevidade.ai` (CNAME) para o mesmo deploy Lovable do domínio principal. Vou listar isso como passo manual ao final — sem isso, `pet.longevidade.ai` não resolverá. O código já estará pronto.
+Tudo bilíngue PT/EN, com bump em `I18N_VERSION` e entrada no `CHANGELOG.md`.
 
 ---
 
-## b) Portais internos idênticos
+## (a) Auditoria de interferência real das predisposições
 
-- `/`, `/tutor`, `/veterinario`, `/administrador` permanecem **uma única implementação** (sem fork).
-- O idioma exibido = idioma escolhido pelo usuário OU default da variante de entrada.
-- Logo/links "home" do `Header.tsx` continuam usando `<Link to="/">` (SPA), o que naturalmente devolve à landing correspondente ao hostname atual.
+Status atual mapeado no código:
 
----
+```text
+breed_predispositions  ──►  useBreedPredispositionsForPet
+                              ├─► BiologicalTimeline (projeção de doenças)
+                              ├─► clinical-analysis-pipeline (pipeline diagnóstico)
+                              ├─► nutrition-gap-analyzer
+                              └─► hybrid-recommendation (edge function)
+                                   └─► usePetCompoundCoverage (KG: nutracêutico×condição)
+```
 
-## c) Ícone de idioma mais claro
+**Confirmação**: predisposições ALIMENTAM:
+- Timeline biológica do pet (risk_factor multiplica severidade projetada).
+- Pipeline clínico (badge "Raça" como fonte de condição).
+- Recomendação híbrida (edge function recebe predisposições e usa KG para sugerir compostos).
+- Relations Auditor + Neo4j sync.
 
-Em `LanguageSwitcher.tsx`:
-- Substituir o ícone `Globe` por **bandeirinhas** (🇧🇷 / 🇺🇸 ou 🇬🇧) renderizadas via emoji ou via SVGs simples.
-- Mostrar a bandeira do idioma **ativo** no botão (em vez do globo genérico), com aria-label adequado.
-- Aumentar contraste do botão (de `text-gray-500` para `text-gray-800`) e adicionar um leve fundo no hover.
-- Manter o dropdown atual com as duas opções, cada uma também com sua bandeira.
-
----
-
-## Arquivos a criar/editar
-
-**Novos**
-- `src/lib/site-variant.ts`
-- `src/contexts/SiteVariantContext.tsx`
-
-**Editados**
-- `src/App.tsx` — envelopa com `SiteVariantProvider`
-- `src/components/landing/OpportunitySection.tsx` — render condicional + selo
-- `src/components/landing/MarketSection.tsx` — render condicional do card PetLove + selo
-- `src/components/landing/OutcomesSection.tsx` — reexibe métrica 1.4M apenas em variante PetLove
-- `src/components/layout/LanguageSwitcher.tsx` — bandeiras + contraste
-- `src/locales/{pt,en}/translation.json` — chaves novas: `landing.partnership.inDevelopment`, `language.pt`, `language.en`
-- `src/i18n.ts` — bump `I18N_VERSION` para `1.75.0`
+**Entrega**: um único arquivo `docs/BREED_PREDISPOSITIONS_AUDIT.md` listando cada ponto de consumo com link para o arquivo/linha, explicando como `risk_factor` e `evidence_grade` afetam o resultado final. Sem alterações de código nesta fase — apenas documentação. Se durante a auditoria detectar lacuna óbvia (ex.: campo coletado mas ignorado), abro **issue separada** em vez de corrigir no mesmo PR — para manter este plano focado em catálogo.
 
 ---
 
-## Resposta à pergunta "é possível?"
+## (b) Expansão de raças — ~120 raças com fontes
 
-Sim, totalmente. A única dependência externa é o apontamento DNS de `pet.longevidade.ai` para o deploy — vou deixar a detecção de hostname pronta e te aviso o passo de DNS no final.
+### Schema (mudanças mínimas)
 
+Adicionar colunas a `breed_predispositions` (migration):
+
+- `genetic_profile TEXT` / `genetic_profile_en TEXT` — descrição do gene/variante (ex.: "MDR1 mutation (ABCB1-1Δ)", "COMMD1 deletion exon 2").
+- `inheritance_pattern TEXT` — `autosomal_recessive | autosomal_dominant | x_linked | polygenic | unknown`.
+- `prevalence_pct NUMERIC` — prevalência estimada na raça (quando disponível).
+- `sources JSONB` — array de `{ label, url, type: 'omia'|'pubmed'|'akc'|'university'|'fci', citation }` com **link direto à publicação/registro**.
+
+Manter `supporting_study_ids` para back-compat.
+
+### Seed manual (JSON pré-validado)
+
+Criar `supabase/seeds/breeds_v2.json` com ~120 raças cobrindo AKC/FCI mais relevantes + raças brasileiras (Fila, Terrier Brasileiro). Para cada raça: ~3–8 predisposições com:
+
+- Nome PT/EN da condição (resolvido por `name`/`name_en` existente em `health_conditions`).
+- `risk_factor`, `evidence_grade`, `prevalence_pct`.
+- `genetic_profile` quando documentado (ex.: Collie + MDR1 → ABCB1-1Δ).
+- 1–3 fontes com URL direta:
+  - **OMIA**: `https://www.omia.org/OMIA000XXX/9615/`
+  - **PubMed**: `https://pubmed.ncbi.nlm.nih.gov/<PMID>/`
+  - **UC Davis VGL / Cornell DNA**: links de página de teste/condição.
+  - **AKC / FCI**: páginas oficiais de padrão de raça.
+
+Aplicar via migration `INSERT ... ON CONFLICT (breed_id, condition_id) DO UPDATE` para idempotência. Condições que ainda não existirem entram primeiro no passo (c).
+
+### UI
+
+`BreedPredispositionsPanel.tsx` ganha:
+- Linha extra por predisposição com chips: `Perfil genético`, `Herança`, `Prevalência`.
+- Lista de **fontes clicáveis** (`<a target="_blank" rel="noopener">`), ícone por tipo (OMIA/PubMed/AKC).
+- Strings PT/EN em `translation.json`.
+
+---
+
+## (c) Revisão de `health_conditions`
+
+Auditar as 109 condições atuais e **adicionar ~40–60 novas** focando em condições crônicas/degenerativas caninas bem documentadas (ex.: SARDS, Degenerative Myelopathy, Exocrine Pancreatic Insufficiency, Atopic Dermatitis subtipos, Cushing iatrogênico, Discoespondilose, Síndrome Vestibular Geriátrica, etc.).
+
+Adicionar coluna `sources JSONB` em `health_conditions` (mesmo formato do (b)), populada para **todas as novas + as principais existentes** com links diretos para revisões/diretrizes (Merck Vet Manual oficial, WSAVA guidelines, ACVIM consensus statements, papers PubMed).
+
+UI da aba "Condições Veterinárias" passa a renderizar bloco "Fontes" com links externos.
+
+---
+
+## (d) Contadores reais na home (`pet.longevidade.ai` + `longevidade.ai`)
+
+`MarketSection.tsx` / `OpportunitySection.tsx` atualmente mostram "267 estudos, 35 compostos, 95 condições". Substituir por **hook `usePlatformCounts`** que faz `SELECT count` em:
+
+- `scientific_studies` (aprovados)
+- `nutraceuticals`
+- `health_conditions`
+- (opcional) `medications` se existir tabela de drogas; caso contrário, manter campo "Drogas" oculto até existir.
+
+Render: `109 condições (em contínua expansão)`, `30 nutracêuticos (em contínua expansão)`, etc. Strings PT/EN com placeholder `{{count}}`. Fallback: se query falhar, esconder o número em vez de mostrar valor falso (no-mock policy).
+
+---
+
+## Modelos e pipeline de validação
+
+- **LLM padrão para esta tarefa de curadoria/validação cruzada**: `google/gemini-3.1-pro-preview` (preview mais recente, melhor reasoning). Para fact-check em volume usar `google/gemini-3-flash-preview`.
+- **Perplexity API** já está conectada (`PERPLEXITY_API_KEY`) → usar para validar URLs de fontes (PubMed/OMIA) antes de gravar no seed, garantindo links vivos e relevantes. Script de validação roda offline (não na app) via `code--exec` antes da migration.
+- Como o seed é manual pré-validado, NÃO há edge function nova nesta entrega — apenas migrations + UI.
+
+---
+
+## Detalhes técnicos
+
+**Migrations** (3, em ordem):
+1. `add_sources_and_genetic_profile_to_breed_predispositions` — colunas + índice GIN em `sources`.
+2. `add_sources_to_health_conditions` + insert das ~50 novas condições com bilingual + sources.
+3. `seed_breeds_v2_120_breeds` — upserts em `breeds` e `breed_predispositions` a partir do JSON.
+
+**Frontend**:
+- `BreedPredispositionsPanel.tsx`: novos campos + lista de fontes.
+- Aba "Condições Veterinárias": novo bloco "Fontes".
+- `src/hooks/usePlatformCounts.ts` (novo).
+- `MarketSection.tsx`/`OpportunitySection.tsx`: consomem hook + chave de tradução com sufixo "em contínua expansão" / "continuously expanding".
+- `src/i18n.ts`: bump de versão.
+- `src/locales/pt|en/translation.json`: novas chaves.
+
+**Documentação**:
+- `docs/BREED_PREDISPOSITIONS_AUDIT.md` (novo, entrega da letra a).
+- `CHANGELOG.md`: entrada em `[Unreleased]` com tags `area: data-catalog · status: shipped · i18n: bumped`.
+- `ARCHITECTURE.md` MINOR bump (novas colunas + nova fonte de verdade para contadores).
+- `docs/CURRENT_STATE.md` MINOR bump.
+
+**Testes**:
+- Vitest unitário para `usePlatformCounts` (fallback quando query falha).
+- Validação de schema do JSON de seed (`scripts/validate-breeds-seed.mjs`).
+
+---
+
+## Ordem de execução
+
+1. Auditoria (a) → entrega o doc.
+2. Migration de schema (colunas `sources`, `genetic_profile`, etc.).
+3. Insert das ~50 novas condições com fontes.
+4. Seed das ~120 raças + predisposições (depende de 3).
+5. UI: painel de raças + aba condições + home counters.
+6. i18n bump + changelog + sync.
+
+Sem mudanças de design ou em outras páginas além das mencionadas.
