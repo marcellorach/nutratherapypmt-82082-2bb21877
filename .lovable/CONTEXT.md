@@ -1,20 +1,32 @@
 # Project context briefing (auto)
-Generated: 2026-05-17T21:58:15.185Z
+Generated: 2026-05-17T22:05:41.922Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.78.8
+## Latest i18n version: 1.78.9
 
 ## Changes by area (last 14 days)
 - **vet-ui**: 13
+- **admin**: 9
 - **tutor-ui**: 8
-- **admin**: 7
 - **clinical-pipeline**: 3
 - **meta**: 2
 - **i18n**: 1
 - **curation**: 1
 
 ## Top 10 recent entries
+### 2026-05-17 · [admin] CHANGED — Sidebar: reposicionar Triplet Quality + catálogo Mars
+- Sidebar "Base de Conhecimento": item Triplet Quality movido para entre Triplet Curation e Evidence Conflicts (antes ficava isolado no fim do grupo). Apenas reordenação visual; rota, ícone e tradução inalterados.
+- Catálogo de Rações: adicionadas 8 marcas do conglomerado Mars Petcare que faltavam — IAMS, Nutro, Cesar, Sheba, Greenies, Crave, Perfect Fit e Temptations. Royal Canin, Pedigree, Eukanuba e Whiskas já estavam cadastradas. Garante prioridade absoluta da Mars na lista de marcas.
+- Files: src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx, public.pet_food_brands (8 inserts).
+_files: src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx_
+
+### 2026-05-17 · [admin] CHANGED — Organograma: corrigir diagrama em branco e simplificar acesso ao Gap-Fill
+- Diagrama Mermaid do organograma voltou a renderizar: removida a manipulação de `width`/`height` do `<svg>` que colapsava o conteúdo, e `fitMin` reduzido de 0.4 para 0.1 para evitar telas em branco quando o diagrama é maior que o container.
+- Tab "Diagnóstico Gap-Fill" removida do menu lateral (Knowledge Base) — virou diagnóstico avançado acessível por botão "Ver diagnóstico avançado" dentro da tela de Mapeamento SNOMED/UMLS. A rota `?tab=gapfill-diagnostics` continua válida; só a entrada de menu foi escondida para reduzir ruído na sidebar.
+- Página "Relações e Conexões" e o force-graph do organograma intencionalmente não foram tocados — auditoria do histórico (commits `385859f4`, `33454cc9`, `bb7d8e39`) confirmou que não houve regressão recente; o volume aparente (28 nós · 1000 edges) é dado real e não complexidade adicionada.
+_files: src/components/administrador/organograma/OrganogramaDiagram.tsx, src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx, src/components/administrador/OntologyMappingTab.tsx, src/i18n.ts_
+
 ### 2026-05-17 · [admin] CHANGED — Sidebar admin: restauração de órfãos e limpeza de tabs sem propósito
 - Knowledge Base recebeu 7 links restaurados/realocados: Curadoria de Triplets, Conflitos de Evidência, Mapeamento SNOMED/UMLS, Catálogo de Rações, Curadoria de Doses, Qualidade de Triplets e Diagnóstico Gap-Fill.
 - Configuration recebeu 3 links novos: Gerenciar Traduções, Convenções de Design e Solicitações de Acesso.
@@ -60,18 +72,6 @@ _files: src/components/pet/PatientKnowledgeSubgraph.tsx, src/components/pet/VetG
 - Pipeline (`clinical-analysis-pipeline.ts → attachStudiesToCompounds`): novo helper `buildPublicSearchStudies(compound, condition)` que monta links determinísticos PubMed + Google Scholar; usado para top-up até `MAX_STUDIES_PER_COMPOUND = 3` quando o conjunto curado tem < 2 itens, e como fallback final no catch.
 - UI (`CompoundDosageSlider.tsx`): novo badge "Busca pública" (cinza) diferenciando-o de PubMed/DOI/Scholar curados — mantém transparência do No-Mock Policy: nada é simulado, são buscas reais rotuladas.
 _files: src/services/clinical-analysis-pipeline.ts, src/components/pet/CompoundDosageSlider.tsx, src/locales/pt/translation.json, src/locales/en/translation.json…_
-
-### 2026-05-13 · [vet-ui] CHANGED — Detratores Geriátricos Ocultos: separação rigorosa de gerociência vs. clínica
-- Renomeada seção "Comorbidades Ocultas (Gerociência)" → "Detratores Geriátricos Ocultos" (PT) / "Hidden Geriatric Detractors" (EN). Reforça que o que aparece ali são processos moleculares de envelhecimento (senescência celular, inflammaging, estresse oxidativo, disfunção mitocondrial), não diagnósticos clínicos.
-- `VetGraphRAGInsightsPanel`: rótulos de gerociência (`Cellular Senescence`, `Inflammaging`, `Oxidative Stress`, `Mitochondrial Dysfunction`) nunca mais aparecem em "Condições Clínicas Atuais Confirmadas" — são sempre redirigidos para detratores ocultos, mesmo se vierem registrados em `pet_conditions` (legado).
-- Nova heurística `inferGeroscienceTriggers()`: dispara detrator oculto a partir de portas de entrada clínicas e idade (≥7a) — Osteoartrite/displasia/sarcopenia → Senescência Celular; Inflamação crônica/obesidade/OA → Inflammaging; DRC/MMVD/CDS → Estresse Oxidativo; CDS/mielopatia/sarcopenia → Disfunção Mitocondrial. Garante que o painel não fica em "0" mesmo quando o KG ainda não tem triplets.
-_files: src/components/pet/VetGraphRAGInsightsPanel.tsx, src/components/pet/GenerateSamplePetsButton.tsx, src/locales/pt/translation.json, src/locales/en/translation.json…_
-
-### 2026-05-13 · [vet-ui] CHANGED — Diferenciação de vozes na consulta: vet livre vs. interpretação rica da IA
-- Reescritos todos os campos `assessment` das 15 consultas de demo (`SAMPLE_PETS`) com texto livre/coloquial em primeira pessoa do veterinário; em ~1 a cada 3 consultas, uma das condições é propositalmente omitida do texto (mas mantida em `conditions[]`) para demonstrar valor da camada Senex AI.
-- Substituída a geração trivial de `machine_summary` (antes: primeira frase do assessment) por nova função `buildMachineSummary()` que sintetiza queixa + exame físico + achados laboratoriais (com `flags_abnormal` e `interpretation`) + condições canônicas completas + medicações + plano. Resultado renderizado no callout amarelo "Interpretação automática desta consulta".
-- Reforço da proposta de valor: o texto livre do vet pode esquecer um diagnóstico — a interpretação automática (Senex AI · PetMoreTime) sempre cobre todas as condições registradas via base de conhecimento.
-_files: src/components/pet/GenerateSamplePetsButton.tsx_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
