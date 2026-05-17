@@ -2011,6 +2011,8 @@
         "settings": "Settings",
         "breedsManagement": "Breeds & Predispositions",
         "labReferences": "Lab References",
+        "breedsManagementStatus": "100% functional",
+        "breedsManagementStatusTooltip": "Breed catalog with genetic predispositions integrated with the clinical pipeline.",
         "labReferencesStatus": "In development",
         "labReferencesStatusTooltip": "Reference values catalog in progress. Integration with lab parser pending.",
         "baseKnowledge": "Base Data",
