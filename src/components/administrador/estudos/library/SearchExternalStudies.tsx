@@ -330,6 +330,7 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
           <div className="flex items-center gap-2">
             <Database className="h-4 w-4 text-blue-600" />
             <h3 className="text-base font-semibold">{t('studies.search.searchExternal')}</h3>
+            <Badge variant="secondary" className="text-[10px]">{t('common.optional')}</Badge>
             <Badge variant="outline" className="text-[10px] bg-blue-100 text-blue-700 border-blue-200">
               PubMed · OpenAlex
             </Badge>
