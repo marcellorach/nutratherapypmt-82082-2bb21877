@@ -7643,6 +7643,8 @@
   "gapFillDiag": {
     "title": "KG Gap-Fill Diagnostics",
     "subtitle": "Inspect conditions, nutraceuticals, and triplets used by the evidence gap-fill pipeline",
+    "explainerTitle": "What is this page?",
+    "explainerBody": "Quality-control dashboard for the Gap-Fill pipeline: when a pet's Digital Twin detects few triplets covering a compound×condition pair, the system queries PubMed and Gemini to generate pending triplets. Here you see what still needs canonicalization (conditions without condition_id) or translation (entities without name_en) for that search to work.",
     "totalConditions": "Health Conditions",
     "totalNutraceuticals": "Nutraceuticals",
     "petConditions": "Pet Conditions",
