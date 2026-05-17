@@ -2672,24 +2672,40 @@ export type Database = {
         Row: {
           aafco_statement: string | null
           antioxidants_added: boolean | null
+          ara_pct: number | null
+          arginine_pct: number | null
           ash_pct: number | null
+          biotin_mg_per_kg: number | null
           ca_p_ratio: number | null
           calcium_pct: number | null
+          chloride_pct: number | null
+          choline_mg_per_kg: number | null
           chondroitin_mg_per_kg: number | null
+          completeness_score: number | null
+          confidence: number | null
+          copper_mg_per_kg: number | null
           created_at: string
+          data_filled_at: string | null
+          dha_pct: number | null
           epa_dha_pct: number | null
+          epa_pct: number | null
           fat_pct: number | null
           fediaf_compliant: boolean | null
           fiber_pct: number | null
           glucosamine_mg_per_kg: number | null
           id: string
+          iodine_mg_per_kg: number | null
+          iron_mg_per_kg: number | null
           is_grain_free: boolean | null
           is_hypoallergenic: boolean | null
           kcal_per_100g: number | null
           kcal_per_kg: number | null
           l_carnitine_mg_per_kg: number | null
+          lysine_pct: number | null
           magnesium_pct: number | null
+          manganese_mg_per_kg: number | null
           meets_aafco_complete: boolean | null
+          methionine_pct: number | null
           moisture_pct: number | null
           nfe_pct: number | null
           omega3_pct: number | null
@@ -2706,35 +2722,66 @@ export type Database = {
           raw_data: Json | null
           raw_label_text: string | null
           revision: number
+          selenium_mg_per_kg: number | null
           sodium_pct: number | null
           source: string
           taurine_mg_per_kg: number | null
+          threonine_pct: number | null
+          tryptophan_pct: number | null
           updated_at: string
           verified: boolean
           verified_at: string | null
           verified_by: string | null
+          vit_a_iu_per_kg: number | null
+          vit_b1_mg_per_kg: number | null
+          vit_b12_mg_per_kg: number | null
+          vit_b2_mg_per_kg: number | null
+          vit_b3_mg_per_kg: number | null
+          vit_b5_mg_per_kg: number | null
+          vit_b6_mg_per_kg: number | null
+          vit_b9_mg_per_kg: number | null
+          vit_d3_iu_per_kg: number | null
+          vit_e_iu_per_kg: number | null
+          vit_k_mg_per_kg: number | null
+          zinc_mg_per_kg: number | null
         }
         Insert: {
           aafco_statement?: string | null
           antioxidants_added?: boolean | null
+          ara_pct?: number | null
+          arginine_pct?: number | null
           ash_pct?: number | null
+          biotin_mg_per_kg?: number | null
           ca_p_ratio?: number | null
           calcium_pct?: number | null
+          chloride_pct?: number | null
+          choline_mg_per_kg?: number | null
           chondroitin_mg_per_kg?: number | null
+          completeness_score?: number | null
+          confidence?: number | null
+          copper_mg_per_kg?: number | null
           created_at?: string
+          data_filled_at?: string | null
+          dha_pct?: number | null
           epa_dha_pct?: number | null
+          epa_pct?: number | null
           fat_pct?: number | null
           fediaf_compliant?: boolean | null
           fiber_pct?: number | null
           glucosamine_mg_per_kg?: number | null
           id?: string
+          iodine_mg_per_kg?: number | null
+          iron_mg_per_kg?: number | null
           is_grain_free?: boolean | null
           is_hypoallergenic?: boolean | null
           kcal_per_100g?: number | null
           kcal_per_kg?: number | null
           l_carnitine_mg_per_kg?: number | null
+          lysine_pct?: number | null
           magnesium_pct?: number | null
+          manganese_mg_per_kg?: number | null
           meets_aafco_complete?: boolean | null
+          methionine_pct?: number | null
           moisture_pct?: number | null
           nfe_pct?: number | null
           omega3_pct?: number | null
@@ -2751,35 +2798,66 @@ export type Database = {
           raw_data?: Json | null
           raw_label_text?: string | null
           revision?: number
+          selenium_mg_per_kg?: number | null
           sodium_pct?: number | null
           source?: string
           taurine_mg_per_kg?: number | null
+          threonine_pct?: number | null
+          tryptophan_pct?: number | null
           updated_at?: string
           verified?: boolean
           verified_at?: string | null
           verified_by?: string | null
+          vit_a_iu_per_kg?: number | null
+          vit_b1_mg_per_kg?: number | null
+          vit_b12_mg_per_kg?: number | null
+          vit_b2_mg_per_kg?: number | null
+          vit_b3_mg_per_kg?: number | null
+          vit_b5_mg_per_kg?: number | null
+          vit_b6_mg_per_kg?: number | null
+          vit_b9_mg_per_kg?: number | null
+          vit_d3_iu_per_kg?: number | null
+          vit_e_iu_per_kg?: number | null
+          vit_k_mg_per_kg?: number | null
+          zinc_mg_per_kg?: number | null
         }
         Update: {
           aafco_statement?: string | null
           antioxidants_added?: boolean | null
+          ara_pct?: number | null
+          arginine_pct?: number | null
           ash_pct?: number | null
+          biotin_mg_per_kg?: number | null
           ca_p_ratio?: number | null
           calcium_pct?: number | null
+          chloride_pct?: number | null
+          choline_mg_per_kg?: number | null
           chondroitin_mg_per_kg?: number | null
+          completeness_score?: number | null
+          confidence?: number | null
+          copper_mg_per_kg?: number | null
           created_at?: string
+          data_filled_at?: string | null
+          dha_pct?: number | null
           epa_dha_pct?: number | null
+          epa_pct?: number | null
           fat_pct?: number | null
           fediaf_compliant?: boolean | null
           fiber_pct?: number | null
           glucosamine_mg_per_kg?: number | null
           id?: string
+          iodine_mg_per_kg?: number | null
+          iron_mg_per_kg?: number | null
           is_grain_free?: boolean | null
           is_hypoallergenic?: boolean | null
           kcal_per_100g?: number | null
           kcal_per_kg?: number | null
           l_carnitine_mg_per_kg?: number | null
+          lysine_pct?: number | null
           magnesium_pct?: number | null
+          manganese_mg_per_kg?: number | null
           meets_aafco_complete?: boolean | null
+          methionine_pct?: number | null
           moisture_pct?: number | null
           nfe_pct?: number | null
           omega3_pct?: number | null
@@ -2796,13 +2874,28 @@ export type Database = {
           raw_data?: Json | null
           raw_label_text?: string | null
           revision?: number
+          selenium_mg_per_kg?: number | null
           sodium_pct?: number | null
           source?: string
           taurine_mg_per_kg?: number | null
+          threonine_pct?: number | null
+          tryptophan_pct?: number | null
           updated_at?: string
           verified?: boolean
           verified_at?: string | null
           verified_by?: string | null
+          vit_a_iu_per_kg?: number | null
+          vit_b1_mg_per_kg?: number | null
+          vit_b12_mg_per_kg?: number | null
+          vit_b2_mg_per_kg?: number | null
+          vit_b3_mg_per_kg?: number | null
+          vit_b5_mg_per_kg?: number | null
+          vit_b6_mg_per_kg?: number | null
+          vit_b9_mg_per_kg?: number | null
+          vit_d3_iu_per_kg?: number | null
+          vit_e_iu_per_kg?: number | null
+          vit_k_mg_per_kg?: number | null
+          zinc_mg_per_kg?: number | null
         }
         Relationships: [
           {
