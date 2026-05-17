@@ -23,6 +23,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-17 — Carga nutricional completa (AAFCO/FEDIAF) no catálogo de rações
+<!-- area: admin · status: entregue · i18n: 1.79.0 -->
+- **`pet_food_nutrition` estendida**: novas colunas para minerais traço (Fe, Cu, Zn, Mn, Se, I, Cl), vitaminas (A, D3, E, K, B1–B12, biotina, colina), EPA/DHA/ARA separados, aminoácidos essenciais (lisina, metionina, triptofano, treonina, arginina) e tracking (`completeness_score`, `confidence`, `data_filled_at`).
+- **`enrich-pet-food-product`**: prompt expandido para schema AAFCO/FEDIAF completo com instrução explícita "nunca invente — prefira null". Parser normaliza `%`, `mg/kg` e `UI/kg` com clamps de plausibilidade. Calcula `completeness_score` (fração de campos numéricos preenchidos) automaticamente em cada insert.
+- **UI do catálogo (`PetFoodCatalogTab`)**: card de produto agora mostra barra de completude + % e confiança da IA; novo botão **Composição** abre dialog com a composição completa agrupada por (Macros / Minerais maiores / Minerais traço / Vitaminas / Ácidos graxos / Aminoácidos / Articulares), badges AAFCO/FEDIAF e statement quando presente.
+- Files: supabase/migrations/20260517232015_*.sql, supabase/functions/enrich-pet-food-product/index.ts, src/components/administrador/pet-food/PetFoodCatalogTab.tsx
+
 ### Added - 2026-05-17 — Fix diagrama + catálogo de System Prompts + traduções
 <!-- area: admin · status: entregue · i18n: 1.79.0 -->
 - **Diagrama do organograma (fotos 1 e 2):** fix definitivo. Após renderizar, o SVG do Mermaid agora recebe `width`/`height` reais lidos do `viewBox` (antes vinha só `style="max-width:100%"`, colapsando dentro do container `max-content`). `useScrollPanZoom.measureNatural` agora prioriza `viewBox.baseVal` sobre `getBBox` (mais estável antes do layout). `ResizeObserver` também observa o `innerRef` para refazer `fit()` quando o SVG aparece. `fitMin` 0.1 → 0.2 (evita escala microscópica).
