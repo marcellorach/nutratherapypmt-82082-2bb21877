@@ -2008,7 +2008,8 @@
         "settings": "Settings",
         "breedsManagement": "Breeds & Predispositions",
         "labReferences": "Lab References",
-        "baseKnowledge": "Base Data"
+        "baseKnowledge": "Base Data",
+        "pharmacology": "Pharmacology Base"
       },
       "dataProcessing": {
         "title": "Data Processing",
