@@ -1682,7 +1682,10 @@
     "treatableConditions": "Treatable Conditions",
     "underConstruction": "Under Construction",
     "subtitleDynamic": "Evidence-based geroprotective therapy platform with {{conditions}} catalogued clinical conditions, {{nutraceuticals}} nutraceuticals and {{breeds}} breeds covered — powering AI-driven personalized recommendations from peer-reviewed literature.",
-    "subtitleExpansionNote": "Catalogue continuously expanding — new conditions, breeds and compounds added weekly."
+    "subtitleExpansionNote": "Catalogue continuously expanding — new conditions, breeds and compounds added weekly.",
+    "inDevelopment": "In development",
+    "comingSoon": "Coming soon",
+    "visitHere": "visit here!"
   },
   "auth": {
     "login": "Login",
@@ -2808,7 +2811,9 @@
     "sloganLine1": "Extending Lives & Preventing Degenerative Disease Through Precision Geroscience",
     "sloganLine2": "1.4 Million Dogs. Unlimited Discoveries.",
     "poweredBy": "Powered by",
-    "comingSoon": "coming soon"
+    "comingSoon": "coming soon",
+    "copyrightFull": "Senex AI © 2025–2026 — developed by PetMoreTime. All rights reserved by PetMoreTime.",
+    "petMoreTimeTagline": "Veterinary Geroscience"
   },
   "header": {
     "platformSubtitleLine1": "Extending Lives & Preventing Degenerative Disease",
@@ -2818,7 +2823,9 @@
     "tutor": "Tutor",
     "login": "Sign In",
     "pendingRequests": "Pending access requests",
-    "pendingRequestsCount": "{{count}} pending request(s)"
+    "pendingRequestsCount": "{{count}} pending request(s)",
+    "platformSubtitleLine1a": "Extending Lives",
+    "platformSubtitleLine1b": "& Preventing Degenerative Disease"
   },
   "messages": {
     "success": "Operation completed successfully",
