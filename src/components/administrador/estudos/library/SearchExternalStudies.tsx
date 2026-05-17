@@ -41,6 +41,7 @@ interface SearchMeta {
 
 interface SearchExternalStudiesProps {
   onStudyImported?: () => void;
+  inline?: boolean;
 }
 
 const DEFAULT_FILTERS: AdvancedFilters = {
@@ -55,7 +56,7 @@ const DEFAULT_FILTERS: AdvancedFilters = {
   sortBy: 'relevance'
 };
 
-const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyImported }) => {
+const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyImported, inline = false }) => {
   const { t } = useSafeTranslation();
   const { toast } = useToast();
   
@@ -320,6 +321,96 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
     return num.toString();
   };
+
+  if (inline) {
+    return (
+      <div className="flex flex-col border rounded-lg overflow-hidden bg-background">
+        {/* Banner — External Search */}
+        <div className="flex-shrink-0 px-4 py-3 border-b bg-blue-50/50 dark:bg-blue-950/20">
+          <div className="flex items-center gap-2">
+            <Database className="h-4 w-4 text-blue-600" />
+            <h3 className="text-base font-semibold">{t('studies.search.searchExternal')}</h3>
+            <Badge variant="outline" className="text-[10px] bg-blue-100 text-blue-700 border-blue-200">
+              PubMed · OpenAlex
+            </Badge>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            {t('studies.search.description')}
+          </p>
+        </div>
+
+        {/* Search Form */}
+        <div className="flex-shrink-0 px-4 py-3 space-y-3 border-b bg-background">
+          <div className="grid gap-2 md:grid-cols-4">
+            <div className="md:col-span-2">
+              <Label htmlFor="query-inline" className="text-xs">{t('studies.search.queryLabel')}</Label>
+              <Input
+                id="query-inline"
+                placeholder={t('studies.search.queryPlaceholder')}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                className="h-8"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">{t('studies.search.sourceLabel')}</Label>
+              <Select value={source} onValueChange={(v: any) => setSource(v)}>
+                <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="both">{t('studies.search.sourceBoth')}</SelectItem>
+                  <SelectItem value="pubmed">PubMed</SelectItem>
+                  <SelectItem value="openalex">OpenAlex</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs">{t('studies.search.maxResultsLabel')}</Label>
+              <Select value={maxResults} onValueChange={setMaxResults}>
+                <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="20">20</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <AdvancedSearchFilters
+            filters={advancedFilters}
+            onFiltersChange={setAdvancedFilters}
+            isOpen={showAdvanced}
+            onOpenChange={setShowAdvanced}
+          />
+
+          <Button onClick={() => handleSearch()} disabled={isSearching} className="w-full gap-2 h-9">
+            {isSearching ? (
+              <><Loader2 className="h-4 w-4 animate-spin" />{t('studies.search.searching')}</>
+            ) : (
+              <><Search className="h-4 w-4" />{t('studies.search.searchButton')}</>
+            )}
+          </Button>
+        </div>
+
+        {/* Results — render via dialog content reuse by opening hidden state */}
+        <InlineResults
+          results={results}
+          meta={meta}
+          isSearching={isSearching}
+          importingIds={importingIds}
+          importedIds={importedIds}
+          downloadingIds={downloadingIds}
+          downloadedIds={downloadedIds}
+          onImport={handleImport}
+          onDownload={handleDownloadPDF}
+          formatNumber={formatNumber}
+          t={t}
+        />
+      </div>
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
