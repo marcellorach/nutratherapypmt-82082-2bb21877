@@ -735,9 +735,11 @@ const ConfiguracoesIATab: React.FC = () => {
             />
             <ApiStatusItem
               service="Perplexity"
-              isConfigured={!!perplexityKey}
+              isConfigured={!!perplexityKey || perplexitySecretAvailable}
               icon="✨"
-              description="Sonar Academic – KG Gap-Fill"
+              description={perplexitySecretAvailable && !perplexityKey
+                ? "Sonar Academic – KG Gap-Fill (via connector)"
+                : "Sonar Academic – KG Gap-Fill"}
             />
             <ApiStatusItem 
               service="Unstructured" 
