@@ -150,7 +150,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
         >
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
-              <PawPrint className={`h-4 w-4 mr-2 ${currentStep === "breeds-management" ? "text-primary" : "text-green-600"}`} />
+              <PawPrint className={`h-4 w-4 mr-2 ${currentStep === "breeds-management" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.knowledgeBase.breedsManagement')}</span>
             </div>
             {currentStep === "breeds-management" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
@@ -166,8 +166,9 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
         >
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
-              <FlaskConical className={`h-4 w-4 mr-2 ${currentStep === "lab-references" ? "text-primary" : "text-orange-500"}`} />
+              <FlaskConical className={`h-4 w-4 mr-2 ${currentStep === "lab-references" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.knowledgeBase.labReferences')}</span>
+              <StatusBadge statusKey="admin.sidebar.knowledgeBase.labReferencesStatus" tooltipKey="admin.sidebar.knowledgeBase.labReferencesStatusTooltip" color="text-yellow-500" />
             </div>
             {currentStep === "lab-references" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
           </div>
@@ -198,8 +199,9 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
         >
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
-              <Pill className={`h-4 w-4 mr-2 ${currentStep === "pharmacology" ? "text-primary" : "text-orange-500"}`} />
+              <Pill className={`h-4 w-4 mr-2 ${currentStep === "pharmacology" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.knowledgeBase.pharmacology', 'Base Farmacológica')}</span>
+              <StatusBadge statusKey="admin.sidebar.knowledgeBase.pharmacologyStatus" tooltipKey="admin.sidebar.knowledgeBase.pharmacologyStatusTooltip" color="text-yellow-500" />
             </div>
             {currentStep === "pharmacology" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
           </div>

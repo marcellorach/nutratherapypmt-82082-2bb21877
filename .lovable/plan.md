@@ -1,42 +1,43 @@
-## Plan: Home cards CTA clarity + Footer rework
 
-### a) Home cards: highlight "Control Panel", mark others as "in development"
-File: `src/pages/Index.tsx` (authenticated 3-card section)
-- **Control Panel** card: keep "Open Admin / Abrir Admin" button enabled, make it visually prominent (primary/default variant instead of outline), keep the red "visite aqui!" arrow callout (translated to bilingual: "visit here!" / "visite aqui!").
-- **Veterinarian Portal** card: replace the button with a disabled button labeled "In development / Em desenvolvimento" + a small muted badge "Coming soon / Em breve". Card opacity slightly reduced.
-- **Owner Portal** card: same treatment — disabled "In development" button + "Coming soon" badge.
-- Add new i18n keys in `src/locales/{pt,en}/translation.json`:
-  - `home.inDevelopment` = "Em desenvolvimento" / "In development"
-  - `home.comingSoon` = "Em breve" / "Coming soon"
-  - `home.visitHere` = "visite aqui!" / "visit here!"
-- Bump `I18N_VERSION` in `src/i18n.ts`.
+## Objetivo
+Corrigir a inconsistência visual no sidebar admin: ícones principais sempre pretos, status comunicado exclusivamente pelas bolinhas de check (CircleCheck) coloridas.
 
-### b) Footer copyright update
-Files: `src/components/layout/Footer.tsx` and `src/components/administrador/layout/AdminFooter.tsx`
-- Replace current copyright line with a corrected bilingual version:
-  - EN: `Senex AI © 2025–2026 — developed by PetMoreTime. All rights reserved by PetMoreTime.`
-  - PT: `Senex AI © 2025–2026 — desenvolvido pela PetMoreTime. Todos os direitos reservados à PetMoreTime.`
-- Use translation keys (`footer.copyrightFull` or update existing `footer.copyright`).
+## Mudanças
 
-### c) Tagline under "PetMoreTime"
-Where: under the "PetMoreTime" wordmark area (header logo block in `src/components/layout/Header.tsx`).
-Note: the visible header logo shows "Senex AI", and "PetMoreTime" appears as a separate brand mark elsewhere (uploaded screenshot shows PetMoreTime logo with tagline "E..." cut off). I'll interpret this as: add the tagline **"Veterinary Geroscience"** (corrected English — "geroscience" is the proper term, not "geocience") under the PetMoreTime brand reference.
-- Add as a small italic line under "a PetMoreTime platform" wherever PetMoreTime is shown (footer "Powered by" / copyright area, and the header subtitle block).
-- New i18n key: `branding.petMoreTimeTagline` = "Veterinary Geroscience" (same in PT, as it's the brand tagline in English — confirm if you want it translated to "Geriatria Veterinária" in PT).
+### 1. `KnowledgeBaseGroup.tsx`
+- **Breeds & Predispositions** (`PawPrint`): remover `text-green-600` quando inativo → usar `text-foreground` (preto). O check verde (StatusBadge) é que indica status.
+- **Lab References** (`FlaskConical`): remover `text-orange-500` quando inativo → `text-foreground`. **Adicionar** `StatusBadge` amarelo (em desenvolvimento) ao lado do label.
+- **Pharmacology Base** (`Pill`): remover `text-orange-500` quando inativo → `text-foreground`. **Adicionar** `StatusBadge` amarelo ao lado do label.
+- **Base Data** (`Database`): já está preto, sem mudança.
 
-### d) Split the middle phrase into two lines, aligned with "PetMoreTime" logo
-The "middle phrase" = `header.platformSubtitleLine1` = "Extending Lives & Preventing Degenerative Disease" (currently single line, centered under Senex AI).
-- Split into two lines:
-  - Line 1: "Extending Lives"
-  - Line 2: "& Preventing Degenerative Disease"
-- Left-align with the PetMoreTime/Senex AI logo (`text-left` instead of `text-center` in the header subtitle block).
-- Update keys:
-  - `header.platformSubtitleLine1a` = "Extending Lives" / "Prolongando Vidas"
-  - `header.platformSubtitleLine1b` = "& Preventing Degenerative Disease" / "& Prevenindo Doenças Degenerativas"
+### 2. `DataProcessingGroup.tsx` — Patient Analysis
+Substituir o grupo atual (🐾 → 🐾) por:
+```
+🐾 (preto) com um CircleCheck laranja sobreposto/adjacente
+   ↓ ArrowRight (cinza/preto)
+   CircleCheck verde
+```
+Layout proposto (inline, antes do label):
+```tsx
+<span className="flex items-center mr-2">
+  <PawPrint className="h-4 w-4 text-foreground" />
+  <CircleCheck className="h-3 w-3 ml-0.5 text-orange-500" />
+  <ArrowRight className="h-3 w-3 mx-0.5 text-muted-foreground" />
+  <CircleCheck className="h-3 w-3 text-green-600" />
+</span>
+```
+Remover o `StatusBadge` amarelo redundante deste item (a transição laranja→verde já comunica o status).
 
-### Clarifying question
-For (c): the PetMoreTime tagline — should it stay in English ("Veterinary Geroscience") in both locales, or be translated to PT ("Geriatria Veterinária" or "Geroscience Veterinária")? I'll default to keeping it in English in both, since it functions as a brand tagline.
+### 3. i18n
+- Bump `I18N_VERSION` em `src/i18n.ts` para `1.78.6`.
+- Adicionar chaves (PT/EN) se necessárias para o tooltip do novo StatusBadge de Lab References / Pharmacology Base (status "em desenvolvimento").
 
-### Documentation updates
-- CHANGELOG.md: add entries under `[Unreleased]` (UI clarity for home cards, footer rebrand, header tagline split).
-- Run `npm run sync:changelog` after the edit.
+## Arquivos afetados
+- `src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx`
+- `src/components/administrador/sidebar/groups/DataProcessingGroup.tsx`
+- `src/i18n.ts`
+- `src/locales/pt/translation.json`
+- `src/locales/en/translation.json`
+
+## Fora de escopo
+Nenhuma mudança de lógica, navegação ou outros grupos do sidebar.

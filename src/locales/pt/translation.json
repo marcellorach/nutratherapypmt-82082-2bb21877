@@ -2011,8 +2011,12 @@
         "settings": "Configurações",
         "breedsManagement": "Raças & Predisposições",
         "labReferences": "Referências Lab",
+        "labReferencesStatus": "Em desenvolvimento",
+        "labReferencesStatusTooltip": "Catálogo de valores de referência em progresso. Integração com parser de exames pendente.",
         "baseKnowledge": "Dados Base",
-        "pharmacology": "Base Farmacológica"
+        "pharmacology": "Base Farmacológica",
+        "pharmacologyStatus": "Em desenvolvimento",
+        "pharmacologyStatusTooltip": "Base farmacológica em construção. Interações medicamentosas e posologias pendentes."
       },
       "dataProcessing": {
         "title": "Processamento de Dados",
