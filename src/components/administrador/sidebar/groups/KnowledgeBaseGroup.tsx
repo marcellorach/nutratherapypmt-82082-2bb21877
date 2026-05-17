@@ -152,7 +152,6 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
             <div className="flex items-center">
               <PawPrint className={`h-4 w-4 mr-2 ${currentStep === "breeds-management" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.knowledgeBase.breedsManagement')}</span>
-              <StatusBadge statusKey="admin.sidebar.knowledgeBase.breedsManagementStatus" tooltipKey="admin.sidebar.knowledgeBase.breedsManagementStatusTooltip" color="text-emerald-500" />
             </div>
             {currentStep === "breeds-management" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
           </div>
