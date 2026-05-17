@@ -1,13 +1,13 @@
 # Project context briefing (auto)
-Generated: 2026-05-17T22:05:41.922Z
+Generated: 2026-05-17T23:24:53.492Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.78.9
+## Latest i18n version: 1.79.0
 
 ## Changes by area (last 14 days)
 - **vet-ui**: 13
-- **admin**: 9
+- **admin**: 11
 - **tutor-ui**: 8
 - **clinical-pipeline**: 3
 - **meta**: 2
@@ -15,6 +15,18 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **curation**: 1
 
 ## Top 10 recent entries
+### 2026-05-17 · [admin] ADDED — Carga nutricional completa (AAFCO/FEDIAF) no catálogo de rações
+- `pet_food_nutrition` estendida: novas colunas para minerais traço (Fe, Cu, Zn, Mn, Se, I, Cl), vitaminas (A, D3, E, K, B1–B12, biotina, colina), EPA/DHA/ARA separados, aminoácidos essenciais (lisina, metionina, triptofano, treonina, arginina) e tracking (`completeness_score`, `confidence`, `data_filled_at`).
+- `enrich-pet-food-product`: prompt expandido para schema AAFCO/FEDIAF completo com instrução explícita "nunca invente — prefira null". Parser normaliza `%`, `mg/kg` e `UI/kg` com clamps de plausibilidade. Calcula `completeness_score` (fração de campos numéricos preenchidos) automaticamente em cada insert.
+- UI do catálogo (`PetFoodCatalogTab`): card de produto agora mostra barra de completude + % e confiança da IA; novo botão Composição abre dialog com a composição completa agrupada por (Macros / Minerais maiores / Minerais traço / Vitaminas / Ácidos graxos / Aminoácidos / Articulares), badges AAFCO/FEDIAF e statement quando presente.
+_files: supabase/functions/enrich-pet-food-product/index.ts, src/components/administrador/pet-food/PetFoodCatalogTab.tsx_
+
+### 2026-05-17 · [admin] ADDED — Fix diagrama + catálogo de System Prompts + traduções
+- Diagrama do organograma (fotos 1 e 2): fix definitivo. Após renderizar, o SVG do Mermaid agora recebe `width`/`height` reais lidos do `viewBox` (antes vinha só `style="max-width:100%"`, colapsando dentro do container `max-content`). `useScrollPanZoom.measureNatural` agora prioriza `viewBox.baseVal` sobre `getBBox` (mais estável antes do layout). `ResizeObserver` também observa o `innerRef` para refazer `fit()` quando o SVG aparece. `fitMin` 0.1 → 0.2 (evita escala microscópica).
+- Catálogo de System Prompts: nova tabela `ai_system_prompts` com 24 prompts agrupados em 13 famílias (Clinical Extraction, Study Ingestion, RAG/Embeddings, Recommendation Orchestration, KG Enrichment, KG Governance, KG Gap-Fill, Clinical Reasoning, Translation, External Lookup, Taxonomy, Conversational). Nova aba System Prompts dentro de "Prompts da IA" lista catálogo com busca, agrupamento por família, badge "override ativo", editor inline e botão "Restaurar default". RLS admin-only. Conteúdo `default_content` ainda vazio em todos (preenchimento via leitura das edge functions vem em rodadas seguintes).
+- Traduções (foto 4): "Organograma", "Conformidade FDA/EMA/AVMA" e "Auditorias Técnicas" estavam hardcoded no `ConfigurationGroup.tsx` — agora usam `t('admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}')`. Chaves espelhadas PT/EN. `I18N_VERSION` 1.78.9 → 1.79.0.
+_files: src/components/administrador/organograma/OrganogramaDiagram.tsx, src/hooks/useScrollPanZoom.ts, src/components/administrador/sidebar/groups/ConfigurationGroup.tsx, src/components/administrador/ConfiguracoesIATab.tsx…_
+
 ### 2026-05-17 · [admin] CHANGED — Sidebar: reposicionar Triplet Quality + catálogo Mars
 - Sidebar "Base de Conhecimento": item Triplet Quality movido para entre Triplet Curation e Evidence Conflicts (antes ficava isolado no fim do grupo). Apenas reordenação visual; rota, ícone e tradução inalterados.
 - Catálogo de Rações: adicionadas 8 marcas do conglomerado Mars Petcare que faltavam — IAMS, Nutro, Cesar, Sheba, Greenies, Crave, Perfect Fit e Temptations. Royal Canin, Pedigree, Eukanuba e Whiskas já estavam cadastradas. Garante prioridade absoluta da Mars na lista de marcas.
@@ -60,18 +72,6 @@ _files: src/components/administrador/breeds/BreedPredispositionsPanel.tsx, src/h
 - Diagnósticos passados (círculos cinza, aresta `HAS_HISTORY` tracejada) lidos de `pet_conditions` resolvidas + consultas anteriores em `pet_consultations`.
 - Traits (hexágonos azul-claro, aresta `HAS_TRAIT`) representando raça, faixa etária (filhote/adulto/sênior/geriátrico) e sexo. Traits de raça desenham `BREED_RISK_FOR` (tracejada azul-escura) apontando para condições predispostas vindas de `BreedPredisposition`.
 _files: src/components/pet/PatientKnowledgeSubgraph.tsx, src/pages/veterinario/PetProfilePage.tsx, src/i18n.ts_
-
-### 2026-05-13 · [vet-ui] ADDED — Subgrafo do paciente vira Digital Twin (Fase 1)
-- `PatientKnowledgeSubgraph` agora renderiza um nó Pet central (estrela azul) com tooltip de raça/idade/peso/sexo, conectando-se via `HAS_CONDITION` a todas as condições ativas — antes condições e compostos flutuavam soltos sem dono clínico.
-- Novos tipos de nó: medicação ativa (caixa roxa, lida de `pet_medications`) ligada ao Pet por `TAKES`, e detratores geriátricos ocultos (diamante âmbar) ligados por `EXHIBITS_DETRACTOR`.
-- Novo tipo de aresta `INTERACTS_WITH` (vermelha, bidirecional) desenhada automaticamente entre composto recomendado e medicação atual sempre que o pipeline detecta um `InteractionAlert` — vet vê o conflito antes de aprovar.
-_files: src/components/pet/PatientKnowledgeSubgraph.tsx, src/components/pet/VetGraphRAGInsightsPanel.tsx, src/pages/veterinario/PetProfilePage.tsx, src/i18n.ts_
-
-### 2026-05-13 · [vet-ui] CHANGED — Evidências sempre com 2-3 links de estudos
-- "Ver evidências e contexto" agora garante 2-3 referências clicáveis por composto, mesmo quando não há estudo curado para o par (composto × condição) — antes a seção "Estudos científicos" simplesmente sumia.
-- Pipeline (`clinical-analysis-pipeline.ts → attachStudiesToCompounds`): novo helper `buildPublicSearchStudies(compound, condition)` que monta links determinísticos PubMed + Google Scholar; usado para top-up até `MAX_STUDIES_PER_COMPOUND = 3` quando o conjunto curado tem < 2 itens, e como fallback final no catch.
-- UI (`CompoundDosageSlider.tsx`): novo badge "Busca pública" (cinza) diferenciando-o de PubMed/DOI/Scholar curados — mantém transparência do No-Mock Policy: nada é simulado, são buscas reais rotuladas.
-_files: src/services/clinical-analysis-pipeline.ts, src/components/pet/CompoundDosageSlider.tsx, src/locales/pt/translation.json, src/locales/en/translation.json…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
