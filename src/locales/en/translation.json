@@ -1392,6 +1392,7 @@
     "logout": "Logout",
     "settings": "Settings",
     "recommended": "Recommended",
+    "optional": "optional",
     "generateRandomData": "Generate random data for example",
     "learnMore": "Learn more",
     "startNow": "Start now",
