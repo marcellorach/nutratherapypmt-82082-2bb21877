@@ -400,6 +400,10 @@ const PromptConfigurationTab: React.FC = () => {
       <TabsContent value="extracao">
         <ExtractionPromptsEditor />
       </TabsContent>
+
+      <TabsContent value="system">
+        <SystemPromptsCatalog />
+      </TabsContent>
     </Tabs>
   );
 };
