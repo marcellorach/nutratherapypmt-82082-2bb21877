@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-17T22:05:41.918Z
+// Última geração: 2026-05-17T23:24:53.484Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,49 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-17";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-17",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Carga nutricional completa (AAFCO/FEDIAF) no catálogo de rações",
+    "bullets": [
+      "`pet_food_nutrition` estendida: novas colunas para minerais traço (Fe, Cu, Zn, Mn, Se, I, Cl), vitaminas (A, D3, E, K, B1–B12, biotina, colina), EPA/DHA/ARA separados, aminoácidos essenciais (lisina, metionina, triptofano, treonina, arginina) e tracking (`completeness_score`, `confidence`, `data_filled_at`).",
+      "`enrich-pet-food-product`: prompt expandido para schema AAFCO/FEDIAF completo com instrução explícita \"nunca invente — prefira null\". Parser normaliza `%`, `mg/kg` e `UI/kg` com clamps de plausibilidade. Calcula `completeness_score` (fração de campos numéricos preenchidos) automaticamente em cada insert.",
+      "UI do catálogo (`PetFoodCatalogTab`): card de produto agora mostra barra de completude + % e confiança da IA; novo botão Composição abre dialog com a composição completa agrupada por (Macros / Minerais maiores / Minerais traço / Vitaminas / Ácidos graxos / Aminoácidos / Articulares), badges AAFCO/FEDIAF e statement quando presente.",
+      "Files: supabase/migrations/20260517232015_*.sql, supabase/functions/enrich-pet-food-product/index.ts, src/components/administrador/pet-food/PetFoodCatalogTab.tsx"
+    ],
+    "files": [
+      "supabase/functions/enrich-pet-food-product/index.ts",
+      "src/components/administrador/pet-food/PetFoodCatalogTab.tsx"
+    ],
+    "i18nVersion": "1.79.0"
+  },
+  {
+    "date": "2026-05-17",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Fix diagrama + catálogo de System Prompts + traduções",
+    "bullets": [
+      "Diagrama do organograma (fotos 1 e 2): fix definitivo. Após renderizar, o SVG do Mermaid agora recebe `width`/`height` reais lidos do `viewBox` (antes vinha só `style=\"max-width:100%\"`, colapsando dentro do container `max-content`). `useScrollPanZoom.measureNatural` agora prioriza `viewBox.baseVal` sobre `getBBox` (mais estável antes do layout). `ResizeObserver` também observa o `innerRef` para refazer `fit()` quando o SVG aparece. `fitMin` 0.1 → 0.2 (evita escala microscópica).",
+      "Catálogo de System Prompts: nova tabela `ai_system_prompts` com 24 prompts agrupados em 13 famílias (Clinical Extraction, Study Ingestion, RAG/Embeddings, Recommendation Orchestration, KG Enrichment, KG Governance, KG Gap-Fill, Clinical Reasoning, Translation, External Lookup, Taxonomy, Conversational). Nova aba System Prompts dentro de \"Prompts da IA\" lista catálogo com busca, agrupamento por família, badge \"override ativo\", editor inline e botão \"Restaurar default\". RLS admin-only. Conteúdo `default_content` ainda vazio em todos (preenchimento via leitura das edge functions vem em rodadas seguintes).",
+      "Traduções (foto 4): \"Organograma\", \"Conformidade FDA/EMA/AVMA\" e \"Auditorias Técnicas\" estavam hardcoded no `ConfigurationGroup.tsx` — agora usam `t('admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}')`. Chaves espelhadas PT/EN. `I18N_VERSION` 1.78.9 → 1.79.0.",
+      "Badge Perplexity (foto 5): `ConfiguracoesIATab` agora chama `perplexity-health` no mount e marca o card como \"Configured\" quando o secret do connector (`PERPLEXITY_API_KEY`) está disponível, mesmo se a chave não estiver salva em `ai_configurations`. Descrição vira \"via connector\" nesse caso.",
+      "Próxima rodada (não entregue ainda): composição nutricional completa (AAFCO) das rações com tabela `pet_food_nutrients` 1:1 com produto; preenchimento dos `default_content` dos 24 system prompts a partir do código das edge functions.",
+      "Files: src/components/administrador/organograma/OrganogramaDiagram.tsx, src/hooks/useScrollPanZoom.ts, src/components/administrador/sidebar/groups/ConfigurationGroup.tsx, src/components/administrador/ConfiguracoesIATab.tsx, src/components/administrador/PromptConfigurationTab.tsx, src/components/administrador/configuracoes/SystemPromptsCatalog.tsx, src/locales/{pt,en}/translation.json, src/i18n.ts, public.ai_system_prompts (nova tabela + 24 seeds)."
+    ],
+    "files": [
+      "src/components/administrador/organograma/OrganogramaDiagram.tsx",
+      "src/hooks/useScrollPanZoom.ts",
+      "src/components/administrador/sidebar/groups/ConfigurationGroup.tsx",
+      "src/components/administrador/ConfiguracoesIATab.tsx",
+      "src/components/administrador/PromptConfigurationTab.tsx",
+      "src/components/administrador/configuracoes/SystemPromptsCatalog.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.79.0"
+  },
   {
     "date": "2026-05-17",
     "kind": "changed",
