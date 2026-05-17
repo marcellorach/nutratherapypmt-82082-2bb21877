@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-17T14:55:43.886Z
+// Última geração: 2026-05-17T15:17:07.309Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,35 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-17";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-17",
+    "kind": "fixed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Links quebrados e duplicatas em predisposições raciais",
+    "bullets": [
+      "Removidas 26 duplicatas em `breed_predispositions` (mesmo par raça×condição inserido 2x pelo seed v2).",
+      "Adicionada constraint única `(breed_id, condition_id)` para impedir reincidência.",
+      "Substituídos URLs `pubmed.ncbi.nlm.nih.gov/<id>` por `europepmc.org/article/MED/<id>` (sem bloqueio de referer no preview).",
+      "Corrigido 404 da OFA: `/diseases/hip-dysplasia/hip-statistics` → `/diseases/hip-dysplasia/`.",
+      "Files: supabase/migrations/*_dedup_predispositions.sql"
+    ],
+    "i18nVersion": "1.77.1"
+  },
+  {
+    "date": "2026-05-17",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Predisposições para 48 raças sem dados (catálogo +139 registros)",
+    "bullets": [
+      "22 novas condições clínicas (Luxação Patelar, Hidrocefalia, Colapso Traqueal, MMVD, HCM Felina, PKD, DRC Felina, Hipertireoidismo Felino, Atopia, Polimiosite, Legg-Calvé-Perthes, Amiloidose Renal, Seio Dermóide, Surdez Congênita, Glaucoma Primário, Cushing, IVDD, DCM, Linfoma, Mastocitoma, Megaesôfago, GDV) com PT/EN, categoria e fontes (OMIA, EuropePMC, ACVS, IRIS, ACVIM).",
+      "133 novas predisposições raciais cobrindo Bullmastiff, Mastim Inglês, Tibetan Mastiff, Dogue de Bordeaux, Fila Brasileiro, Terra Nova, Pastor de Anatólia, Schnauzer Gigante/Miniatura, Vizsla, Weimaraner, Setter Irlandês, Spinone, Sussex, Chihuahua, Maltês, Papillon, Pinscher Min., Poodle Toy/Standard, Bichon, Lhasa Apso, Jack Russell, Bull Terrier, Border/Cairn/Kerry Blue/Norfolk Terrier, Basset Hound, Buldogue Americano/Australiano, Pit Bull, Pastor Belga Malinois, Pastor de Shetland, Old English Sheepdog, Malamute, Shiba Inu, Spitz Alemão, Welsh Corgi Pembroke, Whippet, Rhodesian Ridgeback, Maine Coon, Ragdoll, Persa, Exótico, Siamês, Oriental, Doméstico.",
+      "Cada registro inclui `risk_factor`, `evidence_grade`, `genetic_profile` (quando aplicável, ex.: MYBPC3 em Maine Coon, FGF3/4/19 em Rhodesian Ridgeback, SOD1 em Welsh Corgi, PKD1 em Persa), `inheritance_pattern`, `prevalence_pct` e 1–2 fontes clicáveis verificadas.",
+      "Cobertura: 32 → 80 raças com predisposições (de 81 totais); 121 → 254 registros; 76 → 209 com fontes."
+    ],
+    "i18nVersion": "1.77.1"
+  },
   {
     "date": "2026-05-17",
     "kind": "added",
