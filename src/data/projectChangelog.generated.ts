@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-17T17:08:50.351Z
+// Última geração: 2026-05-17T20:40:17.061Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,26 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-17";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-17",
+    "kind": "changed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Sidebar admin: restauração de órfãos e limpeza de tabs sem propósito",
+    "bullets": [
+      "Knowledge Base recebeu 7 links restaurados/realocados: Curadoria de Triplets, Conflitos de Evidência, Mapeamento SNOMED/UMLS, Catálogo de Rações, Curadoria de Doses, Qualidade de Triplets e Diagnóstico Gap-Fill.",
+      "Configuration recebeu 3 links novos: Gerenciar Traduções, Convenções de Design e Solicitações de Acesso.",
+      "Removidas 4 tabs sem propósito de `admin-tabs.ts`: `acompanhamento` (marketing fora do escopo clínico), `fontes` e `analysis` (steps legados do wizard antigo de ingestão) e import órfão de `MicrobiomeAnalysisTab`.",
+      "Removido item \"Gestão de Campanhas\" do ActionsGroup.",
+      "Files: src/config/admin-tabs.ts, src/components/administrador/sidebar/groups/{KnowledgeBaseGroup,ConfigurationGroup,ActionsGroup}.tsx, src/components/lazy/LazyComponents.tsx, src/locales/{pt,en}/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "src/config/admin-tabs.ts",
+      "src/components/lazy/LazyComponents.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.78.8"
+  },
   {
     "date": "2026-05-17",
     "kind": "changed",
