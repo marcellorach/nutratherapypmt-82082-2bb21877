@@ -2011,6 +2011,8 @@
         "settings": "Configurações",
         "breedsManagement": "Raças & Predisposições",
         "labReferences": "Referências Lab",
+        "breedsManagementStatus": "100% funcional",
+        "breedsManagementStatusTooltip": "Catálogo de raças com predisposições genéticas integrado ao pipeline clínico.",
         "labReferencesStatus": "Em desenvolvimento",
         "labReferencesStatusTooltip": "Catálogo de valores de referência em progresso. Integração com parser de exames pendente.",
         "baseKnowledge": "Dados Base",
