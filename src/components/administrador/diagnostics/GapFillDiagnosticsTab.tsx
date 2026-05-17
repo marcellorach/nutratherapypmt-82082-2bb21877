@@ -100,6 +100,13 @@ const GapFillDiagnosticsTab: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Explainer banner */}
+      <div className="rounded-md border border-blue-200 bg-blue-50/50 dark:bg-blue-950/20 dark:border-blue-900/40 p-3 text-sm text-blue-900 dark:text-blue-100">
+        <p className="font-medium mb-1">{t('gapFillDiag.explainerTitle')}</p>
+        <p className="text-blue-800/80 dark:text-blue-200/80 leading-relaxed">
+          {t('gapFillDiag.explainerBody')}
+        </p>
+      </div>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
