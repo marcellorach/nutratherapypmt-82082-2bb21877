@@ -23,6 +23,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed - 2026-05-17 — Sidebar admin: restauração de órfãos e limpeza de tabs sem propósito
+<!-- area: admin · status: entregue · i18n: 1.78.8 -->
+- Knowledge Base recebeu 7 links restaurados/realocados: Curadoria de Triplets, Conflitos de Evidência, Mapeamento SNOMED/UMLS, Catálogo de Rações, Curadoria de Doses, Qualidade de Triplets e Diagnóstico Gap-Fill.
+- Configuration recebeu 3 links novos: Gerenciar Traduções, Convenções de Design e Solicitações de Acesso.
+- Removidas 4 tabs sem propósito de `admin-tabs.ts`: `acompanhamento` (marketing fora do escopo clínico), `fontes` e `analysis` (steps legados do wizard antigo de ingestão) e import órfão de `MicrobiomeAnalysisTab`.
+- Removido item "Gestão de Campanhas" do ActionsGroup.
+- Files: src/config/admin-tabs.ts, src/components/administrador/sidebar/groups/{KnowledgeBaseGroup,ConfigurationGroup,ActionsGroup}.tsx, src/components/lazy/LazyComponents.tsx, src/locales/{pt,en}/translation.json, src/i18n.ts
+
 ### Changed - 2026-05-17 — Home: destaque Painel de Controle + footer/header rebranding
 <!-- area: tutor-ui · status: entregue · i18n: 1.78.0 -->
 - Home autenticada: Painel de Controle agora usa botão primário com seta vermelha "visite aqui!" (bilingual); cards Vet Portal e Owner Portal mostram badge "Em breve / Coming soon" e botão desabilitado "Em desenvolvimento / In development".
