@@ -72,9 +72,9 @@ const DataProcessingGroup: React.FC<DataProcessingGroupProps> = ({
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <span className="flex items-center mr-2">
-                <PawPrint className={`h-4 w-4 ${currentStep === "pet-management" ? "text-primary" : "text-orange-500"}`} />
+                <PawPrint className={`h-4 w-4 ${currentStep === "pet-management" ? "text-primary" : "text-foreground"}`} />
                 <ArrowRight className={`h-3 w-3 mx-0.5 ${currentStep === "pet-management" ? "text-primary" : "text-muted-foreground"}`} />
-                <PawPrint className={`h-4 w-4 ${currentStep === "pet-management" ? "text-primary" : "text-green-600"}`} />
+                <PawPrint className={`h-4 w-4 ${currentStep === "pet-management" ? "text-primary" : "text-foreground"}`} />
               </span>
               <span>{t('admin.sidebar.dataProcessing.petManagement')}</span>
               <TooltipProvider delayDuration={200}>
