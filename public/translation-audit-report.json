@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-17T16:19:51.917Z",
+  "timestamp": "2026-05-17T18:00:45.801Z",
   "summary": {
     "totalFiles": 867,
     "totalIssues": 415,
@@ -1600,7 +1600,7 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/import/SciImportSection.tsx",
-      "line": 106,
+      "line": 107,
       "text": "*",
       "severity": "high"
     },
@@ -2265,7 +2265,7 @@
     {
       "type": "missing-key",
       "file": "src/components/layout/Header.tsx",
-      "line": 79,
+      "line": 85,
       "text": " ",
       "severity": "high"
     },
@@ -2475,7 +2475,7 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2726,
+      "line": 2748,
       "text": "@",
       "severity": "high"
     },
