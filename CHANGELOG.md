@@ -23,6 +23,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-17 — Catálogo bilíngue de raças e condições com fontes científicas
+<!-- area: admin · status: entregue · i18n: 1.77.1 -->
+- Seed bilíngue com **+30 condições crônicas/degenerativas caninas** (BOAS, mielopatia degenerativa SOD1, EPI, SARDS, hemangiossarcoma, MDR1, etc.) com `sources` JSONB contendo links diretos para OMIA, PubMed, ACVIM, ESCCAP, IRIS e Merck Vet Manual.
+- Seed bilíngue com **+61 raças** (AKC/FCI + Fila Brasileiro) e **+76 predisposições** enriquecidas com `risk_factor`, `evidence_grade`, `inheritance_pattern`, `prevalence_pct` e até 3 fontes científicas com URL direta por predisposição.
+- `BreedPredispositionsPanel` agora renderiza chips de Perfil Genético / Padrão de Herança / Prevalência e lista de fontes clicáveis (`target="_blank"`, ícone ExternalLink) sob cada predisposição.
+- `usePlatformCounts` + counters dinâmicos na home (`Index.tsx`) substituíram números fixos por leitura real do banco com sufixo "em contínua expansão".
+- Documentação: `docs/BREED_PREDISPOSITIONS_AUDIT.md` lista todos os pontos de consumo onde `breed_predispositions` realmente influencia KG, timeline biológica, pipeline clínico e hybrid-recommendation.
+- Files: supabase/migrations/20260517144239_*.sql, src/components/administrador/breeds/BreedPredispositionsPanel.tsx, src/hooks/usePlatformCounts.ts, src/pages/Index.tsx, src/i18n.ts, src/locales/{pt,en}/translation.json, docs/BREED_PREDISPOSITIONS_AUDIT.md
+
 ### Added - 2026-05-13 — Digital Twin do paciente (Fase 2 — histórico, traits, labs)
 <!-- area: vet-ui · status: entregue · i18n: 1.74.5 -->
 - `PatientKnowledgeSubgraph` ganha 3 novas camadas opcionais conectadas ao nó Pet central:

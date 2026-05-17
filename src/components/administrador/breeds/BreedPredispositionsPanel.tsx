@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Plus, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Loader2, ExternalLink, Dna } from 'lucide-react';
 import { toast } from 'sonner';
 import PredispositionTag from '@/components/administrador/tags/PredispositionTag';
 
@@ -19,7 +19,8 @@ interface Props {
 
 
 const BreedPredispositionsPanel: React.FC<Props> = ({ breedId, breedName }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isEn = i18n.language?.startsWith('en');
   const queryClient = useQueryClient();
   const [addOpen, setAddOpen] = useState(false);
   const [selectedCondition, setSelectedCondition] = useState('');
@@ -103,23 +104,66 @@ const BreedPredispositionsPanel: React.FC<Props> = ({ breedId, breedName }) => {
       {predispositions && predispositions.length > 0 ? (
         <div className="space-y-2">
           {predispositions.map((pred: any) => (
-            <div key={pred.id} className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
-              <PredispositionTag
-                conditionName={pred.health_conditions?.name || t('common.unknown')}
-                riskFactor={pred.risk_factor}
-                evidenceGrade={pred.evidence_grade}
-                conditionId={pred.health_conditions?.id}
-                notes={pred.notes}
-                navigable
-              />
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-7 w-7 text-destructive"
-                onClick={() => deleteMutation.mutate(pred.id)}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+            <div key={pred.id} className="p-2 bg-muted/50 rounded-lg space-y-1.5">
+              <div className="flex items-center justify-between gap-2">
+                <PredispositionTag
+                  conditionName={pred.health_conditions?.name || t('common.unknown')}
+                  conditionNameEn={pred.health_conditions?.name_en}
+                  riskFactor={pred.risk_factor}
+                  evidenceGrade={pred.evidence_grade}
+                  conditionId={pred.health_conditions?.id}
+                  notes={pred.notes}
+                  navigable
+                />
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7 text-destructive shrink-0"
+                  onClick={() => deleteMutation.mutate(pred.id)}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+              {(pred.genetic_profile || pred.genetic_profile_en || pred.inheritance_pattern || pred.prevalence_pct != null) && (
+                <div className="flex flex-wrap gap-1.5 text-[11px] text-muted-foreground pl-1">
+                  {(isEn ? (pred.genetic_profile_en || pred.genetic_profile) : (pred.genetic_profile || pred.genetic_profile_en)) && (
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-background border">
+                      <Dna className="h-3 w-3" />
+                      <span className="font-medium">{t('admin.breeds.geneticProfile')}:</span>
+                      <span>{isEn ? (pred.genetic_profile_en || pred.genetic_profile) : (pred.genetic_profile || pred.genetic_profile_en)}</span>
+                    </span>
+                  )}
+                  {pred.inheritance_pattern && (
+                    <span className="px-1.5 py-0.5 rounded bg-background border">
+                      <span className="font-medium">{t('admin.breeds.inheritancePattern')}:</span>{' '}
+                      {t(`admin.breeds.inheritance.${pred.inheritance_pattern}`, { defaultValue: pred.inheritance_pattern })}
+                    </span>
+                  )}
+                  {pred.prevalence_pct != null && (
+                    <span className="px-1.5 py-0.5 rounded bg-background border">
+                      <span className="font-medium">{t('admin.breeds.prevalence')}:</span> {pred.prevalence_pct}%
+                    </span>
+                  )}
+                </div>
+              )}
+              {Array.isArray(pred.sources) && pred.sources.length > 0 && (
+                <div className="pl-1 text-[11px]">
+                  <span className="font-medium text-muted-foreground">{t('admin.breeds.sources')}:</span>{' '}
+                  {pred.sources.map((s: any, idx: number) => (
+                    <a
+                      key={idx}
+                      href={s.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-0.5 text-primary hover:underline mr-2"
+                      title={s.citation || s.label}
+                    >
+                      {s.label || s.url}
+                      <ExternalLink className="h-2.5 w-2.5" />
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>

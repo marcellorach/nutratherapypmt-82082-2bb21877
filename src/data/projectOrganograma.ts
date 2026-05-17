@@ -31,7 +31,7 @@ export interface OrganogramaArea extends OrganogramaNode {
   linksTo?: OrganogramaAreaKey[];
 }
 
-export const organogramaLastUpdated = "2026-05-13";
+export const organogramaLastUpdated = "2026-05-17";
 
 export const organogramaConvencoes: { label: string; label_en: string; value: string; value_en: string }[] = [
   { label: "Idioma", label_en: "Language", value: "PT-BR + EN obrigatórios — incrementar I18N_VERSION em src/i18n.ts a cada mudança de string", value_en: "PT-BR + EN mandatory — increment I18N_VERSION in src/i18n.ts on every string change" },
