@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bot, Database, Cpu, ChevronRight, Check, Languages, ListTree, ShieldCheck, FileSearch, CheckCircle2 } from "lucide-react";
+import { Bot, Database, Cpu, ChevronRight, Check, Languages, ListTree, ShieldCheck, FileSearch, CheckCircle2, FileEdit, Palette, UserCog } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useTranslation } from 'react-i18next';
 
@@ -116,6 +116,66 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
               <ConfiguredCheck />
               {currentStep === "translation-audit" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+              )}
+            </div>
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          isActive={currentStep === "translation-manager"}
+          onClick={() => handleStepClick("translation-manager")}
+          className={currentStep === "translation-manager" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <FileEdit className={`h-4 w-4 mr-2 ${currentStep === "translation-manager" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.configuration.translationManager')}</span>
+            </div>
+            <div className="flex items-center ml-auto">
+              <ConfiguredCheck />
+              {currentStep === "translation-manager" && (
+                <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+              )}
+            </div>
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          isActive={currentStep === "design-conventions"}
+          onClick={() => handleStepClick("design-conventions")}
+          className={currentStep === "design-conventions" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Palette className={`h-4 w-4 mr-2 ${currentStep === "design-conventions" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.configuration.designConventions')}</span>
+            </div>
+            <div className="flex items-center ml-auto">
+              <ConfiguredCheck />
+              {currentStep === "design-conventions" && (
+                <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+              )}
+            </div>
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          isActive={currentStep === "access-requests"}
+          onClick={() => handleStepClick("access-requests")}
+          className={currentStep === "access-requests" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <UserCog className={`h-4 w-4 mr-2 ${currentStep === "access-requests" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.configuration.accessRequests')}</span>
+            </div>
+            <div className="flex items-center ml-auto">
+              <ConfiguredCheck />
+              {currentStep === "access-requests" && (
+                <ChevronRight className="h-4 w-4 ml-auto text-primary" />
               )}
             </div>
           </div>
