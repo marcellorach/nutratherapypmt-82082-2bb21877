@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BookOpen, Beaker, Target, Sparkles, Network, Settings, ChevronRight, Share2, ClipboardCheck, CircleCheck, PawPrint, FlaskConical, Database, Pill } from "lucide-react";
+import { BookOpen, Beaker, Target, Sparkles, Network, Settings, ChevronRight, Share2, ClipboardCheck, CircleCheck, PawPrint, FlaskConical, Database, Pill, GitBranch, AlertTriangle, Scale, UtensilsCrossed, Activity, Stethoscope, Map } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from 'react-i18next';
@@ -64,6 +64,41 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
         </SidebarMenuButton>
       </SidebarMenuItem>
       
+      {/* Triplet Curation — global kanban (cross-study) */}
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          isActive={currentStep === "triplet-curation"}
+          onClick={() => handleStepClick("triplet-curation")}
+          className={currentStep === "triplet-curation" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <GitBranch className={`h-4 w-4 mr-2 ${currentStep === "triplet-curation" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.tripletCuration')}</span>
+              <StatusBadge statusKey="admin.sidebar.knowledgeBase.tripletCurationStatus" tooltipKey="admin.sidebar.knowledgeBase.tripletCurationStatusTooltip" color="text-yellow-500" />
+            </div>
+            {currentStep === "triplet-curation" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          isActive={currentStep === "evidence-conflicts"}
+          onClick={() => handleStepClick("evidence-conflicts")}
+          className={currentStep === "evidence-conflicts" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <AlertTriangle className={`h-4 w-4 mr-2 ${currentStep === "evidence-conflicts" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.evidenceConflicts')}</span>
+              <StatusBadge statusKey="admin.sidebar.knowledgeBase.evidenceConflictsStatus" tooltipKey="admin.sidebar.knowledgeBase.evidenceConflictsStatusTooltip" color="text-yellow-500" />
+            </div>
+            {currentStep === "evidence-conflicts" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "nutraceuticals-unified"} 
@@ -141,6 +176,23 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          isActive={currentStep === "ontology-mapping"}
+          onClick={() => handleStepClick("ontology-mapping")}
+          className={currentStep === "ontology-mapping" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Map className={`h-4 w-4 mr-2 ${currentStep === "ontology-mapping" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.ontologyMapping')}</span>
+              <StatusBadge statusKey="admin.sidebar.knowledgeBase.ontologyMappingStatus" tooltipKey="admin.sidebar.knowledgeBase.ontologyMappingStatusTooltip" color="text-yellow-500" />
+            </div>
+            {currentStep === "ontology-mapping" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
       
       <SidebarMenuItem>
         <SidebarMenuButton 
@@ -172,6 +224,23 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
               <StatusBadge statusKey="admin.sidebar.knowledgeBase.labReferencesStatus" tooltipKey="admin.sidebar.knowledgeBase.labReferencesStatusTooltip" color="text-yellow-500" />
             </div>
             {currentStep === "lab-references" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          isActive={currentStep === "pet-food-catalog"}
+          onClick={() => handleStepClick("pet-food-catalog")}
+          className={currentStep === "pet-food-catalog" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <UtensilsCrossed className={`h-4 w-4 mr-2 ${currentStep === "pet-food-catalog" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.petFoodCatalog')}</span>
+              <StatusBadge statusKey="admin.sidebar.knowledgeBase.petFoodCatalogStatus" tooltipKey="admin.sidebar.knowledgeBase.petFoodCatalogStatusTooltip" color="text-yellow-500" />
+            </div>
+            {currentStep === "pet-food-catalog" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -210,6 +279,23 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
       </SidebarMenuItem>
 
       <SidebarMenuItem>
+        <SidebarMenuButton
+          isActive={currentStep === "dosage-curation"}
+          onClick={() => handleStepClick("dosage-curation")}
+          className={currentStep === "dosage-curation" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Scale className={`h-4 w-4 mr-2 ${currentStep === "dosage-curation" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.dosageCuration')}</span>
+              <StatusBadge statusKey="admin.sidebar.knowledgeBase.dosageCurationStatus" tooltipKey="admin.sidebar.knowledgeBase.dosageCurationStatusTooltip" color="text-yellow-500" />
+            </div>
+            {currentStep === "dosage-curation" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "relacoes"}
           onClick={() => handleStepClick("relacoes")}
@@ -243,7 +329,40 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
-      
+
+      {/* KG Diagnostics */}
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          isActive={currentStep === "triplet-quality"}
+          onClick={() => handleStepClick("triplet-quality")}
+          className={currentStep === "triplet-quality" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Activity className={`h-4 w-4 mr-2 ${currentStep === "triplet-quality" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.tripletQuality')}</span>
+            </div>
+            {currentStep === "triplet-quality" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          isActive={currentStep === "gapfill-diagnostics"}
+          onClick={() => handleStepClick("gapfill-diagnostics")}
+          className={currentStep === "gapfill-diagnostics" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Stethoscope className={`h-4 w-4 mr-2 ${currentStep === "gapfill-diagnostics" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.gapfillDiagnostics')}</span>
+            </div>
+            {currentStep === "gapfill-diagnostics" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "knowledge-base-settings"} 
