@@ -82,6 +82,23 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
         </SidebarMenuButton>
       </SidebarMenuItem>
 
+      {/* KG Diagnostics — Triplet Quality (entre Triplet Curation e Evidence Conflicts) */}
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          isActive={currentStep === "triplet-quality"}
+          onClick={() => handleStepClick("triplet-quality")}
+          className={currentStep === "triplet-quality" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Activity className={`h-4 w-4 mr-2 ${currentStep === "triplet-quality" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.tripletQuality')}</span>
+            </div>
+            {currentStep === "triplet-quality" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
       <SidebarMenuItem>
         <SidebarMenuButton
           isActive={currentStep === "evidence-conflicts"}
@@ -326,23 +343,6 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
             {currentStep === "ai-insights" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
             )}
-          </div>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-
-      {/* KG Diagnostics */}
-      <SidebarMenuItem>
-        <SidebarMenuButton
-          isActive={currentStep === "triplet-quality"}
-          onClick={() => handleStepClick("triplet-quality")}
-          className={currentStep === "triplet-quality" ? "bg-primary/10 text-primary" : ""}
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <Activity className={`h-4 w-4 mr-2 ${currentStep === "triplet-quality" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.knowledgeBase.tripletQuality')}</span>
-            </div>
-            {currentStep === "triplet-quality" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
