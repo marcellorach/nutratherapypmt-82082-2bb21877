@@ -26,15 +26,21 @@ const Header: React.FC = () => {
             alt="Senex AI"
             className="h-6"
           />
-          <div className="flex flex-col leading-tight">
-            <div className="text-lg font-bold text-gray-800 text-center">
+          <div className="flex flex-col leading-tight text-left">
+            <div className="text-lg font-bold text-gray-800">
               Senex AI
             </div>
-            <div className="text-xs text-gray-600 font-light text-center">
-              {t('header.platformSubtitleLine1')}
+            <div className="text-xs text-gray-600 font-light">
+              {t('header.platformSubtitleLine1a')}
             </div>
-            <div className="text-[10px] text-gray-500 font-medium text-center italic">
+            <div className="text-xs text-gray-600 font-light">
+              {t('header.platformSubtitleLine1b')}
+            </div>
+            <div className="text-[10px] text-gray-500 font-medium italic mt-0.5">
               {t('header.platformSubtitleLine2')}
+            </div>
+            <div className="text-[10px] text-gray-500 font-medium italic">
+              {t('footer.petMoreTimeTagline')}
             </div>
           </div>
         </Link>
