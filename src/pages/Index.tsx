@@ -123,8 +123,7 @@ const Index: React.FC = () => {
                     </p>
                     <div className="relative">
                       <Link to="/administrador">
-                        <Button 
-                          variant="outline" 
+                        <Button
                           className="w-full flex items-center justify-center gap-1"
                         >
                           {t('home.researchAreaButton')} <ArrowRight size={16} />
@@ -136,48 +135,53 @@ const Index: React.FC = () => {
                           <path d="M0 12H28M28 12L18 2M28 12L18 22" stroke="#EF4444" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                         <span className="text-red-500 font-bold text-sm whitespace-nowrap italic" style={{ fontFamily: 'cursive' }}>
-                          visite aqui!
+                          {t('home.visitHere')}
                         </span>
                       </div>
                     </div>
                   </div>
                 </div>
                 
-                <div className="p-6 hover:bg-gray-50 transition-colors min-w-0 overflow-hidden">
+                <div className="p-6 transition-colors min-w-0 overflow-hidden opacity-60">
                   <div className="flex flex-col items-center text-center min-w-0">
                     <div className="rounded-full bg-gray-100 p-3 mb-4">
                       <Heart size={28} className="text-gray-800" />
                     </div>
-                    <h3 className="text-lg font-medium mb-3">{t('home.veterinarianArea')}</h3>
+                    <h3 className="text-lg font-medium mb-2">{t('home.veterinarianArea')}</h3>
+                    <span className="inline-block mb-3 px-2 py-0.5 text-[10px] font-semibold rounded-full bg-amber-100 text-amber-800 uppercase tracking-wide">
+                      {t('home.comingSoon')}
+                    </span>
                     <p className="text-gray-500 mb-4">
                       {t('home.veterinarianAreaDesc')}
                     </p>
-                    <Link to="/veterinario">
-                      <Button 
-                        variant="outline" 
-                        className="w-full flex items-center justify-center gap-1"
-                      >
-                        {t('home.veterinarianAreaButton')} <ArrowRight size={16} />
-                      </Button>
-                    </Link>
+                    <Button
+                      variant="outline"
+                      disabled
+                      className="w-full flex items-center justify-center gap-1 cursor-not-allowed"
+                    >
+                      {t('home.inDevelopment')}
+                    </Button>
                   </div>
                 </div>
                 
-                <div className="p-6 bg-gray-50 hover:bg-gray-100 transition-colors min-w-0 overflow-hidden">
+                <div className="p-6 bg-gray-50 transition-colors min-w-0 overflow-hidden opacity-60">
                   <div className="flex flex-col items-center text-center min-w-0">
                     <div className="rounded-full bg-gray-100 p-3 mb-4">
                       <Book size={28} className="text-gray-800" />
                     </div>
-                    <h3 className="text-lg font-medium mb-3">{t('home.tutorArea')}</h3>
+                    <h3 className="text-lg font-medium mb-2">{t('home.tutorArea')}</h3>
+                    <span className="inline-block mb-3 px-2 py-0.5 text-[10px] font-semibold rounded-full bg-amber-100 text-amber-800 uppercase tracking-wide">
+                      {t('home.comingSoon')}
+                    </span>
                     <p className="text-gray-500 mb-4">
                       {t('home.tutorAreaDesc')}
                     </p>
-                    <Button 
-                      variant="outline" 
-                      className="w-full flex items-center justify-center gap-1" 
-                      onClick={() => navigate('/tutor')}
+                    <Button
+                      variant="outline"
+                      disabled
+                      className="w-full flex items-center justify-center gap-1 cursor-not-allowed"
                     >
-                      {t('home.tutorAreaButton')} <ArrowRight size={16} />
+                      {t('home.inDevelopment')}
                     </Button>
                   </div>
                 </div>

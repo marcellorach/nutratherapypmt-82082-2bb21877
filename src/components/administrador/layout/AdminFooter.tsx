@@ -5,8 +5,11 @@ const AdminFooter: React.FC = () => {
     <footer className="bg-gray-50 text-gray-700 border-t border-gray-200 mt-auto">
       <div className="px-6 py-4">
         {/* Copyright e descrição principal */}
-        <div className="text-center text-sm mb-3">
-          Senex AI PET © {new Date().getFullYear()} — uma plataforma PetMoreTime · Sistema inteligente de recomendação de nutracêuticos para pets
+        <div className="text-center mb-3 space-y-1">
+          <div className="text-sm">
+            Senex AI © 2025–2026 — developed by PetMoreTime. All rights reserved by PetMoreTime.
+          </div>
+          <div className="text-[11px] text-gray-500 italic">Veterinary Geroscience</div>
         </div>
         
         {/* Seção Powered by com logos */}

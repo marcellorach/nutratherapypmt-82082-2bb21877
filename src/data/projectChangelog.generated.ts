@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-17T15:17:07.309Z
+// Última geração: 2026-05-17T17:08:50.351Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,28 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-17";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-17",
+    "kind": "changed",
+    "area": "tutor-ui",
+    "status": "entregue",
+    "title": "Home: destaque Painel de Controle + footer/header rebranding",
+    "bullets": [
+      "Home autenticada: Painel de Controle agora usa botão primário com seta vermelha \"visite aqui!\" (bilingual); cards Vet Portal e Owner Portal mostram badge \"Em breve / Coming soon\" e botão desabilitado \"Em desenvolvimento / In development\".",
+      "Footer: copyright atualizado para \"Senex AI © 2025–2026 — developed by PetMoreTime. All rights reserved by PetMoreTime.\" em Footer.tsx e AdminFooter.tsx.",
+      "Tagline \"Veterinary Geroscience\" adicionada sob a referência PetMoreTime no header e em ambos os footers.",
+      "Header: subtítulo \"Extending Lives & Preventing Degenerative Disease\" quebrado em duas linhas e alinhado à esquerda com o logo.",
+      "Files: src/pages/Index.tsx, src/components/layout/Header.tsx, src/components/layout/Footer.tsx, src/components/administrador/layout/AdminFooter.tsx, src/locales/{pt,en}/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "src/pages/Index.tsx",
+      "src/components/layout/Header.tsx",
+      "src/components/layout/Footer.tsx",
+      "src/components/administrador/layout/AdminFooter.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.78.0"
+  },
   {
     "date": "2026-05-17",
     "kind": "fixed",

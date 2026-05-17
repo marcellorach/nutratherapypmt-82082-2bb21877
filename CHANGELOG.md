@@ -23,6 +23,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed - 2026-05-17 — Home: destaque Painel de Controle + footer/header rebranding
+<!-- area: tutor-ui · status: entregue · i18n: 1.78.0 -->
+- Home autenticada: Painel de Controle agora usa botão primário com seta vermelha "visite aqui!" (bilingual); cards Vet Portal e Owner Portal mostram badge "Em breve / Coming soon" e botão desabilitado "Em desenvolvimento / In development".
+- Footer: copyright atualizado para "Senex AI © 2025–2026 — developed by PetMoreTime. All rights reserved by PetMoreTime." em Footer.tsx e AdminFooter.tsx.
+- Tagline "Veterinary Geroscience" adicionada sob a referência PetMoreTime no header e em ambos os footers.
+- Header: subtítulo "Extending Lives & Preventing Degenerative Disease" quebrado em duas linhas e alinhado à esquerda com o logo.
+- Files: src/pages/Index.tsx, src/components/layout/Header.tsx, src/components/layout/Footer.tsx, src/components/administrador/layout/AdminFooter.tsx, src/locales/{pt,en}/translation.json, src/i18n.ts
+
 ### Fixed - 2026-05-17 — Links quebrados e duplicatas em predisposições raciais
 <!-- area: admin · status: entregue · i18n: 1.77.1 -->
 - Removidas 26 duplicatas em `breed_predispositions` (mesmo par raça×condição inserido 2x pelo seed v2).

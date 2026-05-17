@@ -1,48 +1,42 @@
-# Confirmação do diagnóstico
+## Plan: Home cards CTA clarity + Footer rework
 
-Sim, você está certo. Em `src/components/administrador/estudos/import/SciImportSection.tsx` (linhas 173-179), as duas abas renderizam o **mesmo** componente:
+### a) Home cards: highlight "Control Panel", mark others as "in development"
+File: `src/pages/Index.tsx` (authenticated 3-card section)
+- **Control Panel** card: keep "Open Admin / Abrir Admin" button enabled, make it visually prominent (primary/default variant instead of outline), keep the red "visite aqui!" arrow callout (translated to bilingual: "visit here!" / "visite aqui!").
+- **Veterinarian Portal** card: replace the button with a disabled button labeled "In development / Em desenvolvimento" + a small muted badge "Coming soon / Em breve". Card opacity slightly reduced.
+- **Owner Portal** card: same treatment — disabled "In development" button + "Coming soon" badge.
+- Add new i18n keys in `src/locales/{pt,en}/translation.json`:
+  - `home.inDevelopment` = "Em desenvolvimento" / "In development"
+  - `home.comingSoon` = "Em breve" / "Coming soon"
+  - `home.visitHere` = "visite aqui!" / "visit here!"
+- Bump `I18N_VERSION` in `src/i18n.ts`.
 
-```tsx
-<TabsContent value="external-search">
-  <StudiesLibraryTab ... />   // ❌ errado — é a Biblioteca
-</TabsContent>
+### b) Footer copyright update
+Files: `src/components/layout/Footer.tsx` and `src/components/administrador/layout/AdminFooter.tsx`
+- Replace current copyright line with a corrected bilingual version:
+  - EN: `Senex AI © 2025–2026 — developed by PetMoreTime. All rights reserved by PetMoreTime.`
+  - PT: `Senex AI © 2025–2026 — desenvolvido pela PetMoreTime. Todos os direitos reservados à PetMoreTime.`
+- Use translation keys (`footer.copyrightFull` or update existing `footer.copyright`).
 
-<TabsContent value="curated-library">
-  <StudiesLibraryTab ... />   // ✅ correto — é a Biblioteca
-</TabsContent>
-```
+### c) Tagline under "PetMoreTime"
+Where: under the "PetMoreTime" wordmark area (header logo block in `src/components/layout/Header.tsx`).
+Note: the visible header logo shows "Senex AI", and "PetMoreTime" appears as a separate brand mark elsewhere (uploaded screenshot shows PetMoreTime logo with tagline "E..." cut off). I'll interpret this as: add the tagline **"Veterinary Geroscience"** (corrected English — "geroscience" is the proper term, not "geocience") under the PetMoreTime brand reference.
+- Add as a small italic line under "a PetMoreTime platform" wherever PetMoreTime is shown (footer "Powered by" / copyright area, and the header subtitle block).
+- New i18n key: `branding.petMoreTimeTagline` = "Veterinary Geroscience" (same in PT, as it's the brand tagline in English — confirm if you want it translated to "Geriatria Veterinária" in PT).
 
-Por isso "Busca Externa" e "Biblioteca" exibem conteúdo idêntico (66 estudos, 43 curados, 10 na fila).
+### d) Split the middle phrase into two lines, aligned with "PetMoreTime" logo
+The "middle phrase" = `header.platformSubtitleLine1` = "Extending Lives & Preventing Degenerative Disease" (currently single line, centered under Senex AI).
+- Split into two lines:
+  - Line 1: "Extending Lives"
+  - Line 2: "& Preventing Degenerative Disease"
+- Left-align with the PetMoreTime/Senex AI logo (`text-left` instead of `text-center` in the header subtitle block).
+- Update keys:
+  - `header.platformSubtitleLine1a` = "Extending Lives" / "Prolongando Vidas"
+  - `header.platformSubtitleLine1b` = "& Preventing Degenerative Disease" / "& Prevenindo Doenças Degenerativas"
 
-A **Busca Externa real** já existe no projeto e está órfã: `src/components/administrador/estudos/library/SearchExternalStudies.tsx` (612 linhas), conectada à edge function `search-scientific-studies` (PubMed + OpenAlex, com filtros avançados, citações, open access, importação de PDF).
+### Clarifying question
+For (c): the PetMoreTime tagline — should it stay in English ("Veterinary Geroscience") in both locales, or be translated to PT ("Geriatria Veterinária" or "Geroscience Veterinária")? I'll default to keeping it in English in both, since it functions as a brand tagline.
 
-# Plano (alterações mínimas, apenas frontend)
-
-**Arquivo único:** `src/components/administrador/estudos/import/SciImportSection.tsx`
-
-1. **Adicionar import** do componente real:
-   ```ts
-   import SearchExternalStudies from '../library/SearchExternalStudies';
-   ```
-
-2. **Corrigir a aba `external-search`** para usar o componente correto, passando `onStudyImported` para atualizar a Biblioteca após importar:
-   ```tsx
-   <TabsContent value="external-search">
-     <SearchExternalStudies onStudyImported={() => handleTabChange('curated-library')} />
-   </TabsContent>
-   ```
-
-3. **Mudar aba default** de `"external-search"` para `"curated-library"`:
-   ```ts
-   const [activeTab, setActiveTab] = useState<string>("curated-library");
-   ```
-
-# Fora do escopo
-
-- Não vou mexer em traduções, ordem das abas, layout do `TabNavigation`, nem na lógica das outras abas (Upload, Curadoria).
-- Não vou tocar em `StudiesLibraryTab` nem em `SearchExternalStudies` em si — ambos já funcionam.
-- Sem migrations, sem mudanças no backend.
-
-# Validação
-
-Após a mudança: ao abrir `/administrador → Digestão de Estudos Científicos`, a aba **Biblioteca** abre por padrão; clicar em **Busca Externa** mostra o formulário de busca PubMed/OpenAlex (não mais a lista de 66 estudos).
+### Documentation updates
+- CHANGELOG.md: add entries under `[Unreleased]` (UI clarity for home cards, footer rebrand, header tagline split).
+- Run `npm run sync:changelog` after the edit.
