@@ -19,15 +19,13 @@ interface Props {
 
 
 const BreedPredispositionsPanel: React.FC<Props> = ({ breedId, breedName }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isEn = i18n.language?.startsWith('en');
   const queryClient = useQueryClient();
   const [addOpen, setAddOpen] = useState(false);
   const [selectedCondition, setSelectedCondition] = useState('');
   const [riskFactor, setRiskFactor] = useState('1.5');
   const [evidenceGrade, setEvidenceGrade] = useState('moderate');
-
-  const { i18n } = useTranslation();
-  const isEn = i18n.language?.startsWith('en');
 
   const { data: predispositions, isLoading } = useQuery({
     queryKey: ['breed-predispositions', breedId],
