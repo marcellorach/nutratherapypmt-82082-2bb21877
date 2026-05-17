@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Search, Database, AlertTriangle, CheckCircle2, XCircle,
-  Loader2, ExternalLink, Wand2, Shield, Clock, User
+  Loader2, ExternalLink, Wand2, Shield, Clock, User, Stethoscope
 } from 'lucide-react';
 import {
   getMappingStats,
@@ -31,6 +32,7 @@ type FilterMode = 'all' | 'mapped' | 'unmapped';
 const OntologyMappingTab: React.FC = () => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [, setSearchParams] = useSearchParams();
   const [activeTable, setActiveTable] = useState<MappableTable>('health_conditions');
   const [filter, setFilter] = useState<FilterMode>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -173,6 +175,16 @@ const OntologyMappingTab: React.FC = () => {
             {umlsConfigured ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
             UMLS API: {umlsConfigured ? t('ontologyMapping.umls.configured') : t('ontologyMapping.umls.notConfigured')}
           </Badge>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => setSearchParams({ tab: 'gapfill-diagnostics' })}
+            title={t('ontologyMapping.advancedDiagnostics.tooltip')}
+          >
+            <Stethoscope className="h-4 w-4" />
+            {t('ontologyMapping.advancedDiagnostics.button')}
+          </Button>
         </div>
       </div>
 

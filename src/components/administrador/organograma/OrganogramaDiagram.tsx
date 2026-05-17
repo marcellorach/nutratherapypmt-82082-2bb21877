@@ -49,7 +49,7 @@ export const OrganogramaDiagram: React.FC<Props> = ({ onJumpToCards }) => {
   const { containerRef, innerRef, fit, scale, tx, ty } = useScrollPanZoom<HTMLDivElement>({
     min: 0.05,
     max: 6,
-    fitMin: 0.4,
+    fitMin: 0.1,
   });
 
   useEffect(() => {
@@ -62,24 +62,18 @@ export const OrganogramaDiagram: React.FC<Props> = ({ onJumpToCards }) => {
       try {
         setError(null);
         const id = `mmd-${Math.random().toString(36).slice(2)}`;
-        let { svg: rendered } = await mermaid.render(id, source);
+        const { svg: rendered } = await mermaid.render(id, source);
         if (cancelled) return;
         if (!rendered.includes("<svg")) {
           setError(t('organograma.mermaidEmpty'));
           setSvg("");
           return;
         }
-        // Strip mermaid's inline max-width/height so our pan/zoom container controls sizing
-        rendered = rendered
-          .replace(/style="max-width:[^"]*"/g, 'style="max-width:none;"')
-          .replace(/<svg ([^>]*?)width="[^"]*"/, '<svg $1')
-          .replace(/<svg ([^>]*?)height="[^"]*"/, '<svg $1');
         setSvg(rendered);
-        // Aguardar dois frames para o SVG existir e ter layout antes do fit
+        // Aguardar SVG existir e ter layout antes do fit (mantém width/height nativos do Mermaid)
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             fit();
-            // Refit novamente após mermaid medir os textos (pode levar ~100ms)
             setTimeout(() => fit(), 120);
             setTimeout(() => fit(), 350);
           });
