@@ -1679,7 +1679,9 @@
     "registeredNutraceuticals": "Nutracêuticos Cadastrados",
     "scientificStudies": "Estudos Científicos",
     "treatableConditions": "Condições Tratáveis",
-    "underConstruction": "Em Construção"
+    "underConstruction": "Em Construção",
+    "subtitleDynamic": "Plataforma de terapia geroprotetiva baseada em evidências, com {{conditions}} condições clínicas catalogadas, {{nutraceuticals}} nutracêuticos e {{breeds}} raças cobertas — alimentando recomendações personalizadas via IA a partir de literatura revisada.",
+    "subtitleExpansionNote": "Catálogo em contínua expansão — novas condições, raças e compostos entram semanalmente."
   },
   "auth": {
     "login": "Login",
@@ -2086,6 +2088,20 @@
         "condition": "Condição de Saúde",
         "selectCondition": "Selecione uma condição",
         "evidenceGrade": "Grau de Evidência"
+      },
+      "geneticProfile": "Perfil genético",
+      "inheritancePattern": "Padrão de herança",
+      "prevalence": "Prevalência",
+      "sources": "Fontes",
+      "noSources": "Sem fontes cadastradas",
+      "inheritance": {
+        "autosomal_recessive": "Autossômica recessiva",
+        "autosomal_dominant": "Autossômica dominante",
+        "x_linked_recessive": "Ligada ao X (recessiva)",
+        "x_linked_dominant": "Ligada ao X (dominante)",
+        "polygenic": "Poligênica",
+        "mitochondrial": "Mitocondrial",
+        "unknown": "Desconhecida"
       }
     },
     "labReferences": {
@@ -2779,6 +2795,10 @@
         "empty": "Nenhuma interação cadastrada ainda.",
         "emptyHint": "A Fase 2 incluirá interações droga↔droga, droga↔nutracêutico e droga↔condição com alertas em tempo real no cadastro do pet."
       }
+    },
+    "conditions": {
+      "sources": "Fontes científicas",
+      "openSource": "Abrir fonte"
     }
   },
   "footer": {
