@@ -152,6 +152,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
             <div className="flex items-center">
               <PawPrint className={`h-4 w-4 mr-2 ${currentStep === "breeds-management" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.knowledgeBase.breedsManagement')}</span>
+              <StatusBadge statusKey="admin.sidebar.knowledgeBase.breedsManagementStatus" tooltipKey="admin.sidebar.knowledgeBase.breedsManagementStatusTooltip" color="text-emerald-500" />
             </div>
             {currentStep === "breeds-management" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
           </div>
@@ -237,24 +238,6 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
               <span>{t('admin.sidebar.knowledgeBase.aiInsights')}</span>
             </div>
             {currentStep === "ai-insights" && (
-              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-            )}
-          </div>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          isActive={currentStep === "processamento-ia"} 
-          onClick={() => handleStepClick("processamento-ia")}
-          className={currentStep === "processamento-ia" ? "bg-primary/10 text-primary" : ""}
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <Sparkles className={`h-4 w-4 mr-2 ${currentStep === "processamento-ia" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.knowledgeBase.aiProcessing')}</span>
-            </div>
-            {currentStep === "processamento-ia" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
             )}
           </div>
