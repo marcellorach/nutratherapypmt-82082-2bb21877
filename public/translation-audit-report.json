@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-05-17T14:41:26.213Z",
+  "timestamp": "2026-05-17T15:09:49.503Z",
   "summary": {
-    "totalFiles": 866,
+    "totalFiles": 867,
     "totalIssues": 415,
     "hardcodedTexts": 40,
     "missingKeys": 374,
@@ -438,21 +438,21 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/breeds/BreedPredispositionsPanel.tsx",
-      "line": 34,
+      "line": 35,
       "text": "*, health_conditions:condition_id(id, name, name_en)",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/breeds/BreedPredispositionsPanel.tsx",
-      "line": 47,
+      "line": 48,
       "text": "id, name, name_en",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/breeds/BreedPredispositionsPanel.tsx",
-      "line": 108,
+      "line": 110,
       "text": "common.unknown",
       "severity": "high"
     },
@@ -2475,7 +2475,7 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2675,
+      "line": 2697,
       "text": "@",
       "severity": "high"
     },
