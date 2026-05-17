@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-17T21:58:15.180Z
+// Última geração: 2026-05-17T22:05:41.918Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,42 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-17";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-17",
+    "kind": "changed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Sidebar: reposicionar Triplet Quality + catálogo Mars",
+    "bullets": [
+      "Sidebar \"Base de Conhecimento\": item Triplet Quality movido para entre Triplet Curation e Evidence Conflicts (antes ficava isolado no fim do grupo). Apenas reordenação visual; rota, ícone e tradução inalterados.",
+      "Catálogo de Rações: adicionadas 8 marcas do conglomerado Mars Petcare que faltavam — IAMS, Nutro, Cesar, Sheba, Greenies, Crave, Perfect Fit e Temptations. Royal Canin, Pedigree, Eukanuba e Whiskas já estavam cadastradas. Garante prioridade absoluta da Mars na lista de marcas.",
+      "Files: src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx, public.pet_food_brands (8 inserts)."
+    ],
+    "files": [
+      "src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx"
+    ],
+    "i18nVersion": "1.78.9"
+  },
+  {
+    "date": "2026-05-17",
+    "kind": "changed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Organograma: corrigir diagrama em branco e simplificar acesso ao Gap-Fill",
+    "bullets": [
+      "Diagrama Mermaid do organograma voltou a renderizar: removida a manipulação de `width`/`height` do `<svg>` que colapsava o conteúdo, e `fitMin` reduzido de 0.4 para 0.1 para evitar telas em branco quando o diagrama é maior que o container.",
+      "Tab \"Diagnóstico Gap-Fill\" removida do menu lateral (Knowledge Base) — virou diagnóstico avançado acessível por botão \"Ver diagnóstico avançado\" dentro da tela de Mapeamento SNOMED/UMLS. A rota `?tab=gapfill-diagnostics` continua válida; só a entrada de menu foi escondida para reduzir ruído na sidebar.",
+      "Página \"Relações e Conexões\" e o force-graph do organograma intencionalmente não foram tocados — auditoria do histórico (commits `385859f4`, `33454cc9`, `bb7d8e39`) confirmou que não houve regressão recente; o volume aparente (28 nós · 1000 edges) é dado real e não complexidade adicionada.",
+      "Files: src/components/administrador/organograma/OrganogramaDiagram.tsx, src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx, src/components/administrador/OntologyMappingTab.tsx, src/locales/{pt,en}/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "src/components/administrador/organograma/OrganogramaDiagram.tsx",
+      "src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx",
+      "src/components/administrador/OntologyMappingTab.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.78.9"
+  },
   {
     "date": "2026-05-17",
     "kind": "changed",

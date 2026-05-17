@@ -23,6 +23,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed - 2026-05-17 — Sidebar: reposicionar Triplet Quality + catálogo Mars
+<!-- area: admin · status: entregue · i18n: 1.78.9 -->
+- Sidebar "Base de Conhecimento": item **Triplet Quality** movido para entre **Triplet Curation** e **Evidence Conflicts** (antes ficava isolado no fim do grupo). Apenas reordenação visual; rota, ícone e tradução inalterados.
+- Catálogo de Rações: adicionadas 8 marcas do conglomerado **Mars Petcare** que faltavam — IAMS, Nutro, Cesar, Sheba, Greenies, Crave, Perfect Fit e Temptations. Royal Canin, Pedigree, Eukanuba e Whiskas já estavam cadastradas. Garante prioridade absoluta da Mars na lista de marcas.
+- Files: src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx, public.pet_food_brands (8 inserts).
+
 ### Changed - 2026-05-17 — Organograma: corrigir diagrama em branco e simplificar acesso ao Gap-Fill
 <!-- area: admin · status: entregue · i18n: 1.78.9 -->
 - Diagrama Mermaid do organograma voltou a renderizar: removida a manipulação de `width`/`height` do `<svg>` que colapsava o conteúdo, e `fitMin` reduzido de 0.4 para 0.1 para evitar telas em branco quando o diagrama é maior que o container.
