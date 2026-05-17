@@ -37,6 +37,12 @@ export function useScrollPanZoom<T extends HTMLElement>(opts: Options = {}) {
     if (!inner) return null;
     const svg = inner.querySelector("svg");
     if (svg) {
+      // 1) Prefer viewBox (estável mesmo antes do layout final)
+      const vb = (svg as SVGSVGElement).viewBox?.baseVal;
+      if (vb && vb.width > 0 && vb.height > 0) {
+        return { x: vb.x, y: vb.y, w: vb.width, h: vb.height };
+      }
+      // 2) Tenta getBBox (quando SVG já tem layout)
       try {
         const contentBox = (svg as SVGGraphicsElement).getBBox?.();
         if (contentBox && contentBox.width > 0 && contentBox.height > 0) {
@@ -48,11 +54,7 @@ export function useScrollPanZoom<T extends HTMLElement>(opts: Options = {}) {
           };
         }
       } catch {
-        // fallback para viewBox/rect quando o SVG ainda não estiver pronto
-      }
-      const vb = (svg as SVGSVGElement).viewBox?.baseVal;
-      if (vb && vb.width > 0 && vb.height > 0) {
-        return { x: vb.x, y: vb.y, w: vb.width, h: vb.height };
+        // fallback para rect
       }
       const rect = svg.getBoundingClientRect();
       if (rect.width > 0 && rect.height > 0) return { x: 0, y: 0, w: rect.width, h: rect.height };
@@ -148,9 +150,11 @@ export function useScrollPanZoom<T extends HTMLElement>(opts: Options = {}) {
   // Re-fit quando o container redimensiona (incl. troca de tab)
   useLayoutEffect(() => {
     const node = containerRef.current;
+    const inner = innerRef.current;
     if (!node) return;
     const ro = new ResizeObserver(() => fit());
     ro.observe(node);
+    if (inner) ro.observe(inner);
     return () => ro.disconnect();
   }, [fit]);
 

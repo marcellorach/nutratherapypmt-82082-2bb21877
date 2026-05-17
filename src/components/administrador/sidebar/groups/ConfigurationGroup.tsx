@@ -230,7 +230,7 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <ListTree className={`h-4 w-4 mr-2 ${currentStep === "organograma" ? "text-primary" : ""}`} />
-              <span>Organograma</span>
+              <span>{t('admin.sidebar.configuration.organograma')}</span>
             </div>
             <div className="flex items-center ml-auto">
               <ConfiguredCheck />
@@ -250,7 +250,7 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <ShieldCheck className={`h-4 w-4 mr-2 ${currentStep === "compliance-dashboard" ? "text-primary" : ""}`} />
-              <span>Conformidade FDA/EMA/AVMA</span>
+              <span>{t('admin.sidebar.configuration.complianceDashboard')}</span>
             </div>
             <div className="flex items-center ml-auto">
               <ConfiguredCheck />
@@ -270,7 +270,7 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <FileSearch className={`h-4 w-4 mr-2 ${currentStep === "technical-audits" ? "text-primary" : ""}`} />
-              <span>Auditorias Técnicas</span>
+              <span>{t('admin.sidebar.configuration.technicalAudits')}</span>
             </div>
             <div className="flex items-center ml-auto">
               <ConfiguredCheck />

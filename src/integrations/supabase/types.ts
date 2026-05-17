@@ -83,6 +83,57 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_system_prompts: {
+        Row: {
+          created_at: string
+          default_content: string
+          description: string | null
+          display_name: string
+          family: string
+          function_name: string | null
+          has_override: boolean | null
+          id: string
+          is_active: boolean
+          override_content: string | null
+          prompt_key: string
+          updated_at: string
+          updated_by: string | null
+          variables: Json | null
+        }
+        Insert: {
+          created_at?: string
+          default_content?: string
+          description?: string | null
+          display_name: string
+          family: string
+          function_name?: string | null
+          has_override?: boolean | null
+          id?: string
+          is_active?: boolean
+          override_content?: string | null
+          prompt_key: string
+          updated_at?: string
+          updated_by?: string | null
+          variables?: Json | null
+        }
+        Update: {
+          created_at?: string
+          default_content?: string
+          description?: string | null
+          display_name?: string
+          family?: string
+          function_name?: string | null
+          has_override?: boolean | null
+          id?: string
+          is_active?: boolean
+          override_content?: string | null
+          prompt_key?: string
+          updated_at?: string
+          updated_by?: string | null
+          variables?: Json | null
+        }
+        Relationships: []
+      }
       api_usage_logs: {
         Row: {
           api_provider: string

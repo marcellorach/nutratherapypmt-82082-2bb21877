@@ -49,7 +49,7 @@ export const OrganogramaDiagram: React.FC<Props> = ({ onJumpToCards }) => {
   const { containerRef, innerRef, fit, scale, tx, ty } = useScrollPanZoom<HTMLDivElement>({
     min: 0.05,
     max: 6,
-    fitMin: 0.1,
+    fitMin: 0.2,
   });
 
   useEffect(() => {
@@ -69,8 +69,24 @@ export const OrganogramaDiagram: React.FC<Props> = ({ onJumpToCards }) => {
           setSvg("");
           return;
         }
-        setSvg(rendered);
-        // Aguardar SVG existir e ter layout antes do fit (mantém width/height nativos do Mermaid)
+        // Forçar dimensões intrínsecas reais a partir do viewBox para que getBBox / measureNatural funcionem
+        let normalized = rendered;
+        const vbMatch = rendered.match(/viewBox="([\d.\s-]+)"/);
+        if (vbMatch) {
+          const [, , w, h] = vbMatch[1].split(/\s+/).map(Number);
+          if (w > 0 && h > 0) {
+            // remove style max-width que o Mermaid injeta
+            normalized = normalized
+              .replace(/style="[^"]*max-width:[^"]*"/, '')
+              .replace(/<svg([^>]*?)>/, (m, attrs) => {
+                const cleaned = attrs
+                  .replace(/\swidth="[^"]*"/, '')
+                  .replace(/\sheight="[^"]*"/, '');
+                return `<svg${cleaned} width="${w}" height="${h}">`;
+              });
+          }
+        }
+        setSvg(normalized);
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             fit();

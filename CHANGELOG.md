@@ -23,6 +23,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-17 — Fix diagrama + catálogo de System Prompts + traduções
+<!-- area: admin · status: entregue · i18n: 1.79.0 -->
+- **Diagrama do organograma (fotos 1 e 2):** fix definitivo. Após renderizar, o SVG do Mermaid agora recebe `width`/`height` reais lidos do `viewBox` (antes vinha só `style="max-width:100%"`, colapsando dentro do container `max-content`). `useScrollPanZoom.measureNatural` agora prioriza `viewBox.baseVal` sobre `getBBox` (mais estável antes do layout). `ResizeObserver` também observa o `innerRef` para refazer `fit()` quando o SVG aparece. `fitMin` 0.1 → 0.2 (evita escala microscópica).
+- **Catálogo de System Prompts:** nova tabela `ai_system_prompts` com 24 prompts agrupados em 13 famílias (Clinical Extraction, Study Ingestion, RAG/Embeddings, Recommendation Orchestration, KG Enrichment, KG Governance, KG Gap-Fill, Clinical Reasoning, Translation, External Lookup, Taxonomy, Conversational). Nova aba **System Prompts** dentro de "Prompts da IA" lista catálogo com busca, agrupamento por família, badge "override ativo", editor inline e botão "Restaurar default". RLS admin-only. Conteúdo `default_content` ainda vazio em todos (preenchimento via leitura das edge functions vem em rodadas seguintes).
+- **Traduções (foto 4):** "Organograma", "Conformidade FDA/EMA/AVMA" e "Auditorias Técnicas" estavam hardcoded no `ConfigurationGroup.tsx` — agora usam `t('admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}')`. Chaves espelhadas PT/EN. `I18N_VERSION` 1.78.9 → 1.79.0.
+- **Badge Perplexity (foto 5):** `ConfiguracoesIATab` agora chama `perplexity-health` no mount e marca o card como "Configured" quando o secret do connector (`PERPLEXITY_API_KEY`) está disponível, mesmo se a chave não estiver salva em `ai_configurations`. Descrição vira "via connector" nesse caso.
+- **Próxima rodada (não entregue ainda):** composição nutricional completa (AAFCO) das rações com tabela `pet_food_nutrients` 1:1 com produto; preenchimento dos `default_content` dos 24 system prompts a partir do código das edge functions.
+- Files: src/components/administrador/organograma/OrganogramaDiagram.tsx, src/hooks/useScrollPanZoom.ts, src/components/administrador/sidebar/groups/ConfigurationGroup.tsx, src/components/administrador/ConfiguracoesIATab.tsx, src/components/administrador/PromptConfigurationTab.tsx, src/components/administrador/configuracoes/SystemPromptsCatalog.tsx, src/locales/{pt,en}/translation.json, src/i18n.ts, public.ai_system_prompts (nova tabela + 24 seeds).
+
 ### Changed - 2026-05-17 — Sidebar: reposicionar Triplet Quality + catálogo Mars
 <!-- area: admin · status: entregue · i18n: 1.78.9 -->
 - Sidebar "Base de Conhecimento": item **Triplet Quality** movido para entre **Triplet Curation** e **Evidence Conflicts** (antes ficava isolado no fim do grupo). Apenas reordenação visual; rota, ícone e tradução inalterados.

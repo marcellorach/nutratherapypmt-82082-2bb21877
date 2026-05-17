@@ -7,10 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Brain, Plus, Trash2, Edit2, Save, X, Wand2, Layers } from "lucide-react";
+import { Brain, Plus, Trash2, Edit2, Save, X, Wand2, Layers, Layers3 } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import ExtractionPromptsEditor from './configuracoes/ExtractionPromptsEditor';
+import SystemPromptsCatalog from './configuracoes/SystemPromptsCatalog';
 
 interface Prompt {
   id: string;
@@ -230,7 +231,7 @@ const PromptConfigurationTab: React.FC = () => {
 
   return (
     <Tabs defaultValue="recomendacoes" className="w-full">
-      <TabsList className="grid w-full grid-cols-2 mb-6">
+      <TabsList className="grid w-full grid-cols-3 mb-6">
         <TabsTrigger value="recomendacoes" className="flex items-center gap-2">
           <Brain className="h-4 w-4" />
           {t('admin.prompts.recommendationTab')}
@@ -238,6 +239,10 @@ const PromptConfigurationTab: React.FC = () => {
         <TabsTrigger value="extracao" className="flex items-center gap-2">
           <Layers className="h-4 w-4" />
           {t('admin.prompts.extractionTab')}
+        </TabsTrigger>
+        <TabsTrigger value="system" className="flex items-center gap-2">
+          <Layers3 className="h-4 w-4" />
+          System Prompts
         </TabsTrigger>
       </TabsList>
 
@@ -394,6 +399,10 @@ const PromptConfigurationTab: React.FC = () => {
 
       <TabsContent value="extracao">
         <ExtractionPromptsEditor />
+      </TabsContent>
+
+      <TabsContent value="system">
+        <SystemPromptsCatalog />
       </TabsContent>
     </Tabs>
   );
