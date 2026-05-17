@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Plus, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Loader2, ExternalLink, Dna } from 'lucide-react';
 import { toast } from 'sonner';
 import PredispositionTag from '@/components/administrador/tags/PredispositionTag';
 
@@ -25,6 +25,9 @@ const BreedPredispositionsPanel: React.FC<Props> = ({ breedId, breedName }) => {
   const [selectedCondition, setSelectedCondition] = useState('');
   const [riskFactor, setRiskFactor] = useState('1.5');
   const [evidenceGrade, setEvidenceGrade] = useState('moderate');
+
+  const { i18n } = useTranslation();
+  const isEn = i18n.language?.startsWith('en');
 
   const { data: predispositions, isLoading } = useQuery({
     queryKey: ['breed-predispositions', breedId],
