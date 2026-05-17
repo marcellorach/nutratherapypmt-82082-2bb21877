@@ -2079,7 +2079,10 @@
         "translationAudit": "Translation Audit",
         "translationManager": "Manage Translations",
         "designConventions": "Design Conventions",
-        "accessRequests": "Access Requests"
+        "accessRequests": "Access Requests",
+        "organograma": "Organogram",
+        "complianceDashboard": "FDA/EMA/AVMA Compliance",
+        "technicalAudits": "Technical Audits"
       },
       "settingsButton": "Settings"
     },
