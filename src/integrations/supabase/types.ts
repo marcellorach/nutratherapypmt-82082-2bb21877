@@ -477,9 +477,14 @@ export type Database = {
           condition_id: string
           created_at: string | null
           evidence_grade: string
+          genetic_profile: string | null
+          genetic_profile_en: string | null
           id: string
+          inheritance_pattern: string | null
           notes: string | null
+          prevalence_pct: number | null
           risk_factor: number
+          sources: Json
           supporting_study_ids: string[] | null
           updated_at: string | null
         }
@@ -488,9 +493,14 @@ export type Database = {
           condition_id: string
           created_at?: string | null
           evidence_grade: string
+          genetic_profile?: string | null
+          genetic_profile_en?: string | null
           id?: string
+          inheritance_pattern?: string | null
           notes?: string | null
+          prevalence_pct?: number | null
           risk_factor: number
+          sources?: Json
           supporting_study_ids?: string[] | null
           updated_at?: string | null
         }
@@ -499,9 +509,14 @@ export type Database = {
           condition_id?: string
           created_at?: string | null
           evidence_grade?: string
+          genetic_profile?: string | null
+          genetic_profile_en?: string | null
           id?: string
+          inheritance_pattern?: string | null
           notes?: string | null
+          prevalence_pct?: number | null
           risk_factor?: number
+          sources?: Json
           supporting_study_ids?: string[] | null
           updated_at?: string | null
         }
@@ -1284,6 +1299,7 @@ export type Database = {
           ontology_mapping_source: string | null
           severity_level: string | null
           snomed_code: string | null
+          sources: Json
           umls_cui: string | null
           updated_at: string | null
         }
@@ -1301,6 +1317,7 @@ export type Database = {
           ontology_mapping_source?: string | null
           severity_level?: string | null
           snomed_code?: string | null
+          sources?: Json
           umls_cui?: string | null
           updated_at?: string | null
         }
@@ -1318,6 +1335,7 @@ export type Database = {
           ontology_mapping_source?: string | null
           severity_level?: string | null
           snomed_code?: string | null
+          sources?: Json
           umls_cui?: string | null
           updated_at?: string | null
         }

@@ -1679,7 +1679,9 @@
     "registeredNutraceuticals": "Registered Nutraceuticals",
     "scientificStudies": "Scientific Studies",
     "treatableConditions": "Treatable Conditions",
-    "underConstruction": "Under Construction"
+    "underConstruction": "Under Construction",
+    "subtitleDynamic": "Evidence-based geroprotective therapy platform with {{conditions}} catalogued clinical conditions, {{nutraceuticals}} nutraceuticals and {{breeds}} breeds covered — powering AI-driven personalized recommendations from peer-reviewed literature.",
+    "subtitleExpansionNote": "Catalogue continuously expanding — new conditions, breeds and compounds added weekly."
   },
   "auth": {
     "login": "Login",
@@ -2086,6 +2088,20 @@
         "condition": "Health Condition",
         "selectCondition": "Select a condition",
         "evidenceGrade": "Evidence Grade"
+      },
+      "geneticProfile": "Genetic profile",
+      "inheritancePattern": "Inheritance pattern",
+      "prevalence": "Prevalence",
+      "sources": "Sources",
+      "noSources": "No sources on file",
+      "inheritance": {
+        "autosomal_recessive": "Autosomal recessive",
+        "autosomal_dominant": "Autosomal dominant",
+        "x_linked_recessive": "X-linked (recessive)",
+        "x_linked_dominant": "X-linked (dominant)",
+        "polygenic": "Polygenic",
+        "mitochondrial": "Mitochondrial",
+        "unknown": "Unknown"
       }
     },
     "labReferences": {
@@ -2779,6 +2795,10 @@
         "empty": "No interactions registered yet.",
         "emptyHint": "Phase 2 will include drug↔drug, drug↔nutraceutical and drug↔condition interactions with real-time alerts in the pet form."
       }
+    },
+    "conditions": {
+      "sources": "Scientific sources",
+      "openSource": "Open source"
     }
   },
   "footer": {

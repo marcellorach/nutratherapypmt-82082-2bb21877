@@ -8,11 +8,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTranslation } from 'react-i18next';
 import LandingContent from '@/components/landing/LandingContent';
+import { usePlatformCounts } from '@/hooks/usePlatformCounts';
 
 const Index: React.FC = () => {
   const { t } = useTranslation();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { data: counts } = usePlatformCounts();
 
   // Plataforma em modo privado: força autenticação inclusive na home.
   if (loading) {
@@ -33,7 +35,15 @@ const Index: React.FC = () => {
         <div className="text-center max-w-4xl mx-auto mb-12">
           <h1 className="text-5xl font-bold mb-4">{t('home.title')}</h1>
           <p className="text-xl text-gray-700 mb-6">
-            {t('home.subtitle')}
+            {t('home.subtitleDynamic', {
+              studies: counts?.studies ?? '—',
+              nutraceuticals: counts?.nutraceuticals ?? '—',
+              conditions: counts?.conditions ?? '—',
+              breeds: counts?.breeds ?? '—',
+            })}
+          </p>
+          <p className="text-sm text-gray-500 italic">
+            {t('home.subtitleExpansionNote')}
           </p>
         </div>
         
