@@ -1,118 +1,111 @@
-## Respostas às suas dúvidas
 
-### 1) `triplet-curation` — Curadoria de Triplets
-**Confirmado:** É exatamente o que você lembra — o board Kanban (`pending → reviewing → approved → rejected`) que mostra todos os triplets extraídos pelo pipeline, com filtros e enriquecimento. Hoje está **órfã do sidebar** (acessível só via URL).
+## a) Revisão completa da sidebar do admin
 
-→ **Recomendação:** RESTAURAR no sidebar dentro de **Knowledge Base**, logo abaixo de "Estudos Científicos", como **"Curadoria de Triplets"** (com badge amarelo "Em curadoria ativa"). É um hub operacional importante e diferente da curadoria inline no `EstudoDetailDialog` (aquela é por estudo; esta é a fila global cross-study).
+Auditei `src/config/admin-tabs.ts` (38 tabs registradas) vs. os 5 grupos (`KnowledgeBaseGroup`, `DataProcessingGroup`, `ActionsGroup`, `ResearchGroup`, `ConfigurationGroup`).
 
-### 2) `evidence-conflicts` — Conflitos de Evidência
-**Tem função, sim.** É o `ConflictReviewPanel` — detecta e permite resolver conflitos entre claims de estudos diferentes (ex.: Estudo A diz "curcumina reduz CRP", Estudo B diz "sem efeito"). Usa o hook `useEvidenceConflicts` + `useConflictDetection`. Faz parte do governance do KG.
+**Achados:**
 
-→ **Recomendação:** MANTER e adicionar ao sidebar em **Knowledge Base**, agrupado conceitualmente com Curadoria de Triplets (ambos são "curadoria/qualidade do KG").
+1. **Duplicatas (mesmo ID em 2 grupos visíveis):**
+   - `custo-beneficio` (Análise de ROI) — aparece em Ações **e** em Análise Preditiva. Manter só em Análise Preditiva.
+   - `modelos` (Modelos Preditivos) — aparece em Pesquisa **e** em Análise Preditiva. Manter só em Análise Preditiva.
+   - `knowledge-base-settings` (Configurações da KB) — aparece em Knowledge Base **e** em Configuração. Manter só em Knowledge Base.
 
-### 3) `pet-food-catalog` — Catálogo de Rações
-**Concordo:** referências nutricionais são insumo direto do pipeline clínico (gap nutricional vs. necessidade ideal). Faz parte do conhecimento base.
+2. **Itens que ficaram sem rota válida** (referenciados na sidebar mas com tab inexistente em `admin-tabs.ts`):
+   - nenhum encontrado — todos os itens da sidebar resolvem corretamente após a última rodada.
 
-→ **Recomendação:** Adicionar ao sidebar em **Knowledge Base**, próximo a "Referências Laboratoriais" (ambos são "dados de referência externos"). Nome sugerido: **"Catálogo de Rações"**.
+3. **Tabs registradas mas sem entrada na sidebar (órfãs reais):**
+   - `prompts` (AI Prompts) — funcional, importante para administrar prompts de IA. **Adicionar em Configuração.**
+   - `database-migrations` (importada em `LazyComponents` mas não registrada) — verificar e remover import se não usada.
+   - Demais órfãs já foram restauradas na rodada anterior.
 
-### 4) Foto 3 (Gestão de Campanhas + MicrobiomeAnalysisTab)
-Conforme pedido: **remover** do projeto.
+4. **Itens potencialmente sem sentido / a confirmar com você:**
+   - **`actions` (Ações em lote)** — grupo "Ações" tem só esse item; conteúdo é genérico. Sugiro **fundir dentro de Processamento de Dados** e eliminar o grupo "Ações" inteiro.
+   - **`analytics`** em Configuração — métricas básicas; pode permanecer.
+   - **`design-conventions`** — útil só p/ devs; manter em Configuração.
 
----
+5. **Verificação automatizada:** rodar um script que cruza `adminTabsConfig[].id` × IDs usados nos 5 grupos da sidebar e imprime os deltas, para garantir que nada quebrou.
 
-## Reorganização proposta dos demais órfãos (foto 2)
+## b) As alterações da sidebar refletem no Organograma da foto 1?
 
-Agrupando por afinidade funcional:
+**Não automaticamente.** São duas fontes diferentes:
 
-### Grupo A — Mover para **Knowledge Base** (curadoria/qualidade)
-| Tab órfã | Nome no sidebar | Posição sugerida |
-|---|---|---|
-| `triplet-curation` | Curadoria de Triplets | após "Estudos Científicos" |
-| `evidence-conflicts` | Conflitos de Evidência | após "Curadoria de Triplets" |
-| `dosage-curation` | Curadoria de Doses | após "Base Farmacológica" |
-| `pet-food-catalog` | Catálogo de Rações | após "Referências Laboratoriais" |
-| `triplet-quality` | Qualidade de Triplets | grupo "Diagnósticos do KG" (ver abaixo) |
-| `gapfill-diagnostics` | Diagnóstico Gap-Fill | grupo "Diagnósticos do KG" |
-| `ontology-mapping` | Mapeamento SNOMED/UMLS | após "Auditoria de Ontologia" |
+- **Sidebar do admin** vem de `src/config/admin-tabs.ts` + `src/components/administrador/sidebar/groups/*`.
+- **Organograma (fotos 1–4)** vem de `src/data/projectOrganograma.ts` — arquivo **manual** (memória `mem://architecture/organograma-source-of-truth`).
 
-### Grupo B — Mover para **Configuration** (governance/sistema)
-| Tab órfã | Nome no sidebar | Posição sugerida |
-|---|---|---|
-| `translation-manager` | Gerenciar Traduções | logo após "Translation Audit" (são complementares) |
-| `design-conventions` | Convenções de Design | após "Organograma" |
-| `access-requests` | Solicitações de Acesso | seção "Administração de Usuários" |
-| `analytics` | Analytics da Plataforma | seção "Métricas" |
+→ Quando adicionamos/removemos tabs, preciso **também** atualizar `projectOrganograma.ts` manualmente. Vou sincronizar nesta rodada (adicionar `prompts`, remover itens deletados, refletir as fusões).
 
-### Grupo C — REMOVER (substituídas/redundantes)
-| Tab | Por que remover |
-|---|---|
-| `fontes` (Data Processing) | Funcionalidade substituída por "Estudos Científicos" + "Base Knowledge" |
-| `analysis` (Data Processing) | Step legado do wizard antigo de ingestão; substituído pelo pipeline atual em `EstudosTab` |
+## c) Diagrama (fotos 2 e 3) — pequeno e descentralizado
 
-### Grupo D — Excluídos por sua decisão
-- `acompanhamento` (Gestão de Campanhas) — remover tab + import
-- `MicrobiomeAnalysisTab` — remover import órfão em `admin-tabs.ts`
+Arquivo: `src/components/administrador/organograma/OrganogramaDiagram.tsx`.
 
----
+Problema: o `fit()` do `useScrollPanZoom` está sendo chamado em `requestAnimationFrame` antes do SVG ter dimensões medidas → resultado fica num canto, escala mínima (`0.05`).
 
-## Estrutura final do Knowledge Base (depois da reorganização)
+**Correções:**
+- Aguardar via `ResizeObserver` no `innerRef` antes do `fit()`.
+- Aumentar `fitMin` para `0.3` (era `0.05`) para não centralizar num zoom invisível.
+- Forçar refit ao trocar orientação Vertical/Horizontal.
+- Adicionar controles `+ / − / Reset` para o usuário ajustar manualmente.
+- Garantir `min-height` maior do container.
 
-```
-Knowledge Base
-├── 📚 Estudos Científicos              ✓ verde
-├── 🧩 Curadoria de Triplets            ⏳ amarelo (NOVO no sidebar)
-├── ⚠️  Conflitos de Evidência          ⏳ amarelo (NOVO no sidebar)
-├── 💊 Nutracêuticos                    ✓ verde
-├── 🎯 Alvos Veterinários               ✓ verde
-├── 🕸  Knowledge Graph                 ✓ verde
-├── 🗺  Auditoria de Ontologia          ✓ verde
-├── 🔬 Mapeamento SNOMED/UMLS           ⏳ amarelo (NOVO)
-├── 🐾 Raças & Predisposições           ✓ verde
-├── 🧪 Referências Laboratoriais        ⏳ amarelo
-├── 🍖 Catálogo de Rações               ⏳ amarelo (NOVO)
-├── 🗃  Dados Base                      —
-├── 💊 Base Farmacológica               ⏳ amarelo
-├── ⚖️  Curadoria de Doses              ⏳ amarelo (NOVO)
-├── 🔗 Relações                         ✓ verde
-├── ✨ A.I. Insights                    —
-├── ── Diagnósticos do KG ──
-│   ├── 📊 Qualidade de Triplets        (NOVO)
-│   └── 🩺 Diagnóstico Gap-Fill         (NOVO)
-└── ⚙️  Configurações                   —
-```
+## d) Grafo (foto 4) — muito embolado
 
-## Estrutura final do Configuration
+Arquivo: `src/components/administrador/organograma/OrganogramaForceGraph.tsx`.
 
-```
-Configuration
-├── ⚙️  Configurações IA
-├── 🤖 AI Prompts
-├── ✅ Ações (em lote)
-├── ── Traduções ──
-│   ├── 🌐 Translation Audit
-│   └── 📝 Gerenciar Traduções          (NOVO)
-├── 📊 Analytics                        (NOVO)
-├── 🎨 Convenções de Design             (NOVO)
-├── 🗂  Organograma do Projeto
-├── 🛡  Conformidade Regulatória
-├── 📋 Auditorias Técnicas
-└── 🔐 Solicitações de Acesso           (NOVO)
-```
+Problema: a `ForceGraph2D` está com parâmetros padrão → forças fracas, nós colados.
+
+**Correções:**
+- Configurar `d3Force`: aumentar repulsão (`charge` ≈ `-300` p/ áreas, `-80` p/ folhas), `linkDistance` maior (≈ `60` para `tree`, `120` para `cross`).
+- `cooldownTicks` maior (`300`) e `d3VelocityDecay` menor (`0.25`) para o layout assentar mais espalhado.
+- `nodeRelSize` maior nas áreas; folhas com `collisionRadius` para não sobrepor labels.
+- Chamar `zoomToFit(400, 80)` após estabilização.
+
+## e) Foto 5 — página "Mapeamento SNOMED-CT / UMLS"
+
+**O que é:** ferramenta interna de governança para mapear cada **condição de saúde** e **nutracêutico** do nosso banco a códigos padronizados internacionais:
+- **SNOMED-CT VetSCT** → vocabulário clínico veterinário oficial.
+- **UMLS (CUI)** → metatesauro biomédico que unifica vários vocabulários (MeSH, ICD, etc.).
+
+**Para que serve:**
+- Padronizar nomenclatura (evita duplicatas tipo "Demodicose" × "Dermatite por Demodicose").
+- Permitir interoperabilidade futura (publicar dados, integrar com PubMed, comparar com literatura).
+- Habilita o pipeline de Gap-Fill (foto 6) a buscar literatura por CUI em vez de string fuzzy.
+
+**Precisa da API key da UMLS?**
+- **Para auto-mapeamento em lote (botão "Auto-map") → sim**, precisa cadastrar a API key da UMLS (gratuita em https://uts.nlm.nih.gov/uts/signup-login).
+- **Para mapear manualmente** (editar SNOMED/UMLS de cada entidade) → não precisa.
+- Decisão sugerida: **adiar a UMLS API** até começarmos a publicar / integrar com PubMed em escala. Por ora deixar o badge "UMLS API: Não Configurada" e usar mapeamento manual conforme as condições mais críticas.
+
+## f) Foto 6 — página "Diagnóstico do Gap-Fill KG"
+
+**O que é:** painel de inspeção do pipeline de **KG Evidence Gap-Fill** (memória `mem://architecture/kg-evidence-gap-fill-pipeline`).
+
+**Função:** quando o Digital Twin de um pet mostra baixo `years_gained` (poucos triplets cobrem o cruzamento composto×condição), o sistema chama PubMed E-utilities + Gemini para gerar triplets pendentes e preencher o vácuo.
+
+**O painel mostra:**
+- Quantas condições/nutracêuticos/condições de pets/triplets gap-fill existem.
+- Quais **pet conditions estão "sem condition_id"** (badge vermelho `16 sem condition_id`) → essas não conseguem ser pesquisadas no PubMed porque não estão canonicalizadas.
+- Tabela com cada entidade e se tem `name_en` (necessário para query no PubMed).
+- Triplets gap-fill pendentes vs aprovados.
+
+**Utilidade prática:** é a "tela de controle de qualidade" antes de rodar gap-fill — você vê o que está faltando ser canonicalizado/traduzido para que o pipeline funcione.
+
+→ **Manter** a tab (é importante), mas adicionar um header explicativo de 2 linhas em cima do título dizendo exatamente isso, para você (e qualquer admin futuro) entender de cara o que faz.
 
 ---
 
-## Resumo do que será feito (após sua aprovação)
+## Plano de execução
 
-1. **Adicionar 9 links** novos ao sidebar (7 em Knowledge Base, 4 em Configuration — alguns sobrepõem).
-2. **Remover 4 tabs** de `admin-tabs.ts` + imports: `acompanhamento`, `fontes`, `analysis`, `MicrobiomeAnalysisTab` (import morto).
-3. **Adicionar chaves i18n** PT/EN para todos os novos labels e tooltips de status.
-4. **Bump** `I18N_VERSION` → `1.78.8`.
-5. **CHANGELOG.md** entrada em `[Unreleased]` (area: `admin-sidebar`, status: `done`, i18n: `pt+en`) e rodar `npm run sync:changelog`.
+1. Rodar script de auditoria sidebar × `admin-tabs.ts` × `projectOrganograma.ts` e imprimir o diff.
+2. Aplicar correções da seção (a): remover duplicatas, adicionar `prompts` na Configuração, fundir/eliminar grupo "Ações" (após confirmação).
+3. Sincronizar `projectOrganograma.ts` com a nova estrutura da sidebar (resposta a (b)).
+4. Corrigir `OrganogramaDiagram.tsx` (fit/centralização — c).
+5. Corrigir `OrganogramaForceGraph.tsx` (d3Force / espalhamento — d).
+6. Adicionar header explicativo no topo de `GapFillDiagnosticsTab` (f).
+7. Adicionar nota inline na `OntologyMappingTab` explicando quando a UMLS API é/não é necessária (e).
+8. i18n PT/EN para todos os textos novos, bump `I18N_VERSION`, entrada no `CHANGELOG.md` e `npm run sync:changelog`.
 
-## Pontos que ainda precisam da sua decisão antes de eu implementar
+## Confirmações que preciso antes de implementar
 
-a) **`triplet-curation`** — confirma que quer RESTAURAR no sidebar (a memória do projeto diz que foi substituída pela curadoria inline; o board Kanban global ainda faz sentido pra fila cross-study)?
-b) **`fontes` e `analysis`** — confirma REMOVER? (verifiquei: são steps do wizard antigo; nenhum outro componente os referencia além do roteador de tabs)
-c) Algum nome do sidebar que prefere diferente do que sugeri?
-
-Aguardo seu OK (ou ajustes) para passar para a implementação.
+1. **Grupo "Ações"** (que hoje só tem 1 item, "Ações em lote") — posso **eliminar o grupo e mover o item para Processamento de Dados**? Ou manter como está?
+2. **`prompts` (AI Prompts)** — confirmo que entra em **Configuração** (atualmente é órfão mas funcional)?
+3. **UMLS API** — confirma que por ora **NÃO** vamos configurar a API key (mapeamento só manual)?
