@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-05-15T15:35:57.896Z",
+  "timestamp": "2026-05-17T13:20:13.231Z",
   "summary": {
-    "totalFiles": 864,
+    "totalFiles": 866,
     "totalIssues": 415,
-    "hardcodedTexts": 41,
+    "hardcodedTexts": 40,
     "missingKeys": 374,
-    "incompleteTranslations": 0
+    "incompleteTranslations": 1
   },
   "issues": [
     {
@@ -2265,7 +2265,7 @@
     {
       "type": "missing-key",
       "file": "src/components/layout/Header.tsx",
-      "line": 76,
+      "line": 79,
       "text": " ",
       "severity": "high"
     },
@@ -2627,6 +2627,13 @@
       "severity": "high"
     },
     {
+      "type": "incomplete-translation",
+      "file": "src/locales/en/translation.json",
+      "line": 0,
+      "text": "Missing EN translation for: landing.partnership.inDevelopment",
+      "severity": "high"
+    },
+    {
       "type": "hardcoded",
       "file": "src/components/administrador/AIInsightsTab.tsx",
       "line": 74,
@@ -2862,13 +2869,6 @@
       "file": "src/components/landing/InvestmentSection.tsx",
       "line": 159,
       "text": "Contact Marcello Rachlyn",
-      "severity": "medium"
-    },
-    {
-      "type": "hardcoded",
-      "file": "src/components/layout/Footer.tsx",
-      "line": 32,
-      "text": "Google Cloud",
       "severity": "medium"
     },
     {
