@@ -9,9 +9,9 @@ const Footer: React.FC = () => {
       <div className="container mx-auto px-4 py-6 max-w-full overflow-x-hidden">
         {/* Copyright e slogan */}
         <div className="text-center mb-4 space-y-1">
-          <div className="text-xs text-gray-500">{t('footer.copyright')}</div>
-          <div className="text-sm font-semibold text-gray-800">{t('footer.sloganLine1')}</div>
-          
+          <div className="text-xs text-gray-500">{t('footer.copyrightFull')}</div>
+          <div className="text-[11px] text-gray-500 italic">{t('footer.petMoreTimeTagline')}</div>
+          <div className="text-sm font-semibold text-gray-800 pt-1">{t('footer.sloganLine1')}</div>
         </div>
         
         {/* Seção Powered by com logos */}
