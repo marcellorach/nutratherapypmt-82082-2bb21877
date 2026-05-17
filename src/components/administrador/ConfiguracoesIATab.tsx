@@ -24,6 +24,7 @@ const ConfiguracoesIATab: React.FC = () => {
   const [unstructuredKey, setUnstructuredKey] = useState<string>("");
   const [googleGeminiKey, setGoogleGeminiKey] = useState<string>("");
   const [perplexityKey, setPerplexityKey] = useState<string>("");
+  const [perplexitySecretAvailable, setPerplexitySecretAvailable] = useState<boolean>(false);
   const [neo4jUri, setNeo4jUri] = useState<string>("");
   const [neo4jUsername, setNeo4jUsername] = useState<string>("");
   const [neo4jPassword, setNeo4jPassword] = useState<string>("");
@@ -75,6 +76,18 @@ const ConfiguracoesIATab: React.FC = () => {
 
   useEffect(() => {
     fetchKeys();
+  }, []);
+
+  // Check if Perplexity is configured via connector secret (PERPLEXITY_API_KEY)
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await supabase.functions.invoke('perplexity-health', { body: {} });
+        if (data?.configured) setPerplexitySecretAvailable(true);
+      } catch {
+        // ignore – fallback to DB key
+      }
+    })();
   }, []);
 
   const saveConfigToSupabase = async (key: string, value: string) => {
