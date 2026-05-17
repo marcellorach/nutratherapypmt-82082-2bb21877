@@ -14,30 +14,6 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const SYSTEM = `Você é um especialista em nutrição animal. Dado o nome de uma marca e produto de ração para pets,
-retorne SOMENTE JSON válido com a composição garantida e classificação. Use dados públicos do fabricante quando conhecidos.
-Se não souber um campo, use null. Marque "confidence" 0..1 indicando certeza geral.
-Schema:
-{
-  "species": "dog"|"cat"|"both",
-  "life_stage": "puppy"|"adult"|"senior"|"all"|null,
-  "size_target": "small"|"medium"|"large"|"giant"|"all"|null,
-  "food_form": "dry_kibble"|"wet"|"semi_moist"|"raw"|"freeze_dried"|null,
-  "is_prescription": boolean,
-  "prescription_indication": string[]|null,
-  "line": string|null,
-  "nutrition": {
-    "protein_pct": number|null, "fat_pct": number|null, "fiber_pct": number|null,
-    "moisture_pct": number|null, "ash_pct": number|null,
-    "kcal_per_kg": number|null,
-    "calcium_pct": number|null, "phosphorus_pct": number|null,
-    "omega3_pct": number|null, "omega6_pct": number|null,
-    "primary_protein_source": string|null,
-    "is_grain_free": boolean|null
-  },
-  "confidence": number,
-  "notes": string|null
-}`;
-const SYSTEM = `Você é um especialista em nutrição animal. Dado o nome de uma marca e produto de ração para pets,
 retorne SOMENTE JSON válido com a composição garantida COMPLETA (AAFCO/FEDIAF) e classificação.
 Use dados públicos do fabricante (rótulo, site oficial) quando conhecidos. Se não souber um campo, use null.
 Marque "confidence" 0..1 indicando certeza geral. NUNCA invente valores — prefira null.
