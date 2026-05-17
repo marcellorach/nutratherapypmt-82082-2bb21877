@@ -7530,6 +7530,8 @@
   "ontologyMapping": {
     "title": "Mapeamento SNOMED-CT / UMLS",
     "description": "Mapeie entidades para nomenclatura padronizada com rastreabilidade completa",
+    "explainerTitle": "O que é esta página?",
+    "explainerBody": "Aqui você associa cada condição de saúde e nutracêutico do nosso banco a códigos padronizados internacionais (SNOMED-CT veterinário e UMLS). Isso evita duplicatas, padroniza nomenclatura e permite que o pipeline de Gap-Fill busque literatura no PubMed por código (CUI) em vez de texto livre. Para mapear manualmente NÃO é necessária a API key da UMLS — ela só é obrigatória se você quiser usar o botão Auto-map em lote.",
     "searchPlaceholder": "Buscar entidade por nome...",
     "noEntities": "Nenhuma entidade encontrada",
     "noResults": "Nenhum resultado encontrado",
