@@ -2018,7 +2018,23 @@
         "baseKnowledge": "Dados Base",
         "pharmacology": "Base Farmacológica",
         "pharmacologyStatus": "Em desenvolvimento",
-        "pharmacologyStatusTooltip": "Base farmacológica em construção. Interações medicamentosas e posologias pendentes."
+        "pharmacologyStatusTooltip": "Base farmacológica em construção. Interações medicamentosas e posologias pendentes.",
+        "tripletCurationStatus": "Curadoria ativa",
+        "tripletCurationStatusTooltip": "Board Kanban global (cross-study) para revisar e aprovar triplets extraídos pelo pipeline.",
+        "evidenceConflicts": "Conflitos de Evidência",
+        "evidenceConflictsStatus": "Em uso",
+        "evidenceConflictsStatusTooltip": "Detecção e resolução de conflitos entre claims de estudos diferentes.",
+        "ontologyMapping": "Mapeamento SNOMED/UMLS",
+        "ontologyMappingStatus": "Em curadoria",
+        "ontologyMappingStatusTooltip": "Mapeamento de entidades do KG para padrões SNOMED-CT e UMLS, com auditoria manual.",
+        "petFoodCatalog": "Catálogo de Rações",
+        "petFoodCatalogStatus": "Em curadoria",
+        "petFoodCatalogStatusTooltip": "Banco de marcas, produtos e perfil nutricional usado pelo pipeline de gap nutricional.",
+        "dosageCuration": "Curadoria de Doses",
+        "dosageCurationStatus": "Em curadoria",
+        "dosageCurationStatusTooltip": "Revisão e aprovação de doses extraídas da web ou estimadas por IA.",
+        "tripletQuality": "Qualidade de Triplets",
+        "gapfillDiagnostics": "Diagnóstico Gap-Fill"
       },
       "dataProcessing": {
         "title": "Processamento de Dados",
@@ -2060,7 +2076,10 @@
         "knowledgeBase": "Base de Conhecimento",
         "aiConfig": "Config. de IA",
         "aiPrompts": "Prompts da IA",
-        "translationAudit": "Auditoria de Traduções"
+        "translationAudit": "Auditoria de Traduções",
+        "translationManager": "Gerenciar Traduções",
+        "designConventions": "Convenções de Design",
+        "accessRequests": "Solicitações de Acesso"
       },
       "settingsButton": "Configurações"
     },

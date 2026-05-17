@@ -28,11 +28,8 @@ const KnowledgeBaseSettingsTab = lazy(() => import('@/components/administrador/s
 // Outros componentes
 const RegrasClinicasTab = lazy(() => import('@/components/administrador/RegrasClinicasTab'));
 const ImportStep = lazy(() => import('@/components/administrador/dataAnalysis/ImportStep'));
-const FontesTab = lazy(() => import('@/components/administrador/FontesTab'));
-const AnalysisStep = lazy(() => import('@/components/administrador/dataAnalysis/AnalysisStep'));
 const VisualizationStep = lazy(() => import('@/components/administrador/dataAnalysis/VisualizationStep'));
 const ActionsStep = lazy(() => import('@/components/administrador/dataAnalysis/ActionsStep'));
-const AcompanhamentoTab = lazy(() => import('@/components/administrador/acompanhamento/AcompanhamentoTab'));
 const ClinicalMonitoringTab = lazy(() => import('@/components/administrador/clinical-monitoring/ClinicalMonitoringTab'));
 const DataProcessingSettingsTab = lazy(() => import('@/components/administrador/settings/DataProcessingSettingsTab'));
 const EstudosPlanejadosTab = lazy(() => import('@/components/administrador/pesquisa/EstudosPlanejadosTab'));
@@ -49,7 +46,6 @@ const ConfiguracoesIATab = lazy(() => import('@/components/administrador/Configu
 const PromptConfigurationTab = lazy(() => import('@/components/administrador/PromptConfigurationTab'));
 const AnalyticsTab = lazy(() => import('@/components/administrador/AnalyticsTab'));
 const DesignConventionsTab = lazy(() => import('@/components/administrador/DesignConventionsTab'));
-const MicrobiomeAnalysisTab = lazy(() => import('@/components/administrador/MicrobiomeAnalysisTab'));
 const DatabaseMigrationsTab = lazy(() => import('@/components/administrador/migrations/DatabaseMigrationsTab'));
 const TranslationAuditTab = lazy(() => import('@/components/administrador/auditoria/TranslationAuditTab'));
 const TranslationManager = lazy(() => import('@/components/administrador/traducoes/TranslationManager'));
@@ -184,20 +180,6 @@ export const adminTabsConfig: AdminTabConfig[] = [
     description: 'Importação de dados'
   },
   {
-    id: 'fontes',
-    label: 'Fontes',
-    group: 'data-processing',
-    component: FontesTab,
-    description: 'Gerenciamento de fontes'
-  },
-  {
-    id: 'analysis',
-    label: 'Análise',
-    group: 'data-processing',
-    component: AnalysisStep,
-    description: 'Análise de dados'
-  },
-  {
     id: 'visualization',
     label: 'Visualização',
     group: 'data-processing',
@@ -210,13 +192,6 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'configuration',
     component: ActionsStep,
     description: 'Ações em lote e processamento'
-  },
-  {
-    id: 'acompanhamento',
-    label: 'Gestão de Campanhas',
-    group: 'data-processing',
-    component: AcompanhamentoTab,
-    description: 'Gestão de campanhas de marketing'
   },
   {
     id: 'clinical-monitoring',
