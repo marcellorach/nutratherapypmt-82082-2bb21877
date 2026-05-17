@@ -1,111 +1,68 @@
+## a) Diagrama do organograma continua vazio/minúsculo (fotos 1 e 2)
 
-## a) Revisão completa da sidebar do admin
+**Diagnóstico:** o fix anterior (reduzir `fitMin` e remover o strip de `width/height`) não bastou. O `useScrollPanZoom.measureNatural()` usa `getBBox()` no `<svg>`, mas o wrapper interno tem `width: max-content; height: max-content` — quando o Mermaid emite o SVG com `style="max-width: 100%"`, o SVG colapsa horizontalmente dentro de um container 0px, `getBBox` retorna área quase nula, e o `fit()` calcula uma escala minúscula (foto 2) ou nula (foto 1, vertical em que o layout é muito alto).
 
-Auditei `src/config/admin-tabs.ts` (38 tabs registradas) vs. os 5 grupos (`KnowledgeBaseGroup`, `DataProcessingGroup`, `ActionsGroup`, `ResearchGroup`, `ConfigurationGroup`).
+**Correção:**
+1. Em `OrganogramaDiagram.tsx`: após injetar o SVG, **forçar via JS** atributos `width`/`height` reais lidos do `viewBox` (`svg.setAttribute('width', vb.width)`, idem height) e remover qualquer `style="max-width:..."` que o Mermaid coloca. Sem alterar viewBox.
+2. Adicionar um `ResizeObserver` também no `innerRef` em `useScrollPanZoom`, para que o `fit()` rode quando o SVG aparecer/redimensionar (não só o container).
+3. Garantir que `measureNatural()` priorize `viewBox.baseVal` antes de `getBBox()` (mais estável quando o SVG ainda não fez layout) — já existe, só inverter ordem.
+4. Aumentar `fitMin` para `0.2` (com dimensões corretas a escala natural já fica acima disso; isso evita o "ponto" minúsculo).
 
-**Achados:**
+## b) Catálogo de rações (foto 3) — carga nutricional completa
 
-1. **Duplicatas (mesmo ID em 2 grupos visíveis):**
-   - `custo-beneficio` (Análise de ROI) — aparece em Ações **e** em Análise Preditiva. Manter só em Análise Preditiva.
-   - `modelos` (Modelos Preditivos) — aparece em Pesquisa **e** em Análise Preditiva. Manter só em Análise Preditiva.
-   - `knowledge-base-settings` (Configurações da KB) — aparece em Knowledge Base **e** em Configuração. Manter só em Knowledge Base.
+Hoje `pet_food_products` só guarda Proteína %, Gordura %, kcal/kg e Ca:P. Para fechar gaps reais (objetivo da plataforma) precisamos da composição **AAFCO completa**.
 
-2. **Itens que ficaram sem rota válida** (referenciados na sidebar mas com tab inexistente em `admin-tabs.ts`):
-   - nenhum encontrado — todos os itens da sidebar resolvem corretamente após a última rodada.
+**Proposta:** criar tabela `pet_food_nutrients` (1:1 com produto) com:
+- Macros: protein, fat, fiber, ash, moisture, carbs, kcal_per_kg
+- Minerais: Ca, P, K, Na, Mg, Cl, Fe, Cu, Zn, Mn, Se, I (mg/kg)
+- Vitaminas: A, D3, E, K, B1, B2, B3, B5, B6, B9, B12, biotina, colina (UI/kg)
+- Ácidos graxos: omega-3 total, EPA, DHA, omega-6, ARA
+- Aminoácidos: lisina, metionina, taurina, triptofano, treonina, arginina
+- Razões: Ca:P, n6:n3
+- `source` (rótulo / fabricante / AAFCO calculado), `confidence` (0–1), `data_filled_at`
 
-3. **Tabs registradas mas sem entrada na sidebar (órfãs reais):**
-   - `prompts` (AI Prompts) — funcional, importante para administrar prompts de IA. **Adicionar em Configuração.**
-   - `database-migrations` (importada em `LazyComponents` mas não registrada) — verificar e remover import se não usada.
-   - Demais órfãs já foram restauradas na rodada anterior.
+A UI da foto 3 ganha um drawer "Ver composição completa" + barra de completude (%) por produto. Edge function `enrich-pet-food-product` é estendida para popular esses campos via Perplexity + página do fabricante.
 
-4. **Itens potencialmente sem sentido / a confirmar com você:**
-   - **`actions` (Ações em lote)** — grupo "Ações" tem só esse item; conteúdo é genérico. Sugiro **fundir dentro de Processamento de Dados** e eliminar o grupo "Ações" inteiro.
-   - **`analytics`** em Configuração — métricas básicas; pode permanecer.
-   - **`design-conventions`** — útil só p/ devs; manter em Configuração.
+## c) Traduções incompletas (foto 4)
 
-5. **Verificação automatizada:** rodar um script que cruza `adminTabsConfig[].id` × IDs usados nos 5 grupos da sidebar e imprime os deltas, para garantir que nada quebrou.
+Auditar `mem://index.md`/i18n: chaves "Organograma", "Conformidade FDA/EMA/AVMA", "Auditorias Técnicas" estão hardcoded nos componentes de sidebar. Vou rodar `npm run audit:translations`, anotar todos os faltantes, mover para `admin.sidebar.*`, espelhar PT/EN e bumpar `I18N_VERSION` para `1.79.0`.
 
-## b) As alterações da sidebar refletem no Organograma da foto 1?
+## d) Chave Perplexity
 
-**Não automaticamente.** São duas fontes diferentes:
+Já está configurada como secret (`PERPLEXITY_API_KEY` presente). O cartão "Not configured" da foto 5 lê do `ai_configurations`, não do secret. Fix: o card de Perplexity deve verificar via `provider-health` (`supabase/functions/perplexity-health`) e marcar como "Configured" quando o ping retornar 200. Sem nova API key necessária.
 
-- **Sidebar do admin** vem de `src/config/admin-tabs.ts` + `src/components/administrador/sidebar/groups/*`.
-- **Organograma (fotos 1–4)** vem de `src/data/projectOrganograma.ts` — arquivo **manual** (memória `mem://architecture/organograma-source-of-truth`).
+## e) Catálogo de prompts incompleto (foto 6)
 
-→ Quando adicionamos/removemos tabs, preciso **também** atualizar `projectOrganograma.ts` manualmente. Vou sincronizar nesta rodada (adicionar `prompts`, remover itens deletados, refletir as fusões).
+Hoje só prompts criados na UI são salvos em `ai_configurations` (`prompt_*`). Todos os **prompts do sistema estão hardcoded** dentro dos edge functions. Mapeei:
 
-## c) Diagrama (fotos 2 e 3) — pequeno e descentralizado
+| Edge function | Família proposta |
+|---|---|
+| `extract-pet-clinical-data` | **Clinical Extraction** |
+| `parse-pet-exam-pdf` | **Clinical Extraction** |
+| `parse-study` / `extract-study-entities` | **Study Ingestion** |
+| `vectorize-study` / `gemini-file-search` | **RAG / Embeddings** |
+| `hybrid-recommendation` | **Recommendation Orchestration** |
+| `enrich-triplet` / `enrich-knowledge-graph` / `backfill-triplet-enrichment` | **KG Enrichment** |
+| `consolidate-knowledge-graph` / `relations-auditor` | **KG Governance** |
+| `kg-evidence-gap-fill` / `kg-missing-triplets` | **KG Gap-Fill (Perplexity)** |
+| `condition-insights` / `project-pet-trajectory` | **Clinical Reasoning** |
+| `translate-text` / `translate-conditions` / `translate-and-categorize-conditions` / `run-translation-audit` | **Translation** |
+| `web-dosage-lookup` / `enrich-pet-food-product` | **External Lookup** |
+| `suggest-taxonomy-terms` / `auto-tag-studies` | **Taxonomy** |
+| `chat` / `ProposalAIChat` | **Conversational** |
 
-Arquivo: `src/components/administrador/organograma/OrganogramaDiagram.tsx`.
+**Proposta:**
+1. Migração: tabela `ai_system_prompts` (id, family, function_name, version, content, variables jsonb, is_override boolean, updated_at, updated_by). RLS: admin-only.
+2. Seed inicial: extrair cada prompt hardcoded → INSERT com `is_override=false` (origem código).
+3. Edge functions passam a chamar helper `getSystemPrompt(functionName)` que lê override ativo se existir, senão usa o hardcoded como fallback (zero downtime).
+4. UI: na aba **Prompts** adicionar uma 3ª aba "System Prompts" agrupada por família, com edição inline, botão "Restaurar default" e badge "Override ativo".
+5. Documentar no organograma (`projectOrganograma.ts` → Configurações) e CHANGELOG.
 
-Problema: o `fit()` do `useScrollPanZoom` está sendo chamado em `requestAnimationFrame` antes do SVG ter dimensões medidas → resultado fica num canto, escala mínima (`0.05`).
+## Ordem de execução sugerida
 
-**Correções:**
-- Aguardar via `ResizeObserver` no `innerRef` antes do `fit()`.
-- Aumentar `fitMin` para `0.3` (era `0.05`) para não centralizar num zoom invisível.
-- Forçar refit ao trocar orientação Vertical/Horizontal.
-- Adicionar controles `+ / − / Reset` para o usuário ajustar manualmente.
-- Garantir `min-height` maior do container.
+1. **Quick fix diagrama (a)** — sem migração, ~10min.
+2. **Traduções (c)** + perplexity status (d) — bumpa `I18N_VERSION`.
+3. **Catálogo de system prompts (e)** — migração + seed + UI (entrega maior).
+4. **Composição nutricional completa (b)** — migração + extensão do enriquecimento.
 
-## d) Grafo (foto 4) — muito embolado
-
-Arquivo: `src/components/administrador/organograma/OrganogramaForceGraph.tsx`.
-
-Problema: a `ForceGraph2D` está com parâmetros padrão → forças fracas, nós colados.
-
-**Correções:**
-- Configurar `d3Force`: aumentar repulsão (`charge` ≈ `-300` p/ áreas, `-80` p/ folhas), `linkDistance` maior (≈ `60` para `tree`, `120` para `cross`).
-- `cooldownTicks` maior (`300`) e `d3VelocityDecay` menor (`0.25`) para o layout assentar mais espalhado.
-- `nodeRelSize` maior nas áreas; folhas com `collisionRadius` para não sobrepor labels.
-- Chamar `zoomToFit(400, 80)` após estabilização.
-
-## e) Foto 5 — página "Mapeamento SNOMED-CT / UMLS"
-
-**O que é:** ferramenta interna de governança para mapear cada **condição de saúde** e **nutracêutico** do nosso banco a códigos padronizados internacionais:
-- **SNOMED-CT VetSCT** → vocabulário clínico veterinário oficial.
-- **UMLS (CUI)** → metatesauro biomédico que unifica vários vocabulários (MeSH, ICD, etc.).
-
-**Para que serve:**
-- Padronizar nomenclatura (evita duplicatas tipo "Demodicose" × "Dermatite por Demodicose").
-- Permitir interoperabilidade futura (publicar dados, integrar com PubMed, comparar com literatura).
-- Habilita o pipeline de Gap-Fill (foto 6) a buscar literatura por CUI em vez de string fuzzy.
-
-**Precisa da API key da UMLS?**
-- **Para auto-mapeamento em lote (botão "Auto-map") → sim**, precisa cadastrar a API key da UMLS (gratuita em https://uts.nlm.nih.gov/uts/signup-login).
-- **Para mapear manualmente** (editar SNOMED/UMLS de cada entidade) → não precisa.
-- Decisão sugerida: **adiar a UMLS API** até começarmos a publicar / integrar com PubMed em escala. Por ora deixar o badge "UMLS API: Não Configurada" e usar mapeamento manual conforme as condições mais críticas.
-
-## f) Foto 6 — página "Diagnóstico do Gap-Fill KG"
-
-**O que é:** painel de inspeção do pipeline de **KG Evidence Gap-Fill** (memória `mem://architecture/kg-evidence-gap-fill-pipeline`).
-
-**Função:** quando o Digital Twin de um pet mostra baixo `years_gained` (poucos triplets cobrem o cruzamento composto×condição), o sistema chama PubMed E-utilities + Gemini para gerar triplets pendentes e preencher o vácuo.
-
-**O painel mostra:**
-- Quantas condições/nutracêuticos/condições de pets/triplets gap-fill existem.
-- Quais **pet conditions estão "sem condition_id"** (badge vermelho `16 sem condition_id`) → essas não conseguem ser pesquisadas no PubMed porque não estão canonicalizadas.
-- Tabela com cada entidade e se tem `name_en` (necessário para query no PubMed).
-- Triplets gap-fill pendentes vs aprovados.
-
-**Utilidade prática:** é a "tela de controle de qualidade" antes de rodar gap-fill — você vê o que está faltando ser canonicalizado/traduzido para que o pipeline funcione.
-
-→ **Manter** a tab (é importante), mas adicionar um header explicativo de 2 linhas em cima do título dizendo exatamente isso, para você (e qualquer admin futuro) entender de cara o que faz.
-
----
-
-## Plano de execução
-
-1. Rodar script de auditoria sidebar × `admin-tabs.ts` × `projectOrganograma.ts` e imprimir o diff.
-2. Aplicar correções da seção (a): remover duplicatas, adicionar `prompts` na Configuração, fundir/eliminar grupo "Ações" (após confirmação).
-3. Sincronizar `projectOrganograma.ts` com a nova estrutura da sidebar (resposta a (b)).
-4. Corrigir `OrganogramaDiagram.tsx` (fit/centralização — c).
-5. Corrigir `OrganogramaForceGraph.tsx` (d3Force / espalhamento — d).
-6. Adicionar header explicativo no topo de `GapFillDiagnosticsTab` (f).
-7. Adicionar nota inline na `OntologyMappingTab` explicando quando a UMLS API é/não é necessária (e).
-8. i18n PT/EN para todos os textos novos, bump `I18N_VERSION`, entrada no `CHANGELOG.md` e `npm run sync:changelog`.
-
-## Confirmações que preciso antes de implementar
-
-1. **Grupo "Ações"** (que hoje só tem 1 item, "Ações em lote") — posso **eliminar o grupo e mover o item para Processamento de Dados**? Ou manter como está?
-2. **`prompts` (AI Prompts)** — confirmo que entra em **Configuração** (atualmente é órfão mas funcional)?
-3. **UMLS API** — confirma que por ora **NÃO** vamos configurar a API key (mapeamento só manual)?
+Posso seguir tudo de uma vez ou faseado. Confirma a ordem (ou diga quais itens cortar) e eu inicio.
