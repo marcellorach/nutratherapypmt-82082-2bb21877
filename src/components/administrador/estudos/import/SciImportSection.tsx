@@ -172,7 +172,7 @@ const SciImportSection: React.FC = () => {
 
           <div className="p-6">
             <TabsContent value="external-search">
-              <SearchExternalStudies onStudyImported={() => handleTabChange('curated-library')} />
+              <SearchExternalStudies inline onStudyImported={() => handleTabChange('curated-library')} />
             </TabsContent>
 
             <TabsContent value="curated-library">
