@@ -41,6 +41,7 @@ interface SearchMeta {
 
 interface SearchExternalStudiesProps {
   onStudyImported?: () => void;
+  inline?: boolean;
 }
 
 const DEFAULT_FILTERS: AdvancedFilters = {
@@ -55,7 +56,7 @@ const DEFAULT_FILTERS: AdvancedFilters = {
   sortBy: 'relevance'
 };
 
-const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyImported }) => {
+const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyImported, inline = false }) => {
   const { t } = useSafeTranslation();
   const { toast } = useToast();
   
@@ -320,6 +321,206 @@ const SearchExternalStudies: React.FC<SearchExternalStudiesProps> = ({ onStudyIm
     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
     return num.toString();
   };
+
+  if (inline) {
+    return (
+      <div className="flex flex-col border rounded-lg overflow-hidden bg-background">
+        {/* Banner — External Search */}
+        <div className="flex-shrink-0 px-4 py-3 border-b bg-blue-50/50 dark:bg-blue-950/20">
+          <div className="flex items-center gap-2">
+            <Database className="h-4 w-4 text-blue-600" />
+            <h3 className="text-base font-semibold">{t('studies.search.searchExternal')}</h3>
+            <Badge variant="outline" className="text-[10px] bg-blue-100 text-blue-700 border-blue-200">
+              PubMed · OpenAlex
+            </Badge>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            {t('studies.search.description')}
+          </p>
+        </div>
+
+        {/* Search Form */}
+        <div className="flex-shrink-0 px-4 py-3 space-y-3 border-b bg-background">
+          <div className="grid gap-2 md:grid-cols-4">
+            <div className="md:col-span-2">
+              <Label htmlFor="query-inline" className="text-xs">{t('studies.search.queryLabel')}</Label>
+              <Input
+                id="query-inline"
+                placeholder={t('studies.search.queryPlaceholder')}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                className="h-8"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">{t('studies.search.sourceLabel')}</Label>
+              <Select value={source} onValueChange={(v: any) => setSource(v)}>
+                <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="both">{t('studies.search.sourceBoth')}</SelectItem>
+                  <SelectItem value="pubmed">PubMed</SelectItem>
+                  <SelectItem value="openalex">OpenAlex</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs">{t('studies.search.maxResultsLabel')}</Label>
+              <Select value={maxResults} onValueChange={setMaxResults}>
+                <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="20">20</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <AdvancedSearchFilters
+            filters={advancedFilters}
+            onFiltersChange={setAdvancedFilters}
+            isOpen={showAdvanced}
+            onOpenChange={setShowAdvanced}
+          />
+
+          <Button onClick={() => handleSearch()} disabled={isSearching} className="w-full gap-2 h-9">
+            {isSearching ? (
+              <><Loader2 className="h-4 w-4 animate-spin" />{t('studies.search.searching')}</>
+            ) : (
+              <><Search className="h-4 w-4" />{t('studies.search.searchButton')}</>
+            )}
+          </Button>
+        </div>
+
+        {/* Spelling Suggestion */}
+        {meta?.spellingSuggestion && (
+          <Alert className="mx-4 mt-3">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="flex items-center gap-2">
+              {t('studies.search.didYouMean')}
+              <Button variant="link" className="p-0 h-auto text-primary" onClick={handleSpellingSuggestion}>
+                {meta.spellingSuggestion}
+              </Button>
+              ?
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Results */}
+        <div className="flex flex-col min-h-0">
+          {results.length > 0 ? (
+            <>
+              <div className="flex items-center justify-between px-4 py-1.5 bg-muted/50 border-b">
+                <span className="text-xs font-medium">
+                  {t('studies.search.showingResults', {
+                    count: results.length,
+                    total: formatNumber(meta?.totalAvailable || results.length)
+                  })}
+                </span>
+                {meta?.totalAvailable && meta.totalAvailable > results.length && (
+                  <span className="text-xs text-muted-foreground">
+                    {t('studies.search.increaseMaxResults')}
+                  </span>
+                )}
+              </div>
+              <div className="px-4 py-3 space-y-3 max-h-[600px] overflow-y-auto">
+                {results.map((study) => (
+                  <Card key={study.id} className="relative bg-card border">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1">
+                          <CardTitle className="text-sm font-medium leading-tight">{study.title}</CardTitle>
+                          <CardDescription className="text-xs mt-1">
+                            {study.authors.slice(0, 3).join(', ')}
+                            {study.authors.length > 3 && ` +${study.authors.length - 3}`}
+                          </CardDescription>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {getSourceBadge(study.source)}
+                          {study.isOpenAccess && (
+                            <Badge variant="outline" className="bg-transparent text-amber-600 border-amber-400 dark:text-amber-400 text-xs">OA</Badge>
+                          )}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2 flex-wrap">
+                        <span>{study.journal}</span>
+                        <span>•</span>
+                        <span>{study.year}</span>
+                        {study.citationCount !== undefined && study.citationCount > 0 && (
+                          <>
+                            <span>•</span>
+                            <span className="flex items-center gap-1"><Quote className="h-3 w-3" />{study.citationCount}</span>
+                          </>
+                        )}
+                        {study.publicationType && (
+                          <>
+                            <span>•</span>
+                            <Badge variant="secondary" className="text-xs px-1 py-0">{study.publicationType}</Badge>
+                          </>
+                        )}
+                      </div>
+                      {study.abstract && (
+                        <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{study.abstract}</p>
+                      )}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {study.pdfUrl ? (
+                          downloadedIds.has(study.id) ? (
+                            <Badge variant="outline" className="bg-transparent text-green-600 border-green-400 gap-1">
+                              <CheckCircle2 className="h-3 w-3" />{t('studies.search.pdfSaved')}
+                            </Badge>
+                          ) : (
+                            <Button size="sm" variant="outline" onClick={() => handleDownloadPdf(study)} disabled={downloadingIds.has(study.id)} className="gap-1 text-green-600 border-green-400 hover:bg-green-50 dark:hover:bg-green-950">
+                              {downloadingIds.has(study.id) ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
+                              PDF
+                            </Button>
+                          )
+                        ) : (
+                          <Button size="sm" variant="outline" disabled className="gap-1 text-muted-foreground">
+                            <Lock className="h-3 w-3" />PDF
+                          </Button>
+                        )}
+                        {importedIds.has(study.id) ? (
+                          <Badge variant="outline" className="bg-transparent text-green-600 border-green-400 gap-1">
+                            <CheckCircle2 className="h-3 w-3" />{t('studies.search.imported')}
+                          </Badge>
+                        ) : (
+                          <Button size="sm" variant="outline" onClick={() => handleImport(study)} disabled={importingIds.has(study.id)} className="gap-1">
+                            {importingIds.has(study.id) ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+                            {t('studies.search.import')}
+                          </Button>
+                        )}
+                        {study.doi && (
+                          <a href={`https://doi.org/${study.doi}`} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
+                            DOI <ExternalLink className="h-3 w-3" />
+                          </a>
+                        )}
+                        {study.url && (
+                          <a href={study.url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
+                            {t('studies.search.viewOriginal')} <ExternalLink className="h-3 w-3" />
+                          </a>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center justify-center text-muted-foreground p-8">
+              <div className="text-center">
+                <Search className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                <p className="text-sm">{t('studies.search.noResultsYet')}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
