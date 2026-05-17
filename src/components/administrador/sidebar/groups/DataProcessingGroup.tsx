@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Import, BarChart3, Settings, ChevronRight, PawPrint, CircleCheck } from "lucide-react";
+import { Import, BarChart3, Settings, ChevronRight, PawPrint, CircleCheck, ArrowRight } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from 'react-i18next';
@@ -71,7 +71,11 @@ const DataProcessingGroup: React.FC<DataProcessingGroupProps> = ({
         >
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
-              <PawPrint className={`h-4 w-4 mr-2 ${currentStep === "pet-management" ? "text-primary" : ""}`} />
+              <span className="flex items-center mr-2">
+                <PawPrint className={`h-4 w-4 ${currentStep === "pet-management" ? "text-primary" : "text-orange-500"}`} />
+                <ArrowRight className={`h-3 w-3 mx-0.5 ${currentStep === "pet-management" ? "text-primary" : "text-muted-foreground"}`} />
+                <PawPrint className={`h-4 w-4 ${currentStep === "pet-management" ? "text-primary" : "text-green-600"}`} />
+              </span>
               <span>{t('admin.sidebar.dataProcessing.petManagement')}</span>
               <TooltipProvider delayDuration={200}>
                 <Tooltip>
