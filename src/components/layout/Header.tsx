@@ -21,11 +21,16 @@ const Header: React.FC = () => {
     <header className="w-full bg-white text-gray-800 p-6 border-b border-gray-200 shadow-sm fixed top-0 left-0 right-0 z-50">
       <div className="container mx-auto flex justify-between items-center">
         <Link to="/" className="flex items-center gap-4">
-          <img 
-            src="/lovable-uploads/7f924bdb-8c9d-4162-b83d-9d001f6ea02c.png" 
-            alt="Senex AI"
-            className="h-6"
-          />
+          <div className="flex flex-col items-center leading-tight">
+            <img
+              src="/lovable-uploads/7f924bdb-8c9d-4162-b83d-9d001f6ea02c.png"
+              alt="Senex AI"
+              className="h-6"
+            />
+            <div className="text-[10px] text-gray-600 font-medium mt-1">
+              {t('footer.petMoreTimeTagline')}
+            </div>
+          </div>
           <div className="flex flex-col leading-tight text-left">
             <div className="text-lg font-bold text-gray-800">
               Senex AI
@@ -38,9 +43,6 @@ const Header: React.FC = () => {
             </div>
             <div className="text-[10px] text-gray-500 font-medium italic mt-0.5">
               {t('header.platformSubtitleLine2')}
-            </div>
-            <div className="text-[10px] text-gray-500 font-medium italic">
-              {t('footer.petMoreTimeTagline')}
             </div>
           </div>
         </Link>
