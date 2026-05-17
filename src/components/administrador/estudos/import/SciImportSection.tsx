@@ -14,6 +14,7 @@ import TabNavigation from './TabNavigation';
 import FileUploadTab from './FileUploadTab';
 import SciSpace2StepImport from './SciSpace2StepImport';
 import StudiesLibraryTab from '../library/StudiesLibraryTab';
+import SearchExternalStudies from '../library/SearchExternalStudies';
 import EstudoCard from '../cards/EstudoCard';
 import EstudoSearch from '../EstudoSearch';
 // AdicionarEstudoDialog removed - no longer needed in sub-tab layout
@@ -23,7 +24,7 @@ import { useStudyApprovalWorkflow } from '@/hooks/useStudyApprovalWorkflow';
 const SCISPACE_LOGO_URL = "/lovable-uploads/1abbfa4b-69b7-42ab-8e69-bf156f88568a.png";
 
 const SciImportSection: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>("external-search");
+  const [activeTab, setActiveTab] = useState<string>("curated-library");
   const { toast } = useToast();
   const { t } = useTranslation();
 
@@ -171,7 +172,7 @@ const SciImportSection: React.FC = () => {
 
           <div className="p-6">
             <TabsContent value="external-search">
-              <StudiesLibraryTab onNavigateToUpload={() => handleTabChange('file-upload')} />
+              <SearchExternalStudies onStudyImported={() => handleTabChange('curated-library')} />
             </TabsContent>
 
             <TabsContent value="curated-library">
