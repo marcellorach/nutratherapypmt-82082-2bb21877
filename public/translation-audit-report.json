@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-05-17T20:59:32.805Z",
+  "timestamp": "2026-05-17T23:19:37.831Z",
   "summary": {
-    "totalFiles": 867,
+    "totalFiles": 868,
     "totalIssues": 415,
     "hardcodedTexts": 40,
     "missingKeys": 374,
@@ -11,7 +11,7 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/OntologyMappingTab.tsx",
-      "line": 63,
+      "line": 65,
       "text": "id, name, name_en, snomed_code, umls_cui, ontology_mapped_at, ontology_mapped_by, ontology_mapping_source",
       "severity": "high"
     },
@@ -2475,7 +2475,7 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2768,
+      "line": 2804,
       "text": "@",
       "severity": "high"
     },
@@ -2650,7 +2650,7 @@
     {
       "type": "hardcoded",
       "file": "src/components/administrador/OntologyMappingTab.tsx",
-      "line": 317,
+      "line": 336,
       "text": "UMLS CUI",
       "severity": "medium"
     },
