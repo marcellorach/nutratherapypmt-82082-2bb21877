@@ -347,21 +347,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
         </SidebarMenuButton>
       </SidebarMenuItem>
 
-      <SidebarMenuItem>
-        <SidebarMenuButton
-          isActive={currentStep === "gapfill-diagnostics"}
-          onClick={() => handleStepClick("gapfill-diagnostics")}
-          className={currentStep === "gapfill-diagnostics" ? "bg-primary/10 text-primary" : ""}
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <Stethoscope className={`h-4 w-4 mr-2 ${currentStep === "gapfill-diagnostics" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.knowledgeBase.gapfillDiagnostics')}</span>
-            </div>
-            {currentStep === "gapfill-diagnostics" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
-          </div>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
+      {/* Diagnóstico Gap-Fill removido do menu principal — acessível via botão "Ver diagnóstico avançado" dentro de Mapeamento SNOMED/UMLS (rota ?tab=gapfill-diagnostics segue funcionando). */}
 
       <SidebarMenuItem>
         <SidebarMenuButton 
