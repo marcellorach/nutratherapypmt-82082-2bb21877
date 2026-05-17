@@ -2011,8 +2011,12 @@
         "settings": "Settings",
         "breedsManagement": "Breeds & Predispositions",
         "labReferences": "Lab References",
+        "labReferencesStatus": "In development",
+        "labReferencesStatusTooltip": "Reference values catalog in progress. Integration with lab parser pending.",
         "baseKnowledge": "Base Data",
-        "pharmacology": "Pharmacology Base"
+        "pharmacology": "Pharmacology Base",
+        "pharmacologyStatus": "In development",
+        "pharmacologyStatusTooltip": "Pharmacological database under construction. Drug interactions and dosages pending."
       },
       "dataProcessing": {
         "title": "Data Processing",
