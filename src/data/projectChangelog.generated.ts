@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-13T12:43:53.614Z
+// Última geração: 2026-05-17T14:55:43.886Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,9 +19,31 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-05-13";
+export const lastChangelogDate = "2026-05-17";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-17",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Catálogo bilíngue de raças e condições com fontes científicas",
+    "bullets": [
+      "Seed bilíngue com +30 condições crônicas/degenerativas caninas (BOAS, mielopatia degenerativa SOD1, EPI, SARDS, hemangiossarcoma, MDR1, etc.) com `sources` JSONB contendo links diretos para OMIA, PubMed, ACVIM, ESCCAP, IRIS e Merck Vet Manual.",
+      "Seed bilíngue com +61 raças (AKC/FCI + Fila Brasileiro) e +76 predisposições enriquecidas com `risk_factor`, `evidence_grade`, `inheritance_pattern`, `prevalence_pct` e até 3 fontes científicas com URL direta por predisposição.",
+      "`BreedPredispositionsPanel` agora renderiza chips de Perfil Genético / Padrão de Herança / Prevalência e lista de fontes clicáveis (`target=\"_blank\"`, ícone ExternalLink) sob cada predisposição.",
+      "`usePlatformCounts` + counters dinâmicos na home (`Index.tsx`) substituíram números fixos por leitura real do banco com sufixo \"em contínua expansão\".",
+      "Documentação: `docs/BREED_PREDISPOSITIONS_AUDIT.md` lista todos os pontos de consumo onde `breed_predispositions` realmente influencia KG, timeline biológica, pipeline clínico e hybrid-recommendation.",
+      "Files: supabase/migrations/20260517144239_*.sql, src/components/administrador/breeds/BreedPredispositionsPanel.tsx, src/hooks/usePlatformCounts.ts, src/pages/Index.tsx, src/i18n.ts, src/locales/{pt,en}/translation.json, docs/BREED_PREDISPOSITIONS_AUDIT.md"
+    ],
+    "files": [
+      "src/components/administrador/breeds/BreedPredispositionsPanel.tsx",
+      "src/hooks/usePlatformCounts.ts",
+      "src/pages/Index.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.77.1"
+  },
   {
     "date": "2026-05-13",
     "kind": "added",

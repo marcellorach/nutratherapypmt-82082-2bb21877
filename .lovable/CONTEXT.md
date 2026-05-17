@@ -1,22 +1,26 @@
 # Project context briefing (auto)
-Generated: 2026-05-13T12:43:53.617Z
+Generated: 2026-05-17T14:55:43.890Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.74.5
+## Latest i18n version: 1.77.1
 
 ## Changes by area (last 14 days)
-- **vet-ui**: 18
-- **admin**: 11
+- **vet-ui**: 13
 - **tutor-ui**: 7
-- **clinical-pipeline**: 6
-- **kg**: 6
-- **i18n**: 3
-- **curation**: 3
+- **admin**: 4
+- **clinical-pipeline**: 3
 - **meta**: 2
-- **infra**: 2
+- **i18n**: 1
+- **curation**: 1
 
 ## Top 10 recent entries
+### 2026-05-17 · [admin] ADDED — Catálogo bilíngue de raças e condições com fontes científicas
+- Seed bilíngue com +30 condições crônicas/degenerativas caninas (BOAS, mielopatia degenerativa SOD1, EPI, SARDS, hemangiossarcoma, MDR1, etc.) com `sources` JSONB contendo links diretos para OMIA, PubMed, ACVIM, ESCCAP, IRIS e Merck Vet Manual.
+- Seed bilíngue com +61 raças (AKC/FCI + Fila Brasileiro) e +76 predisposições enriquecidas com `risk_factor`, `evidence_grade`, `inheritance_pattern`, `prevalence_pct` e até 3 fontes científicas com URL direta por predisposição.
+- `BreedPredispositionsPanel` agora renderiza chips de Perfil Genético / Padrão de Herança / Prevalência e lista de fontes clicáveis (`target="_blank"`, ícone ExternalLink) sob cada predisposição.
+_files: src/components/administrador/breeds/BreedPredispositionsPanel.tsx, src/hooks/usePlatformCounts.ts, src/pages/Index.tsx, src/i18n.ts_
+
 ### 2026-05-13 · [vet-ui] ADDED — Digital Twin do paciente (Fase 2 — histórico, traits, labs)
 - `PatientKnowledgeSubgraph` ganha 3 novas camadas opcionais conectadas ao nó Pet central:
 - Diagnósticos passados (círculos cinza, aresta `HAS_HISTORY` tracejada) lidos de `pet_conditions` resolvidas + consultas anteriores em `pet_consultations`.
@@ -70,12 +74,6 @@ _files: src/services/exam-classification.ts, src/components/pet/AssessmentInterp
 - Lista de condições no perfil agora ordena condições tradicionais primeiro e empurra hallmarks de gerociência (inflammaging, sarcopenia, disfunção mitocondrial, senescência celular, CCD, imunossenescência etc.) para o final, marcadas como "atenção geriátrica" via `condition-classification.ts`.
 - Novo serviço `src/services/condition-classification.ts` com whitelist EN/PT de hallmarks de envelhecimento e helper `geroscienceOriginLabelKey` que devolve i18n key + params (`bySuggestedExams`, `byVetVisit`, `byVetGeneric`).
 _files: src/services/condition-classification.ts, src/pages/veterinario/PetProfilePage.tsx, src/components/pet/PetConsultationsTimeline.tsx, src/components/pet/PhysicalExamBlock.tsx…_
-
-### 2026-05-12 · [vet-ui] ADDED — Análise nutricional condicional ao catálogo + nomenclatura preventivo/terapêutico + revisão técnica admin-only
-- `NutritionGapAnalysis` agora suprime a tabela de gaps e a seção "Sugerido pela raça" quando a ração não está no catálogo (`pet_food_nutrition` ausente). Em vez disso, exibe um card âmbar único: "A análise de complementação nutricional não foi concluída porque esta ração ainda não está no nosso banco de dados."
-- Botões Procurar e Incorporar (restritos a admin via `useAuth().hasRole('admin')`) chamam a edge `enrich-pet-food-product`. "Incorporar" só é habilitado quando a confiança da extração ≥ 0.4. Sucesso invalida `['nutrition-gap', petId]` e a análise re-roda automaticamente.
-- Edge `enrich-pet-food-product` extendida com `persist: true` + `link_to_item_id?`: cria/recupera `pet_food_brands` e `pet_food_products` (snake-insensitive), insere a composição em `pet_food_nutrition` e vincula o `pet_nutrition_items.product_id` em uma única chamada (service role).
-_files: .lovable/memory/principles/preventive-vs-therapeutic-nomenclature.md, src/components/pet/NutritionGapAnalysis.tsx, src/components/ui/technical-review-section.tsx, src/hooks/usePetFoodEnrichment.ts…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
