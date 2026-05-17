@@ -2018,7 +2018,23 @@
         "baseKnowledge": "Base Data",
         "pharmacology": "Pharmacology Base",
         "pharmacologyStatus": "In development",
-        "pharmacologyStatusTooltip": "Pharmacological database under construction. Drug interactions and dosages pending."
+        "pharmacologyStatusTooltip": "Pharmacological database under construction. Drug interactions and dosages pending.",
+        "tripletCurationStatus": "Active curation",
+        "tripletCurationStatusTooltip": "Global Kanban board (cross-study) to review and approve triplets extracted by the pipeline.",
+        "evidenceConflicts": "Evidence Conflicts",
+        "evidenceConflictsStatus": "In use",
+        "evidenceConflictsStatusTooltip": "Detection and resolution of conflicting claims across different studies.",
+        "ontologyMapping": "SNOMED/UMLS Mapping",
+        "ontologyMappingStatus": "Under curation",
+        "ontologyMappingStatusTooltip": "Mapping of KG entities to SNOMED-CT and UMLS standards, with manual audit.",
+        "petFoodCatalog": "Pet Food Catalog",
+        "petFoodCatalogStatus": "Under curation",
+        "petFoodCatalogStatusTooltip": "Database of brands, products and nutritional profile used by the nutritional gap pipeline.",
+        "dosageCuration": "Dosage Curation",
+        "dosageCurationStatus": "Under curation",
+        "dosageCurationStatusTooltip": "Review and approval of doses extracted from web sources or estimated by AI.",
+        "tripletQuality": "Triplet Quality",
+        "gapfillDiagnostics": "Gap-Fill Diagnostics"
       },
       "dataProcessing": {
         "title": "Data Processing",
@@ -2060,7 +2076,10 @@
         "knowledgeBase": "Knowledge Base",
         "aiConfig": "AI Config",
         "aiPrompts": "AI Prompts",
-        "translationAudit": "Translation Audit"
+        "translationAudit": "Translation Audit",
+        "translationManager": "Manage Translations",
+        "designConventions": "Design Conventions",
+        "accessRequests": "Access Requests"
       },
       "settingsButton": "Settings"
     },
