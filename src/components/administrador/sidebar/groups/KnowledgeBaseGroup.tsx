@@ -150,7 +150,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
         >
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
-              <PawPrint className={`h-4 w-4 mr-2 ${currentStep === "breeds-management" ? "text-primary" : ""}`} />
+              <PawPrint className={`h-4 w-4 mr-2 ${currentStep === "breeds-management" ? "text-primary" : "text-green-600"}`} />
               <span>{t('admin.sidebar.knowledgeBase.breedsManagement')}</span>
             </div>
             {currentStep === "breeds-management" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
@@ -166,7 +166,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
         >
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
-              <FlaskConical className={`h-4 w-4 mr-2 ${currentStep === "lab-references" ? "text-primary" : ""}`} />
+              <FlaskConical className={`h-4 w-4 mr-2 ${currentStep === "lab-references" ? "text-primary" : "text-orange-500"}`} />
               <span>{t('admin.sidebar.knowledgeBase.labReferences')}</span>
             </div>
             {currentStep === "lab-references" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
@@ -198,7 +198,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
         >
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
-              <Pill className={`h-4 w-4 mr-2 ${currentStep === "pharmacology" ? "text-primary" : ""}`} />
+              <Pill className={`h-4 w-4 mr-2 ${currentStep === "pharmacology" ? "text-primary" : "text-orange-500"}`} />
               <span>{t('admin.sidebar.knowledgeBase.pharmacology', 'Base Farmacológica')}</span>
             </div>
             {currentStep === "pharmacology" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
