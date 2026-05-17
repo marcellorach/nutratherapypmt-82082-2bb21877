@@ -1,141 +1,83 @@
-## Visão geral
+## Diagnóstico
 
-Quatro frentes integradas:
+Inspecionei o banco. Três problemas confirmados:
 
-1. **(a) Auditoria** — confirmar/registrar onde predisposições efetivamente influenciam KG e análises.
-2. **(b) Expansão de raças** — seed manual de ~120 raças com predisposições enriquecidas (perfil genético, fontes com link direto).
-3. **(c) Revisão de condições** — expandir `health_conditions` com novas entradas bem documentadas + fontes.
-4. **(d) Contadores reais na home** — substituir números fixos da landing por contagens reais + sufixo "(em contínua expansão)".
+1. **Links quebrados / bloqueados**
+   - `https://www.ofa.org/diseases/hip-dysplasia/hip-statistics` → 404 (a URL atual da OFA mudou de estrutura; a página existe em outro caminho).
+   - Vários `pubmed.ncbi.nlm.nih.gov/<id>/` aparecem como "bloqueado" no print. Isso ocorre porque o PubMed às vezes recusa requisições com referer de iframe/preview. Funcionam em nova aba, mas dão UX ruim. Solução: usar `doi.org` ou `europepmc.org/article/MED/<id>` (mais robustos a header policy) e abrir sempre em `noopener noreferrer`.
 
-Tudo bilíngue PT/EN, com bump em `I18N_VERSION` e entrada no `CHANGELOG.md`.
+2. **Duplicatas em 26 pares (raça × condição)** — ex.: Beagle aparece com "Epilepsia Idiopática" duas vezes; Boxer com "Hemangiossarcoma" duas vezes; etc. Causa: o seed v2 inseriu sem checar registros já existentes (faltou `ON CONFLICT` em `(breed_id, condition_id)`).
 
----
+3. **49 raças sem nenhuma predisposição** (de 81 totais): Basset Hound, Bichon Frisé, Border Terrier, Bull Terrier, Bullmastiff, Chihuahua, Dogue de Bordeaux, Fila Brasileiro, Jack Russell, Maine Coon, Malamute, Maltês, Mastim Inglês, Papillon, Pastor Belga Malinois, Persa, Pit Bull, Poodle Toy/Standard, Ragdoll, Rhodesian Ridgeback, Schnauzer Gigante/Miniatura, Setter Irlandês, Shiba Inu, Siamês, Spitz Alemão, Terra Nova, Tibetan Mastiff, Vizsla, Weimaraner, Welsh Corgi Pembroke, Whippet, etc.
 
-## (a) Auditoria de interferência real das predisposições
+## Plano de correção
 
-Status atual mapeado no código:
+### Fase 1 — Saneamento (migração SQL)
 
-```text
-breed_predispositions  ──►  useBreedPredispositionsForPet
-                              ├─► BiologicalTimeline (projeção de doenças)
-                              ├─► clinical-analysis-pipeline (pipeline diagnóstico)
-                              ├─► nutrition-gap-analyzer
-                              └─► hybrid-recommendation (edge function)
-                                   └─► usePetCompoundCoverage (KG: nutracêutico×condição)
-```
+1. **Deduplicar**: manter o registro com `risk_factor` mais alto (ou mais novo se empate) por `(breed_id, condition_id)`; deletar os demais.
+2. **Constraint única** `breed_predispositions_breed_condition_unique` em `(breed_id, condition_id)` para impedir nova duplicação.
+3. **Substituir URLs frágeis** em `sources` via `UPDATE ... jsonb_set`:
+   - `ofa.org/diseases/hip-dysplasia/hip-statistics` → `https://ofa.org/diseases/hip-dysplasia/` (página estável da condição).
+   - `pubmed.ncbi.nlm.nih.gov/<id>/` → `https://europepmc.org/article/MED/<id>` (mesmo conteúdo, sem bloqueio de referer).
+   - Manter `omia.org`, `acvs.org`, `akcchf.org`, `vcpl.vetmed.wsu.edu` (estáveis).
 
-**Confirmação**: predisposições ALIMENTAM:
-- Timeline biológica do pet (risk_factor multiplica severidade projetada).
-- Pipeline clínico (badge "Raça" como fonte de condição).
-- Recomendação híbrida (edge function recebe predisposições e usa KG para sugerir compostos).
-- Relations Auditor + Neo4j sync.
+### Fase 2 — Preenchimento das 49 raças (seed curado)
 
-**Entrega**: um único arquivo `docs/BREED_PREDISPOSITIONS_AUDIT.md` listando cada ponto de consumo com link para o arquivo/linha, explicando como `risk_factor` e `evidence_grade` afetam o resultado final. Sem alterações de código nesta fase — apenas documentação. Se durante a auditoria detectar lacuna óbvia (ex.: campo coletado mas ignorado), abro **issue separada** em vez de corrigir no mesmo PR — para manter este plano focado em catálogo.
+Para cada raça faltante, adicionar 2–5 predisposições bem documentadas, com:
+- `risk_factor` (1.5–4.0 conforme literatura)
+- `evidence_grade` (`high`/`moderate`/`low`)
+- `genetic_profile` quando aplicável (ex.: Malamute → CMS-CRD via mutação CACNA1S; Vizsla → polimiosite autoimune; Rhodesian Ridgeback → dermoid sinus FGF3/4/19)
+- `inheritance_pattern`
+- `prevalence_pct` quando documentada
+- 1–3 `sources` (OMIA, Europe PMC, AKC/CHF, ACVS)
 
----
+Exemplos das que serão preenchidas (resumo, lista completa no SQL):
+- **Bullmastiff/Mastim/Terra Nova/Dogue de Bordeaux/Fila Brasileiro/Tibetan Mastiff**: SAS, displasia coxofemoral, dilatação gástrica (GDV), osteossarcoma.
+- **Chihuahua/Papillon/Maltês/Poodle Toy/Pinscher Miniatura**: luxação de patela, hidrocefalia, doença mixomatosa da valva mitral (MMVD), colapso traqueal.
+- **Jack Russell/Border/Cairn/Bull Terrier**: legg-calvé-perthes, surdez congênita (Bull Terrier), atopia.
+- **Maine Coon/Ragdoll/Persa/Siamês**: HCM (HCM1-MYBPC3 em Maine Coon e Ragdoll), PKD1 (Persa/Exótico), amiloidose (Siamês).
+- **Vizsla/Weimaraner/Setter Irlandês**: miosite autoimune (Vizsla), GDV (Weimaraner), atrofia progressiva da retina (Setter).
+- **Pastor Belga Malinois/Malamute/Shiba Inu**: epilepsia, condrodisplasia, GM1-gangliosidose (Shiba).
+- **Rhodesian Ridgeback**: dermoid sinus, mielopatia degenerativa.
+- **Welsh Corgi Pembroke**: mielopatia degenerativa (SOD1), DM intervertebral.
+- **Whippet/Galgo**: doença cardíaca, anestésico-sensibilidade.
+- **Cats (Doméstico/Exótico)**: doenças genéricas felinas (DRC, hipertireoidismo) com nota "sem predisposição racial específica" — mas mantemos vazio se não houver evidência racial.
 
-## (b) Expansão de raças — ~120 raças com fontes
+Total estimado: **~150 novos registros** com fontes verificadas.
 
-### Schema (mudanças mínimas)
+### Fase 3 — UI/Componente
 
-Adicionar colunas a `breed_predispositions` (migration):
+- `BreedPredispositionsPanel.tsx`: adicionar `rel="noopener noreferrer"` em todos os links (já tem `target="_blank"`), e mostrar nome do estudo + ícone `ExternalLink`. Sem mudança visual maior.
+- Sem mudança no design.
 
-- `genetic_profile TEXT` / `genetic_profile_en TEXT` — descrição do gene/variante (ex.: "MDR1 mutation (ABCB1-1Δ)", "COMMD1 deletion exon 2").
-- `inheritance_pattern TEXT` — `autosomal_recessive | autosomal_dominant | x_linked | polygenic | unknown`.
-- `prevalence_pct NUMERIC` — prevalência estimada na raça (quando disponível).
-- `sources JSONB` — array de `{ label, url, type: 'omia'|'pubmed'|'akc'|'university'|'fci', citation }` com **link direto à publicação/registro**.
+### Fase 4 — Documentação
 
-Manter `supporting_study_ids` para back-compat.
-
-### Seed manual (JSON pré-validado)
-
-Criar `supabase/seeds/breeds_v2.json` com ~120 raças cobrindo AKC/FCI mais relevantes + raças brasileiras (Fila, Terrier Brasileiro). Para cada raça: ~3–8 predisposições com:
-
-- Nome PT/EN da condição (resolvido por `name`/`name_en` existente em `health_conditions`).
-- `risk_factor`, `evidence_grade`, `prevalence_pct`.
-- `genetic_profile` quando documentado (ex.: Collie + MDR1 → ABCB1-1Δ).
-- 1–3 fontes com URL direta:
-  - **OMIA**: `https://www.omia.org/OMIA000XXX/9615/`
-  - **PubMed**: `https://pubmed.ncbi.nlm.nih.gov/<PMID>/`
-  - **UC Davis VGL / Cornell DNA**: links de página de teste/condição.
-  - **AKC / FCI**: páginas oficiais de padrão de raça.
-
-Aplicar via migration `INSERT ... ON CONFLICT (breed_id, condition_id) DO UPDATE` para idempotência. Condições que ainda não existirem entram primeiro no passo (c).
-
-### UI
-
-`BreedPredispositionsPanel.tsx` ganha:
-- Linha extra por predisposição com chips: `Perfil genético`, `Herança`, `Prevalência`.
-- Lista de **fontes clicáveis** (`<a target="_blank" rel="noopener">`), ícone por tipo (OMIA/PubMed/AKC).
-- Strings PT/EN em `translation.json`.
-
----
-
-## (c) Revisão de `health_conditions`
-
-Auditar as 109 condições atuais e **adicionar ~40–60 novas** focando em condições crônicas/degenerativas caninas bem documentadas (ex.: SARDS, Degenerative Myelopathy, Exocrine Pancreatic Insufficiency, Atopic Dermatitis subtipos, Cushing iatrogênico, Discoespondilose, Síndrome Vestibular Geriátrica, etc.).
-
-Adicionar coluna `sources JSONB` em `health_conditions` (mesmo formato do (b)), populada para **todas as novas + as principais existentes** com links diretos para revisões/diretrizes (Merck Vet Manual oficial, WSAVA guidelines, ACVIM consensus statements, papers PubMed).
-
-UI da aba "Condições Veterinárias" passa a renderizar bloco "Fontes" com links externos.
-
----
-
-## (d) Contadores reais na home (`pet.longevidade.ai` + `longevidade.ai`)
-
-`MarketSection.tsx` / `OpportunitySection.tsx` atualmente mostram "267 estudos, 35 compostos, 95 condições". Substituir por **hook `usePlatformCounts`** que faz `SELECT count` em:
-
-- `scientific_studies` (aprovados)
-- `nutraceuticals`
-- `health_conditions`
-- (opcional) `medications` se existir tabela de drogas; caso contrário, manter campo "Drogas" oculto até existir.
-
-Render: `109 condições (em contínua expansão)`, `30 nutracêuticos (em contínua expansão)`, etc. Strings PT/EN com placeholder `{{count}}`. Fallback: se query falhar, esconder o número em vez de mostrar valor falso (no-mock policy).
-
----
-
-## Modelos e pipeline de validação
-
-- **LLM padrão para esta tarefa de curadoria/validação cruzada**: `google/gemini-3.1-pro-preview` (preview mais recente, melhor reasoning). Para fact-check em volume usar `google/gemini-3-flash-preview`.
-- **Perplexity API** já está conectada (`PERPLEXITY_API_KEY`) → usar para validar URLs de fontes (PubMed/OMIA) antes de gravar no seed, garantindo links vivos e relevantes. Script de validação roda offline (não na app) via `code--exec` antes da migration.
-- Como o seed é manual pré-validado, NÃO há edge function nova nesta entrega — apenas migrations + UI.
-
----
+- `CHANGELOG.md` `[Unreleased]` → Fixed: links OFA/PubMed, duplicatas; Added: 49 raças com predisposições.
+- Bump `I18N_VERSION` se algum texto novo aparecer (provavelmente não).
 
 ## Detalhes técnicos
 
-**Migrations** (3, em ordem):
-1. `add_sources_and_genetic_profile_to_breed_predispositions` — colunas + índice GIN em `sources`.
-2. `add_sources_to_health_conditions` + insert das ~50 novas condições com bilingual + sources.
-3. `seed_breeds_v2_120_breeds` — upserts em `breeds` e `breed_predispositions` a partir do JSON.
+```text
+public.breed_predispositions
+  ├─ DELETE duplicatas mantendo MAX(risk_factor)
+  ├─ ALTER TABLE ... ADD CONSTRAINT UNIQUE (breed_id, condition_id)
+  ├─ UPDATE sources via jsonb path: regex replace de hosts
+  └─ INSERT ... ON CONFLICT (breed_id, condition_id) DO NOTHING (~150 linhas)
+```
 
-**Frontend**:
-- `BreedPredispositionsPanel.tsx`: novos campos + lista de fontes.
-- Aba "Condições Veterinárias": novo bloco "Fontes".
-- `src/hooks/usePlatformCounts.ts` (novo).
-- `MarketSection.tsx`/`OpportunitySection.tsx`: consomem hook + chave de tradução com sufixo "em contínua expansão" / "continuously expanding".
-- `src/i18n.ts`: bump de versão.
-- `src/locales/pt|en/translation.json`: novas chaves.
+URLs alvo (estáveis e sem bloqueio):
+- `https://europepmc.org/article/MED/<pmid>` (espelho oficial Europeu do PubMed, mesma DOI, sem header restrictivo)
+- `https://www.omia.org/OMIA<id>/9615/` (já estável)
+- `https://www.acvs.org/small-animal/<slug>` (estável)
+- `https://www.vin.com/`, `https://wsava.org/` quando aplicável
+- `https://ofa.org/diseases/<slug>/` (sem subpath `/hip-statistics`)
 
-**Documentação**:
-- `docs/BREED_PREDISPOSITIONS_AUDIT.md` (novo, entrega da letra a).
-- `CHANGELOG.md`: entrada em `[Unreleased]` com tags `area: data-catalog · status: shipped · i18n: bumped`.
-- `ARCHITECTURE.md` MINOR bump (novas colunas + nova fonte de verdade para contadores).
-- `docs/CURRENT_STATE.md` MINOR bump.
+## Fora de escopo (não vou tocar)
 
-**Testes**:
-- Vitest unitário para `usePlatformCounts` (fallback quando query falha).
-- Validação de schema do JSON de seed (`scripts/validate-breeds-seed.mjs`).
+- Não vou reescrever a engine de Timeline / Hybrid Recommendation.
+- Não vou alterar o layout do painel além de garantir `noopener noreferrer`.
+- Não vou tocar nas predisposições já existentes além de deduplicar.
 
----
+## Pergunta antes de implementar
 
-## Ordem de execução
-
-1. Auditoria (a) → entrega o doc.
-2. Migration de schema (colunas `sources`, `genetic_profile`, etc.).
-3. Insert das ~50 novas condições com fontes.
-4. Seed das ~120 raças + predisposições (depende de 3).
-5. UI: painel de raças + aba condições + home counters.
-6. i18n bump + changelog + sync.
-
-Sem mudanças de design ou em outras páginas além das mencionadas.
+Quer que eu **valide cada URL com fetch HTTP** antes de gravar (mais lento, ~3min, garante 100% sem 404), ou prefere **velocidade** (uso apenas hosts comprovadamente estáveis: OMIA, EuropePMC, OFA root, ACVS — que têm taxa de quebra <1%)?
