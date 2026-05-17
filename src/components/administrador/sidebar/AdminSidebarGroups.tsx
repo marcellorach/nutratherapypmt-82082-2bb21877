@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/sidebar";
 import KnowledgeBaseGroup from './groups/KnowledgeBaseGroup';
 import DataProcessingGroup from './groups/DataProcessingGroup';
-import ActionsGroup from './groups/ActionsGroup';
 import ResearchGroup from './groups/ResearchGroup';
 import ConfigurationGroup from './groups/ConfigurationGroup';
 import { useSearchParams } from 'react-router-dom';
@@ -55,21 +54,6 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
             <DataProcessingGroup 
               currentStep={currentStep} 
               handleStepClick={handleStepClick} 
-            />
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
-
-      {/* Ações */}
-      <SidebarGroup>
-        <SidebarGroupLabel className="text-orange-500">
-          {t('admin.sidebar.actions.title')}
-        </SidebarGroupLabel>
-        <SidebarGroupContent>
-          <SidebarMenu>
-            <ActionsGroup
-              currentStep={currentStep}
-              handleStepClick={handleStepClick}
             />
           </SidebarMenu>
         </SidebarGroupContent>

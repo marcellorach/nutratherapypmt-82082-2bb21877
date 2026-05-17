@@ -78,8 +78,22 @@ export const OrganogramaForceGraph: React.FC<Props> = ({ onJumpToCards }) => {
     return () => ro.disconnect();
   }, []);
 
+  // Configure d3 forces for a more spread-out layout
+  useEffect(() => {
+    const fg = fgRef.current;
+    if (!fg) return;
+    // Repulsão forte para espalhar nós
+    fg.d3Force?.('charge')?.strength((n: any) => (n.kind === 'area' ? -800 : -180));
+    // Distâncias maiores entre nós conectados
+    fg.d3Force?.('link')?.distance((l: any) => (l.kind === 'cross' ? 220 : 90)).strength(0.4);
+    // Evita sobreposição
+    fg.d3Force?.('center')?.strength(0.05);
+    // Reaquece a simulação
+    fg.d3ReheatSimulation?.();
+  }, [data]);
+
   const handleCenter = () => {
-    fgRef.current?.zoomToFit?.(400, 60);
+    fgRef.current?.zoomToFit?.(600, 80);
   };
 
   const handleNodeClick = (n: any) => {
@@ -126,7 +140,7 @@ export const OrganogramaForceGraph: React.FC<Props> = ({ onJumpToCards }) => {
             width={size.w}
             height={size.h}
             backgroundColor="rgba(0,0,0,0)"
-            nodeRelSize={4}
+            nodeRelSize={6}
             linkColor={(l: any) =>
               l.kind === "cross" ? "rgba(148,163,184,0.4)" : "rgba(148,163,184,0.25)"
             }
@@ -134,7 +148,10 @@ export const OrganogramaForceGraph: React.FC<Props> = ({ onJumpToCards }) => {
             linkDirectionalParticles={(l: any) => (l.kind === "cross" ? 2 : 0)}
             linkDirectionalParticleSpeed={0.006}
             onNodeClick={handleNodeClick}
-            cooldownTicks={120}
+            cooldownTicks={400}
+            d3VelocityDecay={0.25}
+            d3AlphaDecay={0.015}
+            onEngineStop={() => fgRef.current?.zoomToFit?.(600, 80)}
             nodeCanvasObject={(node: any, ctx, globalScale) => {
               const isArea = node.kind === "area";
               const r = isArea ? 12 : 5;

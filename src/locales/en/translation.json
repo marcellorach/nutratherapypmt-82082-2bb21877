@@ -7527,6 +7527,8 @@
   "ontologyMapping": {
     "title": "SNOMED-CT / UMLS Mapping",
     "description": "Map entities to standardized nomenclature with full traceability",
+    "explainerTitle": "What is this page?",
+    "explainerBody": "Here you associate each health condition and nutraceutical in our database with international standard codes (veterinary SNOMED-CT and UMLS). This prevents duplicates, standardizes naming, and lets the Gap-Fill pipeline search PubMed by code (CUI) rather than free text. Manual mapping does NOT require the UMLS API key — it's only required if you want to use the batch Auto-map button.",
     "searchPlaceholder": "Search entity by name...",
     "noEntities": "No entities found",
     "noResults": "No results found",
@@ -7641,6 +7643,8 @@
   "gapFillDiag": {
     "title": "KG Gap-Fill Diagnostics",
     "subtitle": "Inspect conditions, nutraceuticals, and triplets used by the evidence gap-fill pipeline",
+    "explainerTitle": "What is this page?",
+    "explainerBody": "Quality-control dashboard for the Gap-Fill pipeline: when a pet's Digital Twin detects few triplets covering a compound×condition pair, the system queries PubMed and Gemini to generate pending triplets. Here you see what still needs canonicalization (conditions without condition_id) or translation (entities without name_en) for that search to work.",
     "totalConditions": "Health Conditions",
     "totalNutraceuticals": "Nutraceuticals",
     "petConditions": "Pet Conditions",
