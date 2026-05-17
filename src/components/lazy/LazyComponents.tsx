@@ -9,7 +9,7 @@ export const DataAnalysisTab = lazy(() => import('@/components/administrador/dat
 export const PromptConfigurationTab = lazy(() => import('@/components/administrador/PromptConfigurationTab'));
 
 // Lazy loading dos módulos de acompanhamento
-export const AcompanhamentoTab = lazy(() => import('@/components/administrador/acompanhamento/AcompanhamentoTab'));
+
 export const DashboardModule = lazy(() => import('@/components/administrador/acompanhamento/modules/DashboardModule'));
 
 // Lazy loading dos componentes de estudos
@@ -45,6 +45,6 @@ export const withLazyFallback = (
 
 // Componentes exportados com fallback
 export const LazyAdminPainel = withLazyFallback(AdminPainel);
-export const LazyAcompanhamentoTab = withLazyFallback(AcompanhamentoTab);
+
 export const LazyDashboardModule = withLazyFallback(DashboardModule);
 export const LazySciImportSection = withLazyFallback(SciImportSection);
