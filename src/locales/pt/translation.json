@@ -7646,6 +7646,8 @@
   "gapFillDiag": {
     "title": "Diagnóstico do Gap-Fill KG",
     "subtitle": "Inspecionar condições, nutracêuticos e triplets usados pelo pipeline de gap-fill",
+    "explainerTitle": "O que é esta página?",
+    "explainerBody": "Painel de controle de qualidade do pipeline Gap-Fill: quando o Digital Twin de um pet detecta poucos triplets cobrindo um cruzamento composto×condição, o sistema consulta o PubMed e o Gemini para gerar triplets pendentes. Aqui você vê o que ainda precisa ser canonicalizado (condições sem condition_id) ou traduzido (entidades sem name_en) para que essa busca funcione.",
     "totalConditions": "Condições de Saúde",
     "totalNutraceuticals": "Nutracêuticos",
     "petConditions": "Condições de Pets",
