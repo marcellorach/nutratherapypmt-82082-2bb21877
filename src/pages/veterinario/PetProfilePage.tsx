@@ -63,7 +63,7 @@ const PetProfilePage: React.FC = () => {
   const conditionInsights = useConditionInsights(data?.conditions);
   const consultationsQ = usePetConsultations(id);
   const nutritionQ = usePetNutrition(id);
-  const [clinicalTab, setClinicalTab] = useState<string>('conditions');
+  const [clinicalTab, setClinicalTab] = useState<string>('consultations');
   const clinicalTabsRef = React.useRef<HTMLDivElement | null>(null);
   const goToTab = (tab: string) => {
     setClinicalTab(tab);
