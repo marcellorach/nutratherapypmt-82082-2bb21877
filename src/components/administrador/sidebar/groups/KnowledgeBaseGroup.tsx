@@ -314,23 +314,6 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
 
       {/* Diagnóstico Gap-Fill removido do menu principal — acessível via botão "Ver diagnóstico avançado" dentro de Mapeamento SNOMED/UMLS (rota ?tab=gapfill-diagnostics segue funcionando). */}
 
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          isActive={currentStep === "knowledge-base-settings"} 
-          onClick={() => handleStepClick("knowledge-base-settings")}
-          className={currentStep === "knowledge-base-settings" ? "bg-primary/10 text-primary" : ""}
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <Settings className={`h-4 w-4 mr-2 ${currentStep === "knowledge-base-settings" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.knowledgeBase.settings')}</span>
-            </div>
-            {currentStep === "knowledge-base-settings" && (
-              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-            )}
-          </div>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
     </>
   );
 };
