@@ -55,13 +55,23 @@ const SciImportSection: React.FC = () => {
           .in('kanban_status', ['processing', 'parsed']);
         setIsAiProcessing((processingCount ?? 0) > 0);
 
-        // Count studies awaiting AI processing (queue)
-        const { count: queueCount } = await supabase
+        // Count studies awaiting AI processing (queue): kanban_status='new' AND no triplets yet
+        const { data: newStudies } = await supabase
           .from('processed_studies')
-          .select('*', { count: 'exact', head: true })
+          .select('id')
           .is('deleted_at', null)
           .eq('kanban_status', 'new');
-        setAiQueueCount(queueCount ?? 0);
+        const newIds = (newStudies ?? []).map((s: any) => s.id);
+        let pendingQueue = newIds.length;
+        if (newIds.length > 0) {
+          const { data: withTriplets } = await supabase
+            .from('triplet_extractions')
+            .select('study_id')
+            .in('study_id', newIds);
+          const processedSet = new Set((withTriplets ?? []).map((t: any) => t.study_id));
+          pendingQueue = newIds.filter((id) => !processedSet.has(id)).length;
+        }
+        setAiQueueCount(pendingQueue);
 
         // Count pending curation triplets
         const { count: curationCount } = await supabase
