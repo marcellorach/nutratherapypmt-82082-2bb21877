@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-05-18T00:04:10.323Z",
+  "timestamp": "2026-05-18T00:39:04.799Z",
   "summary": {
-    "totalFiles": 868,
-    "totalIssues": 416,
-    "hardcodedTexts": 40,
-    "missingKeys": 375,
+    "totalFiles": 869,
+    "totalIssues": 421,
+    "hardcodedTexts": 42,
+    "missingKeys": 378,
     "incompleteTranslations": 1
   },
   "issues": [
@@ -1872,6 +1872,27 @@
     },
     {
       "type": "missing-key",
+      "file": "src/components/administrador/pet-food/PetFoodCatalogTab.tsx",
+      "line": 109,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pet-food/PetFoodCatalogTab.tsx",
+      "line": 120,
+      "text": "*, pet_food_brands(name), pet_food_nutrition(*)",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pet-food/PetFoodCatalogTab.tsx",
+      "line": 459,
+      "text": "id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/administrador/relations/RelationsAuditorChat.tsx",
       "line": 81,
       "text": "subject_name, predicate, object_name, subject_type, object_type, extraction_confidence, curation_status, intensity, evidence_level",
@@ -2475,14 +2496,14 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 52,
+      "line": 74,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2847,
+      "line": 2869,
       "text": "@",
       "severity": "high"
     },
@@ -2827,6 +2848,20 @@
       "file": "src/components/administrador/migrations/DatabaseMigrationsTab.tsx",
       "line": 255,
       "text": "Database Migrations",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/pet-food/PetFoodCatalogTab.tsx",
+      "line": 429,
+      "text": "Nova marca",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/pet-food/PetFoodCatalogTab.tsx",
+      "line": 503,
+      "text": "Fase de vida",
       "severity": "medium"
     },
     {
