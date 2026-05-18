@@ -1,85 +1,93 @@
-## Diagnóstico
+## Investigação arquitetural: quando vetorizar?
 
-Hoje os dois cães parecem idênticos porque:
+### Onde os embeddings são CONSUMIDOS hoje
 
-1. **O PNG anatômico é raster** — não dá para mudar a cor dos órgãos pintados na imagem. Hoje só desenhamos **elipses/glifos flutuando por cima** (coração pulsando, faíscas no fígado, etc.). Quando a doença é leve, esses overlays são quase invisíveis sobre o desenho colorido do órgão.
-2. **`yearWithout` cai em fallback para `yearWith`** quando o backend devolve poucos dados — então o cão "sem protocolo" mostra exatamente os mesmos marcadores do "com protocolo", só sem a estrela ★.
-3. **Não há gradiente temporal** — severidade é categórica (mild/moderate/severe), não interpola conforme o slider de ano avança nem clareia conforme o protocolo "cura".
+Encontrei 3 lugares que leem `study_embeddings.chunk_text` — **todos durante curadoria, antes da aprovação**:
 
-Resultado: o usuário vê dois Goldens iguais.
+1. `StudyTripletCuration.tsx:727` — busca chunks que contêm os nomes do subject/object do triplet e exibe como **"Trecho de Origem"** (caixa amarela na sua foto 6).
+2. `TripletReviewDialog.tsx:94` — mesmo padrão, em outro modal de revisão.
+3. `enrich-triplet/index.ts:41` — edge function de enriquecimento de triplets usa os chunks como contexto para a LLM.
 
-## Solução proposta
+### Onde os embeddings são GERADOS hoje
 
-### 1. Pintar o órgão de verdade (não só uma elipse por cima)
+Apenas 2 callers de `vectorize-study`:
 
-Para cada órgão clinicamente relevante (cérebro, coração, pulmões, fígado, rins, intestinos, pâncreas, estômago, bexiga, articulações, coluna, pele) vou adicionar um **`<path>` SVG traçando o contorno real do órgão no PNG** (calibrado uma vez sobre o `dog-anatomy.png` em `viewBox 1000x1000`).
+1. `useProcessingLogic.ts:188` — fluxo da aba **"Processamento IA"**, dispara automaticamente após extração Gemini (comentário literal: `// AUTO-VECTORIZATION: Generate embeddings for RAG`).
+2. `EstudoCard.tsx:92` — botão manual ("Sem RAG" clicável).
 
-Esse path fica **invisível quando saudável** (fill transparente). Quando há doença, recebe:
+### Conclusão arquitetural (alinhada aos princípios do projeto)
 
-```text
-fill = cor da severidade (amarelo → laranja → vermelho)
-mix-blend-mode: multiply        ← deixa o órgão original aparecer por baixo, mas tingido
-opacity = f(severidade, tempo, protocolo)
-```
+A vetorização **é, por design, um passo pré-curadoria** — sem ela o curador humano não consegue ver o trecho do PDF que justifica cada triplet, o que viola dois princípios core do projeto:
 
-`multiply` é a chave: o desenho original do órgão (rosa do coração, marrom do fígado) **mistura** com o overlay, então o coração doente fica realmente vermelho-escuro e o fígado doente fica marrom-amarelado, em vez de uma bolha colorida flutuando por cima.
+- **No-Mock Policy** — sem chunk real, exibimos "Texto original não disponível" e a decisão de aprovar/rejeitar fica cega.
+- **Curation Gatekeeper** — a curadoria humana é a porta de entrada do KG; tirar a evidência textual dela degrada a qualidade do gatekeeper.
 
-### 2. Escalar com o tempo (slider de anos)
+**Então a resposta à sua pergunta é: SIM, deve acontecer antes da curadoria.** O alerta "Sem RAG" é legítimo e deve permanecer.
 
-A severidade hoje é discreta. Vou adicionar um campo `intensity` (0-1) calculado por ano:
+### Por que 10 estudos chegaram sem embeddings (a falha real)
 
-```text
-intensityWithout(ano) = severidadeBase + (ano / 8) * progressãoEsperada     ← escurece
-intensityWith(ano)    = severidadeBase * (1 - eficáciaProtocolo * cura(ano))  ← clareia
-```
+Vetorização hoje só roda em **um** dos caminhos de ingestão (aba "Processamento IA"). Os outros caminhos pulam o passo:
 
-A `opacity` do overlay (e a saturação da cor via filtro `<feColorMatrix>`) responde a `intensity`. Quando o slider vai a `ano 0`, os dois cães ficam quase iguais. Quando vai a `ano 5`, o cão **sem protocolo** fica visivelmente mais escuro nos órgãos afetados, e o **com protocolo** mantém ou clareia.
+- Import SciSpace 2-step (`SciSpace2StepImport`)
+- File upload que chama `process-study` direto sem passar pelo queue
+- `batch-reprocess-triplets`
+- Chamadas diretas de `gemini-file-search`
 
-Cores por intensidade:
+Resultado: 10 estudos com triplets e zero embeddings, alguns inclusive já `approved`.
 
-```text
-0.0  → transparente (saudável)
-0.3  → amarelo translúcido (alerta)
-0.55 → laranja médio
-0.8  → vermelho saturado
-1.0  → vermelho escuro + halo pulsante
-```
+Há ainda um problema **separado** de qualidade: 4 desses 10 estudos têm `full_text_content` curtíssimo (562–916 chars) — só o abstract foi parseado do PDF. Mesmo vetorizando, o chunk único seria pobre. Esse é um problema do parser de PDF, não da vetorização — fora do escopo desta tarefa, mas vou listar os IDs para você decidir depois.
 
-### 3. Diferenciar cão "com" vs "sem" protocolo de verdade
+---
 
-- Remover o fallback que reusa `yearWith` para `yearWithout` (ou aplicar `intensity *= 1.4` no sem-protocolo como degradação esperada).
-- No "com protocolo": órgãos protegidos recebem **filtro verde sutil** (`<feColorMatrix>` que injeta hue 160°) + estrela ★, e a `intensity` decai ano a ano em vez de subir.
+## Plano de implementação revisto
 
-### 4. Tooltip e legenda permanecem
+### 1. Garantir vetorização em TODOS os caminhos de ingestão (correção arquitetural)
 
-O `<path>` invisível também serve de área interativa para o `Tooltip` (substitui as elipses transparentes atuais). Legenda nova: "🟡 alerta · 🟠 progressão · 🔴 crítico · ★ protegido pelo protocolo".
+Em vez de espalhar `invoke('vectorize-study')` por cada caller, **centralizar no orchestrator** `process-study` (edge function): após salvar o estudo com sucesso e antes de retornar, disparar `vectorize-study` de forma assíncrona não-bloqueante (`EdgeRuntime.waitUntil`).
 
-## Detalhes técnicos
+- Arquivo: `supabase/functions/process-study/index.ts`
+- Mudança: após o `upsert` bem-sucedido, agendar `fetch` para `vectorize-study` em background (não bloqueia a resposta, não falha o processamento se a vetorização falhar — só loga).
+- Remover a chamada duplicada de `useProcessingLogic.ts:188` (passa a ser redundante).
 
-- **Arquivo principal**: `src/components/pet/DogAnatomySVG.tsx` — adicionar `ORGAN_PATHS: Record<AnatomyRegionId, string>` com path data calibrado, novo prop `intensity` em `RegionState`.
-- **Calibração dos paths**: faço uma única vez visualmente sobre `src/assets/dog-anatomy.png` (cérebro, coração, fígado, pulmões, rins, intestinos, pâncreas, estômago, bexiga, articulações — ~12 paths). Para juntas (ombro/cotovelo/joelho/quadril/jarrete), uso círculos pequenos no contorno real.
-- **`DigitalTwinDog.tsx`**: 
-  - `buildMarkers` passa a calcular `intensity` (0-1) por ano usando `projected_severity_score`.
-  - Remover fallback `yearWithout → yearWith`; em vez disso, gerar `markersWithout` a partir de `yearWith` mas com `intensity *= 1.3` e sem `protectedHere`.
-  - Passar `intensity` no `regionStates` para o SVG.
-- **Blend modes**: `style={{ mixBlendMode: 'multiply' }}` no `<path>` colorido. Para o halo verde de proteção, `mixBlendMode: 'screen'` numa camada separada.
-- **Sem mudança de schema**: puramente render.
-- **i18n**: adiciono 2 chaves novas (`legend.alert`, `legend.progression`) em PT/EN, incremento `I18N_VERSION`.
-- **Changelog**: 1 entrada `area: vet · status: improvement` + `npm run sync:changelog`.
+Para os caminhos que **não** chamam `process-study` (SciSpace direct path, se aplicável), adicionar trigger equivalente — vou verificar caller-by-caller na implementação.
 
-## Resultado visual esperado
+### 2. Backfill dos 10 estudos órfãos
 
-```text
-Ano 0:                      Ano 4 (SEM):            Ano 4 (COM):
-[cão idêntico nos dois]     fígado marrom-vermelho  fígado quase normal
-                            coração vermelho        coração rosa pálido + ★
-                            rins manchados          rins limpos + ★
-                            intestino inflamado     intestino normal + ★
-```
+Adicionar um botão admin único **"Vetorizar estudos pendentes (N)"** no header da seção curadoria, que:
 
-## Risco / fora de escopo
+- consulta estudos com triplets e sem embeddings,
+- enfileira `vectorize-study` para cada um sequencialmente,
+- mostra progresso.
 
-- Não mexo no pipeline, no chat, nem no `BiologicalTimeline` (que continua usando o mesmo `DogAnatomySVG` — `intensity` é opcional, default = derivado da severidade, retrocompatível).
-- Se algum path ficar desalinhado, faço ajuste pontual de coordenadas — sem regerar o PNG.
+Local: `SciImportSection.tsx`, ao lado do botão Refresh existente, só aparece quando `N > 0`.
 
-Posso implementar assim?
+### 3. Manter o aviso "Sem RAG" — mas melhorar UX
+
+O badge amber atual ("Sem RAG") é correto e fica. Adicionar:
+
+- **tooltip explicativo**: "Este estudo não tem texto vetorizado, então a curadoria não consegue mostrar o trecho original que justifica cada triplet. Clique para vetorizar agora."
+- no `EstudoDetailDialog`, quando o usuário abre um estudo sem embeddings, exibir um banner discreto no topo com o mesmo aviso + botão "Vetorizar agora".
+
+### 4. Itens (a), (b), (c) do pedido original — sem mudança
+
+- **(a) Curadoria badge**: contar só estudos com triplets onde `nenhum` foi aprovado/rejeitado (atualmente 14 no banco).
+- **(b) Biblioteca badge**: contar estudos com pelo menos 1 triplet `approved`/`rejected` (atualmente 43).
+- **(c) Link "Ver estudo original"** no card fechado, canto inferior direito: como o banco não tem DOI/URL armazenado, fallback para Google Scholar `?q={title}`. Se no futuro DOI for armazenado em `full_text_metadata.doi`, o link automaticamente usa `https://doi.org/{doi}`.
+
+### Memória a atualizar
+
+Criar `mem://architecture/vectorization-is-pre-curation` — registra que vetorização é passo obrigatório pré-curadoria, deve rodar em todos os caminhos de ingestão (centralizado em `process-study`), e o curador depende dos chunks para ver o "Trecho de Origem".
+
+### Arquivos afetados
+
+- `supabase/functions/process-study/index.ts` — disparar `vectorize-study` em background
+- `src/hooks/ntai/useProcessingLogic.ts` — remover chamada redundante
+- `src/components/administrador/estudos/import/SciImportSection.tsx` — badges (a)(b), botão backfill
+- `src/components/administrador/estudos/import/TabNavigation.tsx` — prop `libraryCount`
+- `src/components/administrador/estudos/cards/EstudoCard.tsx` — link "Ver original", tooltip melhorado
+- `src/dialogs/EstudoDetailDialog.tsx` (ou caminho equivalente) — banner pré-curadoria sem RAG
+- `src/locales/{pt,en}/translation.json` + `src/i18n.ts` — novas chaves + bump `I18N_VERSION`
+- `CHANGELOG.md` + `npm run sync:changelog`
+- `mem://architecture/vectorization-is-pre-curation`
+
+Sem migrations. Sem mudança de schema.
