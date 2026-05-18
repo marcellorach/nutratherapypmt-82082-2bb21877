@@ -27,6 +27,7 @@ type NutritionRow = Record<string, any> & {
   completeness_score: number | null;
   confidence: number | null;
   verified: boolean;
+  source?: string | null;
 };
 type Product = {
   id: string; brand_id: string; name: string; line: string | null;
