@@ -6,6 +6,7 @@ import { Apple, Loader2 } from 'lucide-react';
 import HelpHint from '@/components/ui/help-hint';
 import { usePetNutrition } from '@/hooks/usePetConsultations';
 import NutritionGapAnalysis from '@/components/pet/NutritionGapAnalysis';
+import NutritionGapEvolutionChart from '@/components/pet/NutritionGapEvolutionChart';
 
 interface Props {
   petId: string;
@@ -114,6 +115,19 @@ const PetNutritionPanel: React.FC<Props> = ({ petId, petContext }) => {
       {petContext && petContext.weight_kg > 0 && (
         <CardContent className="pt-0">
           <NutritionGapAnalysis
+            petId={petId}
+            species={petContext.species}
+            weight_kg={petContext.weight_kg}
+            age_years={petContext.age_years}
+            breed_size={petContext.breed_size ?? null}
+            breed_name={petContext.breed_name ?? null}
+            active_conditions={petContext.active_conditions}
+          />
+        </CardContent>
+      )}
+      {petContext && petContext.weight_kg > 0 && data.length >= 2 && (
+        <CardContent className="pt-0">
+          <NutritionGapEvolutionChart
             petId={petId}
             species={petContext.species}
             weight_kg={petContext.weight_kg}

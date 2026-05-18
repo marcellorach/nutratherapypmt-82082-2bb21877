@@ -7896,5 +7896,20 @@
     "incorporateOkDesc": "A composição foi salva no catálogo e a análise será recalculada.",
     "incorporateFailed": "Falha ao incorporar ração",
     "adminOnlyHint": "Ações de catálogo restritas a administradores."
+  },
+  "nutritionGapTimeline": {
+    "title": "Evolução longitudinal dos gaps nutricionais",
+    "helpBody": "Reconstrói déficits e excessos para cada troca de ração registrada no histórico, usando a mesma metodologia FEDIAF/AAFCO da análise atual. Permite verificar se as mudanças dietéticas estão fechando os gaps.",
+    "loading": "Calculando histórico de gaps…",
+    "notEnoughHistory": "São necessários ao menos 2 snapshots de ração com produtos catalogados para mostrar a evolução.",
+    "snapshots": "snapshots",
+    "deficient": "Déficits",
+    "excess": "Excessos",
+    "adequate": "Adequados",
+    "deficits": "déficits",
+    "excesses": "excessos",
+    "sincePeriod": "desde o primeiro snapshot",
+    "topChanges": "Nutrientes com maior variação",
+    "methodologyNote": "Cada ponto representa um snapshot de pet_nutrition; valores são desvios percentuais (Δ%) vs. alvo FEDIAF 2024."
   }
 }
