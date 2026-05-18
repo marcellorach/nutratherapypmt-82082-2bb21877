@@ -7893,5 +7893,20 @@
     "incorporateOkDesc": "Composition saved to catalog; analysis will recompute.",
     "incorporateFailed": "Failed to incorporate food",
     "adminOnlyHint": "Catalog actions are restricted to administrators."
+  },
+  "nutritionGapTimeline": {
+    "title": "Longitudinal evolution of nutrition gaps",
+    "helpBody": "Recomputes deficits and excesses for every food change recorded in the history, using the same FEDIAF/AAFCO methodology as the current analysis. Lets you verify whether dietary changes are closing the gaps.",
+    "loading": "Computing gap history…",
+    "notEnoughHistory": "At least 2 nutrition snapshots with cataloged products are required to show evolution.",
+    "snapshots": "snapshots",
+    "deficient": "Deficits",
+    "excess": "Excesses",
+    "adequate": "Adequate",
+    "deficits": "deficits",
+    "excesses": "excesses",
+    "sincePeriod": "since first snapshot",
+    "topChanges": "Nutrients with biggest variation",
+    "methodologyNote": "Each point is a pet_nutrition snapshot; values are percentage deltas (Δ%) vs. FEDIAF 2024 target."
   }
 }
