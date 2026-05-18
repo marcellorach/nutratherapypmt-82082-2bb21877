@@ -23,6 +23,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-18 — Fase 4b: Provenance gap→composto no card do tutor
+<!-- area: tutor-ui · status: entregue · i18n: 1.82.0 -->
+- Edge `hybrid-recommendation`: schema JSON dos prompts ENRICH e FALLBACK agora exige `closes_gaps: string[]` por composto (rótulos exatos do bloco `NUTRITION_GAPS` que o composto fecha; `[]` quando não fecha nenhum). Sem alteração de prompt além do schema.
+- `clinical-analysis-pipeline.ts`: cada composto materializado ganha `closesGaps: string[]` propagado verbatim do LLM.
+- `PetProfilePage.handleApproveStack`: persiste `closes_gaps` dentro de `treatment_proposals.compounds[]` (jsonb), sem mudanças no resto do "patient analysis".
+- `TreatmentProposalCard` (tutor): renderiza badge esmeralda "Fecha déficit: {nutriente}" abaixo do mecanismo de cada composto que cobre um gap quantitativo da dieta.
+- I18n: `tutor.proposal.closesGap` em PT/EN; bump `I18N_VERSION` 1.81.0 → 1.82.0.
+- Files: supabase/functions/hybrid-recommendation/index.ts, src/services/clinical-analysis-pipeline.ts, src/pages/veterinario/PetProfilePage.tsx, src/components/tutor/TreatmentProposalCard.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts
+
 ### Added - 2026-05-18 — Fase 4: Evolução longitudinal dos gaps nutricionais
 <!-- area: vet-ui · status: entregue · i18n: 1.81.0 -->
 - Novo serviço `src/services/nutrition-gap-timeline.ts`: reconstrói déficits/excessos para **cada snapshot histórico** de `pet_nutrition` reutilizando `analyzeNutritionGaps` (mesma metodologia FEDIAF/AAFCO). Sem mocks — snapshots sem produtos linkados ficam fora do gráfico.
