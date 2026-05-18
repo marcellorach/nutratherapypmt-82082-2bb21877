@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-18T04:41:07.953Z
+// Última geração: 2026-05-18T05:20:46.925Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,23 @@ export const lastChangelogDate = "2026-05-18";
 export const senexVersion = "5.1.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-18",
+    "kind": "changed",
+    "area": "vet-ui",
+    "status": "entregue",
+    "title": "Digital Twin: doenças atingem órgãos internos",
+    "bullets": [
+      "Substituída a silhueta opaca + bolinhas flutuantes do `DigitalTwinDog` por uma ilustração anatômica transparente do Golden Retriever (`src/assets/dog-anatomy.png`) com órgãos internos visíveis (cérebro, coração, pulmões, fígado, rins, intestinos, bexiga, articulações, coluna).",
+      "Cada doença agora ilumina o órgão correspondente *dentro* do corpo (via `DogAnatomySVG` + `mapConditionToRegions`), com pulso/halo proporcional à severidade e estrela verde quando o protocolo protege a região.",
+      "Coordenadas anatômicas (`REGION_COORDS`) recalibradas para o novo asset; `BiologicalTimeline` herda automaticamente o novo visual.",
+      "Files: src/assets/dog-anatomy.png, src/components/pet/DogAnatomySVG.tsx, src/components/pet/DigitalTwinDog.tsx"
+    ],
+    "files": [
+      "src/components/pet/DogAnatomySVG.tsx",
+      "src/components/pet/DigitalTwinDog.tsx"
+    ]
+  },
   {
     "date": "2026-05-18",
     "kind": "changed",
