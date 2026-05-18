@@ -564,3 +564,40 @@ export async function getSystemPrompt(
   }
   return SYSTEM_PROMPTS[key]?.content ?? '';
 }
+
+/**
+ * Variante zero-dependência: usa fetch contra a REST API do Supabase.
+ * Útil em edge functions que não importam @supabase/supabase-js.
+ * Lê `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` do ambiente.
+ * Em runtime: override_content (DB) → default_content (DB) → manifest → fallback opcional.
+ */
+export async function fetchSystemPrompt(key: string, fallback?: string): Promise<string> {
+  try {
+    const url = (globalThis as any).Deno?.env?.get?.('SUPABASE_URL');
+    const serviceKey =
+      (globalThis as any).Deno?.env?.get?.('SUPABASE_SERVICE_ROLE_KEY') ||
+      (globalThis as any).Deno?.env?.get?.('SUPABASE_ANON_KEY');
+    if (url && serviceKey) {
+      const r = await fetch(
+        `${url}/rest/v1/ai_system_prompts?select=override_content,default_content&prompt_key=eq.${encodeURIComponent(key)}&limit=1`,
+        {
+          headers: {
+            apikey: serviceKey,
+            Authorization: `Bearer ${serviceKey}`,
+          },
+        },
+      );
+      if (r.ok) {
+        const rows = (await r.json()) as Array<{ override_content?: string | null; default_content?: string | null }>;
+        const row = rows?.[0];
+        const dbContent = row?.override_content || row?.default_content;
+        if (dbContent && String(dbContent).trim().length > 0) return String(dbContent);
+      }
+    }
+  } catch (_e) {
+    // fall through to manifest / fallback
+  }
+  const fromManifest = SYSTEM_PROMPTS[key]?.content;
+  if (fromManifest && fromManifest.trim().length > 0) return fromManifest;
+  return fallback ?? '';
+}
