@@ -16,6 +16,7 @@ import {
   ConfidenceCalculationParams
 } from '@/types/recommendation-confidence';
 import { computeRecommendationConfidence } from './recommendation-confidence-service';
+import { analyzeNutritionGaps, inferLifeStage, type PetNutritionContext } from './nutrition-gap-analyzer';
 
 interface NutraceuticalRecommendation {
   name: string;
