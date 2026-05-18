@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +26,7 @@ interface SystemPrompt {
 }
 
 const SystemPromptsCatalog: React.FC = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [prompts, setPrompts] = useState<SystemPrompt[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +44,7 @@ const SystemPromptsCatalog: React.FC = () => {
       .order('family')
       .order('display_name');
     if (error) {
-      toast({ variant: 'destructive', title: 'Erro ao carregar prompts', description: error.message });
+      toast({ variant: 'destructive', title: t('admin.systemPrompts.toast.loadError'), description: error.message });
     } else {
       setPrompts(data as SystemPrompt[]);
     }
@@ -59,15 +61,15 @@ const SystemPromptsCatalog: React.FC = () => {
       const total = (data as any)?.total_in_manifest ?? 0;
       if (!silent) {
         toast({
-          title: '✅ Sincronizado',
-          description: `${updated} de ${total} prompts atualizados a partir do código.`,
+          title: t('admin.systemPrompts.toast.syncedTitle'),
+          description: t('admin.systemPrompts.toast.syncedDesc', { updated, total }),
         });
       }
       await load();
       return true;
     } catch (e: any) {
       if (!silent) {
-        toast({ variant: 'destructive', title: 'Falha ao sincronizar', description: e.message });
+        toast({ variant: 'destructive', title: t('admin.systemPrompts.toast.syncFailed'), description: e.message });
       }
       return false;
     } finally {
@@ -116,10 +118,10 @@ const SystemPromptsCatalog: React.FC = () => {
       .update({ override_content: value })
       .eq('id', p.id);
     if (error) {
-      toast({ variant: 'destructive', title: 'Erro ao salvar', description: error.message });
+      toast({ variant: 'destructive', title: t('admin.systemPrompts.toast.saveError'), description: error.message });
       return;
     }
-    toast({ title: '✅ Salvo', description: `Override de "${p.display_name}" atualizado.` });
+    toast({ title: t('admin.systemPrompts.toast.savedTitle'), description: t('admin.systemPrompts.toast.savedDesc', { name: p.display_name }) });
     setEditingId(null);
     load();
   };
@@ -130,10 +132,10 @@ const SystemPromptsCatalog: React.FC = () => {
       .update({ override_content: null })
       .eq('id', p.id);
     if (error) {
-      toast({ variant: 'destructive', title: 'Erro', description: error.message });
+      toast({ variant: 'destructive', title: t('admin.systemPrompts.toast.error'), description: error.message });
       return;
     }
-    toast({ title: '↩️ Restaurado', description: `"${p.display_name}" voltou ao default do código.` });
+    toast({ title: t('admin.systemPrompts.toast.restoredTitle'), description: t('admin.systemPrompts.toast.restoredDesc', { name: p.display_name }) });
     setEditingId(null);
     load();
   };
@@ -146,12 +148,11 @@ const SystemPromptsCatalog: React.FC = () => {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Layers3 className="h-5 w-5 text-primary" />
-                Catálogo de Prompts do Sistema
+                {t('admin.systemPrompts.title')}
               </CardTitle>
               <CardDescription>
-                Todos os prompts usados internamente pelas edge functions, agrupados por família.
-                Edite para criar um <strong>override</strong> sem mexer no código. "Restaurar default" remove o override.
-                O conteúdo padrão vem do manifest <code>supabase/functions/_shared/system-prompts.ts</code>.
+                {t('admin.systemPrompts.description')}{' '}
+                <code>supabase/functions/_shared/system-prompts.ts</code>.
               </CardDescription>
             </div>
             <Button
@@ -162,7 +163,7 @@ const SystemPromptsCatalog: React.FC = () => {
               className="shrink-0"
             >
               <RefreshCw className={`h-3.5 w-3.5 mr-1 ${syncing ? 'animate-spin' : ''}`} />
-              Sincronizar com o código
+              {t('admin.systemPrompts.syncButton')}
             </Button>
           </div>
         </CardHeader>
@@ -172,7 +173,7 @@ const SystemPromptsCatalog: React.FC = () => {
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Filtrar por nome, família ou função…"
+              placeholder={t('admin.systemPrompts.searchPlaceholder')}
               className="pl-9"
             />
           </div>
@@ -180,11 +181,11 @@ const SystemPromptsCatalog: React.FC = () => {
       </Card>
 
       {loading ? (
-        <p className="text-center text-muted-foreground py-8">Carregando catálogo…</p>
+        <p className="text-center text-muted-foreground py-8">{t('admin.systemPrompts.loading')}</p>
       ) : grouped.length === 0 ? (
         <Card>
           <CardContent className="py-8 text-center text-muted-foreground">
-            Nenhum prompt encontrado.
+            {t('admin.systemPrompts.empty')}
           </CardContent>
         </Card>
       ) : (
@@ -196,7 +197,7 @@ const SystemPromptsCatalog: React.FC = () => {
                   <span className="font-medium">{family}</span>
                   <Badge variant="secondary">{list.length}</Badge>
                   {list.some((p) => p.has_override) && (
-                    <Badge className="bg-amber-500 hover:bg-amber-500">override ativo</Badge>
+                    <Badge className="bg-amber-500 hover:bg-amber-500">{t('admin.systemPrompts.badge.overrideActive')}</Badge>
                   )}
                 </div>
               </AccordionTrigger>
@@ -213,17 +214,17 @@ const SystemPromptsCatalog: React.FC = () => {
                               <CardTitle className="text-base flex items-center gap-2">
                                 {p.display_name}
                                 {p.has_override && (
-                                  <Badge className="bg-amber-500 hover:bg-amber-500 text-xs">override</Badge>
+                                  <Badge className="bg-amber-500 hover:bg-amber-500 text-xs">{t('admin.systemPrompts.badge.override')}</Badge>
                                 )}
                                 {!effective && (
                                   <Badge variant="outline" className="text-xs text-amber-600 border-amber-400 gap-1">
-                                    <AlertCircle className="h-3 w-3" /> sem conteúdo
+                                    <AlertCircle className="h-3 w-3" /> {t('admin.systemPrompts.badge.empty')}
                                   </Badge>
                                 )}
                               </CardTitle>
                               <CardDescription className="text-xs">
                                 <code className="text-foreground">{p.prompt_key}</code>
-                                {p.function_name && <> · função <code className="text-foreground">{p.function_name}</code></>}
+                                {p.function_name && <> · {t('admin.systemPrompts.functionLabel')} <code className="text-foreground">{p.function_name}</code></>}
                               </CardDescription>
                               {p.description && (
                                 <p className="text-xs text-muted-foreground">{p.description}</p>
@@ -236,18 +237,18 @@ const SystemPromptsCatalog: React.FC = () => {
                                     <X className="h-3.5 w-3.5" />
                                   </Button>
                                   <Button size="sm" onClick={() => saveOverride(p)}>
-                                    <Save className="h-3.5 w-3.5 mr-1" /> Salvar
+                                    <Save className="h-3.5 w-3.5 mr-1" /> {t('admin.systemPrompts.action.save')}
                                   </Button>
                                 </>
                               ) : (
                                 <>
                                   {p.has_override && (
                                     <Button size="sm" variant="ghost" onClick={() => restoreDefault(p)}>
-                                      <RotateCcw className="h-3.5 w-3.5 mr-1" /> Default
+                                      <RotateCcw className="h-3.5 w-3.5 mr-1" /> {t('admin.systemPrompts.action.default')}
                                     </Button>
                                   )}
                                   <Button size="sm" variant="outline" onClick={() => startEdit(p)}>
-                                    <Edit2 className="h-3.5 w-3.5 mr-1" /> Editar
+                                    <Edit2 className="h-3.5 w-3.5 mr-1" /> {t('admin.systemPrompts.action.edit')}
                                   </Button>
                                 </>
                               )}
@@ -261,7 +262,7 @@ const SystemPromptsCatalog: React.FC = () => {
                               onChange={(e) => setDraft(e.target.value)}
                               rows={10}
                               className="font-mono text-xs"
-                              placeholder="Cole aqui o conteúdo do prompt. Deixe vazio para usar o default do código."
+                              placeholder={t('admin.systemPrompts.editorPlaceholder')}
                             />
                           ) : effective ? (
                             <ScrollArea className="h-32 bg-muted rounded-md p-3">
@@ -269,7 +270,7 @@ const SystemPromptsCatalog: React.FC = () => {
                             </ScrollArea>
                           ) : (
                             <p className="text-xs text-muted-foreground italic px-1">
-                              Conteúdo ainda não catalogado. Use "Editar" para registrar um override ou aguarde a próxima sincronização com o código das edge functions.
+                              {t('admin.systemPrompts.notCatalogued')}
                             </p>
                           )}
                         </CardContent>
