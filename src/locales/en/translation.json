@@ -2805,6 +2805,39 @@
         "evaluationContent": "Evaluate the efficacy of the following nutraceutical composition..."
       }
     },
+    "systemPrompts": {
+      "title": "System Prompts Catalog",
+      "description": "All prompts used internally by edge functions, grouped by family. Edit to create an override without touching the code. \"Restore default\" removes the override. The default content comes from the manifest at",
+      "syncButton": "Sync with code",
+      "searchPlaceholder": "Filter by name, family or function…",
+      "loading": "Loading catalog…",
+      "empty": "No prompts found.",
+      "functionLabel": "function",
+      "editorPlaceholder": "Paste the prompt content here. Leave empty to use the code default.",
+      "notCatalogued": "Content not catalogued yet. Click \"Edit\" to register an override or wait for the next sync with the edge-function code.",
+      "badge": {
+        "overrideActive": "override active",
+        "override": "override",
+        "empty": "no content"
+      },
+      "action": {
+        "save": "Save",
+        "default": "Default",
+        "edit": "Edit"
+      },
+      "toast": {
+        "loadError": "Failed to load prompts",
+        "syncedTitle": "✅ Synced",
+        "syncedDesc": "{{updated}} of {{total}} prompts updated from code.",
+        "syncFailed": "Sync failed",
+        "saveError": "Save failed",
+        "savedTitle": "✅ Saved",
+        "savedDesc": "Override for \"{{name}}\" updated.",
+        "error": "Error",
+        "restoredTitle": "↩️ Restored",
+        "restoredDesc": "\"{{name}}\" reverted to code default."
+      }
+    },
     "pharmacology": {
       "title": "Pharmacology Base",
       "description": "Catalog of active principles, Brazilian commercial brands and drug interactions",
