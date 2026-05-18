@@ -2751,7 +2751,7 @@
       "recommendationTitle": "AI Recommendation Prompts",
       "recommendationDesc": "Configure prompts for personalized recommendations",
       "noPrompts": "No prompts configured yet.",
-      "generateExamples": "Generate Example Prompts",
+      "systemHint": "Internal system prompts are managed in the System Prompts tab. Use \"New Prompt\" only for custom recommendation prompts.",
       "loading": "Loading prompts...",
       "form": {
         "name": "Prompt Name",
