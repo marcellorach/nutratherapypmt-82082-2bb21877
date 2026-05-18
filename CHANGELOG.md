@@ -24,6 +24,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 5.1.0 -->
 
+### Changed - 2026-05-18 — Extraction Prompts: ações movidas para o topo
+<!-- area: admin · status: entregue -->
+- Removido o rodapé "Restaurar Padrões do {{stage}}" / "Testar com estudo real" do `ExtractionPromptsEditor` — agora ambos os botões aparecem no cabeçalho do card de stages, ficando contextuais ao stage ativo (Stage 1…Triplets).
+- Validadas as duas primeiras edge functions migradas para `fetchSystemPrompt`: `extract-pet-clinical-data` e `relations-auditor` (status 200, prompts resolvidos via DB `default_content`).
+- Files: src/components/administrador/configuracoes/ExtractionPromptsEditor.tsx
+
 ### Fixed - 2026-05-18 — System Prompts: catálogo populado + sync com o código
 <!-- area: prompts · status: entregue · i18n: 1.86.6 -->
 - Causa raiz: os 24 registros em `ai_system_prompts` existiam mas com `default_content` vazio, gerando o badge "sem conteúdo" em todos os cards.
