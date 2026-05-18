@@ -7986,5 +7986,122 @@
       "runDone": "Lote concluído: {{processed}} processados, {{succeeded}} sucesso, {{failed}} falhas.",
       "singleDone": "Produto re-enriquecido."
     }
+  },
+  "compliance": {
+    "title": "Dashboard de Conformidade Regulatória",
+    "subtitle": "Mapeamento ponto a ponto FDA (Jan/2025) · EMA (Set/2024 + EU AI Act) · AVMA (Nov/2025)",
+    "systemNote": "Sistema submetido à conformidade: Senex AI — motor proprietário desenvolvido e operado exclusivamente pela PetMoreTime (2025–presente). Sucessor da arquitetura interna VetGraphRAG/VetMedGraph.",
+    "exportCsv": "Exportar CSV",
+    "runCheck": "Rodar verificação de compliance",
+    "running": "Verificando…",
+    "stats": {
+      "total": "Total de requisitos",
+      "meets": "Atende",
+      "partial": "Parcial",
+      "gap": "Gap"
+    },
+    "filters": {
+      "title": "Filtros",
+      "searchPlaceholder": "Buscar por requisito, evidência, arquivo, ação…",
+      "statusPlaceholder": "Status",
+      "priorityPlaceholder": "Prioridade",
+      "allStatuses": "Todos os status",
+      "allPriorities": "Todas as prioridades",
+      "p0": "P0 — crítica",
+      "p1": "P1 — alta",
+      "p2": "P2 — média",
+      "p3": "P3 — baixa"
+    },
+    "status": {
+      "meets": "Atende",
+      "partial": "Parcial",
+      "gap": "Gap"
+    },
+    "table": {
+      "authority": "Órgão",
+      "requirement": "Requisito",
+      "evidence": "Evidência no sistema",
+      "artifact": "Arquivo / Função",
+      "status": "Status",
+      "priority": "Prio.",
+      "action": "Ação recomendada",
+      "empty": "Nenhum requisito corresponde aos filtros aplicados."
+    },
+    "tabs": {
+      "all": "Todos",
+      "showing": "Mostrando {{shown}} de {{total}} — Atende: {{meets}} · Parcial: {{partial}} · Gap: {{gap}}"
+    },
+    "history": {
+      "title": "Histórico de verificações",
+      "subtitle": "Cada rodada gera um snapshot persistido com o diff em relação à anterior (melhorou / piorou / novo).",
+      "empty": "Nenhuma verificação rodada ainda. Clique em \"Rodar verificação de compliance\" para registrar o primeiro snapshot.",
+      "notesPlaceholder": "Notas opcionais (motivo, escopo, observações)…",
+      "runAt": "Executado em",
+      "version": "Versão",
+      "improved": "{{count}} melhorias",
+      "regressed": "{{count}} regressões",
+      "unchanged": "{{count}} inalterados",
+      "new": "{{count}} novos",
+      "viewDiff": "Ver diff",
+      "hideDiff": "Ocultar diff",
+      "deltaImproved": "Melhorou",
+      "deltaRegressed": "Piorou",
+      "deltaNew": "Novo",
+      "deltaUnchanged": "Inalterado",
+      "from": "antes",
+      "to": "agora",
+      "loadError": "Falha ao carregar histórico de verificações.",
+      "runSuccess": "Verificação registrada com sucesso.",
+      "runError": "Falha ao registrar verificação."
+    }
+  },
+  "audits": {
+    "title": "Auditorias Técnicas Internas",
+    "subtitle": "Histórico versionado de auditorias internas do Senex AI. Cada auditoria está vinculada à versão do sistema auditada (i18n + última entrada do changelog).",
+    "ownership": "Motor Senex AI · © PetMoreTime · 2025–presente · desenvolvimento e operação exclusivos · sucessor da arquitetura interna VetGraphRAG/VetMedGraph",
+    "newButton": "Fazer nova auditoria ({{version}})",
+    "newDialog": {
+      "title": "Solicitar nova auditoria técnica",
+      "description": "Edite o escopo abaixo. A auditoria será gerada pelo agente Lovable na próxima sessão dedicada (geração de relatórios completos com infográficos não roda em runtime).",
+      "auditVersion": "Versão da auditoria",
+      "systemVersion": "Versão do sistema (i18n)",
+      "lastChangelog": "Última atualização do changelog",
+      "scope": "Escopo da auditoria",
+      "cancel": "Cancelar",
+      "submit": "Solicitar auditoria",
+      "submitting": "Enviando…"
+    },
+    "pendingBanner": "{{count}} auditoria(s) aguardando geração pelo agente Lovable.",
+    "loading": "Carregando…",
+    "empty": "Nenhuma auditoria ainda. Clique em \"Fazer nova auditoria\".",
+    "system": "Sistema",
+    "auditCard": {
+      "title": "Auditoria {{id}}",
+      "strengths": "{{count}} forças",
+      "gaps": "{{count}} gaps",
+      "risks": "{{count}} riscos",
+      "pages": "{{count}} págs"
+    },
+    "viewer": {
+      "select": "Selecione uma auditoria",
+      "openNewTab": "Abrir em nova aba",
+      "noHtml": "Esta auditoria não tem versão HTML disponível."
+    },
+    "scopeButton": "Escopo",
+    "editScope": {
+      "title": "Editar escopo — {{id}}",
+      "description": "Versões anteriores do escopo são preservadas no histórico."
+    },
+    "common": {
+      "save": "Salvar",
+      "cancel": "Cancelar"
+    },
+    "toast": {
+      "requestError": "Erro ao solicitar auditoria",
+      "requestSuccessTitle": "Auditoria {{version}} solicitada",
+      "requestSuccessDesc": "O escopo foi registrado. O agente Lovable irá gerar a auditoria na próxima sessão dedicada.",
+      "saveError": "Erro ao salvar",
+      "scopeUpdated": "Escopo atualizado"
+    }
   }
 }

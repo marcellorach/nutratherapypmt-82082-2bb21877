@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-18T03:04:47.956Z
+// Última geração: 2026-05-18T03:53:39.490Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,29 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-18";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-18",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Compliance: i18n PT/EN + renovação manual com log",
+    "bullets": [
+      "Compliance Dashboard agora 100% bilíngue (UI + dados em `complianceData.ts` com `_en`).",
+      "Novo botão \"Rodar verificação de compliance\" + tabela `compliance_audit_runs` (totals, per_authority, diff melhorou/piorou/novo) com RLS admin-only.",
+      "Histórico de verificações colapsável com chips de delta e diff item-a-item.",
+      "Auditorias Técnicas: strings PT migradas para `t('audits.*')`.",
+      "Files: src/components/administrador/compliance/ComplianceDashboard.tsx, src/components/administrador/compliance/complianceData.ts, src/components/administrador/audits/TechnicalAuditsTab.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts, supabase/migrations/"
+    ],
+    "files": [
+      "src/components/administrador/compliance/ComplianceDashboard.tsx",
+      "src/components/administrador/compliance/complianceData.ts",
+      "src/components/administrador/audits/TechnicalAuditsTab.tsx",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.86.3"
+  },
   {
     "date": "2026-05-18",
     "kind": "added",

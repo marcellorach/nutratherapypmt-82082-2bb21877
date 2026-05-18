@@ -715,6 +715,45 @@ export type Database = {
           },
         ]
       }
+      compliance_audit_runs: {
+        Row: {
+          created_at: string
+          diff: Json
+          i18n_version: string | null
+          id: string
+          notes: string | null
+          per_authority: Json
+          run_at: string
+          run_by: string | null
+          system_version: string
+          totals: Json
+        }
+        Insert: {
+          created_at?: string
+          diff?: Json
+          i18n_version?: string | null
+          id?: string
+          notes?: string | null
+          per_authority: Json
+          run_at?: string
+          run_by?: string | null
+          system_version: string
+          totals: Json
+        }
+        Update: {
+          created_at?: string
+          diff?: Json
+          i18n_version?: string | null
+          id?: string
+          notes?: string | null
+          per_authority?: Json
+          run_at?: string
+          run_by?: string | null
+          system_version?: string
+          totals?: Json
+        }
+        Relationships: []
+      }
       compound_dosage_reference: {
         Row: {
           compound_name_en: string
