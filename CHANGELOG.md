@@ -24,6 +24,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 5.1.0 -->
 
+### Changed - 2026-05-18 — Vetorização pré-curadoria centralizada + badges Curadoria/Biblioteca corretas
+<!-- area: curation · status: entregue · i18n: 1.86.9 -->
+- Investigação arquitetural confirmou que a vetorização é passo OBRIGATÓRIO pré-curadoria: `StudyTripletCuration`, `TripletReviewDialog` e a edge `enrich-triplet` leem `study_embeddings.chunk_text` para exibir o "Trecho de Origem" que justifica cada triplet. Sem vetorização → curador decide cego (viola No-Mock Policy + Curation Gatekeeper).
+- `extract-study-entities` agora dispara `vectorize-study` em background (`EdgeRuntime.waitUntil`) logo após marcar o estudo como `processed`, garantindo que TODOS os caminhos de ingestão (SciSpace, upload direto, AI Processing queue) resultem em embeddings antes da curadoria. Não bloqueia a resposta nem aborta extração se a vetorização falhar.
+- Badge **Curadoria** (vermelha) agora conta apenas estudos onde NENHUM triplet foi aprovado/rejeitado (curadoria zerada). Estudos com curadoria parcial em andamento migram para Biblioteca.
+- Badge **Biblioteca** (verde) adicionada à tab `curated-library`: conta estudos com ≥1 triplet aprovado ou rejeitado, alinhando com a definição de "curado" usada na própria tab Biblioteca.
+- Botão **"Vetorizar pendentes (N)"** adicionado no header da Curadoria quando há estudos com triplets sem embeddings (backfill manual dos 10 estudos órfãos detectados no banco).
+- `EstudoCard`: badge "Sem RAG" agora aparece sempre que o estudo tem triplets mas não tem embeddings (não só quando kanban_status='processed'), com tooltip explicativo. Link "Ver original" (DOI ou Google Scholar por título) adicionado ao rodapé do card.
+- Files: supabase/functions/extract-study-entities/index.ts, src/components/administrador/estudos/import/SciImportSection.tsx, src/components/administrador/estudos/import/TabNavigation.tsx, src/components/administrador/estudos/cards/EstudoCard.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json
+
 ### Changed - 2026-05-18 — Digital Twin: órgãos tingem com a doença e variam no tempo
 <!-- area: vet-ui · status: entregue -->
 - Adicionada camada `mix-blend-mode: multiply` sobre cada órgão (cérebro, coração, pulmões, fígado, rins, intestinos, pâncreas, estômago, bexiga, articulações) em `DogAnatomySVG`: o desenho original do PNG anatômico fica tingido de amarelo→laranja→vermelho conforme a intensidade, em vez de uma elipse colorida flutuando por cima.

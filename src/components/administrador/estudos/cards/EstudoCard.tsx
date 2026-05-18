@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, ArrowDown, ArrowRight, ArrowLeft, Sparkles, Loader2, CheckCircle2, AlertCircle, Trash2, Clock, Database, FileText, Brain } from 'lucide-react';
+import { ArrowUp, ArrowDown, ArrowRight, ArrowLeft, Sparkles, Loader2, CheckCircle2, AlertCircle, Trash2, Clock, Database, FileText, Brain, ExternalLink } from 'lucide-react';
 import EvidenceTag from '../../tags/EvidenceTag';
 import NutraceuticalTag from '../../tags/NutraceuticalTag';
 import OutcomeTag from '../../tags/OutcomeTag';
@@ -296,12 +296,12 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
                 RAG: {embeddingsCount}
               </Badge>
             )}
-            {embeddingsCount === 0 && localEstudo.kanban_status === 'processed' && (
+            {embeddingsCount === 0 && tripletCount !== null && tripletCount > 0 && (
               <Badge 
                 variant="outline" 
                 className="bg-amber-100 text-amber-800 border-amber-300 flex items-center gap-1 cursor-pointer hover:bg-amber-200"
                 onClick={handleVectorize}
-                title={t('studies.card.clickToVectorize')}
+                title={t('studies.card.noRagTooltip', 'Este estudo não tem texto vetorizado, então a curadoria não consegue mostrar o trecho original que justifica cada triplet. Clique para vetorizar agora.')}
               >
                 <AlertCircle className="h-3 w-3" />
                 {t('studies.card.noRag')}
@@ -534,14 +534,35 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
           </div>
         )}
 
-        <Button 
-          variant="outline" 
-          className="w-full" 
-          size="sm"
-          onClick={() => onView(localEstudo)}
-        >
-          {buttonLabel || t('studies.kanban.viewDetails')}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            className="flex-1" 
+            size="sm"
+            onClick={() => onView(localEstudo)}
+          >
+            {buttonLabel || t('studies.kanban.viewDetails')}
+          </Button>
+          {(() => {
+            const meta = (localEstudo.full_text_metadata as any) || {};
+            const doi = meta.doi || analysisData?.doi || localEstudo.doi;
+            const url = doi
+              ? `https://doi.org/${String(doi).replace(/^https?:\/\/(dx\.)?doi\.org\//i, '')}`
+              : `https://scholar.google.com/scholar?q=${encodeURIComponent(localEstudo.title || localEstudo.original_filename || '')}`;
+            return (
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary underline-offset-2 hover:underline px-2 py-1"
+                title={t('studies.card.viewOriginalStudy', 'Abrir estudo original em nova aba')}
+              >
+                <ExternalLink className="h-3 w-3" />
+                {t('studies.card.viewOriginalStudy', 'Ver original')}
+              </a>
+            );
+          })()}
+        </div>
       </CardContent>
     </Card>
   );

@@ -441,6 +441,39 @@ serve(async (req) => {
       })
       .eq('id', studyId);
 
+    // ==================== AUTO-VECTORIZATION (pré-curadoria) ====================
+    // A curadoria humana depende dos chunks vetorizados para exibir o "Trecho de Origem"
+    // que justifica cada triplet. Disparamos em background para não bloquear a resposta.
+    try {
+      const vectorizePromise = fetch(
+        `${Deno.env.get('SUPABASE_URL')}/functions/v1/vectorize-study`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+          },
+          body: JSON.stringify({ studyId }),
+        }
+      ).then(async (r) => {
+        if (!r.ok) {
+          const text = await r.text();
+          console.warn(`⚠️ vectorize-study falhou (${r.status}): ${text.slice(0, 200)}`);
+        } else {
+          console.log(`✅ vectorize-study disparado em background para ${studyId}`);
+        }
+      }).catch((e) => {
+        console.warn(`⚠️ vectorize-study fetch error: ${e.message}`);
+      });
+      // @ts-ignore - EdgeRuntime existe em Supabase Edge mas não está tipado
+      if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
+        // @ts-ignore
+        EdgeRuntime.waitUntil(vectorizePromise);
+      }
+    } catch (vecErr: any) {
+      console.warn(`⚠️ Falha ao agendar vectorize-study: ${vecErr.message}`);
+    }
+
     // ==================== CRIAR TRIPLETS AUTOMATICAMENTE ====================
     console.log('🔗 Criando triplets para curadoria no Knowledge Graph...');
     const triplets = [];

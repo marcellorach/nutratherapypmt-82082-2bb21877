@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from 'react-i18next';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { RefreshCcw } from "lucide-react";
+import { RefreshCcw, Sparkles, Loader2 } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 
 import TabHeader from './TabHeader';
@@ -42,6 +42,9 @@ const SciImportSection: React.FC = () => {
   const [isAiProcessing, setIsAiProcessing] = useState(false);
   const [pendingCurationCount, setPendingCurationCount] = useState(0);
   const [aiQueueCount, setAiQueueCount] = useState(0);
+  const [libraryCount, setLibraryCount] = useState(0);
+  const [missingVectorCount, setMissingVectorCount] = useState(0);
+  const [backfilling, setBackfilling] = useState(false);
 
   // Fetch tab indicators on mount and periodically
   useEffect(() => {
@@ -73,13 +76,42 @@ const SciImportSection: React.FC = () => {
         }
         setAiQueueCount(pendingQueue);
 
-        // Count distinct studies with pending curation (not raw triplet count)
-        const { data: pendingTriplets } = await supabase
+        // Buscar todos triplets agrupados por study para classificar entre
+        // "em curadoria" (nenhum approved/rejected ainda) e "biblioteca" (>=1 reviewed)
+        const { data: allTriplets } = await supabase
           .from('triplet_extractions')
-          .select('study_id')
-          .eq('curation_status', 'pending');
-        const distinctStudies = new Set((pendingTriplets ?? []).map((t: any) => t.study_id));
-        setPendingCurationCount(distinctStudies.size);
+          .select('study_id, curation_status');
+        const byStudy = new Map<string, { hasReviewed: boolean; hasPending: boolean }>();
+        for (const t of (allTriplets ?? []) as any[]) {
+          const entry = byStudy.get(t.study_id) ?? { hasReviewed: false, hasPending: false };
+          if (t.curation_status === 'approved' || t.curation_status === 'rejected') {
+            entry.hasReviewed = true;
+          } else if (t.curation_status === 'pending') {
+            entry.hasPending = true;
+          }
+          byStudy.set(t.study_id, entry);
+        }
+        let curationOnly = 0;
+        let libraryStudies = 0;
+        for (const v of byStudy.values()) {
+          if (v.hasReviewed) libraryStudies += 1;
+          else if (v.hasPending) curationOnly += 1;
+        }
+        setPendingCurationCount(curationOnly);
+        setLibraryCount(libraryStudies);
+
+        // Contar estudos com triplets mas sem embeddings (vetorização faltando)
+        const studyIdsWithTriplets = Array.from(byStudy.keys());
+        if (studyIdsWithTriplets.length > 0) {
+          const { data: embRows } = await supabase
+            .from('study_embeddings')
+            .select('study_id')
+            .in('study_id', studyIdsWithTriplets);
+          const vectorized = new Set((embRows ?? []).map((r: any) => r.study_id));
+          setMissingVectorCount(studyIdsWithTriplets.filter((id) => !vectorized.has(id)).length);
+        } else {
+          setMissingVectorCount(0);
+        }
       } catch (e) {
         console.error('Error fetching tab indicators:', e);
       }
@@ -167,6 +199,37 @@ const SciImportSection: React.FC = () => {
     fetchEstudos();
   };
 
+  const handleBackfillVectorize = async () => {
+    try {
+      setBackfilling(true);
+      // Re-descobrir estudos sem embeddings
+      const { data: allTriplets } = await supabase
+        .from('triplet_extractions')
+        .select('study_id');
+      const studyIds = Array.from(new Set((allTriplets ?? []).map((t: any) => t.study_id)));
+      const { data: embRows } = await supabase
+        .from('study_embeddings')
+        .select('study_id')
+        .in('study_id', studyIds);
+      const vectorized = new Set((embRows ?? []).map((r: any) => r.study_id));
+      const toProcess = studyIds.filter((id) => !vectorized.has(id));
+      let ok = 0; let fail = 0;
+      for (const id of toProcess) {
+        try {
+          const { error } = await supabase.functions.invoke('vectorize-study', { body: { studyId: id } });
+          if (error) { fail += 1; } else { ok += 1; }
+        } catch { fail += 1; }
+      }
+      toast({
+        title: t('studies.curation.backfillDone', 'Vetorização concluída'),
+        description: t('studies.curation.backfillSummary', '{{ok}} ok, {{fail}} falharam', { ok, fail }),
+      });
+      setMissingVectorCount(fail);
+    } finally {
+      setBackfilling(false);
+    }
+  };
+
   const getNutraceuticalScore = (name: string): number => {
     const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 50;
     return 2 + (hash / 10);
@@ -189,7 +252,7 @@ const SciImportSection: React.FC = () => {
       <Card>
         <Tabs value={activeTab} className="w-full">
           <TabHeader activeTab={activeTab} scispaceLogo={SCISPACE_LOGO_URL} onProcessWithAI={handleProcessWithAI} />
-          <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} isProcessing={isAiProcessing} pendingCurationCount={pendingCurationCount} aiQueueCount={aiQueueCount} />
+          <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} isProcessing={isAiProcessing} pendingCurationCount={pendingCurationCount} aiQueueCount={aiQueueCount} libraryCount={libraryCount} />
 
           <div className="p-6">
             <TabsContent value="external-search">
@@ -221,6 +284,19 @@ const SciImportSection: React.FC = () => {
                     <Badge variant="secondary">{estudos.length}</Badge>
                   </div>
                   <div className="flex items-center gap-2">
+                    {missingVectorCount > 0 && (
+                      <Button
+                        onClick={handleBackfillVectorize}
+                        variant="outline"
+                        size="sm"
+                        disabled={backfilling}
+                        className="flex items-center gap-2 border-amber-300 text-amber-800 hover:bg-amber-50"
+                        title={t('studies.curation.backfillTooltip', 'Estudos com triplets sem texto vetorizado — necessário para a curadoria ver os trechos de origem')}
+                      >
+                        {backfilling ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                        {t('studies.curation.backfillVectorize', 'Vetorizar pendentes')} ({missingVectorCount})
+                      </Button>
+                    )}
                     <Button 
                       onClick={fetchEstudos} 
                       variant="outline" 

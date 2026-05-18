@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-18T05:32:43.196Z
+// Última geração: 2026-05-18T18:37:30.708Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,32 @@ export const lastChangelogDate = "2026-05-18";
 export const senexVersion = "5.1.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-18",
+    "kind": "changed",
+    "area": "curation",
+    "status": "entregue",
+    "title": "Vetorização pré-curadoria centralizada + badges Curadoria/Biblioteca corretas",
+    "bullets": [
+      "Investigação arquitetural confirmou que a vetorização é passo OBRIGATÓRIO pré-curadoria: `StudyTripletCuration`, `TripletReviewDialog` e a edge `enrich-triplet` leem `study_embeddings.chunk_text` para exibir o \"Trecho de Origem\" que justifica cada triplet. Sem vetorização → curador decide cego (viola No-Mock Policy + Curation Gatekeeper).",
+      "`extract-study-entities` agora dispara `vectorize-study` em background (`EdgeRuntime.waitUntil`) logo após marcar o estudo como `processed`, garantindo que TODOS os caminhos de ingestão (SciSpace, upload direto, AI Processing queue) resultem em embeddings antes da curadoria. Não bloqueia a resposta nem aborta extração se a vetorização falhar.",
+      "Badge Curadoria (vermelha) agora conta apenas estudos onde NENHUM triplet foi aprovado/rejeitado (curadoria zerada). Estudos com curadoria parcial em andamento migram para Biblioteca.",
+      "Badge Biblioteca (verde) adicionada à tab `curated-library`: conta estudos com ≥1 triplet aprovado ou rejeitado, alinhando com a definição de \"curado\" usada na própria tab Biblioteca.",
+      "Botão \"Vetorizar pendentes (N)\" adicionado no header da Curadoria quando há estudos com triplets sem embeddings (backfill manual dos 10 estudos órfãos detectados no banco).",
+      "`EstudoCard`: badge \"Sem RAG\" agora aparece sempre que o estudo tem triplets mas não tem embeddings (não só quando kanban_status='processed'), com tooltip explicativo. Link \"Ver original\" (DOI ou Google Scholar por título) adicionado ao rodapé do card.",
+      "Files: supabase/functions/extract-study-entities/index.ts, src/components/administrador/estudos/import/SciImportSection.tsx, src/components/administrador/estudos/import/TabNavigation.tsx, src/components/administrador/estudos/cards/EstudoCard.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json"
+    ],
+    "files": [
+      "supabase/functions/extract-study-entities/index.ts",
+      "src/components/administrador/estudos/import/SciImportSection.tsx",
+      "src/components/administrador/estudos/import/TabNavigation.tsx",
+      "src/components/administrador/estudos/cards/EstudoCard.tsx",
+      "src/i18n.ts",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json"
+    ],
+    "i18nVersion": "1.86.9"
+  },
   {
     "date": "2026-05-18",
     "kind": "changed",
