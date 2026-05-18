@@ -23,6 +23,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-18 — Bridge Nutrition Gaps → Engine de Recomendação
+<!-- area: clinical-pipeline · status: entregue · i18n: none -->
+- `buildLongitudinalContext` (frontend) agora roda `analyzeNutritionGaps` para o pet ativo e envia os gaps quantitativos não-adequados (até 10) dentro de `dietProfile.gaps` para a edge function `hybrid-recommendation`.
+- Edge `hybrid-recommendation`: novo bloco `NUTRITION_GAPS [WEIGHT: 0.8]` renderizado no prompt com `observed / target / delta_pct / rationale / source` por nutriente em déficit/excesso.
+- Prompts ENRICH e FALLBACK atualizados: o LLM PRECISA selecionar pelo menos um composto que feche cada nutriente DEFICIENT listado e NÃO pode recomendar nutrientes já ADEQUATE/EXCESS na dieta; o "mechanism" deve citar explicitamente o gap fechado.
+- Sem mocks — se não houver `pet_food_nutrition` linkada ou pet sem peso, o bloco é simplesmente omitido (analyzer já trata `no_linked_products`).
+- Files: supabase/functions/hybrid-recommendation/index.ts, src/services/hybrid-recommendation-service.ts
+
 ### Fixed - 2026-05-17 — Nutrition: kcal as-fed para ração úmida + cache PostgREST
 <!-- area: admin · status: entregue · i18n: 1.80.0 -->
 - Edge `enrich-pet-food-product`: converte `kcal_per_kg` reportado em base seca para as-fed quando moisture ≥ 50% (resolve Cesar/Sheba mostrando ~9000 kcal/kg).
