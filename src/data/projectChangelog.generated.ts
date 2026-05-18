@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-18T00:07:27.037Z
+// Última geração: 2026-05-18T00:57:28.917Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -41,6 +41,25 @@ export const changelog: ChangelogEntry[] = [
       "src/data/nutritionRequirementsCanine.ts",
       "src/components/administrador/pet-food/PetFoodCatalogTab.tsx",
       "src/i18n.ts"
+    ],
+    "i18nVersion": "1.80.0"
+  },
+  {
+    "date": "2026-05-17",
+    "kind": "fixed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Nutrition: kcal as-fed para ração úmida + cache PostgREST",
+    "bullets": [
+      "Edge `enrich-pet-food-product`: converte `kcal_per_kg` reportado em base seca para as-fed quando moisture ≥ 50% (resolve Cesar/Sheba mostrando ~9000 kcal/kg).",
+      "`NOTIFY pgrst, 'reload schema'` para liberar gravação de `confidence`, `completeness_score` e `data_filled_at` em `pet_food_nutrition` (estavam silenciosamente sendo descartados pelo cache do PostgREST).",
+      "Reprocessados os 19 produtos das marcas Mars recém-adicionadas com a lógica corrigida.",
+      "UI: badge \"Rótulo\" (verde) vs \"IA\" (âmbar) no card de cada ração na aba Nutrition → Rações.",
+      "Files: supabase/functions/enrich-pet-food-product/index.ts, src/components/administrador/pet-food/PetFoodCatalogTab.tsx"
+    ],
+    "files": [
+      "supabase/functions/enrich-pet-food-product/index.ts",
+      "src/components/administrador/pet-food/PetFoodCatalogTab.tsx"
     ],
     "i18nVersion": "1.80.0"
   },
