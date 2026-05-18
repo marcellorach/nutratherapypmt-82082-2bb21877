@@ -2084,7 +2084,8 @@
         "accessRequests": "Access Requests",
         "organograma": "Organogram",
         "complianceDashboard": "FDA/EMA/AVMA Compliance",
-        "technicalAudits": "Technical Audits"
+        "technicalAudits": "Technical Audits",
+        "aboutSenex": "About Senex AI"
       },
       "settingsButton": "Settings"
     },
