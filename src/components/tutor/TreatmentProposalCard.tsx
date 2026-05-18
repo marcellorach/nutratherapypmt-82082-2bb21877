@@ -397,6 +397,19 @@ const TreatmentProposalCard: React.FC<Props> = ({
                     <p className="font-medium text-foreground text-sm">{c.name}</p>
                     {c.reason && <p className="text-xs text-muted-foreground mt-0.5">{c.reason}</p>}
                     {c.mechanism && <p className="text-[10px] text-muted-foreground/70 mt-0.5 italic">{c.mechanism}</p>}
+                    {Array.isArray(c.closes_gaps) && c.closes_gaps.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {c.closes_gaps.map((g: string, gi: number) => (
+                          <Badge
+                            key={gi}
+                            variant="outline"
+                            className="text-[9px] border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                          >
+                            {t('tutor.proposal.closesGap', { gap: g })}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   {c.dosage && (
                     <Badge variant="outline" className="text-xs shrink-0 ml-2">{c.dosage}</Badge>
