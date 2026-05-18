@@ -12,9 +12,9 @@ export interface AIModelConfig {
 const DEFAULT_CONFIG: AIModelConfig = {
   extraction: 'gemini-3-pro-preview',
   triplets: 'gemini-3-pro-preview',
-  chat: 'gemini-3-pro-preview',
+  chat: 'google/gemini-3-flash-preview',
   translate: 'gemini-3-pro-preview',
-  embeddings: 'text-embedding-004',
+  embeddings: 'gemini-embedding-001@768d',
 };
 
 export const useAIConfig = () => {
@@ -61,10 +61,19 @@ export const useAIConfig = () => {
   const getModelDisplayName = useCallback((modelId: string): string => {
     const modelNames: Record<string, string> = {
       'gemini-3-pro-preview': 'Gemini 3 Pro Preview',
+      'google/gemini-3-pro-preview': 'Gemini 3 Pro Preview',
+      'google/gemini-3-flash-preview': 'Gemini 3 Flash Preview',
+      'google/gemini-3.1-pro-preview': 'Gemini 3.1 Pro Preview',
+      'google/gemini-3.1-flash-lite-preview': 'Gemini 3.1 Flash Lite Preview',
+      'google/gemini-2.5-pro': 'Gemini 2.5 Pro',
       'gemini-2.5-flash': 'Gemini 2.5 Flash',
+      'google/gemini-2.5-flash': 'Gemini 2.5 Flash',
       'gemini-2.0-flash-exp': 'Gemini 2.0 Flash Experimental',
       'gemini-1.5-pro': 'Gemini 1.5 Pro',
+      'openai/gpt-5': 'GPT-5',
+      'openai/gpt-5-mini': 'GPT-5 Mini',
       'text-embedding-004': 'Text Embedding 004',
+      'gemini-embedding-001@768d': 'Gemini Embedding 001 (768d, RETRIEVAL_QUERY)',
     };
     return modelNames[modelId] || modelId;
   }, []);

@@ -1,93 +1,64 @@
-## Investigação arquitetural: quando vetorizar?
 
-### Onde os embeddings são CONSUMIDOS hoje
+## Contexto confirmado
 
-Encontrei 3 lugares que leem `study_embeddings.chunk_text` — **todos durante curadoria, antes da aprovação**:
+- **Gêmeo digital, hybrid-recommendation, calculate-recommendation-confidence, breed-predisposition, lab-interpretation, pet-clinical-chat**: NÃO consomem vetores. Operam sobre KG (triplets/hierarchical_edges) e LLM puro. → **Zero risco de regressão clínica** nesta mudança.
+- **Único consumidor real de vetor**: `document-chat` (chat RAG por estudo, área admin).
+- **Pseudo-consumidor**: `clinical-analysis-pipeline.ts:1378` faz `ILIKE chunk_text` (texto, não vetor) só para mostrar excerpt — pode permanecer.
 
-1. `StudyTripletCuration.tsx:727` — busca chunks que contêm os nomes do subject/object do triplet e exibe como **"Trecho de Origem"** (caixa amarela na sua foto 6).
-2. `TripletReviewDialog.tsx:94` — mesmo padrão, em outro modal de revisão.
-3. `enrich-triplet/index.ts:41` — edge function de enriquecimento de triplets usa os chunks como contexto para a LLM.
+## Decisão arquitetural
 
-### Onde os embeddings são GERADOS hoje
+**Embeddings = Google AI direto, gemini-embedding-001, 768d**, com `taskType` correto (`RETRIEVAL_DOCUMENT` na indexação, `RETRIEVAL_QUERY` na busca). Lovable AI Gateway não expõe `taskType`, então perderíamos ~10-15% de recall — não justifica.
 
-Apenas 2 callers de `vectorize-study`:
+**Chat LLM do document-chat = configurável via `useAIConfig`** (admin escolhe entre gemini-3.1-pro-preview, gemini-3-flash-preview, gpt-5, etc. via Lovable AI Gateway). Default: `google/gemini-3-flash-preview`.
 
-1. `useProcessingLogic.ts:188` — fluxo da aba **"Processamento IA"**, dispara automaticamente após extração Gemini (comentário literal: `// AUTO-VECTORIZATION: Generate embeddings for RAG`).
-2. `EstudoCard.tsx:92` — botão manual ("Sem RAG" clicável).
+## Mudanças
 
-### Conclusão arquitetural (alinhada aos princípios do projeto)
+### 1. `supabase/functions/vectorize-study/index.ts`
+- Garantir Google AI direto com `taskType: "RETRIEVAL_DOCUMENT"` e `outputDimensionality: 768` em cada chamada de embedding.
+- Adicionar header `embedding_model_version = "gemini-embedding-001@768d"` no metadata do registro (coluna existente ou em `full_text_metadata.embedding_model`) para detectar mismatch futuro.
 
-A vetorização **é, por design, um passo pré-curadoria** — sem ela o curador humano não consegue ver o trecho do PDF que justifica cada triplet, o que viola dois princípios core do projeto:
+### 2. `supabase/functions/document-chat/index.ts`
+- **Embeddings da query**: trocar Lovable AI Gateway (`text-embedding-004`) por Google AI direto com `taskType: "RETRIEVAL_QUERY"`, `outputDimensionality: 768`, modelo `gemini-embedding-001` — alinhado ao `vectorize-study`.
+- **Chat LLM (geração da resposta)**: continuar via Lovable AI Gateway, mas ler o modelo de `useAIConfig` (campo `documentChatModel`, default `google/gemini-3-flash-preview`). Tratar erros 402/429.
 
-- **No-Mock Policy** — sem chunk real, exibimos "Texto original não disponível" e a decisão de aprovar/rejeitar fica cega.
-- **Curation Gatekeeper** — a curadoria humana é a porta de entrada do KG; tirar a evidência textual dela degrada a qualidade do gatekeeper.
+### 3. `src/hooks/useAIConfig.ts` (ou config admin equivalente)
+- Adicionar nova chave `documentChatModel` com dropdown na tela de Configurações de IA listando: gemini-3.1-pro-preview, gemini-3-flash-preview, gemini-2.5-pro, gemini-2.5-flash, gpt-5, gpt-5-mini. Persistir em `ai_configurations` (tabela já existe).
 
-**Então a resposta à sua pergunta é: SIM, deve acontecer antes da curadoria.** O alerta "Sem RAG" é legítimo e deve permanecer.
+### 4. Backfill dos órfãos
+- Endpoint `handleBackfillVectorize` em `SciImportSection.tsx` já existe; só ajustar para chamar `vectorize-study` com o novo `taskType` (transparente — o edge function cuida).
+- Adicionar contagem de "órfãos por modelo desatualizado" (`full_text_metadata.embedding_model !== "gemini-embedding-001@768d"`) ao mesmo contador "Vetorizar pendentes (N)".
 
-### Por que 10 estudos chegaram sem embeddings (a falha real)
+### 5. UX / i18n
+- Renomear badge "Sem RAG" → "Sem trechos indexados" (`noChunksIndexed`).
+- Tooltip atualizado: "Os trechos vetoriais (RAG) ainda não foram gerados. A curadoria continua disponível, mas o chat do estudo não terá precisão semântica até a vetorização concluir."
+- Adicionar ao admin AI Config tela: descrição "Modelo usado para responder no chat do estudo individual (RAG)".
+- Incrementar `I18N_VERSION` → `1.86.10`.
 
-Vetorização hoje só roda em **um** dos caminhos de ingestão (aba "Processamento IA"). Os outros caminhos pulam o passo:
+### 6. CHANGELOG + memória
+- Entrada `[Unreleased] → Changed`: "Padronizado pipeline de embeddings em Google AI direto (gemini-embedding-001, 768d) com taskType RETRIEVAL_DOCUMENT/QUERY. document-chat agora usa o mesmo modelo do vectorize-study, eliminando incompatibilidade de vetores. Modelo do LLM do chat tornou-se configurável via Admin → Configurações de IA."
+- Atualizar `mem://architecture/vectorization-is-pre-curation` com seção "Modelo canônico: gemini-embedding-001@768d via Google AI direto, taskType obrigatório".
+- Rodar `npm run sync:changelog`.
 
-- Import SciSpace 2-step (`SciSpace2StepImport`)
-- File upload que chama `process-study` direto sem passar pelo queue
-- `batch-reprocess-triplets`
-- Chamadas diretas de `gemini-file-search`
+## Validação pós-deploy
 
-Resultado: 10 estudos com triplets e zero embeddings, alguns inclusive já `approved`.
+1. `supabase--curl_edge_functions` em `vectorize-study` com 1 study_id de teste — confirmar 768 dims salvos.
+2. `supabase--curl_edge_functions` em `document-chat` com query simples — confirmar resposta com citações.
+3. Verificar que badge "Sem trechos indexados" sumiu nos studies pós-backfill.
+4. `supabase--read_query` para confirmar `count(*) FROM study_embeddings WHERE array_length(embedding,1) = 768` cresceu.
 
-Há ainda um problema **separado** de qualidade: 4 desses 10 estudos têm `full_text_content` curtíssimo (562–916 chars) — só o abstract foi parseado do PDF. Mesmo vetorizando, o chunk único seria pobre. Esse é um problema do parser de PDF, não da vetorização — fora do escopo desta tarefa, mas vou listar os IDs para você decidir depois.
+## Arquivos modificados
 
----
+- `supabase/functions/vectorize-study/index.ts`
+- `supabase/functions/document-chat/index.ts`
+- `src/hooks/useAIConfig.ts` + tela de config admin
+- `src/components/administrador/estudos/import/SciImportSection.tsx` (tooltip + contador)
+- `src/components/administrador/estudos/cards/EstudoCard.tsx` (rename badge)
+- `src/locales/pt/translation.json`, `src/locales/en/translation.json`
+- `src/i18n.ts` (versão)
+- `CHANGELOG.md`, `mem://architecture/vectorization-is-pre-curation`
 
-## Plano de implementação revisto
+## Fora de escopo (intencional)
 
-### 1. Garantir vetorização em TODOS os caminhos de ingestão (correção arquitetural)
-
-Em vez de espalhar `invoke('vectorize-study')` por cada caller, **centralizar no orchestrator** `process-study` (edge function): após salvar o estudo com sucesso e antes de retornar, disparar `vectorize-study` de forma assíncrona não-bloqueante (`EdgeRuntime.waitUntil`).
-
-- Arquivo: `supabase/functions/process-study/index.ts`
-- Mudança: após o `upsert` bem-sucedido, agendar `fetch` para `vectorize-study` em background (não bloqueia a resposta, não falha o processamento se a vetorização falhar — só loga).
-- Remover a chamada duplicada de `useProcessingLogic.ts:188` (passa a ser redundante).
-
-Para os caminhos que **não** chamam `process-study` (SciSpace direct path, se aplicável), adicionar trigger equivalente — vou verificar caller-by-caller na implementação.
-
-### 2. Backfill dos 10 estudos órfãos
-
-Adicionar um botão admin único **"Vetorizar estudos pendentes (N)"** no header da seção curadoria, que:
-
-- consulta estudos com triplets e sem embeddings,
-- enfileira `vectorize-study` para cada um sequencialmente,
-- mostra progresso.
-
-Local: `SciImportSection.tsx`, ao lado do botão Refresh existente, só aparece quando `N > 0`.
-
-### 3. Manter o aviso "Sem RAG" — mas melhorar UX
-
-O badge amber atual ("Sem RAG") é correto e fica. Adicionar:
-
-- **tooltip explicativo**: "Este estudo não tem texto vetorizado, então a curadoria não consegue mostrar o trecho original que justifica cada triplet. Clique para vetorizar agora."
-- no `EstudoDetailDialog`, quando o usuário abre um estudo sem embeddings, exibir um banner discreto no topo com o mesmo aviso + botão "Vetorizar agora".
-
-### 4. Itens (a), (b), (c) do pedido original — sem mudança
-
-- **(a) Curadoria badge**: contar só estudos com triplets onde `nenhum` foi aprovado/rejeitado (atualmente 14 no banco).
-- **(b) Biblioteca badge**: contar estudos com pelo menos 1 triplet `approved`/`rejected` (atualmente 43).
-- **(c) Link "Ver estudo original"** no card fechado, canto inferior direito: como o banco não tem DOI/URL armazenado, fallback para Google Scholar `?q={title}`. Se no futuro DOI for armazenado em `full_text_metadata.doi`, o link automaticamente usa `https://doi.org/{doi}`.
-
-### Memória a atualizar
-
-Criar `mem://architecture/vectorization-is-pre-curation` — registra que vetorização é passo obrigatório pré-curadoria, deve rodar em todos os caminhos de ingestão (centralizado em `process-study`), e o curador depende dos chunks para ver o "Trecho de Origem".
-
-### Arquivos afetados
-
-- `supabase/functions/process-study/index.ts` — disparar `vectorize-study` em background
-- `src/hooks/ntai/useProcessingLogic.ts` — remover chamada redundante
-- `src/components/administrador/estudos/import/SciImportSection.tsx` — badges (a)(b), botão backfill
-- `src/components/administrador/estudos/import/TabNavigation.tsx` — prop `libraryCount`
-- `src/components/administrador/estudos/cards/EstudoCard.tsx` — link "Ver original", tooltip melhorado
-- `src/dialogs/EstudoDetailDialog.tsx` (ou caminho equivalente) — banner pré-curadoria sem RAG
-- `src/locales/{pt,en}/translation.json` + `src/i18n.ts` — novas chaves + bump `I18N_VERSION`
-- `CHANGELOG.md` + `npm run sync:changelog`
-- `mem://architecture/vectorization-is-pre-curation`
-
-Sem migrations. Sem mudança de schema.
+- **Não tocar** em `clinical-analysis-pipeline`, `hybrid-recommendation`, gêmeo digital, `PatientKnowledgeSubgraph`, `breed-predisposition`, `lab-interpretation` — auditado, não usam vetores.
+- Não migrar para Lovable AI Gateway nos embeddings (perda de `taskType`).
+- Não mudar dimensionalidade (768 já é o padrão do projeto, evita re-vectorização em massa).

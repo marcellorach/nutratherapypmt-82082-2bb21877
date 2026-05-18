@@ -1028,6 +1028,8 @@
       "completed": "Concluído",
       "errorStatus": "Erro",
       "noRag": "Sem RAG",
+      "noChunksIndexed": "Sem trechos indexados",
+      "noChunksIndexedTooltip": "Os trechos vetoriais (RAG) ainda não foram gerados. A curadoria continua disponível, mas o chat do estudo não terá precisão semântica até a vetorização concluir. Clique para vetorizar agora.",
       "positiveInteractions": "Interações Positivas (Estimulação)",
       "negativeInteractions": "Interações Inibitórias",
       "sideEffectsLabel": "Efeitos Colaterais",

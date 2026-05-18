@@ -301,10 +301,10 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
                 variant="outline" 
                 className="bg-amber-100 text-amber-800 border-amber-300 flex items-center gap-1 cursor-pointer hover:bg-amber-200"
                 onClick={handleVectorize}
-                title={t('studies.card.noRagTooltip', 'Este estudo não tem texto vetorizado, então a curadoria não consegue mostrar o trecho original que justifica cada triplet. Clique para vetorizar agora.')}
+                title={t('studies.card.noChunksIndexedTooltip', 'Os trechos vetoriais (RAG) ainda não foram gerados. A curadoria continua disponível, mas o chat do estudo não terá precisão semântica até a vetorização concluir. Clique para vetorizar agora.')}
               >
                 <AlertCircle className="h-3 w-3" />
-                {t('studies.card.noRag')}
+                {t('studies.card.noChunksIndexed', 'Sem trechos indexados')}
               </Badge>
             )}
           </div>
