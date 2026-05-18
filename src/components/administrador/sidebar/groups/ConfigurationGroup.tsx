@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bot, Database, Cpu, ChevronRight, Check, Languages, ListTree, ShieldCheck, FileSearch, CheckCircle2, FileEdit, Palette, UserCog, Zap, Gauge, Info } from "lucide-react";
+import { Bot, Database, Cpu, ChevronRight, Check, Languages, ListTree, ShieldCheck, FileSearch, CheckCircle2, Palette, UserCog, Zap, Gauge, Info } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useTranslation } from 'react-i18next';
 
@@ -143,39 +143,19 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton 
-          isActive={currentStep === "translation-audit"} 
-          onClick={() => handleStepClick("translation-audit")}
-          className={currentStep === "translation-audit" ? "bg-primary/10 text-primary" : ""}
+          isActive={currentStep === "translations" || currentStep === "translation-audit" || currentStep === "translation-manager"}
+          onClick={() => handleStepClick("translations")}
+          className={(currentStep === "translations" || currentStep === "translation-audit" || currentStep === "translation-manager") ? "bg-primary/10 text-primary" : ""}
         >
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
-              <Languages className={`h-4 w-4 mr-2 ${currentStep === "translation-audit" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.configuration.translationAudit')}</span>
+              <Languages className={`h-4 w-4 mr-2 ${(currentStep === "translations" || currentStep === "translation-audit" || currentStep === "translation-manager") ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.configuration.translationsHub')}</span>
               <ConfiguredCheck />
             </div>
             <div className="flex items-center ml-auto">
-              {currentStep === "translation-audit" && (
+              {(currentStep === "translations" || currentStep === "translation-audit" || currentStep === "translation-manager") && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-              )}
-            </div>
-          </div>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton
-          isActive={currentStep === "translation-manager"}
-          onClick={() => handleStepClick("translation-manager")}
-          className={currentStep === "translation-manager" ? "bg-primary/10 text-primary" : ""}
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <FileEdit className={`h-4 w-4 mr-2 ${currentStep === "translation-manager" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.configuration.translationManager')}</span>
-              <ConfiguredCheck />
-            </div>
-            <div className="flex items-center ml-auto">
-              {currentStep === "translation-manager" && (
-                <ChevronRight className="h-4 w-4 ml-auto text-primary" />
               )}
             </div>
           </div>

@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-18T03:58:07.660Z
+// Última geração: 2026-05-18T04:04:01.239Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,25 @@ export const lastChangelogDate = "2026-05-18";
 export const senexVersion = "5.1.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-18",
+    "kind": "changed",
+    "area": "meta",
+    "status": "entregue",
+    "title": "Header/Footer: versão Senex auto-lida do CHANGELOG",
+    "bullets": [
+      "`scripts/sync-changelog.mjs` agora extrai `<!-- senex: x.y.z -->` do bloco `[Unreleased]` e emite `senexVersion` em `projectChangelog.generated.ts`.",
+      "`src/config/senex-version.ts` consome `senexVersion` + `lastChangelogDate` — sem mais hardcode. Header e Footer atualizam sozinhos.",
+      "Sidebar: ícone \"configurado\" do item FDA/EMA/AVMA Compliance agora fica inline ao lado da palavra, igual aos demais (deixou de ficar centrado à direita quando o texto quebra em 2 linhas).",
+      "Files: scripts/sync-changelog.mjs, src/config/senex-version.ts, src/data/projectChangelog.generated.ts, src/components/administrador/sidebar/groups/ConfigurationGroup.tsx"
+    ],
+    "files": [
+      "scripts/sync-changelog.mjs",
+      "src/config/senex-version.ts",
+      "src/data/projectChangelog.generated.ts",
+      "src/components/administrador/sidebar/groups/ConfigurationGroup.tsx"
+    ]
+  },
   {
     "date": "2026-05-18",
     "kind": "added",

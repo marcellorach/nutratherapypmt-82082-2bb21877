@@ -47,8 +47,7 @@ const PromptConfigurationTab = lazy(() => import('@/components/administrador/Pro
 const AnalyticsTab = lazy(() => import('@/components/administrador/AnalyticsTab'));
 const DesignConventionsTab = lazy(() => import('@/components/administrador/DesignConventionsTab'));
 const DatabaseMigrationsTab = lazy(() => import('@/components/administrador/migrations/DatabaseMigrationsTab'));
-const TranslationAuditTab = lazy(() => import('@/components/administrador/auditoria/TranslationAuditTab'));
-const TranslationManager = lazy(() => import('@/components/administrador/traducoes/TranslationManager'));
+const TranslationsHub = lazy(() => import('@/components/administrador/TranslationsHub'));
 const OntologyHub = lazy(() => import('@/components/administrador/OntologyHub'));
 const AccessRequestsPanel = lazy(() => import('@/components/administrador/access/AccessRequestsPanel'));
 const AdminPetManagementTab = lazy(() => import('@/components/administrador/patients/AdminPetManagementTab'));
@@ -296,18 +295,27 @@ export const adminTabsConfig: AdminTabConfig[] = [
     description: 'Convenções de design'
   },
   {
-    id: 'translation-audit',
-    label: 'Translation Audit',
+    id: 'translations',
+    label: 'Translations',
     group: 'configuration',
-    component: TranslationAuditTab,
-    description: 'Audit and monitor translation coverage'
+    component: TranslationsHub,
+    description: 'Auditoria + edição de traduções (PT/EN) em uma só aba'
   },
   {
-    id: 'translation-manager',
-    label: 'Gerenciar Traduções',
+    // Alias legado — mantém URLs antigos funcionando, mas usa o hub.
+    id: 'translation-audit',
+    label: 'Translations',
     group: 'configuration',
-    component: TranslationManager,
-    description: 'Editar traduções diretamente no banco de dados'
+    component: TranslationsHub,
+    description: 'Alias legado → Translations Hub'
+  },
+  {
+    // Alias legado para deep-link no sub-tab "Manage".
+    id: 'translation-manager',
+    label: 'Translations',
+    group: 'configuration',
+    component: TranslationsHub,
+    description: 'Alias legado → Translations Hub (sub-tab Manage)'
   },
   {
     id: 'ontology-audit',
