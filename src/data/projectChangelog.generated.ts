@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-18T03:53:39.490Z
+// Última geração: 2026-05-18T03:57:59.080Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -20,6 +20,8 @@ export interface ChangelogEntry {
 }
 
 export const lastChangelogDate = "2026-05-18";
+
+export const senexVersion = "5.1.0";
 
 export const changelog: ChangelogEntry[] = [
   {
