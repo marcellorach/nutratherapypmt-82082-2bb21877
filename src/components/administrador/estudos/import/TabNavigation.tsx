@@ -10,9 +10,10 @@ interface TabNavigationProps {
   onTabChange: (value: string) => void;
   isProcessing?: boolean;
   pendingCurationCount?: number;
+  aiQueueCount?: number;
 }
 
-const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange, isProcessing, pendingCurationCount }) => {
+const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange, isProcessing, pendingCurationCount, aiQueueCount }) => {
   const { t } = useTranslation();
   
   const tabs = [
@@ -38,6 +39,11 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange, i
               {tab.value === "ai-processing" && isProcessing && (
                 <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-[10px] leading-4 bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200 animate-pulse">
                   ●
+                </Badge>
+              )}
+              {tab.value === "ai-processing" && aiQueueCount != null && aiQueueCount > 0 && (
+                <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-[10px] leading-4 min-w-[20px] justify-center bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200">
+                  {aiQueueCount}
                 </Badge>
               )}
               {tab.value === "curation" && pendingCurationCount != null && pendingCurationCount > 0 && (

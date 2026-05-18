@@ -41,6 +41,7 @@ const SciImportSection: React.FC = () => {
   // Tab indicator states
   const [isAiProcessing, setIsAiProcessing] = useState(false);
   const [pendingCurationCount, setPendingCurationCount] = useState(0);
+  const [aiQueueCount, setAiQueueCount] = useState(0);
 
   // Fetch tab indicators on mount and periodically
   useEffect(() => {
@@ -53,6 +54,14 @@ const SciImportSection: React.FC = () => {
           .is('deleted_at', null)
           .in('kanban_status', ['processing', 'parsed']);
         setIsAiProcessing((processingCount ?? 0) > 0);
+
+        // Count studies awaiting AI processing (queue)
+        const { count: queueCount } = await supabase
+          .from('processed_studies')
+          .select('*', { count: 'exact', head: true })
+          .is('deleted_at', null)
+          .eq('kanban_status', 'new');
+        setAiQueueCount(queueCount ?? 0);
 
         // Count pending curation triplets
         const { count: curationCount } = await supabase
@@ -169,7 +178,7 @@ const SciImportSection: React.FC = () => {
       <Card>
         <Tabs value={activeTab} className="w-full">
           <TabHeader activeTab={activeTab} scispaceLogo={SCISPACE_LOGO_URL} onProcessWithAI={handleProcessWithAI} />
-          <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} isProcessing={isAiProcessing} pendingCurationCount={pendingCurationCount} />
+          <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} isProcessing={isAiProcessing} pendingCurationCount={pendingCurationCount} aiQueueCount={aiQueueCount} />
 
           <div className="p-6">
             <TabsContent value="external-search">
