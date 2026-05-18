@@ -681,8 +681,13 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
               nodeColor={(node: any) => node.color}
               nodeVal={(node: any) => node.val * nodeSize * 0.5}
               nodeLabel={nodeLabel}
+              nodeCanvasObject={nodeCanvasObject}
+              nodeCanvasObjectMode={() => 'replace'}
+              nodePointerAreaPaint={nodePointerAreaPaint}
               linkColor={(link: any) => link.color}
               linkWidth={linkWidth}
+              linkDirectionalArrowLength={4}
+              linkDirectionalArrowRelPos={0.92}
               linkDirectionalParticles={2}
               linkDirectionalParticleWidth={2}
               onNodeClick={handleNodeClick}
