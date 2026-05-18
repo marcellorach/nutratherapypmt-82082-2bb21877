@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-18T04:04:01.239Z
+// Última geração: 2026-05-18T04:07:13.793Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,30 @@ export const lastChangelogDate = "2026-05-18";
 export const senexVersion = "5.1.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-18",
+    "kind": "changed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "TranslationsHub: Audit + Manage em uma só aba; Knowledge Graph reposicionado",
+    "bullets": [
+      "Novo `TranslationsHub.tsx` (sub-tabs Audit/Manage) substitui os 2 itens separados na sidebar Configuration. Ids legados `translation-audit` e `translation-manager` continuam funcionando como alias do hub (deep-link no sub-tab Manage preservado).",
+      "Sidebar Knowledge Base: `Knowledge Graph` movido para logo abaixo de `Triplets` e acima de `Evidence Conflicts`.",
+      "I18n bump 1.86.3 → 1.86.4 (nova chave `admin.sidebar.configuration.translationsHub`).",
+      "Files: src/components/administrador/TranslationsHub.tsx, src/config/admin-tabs.ts, src/components/administrador/sidebar/groups/ConfigurationGroup.tsx, src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts, src/data/projectOrganograma.ts"
+    ],
+    "files": [
+      "src/components/administrador/TranslationsHub.tsx",
+      "src/config/admin-tabs.ts",
+      "src/components/administrador/sidebar/groups/ConfigurationGroup.tsx",
+      "src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json",
+      "src/i18n.ts",
+      "src/data/projectOrganograma.ts"
+    ],
+    "i18nVersion": "1.86.4"
+  },
   {
     "date": "2026-05-18",
     "kind": "changed",

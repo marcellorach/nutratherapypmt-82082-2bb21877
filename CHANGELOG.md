@@ -24,6 +24,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 5.1.0 -->
 
+### Changed - 2026-05-18 — Landing: AdminFooter unificado + scroll-indicator na 1ª dobra
+<!-- area: admin · status: entregue -->
+- `AdminFooter` agora renderiza o mesmo `Footer` da landing (versão Senex auto-lida, badge `Veterinary Geroscience`, copyright bilíngue, powered-by completo). Antes era um clone hardcoded em EN sem versão.
+- Index hero: reduzido espaço acima do botão "Scroll to discover our vision" (`mt-16` → `mt-4`, `mt-3` → `mt-2`) para caber na 1ª dobra.
+- Files: src/components/administrador/layout/AdminFooter.tsx, src/pages/Index.tsx
+
 ### Changed - 2026-05-18 — TranslationsHub: Audit + Manage em uma só aba; Knowledge Graph reposicionado
 <!-- area: admin · status: entregue · i18n: 1.86.4 -->
 - Novo `TranslationsHub.tsx` (sub-tabs Audit/Manage) substitui os 2 itens separados na sidebar Configuration. Ids legados `translation-audit` e `translation-manager` continuam funcionando como alias do hub (deep-link no sub-tab Manage preservado).
