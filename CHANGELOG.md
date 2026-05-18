@@ -23,6 +23,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-18 — Fase 4: Evolução longitudinal dos gaps nutricionais
+<!-- area: vet-ui · status: entregue · i18n: 1.81.0 -->
+- Novo serviço `src/services/nutrition-gap-timeline.ts`: reconstrói déficits/excessos para **cada snapshot histórico** de `pet_nutrition` reutilizando `analyzeNutritionGaps` (mesma metodologia FEDIAF/AAFCO). Sem mocks — snapshots sem produtos linkados ficam fora do gráfico.
+- `analyzeNutritionGaps` aceita `nutritionId?: string` opcional para forçar análise de um snapshot específico (necessário para timeline).
+- Novo componente `NutritionGapEvolutionChart.tsx` (Recharts ComposedChart): áreas de déficit/excesso + linha de adequados ao longo do tempo, badge de tendência (Δ desde o primeiro snapshot) e tabela "Top 5 nutrientes com maior variação" (antes → depois, Δ percentual em pontos).
+- Mount em `PetNutritionPanel.tsx` (perfil do pet vet): só renderiza quando há ≥2 snapshots, evitando ruído em pets novos.
+- I18n: bloco `nutritionGapTimeline.*` em PT/EN; bump `I18N_VERSION` 1.80.0 → 1.81.0.
+- Files: src/services/nutrition-gap-analyzer.ts, src/services/nutrition-gap-timeline.ts, src/components/pet/NutritionGapEvolutionChart.tsx, src/components/pet/PetNutritionPanel.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts
+
 ### Added - 2026-05-18 — Bridge Nutrition Gaps → Engine de Recomendação
 <!-- area: clinical-pipeline · status: entregue · i18n: none -->
 - `buildLongitudinalContext` (frontend) agora roda `analyzeNutritionGaps` para o pet ativo e envia os gaps quantitativos não-adequados (até 10) dentro de `dietProfile.gaps` para a edge function `hybrid-recommendation`.
