@@ -154,6 +154,9 @@ const Index: React.FC = () => {
                     <p className="text-gray-500 mb-4">
                       {t('home.veterinarianAreaDesc')}
                     </p>
+                    <p className="text-[11px] italic text-amber-700 mb-3">
+                      {t('home.partiallyOperatedInPanel')}
+                    </p>
                     <Button
                       variant="outline"
                       disabled
@@ -175,6 +178,9 @@ const Index: React.FC = () => {
                     </span>
                     <p className="text-gray-500 mb-4">
                       {t('home.tutorAreaDesc')}
+                    </p>
+                    <p className="text-[11px] italic text-amber-700 mb-3">
+                      {t('home.partiallyOperatedInPanel')}
                     </p>
                     <Button
                       variant="outline"

@@ -57,7 +57,7 @@ const AdminPetManagementTab = lazy(() => import('@/components/administrador/pati
 const TripletsHub = lazy(() => import('@/components/administrador/TripletsHub'));
 const KnowledgeGraphViewer = lazy(() => import('@/components/administrador/visualizations/KnowledgeGraphViewer'));
 const ConflictReviewPanel = lazy(() => import('@/components/administrador/conflicts/ConflictReviewPanel'));
-const BaseKnowledgeTab = lazy(() => import('@/components/administrador/base-knowledge/BaseKnowledgeTab'));
+// BaseKnowledgeTab removido — funcionalidade consolidada em Ontology Hub.
 const BreedsManagementTab = lazy(() => import('@/components/administrador/breeds/BreedsManagementTab'));
 const LabReferencesTab = lazy(() => import('@/components/administrador/lab-references/LabReferencesTab'));
 const PetFoodCatalogTab = lazy(() => import('@/components/administrador/pet-food/PetFoodCatalogTab'));
@@ -127,13 +127,6 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'knowledge-base',
     component: ConflictReviewPanel,
     description: 'Revisão e resolução de conflitos entre estudos científicos'
-  },
-  {
-    id: 'base-knowledge',
-    label: 'Dados Base',
-    group: 'knowledge-base',
-    component: BaseKnowledgeTab,
-    description: 'Importação e curadoria de dados de ontologias externas'
   },
   {
     id: 'breeds-management',
