@@ -7,13 +7,13 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Dna, Sparkles, Activity, Loader2, Lock, BrainCircuit,
   ShieldCheck, AlertTriangle, TrendingUp, TrendingDown, Heart, Eye,
 } from 'lucide-react';
 import { Check, Clock, Timer, Database, Cpu, BarChart3, PawPrint, MapPin, Share2 } from 'lucide-react';
-import dogSilhouette from '@/assets/dog-silhouette.png';
+import DogAnatomySVG, { type RegionState as AnatomyRegionState } from '@/components/pet/DogAnatomySVG';
+import { mapConditionToRegions, type AnatomyRegionId } from '@/services/anatomy-region-map';
 import { usePetClinicalAnalysisSnapshot } from '@/hooks/usePetClinicalAnalysisSnapshot';
 import { usePetTrajectoryProjection, type AIProjectionYear } from '@/hooks/usePetTrajectoryProjection';
 import EvidenceGapCard from '@/components/pet/EvidenceGapCard';
@@ -31,53 +31,6 @@ interface DTWorkflowState {
   coverage: DTStageStatus;
   render: DTStageStatus;
 }
-
-// Map conditions (substring lookup) to body regions on the silhouette image.
-const bodyRegionMap: Record<string, { x: number; y: number; region: string }> = {
-  'osteoarthritis': { x: 30, y: 75, region: 'joints' },
-  'arthritis': { x: 30, y: 75, region: 'joints' },
-  'osteoartrite': { x: 30, y: 75, region: 'joints' },
-  'hip dysplasia': { x: 20, y: 55, region: 'hip' },
-  'displasia de quadril': { x: 20, y: 55, region: 'hip' },
-  'displasia coxofemoral': { x: 20, y: 55, region: 'hip' },
-  'elbow dysplasia': { x: 72, y: 65, region: 'elbow' },
-  'displasia de cotovelo': { x: 72, y: 65, region: 'elbow' },
-  'intervertebral disc disease': { x: 45, y: 25, region: 'spine' },
-  'spondylosis': { x: 40, y: 25, region: 'spine' },
-  'espondilose': { x: 40, y: 25, region: 'spine' },
-  'cognitive dysfunction': { x: 85, y: 15, region: 'brain' },
-  'disfunção cognitiva': { x: 85, y: 15, region: 'brain' },
-  'epilepsy': { x: 85, y: 15, region: 'brain' },
-  'epilepsia': { x: 85, y: 15, region: 'brain' },
-  'cardiomyopathy': { x: 65, y: 40, region: 'heart' },
-  'mitral valve': { x: 65, y: 40, region: 'heart' },
-  'heart disease': { x: 65, y: 40, region: 'heart' },
-  'cardiopatia': { x: 65, y: 40, region: 'heart' },
-  'hepatic': { x: 50, y: 45, region: 'liver' },
-  'liver': { x: 50, y: 45, region: 'liver' },
-  'fígado': { x: 50, y: 45, region: 'liver' },
-  'kidney': { x: 35, y: 40, region: 'kidney' },
-  'renal': { x: 35, y: 40, region: 'kidney' },
-  'hypothyroidism': { x: 78, y: 35, region: 'thyroid' },
-  'hipotireoidismo': { x: 78, y: 35, region: 'thyroid' },
-  'diabetes': { x: 48, y: 48, region: 'pancreas' },
-  "cushing": { x: 45, y: 35, region: 'adrenal' },
-  'atopic dermatitis': { x: 50, y: 60, region: 'skin' },
-  'allergies': { x: 50, y: 60, region: 'skin' },
-  'dermatite': { x: 50, y: 60, region: 'skin' },
-  'cataract': { x: 88, y: 18, region: 'eyes' },
-  'catarata': { x: 88, y: 18, region: 'eyes' },
-  'progressive retinal': { x: 88, y: 18, region: 'eyes' },
-  'inflammatory bowel': { x: 45, y: 55, region: 'gi' },
-  'pancreatitis': { x: 48, y: 48, region: 'pancreas' },
-  'pancreatite': { x: 48, y: 48, region: 'pancreas' },
-  'cellular senescence': { x: 50, y: 30, region: 'systemic' },
-  'oxidative stress': { x: 50, y: 30, region: 'systemic' },
-  'chronic inflammation': { x: 50, y: 30, region: 'systemic' },
-  'cancer': { x: 50, y: 30, region: 'systemic' },
-  'brachycephalic': { x: 90, y: 22, region: 'respiratory' },
-  'laryngeal': { x: 80, y: 30, region: 'respiratory' },
-};
 
 type Severity = 'mild' | 'moderate' | 'severe';
 
@@ -101,7 +54,6 @@ function scoreToSeverity(score: number): Severity {
 interface ScenarioMarker {
   key: string;
   name: string;
-  position: { x: number; y: number; region: string };
   severity: Severity;
   isNew: boolean;
   probability?: number;
@@ -117,18 +69,11 @@ function buildMarkers(
   const markers: ScenarioMarker[] = [];
   const lowerCovered = new Set(Array.from(coveredNames).map(n => n.toLowerCase()));
 
-  const findPos = (name: string) => {
-    const k = name.toLowerCase();
-    const match = Object.entries(bodyRegionMap).find(([key]) => k.includes(key));
-    return match ? match[1] : { x: 50, y: 30, region: 'systemic' };
-  };
-
   for (const ec of yearData.existing_conditions || []) {
     const sev: Severity = (ec.projected_severity_label as Severity) || scoreToSeverity(ec.projected_severity_score || 0);
     markers.push({
       key: `e-${ec.name}`,
       name: ec.name,
-      position: findPos(ec.name),
       severity: sev,
       isNew: false,
       protectedHere: applyProtection && lowerCovered.has(ec.name.toLowerCase()),
@@ -140,7 +85,6 @@ function buildMarkers(
     markers.push({
       key: `n-${nc.name}`,
       name: nc.name,
-      position: findPos(nc.name),
       severity: sev,
       isNew: true,
       probability: nc.probability,
@@ -148,6 +92,45 @@ function buildMarkers(
     });
   }
   return markers;
+}
+
+// Convert markers into the regionStates shape consumed by DogAnatomySVG.
+// Multiple conditions can target the same region; we keep the highest severity
+// and aggregate their names so the tooltip lists all of them.
+const SEV_ORDER: Severity[] = ['mild', 'moderate', 'severe'];
+const upgradeSev = (cur: Severity | null, next: Severity): Severity =>
+  !cur ? next : (SEV_ORDER.indexOf(next) > SEV_ORDER.indexOf(cur) ? next : cur);
+
+function markersToRegionStates(
+  markers: ScenarioMarker[],
+  applyProtectionVisual: boolean,
+): { states: Partial<Record<AnatomyRegionId, AnatomyRegionState>>; systemic: Severity | null } {
+  const states: Partial<Record<AnatomyRegionId, AnatomyRegionState>> = {};
+  let systemic: Severity | null = null;
+
+  for (const m of markers) {
+    const mapping = mapConditionToRegions(m.name);
+    if (mapping.systemic) systemic = upgradeSev(systemic, m.severity);
+    for (const region of mapping.regions) {
+      if (region === 'systemic') continue;
+      const prev = states[region];
+      const conditions = prev?.conditions || [];
+      conditions.push({
+        name: m.name,
+        severity: m.severity,
+        isNew: m.isNew,
+        probability: m.probability,
+        protectedBy: m.protectedHere ? ['protocol'] : [],
+      });
+      states[region] = {
+        severity: upgradeSev(prev?.severity ?? null, m.severity),
+        isNew: prev?.isNew || m.isNew,
+        protected: prev?.protected || (applyProtectionVisual && m.protectedHere),
+        conditions,
+      };
+    }
+  }
+  return { states, systemic };
 }
 
 interface DigitalTwinDogProps {
