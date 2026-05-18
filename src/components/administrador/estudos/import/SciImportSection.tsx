@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import TabHeader from './TabHeader';
 import TabNavigation from './TabNavigation';
 import FileUploadTab from './FileUploadTab';
+import AIProcessingTab from './AIProcessingTab';
 import SciSpace2StepImport from './SciSpace2StepImport';
 import StudiesLibraryTab from '../library/StudiesLibraryTab';
 import SearchExternalStudies from '../library/SearchExternalStudies';
@@ -181,6 +182,10 @@ const SciImportSection: React.FC = () => {
 
             <TabsContent value="file-upload">
               <FileUploadTab />
+            </TabsContent>
+
+            <TabsContent value="ai-processing">
+              <AIProcessingTab />
             </TabsContent>
 
             <TabsContent value="scispace-api">

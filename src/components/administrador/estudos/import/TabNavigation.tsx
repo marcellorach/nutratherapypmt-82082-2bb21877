@@ -1,7 +1,7 @@
 
 import React from "react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Search, ClipboardCheck, BookOpen } from "lucide-react";
+import { Upload, Search, ClipboardCheck, BookOpen, Sparkles } from "lucide-react";
 import { useTranslation } from 'react-i18next';
 import { Badge } from "@/components/ui/badge";
 
@@ -18,6 +18,7 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange, i
   const tabs = [
     { value: "external-search", icon: Search, label: t('studies.import.externalSearchTab', 'External Search') },
     { value: "file-upload", icon: Upload, label: t('studies.import.uploadTab') },
+    { value: "ai-processing", icon: Sparkles, label: t('studies.import.aiProcessingTab', 'AI Processing') },
     { value: "curation", icon: ClipboardCheck, label: t('studies.import.curationTab', 'Curation') },
     { value: "curated-library", icon: BookOpen, label: t('studies.import.curatedLibraryTab', 'Library') },
   ];
@@ -34,6 +35,11 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange, i
             >
               <tab.icon className="h-4 w-4" />
               <span>{tab.label}</span>
+              {tab.value === "ai-processing" && isProcessing && (
+                <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-[10px] leading-4 bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200 animate-pulse">
+                  ●
+                </Badge>
+              )}
               {tab.value === "curation" && pendingCurationCount != null && pendingCurationCount > 0 && (
                 <Badge variant="destructive" className="ml-1 px-1.5 py-0 text-[10px] leading-4 min-w-[20px] justify-center">
                   {pendingCurationCount}
