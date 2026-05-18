@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { fetchSystemPrompt } from "../_shared/system-prompts.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -60,6 +61,7 @@ serve(async (req) => {
     }
 
     // Build context-enriched system prompt
+    const SYSTEM_PROMPT = await fetchSystemPrompt('relations_auditor', SYSTEM_PROMPT_FALLBACK);
     let fullSystemPrompt = SYSTEM_PROMPT;
     
     if (context) {
