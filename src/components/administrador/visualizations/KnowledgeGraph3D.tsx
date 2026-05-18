@@ -477,10 +477,10 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
       ctx.strokeRect(bgX, bgY, bgW, bgH);
     }
 
-    ctx.textAlign = 'center';
+    ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#0f172a';
-    ctx.fillText(label, node.x, bgY + bgH / 2);
+    ctx.fillText(label, bgX + padX, bgY + bgH / 2);
   }, [nodeSize, showLabels]);
 
   const nodePointerAreaPaint = useCallback((node: any, color: string, ctx: CanvasRenderingContext2D) => {
