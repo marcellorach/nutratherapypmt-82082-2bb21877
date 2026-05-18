@@ -191,6 +191,40 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
 
       <SidebarMenuItem>
         <SidebarMenuButton 
+          isActive={currentStep === "relacoes"}
+          onClick={() => handleStepClick("relacoes")}
+          className={currentStep === "relacoes" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Network className={`h-4 w-4 mr-2 ${currentStep === "relacoes" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.relations')}</span>
+              <StatusBadge statusKey="admin.sidebar.knowledgeBase.relationsStatus" tooltipKey="admin.sidebar.knowledgeBase.relationsStatusTooltip" color="text-emerald-500" />
+            </div>
+            {currentStep === "relacoes" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          isActive={currentStep === "pet-food-catalog"}
+          onClick={() => handleStepClick("pet-food-catalog")}
+          className={currentStep === "pet-food-catalog" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <UtensilsCrossed className={`h-4 w-4 mr-2 ${currentStep === "pet-food-catalog" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.petFoodCatalog')}</span>
+              <StatusBadge statusKey="admin.sidebar.knowledgeBase.petFoodCatalogStatus" tooltipKey="admin.sidebar.knowledgeBase.petFoodCatalogStatusTooltip" color="text-yellow-500" />
+            </div>
+            {currentStep === "pet-food-catalog" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton 
           isActive={currentStep === "ontology-audit"} 
           onClick={() => handleStepClick("ontology-audit")}
           className={currentStep === "ontology-audit" ? "bg-primary/10 text-primary" : ""}
@@ -242,40 +276,6 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
         </SidebarMenuButton>
       </SidebarMenuItem>
 
-      <SidebarMenuItem>
-        <SidebarMenuButton
-          isActive={currentStep === "pet-food-catalog"}
-          onClick={() => handleStepClick("pet-food-catalog")}
-          className={currentStep === "pet-food-catalog" ? "bg-primary/10 text-primary" : ""}
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <UtensilsCrossed className={`h-4 w-4 mr-2 ${currentStep === "pet-food-catalog" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.knowledgeBase.petFoodCatalog')}</span>
-              <StatusBadge statusKey="admin.sidebar.knowledgeBase.petFoodCatalogStatus" tooltipKey="admin.sidebar.knowledgeBase.petFoodCatalogStatusTooltip" color="text-yellow-500" />
-            </div>
-            {currentStep === "pet-food-catalog" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
-          </div>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          isActive={currentStep === "relacoes"}
-          onClick={() => handleStepClick("relacoes")}
-          className={currentStep === "relacoes" ? "bg-primary/10 text-primary" : ""}
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <Network className={`h-4 w-4 mr-2 ${currentStep === "relacoes" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.knowledgeBase.relations')}</span>
-              <StatusBadge statusKey="admin.sidebar.knowledgeBase.relationsStatus" tooltipKey="admin.sidebar.knowledgeBase.relationsStatusTooltip" color="text-emerald-500" />
-            </div>
-            {currentStep === "relacoes" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
-          </div>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "ai-insights"} 
