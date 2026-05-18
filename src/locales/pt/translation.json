@@ -2743,7 +2743,6 @@
     },
     "prompts": {
       "title": "Configuração de Prompts",
-      "generateExample": "Gerar Prompts de Exemplo",
       "newPrompt": "Novo Prompt",
       "createTitle": "Criar Novo Prompt",
       "createDescription": "Preencha os campos abaixo para criar um novo prompt",
@@ -2752,7 +2751,7 @@
       "recommendationTitle": "Prompts de Recomendação de IA",
       "recommendationDesc": "Configure os prompts para recomendações personalizadas",
       "noPrompts": "Nenhum prompt configurado ainda.",
-      "generateExamples": "Gerar Prompts de Exemplo",
+      "systemHint": "Os prompts internos do sistema são gerenciados na aba System Prompts. Use \"Novo Prompt\" apenas para prompts customizados de recomendação.",
       "loading": "Carregando prompts...",
       "form": {
         "name": "Nome do Prompt",
