@@ -71,13 +71,13 @@ const DataProcessingGroup: React.FC<DataProcessingGroupProps> = ({
         >
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
-              <span className="flex items-center mr-2">
-                <PawPrint className={`h-4 w-4 ${currentStep === "pet-management" ? "text-primary" : "text-foreground"}`} />
-                <CircleCheck className="h-3 w-3 ml-0.5 text-orange-500" />
+              <PawPrint className={`h-4 w-4 mr-2 ${currentStep === "pet-management" ? "text-primary" : "text-foreground"}`} />
+              <span>{t('admin.sidebar.dataProcessing.petManagement')}</span>
+              <span className="flex items-center ml-1.5">
+                <CircleCheck className="h-3 w-3 text-orange-500" />
                 <ArrowRight className={`h-3 w-3 mx-0.5 ${currentStep === "pet-management" ? "text-primary" : "text-muted-foreground"}`} />
                 <CircleCheck className="h-3 w-3 text-emerald-500" />
               </span>
-              <span>{t('admin.sidebar.dataProcessing.petManagement')}</span>
             </div>
             {currentStep === "pet-management" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
