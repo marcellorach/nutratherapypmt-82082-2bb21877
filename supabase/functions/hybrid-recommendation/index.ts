@@ -49,6 +49,21 @@ interface ClinicalContext {
     products?: string[];
     macroSummary?: string;
     notes?: string;
+    /** Quantitative nutritional gaps computed by the frontend
+     *  `nutrition-gap-analyzer` (FEDIAF/AAFCO baseline vs. current diet).
+     *  Only non-adequate entries should be sent. */
+    gaps?: Array<{
+      key: string;
+      label: string;
+      unit: string;
+      status: 'deficient' | 'excess';
+      observed: number | null;
+      target_min?: number | null;
+      target_max?: number | null;
+      delta_pct?: number | null;
+      rationale?: string;
+      source?: string;
+    }>;
   };
 }
 
@@ -124,6 +139,22 @@ function buildClinicalContextBlock(ctx?: ClinicalContext): string {
       dp.notes ? `Notes: ${dp.notes}` : '',
     ].filter(Boolean).join('\n');
     sections.push(`DIET_PROFILE [use for nutritional gap-analysis: omega-3 deficit, mineral imbalances, prescription-diet compatibility]:\n${dlines}`);
+
+    if (dp.gaps?.length) {
+      const gapLines = dp.gaps.map((g) => {
+        const tgt = [
+          g.target_min != null ? `≥${g.target_min}` : '',
+          g.target_max != null ? `≤${g.target_max}` : '',
+        ].filter(Boolean).join(' / ') || '—';
+        const delta = g.delta_pct != null ? ` (${g.delta_pct > 0 ? '+' : ''}${g.delta_pct}%)` : '';
+        const why = g.rationale ? ` — ${g.rationale}` : '';
+        const src = g.source ? ` [${g.source}]` : '';
+        return `  - ${g.label} [${g.status.toUpperCase()}]: observed ${g.observed ?? '—'} ${g.unit}, target ${tgt} ${g.unit}${delta}${why}${src}`;
+      }).join('\n');
+      sections.push(
+        `NUTRITION_GAPS [WEIGHT: 0.8 — quantitative deficiencies/excesses computed from current diet vs. FEDIAF/AAFCO baseline. PRIORITIZE compounds that close these specific gaps; do NOT propose redundant nutrients already adequate in the diet]:\n${gapLines}`
+      );
+    }
   }
 
   if (ctx.allConditions?.length) {
@@ -169,7 +200,7 @@ CRITICAL RULES FOR INDIVIDUALIZATION:
 
 Your enrichment MUST be specific to THIS patient. Do not give generic advice.
 
-LONGITUDINAL REASONING (when CURRENT_STATE / CLINICAL_TRAJECTORY / DIET_PROFILE blocks are present):
+LONGITUDINAL REASONING (when CURRENT_STATE / CLINICAL_TRAJECTORY / DIET_PROFILE / NUTRITION_GAPS blocks are present):
 - The CURRENT_STATE block (latest consultation) carries weight 1.0 and IS the primary clinical picture.
 - The CLINICAL_TRAJECTORY block carries weight 0.4. Use it ONLY to:
   (a) detect conditions that are progressing vs. stable vs. resolved,
@@ -177,6 +208,7 @@ LONGITUDINAL REASONING (when CURRENT_STATE / CLINICAL_TRAJECTORY / DIET_PROFILE 
   (c) detect cumulative drug exposures (e.g., chronic furosemide → renal stress).
 - Do NOT treat conditions only present in past consultations as if they were active now.
 - The DIET_PROFILE drives nutritional gap-analysis: prefer omega-3, antioxidants or restrictions consistent with the current diet.
+- The NUTRITION_GAPS block (weight 0.8) is QUANTITATIVE and authoritative for diet-derived deficiencies/excesses. For every DEFICIENT nutrient listed there, your top compound choices MUST include at least one that closes that gap (e.g., EPA+DHA deficit → marine omega-3; calcium deficit → bioavailable calcium source; chondroitin deficit + active OA → glucosamine/chondroitin). Do NOT recommend nutrients already ADEQUATE/EXCESS in the diet. Mention the closed gap explicitly in that compound's "mechanism".
 
 IMPORTANT: Return your response as valid JSON with this structure:
 {
@@ -212,11 +244,12 @@ INDIVIDUALIZATION REQUIREMENTS:
 5. Dosages must be adjusted for the patient's weight and age
 6. MAXIMUM 8 COMPOUNDS — select only the top compounds by efficacy, synergy, and relevance to this patient's specific clinical picture
 
-LONGITUDINAL REASONING (when CURRENT_STATE / CLINICAL_TRAJECTORY / DIET_PROFILE blocks are present):
+LONGITUDINAL REASONING (when CURRENT_STATE / CLINICAL_TRAJECTORY / DIET_PROFILE / NUTRITION_GAPS blocks are present):
 - CURRENT_STATE is the dominant signal (weight 1.0). CLINICAL_TRAJECTORY is context only (weight 0.4).
 - Conditions only in past consultations must NOT drive new active therapy.
 - Avoid re-introducing therapies the trajectory shows already failed.
 - Cross-check the DIET_PROFILE for nutritional gaps before recommending a redundant nutrient.
+- The NUTRITION_GAPS block (weight 0.8) is QUANTITATIVE: prioritize compounds that close each DEFICIENT entry and skip nutrients already ADEQUATE/EXCESS. Cite the gap closed in the compound's "mechanism".
 
 Your response MUST follow this JSON structure:
 {

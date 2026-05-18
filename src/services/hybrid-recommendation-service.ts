@@ -16,6 +16,7 @@ import {
   ConfidenceCalculationParams
 } from '@/types/recommendation-confidence';
 import { computeRecommendationConfidence } from './recommendation-confidence-service';
+import { analyzeNutritionGaps, inferLifeStage, type PetNutritionContext } from './nutrition-gap-analyzer';
 
 interface NutraceuticalRecommendation {
   name: string;
@@ -133,7 +134,52 @@ export async function buildLongitudinalContext(petId?: string) {
         restrictions: nutrition.restrictions,
         products: items,
         notes: nutrition.notes,
-      };
+      } as any;
+
+      // Quantitative nutrition gap-analysis bridge — only attaches non-adequate
+      // gaps so the LLM prioritizes compounds that close real deficiencies and
+      // skips nutrients already covered by the diet.
+      try {
+        const { data: pet } = await (supabase as any)
+          .from('pet_profiles')
+          .select('id, species, weight_kg, age_years, breed')
+          .eq('id', petId)
+          .maybeSingle();
+        const activeConditionNames = (latestConsultation?.activeConditions ?? [])
+          .map((s) => String(s).replace(/\s*\([^)]*\)\s*$/, '').trim())
+          .filter(Boolean);
+        if (pet && Number(pet.weight_kg) > 0) {
+          const ctx: PetNutritionContext = {
+            petId,
+            species: (pet.species === 'feline' || pet.species === 'cat') ? 'cat' : 'dog',
+            weight_kg: Number(pet.weight_kg),
+            age_years: pet.age_years != null ? Number(pet.age_years) : null,
+            life_stage: inferLifeStage(pet.age_years != null ? Number(pet.age_years) : null, null),
+            breed_name: pet.breed ?? null,
+            active_conditions: activeConditionNames,
+          };
+          const analysis = await analyzeNutritionGaps(ctx);
+          if (analysis?.has_data && analysis.gaps?.length) {
+            dietProfile.gaps = analysis.gaps
+              .filter((g) => g.status === 'deficient' || g.status === 'excess')
+              .slice(0, 10)
+              .map((g) => ({
+                key: g.key,
+                label: g.label_en || g.label_pt,
+                unit: g.unit,
+                status: g.status as 'deficient' | 'excess',
+                observed: g.observed,
+                target_min: g.target_min ?? null,
+                target_max: g.target_max ?? null,
+                delta_pct: g.delta_pct ?? null,
+                rationale: g.rationale_en || g.rationale_pt,
+                source: g.source,
+              }));
+          }
+        }
+      } catch (gapErr) {
+        console.warn('nutrition-gap bridge failed (non-fatal):', gapErr);
+      }
     }
 
     return { latestConsultation, clinicalTrajectory: trajectory, dietProfile };
