@@ -238,13 +238,41 @@ const ExtractionPromptsEditor: React.FC = () => {
     <div className="space-y-6">
       <Card className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 border-purple-200 dark:border-purple-900">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Layers className="h-5 w-5" />
-            {t('extractionPrompts.title')}
-          </CardTitle>
-          <CardDescription>
-            {t('extractionPrompts.description')}
-          </CardDescription>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Layers className="h-5 w-5" />
+                {t('extractionPrompts.title')}
+              </CardTitle>
+              <CardDescription>
+                {t('extractionPrompts.description')}
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => resetToDefaults(activeStage)}
+                disabled={isSaving || isLoading}
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                {t('extractionPrompts.restoreDefaults', { stage: activeStage.toUpperCase() })}
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  toast({
+                    title: t('extractionPrompts.testPromptTitle'),
+                    description: t('extractionPrompts.testPromptDesc'),
+                  });
+                }}
+              >
+                <TestTube className="h-4 w-4 mr-2" />
+                {t('extractionPrompts.testWithStudy')}
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-5 gap-2 p-1 bg-background/50 rounded-lg">
@@ -328,34 +356,6 @@ const ExtractionPromptsEditor: React.FC = () => {
           </Card>
         ))}
       </div>
-
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex justify-between items-center">
-            <Button
-              variant="outline"
-              onClick={() => resetToDefaults(activeStage)}
-              disabled={isSaving || isLoading}
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              {t('extractionPrompts.restoreDefaults', { stage: activeStage.toUpperCase() })}
-            </Button>
-            
-            <Button
-              variant="secondary"
-              onClick={() => {
-                toast({ 
-                  title: t('extractionPrompts.testPromptTitle'), 
-                  description: t('extractionPrompts.testPromptDesc')
-                });
-              }}
-            >
-              <TestTube className="h-4 w-4 mr-2" />
-              {t('extractionPrompts.testWithStudy')}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
