@@ -1122,6 +1122,12 @@ export async function runClinicalAnalysisPipeline(
       doseAdjustments: resolved.adjustments,
       doseTotalDailyMg: resolved.totalDailyMg ?? null,
       doseFrequencyPerDay: resolved.frequencyPerDay ?? null,
+      // Phase 4b — gap-closure provenance: which NUTRITION_GAPS this compound
+      // closes, as declared by the LLM. Forwarded verbatim to the UI and
+      // persisted on treatment_proposals.compounds.
+      closesGaps: Array.isArray(n.closes_gaps)
+        ? n.closes_gaps.filter((x: any) => typeof x === 'string' && x.trim().length > 0)
+        : [],
     };
   }));
 
