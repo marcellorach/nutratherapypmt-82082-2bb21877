@@ -331,17 +331,22 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
   const yearWithout = yearsWithout[safeIndex];
   const current = yearWith || yearWithout;
 
-  const markersWith = useMemo(() => buildMarkers(yearWith, coveredNames, true), [yearWith, coveredNames]);
-  // Fallback: if yearWithout has no existing_conditions, use the same conditions
-  // from yearWith so both avatars show diseases (without gets no protection stars).
+  const horizon = Math.max(1, maxSlider);
+  const markersWith = useMemo(
+    () => buildMarkers(yearWith, coveredNames, true, { yearIndex: yearsAhead, horizon }),
+    [yearWith, coveredNames, yearsAhead, horizon],
+  );
+  // For "without protocol": prefer real yearWithout data; if backend gave none,
+  // synthesize from yearWith but apply progressive deterioration so the two
+  // avatars are visibly different over time (no protection, faster decay).
   const markersWithout = useMemo(() => {
-    const raw = buildMarkers(yearWithout, new Set(), false);
-    if (raw.length === 0 && yearWith) {
-      // Re-use yearWith data but without protection
-      return buildMarkers(yearWith, new Set(), false);
-    }
-    return raw;
-  }, [yearWithout, yearWith]);
+    const baseYear = yearWithout || yearWith;
+    return buildMarkers(baseYear, new Set(), false, {
+      yearIndex: yearsAhead,
+      horizon,
+      withoutProtocol: true,
+    });
+  }, [yearWithout, yearWith, yearsAhead, horizon]);
 
   const yearsGainedLocal = (yearWith?.expected_remaining_years ?? 0) - (yearWithout?.expected_remaining_years ?? 0);
   const yearsGained = aiYearsGained != null ? aiYearsGained : yearsGainedLocal;
