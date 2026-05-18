@@ -358,70 +358,29 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
 
   const isLoadingState = aiQuery.isLoading || !current;
 
-  // ───────────── Render scenario silhouette helper ─────────────
-  const renderSilhouette = (markers: ScenarioMarker[], protectionAura: boolean) => (
-    <div className={`relative w-full rounded-md border ${protectionAura && !noKgBenefit ? 'border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/10' : 'border-border/50 bg-background'}`}>
-      <img
-        src={dogSilhouette}
-        alt={t('petProfile.digitalTwin.silhouetteAlt')}
-        className="w-full h-auto opacity-40 dark:opacity-25 dark:invert"
-      />
-      <TooltipProvider delayDuration={100}>
-        {markers.map((m) => (
-          <Tooltip key={m.key}>
-            <TooltipTrigger asChild>
-              <div
-                className="absolute cursor-pointer group"
-                style={{ left: `${m.position.x}%`, top: `${m.position.y}%`, transform: 'translate(-50%, -50%)' }}
-              >
-                {/* Pulse ring */}
-                <div
-                  className={`absolute rounded-full animate-ping opacity-30 ${SEV_DOT[m.severity]}`}
-                  style={{ width: 24, height: 24, left: -12, top: -12 }}
-                />
-                {/* Emerging condition: dashed amber outer ring */}
-                {m.isNew && (
-                  <div
-                    className="absolute rounded-full border border-dashed border-amber-500"
-                    style={{ width: 22, height: 22, left: -11, top: -11 }}
-                  />
-                )}
-                {/* Core dot */}
-                <div className={`relative w-4 h-4 rounded-full ring-2 ${SEV_DOT[m.severity]} ${SEV_RING[m.severity]} shadow-lg flex items-center justify-center`}>
-                  {m.protectedHere && (
-                    <span className="text-[9px] text-emerald-50 font-bold leading-none">★</span>
-                  )}
-                </div>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-[240px]">
-              <div className="space-y-1">
-                <p className="text-xs font-semibold flex items-center gap-1">
-                  <Activity className="h-3 w-3" />
-                  {m.name}
-                </p>
-                <div className="flex items-center gap-1.5 text-[11px]">
-                  <span className={`w-2 h-2 rounded-full ${SEV_DOT[m.severity]}`} />
-                  <span>{t(`petProfile.severity.${m.severity}`, m.severity)}</span>
-                  {m.isNew && m.probability != null && (
-                    <Badge variant="outline" className="h-4 text-[9px] px-1 border-amber-500 text-amber-700">
-                      {t('petProfile.digitalTwin.newRisk', 'Novo')} {Math.round(m.probability * 100)}%
-                    </Badge>
-                  )}
-                  {m.protectedHere && (
-                    <span className="text-emerald-600 dark:text-emerald-400 text-[10px] font-medium">★ {t('petProfile.digitalTwin.protected', 'protegido')}</span>
-                  )}
-                </div>
-                <p className="text-[10px] text-muted-foreground capitalize">
-                  {t(`petProfile.digitalTwin.regions.${m.position.region}`, m.position.region)}
-                </p>
-              </div>
-            </TooltipContent>
-          </Tooltip>
-        ))}
-      </TooltipProvider>
-    </div>
-  );
+  // ───────────── Render scenario anatomy helper ─────────────
+  // Lights up internal organs / joints on the anatomy chart instead of
+  // floating dots over a silhouette. Driven by mapConditionToRegions.
+  const renderSilhouette = (markers: ScenarioMarker[], protectionAura: boolean) => {
+    const { states, systemic } = markersToRegionStates(markers, protectionAura);
+    const isProtectedScenario = protectionAura && !noKgBenefit;
+    return (
+      <div
+        className={`relative w-full aspect-square rounded-md border overflow-hidden ${
+          isProtectedScenario
+            ? 'border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/10'
+            : 'border-border/50 bg-background'
+        }`}
+      >
+        <DogAnatomySVG
+          regionStates={states}
+          systemicSeverity={systemic}
+          showProtectionAura={isProtectedScenario && Object.values(states).some((s) => s?.protected)}
+          className="w-full h-full"
+        />
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-3">
