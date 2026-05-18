@@ -1997,6 +1997,8 @@
         "veterinaryTargetsStatus": "100% funcional",
         "veterinaryTargetsStatusTooltip": "Mapeamento completo de condições com cálculo de tratabilidade e dados reais.",
         "tripletCuration": "Curadoria de Triplets",
+        "triplets": "Triplets (Curadoria + Qualidade)",
+        "ontologyHub": "Ontologia & SNOMED/UMLS",
         "knowledgeGraph": "Knowledge Graph",
         "knowledgeGraphStatus": "100% funcional",
         "knowledgeGraphStatusTooltip": "Grafo interativo com dados reais do banco, filtros por tipo de entidade e confiança.",
@@ -5421,7 +5423,26 @@
       "resolved": "Resolvidos",
       "dismissed": "Descartados",
       "noConflicts": "Nenhum conflito encontrado",
-      "noConflictsDesc": "Não há conflitos pendentes de revisão nesta categoria"
+      "noConflictsDesc": "Não há conflitos pendentes de revisão nesta categoria",
+      "runDetection": "Executar Detecção",
+      "filterByLevel": "Filtrar por nível",
+      "allLevels": "Todos os níveis",
+      "loadClaimsError": "Erro ao carregar evidências do conflito",
+      "dismissed": "Conflito descartado",
+      "dismissError": "Erro ao descartar conflito",
+      "detectionComplete": "Detecção concluída ({{count}} conflitos)",
+      "detectionError": "Erro ao executar detecção de conflitos"
+    },
+    "status": {
+      "pending": "Pendentes",
+      "inReview": "Em Revisão",
+      "resolved": "Resolvidos",
+      "dismissed": "Descartados"
+    },
+    "level": {
+      "high": "Alto",
+      "moderate": "Moderado",
+      "low": "Baixo"
     },
     "filters": {
       "all": "Todos",

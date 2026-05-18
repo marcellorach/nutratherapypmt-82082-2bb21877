@@ -252,6 +252,22 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
           en: 'Operationalises the canine frailty phenotype (frailty index) — used by Senex to flag predisposition to adverse outcomes and prioritise preventive protocols.'
         },
         url: 'https://www.frontiersin.org/articles/10.3389/fvets.2019.00026/full'
+      },
+      {
+        source: 'Hetionet — Himmelstein et al., eLife 2017',
+        quote: {
+          pt: 'Grafo de conhecimento biomédico integrando 11 tipos de nós (Compound, Disease, Gene, Pathway, Anatomy…) e 24 tipos de relações — referência direta para a topologia L0–L4 do Senex.',
+          en: 'Biomedical knowledge graph integrating 11 node types (Compound, Disease, Gene, Pathway, Anatomy…) and 24 edge types — direct reference for the Senex L0–L4 topology.'
+        },
+        url: 'https://het.io/'
+      },
+      {
+        source: 'Project Rephetio (Hetionet drug repurposing) — Himmelstein et al., eLife 2017',
+        quote: {
+          pt: 'Projeto irmão: reposiciona fármacos aprovados percorrendo metapaths no Hetionet — mesma técnica que o Senex usa para sugerir nutracêuticos sinérgicos via gap-fill no KG.',
+          en: 'Sister project: repositions approved drugs by walking metapaths over Hetionet — the same technique Senex uses to suggest synergistic nutraceuticals via KG gap-fill.'
+        },
+        url: 'https://het.io/repurpose/'
       }
     ],
     overview: {

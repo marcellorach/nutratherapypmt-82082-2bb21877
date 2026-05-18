@@ -19,7 +19,10 @@ const Footer: React.FC = () => {
               v{SENEX_VERSION} · {SENEX_LAST_UPDATE}
             </span>
           </div>
-          <div className="text-xs text-gray-500">{t('footer.copyrightFull')}</div>
+          <div className="text-xs text-gray-500">
+            {t('footer.copyrightFull')}
+            <span className="ml-2 text-gray-400 font-mono tabular-nums">· v{SENEX_VERSION} · {SENEX_LAST_UPDATE}</span>
+          </div>
           <div className="text-[11px] text-gray-500 italic">{t('footer.petMoreTimeTagline')}</div>
           <div className="text-sm font-semibold text-gray-800 pt-1">{t('footer.sloganLine1')}</div>
         </div>
