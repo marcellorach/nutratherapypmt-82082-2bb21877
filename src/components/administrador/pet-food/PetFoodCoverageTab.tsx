@@ -31,7 +31,7 @@ interface RunLog {
   succeeded: number;
   failed: number;
   skipped: number;
-  params: Record<string, unknown>;
+  params: unknown;
   error: string | null;
 }
 
@@ -70,16 +70,16 @@ export default function PetFoodCoverageTab() {
     },
   });
 
-  const runsQ = useQuery<RunLog[]>({
+  const runsQ = useQuery({
     queryKey: ['pet-food-bulk-runs'],
-    queryFn: async () => {
+    queryFn: async (): Promise<RunLog[]> => {
       const { data, error } = await supabase
         .from('pet_food_bulk_enrich_runs')
         .select('id, started_at, finished_at, status, processed, succeeded, failed, skipped, params, error')
         .order('started_at', { ascending: false })
         .limit(20);
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as unknown as RunLog[];
     },
     refetchInterval: 5000,
   });
