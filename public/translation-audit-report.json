@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-05-18T02:39:37.625Z",
+  "timestamp": "2026-05-18T13:23:20.010Z",
   "summary": {
-    "totalFiles": 872,
-    "totalIssues": 423,
-    "hardcodedTexts": 42,
-    "missingKeys": 380,
+    "totalFiles": 878,
+    "totalIssues": 424,
+    "hardcodedTexts": 49,
+    "missingKeys": 374,
     "incompleteTranslations": 1
   },
   "issues": [
@@ -13,6 +13,13 @@
       "file": "src/components/administrador/OntologyMappingTab.tsx",
       "line": 65,
       "text": "id, name, name_en, snomed_code, umls_cui, ontology_mapped_at, ontology_mapped_by, ontology_mapping_source",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/TranslationsHub.tsx",
+      "line": 12,
+      "text": "tab",
       "severity": "high"
     },
     {
@@ -430,6 +437,20 @@
     },
     {
       "type": "missing-key",
+      "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
+      "line": 98,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
+      "line": 99,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/administrador/base-knowledge/ExternalSearchPanel.tsx",
       "line": 30,
       "text": "id, name, name_en",
@@ -500,6 +521,20 @@
     },
     {
       "type": "missing-key",
+      "file": "src/components/administrador/compliance/ComplianceDashboard.tsx",
+      "line": 69,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/compliance/ComplianceDashboard.tsx",
+      "line": 118,
+      "text": "a",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/administrador/configuracoes/AIModelSelector.tsx",
       "line": 50,
       "text": "config_key, config_value",
@@ -517,6 +552,13 @@
       "file": "src/components/administrador/configuracoes/PromptEditor.tsx",
       "line": 116,
       "text": "\\n",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/configuracoes/SystemPromptsCatalog.tsx",
+      "line": 43,
+      "text": "*",
       "severity": "high"
     },
     {
@@ -545,97 +587,6 @@
       "file": "src/components/administrador/conflicts/ConflictCard.tsx",
       "line": 156,
       "text": "conflicts.card.moreClaims",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
-      "line": 71,
-      "text": "conflicts.panel.loadClaimsError",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
-      "line": 93,
-      "text": "conflicts.panel.dismissError",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
-      "line": 109,
-      "text": "conflicts.panel.detectionError",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
-      "line": 157,
-      "text": "conflicts.panel.runDetection",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
-      "line": 170,
-      "text": "conflicts.status.pending",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
-      "line": 179,
-      "text": "conflicts.status.inReview",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
-      "line": 183,
-      "text": "conflicts.status.resolved",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
-      "line": 187,
-      "text": "conflicts.status.dismissed",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
-      "line": 196,
-      "text": "conflicts.panel.filterByLevel",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
-      "line": 199,
-      "text": "conflicts.panel.allLevels",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
-      "line": 200,
-      "text": "conflicts.level.high",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
-      "line": 201,
-      "text": "conflicts.level.moderate",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/components/administrador/conflicts/ConflictReviewPanel.tsx",
-      "line": 202,
-      "text": "conflicts.level.low",
       "severity": "high"
     },
     {
@@ -1600,7 +1551,7 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/import/SciImportSection.tsx",
-      "line": 107,
+      "line": 108,
       "text": "*",
       "severity": "high"
     },
@@ -2300,7 +2251,7 @@
     {
       "type": "missing-key",
       "file": "src/components/layout/Header.tsx",
-      "line": 87,
+      "line": 96,
       "text": " ",
       "severity": "high"
     },
@@ -2321,63 +2272,63 @@
     {
       "type": "missing-key",
       "file": "src/components/pet/DogAnatomySVG.tsx",
-      "line": 178,
+      "line": 270,
       "text": "brain",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/pet/DogAnatomySVG.tsx",
-      "line": 206,
+      "line": 298,
       "text": "eyes",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/pet/DogAnatomySVG.tsx",
-      "line": 220,
+      "line": 312,
       "text": "heart",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/pet/DogAnatomySVG.tsx",
-      "line": 245,
+      "line": 337,
       "text": "intestines",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/pet/DogAnatomySVG.tsx",
-      "line": 296,
+      "line": 388,
       "text": "skin",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/pet/DogAnatomySVG.tsx",
-      "line": 438,
+      "line": 537,
       "text": "ears",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/pet/DogAnatomySVG.tsx",
-      "line": 447,
+      "line": 546,
       "text": "mouth",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/pet/DogAnatomySVG.tsx",
-      "line": 473,
+      "line": 572,
       "text": "paw-hind",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/pet/DogAnatomySVG.tsx",
-      "line": 479,
+      "line": 578,
       "text": "paw-front",
       "severity": "high"
     },
@@ -2510,14 +2461,21 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 186,
+      "line": 171,
+      "text": "audits.*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/data/projectChangelog.generated.ts",
+      "line": 382,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2981,
+      "line": 3177,
       "text": "@",
       "severity": "high"
     },
@@ -2687,6 +2645,48 @@
       "file": "src/components/administrador/AIInsightsTab.tsx",
       "line": 101,
       "text": "No insights found",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/AboutSenexTab.tsx",
+      "line": 23,
+      "text": "Molecular mechanisms",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/AboutSenexTab.tsx",
+      "line": 24,
+      "text": "Clinical context",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/AboutSenexTab.tsx",
+      "line": 203,
+      "text": "No-mock policy",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/AboutSenexTab.tsx",
+      "line": 209,
+      "text": "Curation gatekeeper",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/AboutSenexTab.tsx",
+      "line": 221,
+      "text": "Canine scope",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/AboutSenexTab.tsx",
+      "line": 227,
+      "text": "Therapeutic cap",
       "severity": "medium"
     },
     {
@@ -2930,14 +2930,21 @@
     {
       "type": "hardcoded",
       "file": "src/components/layout/Footer.tsx",
-      "line": 44,
+      "line": 14,
+      "text": "Senex AI",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/layout/Footer.tsx",
+      "line": 57,
       "text": "OpenAI",
       "severity": "medium"
     },
     {
       "type": "hardcoded",
       "file": "src/components/layout/Footer.tsx",
-      "line": 79,
+      "line": 92,
       "text": "Co-Scientist",
       "severity": "medium"
     },

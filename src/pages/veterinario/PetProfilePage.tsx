@@ -579,8 +579,8 @@ const PetProfilePage: React.FC = () => {
 
         {/* 3-column layout: left 2/3 clinical content, right 1/3 chat + twin */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left 2 columns */}
-          <div className="lg:col-span-2 space-y-6">
+          {/* Left columns (expandido p/ ocupar todo o grid enquanto o chat está oculto) */}
+          <div className="lg:col-span-3 space-y-6">
             {/* Patient Clinical Data */}
             <div ref={clinicalTabsRef}>
             <Tabs value={clinicalTab} onValueChange={setClinicalTab}>
@@ -1021,18 +1021,20 @@ const PetProfilePage: React.FC = () => {
             )}
           </div>
 
-          {/* Right column: Biological Timeline (top) + Chat (below) */}
-          <div className="space-y-4">
-            <div className="lg:sticky lg:top-4 space-y-4">
-              <div className="min-h-[640px]">
-                <PetClinicalChat
-                  petId={id!}
-                  petBreed={profile.breed}
-                  petAge={profile.age_years}
-                />
+          {/* Chat Clínico temporariamente oculto — será reativado em breve */}
+          {false && (
+            <div className="space-y-4">
+              <div className="lg:sticky lg:top-4 space-y-4">
+                <div className="min-h-[640px]">
+                  <PetClinicalChat
+                    petId={id!}
+                    petBreed={profile.breed}
+                    petAge={profile.age_years}
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </Layout>
