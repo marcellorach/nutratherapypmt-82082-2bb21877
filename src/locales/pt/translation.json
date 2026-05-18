@@ -1043,6 +1043,8 @@
       "geminiAnalyzing": "🤖 Gemini AI analisando documento... {{progress}}%",
       "vectorizedChunks": "{{count}} chunks vetorizados para busca semântica",
       "clickToVectorize": "Clique para vetorizar e habilitar busca semântica",
+      "noRagTooltip": "Este estudo não tem texto vetorizado, então a curadoria não consegue mostrar o trecho original que justifica cada triplet. Clique para vetorizar agora.",
+      "viewOriginalStudy": "Ver original",
       "abstract": "Abstract",
       "summary": "Resumo",
       "noSummary": "Resumo não disponível",
