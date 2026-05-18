@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-05-18T00:39:04.799Z",
+  "timestamp": "2026-05-18T02:39:37.625Z",
   "summary": {
-    "totalFiles": 869,
-    "totalIssues": 421,
+    "totalFiles": 872,
+    "totalIssues": 423,
     "hardcodedTexts": 42,
-    "missingKeys": 378,
+    "missingKeys": 380,
     "incompleteTranslations": 1
   },
   "issues": [
@@ -1873,22 +1873,36 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/pet-food/PetFoodCatalogTab.tsx",
-      "line": 109,
+      "line": 110,
       "text": "*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/pet-food/PetFoodCatalogTab.tsx",
-      "line": 120,
+      "line": 121,
       "text": "*, pet_food_brands(name), pet_food_nutrition(*)",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/pet-food/PetFoodCatalogTab.tsx",
-      "line": 459,
+      "line": 473,
       "text": "id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pet-food/PetFoodCoverageTab.tsx",
+      "line": 51,
+      "text": "id, name, pet_food_brands!inner(name), pet_food_nutrition(completeness_score, confidence)",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/pet-food/PetFoodCoverageTab.tsx",
+      "line": 78,
+      "text": "id, started_at, finished_at, status, processed, succeeded, failed, skipped, params, error",
       "severity": "high"
     },
     {
@@ -2496,14 +2510,14 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 74,
+      "line": 186,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2869,
+      "line": 2981,
       "text": "@",
       "severity": "high"
     },
@@ -2853,14 +2867,14 @@
     {
       "type": "hardcoded",
       "file": "src/components/administrador/pet-food/PetFoodCatalogTab.tsx",
-      "line": 429,
+      "line": 443,
       "text": "Nova marca",
       "severity": "medium"
     },
     {
       "type": "hardcoded",
       "file": "src/components/administrador/pet-food/PetFoodCatalogTab.tsx",
-      "line": 503,
+      "line": 517,
       "text": "Fase de vida",
       "severity": "medium"
     },
