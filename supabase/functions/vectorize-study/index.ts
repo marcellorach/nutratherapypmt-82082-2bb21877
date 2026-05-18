@@ -11,6 +11,8 @@ interface VectorizeRequest {
 }
 
 const TARGET_EMBEDDING_DIMENSION = 768;
+const EMBEDDING_MODEL_NAME = 'gemini-embedding-001';
+const EMBEDDING_MODEL_VERSION = `${EMBEDDING_MODEL_NAME}@${TARGET_EMBEDDING_DIMENSION}d`;
 
 // Função para dividir texto em chunks com overlap
 function chunkText(text: string, maxChunkSize = 500, overlap = 50): string[] {
@@ -250,6 +252,7 @@ serve(async (req) => {
           vectorized_at: new Date().toISOString(),
           chunks_count: embeddingsData.length,
           embedding_model: workingEndpoint.model,
+          embedding_model_version: EMBEDDING_MODEL_VERSION,
           embedding_provider: 'Google AI',
           embedding_dimension: TARGET_EMBEDDING_DIMENSION
         }
