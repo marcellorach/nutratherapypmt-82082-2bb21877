@@ -2585,23 +2585,8 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
       console.warn('⚠️ Falha ao deletar arquivo (não crítico):', delError);
     }
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        studyId,
-        nutraceuticalsCount: extractedData.nutraceuticals.length,
-        conditionsCount: extractedData.conditions.length,
-        interactionsCount: extractedData.interactions.length,
-        message: 'Pipeline VetGraphRAG 2.0 completo: Extração → Ontologia → Triplets',
-        metadata: {
-          duration_seconds: duration / 1000,
-          retries_used: 'automatic retry enabled for all steps',
-          phase2_entities: extractedData.nutraceuticals.length + extractedData.mechanisms.length + extractedData.biological_effects.length + extractedData.conditions.length,
-          phase3_triplets_estimated: extractedData.interactions.length + (extractedData.nutraceuticals.length * extractedData.conditions.length)
-        }
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    console.log('🏁 Pipeline finalizado com sucesso para studyId:', studyId, 'em', (duration / 1000).toFixed(1), 's');
+    return;
 
   } catch (error) {
     console.error('💥 ============================================');
@@ -2611,29 +2596,7 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
     console.error('❌ Mensagem:', error instanceof Error ? error.message : String(error));
     console.error('❌ Stack:', error instanceof Error ? error.stack : 'N/A');
     console.error('💥 ============================================');
-
-    const errorMessage = error instanceof Error ? error.message : String(error);
-
-    // ✅ Erros esperados (ex.: arquivo inválido/HTML) não devem virar 500,
-    // para evitar que o client reporte "Edge function returned 500".
-    const isInvalidFile = errorMessage.startsWith('ARQUIVO_INVALIDO:');
-
-    const status = isInvalidFile ? 200 : 500;
-    const recommendation = isInvalidFile
-      ? 'O arquivo armazenado não é um PDF válido (muitas vezes é HTML/redirect). Solução: reimportar o estudo, fazer upload manual do PDF ou usar uma fonte aberta do artigo.'
-      : 'Verifique os logs detalhados. Se o erro persistir após 3 retries automáticos, verifique: 1) Tamanho do PDF (<20MB), 2) Formato válido, 3) Quota da API Gemini';
-
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: errorMessage,
-        errorCode: isInvalidFile ? 'INVALID_PDF' : undefined,
-        recommendation,
-      }),
-      {
-        status,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    );
+    // Re-throw so the outer background wrapper records error on processed_studies
+    throw error;
   }
-});
+}
