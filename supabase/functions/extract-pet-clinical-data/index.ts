@@ -1,11 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { fetchSystemPrompt } from "../_shared/system-prompts.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const SYSTEM_PROMPT = `You are a veterinary clinical data extraction assistant. Extract structured medical entities from clinical text about canine patients.
+const SYSTEM_PROMPT_FALLBACK = `You are a veterinary clinical data extraction assistant. Extract structured medical entities from clinical text about canine patients.
 
 Given a clinical description, extract:
 1. **conditions**: Diagnosed conditions or diseases (name, severity if mentioned: mild/moderate/severe, any additional details like laterality)
@@ -44,7 +45,8 @@ serve(async (req: Request) => {
       );
     }
 
-    const systemPrompt = SYSTEM_PROMPT
+    const promptTemplate = await fetchSystemPrompt('extract_pet_clinical_data', SYSTEM_PROMPT_FALLBACK);
+    const systemPrompt = promptTemplate
       .replace('{{breed}}', existingProfile?.breed || 'Unknown')
       .replace('{{age}}', String(existingProfile?.age || 'Unknown'));
 
