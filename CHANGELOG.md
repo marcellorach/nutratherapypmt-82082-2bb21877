@@ -24,6 +24,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 5.1.0 -->
 
+### Changed - 2026-05-18 — Digital Twin: doenças atingem órgãos internos
+<!-- area: vet-ui · status: entregue -->
+- Substituída a silhueta opaca + bolinhas flutuantes do `DigitalTwinDog` por uma ilustração anatômica transparente do Golden Retriever (`src/assets/dog-anatomy.png`) com órgãos internos visíveis (cérebro, coração, pulmões, fígado, rins, intestinos, bexiga, articulações, coluna).
+- Cada doença agora ilumina o órgão correspondente *dentro* do corpo (via `DogAnatomySVG` + `mapConditionToRegions`), com pulso/halo proporcional à severidade e estrela verde quando o protocolo protege a região.
+- Coordenadas anatômicas (`REGION_COORDS`) recalibradas para o novo asset; `BiologicalTimeline` herda automaticamente o novo visual.
+- Files: src/assets/dog-anatomy.png, src/components/pet/DogAnatomySVG.tsx, src/components/pet/DigitalTwinDog.tsx
+
 ### Changed - 2026-05-18 — Extraction Prompts: ações movidas para o topo
 <!-- area: admin · status: entregue -->
 - Removido o rodapé "Restaurar Padrões do {{stage}}" / "Testar com estudo real" do `ExtractionPromptsEditor` — agora ambos os botões aparecem no cabeçalho do card de stages, ficando contextuais ao stage ativo (Stage 1…Triplets).

@@ -1,43 +1,83 @@
-# Plano
+## Objetivo
 
-## Parte 1 — Validar as 2 edge functions refatoradas
+Hoje, no Digital Twin (`/veterinario/pet/...`), as doenças aparecem como **bolinhas amarelas flutuando fora do corpo** do Golden. Você quer que elas atinjam os **órgãos internos** dentro do contorno transparente do cão. Isso é totalmente possível — e parte do trabalho já existe no projeto.
 
-Sem alterar código, executar:
+## O que já temos
 
-1. **`extract-pet-clinical-data`**
-   - `supabase--curl_edge_functions` POST com payload mínimo de teste (texto clínico curto).
-   - `supabase--edge_function_logs` filtrando por `fetchSystemPrompt` para confirmar que o prompt veio de `override_content` → `default_content` → manifesto.
-   - Validar que a resposta JSON mantém o mesmo formato de antes (campos esperados pelo frontend).
+- `DogAnatomySVG.tsx` já mapeia **28 regiões anatômicas** (cérebro, olhos, coração, pulmões, fígado, rins, pâncreas, intestinos, bexiga, coluna cervical/torácica/lombar, ombro/cotovelo/joelho/quadril, pele, etc.) em coordenadas precisas sobre o silhueta lateral, com glifos animados por severidade (pulsação, faíscas, halo de "novo risco", estrela de proteção). Usado hoje em `BiologicalTimeline`.
+- `DigitalTwinDog.tsx` usa uma versão **muito mais simples**: PNG da silhueta com 40% de opacidade + bolinhas posicionadas por `%` x/y (`bodyRegionMap`). É essa a tela do seu screenshot.
 
-2. **`relations-auditor`**
-   - `supabase--curl_edge_functions` POST com uma query de auditoria simples.
-   - `supabase--edge_function_logs` verificando ausência de erros e log de origem do prompt.
-   - Conferir que a resposta continua compatível com o consumidor no admin.
+A solução é **unificar** os dois e elevar o nível visual com uma ilustração anatômica nova.
 
-3. **Teste de override real**: gravar temporariamente `override_content` em um dos prompts via `supabase--insert`, re-invocar a função, confirmar nos logs que o override foi usado, e reverter.
+## O que mudar
 
-Resultado: tabela com status (OK / falha) por função + amostra do log mostrando a origem do prompt.
+### 1. Nova ilustração anatômica (asset)
+Gerar um SVG/PNG do mesmo Golden lateral, **transparente**, com órgãos internos desenhados **em linhas finas e cinza muito claro** (não coloridos) — como um diagrama veterinário sutil:
 
-## Parte 2 — Remover footer "Restore Defaults for TRIPLETS" e mover para o topo
+```text
+contorno do corpo (cinza claro)
+ ├─ crânio + cérebro (silhueta interna)
+ ├─ olho, orelha
+ ├─ coluna cervical / torácica / lombar (vértebras)
+ ├─ coração + pulmões (caixa torácica)
+ ├─ fígado, estômago, pâncreas, baço
+ ├─ rins (par), adrenais, bexiga
+ ├─ intestino delgado/grosso (serpentina)
+ ├─ articulações: ombro, cotovelo, carpo, quadril, joelho, jarrete
+ └─ tireoide (pescoço)
+```
 
-**Arquivo:** `src/components/administrador/configuracoes/ExtractionPromptsEditor.tsx`
+Estilo: traço fino #cbd5e1 / preenchimento branco-creme translúcido. Os órgãos ficam **visíveis mas discretos** quando saudáveis; só "acendem" com cor quando há doença mapeada.
 
-Hoje há um `Card` rodapé (linhas 332–358) com dois botões:
-- `Restaurar Padrões do {{stage}}`  ← o que o usuário quer remover dali
-- `Test with Real Study` ← o usuário **não** mencionou; manter? **Decisão proposta:** mover ambos para o topo, junto da barra de stages, para ficarem contextuais ao stage ativo (incluindo Triplets). Se preferir só mover o Restore e descartar o Test, faço isso na implementação.
+### 2. Reutilizar / estender `DogAnatomySVG`
+O componente já sabe pintar cada órgão pela severidade. Vou:
+- Trocar o `<image href={dogSilhouette}>` pelo novo asset anatômico transparente (mesmo `viewBox 1000x1000`, então as coordenadas já calibradas continuam válidas).
+- Confirmar/ajustar 2-3 coordenadas se a nova ilustração deslocar algum órgão (rápido).
+- Manter os glifos atuais: pulsação no coração, ondas no cérebro, manchas no fígado/rins, serpentina no intestino, marcas no espinho, etc.
 
-Mudanças:
-1. Remover o `Card` rodapé inteiro (linhas 332–358).
-2. No `Card` do cabeçalho (linha 239), adicionar à direita do título/descrição um pequeno grupo de ações com:
-   - Botão **Restaurar Padrões do {{stage}}** (mesma função `resetToDefaults(activeStage)`).
-   - Botão **Testar com estudo real** (mantém o toast atual).
-3. Garantir que o rótulo se atualiza dinamicamente conforme o stage ativo (Stage 1, Stage 2, …, Triplets) — já é o comportamento atual via `activeStage.toUpperCase()`.
-4. Sem novas chaves i18n (reuso de `extractionPrompts.restoreDefaults` e `extractionPrompts.testWithStudy`).
-5. Sem mudança de versão I18N (nenhuma string nova).
+### 3. Substituir o renderer no Digital Twin
+Em `DigitalTwinDog.tsx`:
+- Remover `renderSilhouette` (imagem + bolinhas absolutas).
+- Converter os `ScenarioMarker[]` em `regionStates: Partial<Record<AnatomyRegionId, RegionState>>` (já é o formato de `DogAnatomySVG`). Reusar a lógica existente em `BiologicalTimeline` (`regionsWithout` / `regionsWith`).
+- Renderizar `<DogAnatomySVG regionStates={...} showProtectionAura={protegido} />` nos dois cards "sem protocolo" / "com protocolo".
+- Manter o tooltip por órgão (já implementado em `DogAnatomySVG`) e os textos "X markers / Y protected" embaixo.
+
+### 4. Mapeamento doença → órgão
+A tabela `bodyRegionMap` (cerca de 30 termos PT/EN) será trocada por um mapeamento **doença → AnatomyRegionId** consistente com o que já existe em `services/anatomy-region-map.ts`. Cobertura: cardiopatias→heart, hepáticas→liver, renais→kidneys, disfunção cognitiva/epilepsia→brain, displasias→hips/elbow, IBD/pancreatite→intestines/pancreas, hipotireoidismo→thyroid, dermatites→skin, sistêmicas (câncer, senescência, inflamação crônica)→systemic, etc. (PT + EN).
+
+### 5. Bilíngue + design tokens
+- Sem strings novas hardcoded; chaves `t()` para "órgão afetado", "protegido", "novo risco" — algumas já existem em `petProfile.digitalTwin.*` e `petProfile.severity.*`.
+- Incrementar `I18N_VERSION` se eu adicionar chaves.
+- Cores via tokens HSL semânticos (mild = amber, moderate = orange, severe = red, protected = emerald) — já é o padrão de `SEVERITY_FILL`.
+
+## Resultado visual esperado
+
+```text
+ANTES:                              DEPOIS:
+  ●  ●                              ┌─────────────────────┐
+   \  \    ┌─Golden──┐              │   ⌒ cérebro (●)     │
+    `──→  body silhouette (40%)     │  ┌─────coluna───┐   │
+        2 markers                   │  │ ♥ coração ●  │   │
+                                    │  │ ▓ fígado ●   │   │
+                                    │  │ ◯◯ rins      │   │
+                                    │  └──────────────┘   │
+                                    │   articulações ●    │
+                                    └─────────────────────┘
+                                    Doença ilumina o órgão dentro
+```
+
+Cão saudável → traços cinza discretos. Cão com cardiomiopatia → coração pulsa em vermelho dentro do tórax. Com protocolo → mesmo coração ganha halo verde "★ protegido".
 
 ## Detalhes técnicos
 
-- Nenhuma mudança de schema; nenhuma migração.
-- Nenhum impacto nos demais consumidores (`ai-config`, `resetToDefaults`, `savePrompt` continuam idênticos).
-- Atualizar `CHANGELOG.md [Unreleased]` com entrada em **Changed** (área: `admin`, i18n: `none`) e rodar `npm run sync:changelog`.
-- Não é necessário tocar em `projectOrganograma.ts` (não há mudança de sidebar/tabs).
+- **Asset**: gerar `src/assets/dog-anatomy.png` (1000x1000, fundo transparente) via `imagegen` com prompt "lateral Golden Retriever line drawing, body outline in thin pencil grey, internal organs (brain, heart, lungs, liver, kidneys, intestines, bladder) faintly visible inside the body as anatomical diagram, joints marked, white background transparent, museum quality medical illustration". QA visual no `/mnt/documents/` antes de mover para `src/assets`.
+- **Compatibilidade**: `BiologicalTimeline` continua funcionando porque `DogAnatomySVG` mantém a mesma API.
+- **Sem mudança de schema/DB**: puramente UI.
+- **Changelog**: 1 entrada em `[Unreleased]` (`area: vet · status: improvement`) + `npm run sync:changelog`.
+
+## Risco / fora de escopo
+
+- Não vou mexer no chat, no pipeline clínico, nem em `bodyRegionMap` em outros lugares fora do Twin/Timeline.
+- Se a ilustração gerada não ficar boa após 2 tentativas, faço fallback usando a `dog-silhouette.png` atual + camada de órgãos desenhados em SVG (paths simples) — mesmo resultado final, sem depender de geração de imagem.
+
+Topa que eu implemente assim?
