@@ -202,7 +202,7 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
   'estudos': {
     // ⚠️ MAINTENANCE: every change to the Senex engine that touches this modal
     // MUST bump `version` (semver) and set `lastUpdate` to the current ISO date.
-    version: '5.0.0',
+    version: '5.1.0',
     lastUpdate: '2026-05-18',
     keyExcerpts: [
       {
@@ -264,7 +264,7 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
         { pt: '2. Triple Graph Construction → Document → Chunk → Entity → Mechanism (alimenta as 5 camadas L0–L4)', en: '2. Triple Graph Construction → Document → Chunk → Entity → Mechanism (feeds the 5 layers L0–L4)' },
         { pt: '3. Extração em 3 estágios → Stage 1 Entidades · Stage 2 Mecanismos moleculares · Stage 3 Contexto clínico (dose, AE, outcome)', en: '3. 3-stage extraction → Stage 1 Entities · Stage 2 Molecular mechanisms · Stage 3 Clinical context (dose, AE, outcome)' },
         { pt: '4. Ciclo GRRA (KGARevion) → Generate → Review contra o KG → Revise → Answer/Approve (auto ≥ 0,50, restante para curadoria)', en: '4. GRRA cycle (KGARevion) → Generate → Review against the KG → Revise → Answer/Approve (auto ≥ 0.50, rest goes to curation)' },
-        { pt: '5. Storage híbrido → Supabase pgvector (embeddings) + tabelas hierárquicas L0–L4 + Neo4j AuraDB (planejado)', en: '5. Hybrid storage → Supabase pgvector (embeddings) + L0–L4 hierarchical tables + Neo4j AuraDB (planned)' },
+        { pt: '5. Storage híbrido → Supabase pgvector (embeddings) + tabelas hierárquicas L0–L4 + Neo4j AuraDB (sync ativo via edge functions neo4j-sync / sync-approved-triplets / sync-study-to-neo4j)', en: '5. Hybrid storage → Supabase pgvector (embeddings) + L0–L4 hierarchical tables + Neo4j AuraDB (live sync via edge functions neo4j-sync / sync-approved-triplets / sync-study-to-neo4j)' },
         { pt: '6. U-Retrieval → busca híbrida top-down (graph) + bottom-up (vetorial) sobre o KG do paciente', en: '6. U-Retrieval → hybrid top-down (graph) + bottom-up (vector) search over the patient KG' },
         { pt: '7. Gap-Fill (PubMed E-utilities + Gemini) → quando o Digital Twin acusa years_gained baixo, varre PubMed por pares (compound × condition) ausentes e gera triplets pendentes', en: '7. Gap-Fill (PubMed E-utilities + Gemini) → when the Digital Twin shows low years_gained, scans PubMed for missing (compound × condition) pairs and emits pending triplets' },
         { pt: '8. Síntese clínica → Gemini compõe o protocolo (≤ 8 compostos sinérgicos) + Digital Twin (curva sigmoide severidade × tempo) + citações rastreáveis ao estudo de origem', en: '8. Clinical synthesis → Gemini composes the protocol (≤ 8 synergistic compounds) + Digital Twin (sigmoid severity × time curve) + citations traceable to the source study' }
@@ -406,9 +406,10 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
           { pt: 'Expansão da predisposição por raça para o long-tail (~120 raças cobertas)', en: 'Expanding breed predisposition to the long-tail (~120 breeds covered)' }
         ],
         planned: [
-          { pt: 'Migração do KG para Neo4j AuraDB com Cypher queries diretas', en: 'Migrate the KG to Neo4j AuraDB with direct Cypher queries' },
+          { pt: 'TransE link prediction online por requisição (hoje batch noturno)', en: 'Online TransE link prediction per request (currently a nightly batch)' },
           { pt: 'Modelos compartimentais multi-órgão para o Digital Twin (rim, fígado, articular)', en: 'Multi-organ compartmental models for the Digital Twin (kidney, liver, joint)' },
           { pt: 'Curadoria colaborativa em tempo real (vários veterinários no mesmo triplet)', en: 'Real-time collaborative curation (multiple vets on the same triplet)' },
+          { pt: 'Cypher queries diretas no Neo4j AuraDB para o U-Retrieval clínico (hoje read-path principal vive em RPC Postgres)', en: 'Direct Cypher queries against Neo4j AuraDB for clinical U-Retrieval (current main read-path lives in Postgres RPC)' },
           { pt: 'Extensão controlada para felinos após validação da curva canina', en: 'Controlled extension to felines after the canine curve is validated' }
         ]
       },
