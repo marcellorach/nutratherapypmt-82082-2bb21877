@@ -427,11 +427,12 @@ export const organograma: OrganogramaArea[] = [
         ],
       },
       {
-        title: "Audit & Manager",
-        title_en: "Audit & Manager",
-        description: "Tabs admin para auditar cobertura e editar via DB.",
-        description_en: "Admin tabs for auditing coverage and editing via DB.",
+        title: "Translations Hub (Audit + Manage)",
+        title_en: "Translations Hub (Audit + Manage)",
+        description: "Hub único com sub-tabs Audit (cobertura) + Manage (edição via DB).",
+        description_en: "Single hub with Audit (coverage) + Manage (DB edit) sub-tabs.",
         files: [
+          "src/components/administrador/TranslationsHub.tsx",
           "src/components/administrador/auditoria/TranslationAuditTab.tsx",
           "src/components/administrador/traducoes/TranslationManager.tsx",
         ],

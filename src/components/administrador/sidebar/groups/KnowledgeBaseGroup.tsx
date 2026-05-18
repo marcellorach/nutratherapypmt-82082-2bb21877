@@ -82,6 +82,25 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
       </SidebarMenuItem>
 
       <SidebarMenuItem>
+        <SidebarMenuButton 
+          isActive={currentStep === "knowledge-graph"} 
+          onClick={() => handleStepClick("knowledge-graph")}
+          className={currentStep === "knowledge-graph" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Share2 className={`h-4 w-4 mr-2 ${currentStep === "knowledge-graph" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.knowledgeGraph')}</span>
+              <StatusBadge statusKey="admin.sidebar.knowledgeBase.knowledgeGraphStatus" tooltipKey="admin.sidebar.knowledgeBase.knowledgeGraphStatusTooltip" color="text-emerald-500" />
+            </div>
+            {currentStep === "knowledge-graph" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+            )}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem>
         <SidebarMenuButton
           isActive={currentStep === "evidence-conflicts"}
           onClick={() => handleStepClick("evidence-conflicts")}
@@ -164,27 +183,6 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
               <StatusBadge statusKey="admin.sidebar.knowledgeBase.veterinaryTargetsStatus" tooltipKey="admin.sidebar.knowledgeBase.veterinaryTargetsStatusTooltip" color="text-emerald-500" />
             </div>
             {currentStep === "veterinary-targets" && (
-              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-            )}
-          </div>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-
-      {/* triplet-curation tab removed - curadoria agora integrada ao EstudoDetailDialog */}
-
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          isActive={currentStep === "knowledge-graph"} 
-          onClick={() => handleStepClick("knowledge-graph")}
-          className={currentStep === "knowledge-graph" ? "bg-primary/10 text-primary" : ""}
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <Share2 className={`h-4 w-4 mr-2 ${currentStep === "knowledge-graph" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.knowledgeBase.knowledgeGraph')}</span>
-              <StatusBadge statusKey="admin.sidebar.knowledgeBase.knowledgeGraphStatus" tooltipKey="admin.sidebar.knowledgeBase.knowledgeGraphStatusTooltip" color="text-emerald-500" />
-            </div>
-            {currentStep === "knowledge-graph" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
             )}
           </div>
