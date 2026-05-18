@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import PendingAccessBadge from './PendingAccessBadge';
 import { useAuth } from '@/contexts/AuthContext';
+import { SENEX_VERSION, SENEX_LAST_UPDATE } from '@/config/senex-version';
 
 const Header: React.FC = () => {
   const { t } = useTranslation();
@@ -32,8 +33,16 @@ const Header: React.FC = () => {
             </div>
           </div>
           <div className="flex flex-col leading-tight text-left">
-            <div className="text-lg font-bold text-gray-800">
-              Senex AI
+            <div className="flex items-baseline gap-2">
+              <div className="text-lg font-bold text-gray-800">
+                Senex AI
+              </div>
+              <span
+                className="text-[10px] text-gray-500 font-mono tabular-nums"
+                title={`Senex AI v${SENEX_VERSION} — atualizado em ${SENEX_LAST_UPDATE}`}
+              >
+                v{SENEX_VERSION} · {SENEX_LAST_UPDATE}
+              </span>
             </div>
             <div className="text-xs text-gray-600 font-light">
               {t('header.platformSubtitleLine1a')}
