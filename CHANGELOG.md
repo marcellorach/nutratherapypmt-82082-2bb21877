@@ -24,6 +24,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 5.1.0 -->
 
+### Fixed - 2026-05-18 — System Prompts: catálogo populado + sync com o código
+<!-- area: prompts · status: entregue · i18n: 1.86.6 -->
+- Causa raiz: os 24 registros em `ai_system_prompts` existiam mas com `default_content` vazio, gerando o badge "sem conteúdo" em todos os cards.
+- Novo manifest `supabase/functions/_shared/system-prompts.ts` com o texto real de produção dos 24 prompts (Clinical Extraction, Clinical Reasoning, Conversational, External Lookup, KG Enrichment, KG Gap-Fill, KG Governance, RAG/Embeddings, Recommendation Orchestration, Study Ingestion, Taxonomy, Translation) + helper `getSystemPrompt(supabase, key)` no padrão override → default → manifest.
+- Nova edge function `sync-system-prompts` faz `UPDATE` em `default_content` a partir do manifest, **sem tocar em `override_content`**. Executada agora: 24/24 atualizados.
+- `SystemPromptsCatalog`: botão "Sincronizar com o código" no header + auto-sync silencioso ao montar quando há prompts vazios.
+- `PromptConfigurationTab`: removido o botão "Gerar Prompts de Exemplo" (e o gerador de mocks `generateRandomPrompts`) que violava o No-Mock Policy. Estado vazio agora aponta o admin para a aba System Prompts.
+- i18n: removidas chaves `generateExample` / `generateExamples`; adicionada `systemHint` (PT/EN). I18N_VERSION → 1.86.6.
+- Files: supabase/functions/_shared/system-prompts.ts, supabase/functions/sync-system-prompts/index.ts, src/components/administrador/configuracoes/SystemPromptsCatalog.tsx, src/components/administrador/PromptConfigurationTab.tsx, src/locales/{pt,en}/translation.json, src/i18n.ts
+
 ### Changed - 2026-05-18 — Landing: AdminFooter unificado + scroll-indicator na 1ª dobra
 <!-- area: admin · status: entregue -->
 - `AdminFooter` agora renderiza o mesmo `Footer` da landing (versão Senex auto-lida, badge `Veterinary Geroscience`, copyright bilíngue, powered-by completo). Antes era um clone hardcoded em EN sem versão.

@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-18T04:07:13.793Z
+// Última geração: 2026-05-18T04:25:45.740Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,46 @@ export const lastChangelogDate = "2026-05-18";
 export const senexVersion = "5.1.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-18",
+    "kind": "fixed",
+    "area": "prompts",
+    "status": "entregue",
+    "title": "System Prompts: catálogo populado + sync com o código",
+    "bullets": [
+      "Causa raiz: os 24 registros em `ai_system_prompts` existiam mas com `default_content` vazio, gerando o badge \"sem conteúdo\" em todos os cards.",
+      "Novo manifest `supabase/functions/_shared/system-prompts.ts` com o texto real de produção dos 24 prompts (Clinical Extraction, Clinical Reasoning, Conversational, External Lookup, KG Enrichment, KG Gap-Fill, KG Governance, RAG/Embeddings, Recommendation Orchestration, Study Ingestion, Taxonomy, Translation) + helper `getSystemPrompt(supabase, key)` no padrão override → default → manifest.",
+      "Nova edge function `sync-system-prompts` faz `UPDATE` em `default_content` a partir do manifest, sem tocar em `override_content`. Executada agora: 24/24 atualizados.",
+      "`SystemPromptsCatalog`: botão \"Sincronizar com o código\" no header + auto-sync silencioso ao montar quando há prompts vazios.",
+      "`PromptConfigurationTab`: removido o botão \"Gerar Prompts de Exemplo\" (e o gerador de mocks `generateRandomPrompts`) que violava o No-Mock Policy. Estado vazio agora aponta o admin para a aba System Prompts.",
+      "i18n: removidas chaves `generateExample` / `generateExamples`; adicionada `systemHint` (PT/EN). I18N_VERSION → 1.86.6.",
+      "Files: supabase/functions/_shared/system-prompts.ts, supabase/functions/sync-system-prompts/index.ts, src/components/administrador/configuracoes/SystemPromptsCatalog.tsx, src/components/administrador/PromptConfigurationTab.tsx, src/locales/{pt,en}/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "supabase/functions/_shared/system-prompts.ts",
+      "supabase/functions/sync-system-prompts/index.ts",
+      "src/components/administrador/configuracoes/SystemPromptsCatalog.tsx",
+      "src/components/administrador/PromptConfigurationTab.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.86.6"
+  },
+  {
+    "date": "2026-05-18",
+    "kind": "changed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Landing: AdminFooter unificado + scroll-indicator na 1ª dobra",
+    "bullets": [
+      "`AdminFooter` agora renderiza o mesmo `Footer` da landing (versão Senex auto-lida, badge `Veterinary Geroscience`, copyright bilíngue, powered-by completo). Antes era um clone hardcoded em EN sem versão.",
+      "Index hero: reduzido espaço acima do botão \"Scroll to discover our vision\" (`mt-16` → `mt-4`, `mt-3` → `mt-2`) para caber na 1ª dobra.",
+      "Files: src/components/administrador/layout/AdminFooter.tsx, src/pages/Index.tsx"
+    ],
+    "files": [
+      "src/components/administrador/layout/AdminFooter.tsx",
+      "src/pages/Index.tsx"
+    ]
+  },
   {
     "date": "2026-05-18",
     "kind": "changed",

@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Brain, Plus, Trash2, Edit2, Save, X, Wand2, Layers, Layers3 } from "lucide-react";
+import { Brain, Plus, Trash2, Edit2, Save, X, Layers, Layers3 } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import ExtractionPromptsEditor from './configuracoes/ExtractionPromptsEditor';
@@ -73,53 +73,6 @@ const PromptConfigurationTab: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const generateRandomPrompts = () => {
-    const examples: Omit<Prompt, 'id'>[] = [
-      {
-        name: "Análise de Deficiências Nutricionais",
-        description: "Identifica deficiências nutricionais com base em exames laboratoriais",
-        content: "Você é um especialista em nutrição veterinária. Analise os seguintes resultados de exames e identifique possíveis deficiências nutricionais que podem ser corrigidas com nutracêuticos do nosso catálogo.",
-        category: "analysis",
-        active: true
-      },
-      {
-        name: "Prevenção por Raça",
-        description: "Recomendações preventivas baseadas em predisposições genéticas",
-        content: "Com base na raça, idade e histórico familiar do pet, identifique as doenças degenerativas mais comuns para este perfil e sugira nutracêuticos preventivos do nosso catálogo.",
-        category: "prevention",
-        active: true
-      },
-      {
-        name: "Otimização de Performance",
-        description: "Melhoria de performance para pets ativos ou de competição",
-        content: "Para pets atletas ou de competição, analise o regime de exercícios e sugira suplementos que possam melhorar performance, recuperação muscular e resistência.",
-        category: "performance",
-        active: true
-      }
-    ];
-
-    examples.forEach(async (example, index) => {
-      const promptId = `${example.category}_${Date.now()}_${index}`;
-      const configKey = `prompt_${promptId}`;
-      try {
-        await supabase.functions.invoke('ai-config', {
-          method: 'POST',
-          body: { action: 'set', key: configKey, value: JSON.stringify(example) }
-        });
-      } catch (error) {
-        console.error(`Error saving prompt ${configKey}:`, error);
-      }
-    });
-
-    setTimeout(() => {
-      loadPromptsFromDatabase();
-      toast({
-        title: t('admin.prompts.messages.generated'),
-        description: t('admin.prompts.messages.generatedDescription')
-      });
-    }, 1000);
   };
 
   const handleSavePrompt = async (promptId: string) => {
@@ -253,10 +206,6 @@ const PromptConfigurationTab: React.FC = () => {
             <p className="text-muted-foreground">{t('admin.prompts.recommendationDesc')}</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={generateRandomPrompts} className="flex items-center gap-2">
-              <Wand2 className="h-4 w-4" />
-              {t('admin.prompts.generateExample')}
-            </Button>
             <Button onClick={() => setIsCreating(true)} className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               {t('admin.prompts.newPrompt')}
@@ -336,11 +285,10 @@ const PromptConfigurationTab: React.FC = () => {
             <Card>
               <CardContent className="pt-6 text-center">
                 <Brain className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground mb-4">{t('admin.prompts.noPrompts')}</p>
-                <Button onClick={generateRandomPrompts} variant="outline">
-                  <Wand2 className="h-4 w-4 mr-2" />
-                  {t('admin.prompts.generateExamples')}
-                </Button>
+                <p className="text-muted-foreground mb-2">{t('admin.prompts.noPrompts')}</p>
+                <p className="text-xs text-muted-foreground max-w-md mx-auto">
+                  {t('admin.prompts.systemHint')}
+                </p>
               </CardContent>
             </Card>
           ) : (
