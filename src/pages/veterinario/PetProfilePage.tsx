@@ -1021,18 +1021,20 @@ const PetProfilePage: React.FC = () => {
             )}
           </div>
 
-          {/* Right column: Biological Timeline (top) + Chat (below) */}
-          <div className="space-y-4">
-            <div className="lg:sticky lg:top-4 space-y-4">
-              <div className="min-h-[640px]">
-                <PetClinicalChat
-                  petId={id!}
-                  petBreed={profile.breed}
-                  petAge={profile.age_years}
-                />
+          {/* Chat Clínico temporariamente oculto — será reativado em breve */}
+          {false && (
+            <div className="space-y-4">
+              <div className="lg:sticky lg:top-4 space-y-4">
+                <div className="min-h-[640px]">
+                  <PetClinicalChat
+                    petId={id!}
+                    petBreed={profile.breed}
+                    petAge={profile.age_years}
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </Layout>
