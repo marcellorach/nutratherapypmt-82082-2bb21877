@@ -21,6 +21,7 @@ import EstudoSearch from '../EstudoSearch';
 // AdicionarEstudoDialog removed - no longer needed in sub-tab layout
 import EstudoDetailDialog from '../../dialogs/EstudoDetailDialog';
 import { useStudyApprovalWorkflow } from '@/hooks/useStudyApprovalWorkflow';
+import RagSmokeTestDialog from './RagSmokeTestDialog';
 
 const SCISPACE_LOGO_URL = "/lovable-uploads/1abbfa4b-69b7-42ab-8e69-bf156f88568a.png";
 
@@ -298,6 +299,7 @@ const SciImportSection: React.FC = () => {
                     <Badge variant="secondary">{estudos.length}</Badge>
                   </div>
                   <div className="flex items-center gap-2">
+                    <RagSmokeTestDialog />
                     {missingVectorCount > 0 && (
                       <Button
                         onClick={handleBackfillVectorize}

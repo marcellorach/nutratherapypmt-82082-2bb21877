@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-05-18T18:07:29.828Z",
+  "timestamp": "2026-05-18T19:23:00.176Z",
   "summary": {
     "totalFiles": 878,
-    "totalIssues": 424,
+    "totalIssues": 428,
     "hardcodedTexts": 49,
-    "missingKeys": 374,
+    "missingKeys": 378,
     "incompleteTranslations": 1
   },
   "issues": [
@@ -1551,8 +1551,36 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/import/SciImportSection.tsx",
-      "line": 117,
+      "line": 95,
+      "text": "id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/import/SciImportSection.tsx",
+      "line": 109,
+      "text": "study_id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/import/SciImportSection.tsx",
+      "line": 174,
       "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/import/SciImportSection.tsx",
+      "line": 222,
+      "text": "study_id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/import/SciImportSection.tsx",
+      "line": 226,
+      "text": "study_id",
       "severity": "high"
     },
     {
@@ -2461,21 +2489,21 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 171,
+      "line": 240,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 382,
+      "line": 451,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 3177,
+      "line": 3246,
       "text": "@",
       "severity": "high"
     },
