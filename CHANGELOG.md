@@ -22,6 +22,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ---
 
 ## [Unreleased]
+<!-- senex: 5.1.0 -->
+
+### Changed - 2026-05-18 — Header/Footer: versão Senex auto-lida do CHANGELOG
+<!-- area: meta · status: entregue -->
+- `scripts/sync-changelog.mjs` agora extrai `<!-- senex: x.y.z -->` do bloco `[Unreleased]` e emite `senexVersion` em `projectChangelog.generated.ts`.
+- `src/config/senex-version.ts` consome `senexVersion` + `lastChangelogDate` — sem mais hardcode. Header e Footer atualizam sozinhos.
+- Sidebar: ícone "configurado" do item FDA/EMA/AVMA Compliance agora fica inline ao lado da palavra, igual aos demais (deixou de ficar centrado à direita quando o texto quebra em 2 linhas).
+- Files: scripts/sync-changelog.mjs, src/config/senex-version.ts, src/data/projectChangelog.generated.ts, src/components/administrador/sidebar/groups/ConfigurationGroup.tsx
 
 ### Added - 2026-05-18 — Compliance: i18n PT/EN + renovação manual com log
 <!-- area: admin · status: entregue · i18n: 1.86.3 -->

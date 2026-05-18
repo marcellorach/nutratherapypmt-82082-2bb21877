@@ -142,6 +142,10 @@ export function parseChangelog(md) {
 }
 
 function emitTs(entries) {
+  return emitTsWith(entries, null);
+}
+
+function emitTsWith(entries, senexVersion) {
   const header = `// AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode \`npm run sync:changelog\` após editar o CHANGELOG.
 // Última geração: ${new Date().toISOString()}
@@ -165,9 +169,21 @@ export interface ChangelogEntry {
 
 export const lastChangelogDate = ${JSON.stringify(entries[0]?.date ?? "")};
 
+export const senexVersion = ${JSON.stringify(senexVersion ?? "0.0.0")};
+
 export const changelog: ChangelogEntry[] = ${JSON.stringify(entries, null, 2)};
 `;
   return header;
+}
+
+function extractSenexVersion(md) {
+  // Procura no bloco [Unreleased] um marker `<!-- senex: x.y.z -->`.
+  const unrelIdx = md.indexOf("## [Unreleased]");
+  if (unrelIdx === -1) return null;
+  const nextHead = md.indexOf("\n## ", unrelIdx + 1);
+  const slice = nextHead === -1 ? md.slice(unrelIdx) : md.slice(unrelIdx, nextHead);
+  const m = slice.match(/<!--\s*senex\s*:\s*([\d.]+)\s*-->/i);
+  return m ? m[1] : null;
 }
 
 function emitContext(entries) {
@@ -221,11 +237,12 @@ function main() {
     console.error("[sync-changelog] No entries parsed — aborting (keeping previous generated file).");
     process.exit(1);
   }
-  fs.writeFileSync(OUT_TS, emitTs(entries));
+  const senex = extractSenexVersion(md);
+  fs.writeFileSync(OUT_TS, emitTsWith(entries, senex));
   fs.mkdirSync(path.dirname(CTX_MD), { recursive: true });
   fs.writeFileSync(CTX_MD, emitContext(entries));
   updateOrganogramaDate(entries[0].date);
-  console.log(`[sync-changelog] OK — ${entries.length} entries · last: ${entries[0].date} · area: ${entries[0].area}`);
+  console.log(`[sync-changelog] OK — ${entries.length} entries · last: ${entries[0].date} · area: ${entries[0].area} · senex: ${senex ?? "n/d"}`);
 }
 
 const isCli = (() => {
