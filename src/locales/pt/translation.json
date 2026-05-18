@@ -2031,6 +2031,7 @@
         "petFoodCatalog": "Nutrição",
         "petFoodCatalogStatus": "Em curadoria",
         "petFoodCatalogStatusTooltip": "Banco de marcas, produtos e perfil nutricional usado pelo pipeline de gap nutricional.",
+        "petFoodCoverage": "Cobertura de Rações",
         "dosageCuration": "Curadoria de Doses",
         "dosageCurationStatus": "Em curadoria",
         "dosageCurationStatusTooltip": "Revisão e aprovação de doses extraídas da web ou estimadas por IA.",
