@@ -463,10 +463,12 @@ export async function analyzeNutritionGaps(ctx: PetNutritionContext): Promise<Nu
   // 6.1 — busca dieta atual
   const { data: nutritions } = await (supabase as any)
     .from('pet_nutrition')
-    .select('id, daily_amount_g, is_current')
+    .select('id, daily_amount_g, is_current, started_at, created_at')
     .eq('pet_id', ctx.petId)
     .order('created_at', { ascending: false });
-  const current = (nutritions ?? []).find((n: any) => n.is_current) ?? (nutritions ?? [])[0];
+  const current = ctx.nutritionId
+    ? (nutritions ?? []).find((n: any) => n.id === ctx.nutritionId)
+    : ((nutritions ?? []).find((n: any) => n.is_current) ?? (nutritions ?? [])[0]);
 
   if (!current) {
     return {
