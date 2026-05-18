@@ -31,7 +31,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Files: src/components/administrador/configuracoes/ExtractionPromptsEditor.tsx
 
 ### Fixed - 2026-05-18 — System Prompts: catálogo populado + sync com o código
-<!-- area: prompts · status: entregue · i18n: 1.86.6 -->
+<!-- area: admin · status: entregue · i18n: 1.86.6 -->
 - Causa raiz: os 24 registros em `ai_system_prompts` existiam mas com `default_content` vazio, gerando o badge "sem conteúdo" em todos os cards.
 - Novo manifest `supabase/functions/_shared/system-prompts.ts` com o texto real de produção dos 24 prompts (Clinical Extraction, Clinical Reasoning, Conversational, External Lookup, KG Enrichment, KG Gap-Fill, KG Governance, RAG/Embeddings, Recommendation Orchestration, Study Ingestion, Taxonomy, Translation) + helper `getSystemPrompt(supabase, key)` no padrão override → default → manifest.
 - Nova edge function `sync-system-prompts` faz `UPDATE` em `default_content` a partir do manifest, **sem tocar em `override_content`**. Executada agora: 24/24 atualizados.
