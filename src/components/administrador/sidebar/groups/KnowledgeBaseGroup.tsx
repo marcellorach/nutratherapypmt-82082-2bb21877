@@ -263,22 +263,6 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
       </SidebarMenuItem>
 
       <SidebarMenuItem>
-        <SidebarMenuButton
-          isActive={currentStep === "pet-food-coverage"}
-          onClick={() => handleStepClick("pet-food-coverage")}
-          className={currentStep === "pet-food-coverage" ? "bg-primary/10 text-primary" : ""}
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <UtensilsCrossed className={`h-4 w-4 mr-2 ${currentStep === "pet-food-coverage" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.knowledgeBase.petFoodCoverage')}</span>
-            </div>
-            {currentStep === "pet-food-coverage" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
-          </div>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-
-      <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "base-knowledge"} 
           onClick={() => handleStepClick("base-knowledge")}
