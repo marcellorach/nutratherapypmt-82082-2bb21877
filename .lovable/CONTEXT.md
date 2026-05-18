@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-05-18T04:25:45.745Z
+Generated: 2026-05-18T04:41:07.957Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
 ## Latest i18n version: 1.86.6
 
 ## Changes by area (last 14 days)
-- **admin**: 19
+- **admin**: 20
 - **vet-ui**: 14
 - **tutor-ui**: 9
 - **clinical-pipeline**: 4
@@ -16,6 +16,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **curation**: 1
 
 ## Top 10 recent entries
+### 2026-05-18 · [admin] CHANGED — Extraction Prompts: ações movidas para o topo
+- Removido o rodapé "Restaurar Padrões do {{stage}}" / "Testar com estudo real" do `ExtractionPromptsEditor` — agora ambos os botões aparecem no cabeçalho do card de stages, ficando contextuais ao stage ativo (Stage 1…Triplets).
+- Validadas as duas primeiras edge functions migradas para `fetchSystemPrompt`: `extract-pet-clinical-data` e `relations-auditor` (status 200, prompts resolvidos via DB `default_content`).
+- Files: src/components/administrador/configuracoes/ExtractionPromptsEditor.tsx
+_files: src/components/administrador/configuracoes/ExtractionPromptsEditor.tsx_
+
 ### 2026-05-18 · [prompts] FIXED — System Prompts: catálogo populado + sync com o código
 - Causa raiz: os 24 registros em `ai_system_prompts` existiam mas com `default_content` vazio, gerando o badge "sem conteúdo" em todos os cards.
 - Novo manifest `supabase/functions/_shared/system-prompts.ts` com o texto real de produção dos 24 prompts (Clinical Extraction, Clinical Reasoning, Conversational, External Lookup, KG Enrichment, KG Gap-Fill, KG Governance, RAG/Embeddings, Recommendation Orchestration, Study Ingestion, Taxonomy, Translation) + helper `getSystemPrompt(supabase, key)` no padrão override → default → manifest.
@@ -69,12 +75,6 @@ _files: supabase/functions/bulk-enrich-pet-food/index.ts, src/components/adminis
 - `clinical-analysis-pipeline.ts`: cada composto materializado ganha `closesGaps: string[]` propagado verbatim do LLM.
 - `PetProfilePage.handleApproveStack`: persiste `closes_gaps` dentro de `treatment_proposals.compounds[]` (jsonb), sem mudanças no resto do "patient analysis".
 _files: supabase/functions/hybrid-recommendation/index.ts, src/services/clinical-analysis-pipeline.ts, src/pages/veterinario/PetProfilePage.tsx, src/components/tutor/TreatmentProposalCard.tsx…_
-
-### 2026-05-18 · [vet-ui] ADDED — Fase 4: Evolução longitudinal dos gaps nutricionais
-- Novo serviço `src/services/nutrition-gap-timeline.ts`: reconstrói déficits/excessos para cada snapshot histórico de `pet_nutrition` reutilizando `analyzeNutritionGaps` (mesma metodologia FEDIAF/AAFCO). Sem mocks — snapshots sem produtos linkados ficam fora do gráfico.
-- `analyzeNutritionGaps` aceita `nutritionId?: string` opcional para forçar análise de um snapshot específico (necessário para timeline).
-- Novo componente `NutritionGapEvolutionChart.tsx` (Recharts ComposedChart): áreas de déficit/excesso + linha de adequados ao longo do tempo, badge de tendência (Δ desde o primeiro snapshot) e tabela "Top 5 nutrientes com maior variação" (antes → depois, Δ percentual em pontos).
-_files: src/services/nutrition-gap-timeline.ts, src/services/nutrition-gap-analyzer.ts, src/components/pet/NutritionGapEvolutionChart.tsx, src/components/pet/PetNutritionPanel.tsx…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
