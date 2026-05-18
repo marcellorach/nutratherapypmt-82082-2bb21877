@@ -1,6 +1,7 @@
 // Versão pública do motor Senex AI (exibida no header, footer e modais).
-// Atualizar junto com mudanças significativas no motor (ingestion, KG, gap-fill, digital twin).
-import { lastChangelogDate } from '@/data/projectChangelog.generated';
+// Fonte única: CHANGELOG.md → marker `<!-- senex: x.y.z -->` em [Unreleased].
+// Atualizado automaticamente por `npm run sync:changelog`.
+import { lastChangelogDate, senexVersion } from '@/data/projectChangelog.generated';
 
-export const SENEX_VERSION = '5.1.0';
+export const SENEX_VERSION = senexVersion;
 export const SENEX_LAST_UPDATE = lastChangelogDate;

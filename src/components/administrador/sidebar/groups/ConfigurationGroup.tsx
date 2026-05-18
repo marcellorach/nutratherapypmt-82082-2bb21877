@@ -250,8 +250,10 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <ShieldCheck className={`h-4 w-4 mr-2 ${currentStep === "compliance-dashboard" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.configuration.complianceDashboard')}</span>
-              <ConfiguredCheck />
+              <span>
+                {t('admin.sidebar.configuration.complianceDashboard')}
+                <CheckCircle2 className="inline-block h-3.5 w-3.5 text-emerald-500 ml-1.5 align-middle" aria-label="Configurado" />
+              </span>
             </div>
             <div className="flex items-center ml-auto">
               {currentStep === "compliance-dashboard" && (

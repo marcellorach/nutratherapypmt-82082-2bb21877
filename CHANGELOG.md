@@ -22,6 +22,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ---
 
 ## [Unreleased]
+<!-- senex: 5.1.0 -->
 
 ### Added - 2026-05-18 — Compliance: i18n PT/EN + renovação manual com log
 <!-- area: admin · status: entregue · i18n: 1.86.3 -->
