@@ -3,7 +3,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Badge } from '@/components/ui/badge';
 import { useTranslation } from 'react-i18next';
 import type { AnatomyRegionId } from '@/services/anatomy-region-map';
-import dogSilhouette from '@/assets/dog-silhouette.png';
+import dogAnatomy from '@/assets/dog-anatomy.png';
 
 export type Severity = 'mild' | 'moderate' | 'severe';
 
@@ -51,43 +51,45 @@ const SEVERITY_PULSE_DUR: Record<Severity, string> = {
  * Values calibrated visually against the source image.
  */
 type RegionCoord = { cx: number; cy: number; rx: number; ry: number };
+// Calibrated for src/assets/dog-anatomy.png (Golden Retriever, lateral, facing right,
+// with internal organs visible). viewBox stays 1000x1000.
 const REGION_COORDS: Record<AnatomyRegionId, RegionCoord> = {
   // Head
-  brain:           { cx: 815, cy: 280, rx: 45, ry: 35 },
-  eyes:            { cx: 850, cy: 295, rx: 12, ry: 10 },
-  ears:            { cx: 790, cy: 250, rx: 30, ry: 35 },
-  mouth:           { cx: 905, cy: 340, rx: 28, ry: 12 },
-  throat:          { cx: 770, cy: 370, rx: 25, ry: 18 },
-  // Spine
-  'spine-cervical':{ cx: 720, cy: 330, rx: 50, ry: 14 },
-  'spine-thoracic':{ cx: 560, cy: 360, rx: 130, ry: 14 },
-  'spine-lumbar':  { cx: 340, cy: 400, rx: 110, ry: 14 },
-  // Thorax
-  heart:           { cx: 620, cy: 510, rx: 32, ry: 28 },
-  lungs:           { cx: 595, cy: 460, rx: 70, ry: 35 },
+  brain:           { cx: 820, cy: 170, rx: 55, ry: 45 },
+  eyes:            { cx: 890, cy: 200, rx: 14, ry: 10 },
+  ears:            { cx: 820, cy: 140, rx: 35, ry: 45 },
+  mouth:           { cx: 940, cy: 275, rx: 35, ry: 14 },
+  throat:          { cx: 790, cy: 290, rx: 25, ry: 20 },
+  // Spine (runs along the back, head on right → tail on left)
+  'spine-cervical':{ cx: 760, cy: 250, rx: 45, ry: 12 },
+  'spine-thoracic':{ cx: 570, cy: 285, rx: 140, ry: 12 },
+  'spine-lumbar':  { cx: 330, cy: 315, rx: 110, ry: 12 },
+  // Thorax (ribcage – heart slightly behind front leg)
+  heart:           { cx: 580, cy: 490, rx: 38, ry: 32 },
+  lungs:           { cx: 605, cy: 410, rx: 90, ry: 55 },
   // Abdomen
-  liver:           { cx: 525, cy: 520, rx: 45, ry: 26 },
-  stomach:         { cx: 460, cy: 545, rx: 36, ry: 22 },
-  pancreas:        { cx: 425, cy: 555, rx: 24, ry: 10 },
-  kidneys:         { cx: 340, cy: 490, rx: 38, ry: 26 },
-  adrenal:         { cx: 340, cy: 460, rx: 12, ry: 7 },
-  intestines:      { cx: 400, cy: 605, rx: 80, ry: 22 },
-  bladder:         { cx: 280, cy: 615, rx: 22, ry: 16 },
-  reproductive:    { cx: 240, cy: 640, rx: 18, ry: 12 },
-  // Front leg (right side of image — closer to head)
-  shoulder:        { cx: 660, cy: 480, rx: 22, ry: 18 },
-  elbow:           { cx: 660, cy: 660, rx: 18, ry: 14 },
-  'wrist-front':   { cx: 660, cy: 820, rx: 16, ry: 12 },
-  'paw-front':     { cx: 655, cy: 905, rx: 30, ry: 14 },
-  // Hind leg (left side of image — toward tail)
-  hips:            { cx: 270, cy: 490, rx: 38, ry: 26 },
-  knee:            { cx: 245, cy: 685, rx: 18, ry: 16 },
-  hock:            { cx: 245, cy: 815, rx: 16, ry: 14 },
-  'paw-hind':      { cx: 250, cy: 905, rx: 32, ry: 14 },
-  // Skin/coat (covers full body — used for distributed marks)
-  skin:            { cx: 500, cy: 500, rx: 350, ry: 200 },
-  coat:            { cx: 500, cy: 500, rx: 350, ry: 200 },
-  systemic:        { cx: 500, cy: 500, rx: 350, ry: 200 },
+  liver:           { cx: 485, cy: 500, rx: 55, ry: 35 },
+  stomach:         { cx: 430, cy: 480, rx: 36, ry: 22 },
+  pancreas:        { cx: 470, cy: 540, rx: 26, ry: 11 },
+  kidneys:         { cx: 345, cy: 400, rx: 42, ry: 22 },
+  adrenal:         { cx: 345, cy: 375, rx: 12, ry: 7 },
+  intestines:      { cx: 365, cy: 510, rx: 85, ry: 32 },
+  bladder:         { cx: 235, cy: 560, rx: 22, ry: 16 },
+  reproductive:    { cx: 200, cy: 595, rx: 18, ry: 12 },
+  // Front leg (head side – right of image)
+  shoulder:        { cx: 670, cy: 440, rx: 24, ry: 18 },
+  elbow:           { cx: 665, cy: 605, rx: 18, ry: 14 },
+  'wrist-front':   { cx: 670, cy: 785, rx: 16, ry: 12 },
+  'paw-front':     { cx: 665, cy: 895, rx: 30, ry: 14 },
+  // Hind leg (tail side – left of image)
+  hips:            { cx: 265, cy: 440, rx: 40, ry: 28 },
+  knee:            { cx: 205, cy: 620, rx: 18, ry: 16 },
+  hock:            { cx: 215, cy: 790, rx: 16, ry: 14 },
+  'paw-hind':      { cx: 225, cy: 895, rx: 32, ry: 14 },
+  // Skin/coat/systemic – full body envelope
+  skin:            { cx: 500, cy: 480, rx: 370, ry: 240 },
+  coat:            { cx: 500, cy: 480, rx: 370, ry: 240 },
+  systemic:        { cx: 500, cy: 480, rx: 370, ry: 240 },
 };
 
 /**
@@ -406,16 +408,16 @@ const DogAnatomySVG: React.FC<Props> = ({
           </filter>
         </defs>
 
-        {/* === BASE: real Golden Retriever silhouette === */}
+        {/* === BASE: Golden Retriever anatomy chart (transparent body + internal organs) === */}
         <g filter={showProtectionAura ? 'url(#protectionAura)' : undefined}>
           <image
-            href={dogSilhouette}
+            href={dogAnatomy}
             x="0"
             y="0"
             width="1000"
             height="1000"
             preserveAspectRatio="xMidYMid meet"
-            opacity="0.92"
+            opacity="0.88"
           />
         </g>
 
