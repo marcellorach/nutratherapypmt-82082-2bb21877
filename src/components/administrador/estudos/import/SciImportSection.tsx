@@ -73,12 +73,13 @@ const SciImportSection: React.FC = () => {
         }
         setAiQueueCount(pendingQueue);
 
-        // Count pending curation triplets
-        const { count: curationCount } = await supabase
+        // Count distinct studies with pending curation (not raw triplet count)
+        const { data: pendingTriplets } = await supabase
           .from('triplet_extractions')
-          .select('*', { count: 'exact', head: true })
+          .select('study_id')
           .eq('curation_status', 'pending');
-        setPendingCurationCount(curationCount ?? 0);
+        const distinctStudies = new Set((pendingTriplets ?? []).map((t: any) => t.study_id));
+        setPendingCurationCount(distinctStudies.size);
       } catch (e) {
         console.error('Error fetching tab indicators:', e);
       }
