@@ -449,20 +449,20 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
 
     if (!showLabels) return;
 
-    // Only render labels when zoomed in enough OR for hub nodes (avoids visual noise)
     const isHub = (node.connections || 0) >= 6;
-    if (globalScale < 1.2 && !isHub) return;
-
     const label = node.name as string;
-    const fontSize = Math.max(10, 12 / globalScale);
+    // Always show labels next to nodes; scale font with zoom so it stays readable
+    const fontSize = Math.max(9, 11 / globalScale);
     ctx.font = `${isHub ? '600' : '500'} ${fontSize}px Inter, system-ui, sans-serif`;
     const textWidth = ctx.measureText(label).width;
-    const padX = 4 / globalScale;
-    const padY = 2 / globalScale;
+    const padX = 3 / globalScale;
+    const padY = 1.5 / globalScale;
     const bgW = textWidth + padX * 2;
     const bgH = fontSize + padY * 2;
-    const bgX = node.x - bgW / 2;
-    const bgY = node.y + radius + 2 / globalScale;
+    // Place label to the RIGHT of the node ("do lado das bolas")
+    const gap = 3 / globalScale;
+    const bgX = node.x + radius + gap;
+    const bgY = node.y - bgH / 2;
 
     ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
     ctx.strokeStyle = node.color || '#cbd5e1';
