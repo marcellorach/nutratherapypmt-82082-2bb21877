@@ -7991,6 +7991,8 @@
   "compliance": {
     "title": "Dashboard de Conformidade Regulatória",
     "subtitle": "Mapeamento ponto a ponto FDA (Jan/2025) · EMA (Set/2024 + EU AI Act) · AVMA (Nov/2025)",
+    "subtitlePrefix": "Mapeamento ponto a ponto",
+    "dates": { "fda": "Jan/2025", "ema": "Set/2024", "avma": "Nov/2025" },
     "systemNote": "Sistema submetido à conformidade: Senex AI — motor proprietário desenvolvido e operado exclusivamente pela PetMoreTime (2025–presente). Sucessor da arquitetura interna VetGraphRAG/VetMedGraph.",
     "exportCsv": "Exportar CSV",
     "runCheck": "Rodar verificação de compliance",
