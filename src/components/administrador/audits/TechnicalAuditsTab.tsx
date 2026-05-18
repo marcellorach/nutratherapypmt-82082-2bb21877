@@ -17,6 +17,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { lastChangelogDate } from "@/data/projectChangelog.generated";
+import { useTranslation } from "react-i18next";
 import {
   FileText,
   Download,
@@ -76,6 +77,7 @@ Adicione ou remova itens conforme o foco desta auditoria.`;
 
 export default function TechnicalAuditsTab() {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [audits, setAudits] = useState<TechnicalAudit[]>([]);
   const [requests, setRequests] = useState<AuditRequest[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -133,12 +135,12 @@ export default function TechnicalAuditsTab() {
     });
     setSubmitting(false);
     if (error) {
-      toast({ title: "Erro ao solicitar auditoria", description: error.message, variant: "destructive" });
+      toast({ title: t("audits.toast.requestError"), description: error.message, variant: "destructive" });
       return;
     }
     toast({
-      title: `Auditoria ${nextVersion} solicitada`,
-      description: "O escopo foi registrado. O agente Lovable irá gerar a auditoria na próxima sessão dedicada.",
+      title: t("audits.toast.requestSuccessTitle", { version: nextVersion }),
+      description: t("audits.toast.requestSuccessDesc"),
     });
     setNewOpen(false);
     load();
@@ -155,10 +157,10 @@ export default function TechnicalAuditsTab() {
       .update({ scope: editScope, scope_history: history })
       .eq("id", editTarget.id);
     if (error) {
-      toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
+      toast({ title: t("audits.toast.saveError"), description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: "Escopo atualizado" });
+    toast({ title: t("audits.toast.scopeUpdated") });
     setEditTarget(null);
     load();
   };
@@ -172,14 +174,13 @@ export default function TechnicalAuditsTab() {
         <div>
           <h1 className="text-2xl font-semibold flex items-center gap-2">
             <ShieldCheck className="h-6 w-6 text-primary" />
-            Auditorias Técnicas Internas
+            {t("audits.title")}
           </h1>
           <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-            Histórico versionado de auditorias internas do Senex AI. Cada auditoria está
-            vinculada à versão do sistema auditada (i18n + última entrada do changelog).
+            {t("audits.subtitle")}
           </p>
           <p className="text-[11px] text-muted-foreground mt-2 italic">
-            Motor <strong>Senex AI</strong> · © <strong>PetMoreTime</strong> · 2025–presente · desenvolvimento e operação exclusivos · sucessor da arquitetura interna VetGraphRAG/VetMedGraph
+            {t("audits.ownership")}
           </p>
         </div>
 
@@ -187,38 +188,37 @@ export default function TechnicalAuditsTab() {
           <DialogTrigger asChild>
             <Button className="gap-2">
               <Plus className="h-4 w-4" />
-              Fazer nova auditoria ({nextVersion})
+              {t("audits.newButton", { version: nextVersion })}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-primary" />
-                Solicitar nova auditoria técnica
+                {t("audits.newDialog.title")}
               </DialogTitle>
               <DialogDescription>
-                Edite o escopo abaixo. A auditoria será gerada pelo agente Lovable na próxima
-                sessão dedicada (geração de relatórios completos com infográficos não roda em runtime).
+                {t("audits.newDialog.description")}
               </DialogDescription>
             </DialogHeader>
 
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
-                <label className="text-xs text-muted-foreground">Versão da auditoria</label>
+                <label className="text-xs text-muted-foreground">{t("audits.newDialog.auditVersion")}</label>
                 <Input value={nextVersion} disabled />
               </div>
               <div>
-                <label className="text-xs text-muted-foreground">Versão do sistema (i18n)</label>
+                <label className="text-xs text-muted-foreground">{t("audits.newDialog.systemVersion")}</label>
                 <Input value={CURRENT_I18N_VERSION} disabled />
               </div>
               <div className="col-span-2">
-                <label className="text-xs text-muted-foreground">Última atualização do changelog</label>
+                <label className="text-xs text-muted-foreground">{t("audits.newDialog.lastChangelog")}</label>
                 <Input value={lastChangelogDate || "—"} disabled />
               </div>
             </div>
 
             <div>
-              <label className="text-xs text-muted-foreground">Escopo da auditoria</label>
+              <label className="text-xs text-muted-foreground">{t("audits.newDialog.scope")}</label>
               <Textarea
                 value={newScope}
                 onChange={(e) => setNewScope(e.target.value)}
@@ -228,9 +228,9 @@ export default function TechnicalAuditsTab() {
             </div>
 
             <DialogFooter>
-              <Button variant="ghost" onClick={() => setNewOpen(false)}>Cancelar</Button>
+              <Button variant="ghost" onClick={() => setNewOpen(false)}>{t("audits.newDialog.cancel")}</Button>
               <Button onClick={handleRequestNew} disabled={submitting || !newScope.trim()}>
-                {submitting ? "Enviando..." : "Solicitar auditoria"}
+                {submitting ? t("audits.newDialog.submitting") : t("audits.newDialog.submit")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -241,10 +241,7 @@ export default function TechnicalAuditsTab() {
         <Card className="border-amber-300 bg-amber-50/50 dark:bg-amber-950/20">
           <CardContent className="py-3 flex items-center gap-3 text-sm">
             <AlertTriangle className="h-4 w-4 text-amber-600" />
-            <span className="font-medium">{pendingRequests.length}</span>
-            <span className="text-muted-foreground">
-              auditoria(s) aguardando geração pelo agente Lovable.
-            </span>
+            <span className="text-muted-foreground">{t("audits.pendingBanner", { count: pendingRequests.length })}</span>
           </CardContent>
         </Card>
       )}
@@ -253,7 +250,7 @@ export default function TechnicalAuditsTab() {
         {/* Lista */}
         <div className="space-y-3">
           {loading && (
-            <p className="text-sm text-muted-foreground">Carregando…</p>
+            <p className="text-sm text-muted-foreground">{t("audits.loading")}</p>
           )}
           {audits.map((a) => {
             const isSelected = a.id === selectedId;
@@ -267,12 +264,12 @@ export default function TechnicalAuditsTab() {
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base flex items-center gap-2">
                       <FileText className="h-4 w-4 text-primary" />
-                      Auditoria {a.id.toUpperCase()}
+                      {t("audits.auditCard.title", { id: a.id.toUpperCase() })}
                     </CardTitle>
                     <Badge variant="outline">{a.audit_date}</Badge>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Sistema: <span className="font-mono">{a.system_version}</span>
+                    {t("audits.system")}: <span className="font-mono">{a.system_version}</span>
                     {a.system_changelog_date && ` · ${a.system_changelog_date}`}
                   </p>
                 </CardHeader>
@@ -280,21 +277,21 @@ export default function TechnicalAuditsTab() {
                   <div className="flex flex-wrap gap-1.5 text-xs">
                     {typeof a.summary?.strengths === "number" && (
                       <Badge variant="secondary" className="gap-1">
-                        <CheckCircle2 className="h-3 w-3" />{a.summary.strengths} forças
+                        <CheckCircle2 className="h-3 w-3" />{t("audits.auditCard.strengths", { count: a.summary.strengths })}
                       </Badge>
                     )}
                     {typeof a.summary?.gaps === "number" && (
                       <Badge variant="secondary" className="gap-1">
-                        <AlertTriangle className="h-3 w-3" />{a.summary.gaps} gaps
+                        <AlertTriangle className="h-3 w-3" />{t("audits.auditCard.gaps", { count: a.summary.gaps })}
                       </Badge>
                     )}
                     {typeof a.summary?.risks === "number" && (
                       <Badge variant="destructive" className="gap-1">
-                        {a.summary.risks} riscos
+                        {t("audits.auditCard.risks", { count: a.summary.risks })}
                       </Badge>
                     )}
                     {typeof a.summary?.pages === "number" && (
-                      <Badge variant="outline">{a.summary.pages} págs</Badge>
+                      <Badge variant="outline">{t("audits.auditCard.pages", { count: a.summary.pages })}</Badge>
                     )}
                   </div>
 
@@ -348,7 +345,7 @@ export default function TechnicalAuditsTab() {
                         setEditScope(a.scope);
                       }}
                     >
-                      <Pencil className="h-3 w-3" /> Escopo
+                      <Pencil className="h-3 w-3" /> {t("audits.scopeButton")}
                     </Button>
                   </div>
                 </CardContent>
@@ -359,7 +356,7 @@ export default function TechnicalAuditsTab() {
           {!loading && audits.length === 0 && (
             <Card>
               <CardContent className="py-6 text-sm text-muted-foreground text-center">
-                Nenhuma auditoria ainda. Clique em "Fazer nova auditoria".
+                {t("audits.empty")}
               </CardContent>
             </Card>
           )}
@@ -370,7 +367,7 @@ export default function TechnicalAuditsTab() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <CardTitle className="text-base">
-                {selected ? `${selected.id.toUpperCase()} — ${selected.audit_date}` : "Selecione uma auditoria"}
+                {selected ? `${selected.id.toUpperCase()} — ${selected.audit_date}` : t("audits.viewer.select")}
               </CardTitle>
               {selected?.html_path && (
                 <Button
@@ -379,7 +376,7 @@ export default function TechnicalAuditsTab() {
                   className="gap-1"
                   onClick={() => window.open(selected.html_path!, "_blank")}
                 >
-                  <ExternalLink className="h-3 w-3" /> Abrir em nova aba
+                  <ExternalLink className="h-3 w-3" /> {t("audits.viewer.openNewTab")}
                 </Button>
               )}
             </div>
@@ -398,7 +395,7 @@ export default function TechnicalAuditsTab() {
               />
             ) : (
               <p className="text-sm text-muted-foreground text-center py-12">
-                Esta auditoria não tem versão HTML disponível.
+                {t("audits.viewer.noHtml")}
               </p>
             )}
           </CardContent>
@@ -409,10 +406,8 @@ export default function TechnicalAuditsTab() {
       <Dialog open={!!editTarget} onOpenChange={(o) => !o && setEditTarget(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Editar escopo — {editTarget?.id.toUpperCase()}</DialogTitle>
-            <DialogDescription>
-              Versões anteriores do escopo são preservadas no histórico.
-            </DialogDescription>
+            <DialogTitle>{t("audits.editScope.title", { id: editTarget?.id.toUpperCase() ?? "" })}</DialogTitle>
+            <DialogDescription>{t("audits.editScope.description")}</DialogDescription>
           </DialogHeader>
           <Textarea
             value={editScope}
@@ -421,8 +416,8 @@ export default function TechnicalAuditsTab() {
             className="font-mono text-xs"
           />
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setEditTarget(null)}>Cancelar</Button>
-            <Button onClick={handleSaveScope}>Salvar</Button>
+            <Button variant="ghost" onClick={() => setEditTarget(null)}>{t("audits.common.cancel")}</Button>
+            <Button onClick={handleSaveScope}>{t("audits.common.save")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
