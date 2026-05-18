@@ -1683,9 +1683,10 @@
     "treatableConditions": "Condições Tratáveis",
     "underConstruction": "Em Construção",
     "subtitleDynamic": "Plataforma de terapia geroprotetiva baseada em evidências, com {{conditions}} condições clínicas catalogadas, {{nutraceuticals}} nutracêuticos e {{breeds}} raças cobertas — alimentando recomendações personalizadas via IA a partir de literatura revisada.",
-    "subtitleExpansionNote": "Catálogo em contínua expansão — novas condições, raças e compostos entram semanalmente.",
+    "subtitleExpansionNote": "Em contínua expansão.",
     "inDevelopment": "Em desenvolvimento",
     "comingSoon": "Em breve",
+    "partiallyOperatedInPanel": "Atualmente operado de forma limitada pelo Painel de Controle.",
     "visitHere": "visite aqui!"
   },
   "auth": {

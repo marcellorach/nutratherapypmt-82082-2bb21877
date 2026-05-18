@@ -1683,10 +1683,11 @@
     "treatableConditions": "Treatable Conditions",
     "underConstruction": "Under Construction",
     "subtitleDynamic": "Evidence-based geroprotective therapy platform with {{conditions}} catalogued clinical conditions, {{nutraceuticals}} nutraceuticals and {{breeds}} breeds covered — powering AI-driven personalized recommendations from peer-reviewed literature.",
-    "subtitleExpansionNote": "Catalogue continuously expanding — new conditions, breeds and compounds added weekly.",
+    "subtitleExpansionNote": "Continuously expanding.",
     "inDevelopment": "In development",
     "comingSoon": "Coming soon",
-    "visitHere": "visit here!"
+    "visitHere": "visit here!",
+    "partiallyOperatedInPanel": "Currently operated in limited form via the Control Panel."
   },
   "auth": {
     "login": "Login",
