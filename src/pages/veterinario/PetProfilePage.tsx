@@ -496,10 +496,6 @@ const PetProfilePage: React.FC = () => {
               {profile.neutered && ` · ${t('petRegistration.form.neutered')}`}
             </p>
           </div>
-          <Button className="gap-2" onClick={handleAnalyzeWithKG} disabled={analyzing}>
-            {analyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brain className="h-4 w-4" />}
-            {analyzing ? t('petRegistration.profile.analyzing') : t('petRegistration.profile.analyzeWithKG')}
-          </Button>
         </div>
 
         {/* Summary Cards */}
@@ -581,6 +577,27 @@ const PetProfilePage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left columns (expandido p/ ocupar todo o grid enquanto o chat está oculto) */}
           <div className="lg:col-span-3 space-y-6">
+            {/* Senex AI prominent CTA */}
+            <div className="rounded-xl border border-primary/20 bg-gradient-to-r from-primary/5 via-background to-primary/5 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Brain className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold leading-tight">
+                    {t('petRegistration.profile.analyzeWithKG')}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {t('petProfile.senexCta.subtitle', 'Execute a análise clínica profunda Senex AI para este paciente.')}
+                  </p>
+                </div>
+              </div>
+              <Button size="lg" className="gap-2 shadow-md" onClick={handleAnalyzeWithKG} disabled={analyzing}>
+                {analyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brain className="h-4 w-4" />}
+                {analyzing ? t('petRegistration.profile.analyzing') : t('petRegistration.profile.analyzeWithKG')}
+              </Button>
+            </div>
+
             {/* Patient Clinical Data */}
             <div ref={clinicalTabsRef}>
             <Tabs value={clinicalTab} onValueChange={setClinicalTab}>
