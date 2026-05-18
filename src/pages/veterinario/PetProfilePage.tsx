@@ -587,9 +587,9 @@ const PetProfilePage: React.FC = () => {
                   <h3 className="text-base font-semibold leading-tight">
                     {t('petRegistration.profile.analyzeWithKG')}
                   </h3>
-                  <p className="text-sm text-muted-foreground">
-                   {t('petProfile.senexCta.subtitle', 'Execute a análise profunda Senex AI para este paciente.')}
-                  </p>
+                   <p className="text-sm text-muted-foreground">
+                    {t('petRegistration.profile.analyzeWithKGSubtitle')}
+                   </p>
                 </div>
               </div>
               <Button size="lg" className="gap-2 shadow-md" onClick={handleAnalyzeWithKG} disabled={analyzing}>
