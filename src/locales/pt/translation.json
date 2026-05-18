@@ -5421,7 +5421,26 @@
       "resolved": "Resolvidos",
       "dismissed": "Descartados",
       "noConflicts": "Nenhum conflito encontrado",
-      "noConflictsDesc": "Não há conflitos pendentes de revisão nesta categoria"
+      "noConflictsDesc": "Não há conflitos pendentes de revisão nesta categoria",
+      "runDetection": "Executar Detecção",
+      "filterByLevel": "Filtrar por nível",
+      "allLevels": "Todos os níveis",
+      "loadClaimsError": "Erro ao carregar evidências do conflito",
+      "dismissed": "Conflito descartado",
+      "dismissError": "Erro ao descartar conflito",
+      "detectionComplete": "Detecção concluída ({{count}} conflitos)",
+      "detectionError": "Erro ao executar detecção de conflitos"
+    },
+    "status": {
+      "pending": "Pendentes",
+      "inReview": "Em Revisão",
+      "resolved": "Resolvidos",
+      "dismissed": "Descartados"
+    },
+    "level": {
+      "high": "Alto",
+      "moderate": "Moderado",
+      "low": "Baixo"
     },
     "filters": {
       "all": "Todos",

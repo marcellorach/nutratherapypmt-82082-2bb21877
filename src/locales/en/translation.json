@@ -5421,7 +5421,26 @@
       "resolved": "Resolved",
       "dismissed": "Dismissed",
       "noConflicts": "No conflicts found",
-      "noConflictsDesc": "There are no pending conflicts for review in this category"
+      "noConflictsDesc": "There are no pending conflicts for review in this category",
+      "runDetection": "Run Detection",
+      "filterByLevel": "Filter by level",
+      "allLevels": "All levels",
+      "loadClaimsError": "Failed to load conflict evidence",
+      "dismissed": "Conflict dismissed",
+      "dismissError": "Failed to dismiss conflict",
+      "detectionComplete": "Detection complete ({{count}} conflicts)",
+      "detectionError": "Failed to run conflict detection"
+    },
+    "status": {
+      "pending": "Pending",
+      "inReview": "In Review",
+      "resolved": "Resolved",
+      "dismissed": "Dismissed"
+    },
+    "level": {
+      "high": "High",
+      "moderate": "Moderate",
+      "low": "Low"
     },
     "filters": {
       "all": "All",
