@@ -11,6 +11,11 @@ export interface RegionState {
   severity: Severity | null;
   isNew?: boolean;
   protected?: boolean;
+  /**
+   * 0-1 visual intensity. Drives organ tint opacity over time.
+   * When omitted, derived from `severity` (mild=0.35, moderate=0.6, severe=0.85).
+   */
+  intensity?: number;
   conditions: Array<{ name: string; severity: Severity; isNew: boolean; probability?: number; protectedBy?: string[] }>;
 }
 
@@ -43,6 +48,29 @@ const SEVERITY_PULSE_DUR: Record<Severity, string> = {
   mild: '3.2s',
   moderate: '2.2s',
   severe: '1.4s',
+};
+
+const SEVERITY_BASE_INTENSITY: Record<Severity, number> = {
+  mild: 0.35,
+  moderate: 0.6,
+  severe: 0.85,
+};
+
+const intensityOf = (s: RegionState): number => {
+  if (typeof s.intensity === 'number') return Math.max(0, Math.min(1, s.intensity));
+  return s.severity ? SEVERITY_BASE_INTENSITY[s.severity] : 0;
+};
+
+/**
+ * Map intensity 0-1 → tint fill (clean yellow → deep red).
+ * Returns hsl string. Used for the multiply-blend organ tint.
+ */
+const intensityFill = (i: number): string => {
+  // Hue interpolated 55° (yellow) → 0° (red)
+  const hue = Math.round(55 - 55 * Math.min(1, i));
+  const sat = 85 + Math.round(10 * Math.min(1, i));
+  const light = 60 - Math.round(20 * Math.min(1, i));
+  return `hsl(${hue}, ${sat}%, ${light}%)`;
 };
 
 /**
@@ -106,6 +134,68 @@ const DogAnatomySVG: React.FC<Props> = ({
   const { t } = useTranslation();
   const get = (id: AnatomyRegionId): RegionState | undefined => regionStates[id];
   const coord = (id: AnatomyRegionId) => REGION_COORDS[id];
+
+  // === Multiply-blend organ tint (recolors the underlying PNG organ) ===
+  // This is what makes a "doente" organ actually look red on the chart,
+  // instead of a floating colored bubble. Opacity scales with intensity,
+  // so the same organ darkens year-over-year as severity progresses, and
+  // lightens when a protective protocol reduces intensity.
+  const renderOrganTint = (id: AnatomyRegionId, opts?: { scaleX?: number; scaleY?: number }) => {
+    const s = get(id);
+    if (!s || !s.severity) return null;
+    const i = intensityOf(s);
+    if (i <= 0.02) return null;
+    const c = coord(id);
+    const rx = c.rx * (opts?.scaleX ?? 1);
+    const ry = c.ry * (opts?.scaleY ?? 1);
+    const fill = intensityFill(i);
+    // Tint opacity: never fully covers the organ, so the drawing stays readable.
+    const op = 0.35 + 0.5 * i;
+    return (
+      <g key={`tint-${id}`} pointerEvents="none">
+        <ellipse
+          cx={c.cx}
+          cy={c.cy}
+          rx={rx}
+          ry={ry}
+          fill={fill}
+          opacity={op}
+          style={{ mixBlendMode: 'multiply' as any }}
+        />
+        {s.protected && showProtectionAura && (
+          <ellipse
+            cx={c.cx}
+            cy={c.cy}
+            rx={rx * 1.05}
+            ry={ry * 1.05}
+            fill="hsl(150, 70%, 55%)"
+            opacity={0.32}
+            style={{ mixBlendMode: 'multiply' as any }}
+          />
+        )}
+      </g>
+    );
+  };
+
+  const TINT_REGIONS: Array<{ id: AnatomyRegionId; scaleX?: number; scaleY?: number }> = [
+    { id: 'brain', scaleX: 0.95, scaleY: 0.9 },
+    { id: 'heart', scaleX: 1.0, scaleY: 1.0 },
+    { id: 'lungs', scaleX: 0.95, scaleY: 0.9 },
+    { id: 'liver', scaleX: 1.05, scaleY: 1.0 },
+    { id: 'stomach' },
+    { id: 'pancreas' },
+    { id: 'kidneys', scaleX: 1.0, scaleY: 1.1 },
+    { id: 'adrenal' },
+    { id: 'intestines', scaleX: 1.0, scaleY: 1.0 },
+    { id: 'bladder' },
+    { id: 'throat' },
+    { id: 'shoulder', scaleX: 0.9, scaleY: 0.9 },
+    { id: 'elbow', scaleX: 0.9, scaleY: 0.9 },
+    { id: 'wrist-front', scaleX: 0.9, scaleY: 0.9 },
+    { id: 'hips', scaleX: 0.9, scaleY: 0.9 },
+    { id: 'knee', scaleX: 0.9, scaleY: 0.9 },
+    { id: 'hock', scaleX: 0.9, scaleY: 0.9 },
+  ];
 
   // === Glyph renderers ===
 
@@ -423,6 +513,13 @@ const DogAnatomySVG: React.FC<Props> = ({
 
         {/* === SYSTEMIC LAYER === */}
         {systemicLayer}
+
+        {/* === ORGAN TINT (multiply blend - recolors the PNG organs) === */}
+        {TINT_REGIONS.map(r => (
+          <React.Fragment key={`tintwrap-${r.id}`}>
+            {renderOrganTint(r.id, { scaleX: r.scaleX, scaleY: r.scaleY })}
+          </React.Fragment>
+        ))}
 
         {/* === SPINE === */}
         {renderSpineLine('spine-cervical')}

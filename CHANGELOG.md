@@ -24,6 +24,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 5.1.0 -->
 
+### Changed - 2026-05-18 — Digital Twin: órgãos tingem com a doença e variam no tempo
+<!-- area: vet-ui · status: entregue -->
+- Adicionada camada `mix-blend-mode: multiply` sobre cada órgão (cérebro, coração, pulmões, fígado, rins, intestinos, pâncreas, estômago, bexiga, articulações) em `DogAnatomySVG`: o desenho original do PNG anatômico fica tingido de amarelo→laranja→vermelho conforme a intensidade, em vez de uma elipse colorida flutuando por cima.
+- `RegionState` ganha campo `intensity` (0-1) que controla opacidade/saturação do tingimento; cor é interpolada (hue 55°→0°, saturação e brilho dinâmicos).
+- `buildMarkers` em `DigitalTwinDog` agora calcula intensidade por ano: cenário **sem protocolo** progride (`base + 0.45 * t`), cenário **com protocolo + coberto** decai (`base * (1 - 0.7 * t)`), cenário **com protocolo + não coberto** progride mais devagar (`base + 0.2 * t`). Slider de anos passa a fazer os órgãos escurecerem (sem) ou clarearem (com).
+- Removido o fallback silencioso que copiava `yearWith` para `yearWithout`: agora os dois cães mostram intensidades diferentes mesmo quando o backend retorna só uma curva.
+- Halo verde discreto (multiply) é aplicado sobre órgãos protegidos quando `showProtectionAura=true`, além da estrela existente.
+- Files: src/components/pet/DogAnatomySVG.tsx, src/components/pet/DigitalTwinDog.tsx
+
 ### Changed - 2026-05-18 — Digital Twin: doenças atingem órgãos internos
 <!-- area: vet-ui · status: entregue -->
 - Substituída a silhueta opaca + bolinhas flutuantes do `DigitalTwinDog` por uma ilustração anatômica transparente do Golden Retriever (`src/assets/dog-anatomy.png`) com órgãos internos visíveis (cérebro, coração, pulmões, fígado, rins, intestinos, bexiga, articulações, coluna).

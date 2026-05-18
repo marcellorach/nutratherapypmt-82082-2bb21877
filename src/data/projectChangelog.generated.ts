@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-18T05:20:46.925Z
+// Última geração: 2026-05-18T05:32:43.196Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,25 @@ export const lastChangelogDate = "2026-05-18";
 export const senexVersion = "5.1.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-18",
+    "kind": "changed",
+    "area": "vet-ui",
+    "status": "entregue",
+    "title": "Digital Twin: órgãos tingem com a doença e variam no tempo",
+    "bullets": [
+      "Adicionada camada `mix-blend-mode: multiply` sobre cada órgão (cérebro, coração, pulmões, fígado, rins, intestinos, pâncreas, estômago, bexiga, articulações) em `DogAnatomySVG`: o desenho original do PNG anatômico fica tingido de amarelo→laranja→vermelho conforme a intensidade, em vez de uma elipse colorida flutuando por cima.",
+      "`RegionState` ganha campo `intensity` (0-1) que controla opacidade/saturação do tingimento; cor é interpolada (hue 55°→0°, saturação e brilho dinâmicos).",
+      "`buildMarkers` em `DigitalTwinDog` agora calcula intensidade por ano: cenário sem protocolo progride (`base + 0.45 * t`), cenário com protocolo + coberto decai (`base * (1 - 0.7 * t)`), cenário com protocolo + não coberto progride mais devagar (`base + 0.2 * t`). Slider de anos passa a fazer os órgãos escurecerem (sem) ou clarearem (com).",
+      "Removido o fallback silencioso que copiava `yearWith` para `yearWithout`: agora os dois cães mostram intensidades diferentes mesmo quando o backend retorna só uma curva.",
+      "Halo verde discreto (multiply) é aplicado sobre órgãos protegidos quando `showProtectionAura=true`, além da estrela existente.",
+      "Files: src/components/pet/DogAnatomySVG.tsx, src/components/pet/DigitalTwinDog.tsx"
+    ],
+    "files": [
+      "src/components/pet/DogAnatomySVG.tsx",
+      "src/components/pet/DigitalTwinDog.tsx"
+    ]
+  },
   {
     "date": "2026-05-18",
     "kind": "changed",

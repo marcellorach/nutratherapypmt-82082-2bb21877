@@ -58,30 +58,57 @@ interface ScenarioMarker {
   isNew: boolean;
   probability?: number;
   protectedHere: boolean;
+  /** 0-1 visual intensity at this year (scales organ tint). */
+  intensity: number;
 }
 
 function buildMarkers(
   yearData: AIProjectionYear | undefined,
   coveredNames: Set<string>,
   applyProtection: boolean,
+  opts?: { yearIndex?: number; horizon?: number; withoutProtocol?: boolean },
 ): ScenarioMarker[] {
   if (!yearData) return [];
   const markers: ScenarioMarker[] = [];
   const lowerCovered = new Set(Array.from(coveredNames).map(n => n.toLowerCase()));
+  const yearIdx = opts?.yearIndex ?? 0;
+  const horizon = Math.max(1, opts?.horizon ?? 8);
+  const t = Math.min(1, yearIdx / horizon); // 0..1 along the slider
 
   for (const ec of yearData.existing_conditions || []) {
     const sev: Severity = (ec.projected_severity_label as Severity) || scoreToSeverity(ec.projected_severity_score || 0);
+    const base = ec.projected_severity_score ?? (sev === 'severe' ? 0.85 : sev === 'moderate' ? 0.6 : 0.35);
+    const isProtected = applyProtection && lowerCovered.has(ec.name.toLowerCase());
+    // Without protocol: condition progresses (darkens) over time.
+    // With protocol + protected: condition mitigated (lightens) over time.
+    // With protocol but not covered: mild progression.
+    let intensity: number;
+    if (opts?.withoutProtocol) {
+      intensity = Math.min(1, base + 0.45 * t);
+    } else if (isProtected) {
+      intensity = Math.max(0.05, base * (1 - 0.7 * t));
+    } else {
+      intensity = Math.min(1, base + 0.2 * t);
+    }
     markers.push({
       key: `e-${ec.name}`,
       name: ec.name,
       severity: sev,
       isNew: false,
-      protectedHere: applyProtection && lowerCovered.has(ec.name.toLowerCase()),
+      protectedHere: isProtected,
+      intensity,
     });
   }
   for (const nc of yearData.new_conditions || []) {
     if ((nc.probability ?? 0) < 0.2) continue;
     const sev: Severity = nc.probability >= 0.6 ? 'moderate' : 'mild';
+    // New risks emerge gradually as the slider advances.
+    const emergence = Math.min(1, (nc.probability ?? 0) * (0.4 + 0.6 * t));
+    const intensity = opts?.withoutProtocol
+      ? Math.min(1, emergence + 0.2 * t)
+      : applyProtection
+        ? emergence * 0.55
+        : emergence;
     markers.push({
       key: `n-${nc.name}`,
       name: nc.name,
@@ -89,6 +116,7 @@ function buildMarkers(
       isNew: true,
       probability: nc.probability,
       protectedHere: false,
+      intensity,
     });
   }
   return markers;
@@ -122,10 +150,14 @@ function markersToRegionStates(
         probability: m.probability,
         protectedBy: m.protectedHere ? ['protocol'] : [],
       });
+      // Aggregate intensity: take the max across conditions targeting the same region
+      // so the most-affected condition drives the visible tint.
+      const nextIntensity = Math.max(prev?.intensity ?? 0, m.intensity);
       states[region] = {
         severity: upgradeSev(prev?.severity ?? null, m.severity),
         isNew: prev?.isNew || m.isNew,
         protected: prev?.protected || (applyProtectionVisual && m.protectedHere),
+        intensity: nextIntensity,
         conditions,
       };
     }
@@ -299,17 +331,22 @@ const DigitalTwinDog: React.FC<DigitalTwinDogProps> = ({
   const yearWithout = yearsWithout[safeIndex];
   const current = yearWith || yearWithout;
 
-  const markersWith = useMemo(() => buildMarkers(yearWith, coveredNames, true), [yearWith, coveredNames]);
-  // Fallback: if yearWithout has no existing_conditions, use the same conditions
-  // from yearWith so both avatars show diseases (without gets no protection stars).
+  const horizon = Math.max(1, maxSlider);
+  const markersWith = useMemo(
+    () => buildMarkers(yearWith, coveredNames, true, { yearIndex: yearsAhead, horizon }),
+    [yearWith, coveredNames, yearsAhead, horizon],
+  );
+  // For "without protocol": prefer real yearWithout data; if backend gave none,
+  // synthesize from yearWith but apply progressive deterioration so the two
+  // avatars are visibly different over time (no protection, faster decay).
   const markersWithout = useMemo(() => {
-    const raw = buildMarkers(yearWithout, new Set(), false);
-    if (raw.length === 0 && yearWith) {
-      // Re-use yearWith data but without protection
-      return buildMarkers(yearWith, new Set(), false);
-    }
-    return raw;
-  }, [yearWithout, yearWith]);
+    const baseYear = yearWithout || yearWith;
+    return buildMarkers(baseYear, new Set(), false, {
+      yearIndex: yearsAhead,
+      horizon,
+      withoutProtocol: true,
+    });
+  }, [yearWithout, yearWith, yearsAhead, horizon]);
 
   const yearsGainedLocal = (yearWith?.expected_remaining_years ?? 0) - (yearWithout?.expected_remaining_years ?? 0);
   const yearsGained = aiYearsGained != null ? aiYearsGained : yearsGainedLocal;
