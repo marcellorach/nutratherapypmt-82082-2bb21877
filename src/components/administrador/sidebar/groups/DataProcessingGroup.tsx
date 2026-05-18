@@ -86,23 +86,6 @@ const DataProcessingGroup: React.FC<DataProcessingGroupProps> = ({
         </SidebarMenuButton>
       </SidebarMenuItem>
       <SidebarMenuItem>
-        <SidebarMenuButton 
-          isActive={currentStep === "data-processing-settings"} 
-          onClick={() => handleStepClick("data-processing-settings")}
-          className={currentStep === "data-processing-settings" ? "bg-primary/10 text-primary" : ""}
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <Settings className={`h-4 w-4 mr-2 ${currentStep === "data-processing-settings" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.dataProcessing.settings')}</span>
-            </div>
-            {currentStep === "data-processing-settings" && (
-              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
-            )}
-          </div>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
         <SidebarMenuButton
           isActive={currentStep === "clinical-monitoring"}
           onClick={() => handleStepClick("clinical-monitoring")}

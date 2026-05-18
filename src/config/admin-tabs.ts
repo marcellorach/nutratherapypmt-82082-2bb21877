@@ -49,15 +49,13 @@ const DesignConventionsTab = lazy(() => import('@/components/administrador/Desig
 const DatabaseMigrationsTab = lazy(() => import('@/components/administrador/migrations/DatabaseMigrationsTab'));
 const TranslationAuditTab = lazy(() => import('@/components/administrador/auditoria/TranslationAuditTab'));
 const TranslationManager = lazy(() => import('@/components/administrador/traducoes/TranslationManager'));
-const OntologyAuditTab = lazy(() => import('@/components/administrador/auditoria/OntologyAuditTab'));
-const OntologyMappingTab = lazy(() => import('@/components/administrador/OntologyMappingTab'));
+const OntologyHub = lazy(() => import('@/components/administrador/OntologyHub'));
 const AccessRequestsPanel = lazy(() => import('@/components/administrador/access/AccessRequestsPanel'));
 const AdminPetManagementTab = lazy(() => import('@/components/administrador/patients/AdminPetManagementTab'));
 
 // Knowledge Graph & Curation
-const TripletCurationBoard = lazy(() => import('@/components/administrador/estudos/curation/TripletCurationBoard'));
+const TripletsHub = lazy(() => import('@/components/administrador/TripletsHub'));
 const KnowledgeGraphViewer = lazy(() => import('@/components/administrador/visualizations/KnowledgeGraphViewer'));
-const TripletQualityDashboard = lazy(() => import('@/components/administrador/analytics/TripletQualityDashboard'));
 const ConflictReviewPanel = lazy(() => import('@/components/administrador/conflicts/ConflictReviewPanel'));
 const BaseKnowledgeTab = lazy(() => import('@/components/administrador/base-knowledge/BaseKnowledgeTab'));
 const BreedsManagementTab = lazy(() => import('@/components/administrador/breeds/BreedsManagementTab'));
@@ -111,10 +109,10 @@ export const adminTabsConfig: AdminTabConfig[] = [
   },
   {
     id: 'triplet-curation',
-    label: 'Curadoria de Triplets',
+    label: 'Triplets',
     group: 'knowledge-base',
-    component: TripletCurationBoard,
-    description: 'Sistema Kanban para revisão e aprovação de triplets extraídos'
+    component: TripletsHub,
+    description: 'Curadoria + Qualidade de triplets em uma só aba'
   },
   {
     id: 'knowledge-graph',
@@ -172,14 +170,6 @@ export const adminTabsConfig: AdminTabConfig[] = [
     component: DosageCurationPanel,
     description: 'Revisão e aprovação de doses extraídas da web ou estimadas por IA'
   },
-  {
-    id: 'knowledge-base-settings',
-    label: 'Configurações',
-    group: 'knowledge-base',
-    component: KnowledgeBaseSettingsTab,
-    description: 'Configurações da base de conhecimento'
-  },
-
   // Processamento de Dados
   {
     id: 'import',
@@ -216,14 +206,6 @@ export const adminTabsConfig: AdminTabConfig[] = [
     component: AdminPetManagementTab,
     description: 'Registro e gestão de pacientes caninos'
   },
-  {
-    id: 'data-processing-settings',
-    label: 'Configurações',
-    group: 'data-processing',
-    component: DataProcessingSettingsTab,
-    description: 'Configurações de processamento'
-  },
-
   // Pesquisa e Desenvolvimento
   {
     id: 'estudos-planejados',
@@ -314,13 +296,6 @@ export const adminTabsConfig: AdminTabConfig[] = [
     description: 'Análises e métricas'
   },
   {
-    id: 'triplet-quality',
-    label: 'Qualidade Triplets',
-    group: 'configuration',
-    component: TripletQualityDashboard,
-    description: 'Dashboard de qualidade e completude dos triplets extraídos'
-  },
-  {
     id: 'design-conventions',
     label: 'Design',
     group: 'configuration',
@@ -343,17 +318,10 @@ export const adminTabsConfig: AdminTabConfig[] = [
   },
   {
     id: 'ontology-audit',
-    label: 'Auditoria de Ontologia',
+    label: 'Ontologia & SNOMED/UMLS',
     group: 'knowledge-base',
-    component: OntologyAuditTab,
-    description: 'Auditoria e correção de classificações de entidades no Knowledge Graph'
-  },
-  {
-    id: 'ontology-mapping',
-    label: 'Mapeamento SNOMED/UMLS',
-    group: 'knowledge-base',
-    component: OntologyMappingTab,
-    description: 'Mapeamento de entidades para padrões SNOMED-CT e UMLS com auditoria'
+    component: OntologyHub,
+    description: 'Auditoria de classificações + mapeamento SNOMED-CT / UMLS em uma só aba'
   },
   {
     id: 'access-requests',

@@ -179,20 +179,19 @@ const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) 
                 <div className="mb-6 p-4 border rounded-lg bg-muted/30">
                   <h3 className="text-lg font-semibold mb-3">{t('admin.tabInfo.keyExcerpts.title')}</h3>
                   <div className="space-y-3">
-                    {localizedContent.keyExcerpts.map((excerpt, idx) => (
-                      <div key={idx} className="border-l-4 border-primary pl-4 py-2">
-                        <div className="text-xs font-semibold text-muted-foreground mb-1">{excerpt.source}</div>
-                        <blockquote className="text-sm italic mb-2">&ldquo;{excerpt.quote}&rdquo;</blockquote>
-                        <a
-                          href={excerpt.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-primary hover:underline"
-                        >
-                          {t('admin.tabInfo.keyExcerpts.viewPaper')} →
-                        </a>
-                      </div>
-                    ))}
+                     {localizedContent.keyExcerpts.map((excerpt, idx) => (
+                       <div key={idx} className="border-l-4 border-primary pl-4 py-2 flex items-center justify-between gap-3">
+                         <div className="text-sm font-medium text-foreground">{excerpt.source}</div>
+                         <a
+                           href={excerpt.url}
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           className="text-xs text-primary hover:underline whitespace-nowrap"
+                         >
+                           {t('admin.tabInfo.keyExcerpts.viewPaper')} →
+                         </a>
+                       </div>
+                     ))}
                   </div>
                 </div>
               )}
