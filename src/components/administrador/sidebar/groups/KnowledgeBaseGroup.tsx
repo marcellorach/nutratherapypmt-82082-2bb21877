@@ -116,6 +116,40 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          isActive={currentStep === "pharmacology"}
+          onClick={() => handleStepClick("pharmacology")}
+          className={currentStep === "pharmacology" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Pill className={`h-4 w-4 mr-2 ${currentStep === "pharmacology" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.pharmacology', 'Base Farmacológica')}</span>
+              <StatusBadge statusKey="admin.sidebar.knowledgeBase.pharmacologyStatus" tooltipKey="admin.sidebar.knowledgeBase.pharmacologyStatusTooltip" color="text-yellow-500" />
+            </div>
+            {currentStep === "pharmacology" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          isActive={currentStep === "dosage-curation"}
+          onClick={() => handleStepClick("dosage-curation")}
+          className={currentStep === "dosage-curation" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Scale className={`h-4 w-4 mr-2 ${currentStep === "dosage-curation" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.dosageCuration')}</span>
+              <StatusBadge statusKey="admin.sidebar.knowledgeBase.dosageCurationStatus" tooltipKey="admin.sidebar.knowledgeBase.dosageCurationStatusTooltip" color="text-yellow-500" />
+            </div>
+            {currentStep === "dosage-curation" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
       
       <SidebarMenuItem>
         <SidebarMenuButton 
@@ -223,56 +257,6 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
               <StatusBadge statusKey="admin.sidebar.knowledgeBase.petFoodCatalogStatus" tooltipKey="admin.sidebar.knowledgeBase.petFoodCatalogStatusTooltip" color="text-yellow-500" />
             </div>
             {currentStep === "pet-food-catalog" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
-          </div>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-
-      <SidebarMenuItem>
-        <SidebarMenuButton 
-          isActive={currentStep === "base-knowledge"} 
-          onClick={() => handleStepClick("base-knowledge")}
-          className={currentStep === "base-knowledge" ? "bg-primary/10 text-primary" : ""}
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <Database className={`h-4 w-4 mr-2 ${currentStep === "base-knowledge" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.knowledgeBase.baseKnowledge')}</span>
-            </div>
-            {currentStep === "base-knowledge" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
-          </div>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-
-      <SidebarMenuItem>
-        <SidebarMenuButton
-          isActive={currentStep === "pharmacology"}
-          onClick={() => handleStepClick("pharmacology")}
-          className={currentStep === "pharmacology" ? "bg-primary/10 text-primary" : ""}
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <Pill className={`h-4 w-4 mr-2 ${currentStep === "pharmacology" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.knowledgeBase.pharmacology', 'Base Farmacológica')}</span>
-              <StatusBadge statusKey="admin.sidebar.knowledgeBase.pharmacologyStatus" tooltipKey="admin.sidebar.knowledgeBase.pharmacologyStatusTooltip" color="text-yellow-500" />
-            </div>
-            {currentStep === "pharmacology" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
-          </div>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-
-      <SidebarMenuItem>
-        <SidebarMenuButton
-          isActive={currentStep === "dosage-curation"}
-          onClick={() => handleStepClick("dosage-curation")}
-          className={currentStep === "dosage-curation" ? "bg-primary/10 text-primary" : ""}
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center">
-              <Scale className={`h-4 w-4 mr-2 ${currentStep === "dosage-curation" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.knowledgeBase.dosageCuration')}</span>
-              <StatusBadge statusKey="admin.sidebar.knowledgeBase.dosageCurationStatus" tooltipKey="admin.sidebar.knowledgeBase.dosageCurationStatusTooltip" color="text-yellow-500" />
-            </div>
-            {currentStep === "dosage-curation" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
