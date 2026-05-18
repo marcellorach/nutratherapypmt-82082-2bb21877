@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-18T01:41:54.419Z
+// Última geração: 2026-05-18T02:31:20.807Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,30 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-18";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-18",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Fase 5: Cobertura e enriquecimento em lote do catálogo de rações",
+    "bullets": [
+      "Nova tabela `pet_food_bulk_enrich_runs` (RLS admin-only) para registrar parâmetros, contagens e detalhes por execução do job.",
+      "Edge `bulk-enrich-pet-food`: seleciona produtos `approved` sem nutrição ou com `completeness_score < min_completeness`, dispara `enrich-pet-food-product` em chunks com concorrência configurável (default 4) e grava o resultado no log. Requer admin (verificado via `is_admin()` no cliente do usuário).",
+      "Nova aba admin `Cobertura de Rações` (`pet-food-coverage`, grupo `knowledge-base`): KPIs (total, com nutrição, completude ≥60%, confiança ≥70%), heatmap por marca (piores primeiro), tabela priorizada por completude com botão \"Re-enriquecer\" por linha e formulário de execução em lote, mais log das últimas 20 execuções com auto-refresh.",
+      "Item adicionado ao `KnowledgeBaseGroup.tsx` e ao `admin-tabs.ts`; organograma atualizado (área `admin`).",
+      "i18n: namespace `petFoodCoverage.*` (PT/EN) + label `admin.sidebar.knowledgeBase.petFoodCoverage`. `I18N_VERSION` → 1.83.0.",
+      "Files: supabase/functions/bulk-enrich-pet-food/index.ts, src/components/administrador/pet-food/PetFoodCoverageTab.tsx, src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx, src/config/admin-tabs.ts, src/data/projectOrganograma.ts, src/i18n.ts, src/locales/{pt,en}/translation.json"
+    ],
+    "files": [
+      "supabase/functions/bulk-enrich-pet-food/index.ts",
+      "src/components/administrador/pet-food/PetFoodCoverageTab.tsx",
+      "src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx",
+      "src/config/admin-tabs.ts",
+      "src/data/projectOrganograma.ts",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.83.0"
+  },
   {
     "date": "2026-05-18",
     "kind": "added",
