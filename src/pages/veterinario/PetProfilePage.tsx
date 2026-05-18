@@ -340,6 +340,7 @@ const PetProfilePage: React.FC = () => {
         reason: c.rationale || '',
         mechanism: c.condition || '',
         enabled: !c.removed,
+        closes_gaps: Array.isArray((c as any).closesGaps) ? (c as any).closesGaps : [],
       })),
       scientific_summary: {
         tripletCount: kgTriplets.length,

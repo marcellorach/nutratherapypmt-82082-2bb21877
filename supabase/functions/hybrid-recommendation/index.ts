@@ -227,7 +227,8 @@ IMPORTANT: Return your response as valid JSON with this structure:
       "dosage": "string (weight-adjusted dosage)",
       "mechanism": "string (why this compound for THIS patient)",
       "evidenceLevel": "AI-enriched",
-      "condition": "string (specific condition this targets)"
+      "condition": "string (specific condition this targets)",
+      "closes_gaps": ["array of EXACT nutrient labels from NUTRITION_GAPS block that this compound closes — e.g. ['EPA+DHA','Calcium']. Use [] when the compound does not close any quantitative diet gap."]
     }
   ],
   "rationale": "string (patient-specific reasoning)",
@@ -269,7 +270,8 @@ Your response MUST follow this JSON structure:
       "mechanism": "string (why this compound for THIS patient)",
       "evidenceLevel": "AI-generated",
       "condition": "string (specific condition this targets)",
-      "targetCondition": "string (same as condition)"
+      "targetCondition": "string (same as condition)",
+      "closes_gaps": ["array of EXACT nutrient labels from NUTRITION_GAPS block that this compound closes. Use [] when none."]
     }
   ],
   "rationale": "string (patient-specific reasoning)",

@@ -1484,6 +1484,7 @@
         }
       },
       "compoundsTitle": "Recommended Compounds",
+      "closesGap": "Closes deficit: {{gap}}",
       "vetApproval": "Protocol Reviewed and Approved",
       "vetApprovalBy": "This protocol was reviewed and approved by {{name}}",
       "livingProgramTitle": "Living Follow-up Program",

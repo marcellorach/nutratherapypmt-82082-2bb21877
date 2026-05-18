@@ -1484,6 +1484,7 @@
         }
       },
       "compoundsTitle": "Compostos Recomendados",
+      "closesGap": "Fecha déficit: {{gap}}",
       "vetApproval": "Protocolo Revisado e Aprovado",
       "vetApprovalBy": "Este protocolo foi revisado e aprovado pelo {{name}}",
       "livingProgramTitle": "Programa Vivo de Acompanhamento",
