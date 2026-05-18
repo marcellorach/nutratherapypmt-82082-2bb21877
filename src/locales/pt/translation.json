@@ -8054,5 +8054,54 @@
       "runSuccess": "Verificação registrada com sucesso.",
       "runError": "Falha ao registrar verificação."
     }
+  },
+  "audits": {
+    "title": "Auditorias Técnicas Internas",
+    "subtitle": "Histórico versionado de auditorias internas do Senex AI. Cada auditoria está vinculada à versão do sistema auditada (i18n + última entrada do changelog).",
+    "ownership": "Motor Senex AI · © PetMoreTime · 2025–presente · desenvolvimento e operação exclusivos · sucessor da arquitetura interna VetGraphRAG/VetMedGraph",
+    "newButton": "Fazer nova auditoria ({{version}})",
+    "newDialog": {
+      "title": "Solicitar nova auditoria técnica",
+      "description": "Edite o escopo abaixo. A auditoria será gerada pelo agente Lovable na próxima sessão dedicada (geração de relatórios completos com infográficos não roda em runtime).",
+      "auditVersion": "Versão da auditoria",
+      "systemVersion": "Versão do sistema (i18n)",
+      "lastChangelog": "Última atualização do changelog",
+      "scope": "Escopo da auditoria",
+      "cancel": "Cancelar",
+      "submit": "Solicitar auditoria",
+      "submitting": "Enviando…"
+    },
+    "pendingBanner": "{{count}} auditoria(s) aguardando geração pelo agente Lovable.",
+    "loading": "Carregando…",
+    "empty": "Nenhuma auditoria ainda. Clique em \"Fazer nova auditoria\".",
+    "system": "Sistema",
+    "auditCard": {
+      "title": "Auditoria {{id}}",
+      "strengths": "{{count}} forças",
+      "gaps": "{{count}} gaps",
+      "risks": "{{count}} riscos",
+      "pages": "{{count}} págs"
+    },
+    "viewer": {
+      "select": "Selecione uma auditoria",
+      "openNewTab": "Abrir em nova aba",
+      "noHtml": "Esta auditoria não tem versão HTML disponível."
+    },
+    "scopeButton": "Escopo",
+    "editScope": {
+      "title": "Editar escopo — {{id}}",
+      "description": "Versões anteriores do escopo são preservadas no histórico."
+    },
+    "common": {
+      "save": "Salvar",
+      "cancel": "Cancelar"
+    },
+    "toast": {
+      "requestError": "Erro ao solicitar auditoria",
+      "requestSuccessTitle": "Auditoria {{version}} solicitada",
+      "requestSuccessDesc": "O escopo foi registrado. O agente Lovable irá gerar a auditoria na próxima sessão dedicada.",
+      "saveError": "Erro ao salvar",
+      "scopeUpdated": "Escopo atualizado"
+    }
   }
 }
