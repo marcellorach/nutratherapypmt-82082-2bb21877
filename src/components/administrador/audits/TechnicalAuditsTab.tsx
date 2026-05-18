@@ -17,6 +17,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { lastChangelogDate } from "@/data/projectChangelog.generated";
+import { SENEX_VERSION } from "@/config/senex-version";
 import { useTranslation } from "react-i18next";
 import {
   FileText,
@@ -116,11 +117,7 @@ export default function TechnicalAuditsTab() {
   );
 
   const nextVersion = useMemo(() => {
-    const nums = audits
-      .map((a) => parseInt(a.id.replace(/\D/g, ""), 10))
-      .filter((n) => Number.isFinite(n));
-    const max = nums.length ? Math.max(...nums) : 0;
-    return `v${max + 1}`;
+    return `v${SENEX_VERSION}`;
   }, [audits]);
 
   const handleRequestNew = async () => {
