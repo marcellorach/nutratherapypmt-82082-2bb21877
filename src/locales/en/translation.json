@@ -1028,6 +1028,8 @@
       "completed": "Completed",
       "errorStatus": "Error",
       "noRag": "No RAG",
+      "noChunksIndexed": "No indexed excerpts",
+      "noChunksIndexedTooltip": "Vector excerpts (RAG) have not been generated yet. Curation remains available, but the study chat will lack semantic precision until vectorization completes. Click to vectorize now.",
       "positiveInteractions": "Positive Interactions (Stimulation)",
       "negativeInteractions": "Inhibitory Interactions",
       "sideEffectsLabel": "Side Effects",
