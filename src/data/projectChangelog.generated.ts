@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-18T02:31:20.807Z
+// Última geração: 2026-05-18T03:04:47.956Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,43 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-18";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-18",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Aba \"About Senex AI\" + badge de versão",
+    "bullets": [
+      "Nova aba `about-senex` no grupo Configuration com diagrama Mermaid detalhado do motor (6 fases: ingestion → 3-stage extraction → KG L0–L4 → validation/gap-fill → hybrid storage Supabase + Neo4j → U-Retrieval + Digital Twin), pilares científicos e métricas chave.",
+      "Badge `v{SENEX_VERSION} · {SENEX_LAST_UPDATE}` ao lado de \"Senex AI\" no Header e Footer (fonte única em `src/config/senex-version.ts`).",
+      "Files: src/components/administrador/AboutSenexTab.tsx, src/config/senex-version.ts, src/config/admin-tabs.ts, src/components/administrador/sidebar/groups/ConfigurationGroup.tsx, src/components/layout/Header.tsx, src/components/layout/Footer.tsx, src/locales/{pt,en}/translation.json"
+    ],
+    "files": [
+      "src/config/senex-version.ts",
+      "src/components/administrador/AboutSenexTab.tsx",
+      "src/config/admin-tabs.ts",
+      "src/components/administrador/sidebar/groups/ConfigurationGroup.tsx",
+      "src/components/layout/Header.tsx",
+      "src/components/layout/Footer.tsx"
+    ],
+    "i18nVersion": "1.85.0"
+  },
+  {
+    "date": "2026-05-18",
+    "kind": "changed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Modal de Estudos Científicos v5.1.0 (Neo4j ativo)",
+    "bullets": [
+      "Corrigido o conteúdo desatualizado: Neo4j AuraDB já está integrado (edge functions `neo4j-sync`, `sync-approved-triplets`, `sync-study-to-neo4j`). Removido item \"Migrate KG to Neo4j\" dos planejados e ajustada a limitação para refletir que o read-path clínico ainda usa RPC Postgres.",
+      "Workflow step 5 atualizado para \"sync ativo\" em vez de \"planejado\". Bump de 5.0.0 → 5.1.0.",
+      "Files: src/data/admin-tabs-info-bilingual.ts"
+    ],
+    "files": [
+      "src/data/admin-tabs-info-bilingual.ts"
+    ],
+    "i18nVersion": "1.85.0"
+  },
   {
     "date": "2026-05-18",
     "kind": "added",
