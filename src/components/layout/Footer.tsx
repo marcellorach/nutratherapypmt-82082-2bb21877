@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { SENEX_VERSION, SENEX_LAST_UPDATE } from '@/config/senex-version';
 
 const Footer: React.FC = () => {
   const { t } = useTranslation();
@@ -9,6 +10,15 @@ const Footer: React.FC = () => {
       <div className="container mx-auto px-4 py-6 max-w-full overflow-x-hidden">
         {/* Copyright e slogan */}
         <div className="text-center mb-4 space-y-1">
+          <div className="flex items-baseline justify-center gap-2">
+            <span className="text-sm font-bold text-gray-800">Senex AI</span>
+            <span
+              className="text-[10px] text-gray-500 font-mono tabular-nums"
+              title={`Senex AI v${SENEX_VERSION} — atualizado em ${SENEX_LAST_UPDATE}`}
+            >
+              v{SENEX_VERSION} · {SENEX_LAST_UPDATE}
+            </span>
+          </div>
           <div className="text-xs text-gray-500">{t('footer.copyrightFull')}</div>
           <div className="text-[11px] text-gray-500 italic">{t('footer.petMoreTimeTagline')}</div>
           <div className="text-sm font-semibold text-gray-800 pt-1">{t('footer.sloganLine1')}</div>
