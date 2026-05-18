@@ -11,9 +11,10 @@ interface TabNavigationProps {
   isProcessing?: boolean;
   pendingCurationCount?: number;
   aiQueueCount?: number;
+  libraryCount?: number;
 }
 
-const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange, isProcessing, pendingCurationCount, aiQueueCount }) => {
+const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange, isProcessing, pendingCurationCount, aiQueueCount, libraryCount }) => {
   const { t } = useTranslation();
   
   const tabs = [
@@ -49,6 +50,11 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabChange, i
               {tab.value === "curation" && pendingCurationCount != null && pendingCurationCount > 0 && (
                 <Badge variant="destructive" className="ml-1 px-1.5 py-0 text-[10px] leading-4 min-w-[20px] justify-center">
                   {pendingCurationCount}
+                </Badge>
+              )}
+              {tab.value === "curated-library" && libraryCount != null && libraryCount > 0 && (
+                <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-[10px] leading-4 min-w-[20px] justify-center bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200">
+                  {libraryCount}
                 </Badge>
               )}
             </TabsTrigger>
