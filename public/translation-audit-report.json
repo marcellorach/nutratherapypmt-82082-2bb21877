@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-05-17T23:19:37.831Z",
+  "timestamp": "2026-05-18T00:04:10.323Z",
   "summary": {
     "totalFiles": 868,
-    "totalIssues": 415,
+    "totalIssues": 416,
     "hardcodedTexts": 40,
-    "missingKeys": 374,
+    "missingKeys": 375,
     "incompleteTranslations": 1
   },
   "issues": [
@@ -2475,7 +2475,14 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2804,
+      "line": 52,
+      "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/data/projectChangelog.generated.ts",
+      "line": 2847,
       "text": "@",
       "severity": "high"
     },
