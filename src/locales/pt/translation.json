@@ -7986,5 +7986,73 @@
       "runDone": "Lote concluído: {{processed}} processados, {{succeeded}} sucesso, {{failed}} falhas.",
       "singleDone": "Produto re-enriquecido."
     }
+  },
+  "compliance": {
+    "title": "Dashboard de Conformidade Regulatória",
+    "subtitle": "Mapeamento ponto a ponto FDA (Jan/2025) · EMA (Set/2024 + EU AI Act) · AVMA (Nov/2025)",
+    "systemNote": "Sistema submetido à conformidade: Senex AI — motor proprietário desenvolvido e operado exclusivamente pela PetMoreTime (2025–presente). Sucessor da arquitetura interna VetGraphRAG/VetMedGraph.",
+    "exportCsv": "Exportar CSV",
+    "runCheck": "Rodar verificação de compliance",
+    "running": "Verificando…",
+    "stats": {
+      "total": "Total de requisitos",
+      "meets": "Atende",
+      "partial": "Parcial",
+      "gap": "Gap"
+    },
+    "filters": {
+      "title": "Filtros",
+      "searchPlaceholder": "Buscar por requisito, evidência, arquivo, ação…",
+      "statusPlaceholder": "Status",
+      "priorityPlaceholder": "Prioridade",
+      "allStatuses": "Todos os status",
+      "allPriorities": "Todas as prioridades",
+      "p0": "P0 — crítica",
+      "p1": "P1 — alta",
+      "p2": "P2 — média",
+      "p3": "P3 — baixa"
+    },
+    "status": {
+      "meets": "Atende",
+      "partial": "Parcial",
+      "gap": "Gap"
+    },
+    "table": {
+      "authority": "Órgão",
+      "requirement": "Requisito",
+      "evidence": "Evidência no sistema",
+      "artifact": "Arquivo / Função",
+      "status": "Status",
+      "priority": "Prio.",
+      "action": "Ação recomendada",
+      "empty": "Nenhum requisito corresponde aos filtros aplicados."
+    },
+    "tabs": {
+      "all": "Todos",
+      "showing": "Mostrando {{shown}} de {{total}} — Atende: {{meets}} · Parcial: {{partial}} · Gap: {{gap}}"
+    },
+    "history": {
+      "title": "Histórico de verificações",
+      "subtitle": "Cada rodada gera um snapshot persistido com o diff em relação à anterior (melhorou / piorou / novo).",
+      "empty": "Nenhuma verificação rodada ainda. Clique em \"Rodar verificação de compliance\" para registrar o primeiro snapshot.",
+      "notesPlaceholder": "Notas opcionais (motivo, escopo, observações)…",
+      "runAt": "Executado em",
+      "version": "Versão",
+      "improved": "{{count}} melhorias",
+      "regressed": "{{count}} regressões",
+      "unchanged": "{{count}} inalterados",
+      "new": "{{count}} novos",
+      "viewDiff": "Ver diff",
+      "hideDiff": "Ocultar diff",
+      "deltaImproved": "Melhorou",
+      "deltaRegressed": "Piorou",
+      "deltaNew": "Novo",
+      "deltaUnchanged": "Inalterado",
+      "from": "antes",
+      "to": "agora",
+      "loadError": "Falha ao carregar histórico de verificações.",
+      "runSuccess": "Verificação registrada com sucesso.",
+      "runError": "Falha ao registrar verificação."
+    }
   }
 }
