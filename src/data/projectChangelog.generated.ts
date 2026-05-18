@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-18T04:25:45.740Z
+// Última geração: 2026-05-18T04:41:07.953Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -26,8 +26,23 @@ export const senexVersion = "5.1.0";
 export const changelog: ChangelogEntry[] = [
   {
     "date": "2026-05-18",
-    "kind": "fixed",
+    "kind": "changed",
     "area": "admin",
+    "status": "entregue",
+    "title": "Extraction Prompts: ações movidas para o topo",
+    "bullets": [
+      "Removido o rodapé \"Restaurar Padrões do {{stage}}\" / \"Testar com estudo real\" do `ExtractionPromptsEditor` — agora ambos os botões aparecem no cabeçalho do card de stages, ficando contextuais ao stage ativo (Stage 1…Triplets).",
+      "Validadas as duas primeiras edge functions migradas para `fetchSystemPrompt`: `extract-pet-clinical-data` e `relations-auditor` (status 200, prompts resolvidos via DB `default_content`).",
+      "Files: src/components/administrador/configuracoes/ExtractionPromptsEditor.tsx"
+    ],
+    "files": [
+      "src/components/administrador/configuracoes/ExtractionPromptsEditor.tsx"
+    ]
+  },
+  {
+    "date": "2026-05-18",
+    "kind": "fixed",
+    "area": "prompts",
     "status": "entregue",
     "title": "System Prompts: catálogo populado + sync com o código",
     "bullets": [
