@@ -24,6 +24,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 5.1.0 -->
 
+### Fixed - 2026-05-18 — Badges do pipeline: Biblioteca conta estudos curados e contadores não congelam
+<!-- area: admin · status: entregue · i18n: - -->
+- **Biblioteca**: badge passa a refletir estudos com `kanban_status='approved'` (status final de curadoria), alinhado ao critério usado pela própria aba `StudiesLibraryTab`. Antes contava estudos com qualquer triplet revisado, divergindo do que a aba mostrava.
+- **Contadores congelados**: as contagens carregavam todos os triplets via `select(...)`, atingindo silenciosamente o cap de 1000 linhas do Supabase e travando os badges em valores antigos. Substituído por queries `count: 'exact', head: true` em `processed_studies.kanban_status` — leves, exatas e atualizadas a cada ciclo de 15s.
+- **Curadoria**: badge agora derivado de `kanban_status in ('parsed','review','processed')` (fonte única).
+- **AI Queue**: mantida lógica "kanban_status='new' sem triplets", mas com paginação explícita de IDs para escapar do cap de 1000.
+- Files: src/components/administrador/estudos/import/SciImportSection.tsx
+
 ### Changed - 2026-05-18 — Pipeline de embeddings padronizado (Google AI direto + taskType) e modelo do chat configurável
 <!-- area: curation · status: entregue · i18n: 1.86.10 -->
 - **Auditoria profunda** confirmou que gêmeo digital, hybrid-recommendation, breed-predisposition, lab-interpretation e clinical-analysis-pipeline **NÃO consomem vetores** — operam sobre KG/triplets ou texto literal. Único consumidor real de embedding é `document-chat`. Zero risco de regressão clínica nesta mudança.
