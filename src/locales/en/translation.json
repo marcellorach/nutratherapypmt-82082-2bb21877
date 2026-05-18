@@ -7983,5 +7983,73 @@
       "runDone": "Batch done: {{processed}} processed, {{succeeded}} ok, {{failed}} failed.",
       "singleDone": "Product re-enriched."
     }
+  },
+  "compliance": {
+    "title": "Regulatory Compliance Dashboard",
+    "subtitle": "Point-by-point mapping FDA (Jan/2025) · EMA (Sep/2024 + EU AI Act) · AVMA (Nov/2025)",
+    "systemNote": "System under compliance review: Senex AI — proprietary engine developed and operated exclusively by PetMoreTime (2025–present). Successor to the internal VetGraphRAG/VetMedGraph architecture.",
+    "exportCsv": "Export CSV",
+    "runCheck": "Run compliance check",
+    "running": "Checking…",
+    "stats": {
+      "total": "Total requirements",
+      "meets": "Meets",
+      "partial": "Partial",
+      "gap": "Gap"
+    },
+    "filters": {
+      "title": "Filters",
+      "searchPlaceholder": "Search requirement, evidence, file, action…",
+      "statusPlaceholder": "Status",
+      "priorityPlaceholder": "Priority",
+      "allStatuses": "All statuses",
+      "allPriorities": "All priorities",
+      "p0": "P0 — critical",
+      "p1": "P1 — high",
+      "p2": "P2 — medium",
+      "p3": "P3 — low"
+    },
+    "status": {
+      "meets": "Meets",
+      "partial": "Partial",
+      "gap": "Gap"
+    },
+    "table": {
+      "authority": "Authority",
+      "requirement": "Requirement",
+      "evidence": "Evidence in system",
+      "artifact": "File / Function",
+      "status": "Status",
+      "priority": "Prio.",
+      "action": "Recommended action",
+      "empty": "No requirement matches the filters."
+    },
+    "tabs": {
+      "all": "All",
+      "showing": "Showing {{shown}} of {{total}} — Meets: {{meets}} · Partial: {{partial}} · Gap: {{gap}}"
+    },
+    "history": {
+      "title": "Verification history",
+      "subtitle": "Each round produces a persisted snapshot with the diff against the previous one (improved / regressed / new).",
+      "empty": "No verification has been run yet. Click \"Run compliance check\" to record the first snapshot.",
+      "notesPlaceholder": "Optional notes (reason, scope, observations)…",
+      "runAt": "Run at",
+      "version": "Version",
+      "improved": "{{count}} improvements",
+      "regressed": "{{count}} regressions",
+      "unchanged": "{{count}} unchanged",
+      "new": "{{count}} new",
+      "viewDiff": "View diff",
+      "hideDiff": "Hide diff",
+      "deltaImproved": "Improved",
+      "deltaRegressed": "Regressed",
+      "deltaNew": "New",
+      "deltaUnchanged": "Unchanged",
+      "from": "before",
+      "to": "now",
+      "loadError": "Failed to load verification history.",
+      "runSuccess": "Verification recorded successfully.",
+      "runError": "Failed to record verification."
+    }
   }
 }
