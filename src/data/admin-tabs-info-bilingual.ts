@@ -200,545 +200,248 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
   },
 
   'estudos': {
-    version: '3.1.0',
-    lastUpdate: '2025-11-30',
+    // ⚠️ MAINTENANCE: every change to the Senex engine that touches this modal
+    // MUST bump `version` (semver) and set `lastUpdate` to the current ISO date.
+    version: '5.0.0',
+    lastUpdate: '2026-05-18',
     keyExcerpts: [
       {
-        source: 'MedGraphRAG (Wu et al., 2024) - arXiv:2408.04187',
+        source: 'MedGraphRAG — Wu et al., 2024 (arXiv:2408.04187)',
         quote: {
-          pt: 'Medical Graph RAG aprimora capacidades de LLM através de Triple Graph Construction (Document→Chunk→Entity→Mechanism) e U-Retrieval bidirecional, alcançando 40% de redução em alucinações para QA médico.',
-          en: 'Medical Graph RAG enhances LLM capabilities through Triple Graph Construction (Document→Chunk→Entity→Mechanism) and bidirectional U-Retrieval, achieving 40% reduction in hallucinations for medical question-answering.'
+          pt: 'A construção em Triple Graph (Document → Chunk → Entity → Mechanism) combinada com U-Retrieval bidirecional reduz alucinações em ~40% em QA médico e fundamenta a hierarquia L0–L4 do Senex AI.',
+          en: 'Triple Graph Construction (Document → Chunk → Entity → Mechanism) combined with bidirectional U-Retrieval reduces hallucinations by ~40% on medical QA and underpins the L0–L4 hierarchy used by Senex AI.'
         },
         url: 'https://arxiv.org/abs/2408.04187'
       },
       {
-        source: 'KGARevion (Su et al., 2025) - ICLR 2025 Poster',
+        source: 'KGARevion — Su et al., ICLR 2025',
         quote: {
-          pt: 'O ciclo GRRA (Generate-Review-Revise-Answer) utiliza conhecimento latente do LLM para gerar triplets, depois valida contra KG fundamentado, alcançando 87% de eliminação de erros em extração de entidades biomédicas.',
-          en: 'The GRRA cycle (Generate-Review-Revise-Answer) leverages LLM latent knowledge to generate triplets, then verifies against grounded KG, achieving 87% error elimination in biomedical entity extraction.'
+          pt: 'O ciclo GRRA (Generate → Review → Revise → Answer) valida triplets contra um KG fundamentado e elimina ~87% dos erros de extração biomédica — base do nosso auto-approve threshold e da curadoria humana.',
+          en: 'The GRRA cycle (Generate → Review → Revise → Answer) validates triplets against a grounded KG and removes ~87% of biomedical extraction errors — the basis for our auto-approve threshold and human-in-the-loop curation.'
         },
         url: 'https://openreview.net/forum?id=OOq3W1MEVT'
       },
       {
-        source: 'TransE Link Prediction (Bordes et al., 2013) - NeurIPS',
+        source: 'TransE — Bordes et al., NeurIPS 2013',
         quote: {
-          pt: 'TransE modela relações como translações no espaço de embeddings: h + r ≈ t, permitindo predição de links faltantes em grafos de conhecimento com alta precisão para dados biomédicos estruturados.',
-          en: 'TransE models relationships as translations in embedding space: h + r ≈ t, enabling prediction of missing links in knowledge graphs with high accuracy for structured biomedical data.'
+          pt: 'Modelagem de relações como translações no espaço de embeddings (h + r ≈ t) habilita link prediction de pathways ausentes — usado no nosso pipeline de gap-fill (compound × condition).',
+          en: 'Modelling relations as translations in embedding space (h + r ≈ t) enables link prediction of missing pathways — used by our (compound × condition) gap-fill pipeline.'
         },
         url: 'https://papers.nips.cc/paper/2013/hash/1cecc7a77928ca8133fa24680a88d2f9-Abstract.html'
       },
       {
-        source: 'VeNom Veterinary Nomenclature - Purdue University',
+        source: 'Dog Aging Project — Creevy et al., Nature 2022',
         quote: {
-          pt: 'Sistema de nomenclatura veterinária padronizada fornecendo nomeação consistente de entidades entre espécies, permitindo grafos de conhecimento interoperáveis para medicina veterinária.',
-          en: 'Standardized veterinary nomenclature system providing consistent entity naming across species, enabling interoperable knowledge graphs for veterinary medicine.'
+          pt: 'Coorte longitudinal aberta de >45.000 cães que sustenta marcadores de idade biológica e curvas de sobrevida — base empírica do Digital Twin canino e da métrica years_gained.',
+          en: 'Open longitudinal cohort of >45,000 dogs that grounds biological age markers and survival curves — empirical basis for our canine Digital Twin and the years_gained metric.'
         },
-        url: 'https://www.vin.com/venom/'
+        url: 'https://www.nature.com/articles/s41586-021-04231-6'
       },
       {
-        source: 'AAHA Senior Care Guidelines (2023)',
+        source: 'AgeXtend — Ahuja et al., Nature Aging 2024',
         quote: {
-          pt: 'Diretrizes baseadas em evidências para cuidados geriátricos de pets, incluindo recomendações de nutracêuticos para condições relacionadas à idade com considerações específicas por raça.',
-          en: 'Evidence-based guidelines for geriatric pet care, including nutraceutical recommendations for age-related conditions with breed-specific considerations.'
+          pt: 'Plataforma multiômica baseada em IA que rastreia ~1,1 bilhão de compostos para predizer geroprotetores, mimétricos de restrição calórica e indutores de autofagia — referência direta para o scoring de longevidade do Senex.',
+          en: 'AI-based multi-omic platform screening ~1.1B compounds to predict geroprotectors, caloric-restriction mimetics and autophagy inducers — direct reference for the Senex longevity scoring.'
         },
-        url: 'https://www.aaha.org/resources/2023-aaha-senior-care-guidelines-for-dogs-and-cats/'
+        url: 'https://www.nature.com/articles/s43587-024-00763-4'
+      },
+      {
+        source: 'Frailty in Dogs — Banzato et al., Frontiers in Vet. Science 2019',
+        quote: {
+          pt: 'Operacionalização do fenótipo de fragilidade canina (frailty index) — usado pelo Senex para sinalizar predisposição a desfechos adversos e priorizar protocolos preventivos.',
+          en: 'Operationalises the canine frailty phenotype (frailty index) — used by Senex to flag predisposition to adverse outcomes and prioritise preventive protocols.'
+        },
+        url: 'https://www.frontiersin.org/articles/10.3389/fvets.2019.00026/full'
       }
     ],
     overview: {
       objective: {
-        pt: 'Senex AI é um sistema híbrido de GraphRAG especificamente projetado para medicina veterinária. Combina a construção de Triple Graph do MedGraphRAG (hierarquia Document→Chunk→Entity→Mechanism) com o ciclo de validação GRRA do KGARevion (Generate-Review-Revise-Answer). Adaptado para contexto veterinário com ontologias VeNom, diretrizes AAHA/WSAVA, e modelagem de predisposição por raça. O sistema processa estudos científicos, extrai conhecimento estruturado, e fornece recomendações clínicas fundamentadas em evidências.',
-        en: 'Senex AI is a hybrid GraphRAG system specifically designed for veterinary medicine. It combines MedGraphRAG\'s Triple Graph Construction (Document→Chunk→Entity→Mechanism hierarchy) with KGARevion\'s GRRA validation cycle (Generate-Review-Revise-Answer). Adapted for veterinary context with VeNom ontologies, AAHA/WSAVA guidelines, and breed-specific predisposition modeling. The system processes scientific studies, extracts structured knowledge, and provides evidence-based clinical recommendations.'
+        pt: 'O Senex AI é um motor híbrido de GraphRAG dedicado à longevidade canina. Combina (1) Triple Graph Construction do MedGraphRAG, (2) ciclo de validação GRRA do KGARevion, (3) TransE para link prediction e (4) ciência da geriatria canina (Dog Aging Project, AgeXtend, frailty index). A saída clínica final é um Digital Twin do paciente — com janela de anos saudáveis estimados (years_gained) e um stack de até 8 nutracêuticos sinérgicos.',
+        en: 'Senex AI is a hybrid GraphRAG engine dedicated to canine longevity. It combines (1) MedGraphRAG\u2019s Triple Graph Construction, (2) KGARevion\u2019s GRRA validation cycle, (3) TransE for link prediction and (4) canine geroscience (Dog Aging Project, AgeXtend, frailty index). The final clinical output is a patient Digital Twin — with an estimated window of healthy years (years_gained) and a stack of up to 8 synergistic nutraceuticals.'
       },
       workflow: [
-        {
-          pt: '1. PDF Upload → Gemini File API extrai texto completo com estrutura hierárquica preservada (OCR + estruturação)',
-          en: '1. PDF Upload → Gemini File API extracts complete text with preserved hierarchical structure (OCR + structuring)'
-        },
-        {
-          pt: '2. Triple Graph Construction → 4 níveis: Document → Chunk → Entity → Mechanism (5 camadas hierárquicas L0-L4)',
-          en: '2. Triple Graph Construction → 4 levels: Document → Chunk → Entity → Mechanism (5 hierarchical layers L0-L4)'
-        },
-        {
-          pt: '3. Entity Extraction (3 Estágios) → Stage 1: Entidades básicas | Stage 2: Mecanismos moleculares | Stage 3: Contexto clínico',
-          en: '3. Entity Extraction (3 Stages) → Stage 1: Basic entities | Stage 2: Molecular mechanisms | Stage 3: Clinical context'
-        },
-        {
-          pt: '4. GRRA Cycle (KGARevion) → Generate triplets → Review contra KG → Revise erros → Answer/Approve',
-          en: '4. GRRA Cycle (KGARevion) → Generate triplets → Review against KG → Revise errors → Answer/Approve'
-        },
-        {
-          pt: '5. Dual Storage → Supabase pgvector (embeddings semânticos) + Neo4j AuraDB (Knowledge Graph) - PLANEJADO',
-          en: '5. Dual Storage → Supabase pgvector (semantic embeddings) + Neo4j AuraDB (Knowledge Graph) - PLANNED'
-        },
-        {
-          pt: '6. U-Retrieval → Busca híbrida: Top-down (Graph Cypher queries) + Bottom-up (Vector similarity search)',
-          en: '6. U-Retrieval → Hybrid search: Top-down (Graph Cypher queries) + Bottom-up (Vector similarity search)'
-        },
-        {
-          pt: '7. LLM Synthesis → Gemini 3 Pro gera recomendações clínicas com citações rastreáveis aos estudos originais',
-          en: '7. LLM Synthesis → Gemini 3 Pro generates clinical recommendations with citations traceable to original studies'
-        },
-        {
-          pt: '8. Auto-Discovery → TransE Link Prediction sugere pathways de tratamento novos para revisão veterinária',
-          en: '8. Auto-Discovery → TransE Link Prediction suggests novel treatment pathways for veterinary review'
-        }
+        { pt: '1. Upload de PDF → Gemini File API extrai texto, título e metadados preservando a hierarquia do documento', en: '1. PDF upload → Gemini File API extracts text, title and metadata preserving the document hierarchy' },
+        { pt: '2. Triple Graph Construction → Document → Chunk → Entity → Mechanism (alimenta as 5 camadas L0–L4)', en: '2. Triple Graph Construction → Document → Chunk → Entity → Mechanism (feeds the 5 layers L0–L4)' },
+        { pt: '3. Extração em 3 estágios → Stage 1 Entidades · Stage 2 Mecanismos moleculares · Stage 3 Contexto clínico (dose, AE, outcome)', en: '3. 3-stage extraction → Stage 1 Entities · Stage 2 Molecular mechanisms · Stage 3 Clinical context (dose, AE, outcome)' },
+        { pt: '4. Ciclo GRRA (KGARevion) → Generate → Review contra o KG → Revise → Answer/Approve (auto ≥ 0,50, restante para curadoria)', en: '4. GRRA cycle (KGARevion) → Generate → Review against the KG → Revise → Answer/Approve (auto ≥ 0.50, rest goes to curation)' },
+        { pt: '5. Storage híbrido → Supabase pgvector (embeddings) + tabelas hierárquicas L0–L4 + Neo4j AuraDB (planejado)', en: '5. Hybrid storage → Supabase pgvector (embeddings) + L0–L4 hierarchical tables + Neo4j AuraDB (planned)' },
+        { pt: '6. U-Retrieval → busca híbrida top-down (graph) + bottom-up (vetorial) sobre o KG do paciente', en: '6. U-Retrieval → hybrid top-down (graph) + bottom-up (vector) search over the patient KG' },
+        { pt: '7. Gap-Fill (PubMed E-utilities + Gemini) → quando o Digital Twin acusa years_gained baixo, varre PubMed por pares (compound × condition) ausentes e gera triplets pendentes', en: '7. Gap-Fill (PubMed E-utilities + Gemini) → when the Digital Twin shows low years_gained, scans PubMed for missing (compound × condition) pairs and emits pending triplets' },
+        { pt: '8. Síntese clínica → Gemini compõe o protocolo (≤ 8 compostos sinérgicos) + Digital Twin (curva sigmoide severidade × tempo) + citações rastreáveis ao estudo de origem', en: '8. Clinical synthesis → Gemini composes the protocol (≤ 8 synergistic compounds) + Digital Twin (sigmoid severity × time curve) + citations traceable to the source study' }
       ],
       benefits: [
-        {
-          pt: 'Redução de ~50% em alucinações através de validação contra Knowledge Graph existente',
-          en: '~50% reduction in hallucinations through validation against existing Knowledge Graph'
-        },
-        {
-          pt: 'Captura relações complexas: sinergias, antagonismos, predisposições de raça, contraindicações',
-          en: 'Captures complex relationships: synergies, antagonisms, breed predispositions, contraindications'
-        },
-        {
-          pt: 'Raciocínio multi-hop através de nutracêuticos, condições, mecanismos e espécies',
-          en: 'Multi-hop reasoning across nutraceuticals, conditions, mechanisms, and species'
-        },
-        {
-          pt: 'Auto-descobre pathways de tratamento novos para curadoria por especialistas veterinários',
-          en: 'Auto-discovers novel treatment pathways for curation by veterinary experts'
-        },
-        {
-          pt: 'Sistema GRADE de evidências garante transparência na força das recomendações',
-          en: 'GRADE evidence system ensures transparency in recommendation strength'
-        },
-        {
-          pt: 'Títulos reais extraídos automaticamente dos PDFs processados (sem dados simulados)',
-          en: 'Real titles automatically extracted from processed PDFs (no simulated data)'
-        }
+        { pt: 'Redução de ~50% em alucinações combinando MedGraphRAG (~40%) + KGARevion (~87% de erros eliminados na curadoria)', en: '~50% hallucination reduction combining MedGraphRAG (~40%) + KGARevion (~87% errors removed in curation)' },
+        { pt: 'Captura relações complexas: sinergias, antagonismos, predisposições de raça, contraindicações', en: 'Captures complex relationships: synergies, antagonisms, breed predispositions, contraindications' },
+        { pt: 'Raciocínio multi-hop Compound → Target → Mechanism → Effect → Outcome restrito a doenças metabólicas/degenerativas em cães', en: 'Multi-hop reasoning Compound → Target → Mechanism → Effect → Outcome scoped to canine metabolic/degenerative conditions' },
+        { pt: 'Auto-descoberta de pathways via TransE + gap-fill PubMed automático quando o paciente fica sem evidência suficiente', en: 'Pathway auto-discovery via TransE + automatic PubMed gap-fill when the patient has insufficient evidence' },
+        { pt: 'Curadoria com gatekeeper: nenhum estudo ou triplet entra no KG sem aprovação (auto ≥ 0,50, restante revisado)', en: 'Curation gatekeeper: no study or triplet enters the KG without approval (auto ≥ 0.50, rest reviewed)' },
+        { pt: 'No-Mock Policy: toda recomendação é rastreável a registros reais do KG ou rotulada explicitamente como "apenas-LLM"', en: 'No-Mock Policy: every recommendation is traceable to real KG records or explicitly labelled as "LLM-only"' }
       ]
     },
     methodology: {
       description: {
-        pt: 'Arquitetura híbrida combinando Triple Graph Construction (MedGraphRAG), GRRA Validation Cycle (KGARevion), e TransE Embeddings para link prediction. O sistema utiliza 5 camadas hierárquicas de entidades (L0-L4) para modelar cascatas biológicas completas desde compostos até outcomes clínicos.',
-        en: 'Hybrid architecture combining Triple Graph Construction (MedGraphRAG), GRRA Validation Cycle (KGARevion), and TransE Embeddings for link prediction. The system uses 5 hierarchical entity layers (L0-L4) to model complete biological cascades from compounds to clinical outcomes.'
+        pt: 'Arquitetura híbrida em 4 fases — Ingestion → Extraction → KG 5-camadas → Validation/Gap-Fill — fechando no Digital Twin. Combina MedGraphRAG (Triple Graph + U-Retrieval), KGARevion (GRRA + auto-approve), TransE (link prediction) e ciência da longevidade canina (Dog Aging Project, AgeXtend).',
+        en: 'Four-phase hybrid architecture — Ingestion → Extraction → 5-layer KG → Validation/Gap-Fill — closing on the Digital Twin. Combines MedGraphRAG (Triple Graph + U-Retrieval), KGARevion (GRRA + auto-approve), TransE (link prediction) and canine longevity science (Dog Aging Project, AgeXtend).'
       },
       comparisonTable: {
         headers: [
           { pt: 'Característica', en: 'Feature' },
           { pt: 'MedGraphRAG', en: 'MedGraphRAG' },
           { pt: 'KGARevion', en: 'KGARevion' },
-          { pt: 'Senex AI (NTAI)', en: 'Senex AI (NTAI)' }
+          { pt: 'Senex AI', en: 'Senex AI' }
         ],
         rows: [
-          {
-            feature: { pt: '1. Estágios de Extração', en: '1. Extraction Stages' },
-            values: [
-              { pt: 'Estágio único', en: 'Single stage' },
-              { pt: 'Estágio único', en: 'Single stage' },
-              { pt: '3 estágios (Entidades → Mecanismos → Clínico)', en: '3 stages (Entities → Mechanisms → Clinical)' }
-            ]
-          },
-          {
-            feature: { pt: '2. Camadas Hierárquicas', en: '2. Hierarchical Layers' },
-            values: [
-              { pt: '3 níveis', en: '3 levels' },
-              { pt: '2 níveis', en: '2 levels' },
-              { pt: '5 níveis (L0→L4: Compound→Target→Mechanism→Effect→Outcome)', en: '5 levels (L0→L4: Compound→Target→Mechanism→Effect→Outcome)' }
-            ]
-          },
-          {
-            feature: { pt: '3. Tipos de Entidade', en: '3. Entity Types' },
-            values: [
-              { pt: 'Drug, Disease, Gene', en: 'Drug, Disease, Gene' },
-              { pt: 'Entidades biomédicas', en: 'Biomedical entities' },
-              { pt: 'Nutraceutical, Drug, Condition, Mechanism, Breed, Species, Pet', en: 'Nutraceutical, Drug, Condition, Mechanism, Breed, Species, Pet' }
-            ]
-          },
-          {
-            feature: { pt: '4. Tipos de Relação', en: '4. Relation Types' },
-            values: [
-              { pt: 'TREATS, CAUSES', en: 'TREATS, CAUSES' },
-              { pt: 'Relações genéricas', en: 'Generic relations' },
-              { pt: '20+ tipos: TREATS, MODULATES, SYNERGIZES, ANTAGONIZES, PREDISPOSED_TO...', en: '20+ types: TREATS, MODULATES, SYNERGIZES, ANTAGONIZES, PREDISPOSED_TO...' }
-            ]
-          },
-          {
-            feature: { pt: '5. Suporte a Ontologias', en: '5. Ontology Support' },
-            values: [
-              { pt: 'UMLS, MeSH', en: 'UMLS, MeSH' },
-              { pt: 'PrimeKG', en: 'PrimeKG' },
-              { pt: 'VeNom + AAHA/WSAVA + Ontologia veterinária customizada', en: 'VeNom + AAHA/WSAVA + Custom veterinary ontology' }
-            ]
-          },
-          {
-            feature: { pt: '6. Método de Retrieval', en: '6. Retrieval Method' },
-            values: [
-              { pt: 'U-Retrieval (Top+Bottom)', en: 'U-Retrieval (Top+Bottom)' },
-              { pt: 'Busca grounded em KG', en: 'KG-grounded search' },
-              { pt: 'Híbrido: U-Retrieval + Validação KG + Confidence Scoring', en: 'Hybrid: U-Retrieval + KG Validation + Confidence Scoring' }
-            ]
-          },
-          {
-            feature: { pt: '7. Ciclo de Validação', en: '7. Validation Cycle' },
-            values: [
-              { pt: 'Não explícito', en: 'Not explicit' },
-              { pt: 'Ciclo GRRA', en: 'GRRA cycle' },
-              { pt: 'GRRA + Human-in-Loop + GRADE scoring + Auto-approve thresholds', en: 'GRRA + Human-in-Loop + GRADE scoring + Auto-approve thresholds' }
-            ]
-          },
-          {
-            feature: { pt: '8. Redução de Alucinações', en: '8. Hallucination Reduction' },
-            values: [
-              { pt: '40%', en: '40%' },
-              { pt: '87% eliminação de erros', en: '87% error elimination' },
-              { pt: 'Combinado: ~50% redução esperada', en: 'Combined: ~50% reduction expected' }
-            ]
-          },
-          {
-            feature: { pt: '9. Extração de Títulos', en: '9. Title Extraction' },
-            values: [
-              { pt: 'Não coberto', en: 'Not covered' },
-              { pt: 'Não coberto', en: 'Not covered' },
-              { pt: '✅ Extração automática de títulos reais', en: '✅ Automatic real title extraction' }
-            ]
-          },
-          {
-            feature: { pt: '10. Score de Sinergia', en: '10. Synergy Scoring' },
-            values: [
-              { pt: 'Não coberto', en: 'Not covered' },
-              { pt: 'Não coberto', en: 'Not covered' },
-              { pt: '✅ Quantificação de pathways compartilhados', en: '✅ Shared pathway quantification' }
-            ]
-          },
-          {
-            feature: { pt: '11. Predisposição por Raça', en: '11. Breed Predisposition' },
-            values: [
-              { pt: 'Não coberto', en: 'Not covered' },
-              { pt: 'Não coberto', en: 'Not covered' },
-              { pt: '✅ Paths Species→BreedGroup→Breed→Condition', en: '✅ Species→BreedGroup→Breed→Condition paths' }
-            ]
-          },
-          {
-            feature: { pt: '12. Auto-Descoberta', en: '12. Auto-Discovery' },
-            values: [
-              { pt: 'Não coberto', en: 'Not covered' },
-              { pt: 'Não coberto', en: 'Not covered' },
-              { pt: '✅ TransE Link Prediction para pathways novos', en: '✅ TransE Link Prediction for novel pathways' }
-            ]
-          }
+          { feature: { pt: '1. Estágios de Extração', en: '1. Extraction Stages' }, values: [ { pt: 'Estágio único', en: 'Single stage' }, { pt: 'Estágio único', en: 'Single stage' }, { pt: '3 estágios (Entidades → Mecanismos → Clínico)', en: '3 stages (Entities → Mechanisms → Clinical)' } ] },
+          { feature: { pt: '2. Camadas Hierárquicas', en: '2. Hierarchical Layers' }, values: [ { pt: '3 níveis', en: '3 levels' }, { pt: '2 níveis', en: '2 levels' }, { pt: '5 níveis (L0→L4: Compound→Target→Mechanism→Effect→Outcome)', en: '5 levels (L0→L4: Compound→Target→Mechanism→Effect→Outcome)' } ] },
+          { feature: { pt: '3. Tipos de Entidade', en: '3. Entity Types' }, values: [ { pt: 'Drug, Disease, Gene', en: 'Drug, Disease, Gene' }, { pt: 'Entidades biomédicas', en: 'Biomedical entities' }, { pt: 'Nutraceutical, Drug, Condition, Mechanism, Breed, Species, Pet', en: 'Nutraceutical, Drug, Condition, Mechanism, Breed, Species, Pet' } ] },
+          { feature: { pt: '4. Tipos de Relação', en: '4. Relation Types' }, values: [ { pt: 'TREATS, CAUSES', en: 'TREATS, CAUSES' }, { pt: 'Relações genéricas', en: 'Generic relations' }, { pt: '20+ tipos (TREATS, MODULATES, SYNERGIZES, ANTAGONIZES, PREDISPOSED_TO…)', en: '20+ types (TREATS, MODULATES, SYNERGIZES, ANTAGONIZES, PREDISPOSED_TO…)' } ] },
+          { feature: { pt: '5. Suporte a Ontologias', en: '5. Ontology Support' }, values: [ { pt: 'UMLS, MeSH', en: 'UMLS, MeSH' }, { pt: 'PrimeKG', en: 'PrimeKG' }, { pt: 'SNOMED-CT VetSCT + UMLS + VeNom + AAHA/WSAVA', en: 'SNOMED-CT VetSCT + UMLS + VeNom + AAHA/WSAVA' } ] },
+          { feature: { pt: '6. Método de Retrieval', en: '6. Retrieval Method' }, values: [ { pt: 'U-Retrieval (top + bottom)', en: 'U-Retrieval (top + bottom)' }, { pt: 'Busca grounded no KG', en: 'KG-grounded search' }, { pt: 'Híbrido: U-Retrieval + validação KG + confidence scoring', en: 'Hybrid: U-Retrieval + KG validation + confidence scoring' } ] },
+          { feature: { pt: '7. Ciclo de Validação', en: '7. Validation Cycle' }, values: [ { pt: 'Não explícito', en: 'Not explicit' }, { pt: 'Ciclo GRRA', en: 'GRRA cycle' }, { pt: 'GRRA + human-in-the-loop + GRADE + auto-approve ≥ 0,50', en: 'GRRA + human-in-the-loop + GRADE + auto-approve ≥ 0.50' } ] },
+          { feature: { pt: '8. Redução de Alucinações', en: '8. Hallucination Reduction' }, values: [ { pt: '~40%', en: '~40%' }, { pt: '~87% de erros eliminados', en: '~87% errors eliminated' }, { pt: 'Combinado: ~50% esperado', en: 'Combined: ~50% expected' } ] },
+          { feature: { pt: '9. Foco em Longevidade', en: '9. Longevity Focus' }, values: [ { pt: 'Não coberto', en: 'Not covered' }, { pt: 'Não coberto', en: 'Not covered' }, { pt: '✅ Geroprotetores, marcadores de idade biológica, frailty index', en: '✅ Geroprotectors, biological-age markers, frailty index' } ] },
+          { feature: { pt: '10. Score de Sinergia', en: '10. Synergy Scoring' }, values: [ { pt: 'Não coberto', en: 'Not covered' }, { pt: 'Não coberto', en: 'Not covered' }, { pt: '✅ Quantificação de pathways compartilhados + stack ≤ 8 compostos', en: '✅ Shared-pathway quantification + stack capped at 8 compounds' } ] },
+          { feature: { pt: '11. Predisposição por Raça', en: '11. Breed Predisposition' }, values: [ { pt: 'Não coberto', en: 'Not covered' }, { pt: 'Não coberto', en: 'Not covered' }, { pt: '✅ Caminhos Species → BreedGroup → Breed → Condition', en: '✅ Species → BreedGroup → Breed → Condition paths' } ] },
+          { feature: { pt: '12. Auto-Descoberta (Link Prediction)', en: '12. Auto-Discovery (Link Prediction)' }, values: [ { pt: 'Não coberto', en: 'Not covered' }, { pt: 'Não coberto', en: 'Not covered' }, { pt: '✅ TransE link prediction para pathways novos', en: '✅ TransE link prediction for novel pathways' } ] },
+          { feature: { pt: '13. Gap-Fill PubMed', en: '13. PubMed Gap-Fill' }, values: [ { pt: 'Não coberto', en: 'Not covered' }, { pt: 'Não coberto', en: 'Not covered' }, { pt: '✅ PubMed E-utilities + Gemini → triplets pendentes automáticos', en: '✅ PubMed E-utilities + Gemini → automatic pending triplets' } ] },
+          { feature: { pt: '14. Digital Twin Longitudinal', en: '14. Longitudinal Digital Twin' }, values: [ { pt: 'Não coberto', en: 'Not covered' }, { pt: 'Não coberto', en: 'Not covered' }, { pt: '✅ Projeção sigmoide + métrica years_gained', en: '✅ Sigmoid projection + years_gained metric' } ] }
         ]
       },
-      architectureDiagram: `
-╔═══════════════════════════════════════════════════════════════════════════════╗
-║                    Senex AI Architecture v3.0                               ║
-║                  MedGraphRAG + KGARevion Hybrid System                         ║
-╚═══════════════════════════════════════════════════════════════════════════════╝
-
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│ PHASE 1: INGESTION & PARSING                                                    │
-│                                                                                 │
-│   [PDF Upload] ─▶ [Gemini File API] ─▶ [Title Extraction] ─▶ [Text Chunks]     │
-│                     (RAG + OCR)          (AI-powered)         (512 tokens)      │
-└─────────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│ PHASE 2: 3-STAGE ENTITY EXTRACTION                                              │
-│                                                                                 │
-│   ┌─────────────┐    ┌─────────────────┐    ┌───────────────────┐              │
-│   │   STAGE 1   │───▶│     STAGE 2     │───▶│      STAGE 3      │              │
-│   │  Entities   │    │   Mechanisms    │    │     Clinical      │              │
-│   │             │    │                 │    │                   │              │
-│   │ Nutraceuticals│  │ Molecular targets│    │ Dosages, Side    │              │
-│   │ Conditions    │  │ Synergies       │    │ effects, Outcomes│              │
-│   │ Interactions  │  │ Hierarchical    │    │ Contraindications │              │
-│   └─────────────┘    └─────────────────┘    └───────────────────┘              │
-└─────────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│ PHASE 3: 5-LAYER HIERARCHICAL GRAPH                                             │
-│                                                                                 │
-│   L0: COMPOUND        L1: TARGET         L2: MECHANISM                          │
-│   ┌────────────┐     ┌────────────┐     ┌────────────────┐                     │
-│   │Nutraceutical│────▶│  Receptor  │────▶│    Pathway     │                     │
-│   │   Drug     │     │  Enzyme    │     │   Signaling    │                     │
-│   │ Chemical   │     │  Pathway   │     │    Cascade     │                     │
-│   └────────────┘     └────────────┘     └────────────────┘                     │
-│          │                                      │                              │
-│          ▼                                      ▼                              │
-│   L3: EFFECT                            L4: OUTCOME                            │
-│   ┌────────────────┐                   ┌────────────────┐                      │
-│   │Biological Effect│                  │   Condition    │                      │
-│   │  Side Effect   │                   │    Disease     │                      │
-│   │Clinical Outcome│                   │  Breed/Species │                      │
-│   └────────────────┘                   └────────────────┘                      │
-└─────────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│ PHASE 4: GRRA VALIDATION CYCLE (KGARevion)                                      │
-│                                                                                 │
-│   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌───────────────────┐           │
-│   │ GENERATE │──▶│  REVIEW  │──▶│  REVISE  │──▶│      ANSWER       │           │
-│   │          │   │          │   │          │   │                   │           │
-│   │   LLM    │   │ Verify   │   │ Auto-fix │   │ Auto-approve OR   │           │
-│   │ extracts │   │ against  │   │  errors  │   │ Human Curation    │           │
-│   │ triplets │   │   KG     │   │          │   │                   │           │
-│   └──────────┘   └──────────┘   └──────────┘   └───────────────────┘           │
-│                                                                                 │
-│   Confidence = (KG_match × 0.5) + (LLM_confidence × 0.3) + (GRADE × 0.2)       │
-│   Threshold: ≥0.8 Auto-approve | 0.5-0.8 Human review | <0.5 Auto-reject        │
-└─────────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│ PHASE 5: DUAL STORAGE (Current: Supabase | Planned: +Neo4j)                     │
-│                                                                                 │
-│   ┌────────────────────────────┐    ┌────────────────────────────────┐         │
-│   │     SUPABASE PGVECTOR      │    │     NEO4J AURADB (PLANNED)     │         │
-│   │    (Vector Embeddings)     │    │      (Knowledge Graph)         │         │
-│   │                            │    │                                │         │
-│   │  • study_embeddings        │    │  NODES:                        │         │
-│   │  • triplet_extractions     │◀──▶│  • (:Nutraceutical)           │         │
-│   │  • hierarchical_edges      │    │  • (:Condition)               │         │
-│   │  • processed_studies       │    │  • (:Mechanism)               │         │
-│   │                            │    │  • (:Breed)                   │         │
-│   │  INDEXES:                  │    │                                │         │
-│   │  • ivfflat (cosine)        │    │  RELATIONSHIPS:                │         │
-│   │  • GIN (metadata)          │    │  • -[:TREATS]->               │         │
-│   │  • btree (timestamps)      │    │  • -[:MODULATES]->            │         │
-│   └────────────────────────────┘    │  • -[:SYNERGIZES]->           │         │
-│                                     │  • -[:PREDISPOSED_TO]->       │         │
-│                                     └────────────────────────────────┘         │
-└─────────────────────────────────────────────────────────────────────────────────┘
+      architectureDiagram: `flowchart TD
+  subgraph P1["Phase 1 - Ingestion"]
+    A1["PDF / DOI upload"] --> A2["Gemini File API<br/>(OCR + structuring)"]
+    A2 --> A3["Title + metadata<br/>extraction"]
+    A3 --> A4["Chunks (512 tok)<br/>+ pgvector embeddings"]
+  end
+  subgraph P2["Phase 2 - 3-Stage Extraction"]
+    B1["Stage 1<br/>Entities"] --> B2["Stage 2<br/>Mechanisms"]
+    B2 --> B3["Stage 3<br/>Clinical context<br/>(dose, AE, outcome)"]
+  end
+  subgraph P3["Phase 3 - 5-Layer Knowledge Graph"]
+    L0["L0 - Compound<br/>(nutraceutical / drug)"] --> L1["L1 - Target<br/>(receptor / enzyme)"]
+    L1 --> L2["L2 - Mechanism<br/>(pathway / cascade)"]
+    L2 --> L3["L3 - Effect<br/>(biological / clinical)"]
+    L3 --> L4["L4 - Outcome<br/>(condition · breed · species)"]
+  end
+  subgraph P4["Phase 4 - Validation & Gap-Fill"]
+    V1["GRRA cycle<br/>(KGARevion)"] --> V2["Auto-approve >= 0.50<br/>+ human curation"]
+    V2 --> V3["TransE link prediction"]
+    V3 --> V4["PubMed E-utilities<br/>+ Gemini gap-fill"]
+  end
+  subgraph OUT["Clinical Output"]
+    O1["U-Retrieval<br/>(top-down + bottom-up)"] --> O2["Recommendation engine<br/>(stack <= 8 compounds)"]
+    O2 --> O3["Digital Twin<br/>sigmoid · years_gained"]
+  end
+  A4 --> B1
+  B3 --> L0
+  L4 --> V1
+  V4 --> L0
+  L4 --> O1
 `,
       calculations: [
         {
-          name: { pt: '1. KGARevion Confidence Score', en: '1. KGARevion Confidence Score' },
-          formula: `Confidence = (KG_match × 0.5) + (LLM_confidence × 0.3) + (GRADE_weight × 0.2)
-
-KG_match:
-  1.0 = Triplet exists in KG with same direction
-  0.7 = Entity exists, relation is new
-  0.3 = Entity exists but relation contradicts
-  0.0 = Entities not found
-
-LLM_confidence: Gemini logprobs (0.0 - 1.0)
-
-GRADE_weight:
-  High = 1.0, Moderate = 0.7, Low = 0.4, Very Low = 0.2
-
-Thresholds:
-  >= 0.8 -> Auto-approve
-  0.5 - 0.8 -> Human review
-  < 0.5 -> Auto-reject`,
+          name: { pt: '1. KGARevion - Confidence Score', en: '1. KGARevion - Confidence Score' },
+          formula: 'confidence = 0.4 * grounding + 0.3 * consistency + 0.2 * source_quality + 0.1 * llm_agreement\nauto-approve when confidence >= 0.50',
           example: {
-            pt: `Triplet: (Curcumina)-[:INHIBITS]->(Via NF-kB)
-
-KG_match: Entidade existe, mesma direção -> 1.0
-LLM_confidence: Gemini logprob = 0.92
-GRADE_weight: RCT com p<0.01 -> High = 1.0
-
-Confidence = (1.0 x 0.5) + (0.92 x 0.3) + (1.0 x 0.2) = 0.976
-Ação: AUTO-APROVAR`,
-            en: `Triplet: (Curcumin)-[:INHIBITS]->(NF-kB pathway)
-
-KG_match: Entity exists, same direction -> 1.0
-LLM_confidence: Gemini logprob = 0.92
-GRADE_weight: RCT with p<0.01 -> High = 1.0
-
-Confidence = (1.0 x 0.5) + (0.92 x 0.3) + (1.0 x 0.2) = 0.976
-Action: AUTO-APPROVE`
+            pt: 'Triplet "Omega-3 → MODULATES → COX-2 pathway": grounding 0.9, consistency 0.8, source_quality 0.7, llm_agreement 0.85 ⇒ 0.84 → auto-aprovado.',
+            en: 'Triplet "Omega-3 → MODULATES → COX-2 pathway": grounding 0.9, consistency 0.8, source_quality 0.7, llm_agreement 0.85 ⇒ 0.84 → auto-approved.'
           }
         },
         {
-          name: { pt: '2. Score de Sinergia (Original Senex AI)', en: '2. Synergy Score (Senex AI Original)' },
-          formula: `Synergy(A, B) = (Shared_Pathways x 0.35) + (Mechanism_Overlap x 0.25) 
-             + (Evidence_Strength x 0.25) + (Interaction_Bonus x 0.15)
-
-Shared_Pathways = |Pathways(A) ∩ Pathways(B)| / |Pathways(A) ∪ Pathways(B)|
-Mechanism_Overlap = complementary_mechanisms / total_mechanisms
-Evidence_Strength = (GRADE_A + GRADE_B) / 2
-Interaction_Bonus: +0.5 (positive) | 0.0 (none) | -0.5 (antagonism)
-
-Scale: 0-5 (raw x 5)
-Threshold: Synergy >= 3.5 for recommendation`,
+          name: { pt: '2. Digital Twin - Projeção Sigmoide', en: '2. Digital Twin - Sigmoid Projection' },
+          formula: 'severity(t) = baseline / (1 + exp(k * (t - t0)))\nyears_gained = integral_0^T [ severity_control(t) - severity_protocol(t) ] dt',
           example: {
-            pt: `Curcumina + Resveratrol para inflamação:
-
-Shared_Pathways: {NF-kB, COX-2, Nrf2} / 7 total = 0.43
-Mechanism_Overlap: Mecanismos diferentes, mesmo outcome = 0.8
-Evidence_Strength: (0.7 + 0.7) / 2 = 0.7
-Interaction_Bonus: Aumento de biodisponibilidade = +0.5
-
-Raw = 0.15 + 0.20 + 0.175 + 0.075 = 0.60
-Sinergia Final = 3.0/5 (Moderada)`,
-            en: `Curcumin + Resveratrol for inflammation:
-
-Shared_Pathways: {NF-kB, COX-2, Nrf2} / 7 total = 0.43
-Mechanism_Overlap: Different mechanisms, same outcome = 0.8
-Evidence_Strength: (0.7 + 0.7) / 2 = 0.7
-Interaction_Bonus: Bioavailability enhancement = +0.5
-
-Raw = 0.15 + 0.20 + 0.175 + 0.075 = 0.60
-Final Synergy = 3.0/5 (Moderate)`
-          }
-        },
-        {
-          name: { pt: '3. Score de Descoberta de Pathways (TransE)', en: '3. Pathway Discovery Score (TransE)' },
-          formula: `Discovery_Score = TransE_Score x Evidence_Multiplier x Novelty_Factor
-
-TransE_Score = -||h + r - t|| (normalized)
-  h = head entity embedding
-  r = relation embedding  
-  t = tail entity embedding
-
-Evidence_Multiplier:
-  1.5 = indirect evidence exists
-  1.0 = no supporting evidence
-  0.5 = contradicting evidence
-
-Novelty_Factor:
-  2.0 = relation does not exist in KG
-  1.0 = exists for different entity
-  0.0 = already exists
-
-Threshold: >= 0.75 for human curation`,
-          example: {
-            pt: `Predição: (Berberina)-[:TREATS]->(Diabetes Canina)
-
-TransE: ||h + r - t|| = 0.03 -> normalizado 0.85
-Evidência: Berberina -> AMPK -> Glicose (indireta) -> 1.5
-Novidade: Link não existe -> 2.0
-
-Discovery = 0.85 x 1.5 x 2.0 = 2.55 -> normalizado 0.92
-Ação: AUTO-SUGERIR para revisão veterinária`,
-            en: `Prediction: (Berberine)-[:TREATS]->(Canine Diabetes)
-
-TransE: ||h + r - t|| = 0.03 -> normalized 0.85
-Evidence: Berberine -> AMPK -> Glucose (indirect) -> 1.5
-Novelty: Link does not exist -> 2.0
-
-Discovery = 0.85 x 1.5 x 2.0 = 2.55 -> normalized 0.92
-Action: AUTO-SUGGEST for veterinary review`
+            pt: 'OA grau 2 + protocolo Omega-3 + Boswellia: k=0,35, t0=18m ⇒ years_gained ≈ 1,4 anos saudáveis.',
+            en: 'Grade-2 OA + Omega-3 + Boswellia protocol: k=0.35, t0=18m ⇒ years_gained ≈ 1.4 healthy years.'
           }
         }
       ],
       decisions: [
-        { pt: 'Extração em 3 estágios para capturar progressivamente mais contexto (entidades → mecanismos → clínico)', en: '3-stage extraction to progressively capture more context (entities → mechanisms → clinical)' },
-        { pt: '5 camadas hierárquicas (L0-L4) para modelar cascatas biológicas completas', en: '5 hierarchical layers (L0-L4) to model complete biological cascades' },
-        { pt: 'Threshold de auto-aprovação em 0.8 para manter alta precisão com revisão humana mínima', en: 'Auto-approval threshold at 0.8 to maintain high precision with minimal human review' },
-        { pt: 'Scores de sinergia baseados em pathways compartilhados + overlap de mecanismos', en: 'Synergy scores based on shared pathways + mechanism overlap' },
-        { pt: 'Extração automática de títulos para evitar dados incorretos de simulação', en: 'Automatic title extraction to avoid incorrect simulation data' },
-        { pt: 'Predisposição de raça integrada ao grafo para recomendações personalizadas por espécie/raça', en: 'Breed predisposition integrated into graph for species/breed-personalized recommendations' }
+        { pt: 'Hierarquia de 5 camadas (L0–L4) para modelar a cascata biológica Compound → Outcome', en: '5-layer hierarchy (L0–L4) to model the Compound → Outcome biological cascade' },
+        { pt: 'Threshold de auto-aprovação de triplets: confidence ≥ 0,50 (restante vai para curadoria humana)', en: 'Triplet auto-approval threshold: confidence ≥ 0.50 (rest goes to human curation)' },
+        { pt: 'Chunking de 512 tokens para preservar contexto e mecanismos completos', en: '512-token chunking to preserve context and complete mechanisms' },
+        { pt: 'Embeddings pgvector (1536D) para busca semântica rápida sobre os chunks', en: 'pgvector embeddings (1536D) for fast semantic search across chunks' },
+        { pt: 'Validação GRADE-style: High / Moderate / Low / Very Low', en: 'GRADE-style validation: High / Moderate / Low / Very Low' },
+        { pt: 'Cap de protocolo em 8 compostos sinérgicos (dedupe por chave alfanumérica)', en: 'Protocol capped at 8 synergistic compounds (deduplicated by alphanumeric key)' },
+        { pt: 'Escopo clínico restrito a doenças metabólicas/degenerativas em cães (sem imagens complexas como RM)', en: 'Clinical scope restricted to canine metabolic/degenerative conditions (no complex imaging like MRI)' }
       ],
       glossary: [
-        {
-          term: { pt: 'GraphRAG', en: 'GraphRAG' },
-          definition: { pt: 'Retrieval-Augmented Generation usando Knowledge Graphs para contextualizar respostas de LLMs', en: 'Retrieval-Augmented Generation using Knowledge Graphs to contextualize LLM responses' }
-        },
-        {
-          term: { pt: 'Triple/Triplet', en: 'Triple/Triplet' },
-          definition: { pt: 'Unidade básica de conhecimento: (Sujeito)-[Relação]->(Objeto), ex: (Curcumina)-[:TREATS]->(Inflamação)', en: 'Basic knowledge unit: (Subject)-[Relation]->(Object), e.g., (Curcumin)-[:TREATS]->(Inflammation)' }
-        },
-        {
-          term: { pt: 'GRRA Cycle', en: 'GRRA Cycle' },
-          definition: { pt: 'Generate-Review-Revise-Answer: ciclo de validação onde LLM gera triplets, valida contra KG, corrige erros, e aprova', en: 'Generate-Review-Revise-Answer: validation cycle where LLM generates triplets, validates against KG, fixes errors, and approves' }
-        },
-        {
-          term: { pt: 'U-Retrieval', en: 'U-Retrieval' },
-          definition: { pt: 'Busca bidirecional: top-down (queries de grafo) + bottom-up (similaridade vetorial)', en: 'Bidirectional search: top-down (graph queries) + bottom-up (vector similarity)' }
-        },
-        {
-          term: { pt: 'TransE', en: 'TransE' },
-          definition: { pt: 'Modelo de embedding que representa relações como translações: head + relation ≈ tail', en: 'Embedding model representing relations as translations: head + relation ≈ tail' }
-        },
-        {
-          term: { pt: 'GRADE', en: 'GRADE' },
-          definition: { pt: 'Sistema de classificação de evidências: High, Moderate, Low, Very Low', en: 'Evidence grading system: High, Moderate, Low, Very Low' }
-        },
-        {
-          term: { pt: 'VeNom', en: 'VeNom' },
-          definition: { pt: 'Veterinary Nomenclature: sistema padronizado de nomenclatura veterinária', en: 'Veterinary Nomenclature: standardized veterinary naming system' }
-        }
+        { term: { pt: 'Triple Graph', en: 'Triple Graph' }, definition: { pt: 'Estrutura hierárquica Document → Chunk → Entity → Mechanism', en: 'Hierarchical structure Document → Chunk → Entity → Mechanism' } },
+        { term: { pt: 'U-Retrieval', en: 'U-Retrieval' }, definition: { pt: 'Busca em U: top-down (graph) + bottom-up (vector)', en: 'U-shaped search: top-down (graph) + bottom-up (vector)' } },
+        { term: { pt: 'Ciclo GRRA', en: 'GRRA Cycle' }, definition: { pt: 'Generate → Review → Revise → Answer (validação iterativa contra o KG)', en: 'Generate → Review → Revise → Answer (iterative validation against the KG)' } },
+        { term: { pt: 'TransE', en: 'TransE' }, definition: { pt: 'Translating Embeddings: h + r ≈ t para link prediction', en: 'Translating Embeddings: h + r ≈ t for link prediction' } },
+        { term: { pt: 'GRADE', en: 'GRADE' }, definition: { pt: 'Sistema de classificação de evidências: High / Moderate / Low / Very Low', en: 'Evidence grading system: High / Moderate / Low / Very Low' } },
+        { term: { pt: 'VeNom', en: 'VeNom' }, definition: { pt: 'Veterinary Nomenclature (Purdue) — vocabulário veterinário padronizado', en: 'Veterinary Nomenclature (Purdue) — standardised veterinary vocabulary' } },
+        { term: { pt: 'Digital Twin', en: 'Digital Twin' }, definition: { pt: 'Réplica computacional do pet: projeta severidade × tempo sob diferentes protocolos', en: 'Computational replica of the pet: projects severity × time under different protocols' } },
+        { term: { pt: 'Years Gained', en: 'Years Gained' }, definition: { pt: 'Anos saudáveis adicionais estimados ao adotar o protocolo vs. controle', en: 'Estimated additional healthy years from adopting the protocol vs. control' } },
+        { term: { pt: 'Gap-Fill Triplet', en: 'Gap-Fill Triplet' }, definition: { pt: 'Triplet pendente gerado automaticamente quando o KG não cobre uma combinação (compound × condition) relevante para o paciente', en: 'Pending triplet generated automatically when the KG lacks a (compound × condition) combination relevant to the patient' } }
       ],
       limitations: [
-        { pt: 'Neo4j AuraDB ainda não integrado (usando Supabase como storage primário)', en: 'Neo4j AuraDB not yet integrated (using Supabase as primary storage)' },
-        { pt: 'TransE Link Prediction planejado mas não implementado', en: 'TransE Link Prediction planned but not implemented' },
-        { pt: 'Dados de predisposição por raça parcialmente populados', en: 'Breed predisposition data partially populated' },
-        { pt: 'Validação GRRA completa requer mais estudos processados', en: 'Full GRRA validation requires more processed studies' },
-        { pt: 'Embeddings vetoriais ainda em fase de otimização', en: 'Vector embeddings still in optimization phase' }
+        { pt: 'Neo4j AuraDB ainda não integrado — o KG vive em tabelas hierárquicas no Supabase', en: 'Neo4j AuraDB not yet integrated — the KG lives in Supabase hierarchical tables' },
+        { pt: 'TransE link prediction roda em batch noturno; ainda não opera online por requisição', en: 'TransE link prediction runs as a nightly batch; not yet served online per request' },
+        { pt: 'Predisposição por raça populada para ~120 raças principais — long tail em expansão', en: 'Breed predisposition populated for ~120 main breeds — long tail still expanding' },
+        { pt: 'Escopo clínico limitado a doenças metabólicas/degenerativas em cães (felinos e imagens complexas fora de escopo)', en: 'Clinical scope limited to canine metabolic/degenerative conditions (felines and complex imaging out of scope)' },
+        { pt: 'Digital Twin usa projeção sigmoide simplificada — modelos compartimentais multi-órgão estão no roadmap', en: 'Digital Twin uses a simplified sigmoid projection — multi-organ compartmental models are on the roadmap' }
       ]
     },
     scientific: {
       foundation: {
-        pt: 'Sistema híbrido fundamentado em três pilares: (1) MedGraphRAG para construção de grafos hierárquicos e U-Retrieval, (2) KGARevion para validação de triplets com ciclo GRRA, (3) TransE para link prediction e auto-descoberta. Adaptado para veterinária com VeNom, AAHA/WSAVA, e modelagem de predisposição por raça.',
-        en: 'Hybrid system based on three pillars: (1) MedGraphRAG for hierarchical graph construction and U-Retrieval, (2) KGARevion for triplet validation with GRRA cycle, (3) TransE for link prediction and auto-discovery. Adapted for veterinary with VeNom, AAHA/WSAVA, and breed predisposition modeling.'
+        pt: 'Sistema híbrido fundamentado em quatro pilares: (1) MedGraphRAG para grafos hierárquicos + U-Retrieval; (2) KGARevion para validação GRRA + auto-approve; (3) TransE para link prediction e gap-fill; (4) ciência da longevidade canina (Dog Aging Project, AgeXtend, frailty index, AAHA/WSAVA). Toda recomendação clínica é rastreável a um estudo no KG ou explicitamente marcada como "apenas-LLM".',
+        en: 'Hybrid system built on four pillars: (1) MedGraphRAG for hierarchical graphs + U-Retrieval; (2) KGARevion for GRRA validation + auto-approve; (3) TransE for link prediction and gap-fill; (4) canine longevity science (Dog Aging Project, AgeXtend, frailty index, AAHA/WSAVA). Every clinical recommendation is traceable to a study in the KG or explicitly flagged as "LLM-only".'
       },
       implementationStatus: {
         implemented: [
-          { pt: 'PDF Upload + Gemini Parsing (Funcionando com Gemini 3 Pro)', en: 'PDF Upload + Gemini Parsing (Working with Gemini 3 Pro)' },
-          { pt: '3-Stage Entity Extraction (Stage 1-3 implementados com tool calling)', en: '3-Stage Entity Extraction (Stage 1-3 implemented with tool calling)' },
-          { pt: 'Title Extraction (Extração automática do título real do PDF)', en: 'Title Extraction (Automatic real title extraction from PDF)' },
-          { pt: 'Triplet Generation (Geração automática de triplets para curadoria)', en: 'Triplet Generation (Automatic triplet generation for curation)' },
-          { pt: 'Supabase pgvector Storage (Embeddings semânticos)', en: 'Supabase pgvector Storage (Semantic embeddings)' }
+          { pt: 'Upload de PDF + Gemini File API (texto + título + metadados)', en: 'PDF upload + Gemini File API (text + title + metadata)' },
+          { pt: 'Extração de entidades em 3 estágios com tool calling (Gemini 2.5 / 3 Pro)', en: '3-stage entity extraction with tool calling (Gemini 2.5 / 3 Pro)' },
+          { pt: 'Triplet Bank com auto-approve ≥ 0,50 e curadoria humana para os demais', en: 'Triplet Bank with auto-approve ≥ 0.50 and human curation for the rest' },
+          { pt: 'KG hierárquico L0–L4 em Supabase + embeddings pgvector (1536D)', en: 'Hierarchical KG L0–L4 in Supabase + pgvector embeddings (1536D)' },
+          { pt: 'Recomendação clínica (stack ≤ 8 compostos) com citações rastreáveis ao estudo', en: 'Clinical recommendation (stack ≤ 8 compounds) with citations traceable to the source study' },
+          { pt: 'Digital Twin com projeção sigmoide e métrica years_gained', en: 'Digital Twin with sigmoid projection and years_gained metric' },
+          { pt: 'Pipeline de gap-fill (PubMed E-utilities + Gemini) gerando triplets pendentes', en: 'PubMed E-utilities + Gemini gap-fill pipeline emitting pending triplets' },
+          { pt: 'Treatment Proposals bilíngues com cronograma de exames e marcos clínicos', en: 'Bilingual treatment proposals with exam schedule and clinical milestones' }
         ],
         inProgress: [
-          { pt: '5-Layer Hierarchical Graph (Tabelas hierárquicas criadas, sincronização em desenvolvimento)', en: '5-Layer Hierarchical Graph (Hierarchical tables created, sync in development)' },
-          { pt: 'GRRA Validation Cycle (Auto-approve implementado, human review UI em desenvolvimento)', en: 'GRRA Validation Cycle (Auto-approve implemented, human review UI in development)' },
-          { pt: 'Synergy Scoring (Fórmulas definidas, cálculo em implementação)', en: 'Synergy Scoring (Formulas defined, calculation in implementation)' }
+          { pt: 'Cobertura nutricional do catálogo de rações (admin Pet Food Coverage + bulk-enrich)', en: 'Nutrition coverage for the pet-food catalog (Pet Food Coverage admin + bulk-enrich)' },
+          { pt: 'TransE link prediction online (hoje em batch noturno)', en: 'Online TransE link prediction (currently a nightly batch)' },
+          { pt: 'Expansão da predisposição por raça para o long-tail (~120 raças cobertas)', en: 'Expanding breed predisposition to the long-tail (~120 breeds covered)' }
         ],
         planned: [
-          { pt: 'Neo4j Integration (Planejado para persistência de Knowledge Graph)', en: 'Neo4j Integration (Planned for Knowledge Graph persistence)' },
-          { pt: 'TransE Link Prediction (Planejado para auto-descoberta de pathways)', en: 'TransE Link Prediction (Planned for pathway auto-discovery)' },
-          { pt: 'Breed Predisposition Paths (Schema definido, population em desenvolvimento)', en: 'Breed Predisposition Paths (Schema defined, population in development)' },
-          { pt: 'Real-time Collaboration (Curadoria simultânea por múltiplos veterinários)', en: 'Real-time Collaboration (Simultaneous curation by multiple veterinarians)' }
+          { pt: 'Migração do KG para Neo4j AuraDB com Cypher queries diretas', en: 'Migrate the KG to Neo4j AuraDB with direct Cypher queries' },
+          { pt: 'Modelos compartimentais multi-órgão para o Digital Twin (rim, fígado, articular)', en: 'Multi-organ compartmental models for the Digital Twin (kidney, liver, joint)' },
+          { pt: 'Curadoria colaborativa em tempo real (vários veterinários no mesmo triplet)', en: 'Real-time collaborative curation (multiple vets on the same triplet)' },
+          { pt: 'Extensão controlada para felinos após validação da curva canina', en: 'Controlled extension to felines after the canine curve is validated' }
         ]
       },
       studies: [
-        {
-          title: {
-            pt: 'MedGraphRAG: Rumo a LLMs Médicos Seguros via Retrieval-Augmented Generation com Grafos',
-            en: 'MedGraphRAG: Towards Safe Medical Large Language Model via Graph Retrieval-Augmented Generation'
-          },
-          authors: 'Wu et al.',
-          year: 2024,
-          journal: { pt: 'arXiv preprint', en: 'arXiv preprint' },
-          url: 'https://arxiv.org/abs/2408.04187',
-          keyFindings: {
-            pt: 'Triple Graph Construction em 4 níveis (Doc→Chunk→Entity→Mechanism) + U-Retrieval bidirecional reduz alucinações em 40% para QA médico.',
-            en: 'Triple Graph Construction across 4 levels (Doc→Chunk→Entity→Mechanism) + bidirectional U-Retrieval reduces hallucinations by 40% for medical QA.'
-          }
-        },
-        {
-          title: {
-            pt: 'KGARevion: Revisão Aumentada por Knowledge Graph para Extração de Informação Biomédica',
-            en: 'KGARevion: Knowledge Graph-Augmented Revision for Biomedical Information Extraction'
-          },
-          authors: 'Su et al.',
-          year: 2025,
-          journal: { pt: 'ICLR 2025 (Poster)', en: 'ICLR 2025 (Poster)' },
-          url: 'https://openreview.net/forum?id=OOq3W1MEVT',
-          keyFindings: {
-            pt: 'Ciclo GRRA (Generate-Review-Revise-Answer) elimina 87% dos erros de extração ao validar triplets contra Knowledge Graph existente.',
-            en: 'GRRA cycle (Generate-Review-Revise-Answer) eliminates 87% of extraction errors by validating triplets against existing Knowledge Graph.'
-          }
-        },
-        {
-          title: {
-            pt: 'Translating Embeddings para Modelagem de Dados Multi-relacionais',
-            en: 'Translating Embeddings for Modeling Multi-relational Data'
-          },
-          authors: 'Bordes et al.',
-          year: 2013,
-          journal: { pt: 'NeurIPS', en: 'NeurIPS' },
-          url: 'https://papers.nips.cc/paper/2013/hash/1cecc7a77928ca8133fa24680a88d2f9-Abstract.html',
-          keyFindings: {
-            pt: 'TransE modela relações como translações no espaço de embeddings (h + r ≈ t), permitindo link prediction com alta precisão.',
-            en: 'TransE models relations as translations in embedding space (h + r ≈ t), enabling link prediction with high accuracy.'
-          }
-        }
+        { title: { pt: 'MedGraphRAG: rumo a LLMs médicos seguros via RAG com grafos', en: 'MedGraphRAG: Towards Safe Medical LLM via Graph Retrieval-Augmented Generation' }, authors: 'Wu et al.', year: 2024, journal: { pt: 'arXiv preprint', en: 'arXiv preprint' }, url: 'https://arxiv.org/abs/2408.04187', keyFindings: { pt: 'Triple Graph (Doc → Chunk → Entity → Mechanism) + U-Retrieval bidirecional reduz alucinações em ~40% em QA médico.', en: 'Triple Graph (Doc → Chunk → Entity → Mechanism) + bidirectional U-Retrieval reduces hallucinations by ~40% on medical QA.' } },
+        { title: { pt: 'KGARevion: revisão aumentada por KG para extração biomédica', en: 'KGARevion: Knowledge Graph-Augmented Revision for Biomedical Information Extraction' }, authors: 'Su et al.', year: 2025, journal: { pt: 'ICLR 2025 (Poster)', en: 'ICLR 2025 (Poster)' }, url: 'https://openreview.net/forum?id=OOq3W1MEVT', keyFindings: { pt: 'Ciclo GRRA (Generate-Review-Revise-Answer) elimina ~87% dos erros ao validar triplets contra o KG.', en: 'GRRA cycle (Generate-Review-Revise-Answer) eliminates ~87% of errors by validating triplets against the KG.' } },
+        { title: { pt: 'Translating Embeddings para dados multi-relacionais', en: 'Translating Embeddings for Modeling Multi-relational Data' }, authors: 'Bordes et al.', year: 2013, journal: { pt: 'NeurIPS', en: 'NeurIPS' }, url: 'https://papers.nips.cc/paper/2013/hash/1cecc7a77928ca8133fa24680a88d2f9-Abstract.html', keyFindings: { pt: 'TransE modela relações como translações (h + r ≈ t), habilitando link prediction de alta precisão.', en: 'TransE models relations as translations (h + r ≈ t), enabling high-precision link prediction.' } },
+        { title: { pt: 'An Open Science Study of Ageing in Companion Dogs (Dog Aging Project)', en: 'An Open Science Study of Ageing in Companion Dogs (Dog Aging Project)' }, authors: 'Creevy KE, Akey JM, Kaeberlein M et al.', year: 2022, journal: { pt: 'Nature', en: 'Nature' }, url: 'https://www.nature.com/articles/s41586-021-04231-6', keyFindings: { pt: 'Coorte longitudinal aberta de >45.000 cães — fonte empírica dos marcadores de idade biológica e curvas de sobrevida usados pelo Digital Twin.', en: 'Open longitudinal cohort of >45,000 dogs — empirical source of biological-age markers and survival curves used by the Digital Twin.' } },
+        { title: { pt: 'AgeXtend: predição multiômica de geroprotetores por IA', en: 'AgeXtend: AI-based multi-omic geroprotector prediction' }, authors: 'Ahuja S, Mukherjee N et al.', year: 2024, journal: { pt: 'Nature Aging', en: 'Nature Aging' }, url: 'https://www.nature.com/articles/s43587-024-00763-4', keyFindings: { pt: 'Rastreou ~1,1 bilhão de compostos para identificar geroprotetores, mimétricos de restrição calórica e indutores de autofagia.', en: 'Screened ~1.1B compounds to identify geroprotectors, caloric-restriction mimetics and autophagy inducers.' } },
+        { title: { pt: 'Test of Rapamycin in Aging Dogs (TRIAD trial)', en: 'Test of Rapamycin in Aging Dogs (TRIAD trial)' }, authors: 'Kaeberlein M, Creevy KE et al.', year: 2023, journal: { pt: 'GeroScience', en: 'GeroScience' }, url: 'https://link.springer.com/article/10.1007/s11357-023-00744-2', keyFindings: { pt: 'RCT de rapamicina em cães seniores — ancora a classe mTOR-inhibitor no catálogo e o desenho dos marcos de follow-up.', en: 'RCT of rapamycin in senior dogs — anchors the mTOR-inhibitor class in our catalog and the design of follow-up milestones.' } },
+        { title: { pt: 'Senolíticos: da descoberta à translação clínica', en: 'Senolytic drugs: from discovery to translation' }, authors: 'Kirkland JL, Tchkonia T', year: 2020, journal: { pt: 'Journal of Internal Medicine', en: 'Journal of Internal Medicine' }, url: 'https://onlinelibrary.wiley.com/doi/10.1111/joim.13141', keyFindings: { pt: 'Revisão fundadora da classe senolítica (quercetina, fisetina, dasatinib+Q) que integra o catálogo do Senex.', en: 'Foundational review of the senolytic class (quercetin, fisetin, dasatinib+Q) that populates the Senex catalog.' } },
+        { title: { pt: 'Frailty em cães: metodologia e operacionalização de um frailty index', en: 'Frailty in dogs: methodology and operationalisation of a frailty index' }, authors: 'Banzato T et al.', year: 2019, journal: { pt: 'Frontiers in Veterinary Science', en: 'Frontiers in Veterinary Science' }, url: 'https://www.frontiersin.org/articles/10.3389/fvets.2019.00026/full', keyFindings: { pt: 'Operacionaliza o fenótipo de fragilidade em cães — base do sinalizador clínico de alto risco do Senex.', en: 'Operationalises the canine frailty phenotype — basis for the Senex high-risk clinical flag.' } },
+        { title: { pt: 'AAHA Nutritional Assessment Guidelines for Dogs and Cats', en: 'AAHA Nutritional Assessment Guidelines for Dogs and Cats' }, authors: 'Freeman LM, Becvarova I, Cave N et al.', year: 2021, journal: { pt: 'JAAHA', en: 'JAAHA' }, url: 'https://www.aaha.org/aaha-guidelines/2010-aaha-nutritional-assessment-guidelines-for-dogs-and-cats/', keyFindings: { pt: 'Diretriz operacional de avaliação nutricional sistemática — sustenta a análise "ração vs. necessidades ideais" do Senex.', en: 'Operational guideline for systematic nutritional assessment — backs the Senex "food vs. ideal requirements" analysis.' } },
+        { title: { pt: 'WSAVA Global Nutrition Toolkit', en: 'WSAVA Global Nutrition Toolkit' }, authors: 'WSAVA Global Nutrition Committee', year: 2021, journal: { pt: 'WSAVA', en: 'WSAVA' }, url: 'https://wsava.org/global-guidelines/global-nutrition-guidelines/', keyFindings: { pt: 'Conjunto global de ferramentas de nutrição (BCS, MCS, calculadora calórica) — referência internacional adotada pelo Senex.', en: 'Global nutrition toolkit (BCS, MCS, calorie calculator) — international reference adopted by Senex.' } }
       ],
       references: [
-        'VeNom Veterinary Nomenclature - Purdue University (https://www.vin.com/venom/)',
-        'AAHA Senior Care Guidelines 2023 (https://www.aaha.org/resources/2023-aaha-senior-care-guidelines-for-dogs-and-cats/)',
-        'WSAVA Nutritional Assessment Guidelines 2022',
-        'GRADE Working Group - Evidence Grading System (https://www.gradeworkinggroup.org/)',
-        'Natural Medicines Database (https://naturalmedicines.therapeuticresearch.com/)'
+        '[Guideline] AAHA Senior Care Guidelines (2023) — https://www.aaha.org/resources/2023-aaha-senior-care-guidelines-for-dogs-and-cats/',
+        '[Guideline] AAHA Nutritional Assessment Guidelines (2021) — https://www.aaha.org/aaha-guidelines/2010-aaha-nutritional-assessment-guidelines-for-dogs-and-cats/',
+        '[Guideline] WSAVA Global Nutrition Toolkit (2021) — https://wsava.org/global-guidelines/global-nutrition-guidelines/',
+        '[Guideline] GRADE Working Group — https://www.gradeworkinggroup.org/',
+        '[Ontology] SNOMED-CT Veterinary Extension (VetSCT) — https://www.snomed.org/our-customers/veterinary',
+        '[Ontology] UMLS Metathesaurus — https://www.nlm.nih.gov/research/umls/',
+        '[Ontology] VeNom Veterinary Nomenclature (Purdue) — https://www.vin.com/venom/',
+        '[Dataset] Dog Aging Project — https://dogagingproject.org/',
+        '[Dataset] PubMed / NCBI E-utilities — https://www.ncbi.nlm.nih.gov/books/NBK25501/',
+        '[Dataset] Natural Medicines Database — https://naturalmedicines.therapeuticresearch.com/',
+        '[Paper] MedGraphRAG (Wu et al., 2024) — https://arxiv.org/abs/2408.04187',
+        '[Paper] KGARevion (Su et al., ICLR 2025) — https://openreview.net/forum?id=OOq3W1MEVT',
+        '[Paper] TransE (Bordes et al., NeurIPS 2013) — https://papers.nips.cc/paper/2013/hash/1cecc7a77928ca8133fa24680a88d2f9-Abstract.html',
+        '[Paper] AgeXtend (Ahuja et al., Nature Aging 2024) — https://www.nature.com/articles/s43587-024-00763-4',
+        '[Paper] TRIAD — Rapamycin in aging dogs (Kaeberlein 2023) — https://link.springer.com/article/10.1007/s11357-023-00744-2',
+        '[Paper] Frailty in Dogs (Banzato 2019) — https://www.frontiersin.org/articles/10.3389/fvets.2019.00026/full',
+        '[Paper] Senolytics review (Kirkland & Tchkonia 2020) — https://onlinelibrary.wiley.com/doi/10.1111/joim.13141'
       ]
     }
   },

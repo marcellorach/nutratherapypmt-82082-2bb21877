@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { useTranslation } from 'react-i18next';
 import { TabInfoContentBilingual } from '@/data/types/tabInfoTypes';
 import { getLocalizedTabInfo, getLanguageFromI18n } from '@/data/tabInfoLocalizationHelper';
+import MermaidBlock from '@/components/shared/MermaidBlock';
 
 // Legacy types for backward compatibility
 export interface ScientificStudy {
@@ -144,18 +145,23 @@ const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) 
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle className="text-2xl">{title}</DialogTitle>
-              {localizedContent.version && (
-                <Badge variant="outline" className="ml-2">
-                  v{localizedContent.version}
+              <div className="flex items-center gap-2 ml-2">
+                {localizedContent.version && (
+                  <Badge variant="outline">v{localizedContent.version}</Badge>
+                )}
+                <Badge
+                  variant="secondary"
+                  title={
+                    localizedContent.lastUpdate
+                      ? `${t('admin.tabInfo.lastUpdate')}: ${localizedContent.lastUpdate}`
+                      : 'Required — bump on every edit'
+                  }
+                >
+                  {t('admin.tabInfo.lastUpdate')}: {localizedContent.lastUpdate ?? '—'}
                 </Badge>
-              )}
+              </div>
             </div>
             <DialogDescription>
-              {localizedContent.lastUpdate && (
-                <div className="text-xs text-muted-foreground mt-1">
-                  {t('admin.tabInfo.lastUpdate')}: {localizedContent.lastUpdate}
-                </div>
-              )}
               {t('admin.tabInfo.description')}
             </DialogDescription>
           </DialogHeader>
@@ -259,9 +265,15 @@ const TabInfoButton: React.FC<TabInfoButtonProps> = ({ tabId, title, content }) 
                 {localizedContent.methodology.architectureDiagram && (
                   <div className="mb-6">
                     <h3 className="text-lg font-semibold mb-3">{t('admin.tabInfo.methodology.architectureDiagram')}</h3>
-                    <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs">
-                      <code>{localizedContent.methodology.architectureDiagram}</code>
-                    </pre>
+                    {/^\s*(flowchart|graph|sequenceDiagram|classDiagram|stateDiagram)/i.test(
+                      localizedContent.methodology.architectureDiagram
+                    ) ? (
+                      <MermaidBlock code={localizedContent.methodology.architectureDiagram} />
+                    ) : (
+                      <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-xs">
+                        <code>{localizedContent.methodology.architectureDiagram}</code>
+                      </pre>
+                    )}
                   </div>
                 )}
 

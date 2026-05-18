@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Filter, Plus } from "lucide-react";
 import { useTranslation } from 'react-i18next';
 import TabInfoButton from '../common/TabInfoButton';
-import { adminTabsInfo } from '@/data/admin-tabs-info';
+import { adminTabsInfoBilingual } from '@/data/admin-tabs-info-bilingual';
 
 interface EstudosHeaderProps {
   onAddEstudo: () => void;
@@ -24,7 +24,7 @@ const EstudosHeader: React.FC<EstudosHeaderProps> = ({ onAddEstudo }) => {
         <TabInfoButton
           tabId="estudos"
           title={t('studies.header.title')}
-          content={adminTabsInfo['estudos']}
+          content={adminTabsInfoBilingual['estudos']}
         />
         
         <Button variant="outline" className="flex items-center">
