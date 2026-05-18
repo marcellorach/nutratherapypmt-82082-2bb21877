@@ -27,6 +27,7 @@ type NutritionRow = Record<string, any> & {
   completeness_score: number | null;
   confidence: number | null;
   verified: boolean;
+  source?: string | null;
 };
 type Product = {
   id: string; brand_id: string; name: string; line: string | null;
@@ -261,6 +262,19 @@ export default function PetFoodCatalogTab() {
                             {Math.round(score * 100)}% {t('admin.nutrition.composition', 'composição')}
                             {n.confidence != null && ` · conf ${Math.round((n.confidence ?? 0) * 100)}%`}
                           </Badge>
+                        )}
+                        {n && (
+                          n.verified ? (
+                            <Badge variant="default" className="text-[10px]" title={t('admin.nutrition.sourceLabelHint', 'Verificado por rótulo oficial') as string}>
+                              {t('admin.nutrition.sourceLabel', 'Rótulo')}
+                            </Badge>
+                          ) : (n.source === 'llm_estimated' || n.source == null) ? (
+                            <Badge variant="outline" className="text-[10px] border-amber-500/50 text-amber-700 dark:text-amber-400" title={t('admin.nutrition.sourceAiHint', 'Estimado por IA — não verificado contra rótulo oficial') as string}>
+                              {t('admin.nutrition.sourceAi', 'IA')}
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-[10px]">{n.source}</Badge>
+                          )
                         )}
                         {!n && triedRef.current.has(p.id) && (
                           <Badge variant="outline" className="text-[10px] gap-1">

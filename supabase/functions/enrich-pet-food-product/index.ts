@@ -175,6 +175,16 @@ Deno.serve(async (req) => {
       if (n > 100 && n < 1000) return Number((n * 10).toFixed(0));
       return n >= 1000 && n <= 8000 ? Number(n.toFixed(0)) : null;
     };
+    // Convert a dry-matter-basis kcal value to as-fed using moisture %.
+    // Wet pet food labels typically declare ~700–1500 kcal/kg as-fed.
+    const asFedKcal = (kcalRaw: number | null, moisture: number | null): number | null => {
+      if (kcalRaw == null) return null;
+      if (moisture != null && moisture >= 50 && kcalRaw > 3000) {
+        const converted = kcalRaw * (100 - moisture) / 100;
+        return Number(converted.toFixed(0));
+      }
+      return kcalRaw;
+    };
     const enumOrNull = <T extends string>(v: unknown, allowed: T[]): T | null => {
       if (typeof v !== "string") return null;
       const lc = v.toLowerCase().trim();
@@ -205,7 +215,8 @@ Deno.serve(async (req) => {
       const ash_pct = pct(n.ash_pct);
       const ca = pct(n.calcium_pct), p = pct(n.phosphorus_pct);
       const o3 = pct(n.omega3_pct), o6 = pct(n.omega6_pct);
-      const kcal_per_kg = kcal(n.kcal_per_kg);
+      const kcal_raw = kcal(n.kcal_per_kg);
+      const kcal_per_kg = asFedKcal(kcal_raw, moisture_pct);
       // Trace minerals & vitamins use raw numeric values from the LLM.
       const mg = (v: unknown): number | null => {
         const x = num(v);

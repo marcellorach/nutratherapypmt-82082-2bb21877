@@ -23,6 +23,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Fixed - 2026-05-17 — Nutrition: kcal as-fed para ração úmida + cache PostgREST
+<!-- area: admin · status: entregue · i18n: 1.80.0 -->
+- Edge `enrich-pet-food-product`: converte `kcal_per_kg` reportado em base seca para as-fed quando moisture ≥ 50% (resolve Cesar/Sheba mostrando ~9000 kcal/kg).
+- `NOTIFY pgrst, 'reload schema'` para liberar gravação de `confidence`, `completeness_score` e `data_filled_at` em `pet_food_nutrition` (estavam silenciosamente sendo descartados pelo cache do PostgREST).
+- Reprocessados os 19 produtos das marcas Mars recém-adicionadas com a lógica corrigida.
+- UI: badge "Rótulo" (verde) vs "IA" (âmbar) no card de cada ração na aba Nutrition → Rações.
+- Files: supabase/functions/enrich-pet-food-product/index.ts, src/components/administrador/pet-food/PetFoodCatalogTab.tsx
+
 ### Changed - 2026-05-18 — Aba "Catálogo de Rações" vira "Nutrition" com tags inline + auto-enrich + tabela AAFCO
 <!-- area: admin · status: entregue · i18n: 1.80.0 -->
 - **Nutrientes como tags inline**: o card de produto agora renderiza TODOS os campos nutricionais não-nulos (Prot, Gord, Fibra, Ca, P, Ca:P, n6:n3, EPA, DHA, Lis, Tau, Vit A/D3/E, Zn, Fe, Cu, etc.) como `<Badge>` compactos no padrão visual já usado para `species`/`life_stage`. Sem clique, sem dialog secundário.
