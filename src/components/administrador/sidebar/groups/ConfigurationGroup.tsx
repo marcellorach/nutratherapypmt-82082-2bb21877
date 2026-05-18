@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bot, Database, Cpu, ChevronRight, Check, Languages, ListTree, ShieldCheck, FileSearch, CheckCircle2, FileEdit, Palette, UserCog, Zap, Gauge, Info } from "lucide-react";
+import { Bot, Database, Cpu, ChevronRight, Check, Languages, ListTree, ShieldCheck, FileSearch, CheckCircle2, Palette, UserCog, Zap, Gauge, Info } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useTranslation } from 'react-i18next';
 

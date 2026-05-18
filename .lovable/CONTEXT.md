@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-05-18T03:58:07.663Z
+Generated: 2026-05-18T04:04:01.243Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
@@ -10,11 +10,17 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **vet-ui**: 14
 - **tutor-ui**: 9
 - **clinical-pipeline**: 4
-- **meta**: 2
+- **meta**: 3
 - **i18n**: 1
 - **curation**: 1
 
 ## Top 10 recent entries
+### 2026-05-18 · [meta] CHANGED — Header/Footer: versão Senex auto-lida do CHANGELOG
+- `scripts/sync-changelog.mjs` agora extrai `<!-- senex: x.y.z -->` do bloco `[Unreleased]` e emite `senexVersion` em `projectChangelog.generated.ts`.
+- `src/config/senex-version.ts` consome `senexVersion` + `lastChangelogDate` — sem mais hardcode. Header e Footer atualizam sozinhos.
+- Sidebar: ícone "configurado" do item FDA/EMA/AVMA Compliance agora fica inline ao lado da palavra, igual aos demais (deixou de ficar centrado à direita quando o texto quebra em 2 linhas).
+_files: scripts/sync-changelog.mjs, src/config/senex-version.ts, src/data/projectChangelog.generated.ts, src/components/administrador/sidebar/groups/ConfigurationGroup.tsx_
+
 ### 2026-05-18 · [admin] ADDED — Compliance: i18n PT/EN + renovação manual com log
 - Compliance Dashboard agora 100% bilíngue (UI + dados em `complianceData.ts` com `_en`).
 - Novo botão "Rodar verificação de compliance" + tabela `compliance_audit_runs` (totals, per_authority, diff melhorou/piorou/novo) com RLS admin-only.
@@ -67,12 +73,6 @@ _files: src/data/nutritionRequirementsCanine.ts, src/components/administrador/pe
 - Edge `enrich-pet-food-product`: converte `kcal_per_kg` reportado em base seca para as-fed quando moisture ≥ 50% (resolve Cesar/Sheba mostrando ~9000 kcal/kg).
 - `NOTIFY pgrst, 'reload schema'` para liberar gravação de `confidence`, `completeness_score` e `data_filled_at` em `pet_food_nutrition` (estavam silenciosamente sendo descartados pelo cache do PostgREST).
 - Reprocessados os 19 produtos das marcas Mars recém-adicionadas com a lógica corrigida.
-_files: supabase/functions/enrich-pet-food-product/index.ts, src/components/administrador/pet-food/PetFoodCatalogTab.tsx_
-
-### 2026-05-17 · [admin] ADDED — Carga nutricional completa (AAFCO/FEDIAF) no catálogo de rações
-- `pet_food_nutrition` estendida: novas colunas para minerais traço (Fe, Cu, Zn, Mn, Se, I, Cl), vitaminas (A, D3, E, K, B1–B12, biotina, colina), EPA/DHA/ARA separados, aminoácidos essenciais (lisina, metionina, triptofano, treonina, arginina) e tracking (`completeness_score`, `confidence`, `data_filled_at`).
-- `enrich-pet-food-product`: prompt expandido para schema AAFCO/FEDIAF completo com instrução explícita "nunca invente — prefira null". Parser normaliza `%`, `mg/kg` e `UI/kg` com clamps de plausibilidade. Calcula `completeness_score` (fração de campos numéricos preenchidos) automaticamente em cada insert.
-- UI do catálogo (`PetFoodCatalogTab`): card de produto agora mostra barra de completude + % e confiança da IA; novo botão Composição abre dialog com a composição completa agrupada por (Macros / Minerais maiores / Minerais traço / Vitaminas / Ácidos graxos / Aminoácidos / Articulares), badges AAFCO/FEDIAF e statement quando presente.
 _files: supabase/functions/enrich-pet-food-product/index.ts, src/components/administrador/pet-food/PetFoodCatalogTab.tsx_
 
 ---
