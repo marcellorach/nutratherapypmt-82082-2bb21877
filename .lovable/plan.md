@@ -1,68 +1,65 @@
-## a) Diagrama do organograma continua vazio/minúsculo (fotos 1 e 2)
+## Objetivo
 
-**Diagnóstico:** o fix anterior (reduzir `fitMin` e remover o strip de `width/height`) não bastou. O `useScrollPanZoom.measureNatural()` usa `getBBox()` no `<svg>`, mas o wrapper interno tem `width: max-content; height: max-content` — quando o Mermaid emite o SVG com `style="max-width: 100%"`, o SVG colapsa horizontalmente dentro de um container 0px, `getBBox` retorna área quase nula, e o `fit()` calcula uma escala minúscula (foto 2) ou nula (foto 1, vertical em que o layout é muito alto).
+Transformar a aba `pet-food-catalog` em uma aba "Nutrition" que (a) mostre nutrientes inline como tags (sem clique, sem botão "Enriquecer"), (b) auto-enriqueça produtos novos via IA em background, e (c) hospede também a tabela oficial de necessidades nutricionais caninas (AAFCO/FEDIAF/NRC) por porte e estágio de vida.
 
-**Correção:**
-1. Em `OrganogramaDiagram.tsx`: após injetar o SVG, **forçar via JS** atributos `width`/`height` reais lidos do `viewBox` (`svg.setAttribute('width', vb.width)`, idem height) e remover qualquer `style="max-width:..."` que o Mermaid coloca. Sem alterar viewBox.
-2. Adicionar um `ResizeObserver` também no `innerRef` em `useScrollPanZoom`, para que o `fit()` rode quando o SVG aparecer/redimensionar (não só o container).
-3. Garantir que `measureNatural()` priorize `viewBox.baseVal` antes de `getBBox()` (mais estável quando o SVG ainda não fez layout) — já existe, só inverter ordem.
-4. Aumentar `fitMin` para `0.2` (com dimensões corretas a escala natural já fica acima disso; isso evita o "ponto" minúsculo).
+## Mudanças
 
-## b) Catálogo de rações (foto 3) — carga nutricional completa
+### a) Tags de nutrientes inline + remoção do diálogo "Composição"
 
-Hoje `pet_food_products` só guarda Proteína %, Gordura %, kcal/kg e Ca:P. Para fechar gaps reais (objetivo da plataforma) precisamos da composição **AAFCO completa**.
+`src/components/administrador/pet-food/PetFoodCatalogTab.tsx`:
+- Substituir a linha de texto "Proteína X% · Gordura Y% · …" por uma faixa de `<Badge>` compactos (padrão visual já usado para `species`/`life_stage`/`size_target`), agrupados em uma única linha com scroll horizontal se preciso. Cada nutriente vira uma tag: `Prot 28%`, `Gord 14%`, `Fibra 3%`, `Umid 10%`, `Ca 1.2%`, `P 0.9%`, `Ca:P 1.3`, `n6:n3 5:1`, `EPA+DHA 0.5%`, `Lisina 1.4%`, etc.
+- Mostrar **todos** os campos não-nulos como tags (não só macros). Campos nulos: omitidos.
+- Mini-barra de completude continua, mas vira uma tag de status (`82% composição · conf 0.7`).
+- **Remover** botão "Composição" e o componente `NutritionDetailsDialog` (toda a info já está visível).
+- **Remover** botão "Enriquecer com IA" e o estado `enriching` em `ProductActions`.
 
-**Proposta:** criar tabela `pet_food_nutrients` (1:1 com produto) com:
-- Macros: protein, fat, fiber, ash, moisture, carbs, kcal_per_kg
-- Minerais: Ca, P, K, Na, Mg, Cl, Fe, Cu, Zn, Mn, Se, I (mg/kg)
-- Vitaminas: A, D3, E, K, B1, B2, B3, B5, B6, B9, B12, biotina, colina (UI/kg)
-- Ácidos graxos: omega-3 total, EPA, DHA, omega-6, ARA
-- Aminoácidos: lisina, metionina, taurina, triptofano, treonina, arginina
-- Razões: Ca:P, n6:n3
-- `source` (rótulo / fabricante / AAFCO calculado), `confidence` (0–1), `data_filled_at`
+### b) Auto-enriquecimento em background
 
-A UI da foto 3 ganha um drawer "Ver composição completa" + barra de completude (%) por produto. Edge function `enrich-pet-food-product` é estendida para popular esses campos via Perplexity + página do fabricante.
+- Na query `productsQuery`, ao receber a lista, identificar produtos sem `pet_food_nutrition[0]` ou com `completeness_score < 0.4` e disparar `supabase.functions.invoke('enrich-pet-food-product', { body: { product_id } })` em paralelo (limitar concorrência a 3, fire-and-forget). Após terminar, `invalidateQueries(['pet-food-products'])` para refletir.
+- Adicionar um `useEffect` que roda uma vez por sessão por produto (set local de IDs já tentados) para não entrar em loop.
+- Em `NewProductDialog.onCreated`: já invocar `enrich-pet-food-product` para o produto recém-criado antes de invalidar a query.
+- Sem mudança no edge function — só remover a UI manual.
 
-## c) Traduções incompletas (foto 4)
+### c) Sub-tabs "Nutrition" + tabela oficial por raça/porte/idade
 
-Auditar `mem://index.md`/i18n: chaves "Organograma", "Conformidade FDA/EMA/AVMA", "Auditorias Técnicas" estão hardcoded nos componentes de sidebar. Vou rodar `npm run audit:translations`, anotar todos os faltantes, mover para `admin.sidebar.*`, espelhar PT/EN e bumpar `I18N_VERSION` para `1.79.0`.
+Renomear a aba do menu lateral (`KnowledgeBaseGroup.tsx` + chaves i18n `admin.sidebar.knowledgeBase.petFoodCatalog`) de "Catálogo de Rações" para **"Nutrition"**. O `id` da rota `pet-food-catalog` permanece (evita quebrar links).
 
-## d) Chave Perplexity
+Dentro do componente, reorganizar com `<Tabs>` em 3 abas:
 
-Já está configurada como secret (`PERPLEXITY_API_KEY` presente). O cartão "Not configured" da foto 5 lê do `ai_configurations`, não do secret. Fix: o card de Perplexity deve verificar via `provider-health` (`supabase/functions/perplexity-health`) e marcar como "Configured" quando o ping retornar 200. Sem nova API key necessária.
+1. **Rações** — conteúdo atual de produtos/marcas (com tags inline + auto-enriquecimento).
+2. **Tabela nutricional (raça · porte · idade)** — nova tabela com requisitos mínimos AAFCO/FEDIAF de cães por:
+   - Estágio: filhote em crescimento, adulto manutenção, gestação/lactação, sênior
+   - Porte adulto esperado: pequeno (<10 kg), médio (10–25 kg), grande (25–45 kg), gigante (>45 kg)
+   - Campos: proteína mín %, gordura mín %, Ca %, P %, Ca:P, n6, n3, EPA+DHA, lisina, metionina, taurina (raças predispostas a DCM), kcal/kg de matéria seca recomendado.
+   - Fonte dos dados: arquivo estático bilíngue `src/data/nutritionRequirementsCanine.ts` (constante tipada). Sem mock — valores tirados de AAFCO 2024 Dog Food Nutrient Profiles + FEDIAF 2024 + NRC 2006 (referenciados no rodapé da tabela).
+   - UI: filtros por estágio + porte; tabela com linhas de nutrientes e badges de fonte (AAFCO/FEDIAF/NRC).
+3. **Outras questões nutricionais** — bloco com cards informativos (também bilíngue, estático):
+   - Hidratação (mL/kg/dia por porte)
+   - Frequência de refeições por idade
+   - Restrições por condição (renal, hepática, alérgico) — links para `health_conditions`
+   - Sinais clínicos de deficiência/excesso por nutriente
 
-## e) Catálogo de prompts incompleto (foto 6)
+### Internacionalização
 
-Hoje só prompts criados na UI são salvos em `ai_configurations` (`prompt_*`). Todos os **prompts do sistema estão hardcoded** dentro dos edge functions. Mapeei:
+- Renomear chave `admin.sidebar.knowledgeBase.petFoodCatalog` → manter chave mas mudar valor para "Nutrition" (PT/EN).
+- Novas chaves: `admin.nutrition.tabs.products`, `admin.nutrition.tabs.requirements`, `admin.nutrition.tabs.other`, abreviações de nutrientes (`admin.nutrition.nutrient.protein`, etc.).
+- Bump `I18N_VERSION` em `src/i18n.ts`.
 
-| Edge function | Família proposta |
-|---|---|
-| `extract-pet-clinical-data` | **Clinical Extraction** |
-| `parse-pet-exam-pdf` | **Clinical Extraction** |
-| `parse-study` / `extract-study-entities` | **Study Ingestion** |
-| `vectorize-study` / `gemini-file-search` | **RAG / Embeddings** |
-| `hybrid-recommendation` | **Recommendation Orchestration** |
-| `enrich-triplet` / `enrich-knowledge-graph` / `backfill-triplet-enrichment` | **KG Enrichment** |
-| `consolidate-knowledge-graph` / `relations-auditor` | **KG Governance** |
-| `kg-evidence-gap-fill` / `kg-missing-triplets` | **KG Gap-Fill (Perplexity)** |
-| `condition-insights` / `project-pet-trajectory` | **Clinical Reasoning** |
-| `translate-text` / `translate-conditions` / `translate-and-categorize-conditions` / `run-translation-audit` | **Translation** |
-| `web-dosage-lookup` / `enrich-pet-food-product` | **External Lookup** |
-| `suggest-taxonomy-terms` / `auto-tag-studies` | **Taxonomy** |
-| `chat` / `ProposalAIChat` | **Conversational** |
+### Changelog/organograma
 
-**Proposta:**
-1. Migração: tabela `ai_system_prompts` (id, family, function_name, version, content, variables jsonb, is_override boolean, updated_at, updated_by). RLS: admin-only.
-2. Seed inicial: extrair cada prompt hardcoded → INSERT com `is_override=false` (origem código).
-3. Edge functions passam a chamar helper `getSystemPrompt(functionName)` que lê override ativo se existir, senão usa o hardcoded como fallback (zero downtime).
-4. UI: na aba **Prompts** adicionar uma 3ª aba "System Prompts" agrupada por família, com edição inline, botão "Restaurar default" e badge "Override ativo".
-5. Documentar no organograma (`projectOrganograma.ts` → Configurações) e CHANGELOG.
+- Entrada em `CHANGELOG.md` `[Unreleased]` (área: admin/nutrition).
+- Atualizar `src/data/projectOrganograma.ts` (renomeação da tab + 3 sub-abas).
+- Rodar `npm run sync:changelog`.
 
-## Ordem de execução sugerida
+## Fora de escopo
 
-1. **Quick fix diagrama (a)** — sem migração, ~10min.
-2. **Traduções (c)** + perplexity status (d) — bumpa `I18N_VERSION`.
-3. **Catálogo de system prompts (e)** — migração + seed + UI (entrega maior).
-4. **Composição nutricional completa (b)** — migração + extensão do enriquecimento.
+- Não criar tabela DB para requisitos nutricionais (dados estáticos já bastam para o MVP — promover a DB futuramente se virar editável).
+- Não alterar o edge function `enrich-pet-food-product`.
+- Não mexer em outros componentes que consomem `pet_food_nutrition` (`NutritionGapAnalysis`, etc.).
 
-Posso seguir tudo de uma vez ou faseado. Confirma a ordem (ou diga quais itens cortar) e eu inicio.
+## Detalhes técnicos
+
+- Concorrência do auto-enrich: `Promise.all` em batches de 3 via `for (const batch of chunk(missing, 3))`.
+- Guard contra retries infinitos: `useRef<Set<string>>` com IDs já tentados nesta sessão.
+- Tags de nutrientes: construir array `[{label, value, unit}]` filtrando `value != null`, render `<Badge variant="outline" className="text-[10px]">{label} {value}{unit}</Badge>`.
+- Tabela de requisitos: tipo `CanineNutrientRequirement { stage, size, nutrient, min, max?, unit, source }` em `src/data/nutritionRequirementsCanine.ts` (com campos `_en` para nomes).

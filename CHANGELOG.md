@@ -23,6 +23,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Changed - 2026-05-18 — Aba "Catálogo de Rações" vira "Nutrition" com tags inline + auto-enrich + tabela AAFCO
+<!-- area: admin · status: entregue · i18n: 1.80.0 -->
+- **Nutrientes como tags inline**: o card de produto agora renderiza TODOS os campos nutricionais não-nulos (Prot, Gord, Fibra, Ca, P, Ca:P, n6:n3, EPA, DHA, Lis, Tau, Vit A/D3/E, Zn, Fe, Cu, etc.) como `<Badge>` compactos no padrão visual já usado para `species`/`life_stage`. Sem clique, sem dialog secundário.
+- **Auto-enriquecimento**: `useEffect` na query identifica produtos sem nutrição ou com `completeness_score < 0.4` e invoca `enrich-pet-food-product` em background (batches de 3, guard `useRef<Set>` contra loops). Novo produto cadastrado dispara enrichment imediatamente. Botão manual "Enriquecer com IA" e dialog "Composição" foram removidos.
+- **Renomeação**: aba do menu lateral passa a se chamar **Nutrição/Nutrition** (chave `admin.sidebar.knowledgeBase.petFoodCatalog`, id da rota `pet-food-catalog` preservado).
+- **Sub-aba "Tabela nutricional (raça · porte · idade)"**: nova `RequirementsTable` carrega `CANINE_NUTRIENT_REQUIREMENTS` (AAFCO 2024 + FEDIAF 2024 + NRC 2006) com filtros por estágio (filhote/adulto/gestação-lactação/sênior) e porte (pequeno/médio/grande/gigante). Inclui caps específicos para raças grandes/gigantes (Ca máx 1.5–1.6% para prevenir DOD/displasia) e perfil sênior expandido (proteína ≥25% MS, P 0.4–0.8%, EPA+DHA ≥0.1%, L-carnitina ≥300 mg/kg).
+- **Sub-aba "Outras questões nutricionais"**: 7 cards estáticos bilíngues sobre hidratação, frequência de refeições, restrição renal/hepática, taurina e DCM, razão n6:n3 e sinais clínicos de deficiências.
+- **Bilíngue**: novo `src/data/nutritionRequirementsCanine.ts` carrega labels PT/EN para nutrientes, estágios, portes e tópicos. `I18N_VERSION` 1.79.0 → 1.80.0.
+- Files: src/components/administrador/pet-food/PetFoodCatalogTab.tsx, src/data/nutritionRequirementsCanine.ts, src/locales/{pt,en}/translation.json, src/i18n.ts.
+
 ### Added - 2026-05-17 — Carga nutricional completa (AAFCO/FEDIAF) no catálogo de rações
 <!-- area: admin · status: entregue · i18n: 1.79.0 -->
 - **`pet_food_nutrition` estendida**: novas colunas para minerais traço (Fe, Cu, Zn, Mn, Se, I, Cl), vitaminas (A, D3, E, K, B1–B12, biotina, colina), EPA/DHA/ARA separados, aminoácidos essenciais (lisina, metionina, triptofano, treonina, arginina) e tracking (`completeness_score`, `confidence`, `data_filled_at`).
