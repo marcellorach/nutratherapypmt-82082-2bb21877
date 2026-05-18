@@ -276,7 +276,44 @@ const ComplianceDashboard: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{t('compliance.title')}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{t('compliance.subtitle')}</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            {t('compliance.subtitlePrefix')}{' '}
+            <a
+              href="https://www.fda.gov/medical-devices/software-medical-device-samd/artificial-intelligence-and-machine-learning-software-medical-device"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-primary"
+            >
+              FDA ({t('compliance.dates.fda')})
+            </a>
+            {' · '}
+            <a
+              href="https://www.ema.europa.eu/en/about-us/how-we-work/big-data/artificial-intelligence"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-primary"
+            >
+              EMA ({t('compliance.dates.ema')}
+            </a>
+            {' + '}
+            <a
+              href="https://eur-lex.europa.eu/eli/reg/2024/1689/oj"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-primary"
+            >
+              EU AI Act
+            </a>
+            {') · '}
+            <a
+              href="https://www.avma.org/resources-tools/avma-policies/artificial-intelligence-veterinary-medicine"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-primary"
+            >
+              AVMA ({t('compliance.dates.avma')})
+            </a>
+          </p>
           <p className="text-[11px] text-muted-foreground mt-2 italic max-w-2xl">{t('compliance.systemNote')}</p>
         </div>
         <div className="flex gap-2 flex-wrap">
