@@ -42,7 +42,7 @@ export const changelog: ChangelogEntry[] = [
   {
     "date": "2026-05-18",
     "kind": "fixed",
-    "area": "prompts",
+    "area": "admin",
     "status": "entregue",
     "title": "System Prompts: catálogo populado + sync com o código",
     "bullets": [
