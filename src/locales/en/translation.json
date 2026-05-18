@@ -2743,7 +2743,6 @@
     },
     "prompts": {
       "title": "Prompt Configuration",
-      "generateExample": "Generate Example Prompts",
       "newPrompt": "New Prompt",
       "createTitle": "Create New Prompt",
       "createDescription": "Fill in the fields below to create a new prompt",
