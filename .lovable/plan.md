@@ -1,65 +1,55 @@
-## Objetivo
+## Fase 2 — Conectar Nutrition ↔ Pet / Recomendações
 
-Transformar a aba `pet-food-catalog` em uma aba "Nutrition" que (a) mostre nutrientes inline como tags (sem clique, sem botão "Enriquecer"), (b) auto-enriqueça produtos novos via IA em background, e (c) hospede também a tabela oficial de necessidades nutricionais caninas (AAFCO/FEDIAF/NRC) por porte e estágio de vida.
+Objetivo: transformar a aba "Tabela nutricional" + "Rações" num motor clínico que (a) compara a ração atual do pet com as necessidades AAFCO/FEDIAF por porte/idade/condição, (b) destaca deficiências/excessos, e (c) alimenta o engine de recomendação nutracêutica.
 
-## Mudanças
+### Entregáveis
 
-### a) Tags de nutrientes inline + remoção do diálogo "Composição"
+1. **Serviço `nutritionGapAnalysis.ts`** (frontend, puro)
+   - Input: `pet` (espécie, porte, idade, peso, condições) + `petFoodProduct` + `pet_food_nutrition`.
+   - Calcula necessidades diárias (kcal RER×fator, proteína g/kg^0.75, gordura, ômega-3, cálcio, etc.) usando `nutritionRequirementsCanine.ts` já existente.
+   - Retorna `NutritionGap[]` por nutriente: `{ nutrient, current, target, unit, status: 'deficient'|'adequate'|'excess', deltaPct, severity }`.
 
-`src/components/administrador/pet-food/PetFoodCatalogTab.tsx`:
-- Substituir a linha de texto "Proteína X% · Gordura Y% · …" por uma faixa de `<Badge>` compactos (padrão visual já usado para `species`/`life_stage`/`size_target`), agrupados em uma única linha com scroll horizontal se preciso. Cada nutriente vira uma tag: `Prot 28%`, `Gord 14%`, `Fibra 3%`, `Umid 10%`, `Ca 1.2%`, `P 0.9%`, `Ca:P 1.3`, `n6:n3 5:1`, `EPA+DHA 0.5%`, `Lisina 1.4%`, etc.
-- Mostrar **todos** os campos não-nulos como tags (não só macros). Campos nulos: omitidos.
-- Mini-barra de completude continua, mas vira uma tag de status (`82% composição · conf 0.7`).
-- **Remover** botão "Composição" e o componente `NutritionDetailsDialog` (toda a info já está visível).
-- **Remover** botão "Enriquecer com IA" e o estado `enriching` em `ProductActions`.
+2. **Componente `PetNutritionGapPanel.tsx`** (perfil do pet)
+   - Mostra ração ativa do pet + tabela de gaps com badges coloridos (vermelho/âmbar/verde).
+   - Linha "Sugestão nutracêutica" para cada gap (ex: EPA+DHA baixo → ômega-3 marinho).
+   - Botão "Adicionar à pilha terapêutica".
 
-### b) Auto-enriquecimento em background
+3. **Integração no flow existente**
+   - Novo campo `current_pet_food_product_id` em `pets` (já existe `pet_food_brand`? verificar).
+   - Hook `usePetNutritionGaps(petId)` que faz join `pets` → `pet_food_products` → `pet_food_nutrition`.
+   - Painel renderizado na PetProfilePage abaixo de "Exames" e acima de "Recomendações IA".
 
-- Na query `productsQuery`, ao receber a lista, identificar produtos sem `pet_food_nutrition[0]` ou com `completeness_score < 0.4` e disparar `supabase.functions.invoke('enrich-pet-food-product', { body: { product_id } })` em paralelo (limitar concorrência a 3, fire-and-forget). Após terminar, `invalidateQueries(['pet-food-products'])` para refletir.
-- Adicionar um `useEffect` que roda uma vez por sessão por produto (set local de IDs já tentados) para não entrar em loop.
-- Em `NewProductDialog.onCreated`: já invocar `enrich-pet-food-product` para o produto recém-criado antes de invalidar a query.
-- Sem mudança no edge function — só remover a UI manual.
+4. **Bridge para engine de recomendação**
+   - Edge function `hybrid-recommendation` recebe `nutrition_gaps` no contexto.
+   - Prompt sistêmico passa a priorizar compostos que fecham gaps detectados.
 
-### c) Sub-tabs "Nutrition" + tabela oficial por raça/porte/idade
+5. **Bilíngue + Changelog**
+   - Chaves `t('petProfile.nutritionGap.*')` PT/EN.
+   - Bump `I18N_VERSION`.
+   - Entry no CHANGELOG `[Unreleased]` (area: nutrition · status: implemented · i18n: yes).
 
-Renomear a aba do menu lateral (`KnowledgeBaseGroup.tsx` + chaves i18n `admin.sidebar.knowledgeBase.petFoodCatalog`) de "Catálogo de Rações" para **"Nutrition"**. O `id` da rota `pet-food-catalog` permanece (evita quebrar links).
+### Ordem de execução
 
-Dentro do componente, reorganizar com `<Tabs>` em 3 abas:
+```text
+Step 1  Inspect DB: pets schema (food fields), nutritionRequirementsCanine shape
+Step 2  Create nutritionGapAnalysis.ts service + unit logic
+Step 3  Migration: add pets.current_pet_food_product_id (FK nullable)
+Step 4  usePetNutritionGaps hook
+Step 5  PetNutritionGapPanel.tsx (UI bilíngue, design tokens)
+Step 6  Mount panel in PetProfilePage
+Step 7  Update hybrid-recommendation edge function to consume gaps
+Step 8  i18n keys PT/EN + I18N_VERSION bump
+Step 9  CHANGELOG + sync:changelog + organograma update
+```
 
-1. **Rações** — conteúdo atual de produtos/marcas (com tags inline + auto-enriquecimento).
-2. **Tabela nutricional (raça · porte · idade)** — nova tabela com requisitos mínimos AAFCO/FEDIAF de cães por:
-   - Estágio: filhote em crescimento, adulto manutenção, gestação/lactação, sênior
-   - Porte adulto esperado: pequeno (<10 kg), médio (10–25 kg), grande (25–45 kg), gigante (>45 kg)
-   - Campos: proteína mín %, gordura mín %, Ca %, P %, Ca:P, n6, n3, EPA+DHA, lisina, metionina, taurina (raças predispostas a DCM), kcal/kg de matéria seca recomendado.
-   - Fonte dos dados: arquivo estático bilíngue `src/data/nutritionRequirementsCanine.ts` (constante tipada). Sem mock — valores tirados de AAFCO 2024 Dog Food Nutrient Profiles + FEDIAF 2024 + NRC 2006 (referenciados no rodapé da tabela).
-   - UI: filtros por estágio + porte; tabela com linhas de nutrientes e badges de fonte (AAFCO/FEDIAF/NRC).
-3. **Outras questões nutricionais** — bloco com cards informativos (também bilíngue, estático):
-   - Hidratação (mL/kg/dia por porte)
-   - Frequência de refeições por idade
-   - Restrições por condição (renal, hepática, alérgico) — links para `health_conditions`
-   - Sinais clínicos de deficiência/excesso por nutriente
+### Notas técnicas
 
-### Internacionalização
+- Reusa `nutritionRequirementsCanine.ts` (já bilíngue); não duplicar.
+- Severidade: `|delta| < 15%` adequate, `15–40%` mild, `>40%` severe.
+- Wet food: usar `kcal_per_kg` já corrigido (Fase 1); converter porção diária em g a partir do peso do pet.
+- Se `confidence < 0.5` na ração, mostrar tooltip "valores estimados por IA — confiar com cautela".
+- Sem mocks: se pet sem ração cadastrada, painel mostra CTA "Cadastrar ração atual" em vez de dados fake.
 
-- Renomear chave `admin.sidebar.knowledgeBase.petFoodCatalog` → manter chave mas mudar valor para "Nutrition" (PT/EN).
-- Novas chaves: `admin.nutrition.tabs.products`, `admin.nutrition.tabs.requirements`, `admin.nutrition.tabs.other`, abreviações de nutrientes (`admin.nutrition.nutrient.protein`, etc.).
-- Bump `I18N_VERSION` em `src/i18n.ts`.
+### Confirmação
 
-### Changelog/organograma
-
-- Entrada em `CHANGELOG.md` `[Unreleased]` (área: admin/nutrition).
-- Atualizar `src/data/projectOrganograma.ts` (renomeação da tab + 3 sub-abas).
-- Rodar `npm run sync:changelog`.
-
-## Fora de escopo
-
-- Não criar tabela DB para requisitos nutricionais (dados estáticos já bastam para o MVP — promover a DB futuramente se virar editável).
-- Não alterar o edge function `enrich-pet-food-product`.
-- Não mexer em outros componentes que consomem `pet_food_nutrition` (`NutritionGapAnalysis`, etc.).
-
-## Detalhes técnicos
-
-- Concorrência do auto-enrich: `Promise.all` em batches de 3 via `for (const batch of chunk(missing, 3))`.
-- Guard contra retries infinitos: `useRef<Set<string>>` com IDs já tentados nesta sessão.
-- Tags de nutrientes: construir array `[{label, value, unit}]` filtrando `value != null`, render `<Badge variant="outline" className="text-[10px]">{label} {value}{unit}</Badge>`.
-- Tabela de requisitos: tipo `CanineNutrientRequirement { stage, size, nutrient, min, max?, unit, source }` em `src/data/nutritionRequirementsCanine.ts` (com campos `_en` para nomes).
+Vou começar pelo Step 1 (inspeção) e seguir em sequência. Posso emendar a migração da Fase 1 (pets.current_pet_food_product_id) se preferir tudo numa só. Confirma?
