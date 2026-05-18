@@ -49,6 +49,21 @@ interface ClinicalContext {
     products?: string[];
     macroSummary?: string;
     notes?: string;
+    /** Quantitative nutritional gaps computed by the frontend
+     *  `nutrition-gap-analyzer` (FEDIAF/AAFCO baseline vs. current diet).
+     *  Only non-adequate entries should be sent. */
+    gaps?: Array<{
+      key: string;
+      label: string;
+      unit: string;
+      status: 'deficient' | 'excess';
+      observed: number | null;
+      target_min?: number | null;
+      target_max?: number | null;
+      delta_pct?: number | null;
+      rationale?: string;
+      source?: string;
+    }>;
   };
 }
 
@@ -124,6 +139,22 @@ function buildClinicalContextBlock(ctx?: ClinicalContext): string {
       dp.notes ? `Notes: ${dp.notes}` : '',
     ].filter(Boolean).join('\n');
     sections.push(`DIET_PROFILE [use for nutritional gap-analysis: omega-3 deficit, mineral imbalances, prescription-diet compatibility]:\n${dlines}`);
+
+    if (dp.gaps?.length) {
+      const gapLines = dp.gaps.map((g) => {
+        const tgt = [
+          g.target_min != null ? `≥${g.target_min}` : '',
+          g.target_max != null ? `≤${g.target_max}` : '',
+        ].filter(Boolean).join(' / ') || '—';
+        const delta = g.delta_pct != null ? ` (${g.delta_pct > 0 ? '+' : ''}${g.delta_pct}%)` : '';
+        const why = g.rationale ? ` — ${g.rationale}` : '';
+        const src = g.source ? ` [${g.source}]` : '';
+        return `  - ${g.label} [${g.status.toUpperCase()}]: observed ${g.observed ?? '—'} ${g.unit}, target ${tgt} ${g.unit}${delta}${why}${src}`;
+      }).join('\n');
+      sections.push(
+        `NUTRITION_GAPS [WEIGHT: 0.8 — quantitative deficiencies/excesses computed from current diet vs. FEDIAF/AAFCO baseline. PRIORITIZE compounds that close these specific gaps; do NOT propose redundant nutrients already adequate in the diet]:\n${gapLines}`
+      );
+    }
   }
 
   if (ctx.allConditions?.length) {
