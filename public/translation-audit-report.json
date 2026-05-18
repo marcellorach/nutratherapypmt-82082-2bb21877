@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-18T17:56:20.394Z",
+  "timestamp": "2026-05-18T18:07:29.828Z",
   "summary": {
     "totalFiles": 878,
     "totalIssues": 424,
@@ -1551,7 +1551,7 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/import/SciImportSection.tsx",
-      "line": 108,
+      "line": 117,
       "text": "*",
       "severity": "high"
     },
