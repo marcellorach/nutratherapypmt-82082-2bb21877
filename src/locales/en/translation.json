@@ -5748,6 +5748,7 @@
       "viewProfile": "View Profile",
       "years": "years",
       "analyzeWithKG": "Analyze with Senex AI",
+      "analyzeWithKGSubtitle": "Run the in-depth Senex AI analysis for this patient.",
       "clinicalNotes": "Clinical Notes",
       "clinicalHistory": "Clinical History",
       "noNotes": "No clinical notes registered",
