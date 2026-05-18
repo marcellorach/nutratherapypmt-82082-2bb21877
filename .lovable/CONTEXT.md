@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-05-18T05:20:46.929Z
+Generated: 2026-05-18T05:32:43.200Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
@@ -7,7 +7,7 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 
 ## Changes by area (last 14 days)
 - **admin**: 21
-- **vet-ui**: 15
+- **vet-ui**: 16
 - **tutor-ui**: 9
 - **clinical-pipeline**: 4
 - **meta**: 3
@@ -15,6 +15,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **curation**: 1
 
 ## Top 10 recent entries
+### 2026-05-18 · [vet-ui] CHANGED — Digital Twin: órgãos tingem com a doença e variam no tempo
+- Adicionada camada `mix-blend-mode: multiply` sobre cada órgão (cérebro, coração, pulmões, fígado, rins, intestinos, pâncreas, estômago, bexiga, articulações) em `DogAnatomySVG`: o desenho original do PNG anatômico fica tingido de amarelo→laranja→vermelho conforme a intensidade, em vez de uma elipse colorida flutuando por cima.
+- `RegionState` ganha campo `intensity` (0-1) que controla opacidade/saturação do tingimento; cor é interpolada (hue 55°→0°, saturação e brilho dinâmicos).
+- `buildMarkers` em `DigitalTwinDog` agora calcula intensidade por ano: cenário sem protocolo progride (`base + 0.45 * t`), cenário com protocolo + coberto decai (`base * (1 - 0.7 * t)`), cenário com protocolo + não coberto progride mais devagar (`base + 0.2 * t`). Slider de anos passa a fazer os órgãos escurecerem (sem) ou clarearem (com).
+_files: src/components/pet/DogAnatomySVG.tsx, src/components/pet/DigitalTwinDog.tsx_
+
 ### 2026-05-18 · [vet-ui] CHANGED — Digital Twin: doenças atingem órgãos internos
 - Substituída a silhueta opaca + bolinhas flutuantes do `DigitalTwinDog` por uma ilustração anatômica transparente do Golden Retriever (`src/assets/dog-anatomy.png`) com órgãos internos visíveis (cérebro, coração, pulmões, fígado, rins, intestinos, bexiga, articulações, coluna).
 - Cada doença agora ilumina o órgão correspondente *dentro* do corpo (via `DogAnatomySVG` + `mapConditionToRegions`), com pulso/halo proporcional à severidade e estrela verde quando o protocolo protege a região.
@@ -68,12 +74,6 @@ _files: src/config/senex-version.ts, src/components/administrador/AboutSenexTab.
 - Workflow step 5 atualizado para "sync ativo" em vez de "planejado". Bump de 5.0.0 → 5.1.0.
 - Files: src/data/admin-tabs-info-bilingual.ts
 _files: src/data/admin-tabs-info-bilingual.ts_
-
-### 2026-05-18 · [admin] ADDED — Fase 5: Cobertura e enriquecimento em lote do catálogo de rações
-- Nova tabela `pet_food_bulk_enrich_runs` (RLS admin-only) para registrar parâmetros, contagens e detalhes por execução do job.
-- Edge `bulk-enrich-pet-food`: seleciona produtos `approved` sem nutrição ou com `completeness_score < min_completeness`, dispara `enrich-pet-food-product` em chunks com concorrência configurável (default 4) e grava o resultado no log. Requer admin (verificado via `is_admin()` no cliente do usuário).
-- Nova aba admin `Cobertura de Rações` (`pet-food-coverage`, grupo `knowledge-base`): KPIs (total, com nutrição, completude ≥60%, confiança ≥70%), heatmap por marca (piores primeiro), tabela priorizada por completude com botão "Re-enriquecer" por linha e formulário de execução em lote, mais log das últimas 20 execuções com auto-refresh.
-_files: supabase/functions/bulk-enrich-pet-food/index.ts, src/components/administrador/pet-food/PetFoodCoverageTab.tsx, src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx, src/config/admin-tabs.ts…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
