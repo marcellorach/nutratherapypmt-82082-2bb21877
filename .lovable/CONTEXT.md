@@ -1,9 +1,9 @@
 # Project context briefing (auto)
-Generated: 2026-05-18T05:32:43.200Z
+Generated: 2026-05-18T18:37:30.714Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.86.6
+## Latest i18n version: 1.86.9
 
 ## Changes by area (last 14 days)
 - **admin**: 21
@@ -11,10 +11,16 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **tutor-ui**: 9
 - **clinical-pipeline**: 4
 - **meta**: 3
+- **curation**: 2
 - **i18n**: 1
-- **curation**: 1
 
 ## Top 10 recent entries
+### 2026-05-18 · [curation] CHANGED — Vetorização pré-curadoria centralizada + badges Curadoria/Biblioteca corretas
+- Investigação arquitetural confirmou que a vetorização é passo OBRIGATÓRIO pré-curadoria: `StudyTripletCuration`, `TripletReviewDialog` e a edge `enrich-triplet` leem `study_embeddings.chunk_text` para exibir o "Trecho de Origem" que justifica cada triplet. Sem vetorização → curador decide cego (viola No-Mock Policy + Curation Gatekeeper).
+- `extract-study-entities` agora dispara `vectorize-study` em background (`EdgeRuntime.waitUntil`) logo após marcar o estudo como `processed`, garantindo que TODOS os caminhos de ingestão (SciSpace, upload direto, AI Processing queue) resultem em embeddings antes da curadoria. Não bloqueia a resposta nem aborta extração se a vetorização falhar.
+- Badge Curadoria (vermelha) agora conta apenas estudos onde NENHUM triplet foi aprovado/rejeitado (curadoria zerada). Estudos com curadoria parcial em andamento migram para Biblioteca.
+_files: supabase/functions/extract-study-entities/index.ts, src/components/administrador/estudos/import/SciImportSection.tsx, src/components/administrador/estudos/import/TabNavigation.tsx, src/components/administrador/estudos/cards/EstudoCard.tsx…_
+
 ### 2026-05-18 · [vet-ui] CHANGED — Digital Twin: órgãos tingem com a doença e variam no tempo
 - Adicionada camada `mix-blend-mode: multiply` sobre cada órgão (cérebro, coração, pulmões, fígado, rins, intestinos, pâncreas, estômago, bexiga, articulações) em `DogAnatomySVG`: o desenho original do PNG anatômico fica tingido de amarelo→laranja→vermelho conforme a intensidade, em vez de uma elipse colorida flutuando por cima.
 - `RegionState` ganha campo `intensity` (0-1) que controla opacidade/saturação do tingimento; cor é interpolada (hue 55°→0°, saturação e brilho dinâmicos).
@@ -68,12 +74,6 @@ _files: src/components/administrador/compliance/ComplianceDashboard.tsx, src/com
 - Badge `v{SENEX_VERSION} · {SENEX_LAST_UPDATE}` ao lado de "Senex AI" no Header e Footer (fonte única em `src/config/senex-version.ts`).
 - Files: src/components/administrador/AboutSenexTab.tsx, src/config/senex-version.ts, src/config/admin-tabs.ts, src/components/administrador/sidebar/groups/ConfigurationGroup.tsx, src/components/layout/Header.tsx, src/components/layout/Footer.tsx, src/locales/{pt,en}/translation.json
 _files: src/config/senex-version.ts, src/components/administrador/AboutSenexTab.tsx, src/config/admin-tabs.ts, src/components/administrador/sidebar/groups/ConfigurationGroup.tsx…_
-
-### 2026-05-18 · [admin] CHANGED — Modal de Estudos Científicos v5.1.0 (Neo4j ativo)
-- Corrigido o conteúdo desatualizado: Neo4j AuraDB já está integrado (edge functions `neo4j-sync`, `sync-approved-triplets`, `sync-study-to-neo4j`). Removido item "Migrate KG to Neo4j" dos planejados e ajustada a limitação para refletir que o read-path clínico ainda usa RPC Postgres.
-- Workflow step 5 atualizado para "sync ativo" em vez de "planejado". Bump de 5.0.0 → 5.1.0.
-- Files: src/data/admin-tabs-info-bilingual.ts
-_files: src/data/admin-tabs-info-bilingual.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
