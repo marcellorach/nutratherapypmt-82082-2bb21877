@@ -2805,6 +2805,39 @@
         "evaluationContent": "Avalie a eficácia da seguinte composição nutracêutica..."
       }
     },
+    "systemPrompts": {
+      "title": "Catálogo de Prompts do Sistema",
+      "description": "Todos os prompts usados internamente pelas edge functions, agrupados por família. Edite para criar um override sem mexer no código. \"Restaurar default\" remove o override. O conteúdo padrão vem do manifest",
+      "syncButton": "Sincronizar com o código",
+      "searchPlaceholder": "Filtrar por nome, família ou função…",
+      "loading": "Carregando catálogo…",
+      "empty": "Nenhum prompt encontrado.",
+      "functionLabel": "função",
+      "editorPlaceholder": "Cole aqui o conteúdo do prompt. Deixe vazio para usar o default do código.",
+      "notCatalogued": "Conteúdo ainda não catalogado. Use \"Editar\" para registrar um override ou aguarde a próxima sincronização com o código das edge functions.",
+      "badge": {
+        "overrideActive": "override ativo",
+        "override": "override",
+        "empty": "sem conteúdo"
+      },
+      "action": {
+        "save": "Salvar",
+        "default": "Default",
+        "edit": "Editar"
+      },
+      "toast": {
+        "loadError": "Erro ao carregar prompts",
+        "syncedTitle": "✅ Sincronizado",
+        "syncedDesc": "{{updated}} de {{total}} prompts atualizados a partir do código.",
+        "syncFailed": "Falha ao sincronizar",
+        "saveError": "Erro ao salvar",
+        "savedTitle": "✅ Salvo",
+        "savedDesc": "Override de \"{{name}}\" atualizado.",
+        "error": "Erro",
+        "restoredTitle": "↩️ Restaurado",
+        "restoredDesc": "\"{{name}}\" voltou ao default do código."
+      }
+    },
     "pharmacology": {
       "title": "Base Farmacológica",
       "description": "Catálogo de princípios ativos, marcas comerciais brasileiras e interações farmacológicas",
