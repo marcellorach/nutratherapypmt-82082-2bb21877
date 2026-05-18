@@ -17,6 +17,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { lastChangelogDate } from "@/data/projectChangelog.generated";
+import { SENEX_VERSION } from "@/config/senex-version";
 import { useTranslation } from "react-i18next";
 import {
   FileText,
