@@ -43,6 +43,34 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
+    // Google AI key for embeddings (alinhado ao vectorize-study).
+    // Modelo canônico = gemini-embedding-001 @ 768d, taskType RETRIEVAL_QUERY.
+    // Lovable AI Gateway não expõe taskType, então usamos Google direto.
+    const GOOGLE_AI_API_KEY = Deno.env.get('GOOGLE_AI_API_KEY');
+    const QUERY_EMBEDDING_DIMENSION = 768;
+    const QUERY_EMBEDDING_MODEL = 'gemini-embedding-001';
+
+    // Modelo do chat configurável via tabela ai_configurations (ai_model_chat).
+    // Default: google/gemini-3-flash-preview.
+    let chatModel = 'google/gemini-3-flash-preview';
+    try {
+      const { data: cfgRow } = await supabase
+        .from('ai_configurations')
+        .select('config_value')
+        .eq('config_key', 'ai_model_chat')
+        .maybeSingle();
+      if (cfgRow?.config_value) {
+        const raw = typeof cfgRow.config_value === 'string'
+          ? cfgRow.config_value.replace(/"/g, '')
+          : String(cfgRow.config_value);
+        // Garante prefixo de provider (Lovable AI Gateway aceita ids como `google/...`).
+        chatModel = raw.includes('/') ? raw : `google/${raw}`;
+      }
+    } catch (cfgErr) {
+      console.warn('⚠️ Não foi possível ler ai_model_chat, usando default:', cfgErr);
+    }
+    console.log(`🤖 Modelo do chat: ${chatModel}`);
+
     // Fetch study data and extraction
     console.log('📚 Buscando dados do estudo...');
     const { data: study, error: studyError } = await supabase
@@ -67,24 +95,44 @@ serve(async (req) => {
     
     try {
       console.log('🔍 Iniciando busca vetorial semântica...');
-      
-      // 1. Gerar embedding da pergunta do usuário
-      console.log('🔢 Gerando embedding da pergunta...');
-      const questionEmbeddingResponse = await fetch('https://ai.gateway.lovable.dev/v1/embeddings', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'google/text-embedding-004',
-          input: question
-        }),
-      });
 
-      if (questionEmbeddingResponse.ok) {
-        const questionEmbeddingData = await questionEmbeddingResponse.json();
-        const questionEmbedding = questionEmbeddingData.data[0].embedding;
+      if (!GOOGLE_AI_API_KEY) {
+        console.warn('⚠️ GOOGLE_AI_API_KEY ausente — busca vetorial desativada para esta requisição.');
+      } else {
+        // 1. Gerar embedding da pergunta com Google AI direto (taskType=RETRIEVAL_QUERY, 768d).
+        // ALINHADO ao vectorize-study (gemini-embedding-001 / RETRIEVAL_DOCUMENT / 768d).
+        console.log('🔢 Gerando embedding da pergunta (Google AI, RETRIEVAL_QUERY)...');
+        const questionEmbeddingResponse = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${QUERY_EMBEDDING_MODEL}:embedContent`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-goog-api-key': GOOGLE_AI_API_KEY,
+            },
+            body: JSON.stringify({
+              content: { parts: [{ text: question }] },
+              taskType: 'RETRIEVAL_QUERY',
+              outputDimensionality: QUERY_EMBEDDING_DIMENSION,
+            }),
+          }
+        );
+
+        if (questionEmbeddingResponse.ok) {
+          const questionEmbeddingData = await questionEmbeddingResponse.json();
+          let questionEmbedding: number[] = questionEmbeddingData.embedding?.values ?? [];
+
+          // Safety guard de dimensão (mesma lógica do vectorize-study).
+          if (questionEmbedding.length !== QUERY_EMBEDDING_DIMENSION) {
+            if (questionEmbedding.length > QUERY_EMBEDDING_DIMENSION) {
+              questionEmbedding = questionEmbedding.slice(0, QUERY_EMBEDDING_DIMENSION);
+            } else {
+              questionEmbedding = [
+                ...questionEmbedding,
+                ...new Array(QUERY_EMBEDDING_DIMENSION - questionEmbedding.length).fill(0),
+              ];
+            }
+          }
         
         // 2. Buscar chunks mais relevantes usando similaridade cosseno
         console.log('🔍 Buscando chunks relevantes via pgvector...');
@@ -115,8 +163,10 @@ serve(async (req) => {
         } else {
           console.warn('⚠️ Nenhum chunk relevante encontrado ou erro na busca:', searchError);
         }
-      } else {
-        console.warn('⚠️ Erro ao gerar embedding da pergunta:', questionEmbeddingResponse.status);
+        } else {
+          const errBody = await questionEmbeddingResponse.text();
+          console.warn('⚠️ Erro ao gerar embedding da pergunta:', questionEmbeddingResponse.status, errBody);
+        }
       }
     } catch (ragError) {
       console.warn('⚠️ Erro no processo RAG (continuando com fallback):', ragError);
@@ -537,7 +587,7 @@ Return format:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-3-pro-preview',
+        model: chatModel,
         messages,
         temperature: 0.7,
         max_tokens: 2000,
@@ -554,6 +604,13 @@ Return format:
         return new Response(
           JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      if (aiResponse.status === 402) {
+        return new Response(
+          JSON.stringify({ error: 'Payment required. Please add credits to your Lovable AI workspace.' }),
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
