@@ -1630,30 +1630,82 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Parse & validate request synchronously, then offload the long pipeline
+  // to a background task to avoid the 150s edge IDLE_TIMEOUT.
+  let fileUrl: string, studyId: string, fileName: string;
   try {
-    console.log('🚀 Iniciando processamento com Google Gemini File API');
-    console.log('📥 Recebendo requisição...');
-    
-    const { fileUrl, studyId, fileName } = await req.json();
+    const body = await req.json();
+    fileUrl = body.fileUrl;
+    studyId = body.studyId;
+    fileName = body.fileName;
+  } catch {
+    return new Response(
+      JSON.stringify({ success: false, error: 'Invalid JSON body' }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  if (!fileUrl || !studyId || !fileName) {
+    return new Response(
+      JSON.stringify({ success: false, error: 'Parâmetros obrigatórios ausentes: fileUrl, studyId, fileName' }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  // Heavy pipeline runs in background; client polls processed_studies via realtime.
+  const pipeline = (async () => {
+    try {
+      console.log('🚀 Iniciando processamento com Google Gemini File API (background)');
+      console.log('📋 Parâmetros:', { studyId, fileName, fileUrl });
+
+      await runGeminiPipeline({ fileUrl, studyId, fileName });
+    } catch (error) {
+      console.error('💥 ERRO FATAL NO PROCESSAMENTO (background):', error);
+      try {
+        const supabase = createClient(
+          Deno.env.get('SUPABASE_URL')!,
+          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+        );
+        await supabase
+          .from('processed_studies')
+          .update({
+            kanban_status: 'error',
+            processing_error: error instanceof Error ? error.message : String(error),
+          })
+          .eq('id', studyId);
+      } catch (e) {
+        console.error('Failed to record error on processed_studies:', e);
+      }
+    }
+  })();
+
+  // @ts-ignore — EdgeRuntime is provided by Supabase Edge runtime
+  if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
+    // @ts-ignore
+    EdgeRuntime.waitUntil(pipeline);
+  }
+
+  return new Response(
+    JSON.stringify({
+      success: true,
+      status: 'processing',
+      message: 'Pipeline iniciado em background. Acompanhe via realtime em processed_studies.',
+      studyId,
+    }),
+    { status: 202, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  );
+});
+
+// ============================================================
+// Pipeline original (extraído do handler para rodar em background)
+// ============================================================
+async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: string; studyId: string; fileName: string }) {
+  try {
     
     console.log('📋 Parâmetros recebidos:');
     console.log('  - studyId:', studyId);
     console.log('  - fileName:', fileName);
     console.log('  - fileUrl:', fileUrl);
-
-    if (!fileUrl || !studyId || !fileName) {
-      console.error('❌ Parâmetros obrigatórios ausentes');
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Parâmetros obrigatórios ausentes: fileUrl, studyId, fileName' 
-        }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
 
     // Inicializar Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -1670,14 +1722,7 @@ serve(async (req) => {
 
     if (configError || !configData?.config_value) {
       console.error('❌ Chave não encontrada na tabela ai_configurations:', configError);
-      return new Response(
-        JSON.stringify({ 
-          success: false,
-          error: 'Google Gemini API Key não configurada. Configure em Admin > Configurações IA > Google Gemini',
-          errorCode: 'GEMINI_API_KEY_MISSING'
-        }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      throw new Error('Google Gemini API Key não configurada (ai_configurations.google_gemini_api_key)');
     }
 
     const GOOGLE_GEMINI_KEY = String(configData.config_value);
