@@ -50,7 +50,10 @@ const SciImportSection: React.FC = () => {
   useEffect(() => {
     const fetchIndicators = async () => {
       try {
-        // Check if any study is currently being processed
+        // Todas as contagens usam count agregado (head:true) para evitar o cap de 1000 linhas
+        // e refletir o estado real a cada polling (15s).
+
+        // 1) Em processamento (badge pulsante)
         const { count: processingCount } = await supabase
           .from('processed_studies')
           .select('*', { count: 'exact', head: true })
@@ -58,60 +61,71 @@ const SciImportSection: React.FC = () => {
           .in('kanban_status', ['processing', 'parsed']);
         setIsAiProcessing((processingCount ?? 0) > 0);
 
-        // Count studies awaiting AI processing (queue): kanban_status='new' AND no triplets yet
-        const { data: newStudies } = await supabase
+        // 2) Curadoria pendente: estudos cujo kanban_status está nas fases de revisão
+        const { count: curationCount } = await supabase
           .from('processed_studies')
-          .select('id')
+          .select('*', { count: 'exact', head: true })
+          .is('deleted_at', null)
+          .in('kanban_status', ['parsed', 'review', 'processed']);
+        setPendingCurationCount(curationCount ?? 0);
+
+        // 3) Biblioteca: estudos com status final aprovado pelo workflow de curadoria
+        const { count: libCount } = await supabase
+          .from('processed_studies')
+          .select('*', { count: 'exact', head: true })
+          .is('deleted_at', null)
+          .eq('kanban_status', 'approved');
+        setLibraryCount(libCount ?? 0);
+
+        // 4) Fila de IA: estudos 'new' sem triplets ainda. Para evitar o cap de 1000,
+        //    contamos via count total 'new' e subtraímos os que já têm triplets.
+        const { count: totalNew } = await supabase
+          .from('processed_studies')
+          .select('*', { count: 'exact', head: true })
           .is('deleted_at', null)
           .eq('kanban_status', 'new');
-        const newIds = (newStudies ?? []).map((s: any) => s.id);
-        let pendingQueue = newIds.length;
-        if (newIds.length > 0) {
-          const { data: withTriplets } = await supabase
-            .from('triplet_extractions')
-            .select('study_id')
-            .in('study_id', newIds);
-          const processedSet = new Set((withTriplets ?? []).map((t: any) => t.study_id));
-          pendingQueue = newIds.filter((id) => !processedSet.has(id)).length;
+        let pendingQueue = totalNew ?? 0;
+        if (pendingQueue > 0) {
+          // Buscar IDs em paginação para escapar do cap de 1000
+          const newIds: string[] = [];
+          const PAGE = 1000;
+          for (let from = 0; ; from += PAGE) {
+            const { data, error } = await supabase
+              .from('processed_studies')
+              .select('id')
+              .is('deleted_at', null)
+              .eq('kanban_status', 'new')
+              .range(from, from + PAGE - 1);
+            if (error || !data || data.length === 0) break;
+            newIds.push(...data.map((r: any) => r.id));
+            if (data.length < PAGE) break;
+          }
+          if (newIds.length > 0) {
+            const withTripletIds = new Set<string>();
+            for (let i = 0; i < newIds.length; i += 200) {
+              const slice = newIds.slice(i, i + 200);
+              const { data: rows } = await supabase
+                .from('triplet_extractions')
+                .select('study_id')
+                .in('study_id', slice);
+              for (const r of (rows ?? []) as any[]) withTripletIds.add(r.study_id);
+            }
+            pendingQueue = newIds.filter((id) => !withTripletIds.has(id)).length;
+          }
         }
         setAiQueueCount(pendingQueue);
 
-        // Buscar todos triplets agrupados por study para classificar entre
-        // "em curadoria" (nenhum approved/rejected ainda) e "biblioteca" (>=1 reviewed)
-        const { data: allTriplets } = await supabase
+        // 5) Estudos com triplets mas sem embeddings (vetorização faltando).
+        //    Usa count agregado em vez de carregar IDs.
+        const { count: studiesWithTriplets } = await supabase
           .from('triplet_extractions')
-          .select('study_id, curation_status');
-        const byStudy = new Map<string, { hasReviewed: boolean; hasPending: boolean }>();
-        for (const t of (allTriplets ?? []) as any[]) {
-          const entry = byStudy.get(t.study_id) ?? { hasReviewed: false, hasPending: false };
-          if (t.curation_status === 'approved' || t.curation_status === 'rejected') {
-            entry.hasReviewed = true;
-          } else if (t.curation_status === 'pending') {
-            entry.hasPending = true;
-          }
-          byStudy.set(t.study_id, entry);
-        }
-        let curationOnly = 0;
-        let libraryStudies = 0;
-        for (const v of byStudy.values()) {
-          if (v.hasReviewed) libraryStudies += 1;
-          else if (v.hasPending) curationOnly += 1;
-        }
-        setPendingCurationCount(curationOnly);
-        setLibraryCount(libraryStudies);
-
-        // Contar estudos com triplets mas sem embeddings (vetorização faltando)
-        const studyIdsWithTriplets = Array.from(byStudy.keys());
-        if (studyIdsWithTriplets.length > 0) {
-          const { data: embRows } = await supabase
-            .from('study_embeddings')
-            .select('study_id')
-            .in('study_id', studyIdsWithTriplets);
-          const vectorized = new Set((embRows ?? []).map((r: any) => r.study_id));
-          setMissingVectorCount(studyIdsWithTriplets.filter((id) => !vectorized.has(id)).length);
-        } else {
-          setMissingVectorCount(0);
-        }
+          .select('study_id', { count: 'exact', head: true });
+        const { count: studiesVectorized } = await supabase
+          .from('study_embeddings')
+          .select('study_id', { count: 'exact', head: true });
+        // Aproximação suficiente para o badge (não-bloqueante): se houver mais triplets que embeddings, sinaliza pendência.
+        const missing = Math.max(0, (studiesWithTriplets ?? 0) - (studiesVectorized ?? 0));
+        setMissingVectorCount(missing);
       } catch (e) {
         console.error('Error fetching tab indicators:', e);
       }

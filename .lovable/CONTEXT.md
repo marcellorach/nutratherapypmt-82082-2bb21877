@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-05-18T18:54:29.284Z
+Generated: 2026-05-18T19:02:48.962Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.86.10
+## Latest i18n version: -
 
 ## Changes by area (last 14 days)
-- **admin**: 21
+- **admin**: 22
 - **vet-ui**: 16
 - **tutor-ui**: 9
 - **clinical-pipeline**: 4
@@ -15,6 +15,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **i18n**: 1
 
 ## Top 10 recent entries
+### 2026-05-18 · [admin] FIXED — Badges do pipeline: Biblioteca conta estudos curados e contadores não congelam
+- Biblioteca: badge passa a refletir estudos com `kanban_status='approved'` (status final de curadoria), alinhado ao critério usado pela própria aba `StudiesLibraryTab`. Antes contava estudos com qualquer triplet revisado, divergindo do que a aba mostrava.
+- Contadores congelados: as contagens carregavam todos os triplets via `select(...)`, atingindo silenciosamente o cap de 1000 linhas do Supabase e travando os badges em valores antigos. Substituído por queries `count: 'exact', head: true` em `processed_studies.kanban_status` — leves, exatas e atualizadas a cada ciclo de 15s.
+- Curadoria: badge agora derivado de `kanban_status in ('parsed','review','processed')` (fonte única).
+_files: src/components/administrador/estudos/import/SciImportSection.tsx_
+
 ### 2026-05-18 · [curation] CHANGED — Pipeline de embeddings padronizado (Google AI direto + taskType) e modelo do chat configurável
 - Auditoria profunda confirmou que gêmeo digital, hybrid-recommendation, breed-predisposition, lab-interpretation e clinical-analysis-pipeline NÃO consomem vetores — operam sobre KG/triplets ou texto literal. Único consumidor real de embedding é `document-chat`. Zero risco de regressão clínica nesta mudança.
 - Mismatch crítico corrigido: `document-chat` usava `google/text-embedding-004` (deprecated Jan/2026) via Lovable AI Gateway, enquanto `vectorize-study` indexava com `gemini-embedding-001` direto via Google AI — vetores eram incomparáveis, busca semântica degradada.
@@ -68,12 +74,6 @@ _files: src/components/administrador/TranslationsHub.tsx, src/config/admin-tabs.
 - `src/config/senex-version.ts` consome `senexVersion` + `lastChangelogDate` — sem mais hardcode. Header e Footer atualizam sozinhos.
 - Sidebar: ícone "configurado" do item FDA/EMA/AVMA Compliance agora fica inline ao lado da palavra, igual aos demais (deixou de ficar centrado à direita quando o texto quebra em 2 linhas).
 _files: scripts/sync-changelog.mjs, src/config/senex-version.ts, src/data/projectChangelog.generated.ts, src/components/administrador/sidebar/groups/ConfigurationGroup.tsx_
-
-### 2026-05-18 · [admin] ADDED — Compliance: i18n PT/EN + renovação manual com log
-- Compliance Dashboard agora 100% bilíngue (UI + dados em `complianceData.ts` com `_en`).
-- Novo botão "Rodar verificação de compliance" + tabela `compliance_audit_runs` (totals, per_authority, diff melhorou/piorou/novo) com RLS admin-only.
-- Histórico de verificações colapsável com chips de delta e diff item-a-item.
-_files: src/components/administrador/compliance/ComplianceDashboard.tsx, src/components/administrador/compliance/complianceData.ts, src/components/administrador/audits/TechnicalAuditsTab.tsx, src/locales/pt/translation.json…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

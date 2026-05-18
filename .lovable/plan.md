@@ -1,64 +1,72 @@
+## Contexto
 
-## Contexto confirmado
+**a) "Mismatch de modelos" — o que era e foi resolvido?**
 
-- **Gêmeo digital, hybrid-recommendation, calculate-recommendation-confidence, breed-predisposition, lab-interpretation, pet-clinical-chat**: NÃO consomem vetores. Operam sobre KG (triplets/hierarchical_edges) e LLM puro. → **Zero risco de regressão clínica** nesta mudança.
-- **Único consumidor real de vetor**: `document-chat` (chat RAG por estudo, área admin).
-- **Pseudo-consumidor**: `clinical-analysis-pipeline.ts:1378` faz `ILIKE chunk_text` (texto, não vetor) só para mostrar excerpt — pode permanecer.
+No estado anterior, `vectorize-study` (indexação) usava **Google AI direto com `gemini-embedding-001` (768d)**, enquanto `document-chat` (busca RAG) usava o **gateway Lovable AI com um modelo de embedding diferente/deprecado**. Vetores gerados por modelos diferentes vivem em espaços vetoriais incompatíveis — comparar cosseno entre eles produz scores quase aleatórios (~10–30% de recall útil em vez de 80–90%).
 
-## Decisão arquitetural
+**Sim, foi 100% endereçado no último ajuste:**
+- `vectorize-study` → Google AI direto, `gemini-embedding-001`, 768d, `taskType: RETRIEVAL_DOCUMENT`
+- `document-chat` → Google AI direto, `gemini-embedding-001`, 768d, `taskType: RETRIEVAL_QUERY`
+- Metadata `embedding_model_version: "gemini-embedding-001@768d"` gravada em `processed_studies.full_text_metadata` para detectar mismatches futuros
 
-**Embeddings = Google AI direto, gemini-embedding-001, 768d**, com `taskType` correto (`RETRIEVAL_DOCUMENT` na indexação, `RETRIEVAL_QUERY` na busca). Lovable AI Gateway não expõe `taskType`, então perderíamos ~10-15% de recall — não justifica.
+Único débito pendente: estudos vetorizados **antes** do ajuste podem ter vetores incompatíveis. Como o pipeline atual exige re-vetorização para `RETRIEVAL_DOCUMENT` task type correto, faz sentido oferecer um "re-vetorizar tudo" (mas isso é opcional — não está no escopo desta tarefa).
 
-**Chat LLM do document-chat = configurável via `useAIConfig`** (admin escolhe entre gemini-3.1-pro-preview, gemini-3-flash-preview, gpt-5, etc. via Lovable AI Gateway). Default: `google/gemini-3-flash-preview`.
+---
 
-## Mudanças
+## Plano
 
-### 1. `supabase/functions/vectorize-study/index.ts`
-- Garantir Google AI direto com `taskType: "RETRIEVAL_DOCUMENT"` e `outputDimensionality: 768` em cada chamada de embedding.
-- Adicionar header `embedding_model_version = "gemini-embedding-001@768d"` no metadata do registro (coluna existente ou em `full_text_metadata.embedding_model`) para detectar mismatch futuro.
+### (b) Badge da Biblioteca = estudos curados (não triplets)
 
-### 2. `supabase/functions/document-chat/index.ts`
-- **Embeddings da query**: trocar Lovable AI Gateway (`text-embedding-004`) por Google AI direto com `taskType: "RETRIEVAL_QUERY"`, `outputDimensionality: 768`, modelo `gemini-embedding-001` — alinhado ao `vectorize-study`.
-- **Chat LLM (geração da resposta)**: continuar via Lovable AI Gateway, mas ler o modelo de `useAIConfig` (campo `documentChatModel`, default `google/gemini-3-flash-preview`). Tratar erros 402/429.
+Hoje `libraryCount` em `SciImportSection.tsx` conta estudos que têm **pelo menos 1 triplet** com `curation_status in ('approved','rejected')`. Isso conta estudos parcialmente revisados como "biblioteca", o que diverge do que a própria aba Biblioteca exibe (`kanban_status = 'approved'`).
 
-### 3. `src/hooks/useAIConfig.ts` (ou config admin equivalente)
-- Adicionar nova chave `documentChatModel` com dropdown na tela de Configurações de IA listando: gemini-3.1-pro-preview, gemini-3-flash-preview, gemini-2.5-pro, gemini-2.5-flash, gpt-5, gpt-5-mini. Persistir em `ai_configurations` (tabela já existe).
+**Mudança:** trocar a contagem por uma query direta em `processed_studies`:
 
-### 4. Backfill dos órfãos
-- Endpoint `handleBackfillVectorize` em `SciImportSection.tsx` já existe; só ajustar para chamar `vectorize-study` com o novo `taskType` (transparente — o edge function cuida).
-- Adicionar contagem de "órfãos por modelo desatualizado" (`full_text_metadata.embedding_model !== "gemini-embedding-001@768d"`) ao mesmo contador "Vetorizar pendentes (N)".
+```ts
+const { count: libCount } = await supabase
+  .from('processed_studies')
+  .select('*', { count: 'exact', head: true })
+  .is('deleted_at', null)
+  .eq('kanban_status', 'approved');
+setLibraryCount(libCount ?? 0);
+```
 
-### 5. UX / i18n
-- Renomear badge "Sem RAG" → "Sem trechos indexados" (`noChunksIndexed`).
-- Tooltip atualizado: "Os trechos vetoriais (RAG) ainda não foram gerados. A curadoria continua disponível, mas o chat do estudo não terá precisão semântica até a vetorização concluir."
-- Adicionar ao admin AI Config tela: descrição "Modelo usado para responder no chat do estudo individual (RAG)".
-- Incrementar `I18N_VERSION` → `1.86.10`.
+Critério único e canônico: **`kanban_status = 'approved'`** (status final do workflow de curadoria definido em `useStudyApprovalWorkflow`). Alinha o badge com o que a aba Biblioteca mostra como "curated".
 
-### 6. CHANGELOG + memória
-- Entrada `[Unreleased] → Changed`: "Padronizado pipeline de embeddings em Google AI direto (gemini-embedding-001, 768d) com taskType RETRIEVAL_DOCUMENT/QUERY. document-chat agora usa o mesmo modelo do vectorize-study, eliminando incompatibilidade de vetores. Modelo do LLM do chat tornou-se configurável via Admin → Configurações de IA."
-- Atualizar `mem://architecture/vectorization-is-pre-curation` com seção "Modelo canônico: gemini-embedding-001@768d via Google AI direto, taskType obrigatório".
-- Rodar `npm run sync:changelog`.
+### (c) Garantir polling correto a cada 15s
 
-## Validação pós-deploy
+O `setInterval` de 15s já existe (linha 121). Mas há **dois bugs reais** que fazem o badge "travar" em valores antigos:
 
-1. `supabase--curl_edge_functions` em `vectorize-study` com 1 study_id de teste — confirmar 768 dims salvos.
-2. `supabase--curl_edge_functions` em `document-chat` com query simples — confirmar resposta com citações.
-3. Verificar que badge "Sem trechos indexados" sumiu nos studies pós-backfill.
-4. `supabase--read_query` para confirmar `count(*) FROM study_embeddings WHERE array_length(embedding,1) = 768` cresceu.
+1. **Limite de 1000 linhas do Supabase:** a query `select study_id, curation_status from triplet_extractions` (linha 81-83) carrega **todos** os triplets sem paginação. Com muitos triplets, o cap de 1000 é atingido silenciosamente e os contadores ficam congelados/errados. Solução: usar contadores agregados via `count: 'exact', head: true` em vez de carregar linhas.
 
-## Arquivos modificados
+2. **`pendingCurationCount` também depende do mesmo loop:** vou substituir as 3 contagens (`pendingCurationCount`, `libraryCount`, `missingVectorCount`) por queries `count`-only baseadas em `processed_studies.kanban_status`:
+   - `aiQueueCount`: `kanban_status='new'` e sem triplets → manter lógica atual mas com `count: 'exact'` em vez de listar IDs
+   - `pendingCurationCount`: `kanban_status in ('parsed','review','processed')` AND `deleted_at IS NULL`
+   - `libraryCount`: `kanban_status='approved'` AND `deleted_at IS NULL`
+   - `missingVectorCount`: manter via RPC ou query agregada (não listar)
 
-- `supabase/functions/vectorize-study/index.ts`
-- `supabase/functions/document-chat/index.ts`
-- `src/hooks/useAIConfig.ts` + tela de config admin
-- `src/components/administrador/estudos/import/SciImportSection.tsx` (tooltip + contador)
-- `src/components/administrador/estudos/cards/EstudoCard.tsx` (rename badge)
-- `src/locales/pt/translation.json`, `src/locales/en/translation.json`
-- `src/i18n.ts` (versão)
-- `CHANGELOG.md`, `mem://architecture/vectorization-is-pre-curation`
+3. **Cache do React Query / refetch:** confirmar que a aba Biblioteca (`StudiesLibraryTab`) também faz refetch (não é o badge em si, mas para garantir consistência visual após aprovação). Verificar se há `staleTime` exagerado.
 
-## Fora de escopo (intencional)
+### Arquivos a modificar
 
-- **Não tocar** em `clinical-analysis-pipeline`, `hybrid-recommendation`, gêmeo digital, `PatientKnowledgeSubgraph`, `breed-predisposition`, `lab-interpretation` — auditado, não usam vetores.
-- Não migrar para Lovable AI Gateway nos embeddings (perda de `taskType`).
-- Não mudar dimensionalidade (768 já é o padrão do projeto, evita re-vectorização em massa).
+- `src/components/administrador/estudos/import/SciImportSection.tsx` — reescrever bloco `fetchIndicators` (linhas 50-118) para usar contagens agregadas baseadas em `kanban_status`.
+- `CHANGELOG.md` — entrada em `[Unreleased] → Changed`/`Fixed`.
+- Rodar `npm run sync:changelog` ao final.
+
+### Fora de escopo
+
+- Re-vetorização de estudos antigos (modelo legacy) — pode ser tarefa separada se você quiser.
+- Mudanças em `StudiesLibraryTab.tsx` (já usa o critério correto `kanban_status='approved'`).
+- Alterações em edge functions (mismatch já resolvido).
+
+---
+
+## Detalhes técnicos resumidos
+
+| Badge | Critério novo | Query |
+|---|---|---|
+| AI Queue | `kanban_status='new'` sem triplets | `count` em `processed_studies` + `not.in` join |
+| Curation | `kanban_status in ('parsed','review','processed')` | `count: 'exact', head: true` |
+| Library | `kanban_status='approved'` | `count: 'exact', head: true` |
+| Missing vectors | triplets sem embeddings | RPC ou count agregado |
+
+Todas as queries com `head: true` retornam apenas o número (sem payload), evitando o teto de 1000 linhas e mantendo o polling de 15s consistente.

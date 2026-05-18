@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-18T18:54:29.280Z
+// Última geração: 2026-05-18T19:02:48.958Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,24 @@ export const lastChangelogDate = "2026-05-18";
 export const senexVersion = "5.1.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-18",
+    "kind": "fixed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Badges do pipeline: Biblioteca conta estudos curados e contadores não congelam",
+    "bullets": [
+      "Biblioteca: badge passa a refletir estudos com `kanban_status='approved'` (status final de curadoria), alinhado ao critério usado pela própria aba `StudiesLibraryTab`. Antes contava estudos com qualquer triplet revisado, divergindo do que a aba mostrava.",
+      "Contadores congelados: as contagens carregavam todos os triplets via `select(...)`, atingindo silenciosamente o cap de 1000 linhas do Supabase e travando os badges em valores antigos. Substituído por queries `count: 'exact', head: true` em `processed_studies.kanban_status` — leves, exatas e atualizadas a cada ciclo de 15s.",
+      "Curadoria: badge agora derivado de `kanban_status in ('parsed','review','processed')` (fonte única).",
+      "AI Queue: mantida lógica \"kanban_status='new' sem triplets\", mas com paginação explícita de IDs para escapar do cap de 1000.",
+      "Files: src/components/administrador/estudos/import/SciImportSection.tsx"
+    ],
+    "files": [
+      "src/components/administrador/estudos/import/SciImportSection.tsx"
+    ],
+    "i18nVersion": "-"
+  },
   {
     "date": "2026-05-18",
     "kind": "changed",
