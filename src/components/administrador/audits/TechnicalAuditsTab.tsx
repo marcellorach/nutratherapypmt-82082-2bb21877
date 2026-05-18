@@ -116,11 +116,7 @@ export default function TechnicalAuditsTab() {
   );
 
   const nextVersion = useMemo(() => {
-    const nums = audits
-      .map((a) => parseInt(a.id.replace(/\D/g, ""), 10))
-      .filter((n) => Number.isFinite(n));
-    const max = nums.length ? Math.max(...nums) : 0;
-    return `v${max + 1}`;
+    return `v${SENEX_VERSION}`;
   }, [audits]);
 
   const handleRequestNew = async () => {
