@@ -377,7 +377,7 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
         { term: { pt: 'Gap-Fill Triplet', en: 'Gap-Fill Triplet' }, definition: { pt: 'Triplet pendente gerado automaticamente quando o KG não cobre uma combinação (compound × condition) relevante para o paciente', en: 'Pending triplet generated automatically when the KG lacks a (compound × condition) combination relevant to the patient' } }
       ],
       limitations: [
-        { pt: 'Neo4j AuraDB ainda não integrado — o KG vive em tabelas hierárquicas no Supabase', en: 'Neo4j AuraDB not yet integrated — the KG lives in Supabase hierarchical tables' },
+        { pt: 'Neo4j AuraDB integrado para sincronização e exploração (sync-approved-triplets / sync-study-to-neo4j), mas o read-path clínico principal ainda é via RPC Postgres — Cypher direto está no roadmap', en: 'Neo4j AuraDB is integrated for sync and exploration (sync-approved-triplets / sync-study-to-neo4j), but the main clinical read-path still goes through Postgres RPC — direct Cypher is on the roadmap' },
         { pt: 'TransE link prediction roda em batch noturno; ainda não opera online por requisição', en: 'TransE link prediction runs as a nightly batch; not yet served online per request' },
         { pt: 'Predisposição por raça populada para ~120 raças principais — long tail em expansão', en: 'Breed predisposition populated for ~120 main breeds — long tail still expanding' },
         { pt: 'Escopo clínico limitado a doenças metabólicas/degenerativas em cães (felinos e imagens complexas fora de escopo)', en: 'Clinical scope limited to canine metabolic/degenerative conditions (felines and complex imaging out of scope)' },
