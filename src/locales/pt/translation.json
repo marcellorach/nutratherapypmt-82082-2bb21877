@@ -2027,7 +2027,7 @@
         "ontologyMapping": "Mapeamento SNOMED/UMLS",
         "ontologyMappingStatus": "Em curadoria",
         "ontologyMappingStatusTooltip": "Mapeamento de entidades do KG para padrões SNOMED-CT e UMLS, com auditoria manual.",
-        "petFoodCatalog": "Catálogo de Rações",
+        "petFoodCatalog": "Nutrição",
         "petFoodCatalogStatus": "Em curadoria",
         "petFoodCatalogStatusTooltip": "Banco de marcas, produtos e perfil nutricional usado pelo pipeline de gap nutricional.",
         "dosageCuration": "Curadoria de Doses",
