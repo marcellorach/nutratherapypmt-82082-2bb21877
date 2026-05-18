@@ -23,6 +23,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-18 — Compliance: i18n PT/EN + renovação manual com log
+<!-- area: admin · status: entregue · i18n: 1.86.3 -->
+- Compliance Dashboard agora 100% bilíngue (UI + dados em `complianceData.ts` com `_en`).
+- Novo botão "Rodar verificação de compliance" + tabela `compliance_audit_runs` (totals, per_authority, diff melhorou/piorou/novo) com RLS admin-only.
+- Histórico de verificações colapsável com chips de delta e diff item-a-item.
+- Auditorias Técnicas: strings PT migradas para `t('audits.*')`.
+- Files: src/components/administrador/compliance/ComplianceDashboard.tsx, src/components/administrador/compliance/complianceData.ts, src/components/administrador/audits/TechnicalAuditsTab.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts, supabase/migrations/
+
 ### Added - 2026-05-18 — Aba "About Senex AI" + badge de versão
 <!-- area: admin · status: entregue · i18n: 1.85.0 -->
 - Nova aba `about-senex` no grupo Configuration com diagrama Mermaid detalhado do motor (6 fases: ingestion → 3-stage extraction → KG L0–L4 → validation/gap-fill → hybrid storage Supabase + Neo4j → U-Retrieval + Digital Twin), pilares científicos e métricas chave.
