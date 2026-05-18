@@ -133,7 +133,16 @@ function buildClinicalContextBlock(ctx?: ClinicalContext): string {
     const dlines = [
       dp.diet_type ? `Type: ${dp.diet_type}` : '',
       dp.daily_amount_g ? `Daily amount: ${dp.daily_amount_g}g in ${dp.meals_per_day || '?'} meals` : '',
-      dp.products?.length ? `Products: ${dp.products.join(' + ')}` : '',
+      dp.products?.length ? `Products: ${dp.products.map((p: any) => {
+        if (typeof p === 'string') return p;
+        if (p && typeof p === 'object') {
+          const brand = p.brand || p.raw_brand_text || '';
+          const name = p.name || p.product || p.raw_product_text || '';
+          const share = p.share_percent != null ? ` (${p.share_percent}%)` : '';
+          return `${brand} ${name}${share}`.trim() || JSON.stringify(p);
+        }
+        return String(p);
+      }).join(' + ')}` : '',
       dp.restrictions?.length ? `Restrictions: ${dp.restrictions.join(', ')}` : '',
       dp.macroSummary ? `Nutrition snapshot: ${dp.macroSummary}` : '',
       dp.notes ? `Notes: ${dp.notes}` : '',
