@@ -588,7 +588,7 @@ const PetProfilePage: React.FC = () => {
                     {t('petRegistration.profile.analyzeWithKG')}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {t('petProfile.senexCta.subtitle', 'Execute a análise clínica profunda Senex AI para este paciente.')}
+                   {t('petProfile.senexCta.subtitle', 'Execute a análise profunda Senex AI para este paciente.')}
                   </p>
                 </div>
               </div>
