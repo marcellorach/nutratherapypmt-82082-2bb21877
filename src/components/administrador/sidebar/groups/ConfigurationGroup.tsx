@@ -31,9 +31,9 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
             <div className="flex items-center">
               <Database className={`h-4 w-4 mr-2 ${currentStep === "knowledge-base-settings" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.configuration.knowledgeBase')}</span>
+              <ConfiguredCheck />
             </div>
             <div className="flex items-center ml-auto">
-              <ConfiguredCheck />
               {currentStep === "knowledge-base-settings" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
               )}
@@ -51,9 +51,9 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
             <div className="flex items-center">
               <Cpu className={`h-4 w-4 mr-2 ${currentStep === "config-ia" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.configuration.aiConfig')}</span>
+              <ConfiguredCheck />
             </div>
             <div className="flex items-center ml-auto">
-              <ConfiguredCheck />
               {currentStep === "config-ia" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
               )}
@@ -71,9 +71,9 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
             <div className="flex items-center">
               <Bot className={`h-4 w-4 mr-2 ${currentStep === "prompts" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.configuration.aiPrompts')}</span>
+              <ConfiguredCheck />
             </div>
             <div className="flex items-center ml-auto">
-              <ConfiguredCheck />
               {currentStep === "prompts" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
               )}
@@ -91,9 +91,9 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
             <div className="flex items-center">
               <Check className={`h-4 w-4 mr-2 ${currentStep === "actions" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.actions.bulkActions')}</span>
+              <ConfiguredCheck />
             </div>
             <div className="flex items-center ml-auto">
-              <ConfiguredCheck />
               {currentStep === "actions" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
               )}
@@ -111,9 +111,9 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
             <div className="flex items-center">
               <Zap className={`h-4 w-4 mr-2 ${currentStep === "analytics" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.actions.analytics')}</span>
+              <ConfiguredCheck />
             </div>
             <div className="flex items-center ml-auto">
-              <ConfiguredCheck />
               {currentStep === "analytics" && (
                 <ChevronRight className="h-4 w-4 ml-auto text-primary" />
               )}
@@ -131,9 +131,9 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
             <div className="flex items-center">
               <Gauge className={`h-4 w-4 mr-2 ${currentStep === "custo-beneficio" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.actions.roiAnalysis')}</span>
+              <ConfiguredCheck />
             </div>
             <div className="flex items-center ml-auto">
-              <ConfiguredCheck />
               {currentStep === "custo-beneficio" && (
                 <ChevronRight className="h-4 w-4 ml-auto text-primary" />
               )}
@@ -151,9 +151,9 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
             <div className="flex items-center">
               <Languages className={`h-4 w-4 mr-2 ${currentStep === "translation-audit" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.configuration.translationAudit')}</span>
+              <ConfiguredCheck />
             </div>
             <div className="flex items-center ml-auto">
-              <ConfiguredCheck />
               {currentStep === "translation-audit" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
               )}
@@ -171,9 +171,9 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
             <div className="flex items-center">
               <FileEdit className={`h-4 w-4 mr-2 ${currentStep === "translation-manager" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.configuration.translationManager')}</span>
+              <ConfiguredCheck />
             </div>
             <div className="flex items-center ml-auto">
-              <ConfiguredCheck />
               {currentStep === "translation-manager" && (
                 <ChevronRight className="h-4 w-4 ml-auto text-primary" />
               )}
@@ -191,9 +191,9 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
             <div className="flex items-center">
               <Palette className={`h-4 w-4 mr-2 ${currentStep === "design-conventions" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.configuration.designConventions')}</span>
+              <ConfiguredCheck />
             </div>
             <div className="flex items-center ml-auto">
-              <ConfiguredCheck />
               {currentStep === "design-conventions" && (
                 <ChevronRight className="h-4 w-4 ml-auto text-primary" />
               )}
@@ -211,9 +211,9 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
             <div className="flex items-center">
               <UserCog className={`h-4 w-4 mr-2 ${currentStep === "access-requests" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.configuration.accessRequests')}</span>
+              <ConfiguredCheck />
             </div>
             <div className="flex items-center ml-auto">
-              <ConfiguredCheck />
               {currentStep === "access-requests" && (
                 <ChevronRight className="h-4 w-4 ml-auto text-primary" />
               )}
@@ -231,9 +231,9 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
             <div className="flex items-center">
               <ListTree className={`h-4 w-4 mr-2 ${currentStep === "organograma" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.configuration.organograma')}</span>
+              <ConfiguredCheck />
             </div>
             <div className="flex items-center ml-auto">
-              <ConfiguredCheck />
               {currentStep === "organograma" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
               )}
@@ -251,9 +251,9 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
             <div className="flex items-center">
               <ShieldCheck className={`h-4 w-4 mr-2 ${currentStep === "compliance-dashboard" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.configuration.complianceDashboard')}</span>
+              <ConfiguredCheck />
             </div>
             <div className="flex items-center ml-auto">
-              <ConfiguredCheck />
               {currentStep === "compliance-dashboard" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
               )}
@@ -271,9 +271,9 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
             <div className="flex items-center">
               <FileSearch className={`h-4 w-4 mr-2 ${currentStep === "technical-audits" ? "text-primary" : ""}`} />
               <span>{t('admin.sidebar.configuration.technicalAudits')}</span>
+              <ConfiguredCheck />
             </div>
             <div className="flex items-center ml-auto">
-              <ConfiguredCheck />
               {currentStep === "technical-audits" && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
               )}
