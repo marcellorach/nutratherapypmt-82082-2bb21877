@@ -1,20 +1,26 @@
 # Project context briefing (auto)
-Generated: 2026-05-18T18:37:30.714Z
+Generated: 2026-05-18T18:54:29.284Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.86.9
+## Latest i18n version: 1.86.10
 
 ## Changes by area (last 14 days)
 - **admin**: 21
 - **vet-ui**: 16
 - **tutor-ui**: 9
 - **clinical-pipeline**: 4
+- **curation**: 3
 - **meta**: 3
-- **curation**: 2
 - **i18n**: 1
 
 ## Top 10 recent entries
+### 2026-05-18 · [curation] CHANGED — Pipeline de embeddings padronizado (Google AI direto + taskType) e modelo do chat configurável
+- Auditoria profunda confirmou que gêmeo digital, hybrid-recommendation, breed-predisposition, lab-interpretation e clinical-analysis-pipeline NÃO consomem vetores — operam sobre KG/triplets ou texto literal. Único consumidor real de embedding é `document-chat`. Zero risco de regressão clínica nesta mudança.
+- Mismatch crítico corrigido: `document-chat` usava `google/text-embedding-004` (deprecated Jan/2026) via Lovable AI Gateway, enquanto `vectorize-study` indexava com `gemini-embedding-001` direto via Google AI — vetores eram incomparáveis, busca semântica degradada.
+- Modelo canônico unificado: `gemini-embedding-001` direto via Google AI, 768d, com `taskType: RETRIEVAL_DOCUMENT` na indexação (`vectorize-study`) e `RETRIEVAL_QUERY` na busca (`document-chat`). Lovable AI Gateway não expõe `taskType` (perde ~10-15% de recall), por isso mantemos Google direto.
+_files: supabase/functions/vectorize-study/index.ts, supabase/functions/document-chat/index.ts, src/hooks/useAIConfig.ts, src/components/administrador/estudos/cards/EstudoCard.tsx…_
+
 ### 2026-05-18 · [curation] CHANGED — Vetorização pré-curadoria centralizada + badges Curadoria/Biblioteca corretas
 - Investigação arquitetural confirmou que a vetorização é passo OBRIGATÓRIO pré-curadoria: `StudyTripletCuration`, `TripletReviewDialog` e a edge `enrich-triplet` leem `study_embeddings.chunk_text` para exibir o "Trecho de Origem" que justifica cada triplet. Sem vetorização → curador decide cego (viola No-Mock Policy + Curation Gatekeeper).
 - `extract-study-entities` agora dispara `vectorize-study` em background (`EdgeRuntime.waitUntil`) logo após marcar o estudo como `processed`, garantindo que TODOS os caminhos de ingestão (SciSpace, upload direto, AI Processing queue) resultem em embeddings antes da curadoria. Não bloqueia a resposta nem aborta extração se a vetorização falhar.
@@ -68,12 +74,6 @@ _files: scripts/sync-changelog.mjs, src/config/senex-version.ts, src/data/projec
 - Novo botão "Rodar verificação de compliance" + tabela `compliance_audit_runs` (totals, per_authority, diff melhorou/piorou/novo) com RLS admin-only.
 - Histórico de verificações colapsável com chips de delta e diff item-a-item.
 _files: src/components/administrador/compliance/ComplianceDashboard.tsx, src/components/administrador/compliance/complianceData.ts, src/components/administrador/audits/TechnicalAuditsTab.tsx, src/locales/pt/translation.json…_
-
-### 2026-05-18 · [admin] ADDED — Aba "About Senex AI" + badge de versão
-- Nova aba `about-senex` no grupo Configuration com diagrama Mermaid detalhado do motor (6 fases: ingestion → 3-stage extraction → KG L0–L4 → validation/gap-fill → hybrid storage Supabase + Neo4j → U-Retrieval + Digital Twin), pilares científicos e métricas chave.
-- Badge `v{SENEX_VERSION} · {SENEX_LAST_UPDATE}` ao lado de "Senex AI" no Header e Footer (fonte única em `src/config/senex-version.ts`).
-- Files: src/components/administrador/AboutSenexTab.tsx, src/config/senex-version.ts, src/config/admin-tabs.ts, src/components/administrador/sidebar/groups/ConfigurationGroup.tsx, src/components/layout/Header.tsx, src/components/layout/Footer.tsx, src/locales/{pt,en}/translation.json
-_files: src/config/senex-version.ts, src/components/administrador/AboutSenexTab.tsx, src/config/admin-tabs.ts, src/components/administrador/sidebar/groups/ConfigurationGroup.tsx…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
