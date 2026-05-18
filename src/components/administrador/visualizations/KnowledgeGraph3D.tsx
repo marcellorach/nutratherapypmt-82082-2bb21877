@@ -422,15 +422,74 @@ export const KnowledgeGraph3D: React.FC<KnowledgeGraph3DProps> = ({
     // Create SpriteText label
     const sprite = new SpriteText(node.name);
     sprite.color = '#1e293b';  // Dark text for light background
-    sprite.textHeight = 4;
+    sprite.textHeight = 6;
     sprite.fontFace = 'Inter, system-ui, sans-serif';
     sprite.fontWeight = 'bold';
-    sprite.backgroundColor = 'rgba(255, 255, 255, 0.85)';
-    sprite.padding = 2;
-    sprite.borderRadius = 3;
+    sprite.backgroundColor = 'rgba(255, 255, 255, 0.92)';
+    sprite.borderColor = node.color || '#cbd5e1';
+    sprite.borderWidth = 0.4;
+    sprite.padding = 3;
+    sprite.borderRadius = 4;
     
     return sprite;
   }, [showLabels]);
+
+  // Custom canvas renderer for 2D mode: draws circle + name label
+  const nodeCanvasObject = useCallback((node: any, ctx: CanvasRenderingContext2D, globalScale: number) => {
+    const radius = Math.max(4, (node.val || 3) * nodeSize * 0.35);
+
+    // Node circle
+    ctx.beginPath();
+    ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
+    ctx.fillStyle = node.color || '#64748b';
+    ctx.fill();
+    ctx.lineWidth = 0.8 / globalScale;
+    ctx.strokeStyle = 'rgba(15, 23, 42, 0.35)';
+    ctx.stroke();
+
+    if (!showLabels) return;
+
+    // Only render labels when zoomed in enough OR for hub nodes (avoids visual noise)
+    const isHub = (node.connections || 0) >= 6;
+    if (globalScale < 1.2 && !isHub) return;
+
+    const label = node.name as string;
+    const fontSize = Math.max(10, 12 / globalScale);
+    ctx.font = `${isHub ? '600' : '500'} ${fontSize}px Inter, system-ui, sans-serif`;
+    const textWidth = ctx.measureText(label).width;
+    const padX = 4 / globalScale;
+    const padY = 2 / globalScale;
+    const bgW = textWidth + padX * 2;
+    const bgH = fontSize + padY * 2;
+    const bgX = node.x - bgW / 2;
+    const bgY = node.y + radius + 2 / globalScale;
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+    ctx.strokeStyle = node.color || '#cbd5e1';
+    ctx.lineWidth = 0.6 / globalScale;
+    if ((ctx as any).roundRect) {
+      ctx.beginPath();
+      (ctx as any).roundRect(bgX, bgY, bgW, bgH, 3 / globalScale);
+      ctx.fill();
+      ctx.stroke();
+    } else {
+      ctx.fillRect(bgX, bgY, bgW, bgH);
+      ctx.strokeRect(bgX, bgY, bgW, bgH);
+    }
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#0f172a';
+    ctx.fillText(label, node.x, bgY + bgH / 2);
+  }, [nodeSize, showLabels]);
+
+  const nodePointerAreaPaint = useCallback((node: any, color: string, ctx: CanvasRenderingContext2D) => {
+    const radius = Math.max(6, (node.val || 3) * nodeSize * 0.45);
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
+    ctx.fill();
+  }, [nodeSize]);
 
   if (graphError) {
     return (
