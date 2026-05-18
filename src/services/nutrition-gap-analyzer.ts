@@ -47,6 +47,9 @@ export interface PetNutritionContext {
   active_conditions: string[];
   /** Predisposições raciais (vindas de `breed_predispositions`). Opcional. */
   breed_predispositions?: BreedPredispositionInput[];
+  /** Quando fornecido, força o analisador a usar este snapshot de `pet_nutrition`
+   *  em vez do `is_current=true`. Necessário para análise histórica (timeline). */
+  nutritionId?: string;
 }
 
 export interface NutrientTarget {
