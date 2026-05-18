@@ -8,7 +8,7 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Edit2, Save, X, RotateCcw, Search, Layers3, AlertCircle } from 'lucide-react';
+import { Edit2, Save, X, RotateCcw, Search, Layers3, AlertCircle, RefreshCw } from 'lucide-react';
 
 interface SystemPrompt {
   id: string;
@@ -31,6 +31,8 @@ const SystemPromptsCatalog: React.FC = () => {
   const [query, setQuery] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
+  const [syncing, setSyncing] = useState(false);
+  const autoSyncedRef = React.useRef(false);
 
   const load = async () => {
     setLoading(true);
@@ -45,8 +47,45 @@ const SystemPromptsCatalog: React.FC = () => {
       setPrompts(data as SystemPrompt[]);
     }
     setLoading(false);
+    return (data as SystemPrompt[] | null) ?? [];
   };
-  useEffect(() => { load(); }, []);
+
+  const runSync = async (silent = false): Promise<boolean> => {
+    setSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-system-prompts', { method: 'POST' });
+      if (error) throw error;
+      const updated = (data as any)?.updated ?? 0;
+      const total = (data as any)?.total_in_manifest ?? 0;
+      if (!silent) {
+        toast({
+          title: '✅ Sincronizado',
+          description: `${updated} de ${total} prompts atualizados a partir do código.`,
+        });
+      }
+      await load();
+      return true;
+    } catch (e: any) {
+      if (!silent) {
+        toast({ variant: 'destructive', title: 'Falha ao sincronizar', description: e.message });
+      }
+      return false;
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      const rows = await load();
+      // Auto-sync silencioso se qualquer prompt está sem conteúdo
+      if (!autoSyncedRef.current && rows.some((p) => !p.default_content && !p.override_content)) {
+        autoSyncedRef.current = true;
+        await runSync(true);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const grouped = useMemo(() => {
     const filtered = prompts.filter(
@@ -103,14 +142,29 @@ const SystemPromptsCatalog: React.FC = () => {
     <div className="space-y-4">
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2">
-            <Layers3 className="h-5 w-5 text-primary" />
-            Catálogo de Prompts do Sistema
-          </CardTitle>
-          <CardDescription>
-            Todos os prompts usados internamente pelas edge functions, agrupados por família.
-            Edite para criar um <strong>override</strong> sem mexer no código. "Restaurar default" remove o override.
-          </CardDescription>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Layers3 className="h-5 w-5 text-primary" />
+                Catálogo de Prompts do Sistema
+              </CardTitle>
+              <CardDescription>
+                Todos os prompts usados internamente pelas edge functions, agrupados por família.
+                Edite para criar um <strong>override</strong> sem mexer no código. "Restaurar default" remove o override.
+                O conteúdo padrão vem do manifest <code>supabase/functions/_shared/system-prompts.ts</code>.
+              </CardDescription>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => runSync(false)}
+              disabled={syncing}
+              className="shrink-0"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 mr-1 ${syncing ? 'animate-spin' : ''}`} />
+              Sincronizar com o código
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="relative">
