@@ -63,6 +63,7 @@ const BaseKnowledgeTab = lazy(() => import('@/components/administrador/base-know
 const BreedsManagementTab = lazy(() => import('@/components/administrador/breeds/BreedsManagementTab'));
 const LabReferencesTab = lazy(() => import('@/components/administrador/lab-references/LabReferencesTab'));
 const PetFoodCatalogTab = lazy(() => import('@/components/administrador/pet-food/PetFoodCatalogTab'));
+const PetFoodCoverageTab = lazy(() => import('@/components/administrador/pet-food/PetFoodCoverageTab'));
 const DosageCurationPanel = lazy(() => import('@/components/administrador/dosage-curation/DosageCurationPanel'));
 const OrganogramaTab = lazy(() => import('@/pages/administrador/OrganogramaTab'));
 const GapFillDiagnosticsTab = lazy(() => import('@/components/administrador/diagnostics/GapFillDiagnosticsTab'));
@@ -155,6 +156,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'knowledge-base',
     component: PetFoodCatalogTab,
     description: 'Banco de marcas, produtos e perfil nutricional de rações'
+  },
+  {
+    id: 'pet-food-coverage',
+    label: 'Cobertura de Rações',
+    group: 'knowledge-base',
+    component: PetFoodCoverageTab,
+    description: 'KPIs, heatmap por marca, enriquecimento em lote e log de execuções do catálogo de rações'
   },
   {
     id: 'dosage-curation',

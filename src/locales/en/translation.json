@@ -2031,6 +2031,7 @@
         "petFoodCatalog": "Nutrition",
         "petFoodCatalogStatus": "Under curation",
         "petFoodCatalogStatusTooltip": "Database of brands, products and nutritional profile used by the nutritional gap pipeline.",
+        "petFoodCoverage": "Pet Food Coverage",
         "dosageCuration": "Dosage Curation",
         "dosageCurationStatus": "Under curation",
         "dosageCurationStatusTooltip": "Review and approval of doses extracted from web sources or estimated by AI.",
@@ -7909,5 +7910,55 @@
     "sincePeriod": "since first snapshot",
     "topChanges": "Nutrients with biggest variation",
     "methodologyNote": "Each point is a pet_nutrition snapshot; values are percentage deltas (Δ%) vs. FEDIAF 2024 target."
+  },
+  "petFoodCoverage": {
+    "title": "Pet Food Catalog Coverage",
+    "subtitle": "KPIs, brand heatmap, bulk enrichment and run log.",
+    "refresh": "Refresh",
+    "kpi": {
+      "total": "Approved products",
+      "enriched": "With nutrition",
+      "highComp": "Completeness ≥ 60%",
+      "highConf": "Confidence ≥ 70%"
+    },
+    "bulk": {
+      "title": "Bulk enrich",
+      "limit": "Max products",
+      "minCompleteness": "Re-process if below",
+      "onlyMissing": "Only missing nutrition",
+      "run": "Run now",
+      "warning": "Each item triggers a Lovable AI call. Use small batches (≤ 25) to test."
+    },
+    "heatmap": {
+      "title": "Coverage by brand (worst first)",
+      "avgComp": "avg comp.",
+      "empty": "No products registered yet."
+    },
+    "table": {
+      "title": "Products needing review",
+      "searchPh": "Search by brand or product…",
+      "brand": "Brand",
+      "product": "Product",
+      "completeness": "Completeness",
+      "confidence": "Confidence",
+      "actions": "Actions",
+      "reenrich": "Re-enrich",
+      "missing": "no nutrition",
+      "empty": "No products found."
+    },
+    "runs": {
+      "title": "Run history",
+      "when": "When",
+      "status": "Status",
+      "processed": "Processed",
+      "succeeded": "Succeeded",
+      "failed": "Failed",
+      "skipped": "Skipped",
+      "empty": "No runs recorded."
+    },
+    "toast": {
+      "runDone": "Batch done: {{processed}} processed, {{succeeded}} ok, {{failed}} failed.",
+      "singleDone": "Product re-enriched."
+    }
   }
 }

@@ -390,6 +390,16 @@ export const organograma: OrganogramaArea[] = [
         description_en: "Demo pets (is_demo flag) with increasing complexity.",
         files: ["src/components/administrador/patients/AdminPetManagementTab.tsx"],
       },
+      {
+        title: "Cobertura de rações (Fase 5)",
+        title_en: "Pet Food Coverage (Phase 5)",
+        description: "KPIs, heatmap por marca, enriquecimento em lote e log de execuções.",
+        description_en: "KPIs, brand heatmap, bulk enrichment and run log.",
+        files: [
+          "src/components/administrador/pet-food/PetFoodCoverageTab.tsx",
+          "supabase/functions/bulk-enrich-pet-food/index.ts",
+        ],
+      },
     ],
   },
   {

@@ -23,6 +23,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Added - 2026-05-18 — Fase 5: Cobertura e enriquecimento em lote do catálogo de rações
+<!-- area: admin · status: entregue · i18n: 1.83.0 -->
+- Nova tabela `pet_food_bulk_enrich_runs` (RLS admin-only) para registrar parâmetros, contagens e detalhes por execução do job.
+- Edge `bulk-enrich-pet-food`: seleciona produtos `approved` sem nutrição ou com `completeness_score < min_completeness`, dispara `enrich-pet-food-product` em chunks com concorrência configurável (default 4) e grava o resultado no log. Requer admin (verificado via `is_admin()` no cliente do usuário).
+- Nova aba admin `Cobertura de Rações` (`pet-food-coverage`, grupo `knowledge-base`): KPIs (total, com nutrição, completude ≥60%, confiança ≥70%), heatmap por marca (piores primeiro), tabela priorizada por completude com botão "Re-enriquecer" por linha e formulário de execução em lote, mais log das últimas 20 execuções com auto-refresh.
+- Item adicionado ao `KnowledgeBaseGroup.tsx` e ao `admin-tabs.ts`; organograma atualizado (área `admin`).
+- i18n: namespace `petFoodCoverage.*` (PT/EN) + label `admin.sidebar.knowledgeBase.petFoodCoverage`. `I18N_VERSION` → 1.83.0.
+- Files: supabase/functions/bulk-enrich-pet-food/index.ts, src/components/administrador/pet-food/PetFoodCoverageTab.tsx, src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx, src/config/admin-tabs.ts, src/data/projectOrganograma.ts, src/i18n.ts, src/locales/{pt,en}/translation.json
+
 ### Added - 2026-05-18 — Fase 4b: Provenance gap→composto no card do tutor
 <!-- area: tutor-ui · status: entregue · i18n: 1.82.0 -->
 - Edge `hybrid-recommendation`: schema JSON dos prompts ENRICH e FALLBACK agora exige `closes_gaps: string[]` por composto (rótulos exatos do bloco `NUTRITION_GAPS` que o composto fecha; `[]` quando não fecha nenhum). Sem alteração de prompt além do schema.
