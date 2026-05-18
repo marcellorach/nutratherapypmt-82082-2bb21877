@@ -2624,6 +2624,51 @@ export type Database = {
         }
         Relationships: []
       }
+      pet_food_bulk_enrich_runs: {
+        Row: {
+          details: Json
+          error: string | null
+          failed: number
+          finished_at: string | null
+          id: string
+          params: Json
+          processed: number
+          skipped: number
+          started_at: string
+          status: string
+          succeeded: number
+          triggered_by: string | null
+        }
+        Insert: {
+          details?: Json
+          error?: string | null
+          failed?: number
+          finished_at?: string | null
+          id?: string
+          params?: Json
+          processed?: number
+          skipped?: number
+          started_at?: string
+          status?: string
+          succeeded?: number
+          triggered_by?: string | null
+        }
+        Update: {
+          details?: Json
+          error?: string | null
+          failed?: number
+          finished_at?: string | null
+          id?: string
+          params?: Json
+          processed?: number
+          skipped?: number
+          started_at?: string
+          status?: string
+          succeeded?: number
+          triggered_by?: string | null
+        }
+        Relationships: []
+      }
       pet_food_ingredients: {
         Row: {
           created_at: string
