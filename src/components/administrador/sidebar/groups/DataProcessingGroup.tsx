@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Import, BarChart3, Settings, ChevronRight, PawPrint, CircleCheck, ArrowRight, Activity } from "lucide-react";
+import { Import, BarChart3, ChevronRight, PawPrint, CircleCheck, ArrowRight, Activity } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from 'react-i18next';

@@ -1997,6 +1997,8 @@
         "veterinaryTargetsStatus": "100% functional",
         "veterinaryTargetsStatusTooltip": "Complete condition mapping with treatability calculation and real data.",
         "tripletCuration": "Triplet Curation",
+        "triplets": "Triplets (Curation + Quality)",
+        "ontologyHub": "Ontology & SNOMED/UMLS",
         "knowledgeGraph": "Knowledge Graph",
         "knowledgeGraphStatus": "100% functional",
         "knowledgeGraphStatusTooltip": "Interactive graph with real database data, entity type and confidence filters.",
