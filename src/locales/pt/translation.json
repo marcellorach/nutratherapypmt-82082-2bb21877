@@ -7913,5 +7913,55 @@
     "sincePeriod": "desde o primeiro snapshot",
     "topChanges": "Nutrientes com maior variação",
     "methodologyNote": "Cada ponto representa um snapshot de pet_nutrition; valores são desvios percentuais (Δ%) vs. alvo FEDIAF 2024."
+  },
+  "petFoodCoverage": {
+    "title": "Cobertura do Catálogo de Rações",
+    "subtitle": "KPIs, heatmap por marca, enriquecimento em lote e log de execuções.",
+    "refresh": "Atualizar",
+    "kpi": {
+      "total": "Produtos aprovados",
+      "enriched": "Com nutrição",
+      "highComp": "Completude ≥ 60%",
+      "highConf": "Confiança ≥ 70%"
+    },
+    "bulk": {
+      "title": "Enriquecer em lote",
+      "limit": "Máx. de produtos",
+      "minCompleteness": "Recompletar abaixo de",
+      "onlyMissing": "Somente sem nutrição",
+      "run": "Executar agora",
+      "warning": "Cada item dispara uma chamada à Lovable AI. Use limites pequenos (≤ 25) para testar."
+    },
+    "heatmap": {
+      "title": "Cobertura por marca (piores primeiro)",
+      "avgComp": "média comp.",
+      "empty": "Sem produtos cadastrados ainda."
+    },
+    "table": {
+      "title": "Produtos prioritários para revisão",
+      "searchPh": "Buscar por marca ou produto…",
+      "brand": "Marca",
+      "product": "Produto",
+      "completeness": "Completude",
+      "confidence": "Confiança",
+      "actions": "Ações",
+      "reenrich": "Re-enriquecer",
+      "missing": "sem nutrição",
+      "empty": "Nenhum produto encontrado."
+    },
+    "runs": {
+      "title": "Histórico de execuções",
+      "when": "Quando",
+      "status": "Status",
+      "processed": "Processados",
+      "succeeded": "Sucessos",
+      "failed": "Falhas",
+      "skipped": "Ignorados",
+      "empty": "Nenhuma execução registrada."
+    },
+    "toast": {
+      "runDone": "Lote concluído: {{processed}} processados, {{succeeded}} sucesso, {{failed}} falhas.",
+      "singleDone": "Produto re-enriquecido."
+    }
   }
 }
