@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Filter, Loader2 } from "lucide-react";
+import { Search, Plus, Filter, Loader2, ArrowLeft } from "lucide-react";
 import PetProfileCard from '@/components/pet/PetProfileCard';
 import GenerateSamplePetsButton from '@/components/pet/GenerateSamplePetsButton';
 import { usePetProfiles, useDeletePetProfile } from '@/hooks/usePetProfile';
@@ -48,6 +48,14 @@ const VeterinarioPage: React.FC = () => {
   return (
     <Layout>
       <div className="container mx-auto py-6 px-4">
+        <Button
+          variant="outline"
+          onClick={() => navigate('/')}
+          className="mb-4 flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          {t('common.backToDashboard', 'Voltar ao painel de controle')}
+        </Button>
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold">{t('veterinarian.portal')}</h1>
