@@ -200,7 +200,7 @@ CRITICAL RULES FOR INDIVIDUALIZATION:
 
 Your enrichment MUST be specific to THIS patient. Do not give generic advice.
 
-LONGITUDINAL REASONING (when CURRENT_STATE / CLINICAL_TRAJECTORY / DIET_PROFILE blocks are present):
+LONGITUDINAL REASONING (when CURRENT_STATE / CLINICAL_TRAJECTORY / DIET_PROFILE / NUTRITION_GAPS blocks are present):
 - The CURRENT_STATE block (latest consultation) carries weight 1.0 and IS the primary clinical picture.
 - The CLINICAL_TRAJECTORY block carries weight 0.4. Use it ONLY to:
   (a) detect conditions that are progressing vs. stable vs. resolved,
@@ -208,6 +208,7 @@ LONGITUDINAL REASONING (when CURRENT_STATE / CLINICAL_TRAJECTORY / DIET_PROFILE 
   (c) detect cumulative drug exposures (e.g., chronic furosemide → renal stress).
 - Do NOT treat conditions only present in past consultations as if they were active now.
 - The DIET_PROFILE drives nutritional gap-analysis: prefer omega-3, antioxidants or restrictions consistent with the current diet.
+- The NUTRITION_GAPS block (weight 0.8) is QUANTITATIVE and authoritative for diet-derived deficiencies/excesses. For every DEFICIENT nutrient listed there, your top compound choices MUST include at least one that closes that gap (e.g., EPA+DHA deficit → marine omega-3; calcium deficit → bioavailable calcium source; chondroitin deficit + active OA → glucosamine/chondroitin). Do NOT recommend nutrients already ADEQUATE/EXCESS in the diet. Mention the closed gap explicitly in that compound's "mechanism".
 
 IMPORTANT: Return your response as valid JSON with this structure:
 {
@@ -243,11 +244,12 @@ INDIVIDUALIZATION REQUIREMENTS:
 5. Dosages must be adjusted for the patient's weight and age
 6. MAXIMUM 8 COMPOUNDS — select only the top compounds by efficacy, synergy, and relevance to this patient's specific clinical picture
 
-LONGITUDINAL REASONING (when CURRENT_STATE / CLINICAL_TRAJECTORY / DIET_PROFILE blocks are present):
+LONGITUDINAL REASONING (when CURRENT_STATE / CLINICAL_TRAJECTORY / DIET_PROFILE / NUTRITION_GAPS blocks are present):
 - CURRENT_STATE is the dominant signal (weight 1.0). CLINICAL_TRAJECTORY is context only (weight 0.4).
 - Conditions only in past consultations must NOT drive new active therapy.
 - Avoid re-introducing therapies the trajectory shows already failed.
 - Cross-check the DIET_PROFILE for nutritional gaps before recommending a redundant nutrient.
+- The NUTRITION_GAPS block (weight 0.8) is QUANTITATIVE: prioritize compounds that close each DEFICIENT entry and skip nutrients already ADEQUATE/EXCESS. Cite the gap closed in the compound's "mechanism".
 
 Your response MUST follow this JSON structure:
 {
