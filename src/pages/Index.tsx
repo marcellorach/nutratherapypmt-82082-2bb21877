@@ -32,7 +32,7 @@ const Index: React.FC = () => {
     <Layout>
       <div className="container mx-auto px-4 py-8 max-w-full overflow-x-hidden min-w-0">
         {/* Hero Section */}
-        <div className="text-center max-w-4xl mx-auto mb-12">
+        <div className="text-center max-w-4xl mx-auto mb-6">
           <h1 className="text-5xl font-bold mb-4">{t('home.title')}</h1>
           <p className="text-xl text-gray-700 mb-6">
             {t('home.subtitleDynamic', {
@@ -102,9 +102,9 @@ const Index: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="mt-8">
+          <div className="mt-4">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden w-full max-w-full">
-              <div className="p-8 text-center border-b border-gray-100">
+              <div className="px-8 py-4 text-center border-b border-gray-100">
                 <h2 className="text-2xl font-bold mb-2">{t('home.welcomeBack')}</h2>
                 <p className="text-gray-600 mb-0">
                   {t('home.connectedAs')} <span className="font-medium">{user.email}</span>
