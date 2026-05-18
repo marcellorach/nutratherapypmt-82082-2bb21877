@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-18T01:17:52.093Z
+// Última geração: 2026-05-18T01:24:24.088Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,31 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-18";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-18",
+    "kind": "added",
+    "area": "tutor-ui",
+    "status": "entregue",
+    "title": "Fase 4b: Provenance gap→composto no card do tutor",
+    "bullets": [
+      "Edge `hybrid-recommendation`: schema JSON dos prompts ENRICH e FALLBACK agora exige `closes_gaps: string[]` por composto (rótulos exatos do bloco `NUTRITION_GAPS` que o composto fecha; `[]` quando não fecha nenhum). Sem alteração de prompt além do schema.",
+      "`clinical-analysis-pipeline.ts`: cada composto materializado ganha `closesGaps: string[]` propagado verbatim do LLM.",
+      "`PetProfilePage.handleApproveStack`: persiste `closes_gaps` dentro de `treatment_proposals.compounds[]` (jsonb), sem mudanças no resto do \"patient analysis\".",
+      "`TreatmentProposalCard` (tutor): renderiza badge esmeralda \"Fecha déficit: {nutriente}\" abaixo do mecanismo de cada composto que cobre um gap quantitativo da dieta.",
+      "I18n: `tutor.proposal.closesGap` em PT/EN; bump `I18N_VERSION` 1.81.0 → 1.82.0.",
+      "Files: supabase/functions/hybrid-recommendation/index.ts, src/services/clinical-analysis-pipeline.ts, src/pages/veterinario/PetProfilePage.tsx, src/components/tutor/TreatmentProposalCard.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "supabase/functions/hybrid-recommendation/index.ts",
+      "src/services/clinical-analysis-pipeline.ts",
+      "src/pages/veterinario/PetProfilePage.tsx",
+      "src/components/tutor/TreatmentProposalCard.tsx",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.82.0"
+  },
   {
     "date": "2026-05-18",
     "kind": "added",
