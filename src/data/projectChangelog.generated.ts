@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-18T00:57:28.917Z
+// Última geração: 2026-05-18T01:03:34.554Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -22,6 +22,25 @@ export interface ChangelogEntry {
 export const lastChangelogDate = "2026-05-18";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-18",
+    "kind": "added",
+    "area": "clinical-pipeline",
+    "status": "entregue",
+    "title": "Bridge Nutrition Gaps → Engine de Recomendação",
+    "bullets": [
+      "`buildLongitudinalContext` (frontend) agora roda `analyzeNutritionGaps` para o pet ativo e envia os gaps quantitativos não-adequados (até 10) dentro de `dietProfile.gaps` para a edge function `hybrid-recommendation`.",
+      "Edge `hybrid-recommendation`: novo bloco `NUTRITION_GAPS [WEIGHT: 0.8]` renderizado no prompt com `observed / target / delta_pct / rationale / source` por nutriente em déficit/excesso.",
+      "Prompts ENRICH e FALLBACK atualizados: o LLM PRECISA selecionar pelo menos um composto que feche cada nutriente DEFICIENT listado e NÃO pode recomendar nutrientes já ADEQUATE/EXCESS na dieta; o \"mechanism\" deve citar explicitamente o gap fechado.",
+      "Sem mocks — se não houver `pet_food_nutrition` linkada ou pet sem peso, o bloco é simplesmente omitido (analyzer já trata `no_linked_products`).",
+      "Files: supabase/functions/hybrid-recommendation/index.ts, src/services/hybrid-recommendation-service.ts"
+    ],
+    "files": [
+      "supabase/functions/hybrid-recommendation/index.ts",
+      "src/services/hybrid-recommendation-service.ts"
+    ],
+    "i18nVersion": "none"
+  },
   {
     "date": "2026-05-18",
     "kind": "changed",
