@@ -70,6 +70,7 @@ const GapFillDiagnosticsTab = lazy(() => import('@/components/administrador/diag
 const PharmacologyTab = lazy(() => import('@/components/administrador/pharmacology/PharmacologyTab'));
 const ComplianceDashboard = lazy(() => import('@/components/administrador/compliance/ComplianceDashboard'));
 const TechnicalAuditsTab = lazy(() => import('@/components/administrador/audits/TechnicalAuditsTab'));
+const AboutSenexTab = lazy(() => import('@/components/administrador/AboutSenexTab'));
 
 export const adminTabsConfig: AdminTabConfig[] = [
   // Base de Conhecimento
@@ -395,6 +396,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'configuration',
     component: TechnicalAuditsTab,
     description: 'Histórico versionado de auditorias técnicas internas (HTML/PDF/DOCX) vinculadas à versão do sistema'
+  },
+  {
+    id: 'about-senex',
+    label: 'About Senex AI',
+    group: 'configuration',
+    component: AboutSenexTab,
+    description: 'Visão técnica detalhada do motor Senex AI: arquitetura em 6 fases, pilares científicos e princípios operacionais'
   }
 ];
 
