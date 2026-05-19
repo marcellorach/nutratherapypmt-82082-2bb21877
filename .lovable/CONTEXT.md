@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-05-18T19:02:48.962Z
+Generated: 2026-05-19T01:36:02.121Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
 ## Latest i18n version: -
 
 ## Changes by area (last 14 days)
-- **admin**: 22
+- **admin**: 21
 - **vet-ui**: 16
 - **tutor-ui**: 9
 - **clinical-pipeline**: 4
@@ -15,6 +15,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **i18n**: 1
 
 ## Top 10 recent entries
+### 2026-05-19 · [curation] ADDED — Governança de versão de embedding (Etapa 2 do plano RAG)
+- Coluna `embedding_model_version` adicionada a `study_embeddings` com default `gemini-embedding-001@768d` e índice dedicado, permitindo rastrear qual encoder gerou cada chunk vetorial.
+- Backfill dos 1.293 chunks legacy com a tag canônica — validado empiricamente pelo smoke test (avg top-similarity = 0.743, verdict PASS) executado na Etapa 1, confirmando compatibilidade com o encoder atual.
+- RPC `search_study_chunks` recriado para retornar `embedding_model_version` em cada resultado, sem alterar a assinatura semântica (mesmos filtros/ordenação).
+_files: supabase/functions/vectorize-study/index.ts, supabase/functions/document-chat/index.ts_
+
 ### 2026-05-18 · [admin] FIXED — Badges do pipeline: Biblioteca conta estudos curados e contadores não congelam
 - Biblioteca: badge passa a refletir estudos com `kanban_status='approved'` (status final de curadoria), alinhado ao critério usado pela própria aba `StudiesLibraryTab`. Antes contava estudos com qualquer triplet revisado, divergindo do que a aba mostrava.
 - Contadores congelados: as contagens carregavam todos os triplets via `select(...)`, atingindo silenciosamente o cap de 1000 linhas do Supabase e travando os badges em valores antigos. Substituído por queries `count: 'exact', head: true` em `processed_studies.kanban_status` — leves, exatas e atualizadas a cada ciclo de 15s.
@@ -68,12 +74,6 @@ _files: src/components/administrador/layout/AdminFooter.tsx, src/pages/Index.tsx
 - Sidebar Knowledge Base: `Knowledge Graph` movido para logo abaixo de `Triplets` e acima de `Evidence Conflicts`.
 - I18n bump 1.86.3 → 1.86.4 (nova chave `admin.sidebar.configuration.translationsHub`).
 _files: src/components/administrador/TranslationsHub.tsx, src/config/admin-tabs.ts, src/components/administrador/sidebar/groups/ConfigurationGroup.tsx, src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx…_
-
-### 2026-05-18 · [meta] CHANGED — Header/Footer: versão Senex auto-lida do CHANGELOG
-- `scripts/sync-changelog.mjs` agora extrai `<!-- senex: x.y.z -->` do bloco `[Unreleased]` e emite `senexVersion` em `projectChangelog.generated.ts`.
-- `src/config/senex-version.ts` consome `senexVersion` + `lastChangelogDate` — sem mais hardcode. Header e Footer atualizam sozinhos.
-- Sidebar: ícone "configurado" do item FDA/EMA/AVMA Compliance agora fica inline ao lado da palavra, igual aos demais (deixou de ficar centrado à direita quando o texto quebra em 2 linhas).
-_files: scripts/sync-changelog.mjs, src/config/senex-version.ts, src/data/projectChangelog.generated.ts, src/components/administrador/sidebar/groups/ConfigurationGroup.tsx_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

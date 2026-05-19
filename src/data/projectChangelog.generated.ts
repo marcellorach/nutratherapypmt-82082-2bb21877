@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-18T19:02:48.958Z
+// Última geração: 2026-05-19T01:36:02.117Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,32 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-05-18";
+export const lastChangelogDate = "2026-05-19";
 
 export const senexVersion = "5.1.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-19",
+    "kind": "added",
+    "area": "curation",
+    "status": "entregue",
+    "title": "Governança de versão de embedding (Etapa 2 do plano RAG)",
+    "bullets": [
+      "Coluna `embedding_model_version` adicionada a `study_embeddings` com default `gemini-embedding-001@768d` e índice dedicado, permitindo rastrear qual encoder gerou cada chunk vetorial.",
+      "Backfill dos 1.293 chunks legacy com a tag canônica — validado empiricamente pelo smoke test (avg top-similarity = 0.743, verdict PASS) executado na Etapa 1, confirmando compatibilidade com o encoder atual.",
+      "RPC `search_study_chunks` recriado para retornar `embedding_model_version` em cada resultado, sem alterar a assinatura semântica (mesmos filtros/ordenação).",
+      "`vectorize-study` passa a gravar `embedding_model_version` em cada linha inserida (além da metadata já existente em `processed_studies.full_text_metadata`), garantindo proveniência por chunk.",
+      "`document-chat` loga `EMBEDDING_MODEL_MISMATCH` (warning) sempre que um chunk recuperado vem de versão diferente do encoder atual — alerta automático para regressões futuras de pipeline.",
+      "Etapa 3 (re-vetorização em massa) descartada: smoke test confirmou que o índice legacy não precisa ser regenerado. Re-vetorização ficará disponível como ferramenta opcional caso o aviso de mismatch comece a aparecer no futuro.",
+      "Files: supabase/functions/vectorize-study/index.ts, supabase/functions/document-chat/index.ts, supabase/migrations (study_embeddings + search_study_chunks)"
+    ],
+    "files": [
+      "supabase/functions/vectorize-study/index.ts",
+      "supabase/functions/document-chat/index.ts"
+    ],
+    "i18nVersion": "-"
+  },
   {
     "date": "2026-05-18",
     "kind": "fixed",
