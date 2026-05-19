@@ -47,9 +47,12 @@ const SciImportSection: React.FC = () => {
   const [missingVectorCount, setMissingVectorCount] = useState(0);
   const [backfilling, setBackfilling] = useState(false);
 
-  // Fetch tab indicators on mount and periodically
+  // Fetch tab indicators on mount, periodically (15s) and on realtime changes
+  const fetchIndicatorsRef = React.useRef<() => Promise<void>>(async () => {});
   useEffect(() => {
+    let cancelled = false;
     const fetchIndicators = async () => {
+      if (cancelled) return;
       try {
         // Todas as contagens usam count agregado (head:true) para evitar o cap de 1000 linhas
         // e refletir o estado real a cada polling (15s).
@@ -126,15 +129,24 @@ const SciImportSection: React.FC = () => {
           .select('study_id', { count: 'exact', head: true });
         // Aproximação suficiente para o badge (não-bloqueante): se houver mais triplets que embeddings, sinaliza pendência.
         const missing = Math.max(0, (studiesWithTriplets ?? 0) - (studiesVectorized ?? 0));
+        if (cancelled) return;
         setMissingVectorCount(missing);
       } catch (e) {
         console.error('Error fetching tab indicators:', e);
       }
     };
+    fetchIndicatorsRef.current = fetchIndicators;
 
     fetchIndicators();
     const interval = setInterval(fetchIndicators, 15000);
-    return () => clearInterval(interval);
+    // Refresh imediato quando a aba volta a ficar visível (evita badge "velho" após troca de janela)
+    const onVisible = () => { if (document.visibilityState === 'visible') fetchIndicators(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
   }, []);
 
   // Listen for custom event to navigate to AI Processing tab
@@ -162,6 +174,11 @@ const SciImportSection: React.FC = () => {
       .channel('processed_studies_changes_pipeline')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'processed_studies' }, () => {
         if (activeTab === 'curation') fetchEstudos();
+        // Atualiza badges imediatamente (sem esperar o polling de 15s)
+        fetchIndicatorsRef.current?.();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'triplet_extractions' }, () => {
+        fetchIndicatorsRef.current?.();
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
