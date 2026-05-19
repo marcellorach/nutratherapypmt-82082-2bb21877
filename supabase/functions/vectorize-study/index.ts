@@ -205,11 +205,13 @@ serve(async (req) => {
           chunk_index: i,
           chunk_text: chunks[i],
           embedding: JSON.stringify(embedding), // pgvector aceita string ou array
+          embedding_model_version: EMBEDDING_MODEL_VERSION,
           chunk_metadata: {
             char_start: chunkPosition >= 0 ? chunkPosition : null,
             char_count: chunks[i].length,
             word_count: chunks[i].split(/\s+/).length,
             embedding_dimension: embedding.length,
+            embedding_model_version: EMBEDDING_MODEL_VERSION,
           }
         });
 
