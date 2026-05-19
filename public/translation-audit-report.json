@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-05-18T19:23:00.176Z",
+  "timestamp": "2026-05-19T01:32:03.456Z",
   "summary": {
-    "totalFiles": 878,
+    "totalFiles": 879,
     "totalIssues": 428,
     "hardcodedTexts": 49,
     "missingKeys": 378,
@@ -1551,35 +1551,35 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/import/SciImportSection.tsx",
-      "line": 95,
+      "line": 96,
       "text": "id",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/import/SciImportSection.tsx",
-      "line": 109,
+      "line": 110,
       "text": "study_id",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/import/SciImportSection.tsx",
-      "line": 174,
+      "line": 175,
       "text": "*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/import/SciImportSection.tsx",
-      "line": 222,
+      "line": 223,
       "text": "study_id",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/import/SciImportSection.tsx",
-      "line": 226,
+      "line": 227,
       "text": "study_id",
       "severity": "high"
     },
