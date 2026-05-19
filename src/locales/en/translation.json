@@ -607,7 +607,9 @@
       "dataExtracted": "Data extracted successfully by AI",
       "awaitingExtraction": "Awaiting Extraction",
       "processStudyDesc": "Process the study to automatically extract: population, dosages, biomarkers, adverse effects, contraindications and interactions.",
-      "useProcessButton": "Use the \"Process\" button in the pipeline to start extraction"
+      "useProcessButton": "Use the \"Process\" button in the pipeline to start extraction",
+      "tripletFallbackTitle": "Summary derived from extracted relations",
+      "tripletFallbackHint": "Structured data (dosages, biomarkers, adverse effects) has not been extracted yet. Reprocess the study for complete details."
     },
     "vetGraphRAG": {
       "title": "Senex AI",
