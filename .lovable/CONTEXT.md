@@ -1,20 +1,26 @@
 # Project context briefing (auto)
-Generated: 2026-05-19T01:36:02.121Z
+Generated: 2026-05-19T13:54:54.648Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: -
+## Latest i18n version: 1.86.11
 
 ## Changes by area (last 14 days)
 - **admin**: 21
 - **vet-ui**: 16
 - **tutor-ui**: 9
+- **curation**: 4
 - **clinical-pipeline**: 4
-- **curation**: 3
 - **meta**: 3
 - **i18n**: 1
 
 ## Top 10 recent entries
+### 2026-05-19 · [curation] FIXED — Cards e modal de curadoria consistentes (derivação de triplets)
+- Causa-raiz identificada: cards "nus" em "Em Curadoria" (Spermidine, Vet Geroscience) ocorrem quando o Stage 1 do `extract-study-entities` retorna `extractedNutraceuticals/extractedConditions` vazios, mesmo com triplets válidos gerados pelo Stage 2 (14 e 23 triplets, respectivamente). Card e modal "Análise IA" leem só de `analysis_data` → ficam vazios.
+- Backfill imediato (data migration via UPDATE): 2 estudos afetados tiveram `extractedNutraceuticals` e `extractedConditions` derivados de `triplet_extractions` (Nutraceutical/Compound/Drug → nutracêuticos; Condition/Disease/Phenotype/Outcome → condições, dedup por nome lowercase, confidence padrão 3).
+- Fallback definitivo no pipeline: `extract-study-entities/index.ts` agora deriva as listas a partir dos triplets recém-inseridos quando Stage 1 vier vazio, antes do `UPDATE processed_studies.analysis_data`. Logs `🛟 Fallback: derivados N nutracêuticos/condições`.
+_files: supabase/functions/extract-study-entities/index.ts, src/components/administrador/estudos/detalhes/tabs/AnaliseTab.tsx, src/i18n.ts_
+
 ### 2026-05-19 · [curation] ADDED — Governança de versão de embedding (Etapa 2 do plano RAG)
 - Coluna `embedding_model_version` adicionada a `study_embeddings` com default `gemini-embedding-001@768d` e índice dedicado, permitindo rastrear qual encoder gerou cada chunk vetorial.
 - Backfill dos 1.293 chunks legacy com a tag canônica — validado empiricamente pelo smoke test (avg top-similarity = 0.743, verdict PASS) executado na Etapa 1, confirmando compatibilidade com o encoder atual.
@@ -68,12 +74,6 @@ _files: supabase/functions/_shared/system-prompts.ts, supabase/functions/sync-sy
 - Index hero: reduzido espaço acima do botão "Scroll to discover our vision" (`mt-16` → `mt-4`, `mt-3` → `mt-2`) para caber na 1ª dobra.
 - Files: src/components/administrador/layout/AdminFooter.tsx, src/pages/Index.tsx
 _files: src/components/administrador/layout/AdminFooter.tsx, src/pages/Index.tsx_
-
-### 2026-05-18 · [admin] CHANGED — TranslationsHub: Audit + Manage em uma só aba; Knowledge Graph reposicionado
-- Novo `TranslationsHub.tsx` (sub-tabs Audit/Manage) substitui os 2 itens separados na sidebar Configuration. Ids legados `translation-audit` e `translation-manager` continuam funcionando como alias do hub (deep-link no sub-tab Manage preservado).
-- Sidebar Knowledge Base: `Knowledge Graph` movido para logo abaixo de `Triplets` e acima de `Evidence Conflicts`.
-- I18n bump 1.86.3 → 1.86.4 (nova chave `admin.sidebar.configuration.translationsHub`).
-_files: src/components/administrador/TranslationsHub.tsx, src/config/admin-tabs.ts, src/components/administrador/sidebar/groups/ConfigurationGroup.tsx, src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

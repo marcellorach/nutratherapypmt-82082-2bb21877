@@ -590,7 +590,39 @@ serve(async (req) => {
       // Metadata
       extractionStages: ['stage1_entities', 'stage2_mechanisms', 'stage3_clinical']
     };
-    
+
+    // 🛟 FALLBACK: se Stage 1 não detectou nutracêuticos/condições mas Stage 2
+    // gerou triplets válidos, derivar as listas a partir dos triplets para que
+    // o card de curadoria e o modal de detalhes não fiquem "nus".
+    const NUTRA_TYPES = new Set(['Nutraceutical', 'Compound', 'Drug']);
+    const COND_TYPES = new Set(['Condition', 'Disease', 'Phenotype', 'Outcome']);
+    if (frontendData.extractedNutraceuticals.length === 0 && triplets.length > 0) {
+      const derived = new Map<string, { name: string; confidence: number }>();
+      for (const t of triplets) {
+        if (NUTRA_TYPES.has(t.subject_type) && t.subject_name) {
+          const key = String(t.subject_name).trim().toLowerCase();
+          if (key && !derived.has(key)) derived.set(key, { name: t.subject_name, confidence: 3 });
+        }
+      }
+      if (derived.size > 0) {
+        frontendData.extractedNutraceuticals = Array.from(derived.values());
+        console.log(`🛟 Fallback: derivados ${derived.size} nutracêuticos a partir de triplets`);
+      }
+    }
+    if (frontendData.extractedConditions.length === 0 && triplets.length > 0) {
+      const derived = new Map<string, { name: string; confidence: number }>();
+      for (const t of triplets) {
+        if (COND_TYPES.has(t.object_type) && t.object_name) {
+          const key = String(t.object_name).trim().toLowerCase();
+          if (key && !derived.has(key)) derived.set(key, { name: t.object_name, confidence: 3 });
+        }
+      }
+      if (derived.size > 0) {
+        frontendData.extractedConditions = Array.from(derived.values());
+        console.log(`🛟 Fallback: derivadas ${derived.size} condições a partir de triplets`);
+      }
+    }
+
     console.log('💾 Atualizando analysis_data com dados dos 3 stages...');
     await supabase
       .from('processed_studies')

@@ -24,6 +24,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 5.1.0 -->
 
+### Fixed - 2026-05-19 — Cards e modal de curadoria consistentes (derivação de triplets)
+<!-- area: curation · status: entregue · i18n: 1.86.11 -->
+- **Causa-raiz identificada**: cards "nus" em "Em Curadoria" (Spermidine, Vet Geroscience) ocorrem quando o Stage 1 do `extract-study-entities` retorna `extractedNutraceuticals/extractedConditions` vazios, mesmo com triplets válidos gerados pelo Stage 2 (14 e 23 triplets, respectivamente). Card e modal "Análise IA" leem só de `analysis_data` → ficam vazios.
+- **Backfill imediato** (data migration via UPDATE): 2 estudos afetados tiveram `extractedNutraceuticals` e `extractedConditions` derivados de `triplet_extractions` (Nutraceutical/Compound/Drug → nutracêuticos; Condition/Disease/Phenotype/Outcome → condições, dedup por nome lowercase, confidence padrão 3).
+- **Fallback definitivo no pipeline**: `extract-study-entities/index.ts` agora deriva as listas a partir dos triplets recém-inseridos quando Stage 1 vier vazio, antes do `UPDATE processed_studies.analysis_data`. Logs `🛟 Fallback: derivados N nutracêuticos/condições`.
+- **Fallback no modal "Análise IA"**: `AnaliseTab.tsx` consulta `triplet_extractions` quando `analysis_data` não tem dados estruturados de Stage 3 e renderiza um resumo agrupado por `predicate` (até 50 triplets, top 12 por grupo) com badges `subject → object`. Mensagem deixa claro que dosagens/biomarcadores requerem reprocessamento.
+- **i18n**: novas chaves `studies.analysis.tripletFallbackTitle` e `tripletFallbackHint` em PT/EN. `I18N_VERSION` 1.86.10 → 1.86.11.
+- Files: `supabase/functions/extract-study-entities/index.ts`, `src/components/administrador/estudos/detalhes/tabs/AnaliseTab.tsx`, `src/locales/{pt,en}/translation.json`, `src/i18n.ts`, data migration via UPDATE em `processed_studies`.
+
 ### Added - 2026-05-19 — Governança de versão de embedding (Etapa 2 do plano RAG)
 <!-- area: curation · status: entregue · i18n: - -->
 - **Coluna `embedding_model_version`** adicionada a `study_embeddings` com default `gemini-embedding-001@768d` e índice dedicado, permitindo rastrear qual encoder gerou cada chunk vetorial.
