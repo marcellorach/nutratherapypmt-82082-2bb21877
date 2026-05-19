@@ -4465,6 +4465,7 @@ export type Database = {
           chunk_index: number
           chunk_metadata: Json
           chunk_text: string
+          embedding_model_version: string
           similarity: number
           study_id: string
         }[]
