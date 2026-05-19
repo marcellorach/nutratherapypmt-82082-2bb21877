@@ -149,6 +149,22 @@ serve(async (req) => {
         if (!searchError && chunks && chunks.length > 0) {
           relevantChunks = chunks;
           console.log(`✅ Encontrados ${chunks.length} chunks relevantes via RAG`);
+
+          // Governança (Etapa 2): detectar mismatch de modelo de embedding entre o
+          // encoder atual e o encoder usado para gerar os chunks. Se um chunk foi
+          // vetorizado por outro modelo, a comparação cosseno fica degradada.
+          const EXPECTED_VERSION = 'gemini-embedding-001@768d';
+          const mismatched = chunks.filter(
+            (c: any) => c.embedding_model_version && c.embedding_model_version !== EXPECTED_VERSION,
+          );
+          if (mismatched.length > 0) {
+            const versions = Array.from(
+              new Set(mismatched.map((c: any) => c.embedding_model_version)),
+            );
+            console.warn(
+              `⚠️ EMBEDDING_MODEL_MISMATCH: ${mismatched.length}/${chunks.length} chunks usam modelo diferente do encoder atual (${EXPECTED_VERSION}). Versões encontradas: ${versions.join(', ')}. Re-vetorização recomendada.`,
+            );
+          }
           
           // Construir contexto com chunks relevantes
           vectorContext = '\n\n**CONTEXTO VETORIAL (RAG) - Trechos Mais Relevantes do Estudo Completo**:\n\n';

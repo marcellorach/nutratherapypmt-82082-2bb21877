@@ -24,6 +24,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 5.1.0 -->
 
+### Added - 2026-05-19 — Governança de versão de embedding (Etapa 2 do plano RAG)
+<!-- area: curation · status: entregue · i18n: - -->
+- **Coluna `embedding_model_version`** adicionada a `study_embeddings` com default `gemini-embedding-001@768d` e índice dedicado, permitindo rastrear qual encoder gerou cada chunk vetorial.
+- **Backfill** dos 1.293 chunks legacy com a tag canônica — validado empiricamente pelo smoke test (avg top-similarity = 0.743, verdict PASS) executado na Etapa 1, confirmando compatibilidade com o encoder atual.
+- **RPC `search_study_chunks`** recriado para retornar `embedding_model_version` em cada resultado, sem alterar a assinatura semântica (mesmos filtros/ordenação).
+- **`vectorize-study`** passa a gravar `embedding_model_version` em cada linha inserida (além da metadata já existente em `processed_studies.full_text_metadata`), garantindo proveniência por chunk.
+- **`document-chat`** loga `EMBEDDING_MODEL_MISMATCH` (warning) sempre que um chunk recuperado vem de versão diferente do encoder atual — alerta automático para regressões futuras de pipeline.
+- **Etapa 3 (re-vetorização em massa) descartada:** smoke test confirmou que o índice legacy não precisa ser regenerado. Re-vetorização ficará disponível como ferramenta opcional caso o aviso de mismatch comece a aparecer no futuro.
+- Files: supabase/functions/vectorize-study/index.ts, supabase/functions/document-chat/index.ts, supabase/migrations (study_embeddings + search_study_chunks)
+
 ### Fixed - 2026-05-18 — Badges do pipeline: Biblioteca conta estudos curados e contadores não congelam
 <!-- area: admin · status: entregue · i18n: - -->
 - **Biblioteca**: badge passa a refletir estudos com `kanban_status='approved'` (status final de curadoria), alinhado ao critério usado pela própria aba `StudiesLibraryTab`. Antes contava estudos com qualquer triplet revisado, divergindo do que a aba mostrava.
