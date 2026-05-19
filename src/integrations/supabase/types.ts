@@ -3830,6 +3830,7 @@ export type Database = {
           chunk_text: string
           created_at: string | null
           embedding: string | null
+          embedding_model_version: string | null
           id: string
           study_id: string
           updated_at: string | null
@@ -3840,6 +3841,7 @@ export type Database = {
           chunk_text: string
           created_at?: string | null
           embedding?: string | null
+          embedding_model_version?: string | null
           id?: string
           study_id: string
           updated_at?: string | null
@@ -3850,6 +3852,7 @@ export type Database = {
           chunk_text?: string
           created_at?: string | null
           embedding?: string | null
+          embedding_model_version?: string | null
           id?: string
           study_id?: string
           updated_at?: string | null
