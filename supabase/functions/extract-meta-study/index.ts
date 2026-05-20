@@ -9,6 +9,7 @@ const corsHeaders = {
 };
 
 const lovableApiKey = Deno.env.get("LOVABLE_API_KEY") || "";
+const googleAiApiKey = Deno.env.get("GOOGLE_AI_API_KEY") || "";
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
 const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
@@ -19,6 +20,13 @@ const MODEL = "google/gemini-3-pro-preview";
 // so we fail FAST and LOUD above this threshold instead of silently truncating.
 const GATEWAY_PDF_LIMIT_BYTES = 7 * 1024 * 1024;
 const LLM_TIMEOUT_MS = 110_000;
+
+type GeminiUploadedFile = {
+  name: string;
+  uri: string;
+  mimeType: string;
+  state?: string;
+};
 
 type TraceEntry = {
   stage: string;
@@ -35,6 +43,80 @@ function bytesToBase64(bytes: Uint8Array): string {
     binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
   }
   return btoa(binary);
+}
+
+async function uploadPdfToGoogleAi(pdfBytes: Uint8Array, fileName: string, mimeType: string) {
+  if (!googleAiApiKey) {
+    throw new Error("GOOGLE_AI_API_KEY not configured");
+  }
+
+  const initResponse = await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${googleAiApiKey}`, {
+    method: "POST",
+    headers: {
+      "X-Goog-Upload-Protocol": "resumable",
+      "X-Goog-Upload-Command": "start",
+      "X-Goog-Upload-Header-Content-Length": String(pdfBytes.length),
+      "X-Goog-Upload-Header-Content-Type": mimeType,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ file: { display_name: fileName } }),
+  });
+
+  if (!initResponse.ok) {
+    throw new Error(`Falha ao iniciar upload do PDF grande: ${initResponse.status} - ${await initResponse.text()}`);
+  }
+
+  const uploadUrl = initResponse.headers.get("X-Goog-Upload-URL");
+  if (!uploadUrl) {
+    throw new Error("Google AI não retornou upload URL para o PDF grande.");
+  }
+
+  const uploadResponse = await fetch(uploadUrl, {
+    method: "POST",
+    headers: {
+      "Content-Length": String(pdfBytes.length),
+      "X-Goog-Upload-Offset": "0",
+      "X-Goog-Upload-Command": "upload, finalize",
+    },
+    body: pdfBytes,
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error(`Falha ao enviar PDF grande: ${uploadResponse.status} - ${await uploadResponse.text()}`);
+  }
+
+  const uploaded = (await uploadResponse.json()).file as GeminiUploadedFile | undefined;
+  if (!uploaded?.name || !uploaded?.uri) {
+    throw new Error("Google AI não retornou metadados válidos do arquivo enviado.");
+  }
+
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const infoResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/${uploaded.name}?key=${googleAiApiKey}`);
+    if (!infoResponse.ok) {
+      throw new Error(`Falha ao consultar status do PDF grande: ${infoResponse.status} - ${await infoResponse.text()}`);
+    }
+    const fileInfo = await infoResponse.json() as GeminiUploadedFile;
+    if (fileInfo.state === "ACTIVE") {
+      return fileInfo;
+    }
+    if (fileInfo.state === "FAILED") {
+      throw new Error("Google AI marcou o arquivo como FAILED durante o processamento.");
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+  }
+
+  throw new Error("Google AI demorou demais para ativar o PDF grande.");
+}
+
+async function deleteGoogleAiFile(fileName: string) {
+  if (!googleAiApiKey || !fileName) return;
+  try {
+    await fetch(`https://generativelanguage.googleapis.com/v1beta/${fileName}?key=${googleAiApiKey}`, {
+      method: "DELETE",
+    });
+  } catch (_err) {
+    // best effort cleanup
+  }
 }
 
 const TOOL = {
@@ -142,6 +224,7 @@ Deno.serve(async (req) => {
     // Download the source document (PDF or text-like). For PDFs we attach as
     // multimodal input to Gemini; for text-like we read as UTF-8.
     let pdfBase64: string | null = null;
+    let googleAiFile: GeminiUploadedFile | null = null;
     let pdfMime: string = pdf_mime || "application/pdf";
     if (pdf_storage_path) {
       const tDl = performance.now();
@@ -166,28 +249,43 @@ Deno.serve(async (req) => {
       } else {
         if (buf.byteLength > GATEWAY_PDF_LIMIT_BYTES) {
           const sizeMb = (buf.byteLength / 1024 / 1024).toFixed(1);
-          const capMb = (GATEWAY_PDF_LIMIT_BYTES / 1024 / 1024).toFixed(0);
-          return fail(
-            413,
-            "extraction",
-            `PDF tem ${sizeMb} MB — acima do limite seguro de ${capMb} MB para envio inline ao Gemini via gateway. Não vou truncar o estudo silenciosamente.`,
-            {
-              options: [
-                "Dividir o PDF em partes (ex: capítulos, ou abstract+métodos+discussão) e ingerir cada parte como um meta-estudo separado.",
-                "Extrair o texto fora da plataforma (qualquer leitor de PDF → exportar como .txt ou .md) e reenviar como arquivo de texto — sem limite de tamanho relevante.",
-                "Reenviar apenas as seções essenciais (abstract + conclusão + tabela de resultados) como .md, anotando no campo 'Notas do curador' o que foi omitido.",
-                "Se o PDF for um scan (sem texto selecionável), rodar OCR antes (ex: ocrmypdf) — o tamanho costuma cair drasticamente.",
-              ],
-            },
-          );
+          try {
+            googleAiFile = await uploadPdfToGoogleAi(
+              buf,
+              pdf_storage_path?.split("/").pop() || "document.pdf",
+              pdfMime,
+            );
+            pushTrace({
+              stage: "extraction",
+              status: "success",
+              duration_ms: Math.round(performance.now() - tDl),
+              detail: `PDF grande enviado via Google AI File API (${sizeMb} MB · ${pdfMime})`,
+            });
+          } catch (fileApiErr: any) {
+            const capMb = (GATEWAY_PDF_LIMIT_BYTES / 1024 / 1024).toFixed(0);
+            return fail(
+              413,
+              "extraction",
+              `PDF tem ${sizeMb} MB — acima do limite seguro de ${capMb} MB para envio inline ao gateway, e o fallback automático de arquivo grande falhou: ${fileApiErr?.message || fileApiErr}`,
+              {
+                options: [
+                  "Tentar novamente: o fallback automático para PDF grande usa upload dedicado e pode falhar por rate limit/transiente do provedor.",
+                  "Dividir o PDF em partes (ex: capítulos, ou abstract+métodos+discussão) e ingerir cada parte como um meta-estudo separado.",
+                  "Extrair o texto fora da plataforma (qualquer leitor de PDF → exportar como .txt ou .md) e reenviar como arquivo de texto, preservando o estudo completo.",
+                  "Se o PDF for scan, rodar OCR antes (ex: ocrmypdf) para melhorar leitura e reduzir peso efetivo.",
+                ],
+              },
+            );
+          }
+        } else {
+          pdfBase64 = bytesToBase64(buf);
+          pushTrace({
+            stage: "extraction",
+            status: "success",
+            duration_ms: Math.round(performance.now() - tDl),
+            detail: `PDF anexado ao Gemini (${(buf.byteLength / 1024).toFixed(0)} KB · ${pdfMime})`,
+          });
         }
-        pdfBase64 = bytesToBase64(buf);
-        pushTrace({
-          stage: "extraction",
-          status: "success",
-          duration_ms: Math.round(performance.now() - tDl),
-          detail: `PDF anexado ao Gemini (${(buf.byteLength / 1024).toFixed(0)} KB · ${pdfMime})`,
-        });
       }
     } else if (text) {
       pushTrace({
@@ -199,7 +297,7 @@ Deno.serve(async (req) => {
       return fail(400, "extraction", "Anexe um documento (PDF/.md/.txt/.docx) ou cole o texto.");
     }
 
-    if (!pdfBase64 && (!text || text.length < 50)) {
+    if (!pdfBase64 && !googleAiFile && (!text || text.length < 50)) {
       return fail(422, "extraction", "Texto extraído é muito curto (<50 chars). Pode ser PDF escaneado sem OCR.");
     }
 
@@ -221,7 +319,7 @@ Deno.serve(async (req) => {
 
     const textPrompt =
       `EXISTING CORE RULES (link only to these rule_ids):\n${rulesCatalog || "(none)"}\n${curatorBlock}\n` +
-      (pdfBase64
+      (pdfBase64 || googleAiFile
         ? `SOURCE${source_url ? ` (${source_url})` : ""}: see attached PDF.`
         : `SOURCE${source_url ? ` (${source_url})` : ""}:\n${truncated}`);
 
@@ -234,80 +332,149 @@ Deno.serve(async (req) => {
           file_data: `data:${pdfMime};base64,${pdfBase64}`,
         },
       });
+    } else if (googleAiFile) {
+      userContent.push({
+        type: "file",
+        file: {
+          file_id: googleAiFile.name,
+        },
+      });
     }
 
     const tLlm = performance.now();
     const ctrl = new AbortController();
     const timeoutId = setTimeout(() => ctrl.abort(), LLM_TIMEOUT_MS);
-    let aiRes: Response;
+    let call: any = null;
+    let usage: any = {};
     try {
-      aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${lovableApiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: MODEL,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userContent },
-          ],
-          tools: [TOOL],
-          tool_choice: { type: "function", function: { name: TOOL.function.name } },
-        }),
-        signal: ctrl.signal,
-      });
+      if (googleAiFile) {
+        const aiRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${googleAiApiKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{
+                role: "user",
+                parts: [
+                  {
+                    fileData: {
+                      mimeType: googleAiFile.mimeType || pdfMime,
+                      fileUri: googleAiFile.uri,
+                    },
+                  },
+                  { text: `${systemPrompt}\n\n${textPrompt}` },
+                ],
+              }],
+              tools: [{
+                functionDeclarations: [{
+                  name: TOOL.function.name,
+                  description: TOOL.function.description,
+                  parameters: TOOL.function.parameters,
+                }],
+              }],
+              toolConfig: {
+                functionCallingConfig: {
+                  mode: "ANY",
+                  allowedFunctionNames: [TOOL.function.name],
+                },
+              },
+            }),
+            signal: ctrl.signal,
+          },
+        );
+
+        if (!aiRes.ok) {
+          const errText = await aiRes.text();
+          console.error("Google AI direct error", aiRes.status, errText);
+          const httpCode = aiRes.status === 429 || aiRes.status === 402 ? aiRes.status : 502;
+          const friendly = aiRes.status === 429
+            ? "Limite de requisições do Gemini excedido. Aguarde 1 min e tente novamente."
+            : aiRes.status === 402
+            ? "Créditos do provedor de IA esgotados."
+            : `Falha no processamento de PDF grande via Google AI (HTTP ${aiRes.status}).`;
+          await deleteGoogleAiFile(googleAiFile.name);
+          return fail(httpCode, "llm_analysis", friendly, { detail: errText });
+        }
+
+        const json = await aiRes.json();
+        await deleteGoogleAiFile(googleAiFile.name);
+        call = json.candidates?.[0]?.content?.parts?.find((part: any) => part.functionCall?.name === TOOL.function.name)?.functionCall;
+        usage = json.usageMetadata || {};
+      } else {
+        const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${lovableApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: MODEL,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userContent },
+            ],
+            tools: [TOOL],
+            tool_choice: { type: "function", function: { name: TOOL.function.name } },
+          }),
+          signal: ctrl.signal,
+        });
+
+        if (!aiRes.ok) {
+          const errText = await aiRes.text();
+          console.error("Lovable AI error", aiRes.status, errText);
+          const httpCode = aiRes.status === 429 || aiRes.status === 402 ? aiRes.status : 502;
+          const friendly = aiRes.status === 429
+            ? "Limite de requisições do Gemini excedido. Aguarde 1 min e tente novamente."
+            : aiRes.status === 402
+            ? "Créditos do Lovable AI esgotados. Adicione créditos em Settings > Workspace > Usage."
+            : aiRes.status === 413 || /payload|too large|size/i.test(errText)
+            ? `Gateway rejeitou o PDF por tamanho (HTTP ${aiRes.status}). Reenvie em partes menores ou como texto.`
+            : `Falha no gateway de IA (HTTP ${aiRes.status}).`;
+          return fail(httpCode, "llm_analysis", friendly, { detail: errText });
+        }
+
+        const json = await aiRes.json();
+        call = json.choices?.[0]?.message?.tool_calls?.[0];
+        usage = json.usage || {};
+      }
     } catch (e: any) {
       clearTimeout(timeoutId);
+      if (googleAiFile?.name) {
+        await deleteGoogleAiFile(googleAiFile.name);
+      }
       const aborted = e?.name === "AbortError";
       return fail(
         aborted ? 504 : 502,
         "llm_analysis",
         aborted
           ? `Gemini não respondeu em ${Math.round(LLM_TIMEOUT_MS / 1000)}s — provavelmente o PDF está grande/complexo demais para uma única chamada.`
-          : `Falha de rede ao chamar o gateway: ${e?.message || e}`,
+          : `Falha de rede ao chamar a IA: ${e?.message || e}`,
         {
           options: aborted ? [
             "Dividir o PDF em partes menores e ingerir cada uma separadamente.",
             "Reenviar apenas abstract + conclusão como .md (muito mais rápido para o modelo digerir).",
-            "Tentar novamente em alguns minutos — o gateway pode estar sob carga.",
+            "Tentar novamente em alguns minutos — o provedor pode estar sob carga.",
           ] : undefined,
         },
       );
     }
     clearTimeout(timeoutId);
 
-    if (!aiRes.ok) {
-      const errText = await aiRes.text();
-      console.error("Lovable AI error", aiRes.status, errText);
-      const httpCode = aiRes.status === 429 || aiRes.status === 402 ? aiRes.status : 502;
-      const friendly = aiRes.status === 429
-        ? "Limite de requisições do Gemini excedido. Aguarde 1 min e tente novamente."
-        : aiRes.status === 402
-        ? "Créditos do Lovable AI esgotados. Adicione créditos em Settings > Workspace > Usage."
-        : aiRes.status === 413 || /payload|too large|size/i.test(errText)
-        ? `Gateway rejeitou o PDF por tamanho (HTTP ${aiRes.status}). Reenvie em partes menores ou como texto.`
-        : `Falha no gateway de IA (HTTP ${aiRes.status}).`;
-      return fail(httpCode, "llm_analysis", friendly, { detail: errText });
-    }
-
-    const json = await aiRes.json();
-    const call = json.choices?.[0]?.message?.tool_calls?.[0];
     if (!call) {
       return fail(502, "llm_analysis", "Gemini não retornou rascunho estruturado (tool_call ausente). Tente novamente ou cole abstract+conclusão como texto.");
     }
-    const usage = json.usage || {};
     pushTrace({
       stage: "llm_analysis",
       status: "success",
       duration_ms: Math.round(performance.now() - tLlm),
-      detail: `${MODEL} · ${usage.total_tokens ?? "?"} tokens`,
+      detail: `${MODEL} · ${usage.total_tokens ?? usage.totalTokenCount ?? "?"} tokens`,
     });
 
     let draft: any;
     try {
-      draft = JSON.parse(call.function.arguments);
+      const rawArgs = call.function?.arguments ?? call.args;
+      draft = typeof rawArgs === "string" ? JSON.parse(rawArgs) : rawArgs;
     } catch (e: any) {
       return fail(502, "structuring", `Falha ao parsear JSON do Gemini: ${e?.message || e}`);
     }

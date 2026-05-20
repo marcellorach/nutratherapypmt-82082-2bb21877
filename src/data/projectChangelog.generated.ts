@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-20T04:17:31.034Z
+// Última geração: 2026-05-20T04:33:03.582Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,23 @@ export const lastChangelogDate = "2026-05-20";
 export const senexVersion = "5.1.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-20",
+    "kind": "fixed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Meta-estudo: fallback automático para PDF grande",
+    "bullets": [
+      "Edge `extract-meta-study` agora tenta fallback automático para PDFs acima do limite inline do gateway usando upload dedicado no Google AI File API, preservando o estudo completo sem truncamento silencioso.",
+      "Fluxo de análise: PDFs pequenos continuam no gateway atual; PDFs grandes passam por upload dedicado + chamada direta ao Gemini 3 Pro com o mesmo schema estruturado e o mesmo `trace[]` por estágio.",
+      "Falhas reais de PDF grande agora explicam se o bloqueio foi no fallback automático (upload/processamento do arquivo) antes de sugerir alternativas manuais.",
+      "Files: supabase/functions/extract-meta-study/index.ts"
+    ],
+    "files": [
+      "supabase/functions/extract-meta-study/index.ts"
+    ],
+    "i18nVersion": "1.93.0"
+  },
   {
     "date": "2026-05-20",
     "kind": "changed",

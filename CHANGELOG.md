@@ -24,6 +24,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 5.1.0 -->
 
+### Fixed - 2026-05-20 — Meta-estudo: fallback automático para PDF grande
+<!-- area: admin · status: entregue · i18n: 1.93.0 -->
+
+- **Edge `extract-meta-study`** agora tenta fallback automático para PDFs acima do limite inline do gateway usando upload dedicado no Google AI File API, preservando o estudo completo sem truncamento silencioso.
+- **Fluxo de análise**: PDFs pequenos continuam no gateway atual; PDFs grandes passam por upload dedicado + chamada direta ao Gemini 3 Pro com o mesmo schema estruturado e o mesmo `trace[]` por estágio.
+- **Falhas reais** de PDF grande agora explicam se o bloqueio foi no fallback automático (upload/processamento do arquivo) antes de sugerir alternativas manuais.
+- Files: supabase/functions/extract-meta-study/index.ts
+
 ### Changed - 2026-05-20 — Sidebar admin: nova família "Governança & IA"
 <!-- area: admin · status: entregue · i18n: 1.93.0 -->
 
