@@ -1,83 +1,89 @@
-## Objetivo
+## Problema
 
-Tornar a ingestão de meta-estudos em **Fundamentos > Ingestão** robusta e transparente: PDF é obrigatório, extração de texto realmente acontece, curador pode anexar notas que guiam a IA, e cada etapa mostra status como no pipeline de estudos clínicos.
+A digestão atual reduz papers arquiteturais densos (ex.: MedGraphRAG) a ~4 "claims" planos e só sabe **vincular** a RCs que já existem. Lições novas (chunking, vocabulários controlados, U-Retrieval, anti-padrões) se perdem. Além disso, todas as RCs atuais nasceram de incidentes no chat (indução) — não há canal formal para regras **deduzidas de literatura**, que é justamente a razão de existir do meta-KG.
 
----
+## Princípio
 
-## Mudanças
+Toda regra-core deve declarar sua **origem epistêmica**:
+- `inductive` — emergiu de incidente concreto / discussão usuário↔IA (ex.: RC-001, RC-002).
+- `deductive` — destilada de paper arquitetural/metodológico no meta-KG.
+- `hybrid` — incidente confirmado depois por literatura (ou vice-versa).
 
-### 1. UI — `IngestaoMetaEstudo.tsx`
+Isso torna auditável "por que acreditamos nisso" e habilita workflows distintos de validação.
 
-**Reorganização do formulário:**
-- **Documento fonte (obrigatório)** — dropzone drag & drop aceitando `.pdf`, `.docx`, `.txt`, `.md` (até 20MB). Mostra preview do nome + tamanho + botão remover.
-- **Notas do curador (opcional)** — textarea menor, label clara: *"Diretrizes para a IA: como ponderar este estudo, claims a ignorar, RCs já cobertas, etc."* Aceita markdown.
-- **DOI / URL (opcional, recolhido)** — campo pequeno dentro de um `<details>` "Metadados adicionais", grava em `meta_studies.doi`.
-- Remover o campo grande "Texto / .md / abstract" da forma atual (passa a ser fallback automático se a extração falhar).
-- Botão "Analisar com IA" desabilitado até ter documento anexado.
+## Mudanças propostas
 
-**Painel de log de digestão (novo):**
-Lista vertical estilo timeline com 5 estágios, cada um com ícone de status (pending/running/success/error) + mensagem + tempo:
-1. `Upload do documento` (cliente → storage `meta_studies_pdfs`)
-2. `Extração de texto` (edge → tamanho extraído em chars)
-3. `Catálogo de Regras-Core carregado` (N regras disponíveis para vínculo)
-4. `Análise pelo Gemini 3 Pro` (modelo, latência, tokens)
-5. `Rascunho estruturado` (N claims, N vínculos sugeridos)
+### 1. Schema rico de extração (`extract-meta-study`)
 
-Em caso de erro, o estágio fica vermelho com a mensagem técnica + dica acionável (ex: *"PDF protegido por senha — exporte uma cópia sem proteção"*).
+Substituir `key_claims` plano por **seções tipadas**, cada uma com mínimo recomendado de itens (instrução no prompt, não constraint rígido):
 
-### 2. Edge function — `extract-meta-study`
+```text
+emit_meta_study_draft {
+  title, authors, year, journal, doi, kind, summary,
 
-**Trocar modelo:** `google/gemini-3-pro-preview` (substitui `gemini-2.5-pro`).
+  architectural_patterns[]     // padrões reutilizáveis (Triple Graph, U-Retrieval...)
+  methodological_recipes[]     // como fazer X (chunking 512 tokens, ...)
+  vocabularies_standards[]     // UMLS, SNOMED, MeSH adotados
+  quantitative_parameters[]    // chunk_size=512, top_k=10, weight=0.7
+  anti_patterns_pitfalls[]     // o que NÃO fazer + por quê
+  evaluation_metrics[]         // como medir sucesso (precision@k, ...)
+  open_questions[]             // lacunas reconhecidas pelos autores
 
-**Extração real de PDF/docx:**
-- Para PDF: enviar ao Gemini como **multimodal inline** (`type: "image_url"` com `data:application/pdf;base64,...` no payload do gateway — Gemini 3 Pro aceita PDF nativamente até 20MB).
-- Para `.docx`: extrair texto via biblioteca Deno (`docx` parser) ou rejeitar com mensagem clara se não suportado nesta fase.
-- Para `.txt` / `.md`: ler direto.
-- Fallback: se a extração devolver <200 chars úteis, retornar erro 422 com `stage: "extraction"` para a UI marcar vermelho.
+  // cada item = { statement, quote (literal ≤300 chars), weight 0–1, applies_to }
 
-**Aceitar `curator_notes`** no payload e injetar como bloco separado no system prompt:
-> *"O curador anexou as seguintes diretrizes — respeite-as: {curator_notes}"*
-
-**Retornar telemetria por estágio** no JSON de resposta, para o painel de log popular cada linha:
-```ts
-{
-  draft: {...},
-  trace: [
-    { stage: "extraction", status: "success", duration_ms: 420, detail: "12450 chars extracted" },
-    { stage: "rules_catalog", status: "success", detail: "18 rules loaded" },
-    { stage: "llm_analysis", status: "success", duration_ms: 8200, detail: "gemini-3-pro-preview · 4231 tokens" },
-    { stage: "structuring", status: "success", detail: "3 claims · 2 suggested links" }
-  ]
+  suggested_links[]            // (como hoje) vínculos a RCs existentes
+  proposed_rules[]             // NOVO: candidatos a RC deduzidos do paper
 }
 ```
 
-### 3. Migration — `meta_studies.curator_notes`
+`proposed_rules[]` por item: `{ proposed_title, category, enunciado, justification_quote, suggested_application, confidence }` — status sempre `proposed`, **nunca grava direto em `core_rules`**.
 
-Adicionar coluna `curator_notes TEXT NULL` em `meta_studies` para persistir as diretrizes do curador junto com o estudo aprovado.
+O prompt do sistema passa a exigir explicitamente: "extraia entre 8–20 lições no total entre as categorias acima; se uma lição não cabe em RC existente, emita em `proposed_rules`".
 
-### 4. i18n
+### 2. Coluna `origin` em `core_rules`
 
-Bump `I18N_VERSION` (1.91.0 → 1.92.0) e adicionar chaves novas: `fundamentos.ingestao.dropzone.*`, `fundamentos.ingestao.curatorNotes.*`, `fundamentos.ingestao.log.stages.*`.
+Migração:
+```sql
+alter table core_rules
+  add column origin text not null default 'inductive'
+    check (origin in ('inductive','deductive','hybrid')),
+  add column proposed_from_meta_study uuid references meta_studies(id),
+  add column promoted_at timestamptz,
+  add column promoted_by uuid;
+```
 
-### 5. CHANGELOG + organograma sync
+Backfill: RC-001, RC-002 → `inductive`; RC-003 (planejada) → `deductive` quando promovida do paper de anti-aging.
 
-Entrada em `[Unreleased]` (`area: admin · status: improved · i18n: bump`) e `npm run sync:changelog`.
+### 3. UI de revisão na Fundamentos > Ingestão
 
----
+Tabs no rascunho devolvido:
+- **Lições estruturadas** (7 categorias acima, com contadores)
+- **Vínculos a RCs existentes** (como hoje)
+- **🆕 Novas RCs propostas** — cada uma com botões `Promover para RC-NNN` / `Mesclar com RC existente` / `Descartar`. Promover gera nova linha em `core_rules` com `origin='deductive'` e `proposed_from_meta_study` apontando para o meta-study.
 
-## O que **não** muda
-- Schema de `core_rules`, `core_rule_evidence`, `core_rule_modulators` permanece igual.
-- Fluxo de aprovação manual (`approve_meta_study` no front) permanece igual.
-- Tabs vizinhas (Justificativas, Estudos, Score Popovers) não são tocadas.
+### 4. `docs/CORE_RULES.md` — seção nova
 
----
+Adicionar bloco no topo "**Origem das regras**" explicando indutivo/dedutivo/híbrido + convenção: toda RC deve declarar origem no header. Adicionar campo `Origem:` ao template.
 
-## Riscos e mitigações
-- **Gemini 3 Pro Preview pode ter rate limits diferentes** → tratar 429/402 já está coberto pelo handler existente.
-- **PDFs digitalizados (scan puro)** podem não ter texto extraível → o estágio "Extração" mostra `0 chars` e sugere OCR manual antes de tentar de novo.
-- **Curator notes muito longas** podem inflar o prompt → cap em 4000 chars com aviso na UI.
+### 5. Pasta de "regras candidatas" (deduzidas, ainda não promovidas)
 
----
+`docs/CORE_RULES_PROPOSED.md` — espelha automaticamente as `proposed_rules` ainda não revisadas, para visibilidade humana fora da UI. Sincronizado por extensão do `scripts/sync-core-rules.mjs` (Fase 2 já planejada).
 
-## Pergunta antes de implementar
-Confirma que quer **manter o DOI/URL escondido em `<details>`** (não eliminar de vez), ou prefere remover totalmente da UI e deixar só editável depois, no rascunho? Eu recomendo manter recolhido — custa zero ruído visual e ajuda auditoria.
+## Não inclui (fora de escopo deste plano)
+
+- Re-extrair retroativamente meta-estudos já ingeridos (faremos botão "re-digerir com schema v2" depois).
+- Mudar pipeline de **estudos clínicos** (`extract-study-entities`) — este plano só toca o pipeline **arquitetural** (`extract-meta-study`).
+- Auto-promoção de regras deduzidas — toda promoção continua humana (consistente com a regra de Curadoria Gatekeeper).
+
+## Detalhes técnicos
+
+**Arquivos a tocar:**
+- `supabase/functions/extract-meta-study/index.ts` — novo `TOOL.parameters`, novo `systemPrompt`, novo `trace` por categoria.
+- `supabase/migrations/<timestamp>_core_rules_origin.sql` — migração acima.
+- `src/components/administrador/fundamentos/IngestaoMetaEstudo.tsx` — renderizar 7 categorias + aba "Novas RCs propostas" com ações.
+- `docs/CORE_RULES.md` — seção "Origem das regras" + template atualizado.
+- `docs/CORE_RULES_PROPOSED.md` — arquivo novo (placeholder).
+- `CHANGELOG.md` + `npm run sync:changelog`.
+
+**Validação após implementação:**
+Re-ingerir o paper MedGraphRAG; esperar ≥10 lições distribuídas entre `architectural_patterns`, `methodological_recipes`, `vocabularies_standards`, `quantitative_parameters`, e ≥2 entradas em `proposed_rules` (ex.: "Chunking obrigatório acima de N tokens", "Vocabulário controlado UMLS-equivalente para entidades clínicas").
