@@ -1032,6 +1032,8 @@
       "noRag": "Sem RAG",
       "noChunksIndexed": "Sem trechos indexados",
       "noChunksIndexedTooltip": "Os trechos vetoriais (RAG) ainda não foram gerados. A curadoria continua disponível, mas o chat do estudo não terá precisão semântica até a vetorização concluir. Clique para vetorizar agora.",
+      "ragNotIndexed": "RAG não indexado",
+      "ragNotIndexedTooltip": "Este estudo ainda não foi vetorizado. O curador não verá o \"Trecho de Origem\" e o chat do estudo não terá precisão semântica. Clique para reprocessar a vetorização.",
       "positiveInteractions": "Interações Positivas (Estimulação)",
       "negativeInteractions": "Interações Inibitórias",
       "sideEffectsLabel": "Efeitos Colaterais",

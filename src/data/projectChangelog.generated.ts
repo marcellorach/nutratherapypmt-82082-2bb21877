@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-19T13:54:54.644Z
+// Última geração: 2026-05-20T02:44:23.875Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,38 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-05-19";
+export const lastChangelogDate = "2026-05-20";
 
 export const senexVersion = "5.1.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-20",
+    "kind": "added",
+    "area": "meta",
+    "status": "entregue",
+    "title": "Governança de Regras-Core (RC-001, RC-002, RC-003 planejada)",
+    "bullets": [
+      "Novo arquivo `docs/CORE_RULES.md` como fonte canônica auditável das regras-core do Senex AI. Cada regra tem `id` (RC-NNN), categoria, versão, status, justificativa, aplicação em código e evidências sustentadoras. Substitui o status anterior em que regras-core estavam dispersas entre `.lovable/memory/`, custom-knowledge e CHANGELOG.",
+      "RC-001 — Exclusão de trial ≠ Contraindicação: critério de exclusão indica lacuna de evidência, não risco demonstrado. Aplicada em (a) prompt do Stage 3 em `extract-study-entities` (regra #8 no system prompt), (b) banner amarelo no topo da seção \"Contraindicações\" do `ExtractedDataVisualization` lembrando o curador. Motivada pelo estudo PQQ humano que listou \"Pregnancy and Nursing\" e \"Serious Chronic Diseases\" como contraindicações, quando eram apenas exclusões do trial.",
+      "RC-002 — Eventos adversos: negação explícita ≠ ocorrência: quando estudo declara \"no adverse events reported\", `side_effects` é normalizado para `[]` e flag `explicitly_no_adverse_events=true` é setada. UI exibe badge verde \"Sem eventos adversos reportados\" em vez de contador \"(1)\" enganoso. Filtro via regex `NEGATIVE_AE_REGEX` no pós-Stage 3 + filtro espelhado no componente UI.",
+      "RC-003 — Translational Weighting Humano→Cão (planejada, Fase 2): registrada como `status: planned` com pesos sugeridos por domínio (cognição 0.7, metabolismo hepático 0.4, articular/inflamação 0.8). Implementação no `hybrid-recommendation` virá após criação da tabela `core_rule_modulators` + ingestão de meta-estudos.",
+      "Renomeação de label: badge \"Sem trechos indexados\" → \"RAG não indexado\" (PT) / \"RAG not indexed\" (EN), com tooltip mais explícito sobre impacto na curadoria e no chat semântico. Clique continua disparando reprocessamento de vetorização.",
+      "Memórias internas: novas em `.lovable/memory/principles/exclusion-vs-contraindication.md` e `.lovable/memory/architecture/core-rules-governance.md`.",
+      "i18n: novas chaves `studies.card.ragNotIndexed`, `ragNotIndexedTooltip`, `studies.extraction.noAdverseEventsReported`, `noAdverseEventsHint`, `rc001Title`, `rc001Hint` (fallback inline). `I18N_VERSION` 1.86.11 → 1.87.0.",
+      "Files: `docs/CORE_RULES.md` (novo), `supabase/functions/extract-study-entities/index.ts`, `src/components/administrador/estudos/cards/EstudoCard.tsx`, `src/components/administrador/estudos/visualization/ExtractedDataVisualization.tsx`, `src/locales/{pt,en}/translation.json`, `src/i18n.ts`, 2 arquivos em `.lovable/memory/`.",
+      "Não incluído neste turno (próximas fases): timestamps timeline (1.2), scores clicáveis com critérios (1.4), tabela `core_rules` espelhada (2.2), tab \"Fundamentos Arquiteturais\" (2.3), ingestão do PDF \"Anti-aging strategies for dogs\" como meta-estudo (2.4), translational weighting no `hybrid-recommendation` (2.5)."
+    ],
+    "files": [
+      ".lovable/memory/principles/exclusion-vs-contraindication.md",
+      ".lovable/memory/architecture/core-rules-governance.md",
+      "supabase/functions/extract-study-entities/index.ts",
+      "src/components/administrador/estudos/cards/EstudoCard.tsx",
+      "src/components/administrador/estudos/visualization/ExtractedDataVisualization.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.87.0"
+  },
   {
     "date": "2026-05-19",
     "kind": "fixed",

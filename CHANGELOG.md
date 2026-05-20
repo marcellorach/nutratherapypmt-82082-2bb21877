@@ -24,6 +24,18 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 5.1.0 -->
 
+### Added - 2026-05-20 — Governança de Regras-Core (RC-001, RC-002, RC-003 planejada)
+<!-- area: meta · status: entregue · i18n: 1.87.0 -->
+- **Novo arquivo `docs/CORE_RULES.md`** como fonte canônica auditável das regras-core do Senex AI. Cada regra tem `id` (RC-NNN), categoria, versão, status, justificativa, aplicação em código e evidências sustentadoras. Substitui o status anterior em que regras-core estavam dispersas entre `.lovable/memory/`, custom-knowledge e CHANGELOG.
+- **RC-001 — Exclusão de trial ≠ Contraindicação**: critério de exclusão indica lacuna de evidência, não risco demonstrado. Aplicada em (a) prompt do Stage 3 em `extract-study-entities` (regra #8 no system prompt), (b) banner amarelo no topo da seção "Contraindicações" do `ExtractedDataVisualization` lembrando o curador. Motivada pelo estudo PQQ humano que listou "Pregnancy and Nursing" e "Serious Chronic Diseases" como contraindicações, quando eram apenas exclusões do trial.
+- **RC-002 — Eventos adversos: negação explícita ≠ ocorrência**: quando estudo declara "no adverse events reported", `side_effects` é normalizado para `[]` e flag `explicitly_no_adverse_events=true` é setada. UI exibe badge verde "Sem eventos adversos reportados" em vez de contador "(1)" enganoso. Filtro via regex `NEGATIVE_AE_REGEX` no pós-Stage 3 + filtro espelhado no componente UI.
+- **RC-003 — Translational Weighting Humano→Cão** (planejada, Fase 2): registrada como `status: planned` com pesos sugeridos por domínio (cognição 0.7, metabolismo hepático 0.4, articular/inflamação 0.8). Implementação no `hybrid-recommendation` virá após criação da tabela `core_rule_modulators` + ingestão de meta-estudos.
+- **Renomeação de label**: badge "Sem trechos indexados" → "RAG não indexado" (PT) / "RAG not indexed" (EN), com tooltip mais explícito sobre impacto na curadoria e no chat semântico. Clique continua disparando reprocessamento de vetorização.
+- **Memórias internas**: novas em `.lovable/memory/principles/exclusion-vs-contraindication.md` e `.lovable/memory/architecture/core-rules-governance.md`.
+- **i18n**: novas chaves `studies.card.ragNotIndexed`, `ragNotIndexedTooltip`, `studies.extraction.noAdverseEventsReported`, `noAdverseEventsHint`, `rc001Title`, `rc001Hint` (fallback inline). `I18N_VERSION` 1.86.11 → 1.87.0.
+- Files: `docs/CORE_RULES.md` (novo), `supabase/functions/extract-study-entities/index.ts`, `src/components/administrador/estudos/cards/EstudoCard.tsx`, `src/components/administrador/estudos/visualization/ExtractedDataVisualization.tsx`, `src/locales/{pt,en}/translation.json`, `src/i18n.ts`, 2 arquivos em `.lovable/memory/`.
+- **Não incluído neste turno** (próximas fases): timestamps timeline (1.2), scores clicáveis com critérios (1.4), tabela `core_rules` espelhada (2.2), tab "Fundamentos Arquiteturais" (2.3), ingestão do PDF "Anti-aging strategies for dogs" como meta-estudo (2.4), translational weighting no `hybrid-recommendation` (2.5).
+
 ### Fixed - 2026-05-19 — Cards e modal de curadoria consistentes (derivação de triplets)
 <!-- area: curation · status: entregue · i18n: 1.86.11 -->
 - **Causa-raiz identificada**: cards "nus" em "Em Curadoria" (Spermidine, Vet Geroscience) ocorrem quando o Stage 1 do `extract-study-entities` retorna `extractedNutraceuticals/extractedConditions` vazios, mesmo com triplets válidos gerados pelo Stage 2 (14 e 23 triplets, respectivamente). Card e modal "Análise IA" leem só de `analysis_data` → ficam vazios.

@@ -176,6 +176,17 @@ serve(async (req) => {
     const stage3Data = stage3Result ? JSON.parse(stage3Result.function.arguments) : { dosages: [], side_effects: [], contraindications: [], clinical_outcomes: [] };
     console.log(`✅ Stage 3: ${stage3Data.dosages?.length || 0} dosagens, ${stage3Data.side_effects?.length || 0} efeitos colaterais`);
 
+    // RC-001 / Adverse-events normalization: drop pseudo-entries that mean "no AEs reported"
+    const NEGATIVE_AE_REGEX = /\b(no|none|not|sem|nenhum|nenhuma|n[ãa]o)\b.*\b(adverse|side[- ]?effect|event|reported|observed|evento|efeito|adverso|reportado|observad)/i;
+    const originalAEs = Array.isArray(stage3Data.side_effects) ? stage3Data.side_effects : [];
+    const filteredAEs = originalAEs.filter((e: any) => !NEGATIVE_AE_REGEX.test(`${e?.name || ''} ${e?.description || ''}`));
+    if (originalAEs.length > 0 && filteredAEs.length !== originalAEs.length) {
+      console.log(`🧹 Adverse-events normalization: removed ${originalAEs.length - filteredAEs.length} negation-only entries (kept ${filteredAEs.length})`);
+    }
+    stage3Data.side_effects = filteredAEs;
+    stage3Data.explicitly_no_adverse_events =
+      originalAEs.length > 0 && filteredAEs.length === 0;
+
     // ==================== POST-EXTRACTION VALIDATION ====================
     // Filter dosages to only include compounds that were found in Stage 1 (with flexible matching)
     const stage1Nutraceuticals = stage1Data.nutraceuticals || [];
@@ -1122,7 +1133,16 @@ CRITICAL RULES - YOU MUST FOLLOW:
 4. For compound names, use the EXACT name from Stage 1 nutraceuticals when possible
 5. If a study mentions dosages for multiple species, create SEPARATE entries for each species
 6. Only include side effects and contraindications explicitly stated in this study
-7. Never assume or hallucinate data - if it's not in the document, don't include it`;
+7. Never assume or hallucinate data - if it's not in the document, don't include it
+8. CORE RULE RC-001 — EXCLUSION CRITERIA ARE NOT CONTRAINDICATIONS:
+   - If a population was EXCLUDED from the trial (e.g., "pregnant women were excluded", "patients with diabetes were not enrolled"),
+     this is an EVIDENCE GAP, not a contraindication.
+   - Only classify as a contraindication if the text EXPLICITLY states harm, risk, or recommends against use
+     (e.g., "contraindicated in...", "should not be used in...", "caused adverse events in patients with...").
+   - When in doubt, prefer to omit the contraindication rather than infer one from exclusion criteria.
+9. ADVERSE EVENTS — explicit negation:
+   - If the study explicitly reports that NO adverse events were observed, return side_effects as an EMPTY array [].
+   - Do NOT create a side_effect entry whose name/description is "No adverse events reported" — that distorts downstream counts.`;
 }
 
 function getDefaultStage3UserPrompt(): string {
