@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-05-20T04:17:31.039Z
+Generated: 2026-05-20T04:33:03.586Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
 ## Latest i18n version: 1.93.0
 
 ## Changes by area (last 14 days)
-- **admin**: 26
+- **admin**: 27
 - **vet-ui**: 16
 - **tutor-ui**: 9
 - **meta**: 4
@@ -15,6 +15,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **i18n**: 1
 
 ## Top 10 recent entries
+### 2026-05-20 · [admin] FIXED — Meta-estudo: fallback automático para PDF grande
+- Edge `extract-meta-study` agora tenta fallback automático para PDFs acima do limite inline do gateway usando upload dedicado no Google AI File API, preservando o estudo completo sem truncamento silencioso.
+- Fluxo de análise: PDFs pequenos continuam no gateway atual; PDFs grandes passam por upload dedicado + chamada direta ao Gemini 3 Pro com o mesmo schema estruturado e o mesmo `trace[]` por estágio.
+- Falhas reais de PDF grande agora explicam se o bloqueio foi no fallback automático (upload/processamento do arquivo) antes de sugerir alternativas manuais.
+_files: supabase/functions/extract-meta-study/index.ts_
+
 ### 2026-05-20 · [admin] CHANGED — Sidebar admin: nova família "Governança & IA"
 - Removido link órfão "Base de Conhecimento" (tab `knowledge-base-settings`) que não tinha conteúdo.
 - Criada nova seção lateral "Governança & IA" (`GovernanceAIGroup`) separada de Configuração, agrupando: AI Config, AI Prompts, Organograma, Conformidade FDA/EMA/AVMA, Auditorias Técnicas, About Senex AI e Fundamentos Arquiteturais.
@@ -68,12 +74,6 @@ _files: supabase/functions/vectorize-study/index.ts, supabase/functions/document
 - Contadores congelados: as contagens carregavam todos os triplets via `select(...)`, atingindo silenciosamente o cap de 1000 linhas do Supabase e travando os badges em valores antigos. Substituído por queries `count: 'exact', head: true` em `processed_studies.kanban_status` — leves, exatas e atualizadas a cada ciclo de 15s.
 - Curadoria: badge agora derivado de `kanban_status in ('parsed','review','processed')` (fonte única).
 _files: src/components/administrador/estudos/import/SciImportSection.tsx_
-
-### 2026-05-18 · [curation] CHANGED — Pipeline de embeddings padronizado (Google AI direto + taskType) e modelo do chat configurável
-- Auditoria profunda confirmou que gêmeo digital, hybrid-recommendation, breed-predisposition, lab-interpretation e clinical-analysis-pipeline NÃO consomem vetores — operam sobre KG/triplets ou texto literal. Único consumidor real de embedding é `document-chat`. Zero risco de regressão clínica nesta mudança.
-- Mismatch crítico corrigido: `document-chat` usava `google/text-embedding-004` (deprecated Jan/2026) via Lovable AI Gateway, enquanto `vectorize-study` indexava com `gemini-embedding-001` direto via Google AI — vetores eram incomparáveis, busca semântica degradada.
-- Modelo canônico unificado: `gemini-embedding-001` direto via Google AI, 768d, com `taskType: RETRIEVAL_DOCUMENT` na indexação (`vectorize-study`) e `RETRIEVAL_QUERY` na busca (`document-chat`). Lovable AI Gateway não expõe `taskType` (perde ~10-15% de recall), por isso mantemos Google direto.
-_files: supabase/functions/vectorize-study/index.ts, supabase/functions/document-chat/index.ts, src/hooks/useAIConfig.ts, src/components/administrador/estudos/cards/EstudoCard.tsx…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
