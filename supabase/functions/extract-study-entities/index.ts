@@ -1122,7 +1122,16 @@ CRITICAL RULES - YOU MUST FOLLOW:
 4. For compound names, use the EXACT name from Stage 1 nutraceuticals when possible
 5. If a study mentions dosages for multiple species, create SEPARATE entries for each species
 6. Only include side effects and contraindications explicitly stated in this study
-7. Never assume or hallucinate data - if it's not in the document, don't include it`;
+7. Never assume or hallucinate data - if it's not in the document, don't include it
+8. CORE RULE RC-001 — EXCLUSION CRITERIA ARE NOT CONTRAINDICATIONS:
+   - If a population was EXCLUDED from the trial (e.g., "pregnant women were excluded", "patients with diabetes were not enrolled"),
+     this is an EVIDENCE GAP, not a contraindication.
+   - Only classify as a contraindication if the text EXPLICITLY states harm, risk, or recommends against use
+     (e.g., "contraindicated in...", "should not be used in...", "caused adverse events in patients with...").
+   - When in doubt, prefer to omit the contraindication rather than infer one from exclusion criteria.
+9. ADVERSE EVENTS — explicit negation:
+   - If the study explicitly reports that NO adverse events were observed, return side_effects as an EMPTY array [].
+   - Do NOT create a side_effect entry whose name/description is "No adverse events reported" — that distorts downstream counts.`;
 }
 
 function getDefaultStage3UserPrompt(): string {
