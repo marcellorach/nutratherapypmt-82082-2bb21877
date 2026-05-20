@@ -1031,6 +1031,8 @@
       "errorStatus": "Error",
       "noRag": "No RAG",
       "noChunksIndexed": "No indexed excerpts",
+      "ragNotIndexed": "RAG not indexed",
+      "ragNotIndexedTooltip": "This study has not been vectorized yet. The curator won't see the \"Source Excerpt\" and the study chat won't have semantic precision. Click to reprocess vectorization.",
       "noChunksIndexedTooltip": "Vector excerpts (RAG) have not been generated yet. Curation remains available, but the study chat will lack semantic precision until vectorization completes. Click to vectorize now.",
       "positiveInteractions": "Positive Interactions (Stimulation)",
       "negativeInteractions": "Inhibitory Interactions",
