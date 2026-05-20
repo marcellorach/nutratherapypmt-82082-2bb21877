@@ -22,6 +22,21 @@ interface SuggestedLink {
   rationale?: string;
   _enabled?: boolean;
 }
+interface LessonItem {
+  statement: string;
+  quote?: string;
+  weight?: number;
+  applies_to?: string;
+}
+interface ProposedRule {
+  proposed_title: string;
+  category?: string;
+  enunciado: string;
+  justification_quote?: string;
+  suggested_application?: string;
+  confidence?: number;
+  _action?: 'promote' | 'discard' | null;
+}
 interface Draft {
   title: string;
   authors?: string;
@@ -34,6 +49,14 @@ interface Draft {
   summary?: string;
   key_claims: Claim[];
   suggested_links: SuggestedLink[];
+  architectural_patterns?: LessonItem[];
+  methodological_recipes?: LessonItem[];
+  vocabularies_standards?: LessonItem[];
+  quantitative_parameters?: LessonItem[];
+  anti_patterns_pitfalls?: LessonItem[];
+  evaluation_metrics?: LessonItem[];
+  open_questions?: LessonItem[];
+  proposed_rules?: ProposedRule[];
 }
 
 type TraceStatus = 'pending' | 'running' | 'success' | 'error';
@@ -63,6 +86,16 @@ const RELATION_COLOR: Record<string, string> = {
   modulates_weight: 'bg-blue-50 text-blue-700 border-blue-200',
   inspires: 'bg-purple-50 text-purple-700 border-purple-200',
 };
+
+const LESSON_SECTIONS: Array<{ key: keyof Draft; label: string; tone: string }> = [
+  { key: 'architectural_patterns',  label: 'Padrões arquiteturais',       tone: 'border-l-purple-400' },
+  { key: 'methodological_recipes',  label: 'Receitas metodológicas',      tone: 'border-l-blue-400' },
+  { key: 'vocabularies_standards',  label: 'Vocabulários e padrões',      tone: 'border-l-cyan-400' },
+  { key: 'quantitative_parameters', label: 'Parâmetros quantitativos',    tone: 'border-l-emerald-400' },
+  { key: 'anti_patterns_pitfalls',  label: 'Anti-padrões / armadilhas',   tone: 'border-l-red-400' },
+  { key: 'evaluation_metrics',      label: 'Métricas de avaliação',       tone: 'border-l-amber-400' },
+  { key: 'open_questions',          label: 'Perguntas em aberto',         tone: 'border-l-slate-400' },
+];
 
 function StatusIcon({ status }: { status: TraceStatus }) {
   if (status === 'success') return <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />;
@@ -191,6 +224,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
         source_url: sourceUrl || undefined,
         pdf_storage_path: path,
         suggested_links: (data.draft.suggested_links || []).map((l: SuggestedLink) => ({ ...l, _enabled: true })),
+        proposed_rules: (data.draft.proposed_rules || []).map((p: ProposedRule) => ({ ...p, _action: null })),
       };
       setDraft(d);
       toast.success('Rascunho gerado — revise antes de aprovar.');
