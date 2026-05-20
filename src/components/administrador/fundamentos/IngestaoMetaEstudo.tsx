@@ -151,12 +151,6 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
         },
       });
 
-      const remoteTrace: any[] = (data && Array.isArray(data.trace)) ? data.trace : [];
-      remoteTrace.forEach(t => {
-        const status: TraceStatus = t.status === 'success' ? 'success' : t.status === 'error' ? 'error' : 'pending';
-        setStage(t.stage, { status, detail: t.detail, duration_ms: t.duration_ms });
-      });
-
       // supabase.functions.invoke returns a FunctionsHttpError whose `context`
       // is the raw Response — we need to parse its body to get { error, stage, options, trace }.
       let errorPayload: any = null;
