@@ -344,73 +344,131 @@ Deno.serve(async (req) => {
     const tLlm = performance.now();
     const ctrl = new AbortController();
     const timeoutId = setTimeout(() => ctrl.abort(), LLM_TIMEOUT_MS);
-    let aiRes: Response;
+    let call: any = null;
+    let usage: any = {};
     try {
-      aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${lovableApiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: MODEL,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userContent },
-          ],
-          tools: [TOOL],
-          tool_choice: { type: "function", function: { name: TOOL.function.name } },
-        }),
-        signal: ctrl.signal,
-      });
+      if (googleAiFile) {
+        const aiRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${googleAiApiKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{
+                role: "user",
+                parts: [
+                  {
+                    fileData: {
+                      mimeType: googleAiFile.mimeType || pdfMime,
+                      fileUri: googleAiFile.uri,
+                    },
+                  },
+                  { text: `${systemPrompt}\n\n${textPrompt}` },
+                ],
+              }],
+              tools: [{
+                functionDeclarations: [{
+                  name: TOOL.function.name,
+                  description: TOOL.function.description,
+                  parameters: TOOL.function.parameters,
+                }],
+              }],
+              toolConfig: {
+                functionCallingConfig: {
+                  mode: "ANY",
+                  allowedFunctionNames: [TOOL.function.name],
+                },
+              },
+            }),
+            signal: ctrl.signal,
+          },
+        );
+
+        if (!aiRes.ok) {
+          const errText = await aiRes.text();
+          console.error("Google AI direct error", aiRes.status, errText);
+          const httpCode = aiRes.status === 429 || aiRes.status === 402 ? aiRes.status : 502;
+          const friendly = aiRes.status === 429
+            ? "Limite de requisições do Gemini excedido. Aguarde 1 min e tente novamente."
+            : aiRes.status === 402
+            ? "Créditos do provedor de IA esgotados."
+            : `Falha no processamento de PDF grande via Google AI (HTTP ${aiRes.status}).`;
+          await deleteGoogleAiFile(googleAiFile.name);
+          return fail(httpCode, "llm_analysis", friendly, { detail: errText });
+        }
+
+        const json = await aiRes.json();
+        await deleteGoogleAiFile(googleAiFile.name);
+        call = json.candidates?.[0]?.content?.parts?.find((part: any) => part.functionCall?.name === TOOL.function.name)?.functionCall;
+        usage = json.usageMetadata || {};
+      } else {
+        const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${lovableApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: MODEL,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userContent },
+            ],
+            tools: [TOOL],
+            tool_choice: { type: "function", function: { name: TOOL.function.name } },
+          }),
+          signal: ctrl.signal,
+        });
+
+        if (!aiRes.ok) {
+          const errText = await aiRes.text();
+          console.error("Lovable AI error", aiRes.status, errText);
+          const httpCode = aiRes.status === 429 || aiRes.status === 402 ? aiRes.status : 502;
+          const friendly = aiRes.status === 429
+            ? "Limite de requisições do Gemini excedido. Aguarde 1 min e tente novamente."
+            : aiRes.status === 402
+            ? "Créditos do Lovable AI esgotados. Adicione créditos em Settings > Workspace > Usage."
+            : aiRes.status === 413 || /payload|too large|size/i.test(errText)
+            ? `Gateway rejeitou o PDF por tamanho (HTTP ${aiRes.status}). Reenvie em partes menores ou como texto.`
+            : `Falha no gateway de IA (HTTP ${aiRes.status}).`;
+          return fail(httpCode, "llm_analysis", friendly, { detail: errText });
+        }
+
+        const json = await aiRes.json();
+        call = json.choices?.[0]?.message?.tool_calls?.[0];
+        usage = json.usage || {};
+      }
     } catch (e: any) {
       clearTimeout(timeoutId);
+      if (googleAiFile?.name) {
+        await deleteGoogleAiFile(googleAiFile.name);
+      }
       const aborted = e?.name === "AbortError";
       return fail(
         aborted ? 504 : 502,
         "llm_analysis",
         aborted
           ? `Gemini não respondeu em ${Math.round(LLM_TIMEOUT_MS / 1000)}s — provavelmente o PDF está grande/complexo demais para uma única chamada.`
-          : `Falha de rede ao chamar o gateway: ${e?.message || e}`,
+          : `Falha de rede ao chamar a IA: ${e?.message || e}`,
         {
           options: aborted ? [
             "Dividir o PDF em partes menores e ingerir cada uma separadamente.",
             "Reenviar apenas abstract + conclusão como .md (muito mais rápido para o modelo digerir).",
-            "Tentar novamente em alguns minutos — o gateway pode estar sob carga.",
+            "Tentar novamente em alguns minutos — o provedor pode estar sob carga.",
           ] : undefined,
         },
       );
     }
     clearTimeout(timeoutId);
 
-    if (!aiRes.ok) {
-      const errText = await aiRes.text();
-      console.error("Lovable AI error", aiRes.status, errText);
-      const httpCode = aiRes.status === 429 || aiRes.status === 402 ? aiRes.status : 502;
-      const friendly = aiRes.status === 429
-        ? "Limite de requisições do Gemini excedido. Aguarde 1 min e tente novamente."
-        : aiRes.status === 402
-        ? "Créditos do Lovable AI esgotados. Adicione créditos em Settings > Workspace > Usage."
-        : aiRes.status === 413 || /payload|too large|size/i.test(errText)
-        ? `Gateway rejeitou o PDF por tamanho (HTTP ${aiRes.status}). Reenvie em partes menores ou como texto.`
-        : `Falha no gateway de IA (HTTP ${aiRes.status}).`;
-      return fail(httpCode, "llm_analysis", friendly, { detail: errText });
-    }
-
-    const json = await aiRes.json();
-    if (googleAiFile?.name) {
-      await deleteGoogleAiFile(googleAiFile.name);
-    }
-    const call = json.choices?.[0]?.message?.tool_calls?.[0];
     if (!call) {
       return fail(502, "llm_analysis", "Gemini não retornou rascunho estruturado (tool_call ausente). Tente novamente ou cole abstract+conclusão como texto.");
     }
-    const usage = json.usage || {};
     pushTrace({
       stage: "llm_analysis",
       status: "success",
       duration_ms: Math.round(performance.now() - tLlm),
-      detail: `${MODEL} · ${usage.total_tokens ?? "?"} tokens`,
+      detail: `${MODEL} · ${usage.total_tokens ?? usage.totalTokenCount ?? "?"} tokens`,
     });
 
     let draft: any;
