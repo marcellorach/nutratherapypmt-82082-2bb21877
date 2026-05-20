@@ -205,8 +205,11 @@ Deno.serve(async (req) => {
     const userContent: any[] = [{ type: "text", text: textPrompt }];
     if (pdfBase64) {
       userContent.push({
-        type: "image_url",
-        image_url: { url: `data:${pdfMime};base64,${pdfBase64}` },
+        type: "file",
+        file: {
+          filename: (pdf_storage_path?.split("/").pop() || "document.pdf"),
+          file_data: `data:${pdfMime};base64,${pdfBase64}`,
+        },
       });
     }
 
