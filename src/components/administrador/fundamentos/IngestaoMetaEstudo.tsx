@@ -93,7 +93,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
     try {
       const { data: inserted, error: insErr } = await supabase
         .from('meta_studies')
-        .insert({
+        .insert([{
           title: draft.title,
           authors: draft.authors || null,
           year: draft.year || null,
@@ -104,7 +104,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
           kind: draft.kind,
           summary: draft.summary || null,
           key_claims: draft.key_claims || [],
-        })
+        }])
         .select('id')
         .single();
       if (insErr) throw insErr;
