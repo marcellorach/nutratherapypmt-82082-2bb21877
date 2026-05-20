@@ -224,6 +224,7 @@ Deno.serve(async (req) => {
     // Download the source document (PDF or text-like). For PDFs we attach as
     // multimodal input to Gemini; for text-like we read as UTF-8.
     let pdfBase64: string | null = null;
+    let googleAiFile: GeminiUploadedFile | null = null;
     let pdfMime: string = pdf_mime || "application/pdf";
     if (pdf_storage_path) {
       const tDl = performance.now();
@@ -248,28 +249,43 @@ Deno.serve(async (req) => {
       } else {
         if (buf.byteLength > GATEWAY_PDF_LIMIT_BYTES) {
           const sizeMb = (buf.byteLength / 1024 / 1024).toFixed(1);
-          const capMb = (GATEWAY_PDF_LIMIT_BYTES / 1024 / 1024).toFixed(0);
-          return fail(
-            413,
-            "extraction",
-            `PDF tem ${sizeMb} MB — acima do limite seguro de ${capMb} MB para envio inline ao Gemini via gateway. Não vou truncar o estudo silenciosamente.`,
-            {
-              options: [
-                "Dividir o PDF em partes (ex: capítulos, ou abstract+métodos+discussão) e ingerir cada parte como um meta-estudo separado.",
-                "Extrair o texto fora da plataforma (qualquer leitor de PDF → exportar como .txt ou .md) e reenviar como arquivo de texto — sem limite de tamanho relevante.",
-                "Reenviar apenas as seções essenciais (abstract + conclusão + tabela de resultados) como .md, anotando no campo 'Notas do curador' o que foi omitido.",
-                "Se o PDF for um scan (sem texto selecionável), rodar OCR antes (ex: ocrmypdf) — o tamanho costuma cair drasticamente.",
-              ],
-            },
-          );
+          try {
+            googleAiFile = await uploadPdfToGoogleAi(
+              buf,
+              pdf_storage_path?.split("/").pop() || "document.pdf",
+              pdfMime,
+            );
+            pushTrace({
+              stage: "extraction",
+              status: "success",
+              duration_ms: Math.round(performance.now() - tDl),
+              detail: `PDF grande enviado via Google AI File API (${sizeMb} MB · ${pdfMime})`,
+            });
+          } catch (fileApiErr: any) {
+            const capMb = (GATEWAY_PDF_LIMIT_BYTES / 1024 / 1024).toFixed(0);
+            return fail(
+              413,
+              "extraction",
+              `PDF tem ${sizeMb} MB — acima do limite seguro de ${capMb} MB para envio inline ao gateway, e o fallback automático de arquivo grande falhou: ${fileApiErr?.message || fileApiErr}`,
+              {
+                options: [
+                  "Tentar novamente: o fallback automático para PDF grande usa upload dedicado e pode falhar por rate limit/transiente do provedor.",
+                  "Dividir o PDF em partes (ex: capítulos, ou abstract+métodos+discussão) e ingerir cada parte como um meta-estudo separado.",
+                  "Extrair o texto fora da plataforma (qualquer leitor de PDF → exportar como .txt ou .md) e reenviar como arquivo de texto, preservando o estudo completo.",
+                  "Se o PDF for scan, rodar OCR antes (ex: ocrmypdf) para melhorar leitura e reduzir peso efetivo.",
+                ],
+              },
+            );
+          }
+        } else {
+          pdfBase64 = bytesToBase64(buf);
+          pushTrace({
+            stage: "extraction",
+            status: "success",
+            duration_ms: Math.round(performance.now() - tDl),
+            detail: `PDF anexado ao Gemini (${(buf.byteLength / 1024).toFixed(0)} KB · ${pdfMime})`,
+          });
         }
-        pdfBase64 = bytesToBase64(buf);
-        pushTrace({
-          stage: "extraction",
-          status: "success",
-          duration_ms: Math.round(performance.now() - tDl),
-          detail: `PDF anexado ao Gemini (${(buf.byteLength / 1024).toFixed(0)} KB · ${pdfMime})`,
-        });
       }
     } else if (text) {
       pushTrace({
@@ -303,7 +319,7 @@ Deno.serve(async (req) => {
 
     const textPrompt =
       `EXISTING CORE RULES (link only to these rule_ids):\n${rulesCatalog || "(none)"}\n${curatorBlock}\n` +
-      (pdfBase64
+      (pdfBase64 || googleAiFile
         ? `SOURCE${source_url ? ` (${source_url})` : ""}: see attached PDF.`
         : `SOURCE${source_url ? ` (${source_url})` : ""}:\n${truncated}`);
 
@@ -314,6 +330,13 @@ Deno.serve(async (req) => {
         file: {
           filename: (pdf_storage_path?.split("/").pop() || "document.pdf"),
           file_data: `data:${pdfMime};base64,${pdfBase64}`,
+        },
+      });
+    } else if (googleAiFile) {
+      userContent.push({
+        type: "file",
+        file: {
+          file_id: googleAiFile.name,
         },
       });
     }
@@ -375,6 +398,9 @@ Deno.serve(async (req) => {
     }
 
     const json = await aiRes.json();
+    if (googleAiFile?.name) {
+      await deleteGoogleAiFile(googleAiFile.name);
+    }
     const call = json.choices?.[0]?.message?.tool_calls?.[0];
     if (!call) {
       return fail(502, "llm_analysis", "Gemini não retornou rascunho estruturado (tool_call ausente). Tente novamente ou cole abstract+conclusão como texto.");
