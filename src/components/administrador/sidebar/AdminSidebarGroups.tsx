@@ -10,6 +10,7 @@ import KnowledgeBaseGroup from './groups/KnowledgeBaseGroup';
 import DataProcessingGroup from './groups/DataProcessingGroup';
 import ResearchGroup from './groups/ResearchGroup';
 import ConfigurationGroup from './groups/ConfigurationGroup';
+import GovernanceAIGroup from './groups/GovernanceAIGroup';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -84,6 +85,21 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
             <ConfigurationGroup 
               currentStep={currentStep} 
               handleStepClick={handleStepClick} 
+            />
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      {/* Governança & IA */}
+      <SidebarGroup>
+        <SidebarGroupLabel className="text-orange-500">
+          {t('admin.sidebar.governanceAI.title', 'Governança & IA')}
+        </SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            <GovernanceAIGroup
+              currentStep={currentStep}
+              handleStepClick={handleStepClick}
             />
           </SidebarMenu>
         </SidebarGroupContent>
