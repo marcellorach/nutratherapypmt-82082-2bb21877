@@ -24,6 +24,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 5.1.0 -->
 
+### Added - 2026-05-20 — Meta-estudo: digestão profunda + RCs deduzidas
+<!-- area: admin · status: entregue · i18n: 1.93.0 -->
+
+- **Schema de extração v2**: o tool-call `emit_meta_study_draft` agora pede 7 seções tipadas (padrões arquiteturais, receitas metodológicas, vocabulários/padrões, parâmetros quantitativos, anti-padrões, métricas de avaliação, perguntas em aberto) em vez de uma lista plana de "claims". Prompt exige ≥10 lições no total para papers não-triviais.
+- **Canal para regras deduzidas**: novo array `proposed_rules[]` permite ao paper sugerir candidatas a Regra-Core que não mapeiam para nenhuma RC existente, em vez de silenciosamente descartá-las. O prompt orienta gerar ≥2 propostas em papers arquiteturais substantivos.
+- **Origem epistêmica nas RCs**: tabela `core_rules` ganha coluna `origin` (`inductive` / `deductive` / `hybrid`) + provenance (`proposed_from_meta_study`, `promoted_at`, `promoted_by`). RC-001 e RC-002 marcadas como `inductive` (nasceram do chat); novas RCs promovidas via UI ganham `origin='deductive'`.
+- **UI Fundamentos > Ingestão**: rascunho agora exibe seções tipadas (collapsibles coloridos por categoria) + bloco "Novas Regras-Core propostas" com ações **Promover** / **Descartar** por candidata. Promover gera RC ativa com `RC-NNN` auto-incrementado e link de volta ao meta-estudo.
+- **Governança**: `docs/CORE_RULES.md` ganha seção "Origem epistêmica" + template atualizado; novo `docs/CORE_RULES_PROPOSED.md` documenta o ciclo de promoção; campo `extraction_schema_version='v2'` em `meta_studies` permite identificar estudos digeridos com schema antigo para re-digestão futura.
+- Files: supabase/functions/extract-meta-study/index.ts, src/components/administrador/fundamentos/IngestaoMetaEstudo.tsx, docs/CORE_RULES.md, docs/CORE_RULES_PROPOSED.md, supabase/migrations/*core_rules_origin*.sql
+
 ### Fixed - 2026-05-20 — Meta-estudo: fallback automático para PDF grande
 <!-- area: admin · status: entregue · i18n: 1.93.0 -->
 

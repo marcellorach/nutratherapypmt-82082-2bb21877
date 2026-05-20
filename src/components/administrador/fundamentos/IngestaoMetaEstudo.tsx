@@ -22,6 +22,21 @@ interface SuggestedLink {
   rationale?: string;
   _enabled?: boolean;
 }
+interface LessonItem {
+  statement: string;
+  quote?: string;
+  weight?: number;
+  applies_to?: string;
+}
+interface ProposedRule {
+  proposed_title: string;
+  category?: string;
+  enunciado: string;
+  justification_quote?: string;
+  suggested_application?: string;
+  confidence?: number;
+  _action?: 'promote' | 'discard' | null;
+}
 interface Draft {
   title: string;
   authors?: string;
@@ -34,6 +49,14 @@ interface Draft {
   summary?: string;
   key_claims: Claim[];
   suggested_links: SuggestedLink[];
+  architectural_patterns?: LessonItem[];
+  methodological_recipes?: LessonItem[];
+  vocabularies_standards?: LessonItem[];
+  quantitative_parameters?: LessonItem[];
+  anti_patterns_pitfalls?: LessonItem[];
+  evaluation_metrics?: LessonItem[];
+  open_questions?: LessonItem[];
+  proposed_rules?: ProposedRule[];
 }
 
 type TraceStatus = 'pending' | 'running' | 'success' | 'error';
@@ -63,6 +86,16 @@ const RELATION_COLOR: Record<string, string> = {
   modulates_weight: 'bg-blue-50 text-blue-700 border-blue-200',
   inspires: 'bg-purple-50 text-purple-700 border-purple-200',
 };
+
+const LESSON_SECTIONS: Array<{ key: keyof Draft; label: string; tone: string }> = [
+  { key: 'architectural_patterns',  label: 'Padrões arquiteturais',       tone: 'border-l-purple-400' },
+  { key: 'methodological_recipes',  label: 'Receitas metodológicas',      tone: 'border-l-blue-400' },
+  { key: 'vocabularies_standards',  label: 'Vocabulários e padrões',      tone: 'border-l-cyan-400' },
+  { key: 'quantitative_parameters', label: 'Parâmetros quantitativos',    tone: 'border-l-emerald-400' },
+  { key: 'anti_patterns_pitfalls',  label: 'Anti-padrões / armadilhas',   tone: 'border-l-red-400' },
+  { key: 'evaluation_metrics',      label: 'Métricas de avaliação',       tone: 'border-l-amber-400' },
+  { key: 'open_questions',          label: 'Perguntas em aberto',         tone: 'border-l-slate-400' },
+];
 
 function StatusIcon({ status }: { status: TraceStatus }) {
   if (status === 'success') return <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />;
@@ -191,6 +224,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
         source_url: sourceUrl || undefined,
         pdf_storage_path: path,
         suggested_links: (data.draft.suggested_links || []).map((l: SuggestedLink) => ({ ...l, _enabled: true })),
+        proposed_rules: (data.draft.proposed_rules || []).map((p: ProposedRule) => ({ ...p, _action: null })),
       };
       setDraft(d);
       toast.success('Rascunho gerado — revise antes de aprovar.');
@@ -219,6 +253,15 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
           kind: draft.kind,
           summary: draft.summary || null,
           key_claims: (draft.key_claims || []) as any,
+          architectural_patterns:  (draft.architectural_patterns  || []) as any,
+          methodological_recipes:  (draft.methodological_recipes  || []) as any,
+          vocabularies_standards:  (draft.vocabularies_standards  || []) as any,
+          quantitative_parameters: (draft.quantitative_parameters || []) as any,
+          anti_patterns_pitfalls:  (draft.anti_patterns_pitfalls  || []) as any,
+          evaluation_metrics:      (draft.evaluation_metrics      || []) as any,
+          open_questions:          (draft.open_questions          || []) as any,
+          proposed_rules:          (draft.proposed_rules          || []) as any,
+          extraction_schema_version: 'v2',
           curator_notes: curatorNotes.trim() || null,
         }])
         .select('id')
@@ -248,6 +291,42 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
           if (evErr) throw evErr;
         }
       }
+
+      // Promote any proposed_rules the curator marked as 'promote' into core_rules
+      // with origin='deductive' and provenance back to this meta-study.
+      const toPromote = (draft.proposed_rules || []).filter(p => p._action === 'promote');
+      if (toPromote.length) {
+        const { data: existing } = await supabase
+          .from('core_rules').select('rule_id').order('rule_id', { ascending: false }).limit(1);
+        let nextN = 1;
+        const lastCode = existing?.[0]?.rule_id;
+        if (lastCode && /^RC-\d+$/.test(lastCode)) {
+          nextN = parseInt(lastCode.slice(3), 10) + 1;
+        }
+        const { data: userData } = await supabase.auth.getUser();
+        const rows = toPromote.map((p, idx) => ({
+          rule_id: `RC-${String(nextN + idx).padStart(3, '0')}`,
+          title: p.proposed_title.slice(0, 200),
+          category: p.category || 'uncategorized',
+          status: 'active',
+          version: '1.0.0',
+          justification: p.enunciado,
+          application: p.suggested_application || null,
+          runtime_effect: 'doc_only',
+          origin: 'deductive',
+          proposed_from_meta_study: studyId,
+          promoted_at: new Date().toISOString(),
+          promoted_by: userData?.user?.id ?? null,
+        }));
+        const { error: rcErr } = await supabase.from('core_rules').insert(rows as any);
+        if (rcErr) {
+          console.warn('Falha ao promover RCs propostas:', rcErr);
+          toast.warning(`Meta-estudo salvo, mas ${toPromote.length} RC(s) propostas não foram promovidas: ${rcErr.message}`);
+        } else {
+          toast.success(`${toPromote.length} nova(s) RC(s) deduzida(s) promovida(s).`);
+        }
+      }
+
       toast.success('Meta-estudo aprovado e vinculado.');
       setDraft(null); setFile(null); setSourceUrl(''); setCuratorNotes(''); resetTrace();
       onSaved?.();
@@ -458,6 +537,41 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
               </ul>
             </div>
 
+            {/* Lições estruturadas (schema v2) */}
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold uppercase tracking-wide">
+                Lições estruturadas ({LESSON_SECTIONS.reduce((n, s) => n + ((draft as any)[s.key]?.length || 0), 0)})
+              </Label>
+              {LESSON_SECTIONS.map(section => {
+                const items = ((draft as any)[section.key] || []) as LessonItem[];
+                if (!items.length) return null;
+                return (
+                  <details key={String(section.key)} className={`border-l-2 ${section.tone} pl-2`} open={items.length <= 3}>
+                    <summary className="cursor-pointer text-xs font-medium select-none">
+                      {section.label} <span className="text-muted-foreground">({items.length})</span>
+                    </summary>
+                    <ul className="space-y-1 mt-1.5 text-xs">
+                      {items.map((it, i) => (
+                        <li key={i} className="border rounded px-2 py-1.5">
+                          <div className="font-medium">{it.statement}</div>
+                          {it.quote && <div className="text-muted-foreground italic mt-0.5">"{it.quote}"</div>}
+                          <div className="flex gap-1.5 mt-1 flex-wrap">
+                            {typeof it.weight === 'number' && <Badge variant="outline" className="text-[10px]">w={it.weight}</Badge>}
+                            {it.applies_to && <Badge variant="outline" className="text-[10px]">→ {it.applies_to}</Badge>}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                );
+              })}
+              {LESSON_SECTIONS.every(s => !((draft as any)[s.key]?.length)) && (
+                <p className="text-[11px] text-muted-foreground italic">
+                  Nenhuma lição estruturada extraída — o paper pode ser denso demais para uma única passada ou o schema v2 ainda não foi aplicado. Considere re-digerir.
+                </p>
+              )}
+            </div>
+
             <div>
               <Label className="text-xs font-semibold uppercase tracking-wide">
                 Vínculos sugeridos com Regras-Core ({draft.suggested_links.filter(l => l._enabled).length}/{draft.suggested_links.length})
@@ -485,6 +599,69 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                   ))}
                 </ul>
               )}
+            </div>
+
+            {/* RCs deduzidas propostas pelo paper */}
+            <div>
+              <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5">
+                <Sparkles className="h-3 w-3 text-purple-600" />
+                Novas Regras-Core propostas ({(draft.proposed_rules || []).length})
+                <span className="text-[10px] font-normal text-muted-foreground normal-case">
+                  — deduzidas deste paper, origem='deductive'
+                </span>
+              </Label>
+              {(draft.proposed_rules || []).length === 0 ? (
+                <p className="text-xs text-muted-foreground italic mt-1">
+                  A IA não propôs novas regras — todas as lições já mapearam para RCs existentes (ou o paper é mais ilustrativo do que normativo).
+                </p>
+              ) : (
+                <ul className="space-y-1.5 mt-1 text-xs">
+                  {(draft.proposed_rules || []).map((p, i) => (
+                    <li key={i} className={`border rounded px-2 py-2 ${p._action === 'promote' ? 'border-emerald-400 bg-emerald-50/40' : p._action === 'discard' ? 'opacity-40' : ''}`}>
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <Badge className="bg-purple-100 text-purple-800 border-purple-200">PROPOSTA</Badge>
+                        {p.category && <Badge variant="outline" className="text-[10px]">{p.category}</Badge>}
+                        {typeof p.confidence === 'number' && <Badge variant="outline" className="text-[10px]">conf={p.confidence.toFixed(2)}</Badge>}
+                      </div>
+                      <div className="font-medium">{p.proposed_title}</div>
+                      <div className="text-muted-foreground mt-0.5">{p.enunciado}</div>
+                      {p.justification_quote && <div className="text-muted-foreground italic mt-1">"{p.justification_quote}"</div>}
+                      {p.suggested_application && (
+                        <div className="text-[11px] mt-1"><span className="text-muted-foreground">Aplicação sugerida:</span> <code className="text-[10px]">{p.suggested_application}</code></div>
+                      )}
+                      <div className="flex gap-1.5 mt-2">
+                        <Button
+                          size="sm"
+                          variant={p._action === 'promote' ? 'default' : 'outline'}
+                          className="h-6 text-[11px]"
+                          onClick={() => {
+                            const copy = [...(draft.proposed_rules || [])];
+                            copy[i] = { ...copy[i], _action: copy[i]._action === 'promote' ? null : 'promote' };
+                            setDraft({ ...draft, proposed_rules: copy });
+                          }}
+                        >
+                          {p._action === 'promote' ? '✓ Promover para nova RC' : 'Promover para nova RC'}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={p._action === 'discard' ? 'secondary' : 'ghost'}
+                          className="h-6 text-[11px]"
+                          onClick={() => {
+                            const copy = [...(draft.proposed_rules || [])];
+                            copy[i] = { ...copy[i], _action: copy[i]._action === 'discard' ? null : 'discard' };
+                            setDraft({ ...draft, proposed_rules: copy });
+                          }}
+                        >
+                          {p._action === 'discard' ? '✓ Descartar' : 'Descartar'}
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p className="text-[10px] text-muted-foreground mt-1.5 italic">
+                Não marcadas serão salvas no meta-estudo como candidatas (campo <code>proposed_rules</code>) sem virar RC ativa — você pode promovê-las depois.
+              </p>
             </div>
 
             <div className="flex gap-2">

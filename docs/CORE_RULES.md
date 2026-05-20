@@ -7,10 +7,23 @@
 
 ---
 
+## Origem epistêmica das regras
+
+Toda RC declara, no header, sua **origem** — isso torna auditável "por que acreditamos nisso":
+
+- **`inductive`** — a regra emergiu de um incidente concreto / discussão usuário↔IA. Forte em pragmatismo, fraca em generalização.
+- **`deductive`** — a regra foi destilada de literatura arquitetural/metodológica catalogada no meta-KG (ver `meta_studies` + tab "Fundamentos > Ingestão de meta-estudos"). Forte em generalização, fraca enquanto não validada por incidente concreto.
+- **`hybrid`** — incidente confirmado depois por literatura (ou vice-versa). Forma mais robusta.
+
+Regras candidatas (deduzidas mas ainda não promovidas) vivem em [`CORE_RULES_PROPOSED.md`](./CORE_RULES_PROPOSED.md) e na coluna `proposed_rules` da tabela `meta_studies`. A promoção é sempre humana, feita na UI de Ingestão.
+
+---
+
 ## RC-001 — Exclusão de trial ≠ Contraindicação
 
 - **Categoria**: clinical-semantics
 - **Versão**: 1.0
+- **Origem**: inductive
 - **Criada em**: 2026-05-19
 - **Status**: active
 - **Justificada por**: discussão com o usuário (chat 2026-05-19) sobre o estudo PQQ humano que listou "Pregnancy and Nursing" e "Serious Chronic Diseases" como contraindicações, quando na verdade eram apenas critérios de exclusão do trial.
@@ -49,6 +62,7 @@ Misturar exclusão com contraindicação:
 
 - **Categoria**: data-integrity
 - **Versão**: 1.0
+- **Origem**: inductive
 - **Criada em**: 2026-05-19
 - **Status**: active
 
@@ -67,6 +81,7 @@ Quando um estudo declara "no adverse events reported" / "nenhum evento adverso o
 
 - **Categoria**: epistemology
 - **Versão**: 0.1 (rascunho)
+- **Origem**: deductive (a ser promovida a partir do meta-estudo "Anti-aging strategies for dogs")
 - **Status**: planned
 
 ### Enunciado (rascunho)
@@ -85,5 +100,28 @@ _(Valores finais virão do meta-KG na Fase 2.)_
 
 - **ID**: `RC-NNN` sequencial, nunca reciclar.
 - **Status**: `active` | `deprecated` | `superseded` | `planned`.
+- **Origem**: `inductive` | `deductive` | `hybrid` (obrigatório).
 - **Quando arquivar**: nunca apagar uma RC. Marque como `deprecated` ou `superseded by RC-XXX` e mantenha o histórico.
 - **Quem pode criar**: qualquer ciclo usuário↔IA que combine uma regra que afete prompts, schema, scoring, ou semântica clínica.
+
+### Template
+
+```
+## RC-NNN — Título
+
+- **Categoria**: ...
+- **Versão**: 1.0
+- **Origem**: inductive | deductive | hybrid
+- **Criada em**: YYYY-MM-DD
+- **Status**: active
+- **Justificada por**: (incidente, paper, ou ambos)
+
+### Enunciado
+...
+
+### Por quê
+...
+
+### Como aplicar
+...
+```

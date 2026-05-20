@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-05-20T04:33:03.586Z
+Generated: 2026-05-20T05:00:28.195Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
 ## Latest i18n version: 1.93.0
 
 ## Changes by area (last 14 days)
-- **admin**: 27
+- **admin**: 28
 - **vet-ui**: 16
 - **tutor-ui**: 9
 - **meta**: 4
@@ -15,6 +15,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **i18n**: 1
 
 ## Top 10 recent entries
+### 2026-05-20 · [admin] ADDED — Meta-estudo: digestão profunda + RCs deduzidas
+- Schema de extração v2: o tool-call `emit_meta_study_draft` agora pede 7 seções tipadas (padrões arquiteturais, receitas metodológicas, vocabulários/padrões, parâmetros quantitativos, anti-padrões, métricas de avaliação, perguntas em aberto) em vez de uma lista plana de "claims". Prompt exige ≥10 lições no total para papers não-triviais.
+- Canal para regras deduzidas: novo array `proposed_rules[]` permite ao paper sugerir candidatas a Regra-Core que não mapeiam para nenhuma RC existente, em vez de silenciosamente descartá-las. O prompt orienta gerar ≥2 propostas em papers arquiteturais substantivos.
+- Origem epistêmica nas RCs: tabela `core_rules` ganha coluna `origin` (`inductive` / `deductive` / `hybrid`) + provenance (`proposed_from_meta_study`, `promoted_at`, `promoted_by`). RC-001 e RC-002 marcadas como `inductive` (nasceram do chat); novas RCs promovidas via UI ganham `origin='deductive'`.
+_files: supabase/functions/extract-meta-study/index.ts, src/components/administrador/fundamentos/IngestaoMetaEstudo.tsx_
+
 ### 2026-05-20 · [admin] FIXED — Meta-estudo: fallback automático para PDF grande
 - Edge `extract-meta-study` agora tenta fallback automático para PDFs acima do limite inline do gateway usando upload dedicado no Google AI File API, preservando o estudo completo sem truncamento silencioso.
 - Fluxo de análise: PDFs pequenos continuam no gateway atual; PDFs grandes passam por upload dedicado + chamada direta ao Gemini 3 Pro com o mesmo schema estruturado e o mesmo `trace[]` por estágio.
@@ -68,12 +74,6 @@ _files: supabase/functions/extract-study-entities/index.ts, src/components/admin
 - Backfill dos 1.293 chunks legacy com a tag canônica — validado empiricamente pelo smoke test (avg top-similarity = 0.743, verdict PASS) executado na Etapa 1, confirmando compatibilidade com o encoder atual.
 - RPC `search_study_chunks` recriado para retornar `embedding_model_version` em cada resultado, sem alterar a assinatura semântica (mesmos filtros/ordenação).
 _files: supabase/functions/vectorize-study/index.ts, supabase/functions/document-chat/index.ts_
-
-### 2026-05-18 · [admin] FIXED — Badges do pipeline: Biblioteca conta estudos curados e contadores não congelam
-- Biblioteca: badge passa a refletir estudos com `kanban_status='approved'` (status final de curadoria), alinhado ao critério usado pela própria aba `StudiesLibraryTab`. Antes contava estudos com qualquer triplet revisado, divergindo do que a aba mostrava.
-- Contadores congelados: as contagens carregavam todos os triplets via `select(...)`, atingindo silenciosamente o cap de 1000 linhas do Supabase e travando os badges em valores antigos. Substituído por queries `count: 'exact', head: true` em `processed_studies.kanban_status` — leves, exatas e atualizadas a cada ciclo de 15s.
-- Curadoria: badge agora derivado de `kanban_status in ('parsed','review','processed')` (fonte única).
-_files: src/components/administrador/estudos/import/SciImportSection.tsx_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

@@ -186,6 +186,99 @@ const TOOL = {
   },
 };
 
+// Reusable lesson-item shape: { statement, quote, weight, applies_to }
+const LESSON_ITEM = {
+  type: "object",
+  properties: {
+    statement: { type: "string", description: "One-sentence lesson, self-contained." },
+    quote: { type: "string", description: "Literal substring of the source (<=300 chars)." },
+    weight: { type: "number", minimum: 0, maximum: 1, description: "How strongly the paper backs this lesson." },
+    applies_to: { type: "string", description: "Which subsystem this informs (e.g. 'extract-study-entities Stage 3', 'KG indexing', 'curation UI')." },
+  },
+  required: ["statement"],
+};
+
+const TOOL_V2 = {
+  type: "function",
+  function: {
+    name: "emit_meta_study_draft",
+    description:
+      "Emit a deeply-structured draft of an architectural/methodological meta-study, with seven typed lesson sections, links to existing Core Rules, and candidate NEW rules deduced from the paper.",
+    parameters: {
+      type: "object",
+      properties: {
+        title: { type: "string" },
+        authors: { type: "string" },
+        year: { type: "integer" },
+        journal: { type: "string" },
+        doi: { type: "string" },
+        kind: {
+          type: "string",
+          enum: ["architectural", "translational", "methodological", "inspiration"],
+        },
+        summary: { type: "string", description: "2-4 sentence executive summary." },
+
+        // Backwards-compat: kept so older consumers still work.
+        key_claims: {
+          type: "array",
+          description: "Legacy flat list. Prefer the typed sections below; include here only the 3-5 most load-bearing claims.",
+          items: {
+            type: "object",
+            properties: {
+              claim: { type: "string" },
+              quote: { type: "string" },
+              weight: { type: "number", minimum: 0, maximum: 1 },
+            },
+            required: ["claim"],
+          },
+        },
+
+        architectural_patterns:  { type: "array", description: "Reusable design patterns (e.g. Triple Graph Construction, U-Retrieval, two-tier curation gate).", items: LESSON_ITEM },
+        methodological_recipes:  { type: "array", description: "How-to recipes the paper prescribes (e.g. chunking strategy, prompt staging, RAG pipeline order).", items: LESSON_ITEM },
+        vocabularies_standards:  { type: "array", description: "Controlled vocabularies / ontologies / standards adopted (UMLS, MeSH, SNOMED, OBO, schema.org).", items: LESSON_ITEM },
+        quantitative_parameters: { type: "array", description: "Concrete numeric parameters defended (chunk_size=512, top_k=10, weight=0.7). Quote MUST contain the number.", items: LESSON_ITEM },
+        anti_patterns_pitfalls:  { type: "array", description: "What NOT to do and why — failure modes the paper documents.", items: LESSON_ITEM },
+        evaluation_metrics:      { type: "array", description: "How to measure success (precision@k, faithfulness, hallucination rate, ablations).", items: LESSON_ITEM },
+        open_questions:          { type: "array", description: "Gaps/limitations the authors themselves acknowledge.", items: LESSON_ITEM },
+
+        suggested_links: {
+          type: "array",
+          description: "Links to EXISTING Core Rules by rule_id (e.g. RC-001). Only emit if the rule_id appears in the provided catalog.",
+          items: {
+            type: "object",
+            properties: {
+              rule_id: { type: "string" },
+              relation: { type: "string", enum: ["supports", "contradicts", "modulates_weight", "inspires"] },
+              weight: { type: "number", minimum: 0, maximum: 1 },
+              quote: { type: "string" },
+              rationale: { type: "string" },
+            },
+            required: ["rule_id", "relation"],
+          },
+        },
+
+        proposed_rules: {
+          type: "array",
+          description: "Candidate NEW Core Rules deduced from this paper that DO NOT map cleanly to any existing rule_id. The curator will decide whether to promote, merge, or discard.",
+          items: {
+            type: "object",
+            properties: {
+              proposed_title: { type: "string", description: "Short, prescriptive title (e.g. 'Chunk source documents above N tokens')." },
+              category: { type: "string", description: "Suggested category (e.g. 'data-integrity', 'epistemology', 'clinical-semantics', 'retrieval', 'governance')." },
+              enunciado: { type: "string", description: "1-3 sentence rule statement in the imperative." },
+              justification_quote: { type: "string", description: "Literal supporting quote from the paper (<=300 chars)." },
+              suggested_application: { type: "string", description: "Where in the codebase this rule would apply (file/function/UI surface)." },
+              confidence: { type: "number", minimum: 0, maximum: 1 },
+            },
+            required: ["proposed_title", "enunciado"],
+          },
+        },
+      },
+      required: ["title", "kind", "summary", "suggested_links", "proposed_rules"],
+    },
+  },
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -320,10 +413,16 @@ Deno.serve(async (req) => {
 
     const systemPrompt =
       "You curate architectural/methodological references for a veterinary geroprotector platform's Meta-KG. " +
-      "These are NOT clinical studies — they justify how the pipeline reasons (translational weighting, exclusion vs contraindication, fallback policies, etc.). " +
-      "Extract a faithful draft and propose links to EXISTING Core Rules only (use their rule_id verbatim). " +
-      "Use 'supports' when the study justifies the rule; 'contradicts' when it challenges it; 'modulates_weight' when it informs a numeric weight (e.g. canine→human translatability); 'inspires' when it motivated the rule conceptually. " +
-      "Quotes must be literal substrings of the source text (<=300 chars). If unsure, omit the link.";
+      "These are NOT clinical studies — they justify how the pipeline reasons (translational weighting, exclusion vs contraindication, retrieval strategy, chunking, controlled vocabularies, fallback policies, etc.).\n\n" +
+      "DEPTH REQUIREMENT — do not be lazy. An architectural paper typically yields 10-25 distinct lessons. " +
+      "Distribute them across the SEVEN typed sections (architectural_patterns, methodological_recipes, vocabularies_standards, quantitative_parameters, anti_patterns_pitfalls, evaluation_metrics, open_questions). " +
+      "Aim for a TOTAL of at least 10 items combined across these sections for any non-trivial paper. " +
+      "Each item must include a literal quote (<=300 chars) and, when possible, an `applies_to` pointer naming the subsystem it informs.\n\n" +
+      "key_claims is LEGACY — put only the 3-5 most load-bearing claims there; the real richness goes into the typed sections.\n\n" +
+      "TWO PARALLEL OUTPUTS for governance:\n" +
+      "(a) suggested_links → only to rule_ids present in the provided catalog. Relations: 'supports' (justifies), 'contradicts' (challenges), 'modulates_weight' (informs a numeric weight), 'inspires' (motivated the rule conceptually).\n" +
+      "(b) proposed_rules → candidate NEW Core Rules deduced from the paper that do NOT map to any existing rule_id. Be generous here: it is far better to propose a candidate (which the curator will accept/merge/discard) than to silently drop a teachable lesson. Aim for at least 2 proposed_rules on any substantial architectural paper.\n\n" +
+      "All quotes must be literal substrings of the source text. If unsure, omit.";
 
     const curatorBlock = curator_notes && curator_notes.trim()
       ? `\n\nCURATOR NOTES (treat as binding guidance — respect them):\n${curator_notes.trim().slice(0, 4000)}\n`
@@ -380,15 +479,15 @@ Deno.serve(async (req) => {
               }],
               tools: [{
                 functionDeclarations: [{
-                  name: TOOL.function.name,
-                  description: TOOL.function.description,
-                  parameters: TOOL.function.parameters,
+                  name: TOOL_V2.function.name,
+                  description: TOOL_V2.function.description,
+                  parameters: TOOL_V2.function.parameters,
                 }],
               }],
               toolConfig: {
                 functionCallingConfig: {
                   mode: "ANY",
-                  allowedFunctionNames: [TOOL.function.name],
+                  allowedFunctionNames: [TOOL_V2.function.name],
                 },
               },
             }),
@@ -429,7 +528,7 @@ Deno.serve(async (req) => {
 
         const json = await aiRes.json();
         await deleteGoogleAiFile(googleAiFile.name);
-        call = json.candidates?.[0]?.content?.parts?.find((part: any) => part.functionCall?.name === TOOL.function.name)?.functionCall;
+        call = json.candidates?.[0]?.content?.parts?.find((part: any) => part.functionCall?.name === TOOL_V2.function.name)?.functionCall;
         usage = json.usageMetadata || {};
       } else {
         const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -444,8 +543,8 @@ Deno.serve(async (req) => {
               { role: "system", content: systemPrompt },
               { role: "user", content: userContent },
             ],
-            tools: [TOOL],
-            tool_choice: { type: "function", function: { name: TOOL.function.name } },
+            tools: [TOOL_V2],
+            tool_choice: { type: "function", function: { name: TOOL_V2.function.name } },
           }),
           signal: ctrl.signal,
         });
@@ -531,10 +630,34 @@ Deno.serve(async (req) => {
       validRuleIds.has(l.rule_id)
     );
 
+    // Normalize all lesson sections to arrays (defensive against partial LLM outputs).
+    const LESSON_KEYS = [
+      "architectural_patterns",
+      "methodological_recipes",
+      "vocabularies_standards",
+      "quantitative_parameters",
+      "anti_patterns_pitfalls",
+      "evaluation_metrics",
+      "open_questions",
+      "proposed_rules",
+    ] as const;
+    for (const k of LESSON_KEYS) {
+      if (!Array.isArray(draft[k])) draft[k] = [];
+    }
+
+    const lessonTotal = LESSON_KEYS.slice(0, 7).reduce(
+      (n, k) => n + (Array.isArray(draft[k]) ? draft[k].length : 0),
+      0,
+    );
+
     pushTrace({
       stage: "structuring",
       status: "success",
-      detail: `${draft.key_claims?.length ?? 0} claims · ${draft.suggested_links?.length ?? 0} vínculos válidos`,
+      detail:
+        `${lessonTotal} lições estruturadas · ` +
+        `${draft.key_claims?.length ?? 0} claims legados · ` +
+        `${draft.suggested_links?.length ?? 0} vínculos a RCs existentes · ` +
+        `${draft.proposed_rules?.length ?? 0} RCs propostas`,
     });
 
     return new Response(

@@ -983,6 +983,10 @@ export type Database = {
           id: string
           justification: string
           justification_en: string | null
+          origin: string
+          promoted_at: string | null
+          promoted_by: string | null
+          proposed_from_meta_study: string | null
           rule_id: string
           runtime_effect: string
           status: string
@@ -1001,6 +1005,10 @@ export type Database = {
           id?: string
           justification: string
           justification_en?: string | null
+          origin?: string
+          promoted_at?: string | null
+          promoted_by?: string | null
+          proposed_from_meta_study?: string | null
           rule_id: string
           runtime_effect?: string
           status?: string
@@ -1019,6 +1027,10 @@ export type Database = {
           id?: string
           justification?: string
           justification_en?: string | null
+          origin?: string
+          promoted_at?: string | null
+          promoted_by?: string | null
+          proposed_from_meta_study?: string | null
           rule_id?: string
           runtime_effect?: string
           status?: string
@@ -1027,7 +1039,15 @@ export type Database = {
           updated_at?: string
           version?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "core_rules_proposed_from_meta_study_fkey"
+            columns: ["proposed_from_meta_study"]
+            isOneToOne: false
+            referencedRelation: "meta_studies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       data_management_settings: {
         Row: {
@@ -1945,53 +1965,80 @@ export type Database = {
       meta_studies: {
         Row: {
           added_by: string | null
+          anti_patterns_pitfalls: Json
+          architectural_patterns: Json
           authors: string | null
           created_at: string
           curator_notes: string | null
           doi: string | null
+          evaluation_metrics: Json
+          extraction_schema_version: string
           id: string
           journal: string | null
           key_claims: Json
           kind: string
+          methodological_recipes: Json
+          open_questions: Json
           pdf_storage_path: string | null
+          proposed_rules: Json
+          quantitative_parameters: Json
           source_url: string | null
           summary: string | null
           title: string
           updated_at: string
+          vocabularies_standards: Json
           year: number | null
         }
         Insert: {
           added_by?: string | null
+          anti_patterns_pitfalls?: Json
+          architectural_patterns?: Json
           authors?: string | null
           created_at?: string
           curator_notes?: string | null
           doi?: string | null
+          evaluation_metrics?: Json
+          extraction_schema_version?: string
           id?: string
           journal?: string | null
           key_claims?: Json
           kind?: string
+          methodological_recipes?: Json
+          open_questions?: Json
           pdf_storage_path?: string | null
+          proposed_rules?: Json
+          quantitative_parameters?: Json
           source_url?: string | null
           summary?: string | null
           title: string
           updated_at?: string
+          vocabularies_standards?: Json
           year?: number | null
         }
         Update: {
           added_by?: string | null
+          anti_patterns_pitfalls?: Json
+          architectural_patterns?: Json
           authors?: string | null
           created_at?: string
           curator_notes?: string | null
           doi?: string | null
+          evaluation_metrics?: Json
+          extraction_schema_version?: string
           id?: string
           journal?: string | null
           key_claims?: Json
           kind?: string
+          methodological_recipes?: Json
+          open_questions?: Json
           pdf_storage_path?: string | null
+          proposed_rules?: Json
+          quantitative_parameters?: Json
           source_url?: string | null
           summary?: string | null
           title?: string
           updated_at?: string
+          vocabularies_standards?: Json
           year?: number | null
         }
         Relationships: []
