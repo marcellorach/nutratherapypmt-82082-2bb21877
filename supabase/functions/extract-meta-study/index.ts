@@ -9,6 +9,7 @@ const corsHeaders = {
 };
 
 const lovableApiKey = Deno.env.get("LOVABLE_API_KEY") || "";
+const googleAiApiKey = Deno.env.get("GOOGLE_AI_API_KEY") || "";
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
 const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
@@ -19,6 +20,13 @@ const MODEL = "google/gemini-3-pro-preview";
 // so we fail FAST and LOUD above this threshold instead of silently truncating.
 const GATEWAY_PDF_LIMIT_BYTES = 7 * 1024 * 1024;
 const LLM_TIMEOUT_MS = 110_000;
+
+type GeminiUploadedFile = {
+  name: string;
+  uri: string;
+  mimeType: string;
+  state?: string;
+};
 
 type TraceEntry = {
   stage: string;
@@ -35,6 +43,80 @@ function bytesToBase64(bytes: Uint8Array): string {
     binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
   }
   return btoa(binary);
+}
+
+async function uploadPdfToGoogleAi(pdfBytes: Uint8Array, fileName: string, mimeType: string) {
+  if (!googleAiApiKey) {
+    throw new Error("GOOGLE_AI_API_KEY not configured");
+  }
+
+  const initResponse = await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${googleAiApiKey}`, {
+    method: "POST",
+    headers: {
+      "X-Goog-Upload-Protocol": "resumable",
+      "X-Goog-Upload-Command": "start",
+      "X-Goog-Upload-Header-Content-Length": String(pdfBytes.length),
+      "X-Goog-Upload-Header-Content-Type": mimeType,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ file: { display_name: fileName } }),
+  });
+
+  if (!initResponse.ok) {
+    throw new Error(`Falha ao iniciar upload do PDF grande: ${initResponse.status} - ${await initResponse.text()}`);
+  }
+
+  const uploadUrl = initResponse.headers.get("X-Goog-Upload-URL");
+  if (!uploadUrl) {
+    throw new Error("Google AI não retornou upload URL para o PDF grande.");
+  }
+
+  const uploadResponse = await fetch(uploadUrl, {
+    method: "POST",
+    headers: {
+      "Content-Length": String(pdfBytes.length),
+      "X-Goog-Upload-Offset": "0",
+      "X-Goog-Upload-Command": "upload, finalize",
+    },
+    body: pdfBytes,
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error(`Falha ao enviar PDF grande: ${uploadResponse.status} - ${await uploadResponse.text()}`);
+  }
+
+  const uploaded = (await uploadResponse.json()).file as GeminiUploadedFile | undefined;
+  if (!uploaded?.name || !uploaded?.uri) {
+    throw new Error("Google AI não retornou metadados válidos do arquivo enviado.");
+  }
+
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const infoResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/${uploaded.name}?key=${googleAiApiKey}`);
+    if (!infoResponse.ok) {
+      throw new Error(`Falha ao consultar status do PDF grande: ${infoResponse.status} - ${await infoResponse.text()}`);
+    }
+    const fileInfo = await infoResponse.json() as GeminiUploadedFile;
+    if (fileInfo.state === "ACTIVE") {
+      return fileInfo;
+    }
+    if (fileInfo.state === "FAILED") {
+      throw new Error("Google AI marcou o arquivo como FAILED durante o processamento.");
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+  }
+
+  throw new Error("Google AI demorou demais para ativar o PDF grande.");
+}
+
+async function deleteGoogleAiFile(fileName: string) {
+  if (!googleAiApiKey || !fileName) return;
+  try {
+    await fetch(`https://generativelanguage.googleapis.com/v1beta/${fileName}?key=${googleAiApiKey}`, {
+      method: "DELETE",
+    });
+  } catch (_err) {
+    // best effort cleanup
+  }
 }
 
 const TOOL = {
