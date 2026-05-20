@@ -1036,6 +1036,33 @@ function getStage3Tools() {
           },
           contraindications: {
             type: 'array',
+            description: 'PROVEN risks — only conditions where the text explicitly states harm, risk or recommends against use. RC-001.',
+            items: {
+              type: 'object',
+              properties: {
+                condition: { type: 'string' },
+                severity: { type: 'string', enum: ['absolute', 'relative', 'caution', 'unknown'] },
+                reason: { type: 'string' },
+                evidence_level: { type: 'string' }
+              },
+              required: ['condition']
+            }
+          },
+          exclusion_criteria: {
+            type: 'array',
+            description: 'Populations EXCLUDED from the trial (evidence gaps, NOT contraindications). RC-001.',
+            items: {
+              type: 'object',
+              properties: {
+                population: { type: 'string' },
+                quote: { type: 'string' }
+              },
+              required: ['population']
+            }
+          },
+          evidence_gaps: {
+            type: 'array',
+            description: 'Areas the study explicitly identifies as needing more research.',
             items: { type: 'string' }
           },
           clinical_outcomes: {
