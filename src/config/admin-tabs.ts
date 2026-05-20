@@ -68,6 +68,7 @@ const PharmacologyTab = lazy(() => import('@/components/administrador/pharmacolo
 const ComplianceDashboard = lazy(() => import('@/components/administrador/compliance/ComplianceDashboard'));
 const TechnicalAuditsTab = lazy(() => import('@/components/administrador/audits/TechnicalAuditsTab'));
 const AboutSenexTab = lazy(() => import('@/components/administrador/AboutSenexTab'));
+const FundamentosTab = lazy(() => import('@/pages/administrador/FundamentosTab'));
 
 export const adminTabsConfig: AdminTabConfig[] = [
   // Base de Conhecimento
