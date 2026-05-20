@@ -366,6 +366,16 @@ export const organograma: OrganogramaArea[] = [
         files: ["src/config/admin-tabs.ts"],
       },
       {
+        title: "Fundamentos Arquiteturais (Meta-KG)",
+        title_en: "Architectural Foundations (Meta-KG)",
+        description: "Governança: Core Rules (RC-001/002/003), meta-estudos arquiteturais e mapa de influência.",
+        description_en: "Governance: Core Rules (RC-001/002/003), architectural meta-studies and influence map.",
+        files: [
+          "src/pages/administrador/FundamentosTab.tsx",
+          "docs/CORE_RULES.md",
+        ],
+      },
+      {
         title: "Sidebar agrupada",
         title_en: "Grouped Sidebar",
         description: "5 grupos: KB, Data, Research, Predictive, Configuration.",
