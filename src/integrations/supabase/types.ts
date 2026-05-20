@@ -984,6 +984,7 @@ export type Database = {
           justification: string
           justification_en: string | null
           rule_id: string
+          runtime_effect: string
           status: string
           title: string
           title_en: string | null
@@ -1001,6 +1002,7 @@ export type Database = {
           justification: string
           justification_en?: string | null
           rule_id: string
+          runtime_effect?: string
           status?: string
           title: string
           title_en?: string | null
@@ -1018,6 +1020,7 @@ export type Database = {
           justification?: string
           justification_en?: string | null
           rule_id?: string
+          runtime_effect?: string
           status?: string
           title?: string
           title_en?: string | null
