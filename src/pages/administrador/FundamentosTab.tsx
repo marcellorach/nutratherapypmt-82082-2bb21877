@@ -5,9 +5,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useTranslation } from 'react-i18next';
-import { Shield, BookOpenCheck, GitBranch, Loader2, ExternalLink, Sparkles, AlertTriangle, Upload } from 'lucide-react';
+import { Shield, BookOpenCheck, GitBranch, Loader2, ExternalLink, Sparkles, AlertTriangle, Upload, History } from 'lucide-react';
 import { toast } from 'sonner';
 import IngestaoMetaEstudo from '@/components/administrador/fundamentos/IngestaoMetaEstudo';
+import CoreRuleHistory from '@/components/administrador/fundamentos/CoreRuleHistory';
 
 interface CoreRule {
   id: string;
@@ -156,6 +157,9 @@ const FundamentosTab: React.FC = () => {
           </TabsTrigger>
           <TabsTrigger value="ingest">
             <Upload className="h-4 w-4 mr-1" /> {t('fundamentos.tabs.ingest', 'Ingestão')}
+          </TabsTrigger>
+          <TabsTrigger value="history">
+            <History className="h-4 w-4 mr-1" /> {t('fundamentos.tabs.history', 'Histórico & Auditoria')}
           </TabsTrigger>
         </TabsList>
 
@@ -344,6 +348,11 @@ const FundamentosTab: React.FC = () => {
         {/* === INGESTION === */}
         <TabsContent value="ingest" className="mt-4">
           <IngestaoMetaEstudo onSaved={load} />
+        </TabsContent>
+
+        {/* === HISTORY & AUDIT === */}
+        <TabsContent value="history" className="mt-4">
+          <CoreRuleHistory />
         </TabsContent>
       </Tabs>
     </div>
