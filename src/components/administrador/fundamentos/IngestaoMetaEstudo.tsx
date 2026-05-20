@@ -151,28 +151,37 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
         },
       });
 
-      const remoteTrace: any[] = (data && Array.isArray(data.trace)) ? data.trace : [];
-      remoteTrace.forEach(t => {
-        const status: TraceStatus = t.status === 'success' ? 'success' : t.status === 'error' ? 'error' : 'pending';
-        setStage(t.stage, { status, detail: t.detail, duration_ms: t.duration_ms });
-      });
+      // supabase.functions.invoke returns a FunctionsHttpError whose `context`
+      // is the raw Response — we need to parse its body to get { error, stage, options, trace }.
+      let errorPayload: any = null;
+      if (error) {
+        const ctx: any = (error as any).context;
+        try {
+          if (ctx && typeof ctx.json === 'function') {
+            errorPayload = await ctx.clone().json();
+          } else if (ctx && typeof ctx.text === 'function') {
+            errorPayload = JSON.parse(await ctx.clone().text());
+          } else if (typeof ctx?.body === 'string') {
+            errorPayload = JSON.parse(ctx.body);
+          } else if (ctx?.body) {
+            errorPayload = ctx.body;
+          }
+        } catch { /* noop */ }
+      }
+
+      const effective = errorPayload || data;
+      if (Array.isArray(effective?.trace)) {
+        effective.trace.forEach((t: any) => {
+          const status: TraceStatus = t.status === 'success' ? 'success' : t.status === 'error' ? 'error' : 'pending';
+          setStage(t.stage, { status, detail: t.detail, duration_ms: t.duration_ms });
+        });
+      }
 
       if (error || data?.error) {
         setTrace(prev => prev.map(t => t.status === 'running' ? { ...t, status: 'error', detail: t.detail || 'Não executado' } : t));
-        const msg = (data?.error as string) || (error as any)?.message || 'Falha desconhecida.';
-        // Try to surface options the edge function returned.
-        let opts: string[] | undefined;
-        let stg: string = data?.stage || 'llm_analysis';
-        try {
-          if (Array.isArray(data?.options)) opts = data.options;
-          // supabase.functions.invoke wraps non-2xx into error.context.body
-          const ctxBody = (error as any)?.context?.body;
-          if (!opts && ctxBody) {
-            const parsed = typeof ctxBody === 'string' ? JSON.parse(ctxBody) : ctxBody;
-            if (Array.isArray(parsed?.options)) opts = parsed.options;
-            if (parsed?.stage) stg = parsed.stage;
-          }
-        } catch { /* noop */ }
+        const msg = (effective?.error as string) || (error as any)?.message || 'Falha desconhecida.';
+        const opts: string[] | undefined = Array.isArray(effective?.options) ? effective.options : undefined;
+        const stg: string = effective?.stage || 'llm_analysis';
         setFailure({ stage: stg, message: msg, options: opts });
         throw new Error(msg);
       }
