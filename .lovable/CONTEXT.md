@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-05-20T15:49:22.375Z
+Generated: 2026-05-20T15:59:03.632Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
 ## Latest i18n version: 1.93.0
 
 ## Changes by area (last 14 days)
-- **admin**: 29
+- **admin**: 30
 - **vet-ui**: 16
 - **tutor-ui**: 9
 - **meta**: 4
@@ -15,6 +15,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **i18n**: 1
 
 ## Top 10 recent entries
+### 2026-05-20 · [admin] ADDED — Fundamentos: histórico por Core Rule + audit log de governança
+- Nova tabela `core_rule_audit_log`: registra cada `stance_detected` produzido pelo LLM e cada ação de governança (`promote`, `attach`, `resolve_keep`, `discard`, `approve_meta_study`) com `actor_user_id`, `created_at`, `justification` (curator notes) e `payload` JSON com snapshot da proposta. RLS: admin-only.
+- Aba "Histórico & Auditoria" em Fundamentos Arquiteturais: lista todas as RCs com busca (RC-ID/título/categoria) e filtros por stance (`confirms`/`extends`/`contradicts`/`unrelated`) e por ação. Cada RC expansível mostra evidências vinculadas + log de auditoria com proposta, stance, ator, timestamp e justificativa. Bloco extra para entradas órfãs (rule_code referenciado que não existe mais).
+- Approve handler instrumentado: `IngestaoMetaEstudo.approve()` agora grava em lote no audit log (1 entrada por stance detectada + 1 por ação tomada + 1 evento `approve_meta_study` agregado) usando `curatorNotes` como justificativa padrão.
+_files: src/components/administrador/fundamentos/CoreRuleHistory.tsx, src/components/administrador/fundamentos/IngestaoMetaEstudo.tsx, src/pages/administrador/FundamentosTab.tsx_
+
 ### 2026-05-20 · [admin] ADDED — Meta-estudo: detecção de conflito com RCs ativas (governança)
 - Stance classification em `proposed_rules`: cada candidata agora é classificada pelo LLM como `confirms`, `extends`, `contradicts` ou `unrelated` em relação ao catálogo de Regras-Core ativas, com `conflicts_with[]` listando os `rule_id`s referenciados. Validação server-side rebaixa para `extends` se a stance reivindica conflito mas não cita rule_id válido.
 - 3 lanes na UI de Ingestão: 🔴 Conflitos (vermelho, promoção bloqueada — só permite "Manter RC atual" como evidência de governança ou "Descartar") · 🟢 Confirmações (verde, vira `core_rule_evidence` com `relation='supports'` em vez de duplicar a RC) · 🔵 Extensões/Novas (purple, fluxo atual de promoção para nova RC).
@@ -68,12 +74,6 @@ _files: src/components/administrador/estudos/StudyTimeline.tsx, src/utils/llmEnu
 - RC-001 — Exclusão de trial ≠ Contraindicação: critério de exclusão indica lacuna de evidência, não risco demonstrado. Aplicada em (a) prompt do Stage 3 em `extract-study-entities` (regra #8 no system prompt), (b) banner amarelo no topo da seção "Contraindicações" do `ExtractedDataVisualization` lembrando o curador. Motivada pelo estudo PQQ humano que listou "Pregnancy and Nursing" e "Serious Chronic Diseases" como contraindicações, quando eram apenas exclusões do trial.
 - RC-002 — Eventos adversos: negação explícita ≠ ocorrência: quando estudo declara "no adverse events reported", `side_effects` é normalizado para `[]` e flag `explicitly_no_adverse_events=true` é setada. UI exibe badge verde "Sem eventos adversos reportados" em vez de contador "(1)" enganoso. Filtro via regex `NEGATIVE_AE_REGEX` no pós-Stage 3 + filtro espelhado no componente UI.
 _files: .lovable/memory/principles/exclusion-vs-contraindication.md, .lovable/memory/architecture/core-rules-governance.md, supabase/functions/extract-study-entities/index.ts, src/components/administrador/estudos/cards/EstudoCard.tsx…_
-
-### 2026-05-19 · [curation] FIXED — Cards e modal de curadoria consistentes (derivação de triplets)
-- Causa-raiz identificada: cards "nus" em "Em Curadoria" (Spermidine, Vet Geroscience) ocorrem quando o Stage 1 do `extract-study-entities` retorna `extractedNutraceuticals/extractedConditions` vazios, mesmo com triplets válidos gerados pelo Stage 2 (14 e 23 triplets, respectivamente). Card e modal "Análise IA" leem só de `analysis_data` → ficam vazios.
-- Backfill imediato (data migration via UPDATE): 2 estudos afetados tiveram `extractedNutraceuticals` e `extractedConditions` derivados de `triplet_extractions` (Nutraceutical/Compound/Drug → nutracêuticos; Condition/Disease/Phenotype/Outcome → condições, dedup por nome lowercase, confidence padrão 3).
-- Fallback definitivo no pipeline: `extract-study-entities/index.ts` agora deriva as listas a partir dos triplets recém-inseridos quando Stage 1 vier vazio, antes do `UPDATE processed_studies.analysis_data`. Logs `🛟 Fallback: derivados N nutracêuticos/condições`.
-_files: supabase/functions/extract-study-entities/index.ts, src/components/administrador/estudos/detalhes/tabs/AnaliseTab.tsx, src/i18n.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

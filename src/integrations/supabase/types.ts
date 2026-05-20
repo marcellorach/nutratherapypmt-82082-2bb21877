@@ -877,6 +877,60 @@ export type Database = {
         }
         Relationships: []
       }
+      core_rule_audit_log: {
+        Row: {
+          action: string
+          actor_user_id: string | null
+          created_at: string
+          id: string
+          justification: string | null
+          meta_study_id: string | null
+          payload: Json
+          rule_code: string | null
+          rule_id: string | null
+          stance: string | null
+        }
+        Insert: {
+          action: string
+          actor_user_id?: string | null
+          created_at?: string
+          id?: string
+          justification?: string | null
+          meta_study_id?: string | null
+          payload?: Json
+          rule_code?: string | null
+          rule_id?: string | null
+          stance?: string | null
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string | null
+          created_at?: string
+          id?: string
+          justification?: string | null
+          meta_study_id?: string | null
+          payload?: Json
+          rule_code?: string | null
+          rule_id?: string | null
+          stance?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_rule_audit_log_meta_study_id_fkey"
+            columns: ["meta_study_id"]
+            isOneToOne: false
+            referencedRelation: "meta_studies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_rule_audit_log_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "core_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       core_rule_evidence: {
         Row: {
           created_at: string

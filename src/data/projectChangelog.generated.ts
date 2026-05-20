@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-20T15:49:22.369Z
+// Última geração: 2026-05-20T15:59:03.628Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,25 @@ export const lastChangelogDate = "2026-05-20";
 export const senexVersion = "5.1.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-20",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Fundamentos: histórico por Core Rule + audit log de governança",
+    "bullets": [
+      "Nova tabela `core_rule_audit_log`: registra cada `stance_detected` produzido pelo LLM e cada ação de governança (`promote`, `attach`, `resolve_keep`, `discard`, `approve_meta_study`) com `actor_user_id`, `created_at`, `justification` (curator notes) e `payload` JSON com snapshot da proposta. RLS: admin-only.",
+      "Aba \"Histórico & Auditoria\" em Fundamentos Arquiteturais: lista todas as RCs com busca (RC-ID/título/categoria) e filtros por stance (`confirms`/`extends`/`contradicts`/`unrelated`) e por ação. Cada RC expansível mostra evidências vinculadas + log de auditoria com proposta, stance, ator, timestamp e justificativa. Bloco extra para entradas órfãs (rule_code referenciado que não existe mais).",
+      "Approve handler instrumentado: `IngestaoMetaEstudo.approve()` agora grava em lote no audit log (1 entrada por stance detectada + 1 por ação tomada + 1 evento `approve_meta_study` agregado) usando `curatorNotes` como justificativa padrão.",
+      "Files: supabase/migrations/*core_rule_audit_log*.sql, src/components/administrador/fundamentos/CoreRuleHistory.tsx, src/components/administrador/fundamentos/IngestaoMetaEstudo.tsx, src/pages/administrador/FundamentosTab.tsx"
+    ],
+    "files": [
+      "src/components/administrador/fundamentos/CoreRuleHistory.tsx",
+      "src/components/administrador/fundamentos/IngestaoMetaEstudo.tsx",
+      "src/pages/administrador/FundamentosTab.tsx"
+    ],
+    "i18nVersion": "1.93.0"
+  },
   {
     "date": "2026-05-20",
     "kind": "added",
