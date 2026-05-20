@@ -103,7 +103,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
           pdf_storage_path: draft.pdf_storage_path || null,
           kind: draft.kind,
           summary: draft.summary || null,
-          key_claims: draft.key_claims || [],
+          key_claims: (draft.key_claims || []) as any,
         }])
         .select('id')
         .single();
