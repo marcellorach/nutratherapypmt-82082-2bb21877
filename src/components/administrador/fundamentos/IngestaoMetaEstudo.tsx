@@ -304,7 +304,61 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
 
       // Promote any proposed_rules the curator marked as 'promote' into core_rules
       // with origin='deductive' and provenance back to this meta-study.
-      const toPromote = (draft.proposed_rules || []).filter(p => p._action === 'promote');
+      const allProposed = draft.proposed_rules || [];
+      // Safety guard: contradicts are BLOCKED from promotion — they must go through
+      // human governance resolution (attach as evidence / supersede / coexist).
+      const blockedPromotions = allProposed.filter(
+        p => p._action === 'promote' && p.stance === 'contradicts',
+      );
+      if (blockedPromotions.length) {
+        toast.error(
+          `${blockedPromotions.length} proposta(s) em CONFLITO com RCs ativas não podem ser promovidas diretamente. Use "Manter RC atual" ou edite a stance.`,
+        );
+        setSaving(false);
+        return;
+      }
+      const toPromote = allProposed.filter(p => p._action === 'promote');
+      const toAttach = allProposed.filter(
+        p => (p._action === 'attach' || p._action === 'resolve_keep') &&
+             Array.isArray(p.conflicts_with) && p.conflicts_with.length > 0,
+      );
+
+      // Attach 'confirms' / 'resolve_keep' candidates as evidence on the targeted RC(s)
+      // instead of creating a duplicate rule.
+      if (toAttach.length) {
+        const targetCodes = Array.from(
+          new Set(toAttach.flatMap(p => p.conflicts_with || [])),
+        );
+        const { data: ruleRows, error: rErr } = await supabase
+          .from('core_rules').select('id, rule_id').in('rule_id', targetCodes);
+        if (rErr) throw rErr;
+        const byCode = new Map((ruleRows || []).map((r: any) => [r.rule_id, r.id]));
+        const evRows = toAttach.flatMap(p =>
+          (p.conflicts_with || [])
+            .filter(code => byCode.has(code))
+            .map(code => ({
+              rule_id: byCode.get(code),
+              meta_study_id: studyId,
+              relation: p._action === 'resolve_keep' ? 'contradicts' : 'supports',
+              weight: typeof p.confidence === 'number' ? p.confidence : 1.0,
+              quote: p.justification_quote || null,
+              notes:
+                p._action === 'resolve_keep'
+                  ? `[governance] Conflito revisado · RC mantida · proposta arquivada: ${p.proposed_title}${p.enunciado ? ` — ${p.enunciado}` : ''}`
+                  : `[auto] Confirma RC via proposta: ${p.proposed_title}${p.enunciado ? ` — ${p.enunciado}` : ''}`,
+            })),
+        );
+        if (evRows.length) {
+          const { error: evErr } = await supabase.from('core_rule_evidence').insert(evRows);
+          if (evErr) {
+            console.warn('Falha ao anexar evidências de stance:', evErr);
+            toast.warning(`Meta-estudo salvo, mas ${evRows.length} evidência(s) de stance falharam: ${evErr.message}`);
+          } else {
+            toast.success(`${evRows.length} evidência(s) de stance anexada(s) a RCs existentes.`);
+          }
+        }
+      }
+
       if (toPromote.length) {
         const { data: existing } = await supabase
           .from('core_rules').select('rule_id').order('rule_id', { ascending: false }).limit(1);
