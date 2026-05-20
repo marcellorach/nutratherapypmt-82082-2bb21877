@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +7,10 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Sparkles, Upload, FileText, CheckCircle2, Trash2, AlertTriangle } from 'lucide-react';
+import {
+  Loader2, Sparkles, Upload, FileText, CheckCircle2, Trash2, AlertTriangle,
+  Circle, XCircle, ChevronDown, X,
+} from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Claim { claim: string; quote?: string; weight?: number }
@@ -33,6 +36,26 @@ interface Draft {
   suggested_links: SuggestedLink[];
 }
 
+type TraceStatus = 'pending' | 'running' | 'success' | 'error';
+interface TraceLine {
+  stage: string;
+  label: string;
+  status: TraceStatus;
+  detail?: string;
+  duration_ms?: number;
+}
+
+const STAGES: Array<{ key: string; label: string }> = [
+  { key: 'upload', label: 'Upload do documento' },
+  { key: 'extraction', label: 'Extração de texto / anexo do PDF' },
+  { key: 'rules_catalog', label: 'Catálogo de Regras-Core carregado' },
+  { key: 'llm_analysis', label: 'Análise pelo Gemini 3 Pro' },
+  { key: 'structuring', label: 'Rascunho estruturado pronto' },
+];
+
+const ACCEPT = '.pdf,.md,.txt,.docx,application/pdf,text/markdown,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+const MAX_BYTES = 20 * 1024 * 1024;
+
 const RELATION_COLOR: Record<string, string> = {
   supports: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   contradicts: 'bg-red-50 text-red-700 border-red-200',
@@ -40,48 +63,112 @@ const RELATION_COLOR: Record<string, string> = {
   inspires: 'bg-purple-50 text-purple-700 border-purple-200',
 };
 
+function StatusIcon({ status }: { status: TraceStatus }) {
+  if (status === 'success') return <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />;
+  if (status === 'error') return <XCircle className="h-3.5 w-3.5 text-red-600" />;
+  if (status === 'running') return <Loader2 className="h-3.5 w-3.5 text-blue-600 animate-spin" />;
+  return <Circle className="h-3.5 w-3.5 text-muted-foreground/40" />;
+}
+
 interface Props { onSaved?: () => void }
 
 const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
-  const [text, setText] = useState('');
   const [sourceUrl, setSourceUrl] = useState('');
-  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [curatorNotes, setCuratorNotes] = useState('');
+  const [dragOver, setDragOver] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [draft, setDraft] = useState<Draft | null>(null);
+  const [trace, setTrace] = useState<TraceLine[]>(
+    STAGES.map(s => ({ stage: s.key, label: s.label, status: 'pending' as TraceStatus }))
+  );
+
+  const setStage = (key: string, patch: Partial<TraceLine>) => {
+    setTrace(prev => prev.map(t => t.stage === key ? { ...t, ...patch } : t));
+  };
+  const resetTrace = () => setTrace(STAGES.map(s => ({ stage: s.key, label: s.label, status: 'pending' as TraceStatus })));
+
+  const onFile = (f: File | null) => {
+    if (!f) { setFile(null); return; }
+    if (f.size > MAX_BYTES) {
+      toast.error('Arquivo excede 20MB.');
+      return;
+    }
+    setFile(f);
+  };
+
+  const onDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setDragOver(false);
+    const f = e.dataTransfer.files?.[0];
+    if (f) onFile(f);
+  }, []);
 
   const analyze = async () => {
-    if (!text.trim() && !pdfFile) {
-      toast.error('Cole o texto do estudo ou anexe um PDF.');
+    if (!file) {
+      toast.error('Anexe um documento (PDF, .md, .txt ou .docx) para iniciar.');
       return;
     }
     setAnalyzing(true);
+    setDraft(null);
+    resetTrace();
     try {
-      let pdf_storage_path: string | undefined;
-      if (pdfFile) {
-        const path = `${Date.now()}_${pdfFile.name.replace(/[^\w.\-]/g, '_')}`;
-        const up = await supabase.storage.from('meta_studies_pdfs').upload(path, pdfFile, {
-          upsert: false, contentType: pdfFile.type || 'application/pdf',
-        });
-        if (up.error) throw up.error;
-        pdf_storage_path = path;
-      }
-      const { data, error } = await supabase.functions.invoke('extract-meta-study', {
-        body: { text: text.trim() || undefined, source_url: sourceUrl || undefined, pdf_storage_path },
+      // Stage 1 — upload
+      setStage('upload', { status: 'running' });
+      const t0 = performance.now();
+      const path = `${Date.now()}_${file.name.replace(/[^\w.\-]/g, '_')}`;
+      const mime = file.type || (path.match(/\.(md|txt)$/i) ? 'text/plain' : 'application/pdf');
+      const up = await supabase.storage.from('meta_studies_pdfs').upload(path, file, {
+        upsert: false, contentType: mime,
       });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (up.error) {
+        setStage('upload', { status: 'error', detail: up.error.message });
+        throw up.error;
+      }
+      setStage('upload', {
+        status: 'success',
+        duration_ms: Math.round(performance.now() - t0),
+        detail: `${file.name} · ${(file.size / 1024).toFixed(0)} KB`,
+      });
+
+      // Stages 2..5 will be reported by the edge function via `trace`
+      ['extraction', 'rules_catalog', 'llm_analysis', 'structuring'].forEach(s =>
+        setStage(s, { status: 'running' })
+      );
+
+      const { data, error } = await supabase.functions.invoke('extract-meta-study', {
+        body: {
+          source_url: sourceUrl.trim() || undefined,
+          pdf_storage_path: path,
+          pdf_mime: mime,
+          curator_notes: curatorNotes.trim() || undefined,
+        },
+      });
+
+      const remoteTrace: any[] = (data && Array.isArray(data.trace)) ? data.trace : [];
+      remoteTrace.forEach(t => {
+        const status: TraceStatus = t.status === 'success' ? 'success' : t.status === 'error' ? 'error' : 'pending';
+        setStage(t.stage, { status, detail: t.detail, duration_ms: t.duration_ms });
+      });
+
+      if (error || data?.error) {
+        setTrace(prev => prev.map(t => t.status === 'running' ? { ...t, status: 'error', detail: t.detail || 'Não executado' } : t));
+        const msg = (data?.error as string) || (error as any)?.message || 'Falha desconhecida.';
+        throw new Error(msg);
+      }
+
       const d: Draft = {
         ...data.draft,
         source_url: sourceUrl || undefined,
-        pdf_storage_path,
+        pdf_storage_path: path,
         suggested_links: (data.draft.suggested_links || []).map((l: SuggestedLink) => ({ ...l, _enabled: true })),
       };
       setDraft(d);
       toast.success('Rascunho gerado — revise antes de aprovar.');
     } catch (err: any) {
       console.error(err);
-      toast.error(err?.message || 'Falha ao analisar.');
+      toast.error(err?.message || 'Falha ao analisar. Veja o log de digestão.');
     } finally {
       setAnalyzing(false);
     }
@@ -104,6 +191,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
           kind: draft.kind,
           summary: draft.summary || null,
           key_claims: (draft.key_claims || []) as any,
+          curator_notes: curatorNotes.trim() || null,
         }])
         .select('id')
         .single();
@@ -112,7 +200,6 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
 
       const enabledLinks = (draft.suggested_links || []).filter(l => l._enabled);
       if (enabledLinks.length) {
-        // Resolve rule_id (text like "RC-001") -> uuid
         const ruleIds = Array.from(new Set(enabledLinks.map(l => l.rule_id)));
         const { data: ruleRows, error: rErr } = await supabase
           .from('core_rules').select('id, rule_id').in('rule_id', ruleIds);
@@ -134,7 +221,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
         }
       }
       toast.success('Meta-estudo aprovado e vinculado.');
-      setDraft(null); setText(''); setPdfFile(null); setSourceUrl('');
+      setDraft(null); setFile(null); setSourceUrl(''); setCuratorNotes(''); resetTrace();
       onSaved?.();
     } catch (err: any) {
       console.error(err);
@@ -152,7 +239,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
           <span>
             Ingestão <b>NÃO grava direto</b>: a IA produz um rascunho, você revisa/edita os
             vínculos com Regras-Core sugeridos e aprova manualmente. Estudos aqui são <b>arquiteturais</b>
-            (governança do pipeline), não clínicos.
+            {' '}(governança do pipeline), não clínicos.
           </span>
         </CardContent>
       </Card>
@@ -163,31 +250,115 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
             <CardTitle className="text-base flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-purple-600" /> Novo meta-estudo
             </CardTitle>
-            <CardDescription>Cole o texto (abstract + conclusão funcionam bem) e/ou anexe o PDF. Gemini 2.5 Pro extrai e sugere vínculos.</CardDescription>
+            <CardDescription>
+              Anexe o documento-fonte (PDF, .md, .txt ou .docx). Opcionalmente acrescente notas
+              do curador para orientar a IA. Processado por <b>Gemini 3 Pro</b>.
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
+            {/* Dropzone — required */}
             <div>
-              <Label className="text-xs">URL da fonte (opcional)</Label>
-              <Input value={sourceUrl} onChange={e => setSourceUrl(e.target.value)} placeholder="https://doi.org/..." />
+              <Label className="text-xs flex items-center gap-1">
+                <Upload className="h-3 w-3" /> Documento-fonte <span className="text-red-600">*</span>
+              </Label>
+              <div
+                onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={onDrop}
+                className={`mt-1 rounded-md border-2 border-dashed px-4 py-6 text-center transition-colors cursor-pointer ${
+                  dragOver ? 'border-purple-500 bg-purple-50/50' : 'border-muted-foreground/30 hover:border-muted-foreground/60'
+                }`}
+                onClick={() => document.getElementById('meta-file-input')?.click()}
+              >
+                {file ? (
+                  <div className="flex items-center justify-center gap-2 text-sm">
+                    <FileText className="h-4 w-4 text-purple-600" />
+                    <span className="font-medium">{file.name}</span>
+                    <span className="text-muted-foreground text-xs">· {(file.size / 1024).toFixed(0)} KB</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2"
+                      onClick={(e) => { e.stopPropagation(); setFile(null); }}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground">
+                    <Upload className="h-5 w-5 mx-auto mb-1.5 opacity-60" />
+                    <div>Arraste o arquivo aqui ou <span className="text-purple-700 font-medium">clique para selecionar</span></div>
+                    <div className="text-[10px] mt-1">PDF, .md, .txt, .docx · até 20MB</div>
+                  </div>
+                )}
+                <input
+                  id="meta-file-input"
+                  type="file"
+                  accept={ACCEPT}
+                  className="hidden"
+                  onChange={e => onFile(e.target.files?.[0] || null)}
+                />
+              </div>
             </div>
+
+            {/* Curator notes */}
             <div>
-              <Label className="text-xs">Texto / .md / abstract</Label>
+              <Label className="text-xs">Notas do curador <span className="text-muted-foreground">(opcional)</span></Label>
               <Textarea
-                value={text}
-                onChange={e => setText(e.target.value)}
-                placeholder="Cole aqui o conteúdo (mínimo ~50 caracteres). Para PDFs longos, prefira colar abstract + introdução + conclusão."
-                className="min-h-40 font-mono text-xs"
+                value={curatorNotes}
+                onChange={e => setCuratorNotes(e.target.value)}
+                placeholder="Diretrizes para a IA sobre este paper: como ponderar, claims a ignorar, RCs já cobertas, contexto histórico, etc. Aceita markdown."
+                className="min-h-24 text-xs"
+                maxLength={4000}
               />
-              <p className="text-[10px] text-muted-foreground mt-1">{text.length} caracteres</p>
+              <p className="text-[10px] text-muted-foreground mt-1">
+                {curatorNotes.length}/4000 — injetado no prompt como contexto vinculante, não como conteúdo do estudo.
+              </p>
             </div>
-            <div>
-              <Label className="text-xs flex items-center gap-1"><Upload className="h-3 w-3" /> PDF (opcional)</Label>
-              <Input type="file" accept="application/pdf" onChange={e => setPdfFile(e.target.files?.[0] || null)} />
-              {pdfFile && <p className="text-[10px] text-muted-foreground mt-1">{pdfFile.name} · {(pdfFile.size / 1024).toFixed(0)} KB</p>}
-            </div>
-            <Button onClick={analyze} disabled={analyzing}>
+
+            {/* Optional metadata */}
+            <details className="text-xs">
+              <summary className="cursor-pointer text-muted-foreground hover:text-foreground flex items-center gap-1 select-none">
+                <ChevronDown className="h-3 w-3" /> Metadados adicionais (opcional)
+              </summary>
+              <div className="mt-2 pl-4">
+                <Label className="text-xs">DOI / URL da fonte</Label>
+                <Input value={sourceUrl} onChange={e => setSourceUrl(e.target.value)} placeholder="https://doi.org/..." />
+              </div>
+            </details>
+
+            <Button onClick={analyze} disabled={analyzing || !file}>
               {analyzing ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Analisando…</> : <><Sparkles className="h-4 w-4 mr-1" /> Analisar com IA</>}
             </Button>
+
+            {/* Digestion log */}
+            <div className="border rounded-md p-3 bg-muted/20">
+              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                Log de digestão
+              </div>
+              <ol className="space-y-1.5">
+                {trace.map((t, i) => (
+                  <li key={t.stage} className="flex items-start gap-2 text-xs">
+                    <span className="mt-0.5"><StatusIcon status={t.status} /></span>
+                    <span className="text-muted-foreground font-mono w-4">{i + 1}.</span>
+                    <div className="flex-1">
+                      <div className={`font-medium ${t.status === 'error' ? 'text-red-700' : t.status === 'success' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                        {t.label}
+                        {typeof t.duration_ms === 'number' && (
+                          <span className="ml-2 text-[10px] text-muted-foreground">{t.duration_ms}ms</span>
+                        )}
+                      </div>
+                      {t.detail && (
+                        <div className={`text-[11px] mt-0.5 ${t.status === 'error' ? 'text-red-600' : 'text-muted-foreground'}`}>
+                          {t.detail}
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
           </CardContent>
         </Card>
       )}

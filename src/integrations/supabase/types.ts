@@ -1947,6 +1947,7 @@ export type Database = {
           added_by: string | null
           authors: string | null
           created_at: string
+          curator_notes: string | null
           doi: string | null
           id: string
           journal: string | null
@@ -1963,6 +1964,7 @@ export type Database = {
           added_by?: string | null
           authors?: string | null
           created_at?: string
+          curator_notes?: string | null
           doi?: string | null
           id?: string
           journal?: string | null
@@ -1979,6 +1981,7 @@ export type Database = {
           added_by?: string | null
           authors?: string | null
           created_at?: string
+          curator_notes?: string | null
           doi?: string | null
           id?: string
           journal?: string | null
