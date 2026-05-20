@@ -176,6 +176,17 @@ serve(async (req) => {
     const stage3Data = stage3Result ? JSON.parse(stage3Result.function.arguments) : { dosages: [], side_effects: [], contraindications: [], clinical_outcomes: [] };
     console.log(`✅ Stage 3: ${stage3Data.dosages?.length || 0} dosagens, ${stage3Data.side_effects?.length || 0} efeitos colaterais`);
 
+    // RC-001 / Adverse-events normalization: drop pseudo-entries that mean "no AEs reported"
+    const NEGATIVE_AE_REGEX = /\b(no|none|not|sem|nenhum|nenhuma|n[ãa]o)\b.*\b(adverse|side[- ]?effect|event|reported|observed|evento|efeito|adverso|reportado|observad)/i;
+    const originalAEs = Array.isArray(stage3Data.side_effects) ? stage3Data.side_effects : [];
+    const filteredAEs = originalAEs.filter((e: any) => !NEGATIVE_AE_REGEX.test(`${e?.name || ''} ${e?.description || ''}`));
+    if (originalAEs.length > 0 && filteredAEs.length !== originalAEs.length) {
+      console.log(`🧹 Adverse-events normalization: removed ${originalAEs.length - filteredAEs.length} negation-only entries (kept ${filteredAEs.length})`);
+    }
+    stage3Data.side_effects = filteredAEs;
+    stage3Data.explicitly_no_adverse_events =
+      originalAEs.length > 0 && filteredAEs.length === 0;
+
     // ==================== POST-EXTRACTION VALIDATION ====================
     // Filter dosages to only include compounds that were found in Stage 1 (with flexible matching)
     const stage1Nutraceuticals = stage1Data.nutraceuticals || [];
