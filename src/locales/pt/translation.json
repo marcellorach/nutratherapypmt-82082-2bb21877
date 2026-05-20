@@ -403,6 +403,7 @@
   },
   "studies": {
     "approval": {
+      "_timeline_anchor_pt": "",
       "approveStudy": "Aprovar Estudo",
       "confirmTitle": "Confirmar Aprovação",
       "confirmDescription": "Você está prestes a aprovar este estudo. Esta ação irá:",
