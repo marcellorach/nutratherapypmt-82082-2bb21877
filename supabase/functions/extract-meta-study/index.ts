@@ -14,6 +14,12 @@ const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
 const MODEL = "google/gemini-3-pro-preview";
 
+// Conservative inline-PDF cap for the Lovable AI Gateway. The gateway has
+// historically rejected/dropped silently around ~8–10MB of inline file data,
+// so we fail FAST and LOUD above this threshold instead of silently truncating.
+const GATEWAY_PDF_LIMIT_BYTES = 7 * 1024 * 1024;
+const LLM_TIMEOUT_MS = 110_000;
+
 type TraceEntry = {
   stage: string;
   status: "success" | "error" | "skipped";
@@ -158,6 +164,23 @@ Deno.serve(async (req) => {
           detail: `Texto lido (${text.length} chars)`,
         });
       } else {
+        if (buf.byteLength > GATEWAY_PDF_LIMIT_BYTES) {
+          const sizeMb = (buf.byteLength / 1024 / 1024).toFixed(1);
+          const capMb = (GATEWAY_PDF_LIMIT_BYTES / 1024 / 1024).toFixed(0);
+          return fail(
+            413,
+            "extraction",
+            `PDF tem ${sizeMb} MB — acima do limite seguro de ${capMb} MB para envio inline ao Gemini via gateway. Não vou truncar o estudo silenciosamente.`,
+            {
+              options: [
+                "Dividir o PDF em partes (ex: capítulos, ou abstract+métodos+discussão) e ingerir cada parte como um meta-estudo separado.",
+                "Extrair o texto fora da plataforma (qualquer leitor de PDF → exportar como .txt ou .md) e reenviar como arquivo de texto — sem limite de tamanho relevante.",
+                "Reenviar apenas as seções essenciais (abstract + conclusão + tabela de resultados) como .md, anotando no campo 'Notas do curador' o que foi omitido.",
+                "Se o PDF for um scan (sem texto selecionável), rodar OCR antes (ex: ocrmypdf) — o tamanho costuma cair drasticamente.",
+              ],
+            },
+          );
+        }
         pdfBase64 = bytesToBase64(buf);
         pushTrace({
           stage: "extraction",
@@ -214,22 +237,46 @@ Deno.serve(async (req) => {
     }
 
     const tLlm = performance.now();
-    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${lovableApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userContent },
-        ],
-        tools: [TOOL],
-        tool_choice: { type: "function", function: { name: TOOL.function.name } },
-      }),
-    });
+    const ctrl = new AbortController();
+    const timeoutId = setTimeout(() => ctrl.abort(), LLM_TIMEOUT_MS);
+    let aiRes: Response;
+    try {
+      aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${lovableApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: MODEL,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userContent },
+          ],
+          tools: [TOOL],
+          tool_choice: { type: "function", function: { name: TOOL.function.name } },
+        }),
+        signal: ctrl.signal,
+      });
+    } catch (e: any) {
+      clearTimeout(timeoutId);
+      const aborted = e?.name === "AbortError";
+      return fail(
+        aborted ? 504 : 502,
+        "llm_analysis",
+        aborted
+          ? `Gemini não respondeu em ${Math.round(LLM_TIMEOUT_MS / 1000)}s — provavelmente o PDF está grande/complexo demais para uma única chamada.`
+          : `Falha de rede ao chamar o gateway: ${e?.message || e}`,
+        {
+          options: aborted ? [
+            "Dividir o PDF em partes menores e ingerir cada uma separadamente.",
+            "Reenviar apenas abstract + conclusão como .md (muito mais rápido para o modelo digerir).",
+            "Tentar novamente em alguns minutos — o gateway pode estar sob carga.",
+          ] : undefined,
+        },
+      );
+    }
+    clearTimeout(timeoutId);
 
     if (!aiRes.ok) {
       const errText = await aiRes.text();
@@ -239,6 +286,8 @@ Deno.serve(async (req) => {
         ? "Limite de requisições do Gemini excedido. Aguarde 1 min e tente novamente."
         : aiRes.status === 402
         ? "Créditos do Lovable AI esgotados. Adicione créditos em Settings > Workspace > Usage."
+        : aiRes.status === 413 || /payload|too large|size/i.test(errText)
+        ? `Gateway rejeitou o PDF por tamanho (HTTP ${aiRes.status}). Reenvie em partes menores ou como texto.`
         : `Falha no gateway de IA (HTTP ${aiRes.status}).`;
       return fail(httpCode, "llm_analysis", friendly, { detail: errText });
     }
