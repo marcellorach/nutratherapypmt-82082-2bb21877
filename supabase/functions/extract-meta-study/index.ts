@@ -297,7 +297,7 @@ Deno.serve(async (req) => {
       return fail(400, "extraction", "Anexe um documento (PDF/.md/.txt/.docx) ou cole o texto.");
     }
 
-    if (!pdfBase64 && (!text || text.length < 50)) {
+    if (!pdfBase64 && !googleAiFile && (!text || text.length < 50)) {
       return fail(422, "extraction", "Texto extraído é muito curto (<50 chars). Pode ser PDF escaneado sem OCR.");
     }
 
@@ -473,7 +473,8 @@ Deno.serve(async (req) => {
 
     let draft: any;
     try {
-      draft = JSON.parse(call.function.arguments);
+      const rawArgs = call.function?.arguments ?? call.args;
+      draft = typeof rawArgs === "string" ? JSON.parse(rawArgs) : rawArgs;
     } catch (e: any) {
       return fail(502, "structuring", `Falha ao parsear JSON do Gemini: ${e?.message || e}`);
     }
