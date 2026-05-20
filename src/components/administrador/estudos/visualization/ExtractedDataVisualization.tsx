@@ -98,6 +98,8 @@ interface ExtractedDataVisualizationProps {
     mechanisms?: any[];
     conditions?: any[];
     interactions?: any[];
+    exclusion_criteria?: Array<{ population: string; quote?: string }>;
+    evidence_gaps?: string[];
   };
 }
 
@@ -155,8 +157,10 @@ const ExtractedDataVisualization: React.FC<ExtractedDataVisualizationProps> = ({
     side_effects, 
     contraindications, 
     drug_interactions, 
-    synergies 
+    synergies,
   } = analysisData || {};
+  const exclusion_criteria = (analysisData as any)?.exclusion_criteria || [];
+  const evidence_gaps = (analysisData as any)?.evidence_gaps || [];
 
   // Check if we have any expanded data
   const hasExpandedData = study_population || 
@@ -164,6 +168,8 @@ const ExtractedDataVisualization: React.FC<ExtractedDataVisualizationProps> = ({
     (biomarkers && biomarkers.length > 0) ||
     (side_effects && side_effects.length > 0) ||
     (contraindications && contraindications.length > 0) ||
+    exclusion_criteria.length > 0 ||
+    evidence_gaps.length > 0 ||
     (drug_interactions && drug_interactions.length > 0) ||
     (synergies && synergies.length > 0);
 
