@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-05-19T03:13:43.352Z",
+  "timestamp": "2026-05-20T02:12:17.682Z",
   "summary": {
     "totalFiles": 879,
-    "totalIssues": 428,
+    "totalIssues": 429,
     "hardcodedTexts": 49,
-    "missingKeys": 378,
+    "missingKeys": 379,
     "incompleteTranslations": 1
   },
   "issues": [
@@ -1515,6 +1515,13 @@
     },
     {
       "type": "missing-key",
+      "file": "src/components/administrador/estudos/detalhes/tabs/AnaliseTab.tsx",
+      "line": 33,
+      "text": "subject_name, subject_type, predicate, object_name, object_type, extraction_confidence",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/administrador/estudos/detalhes/tabs/PipelineDebugTab.tsx",
       "line": 55,
       "text": "id, subject_name, predicate, object_name, synced_to_neo4j, curation_status, extraction_confidence",
@@ -1551,35 +1558,35 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/import/SciImportSection.tsx",
-      "line": 96,
+      "line": 99,
       "text": "id",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/import/SciImportSection.tsx",
-      "line": 110,
+      "line": 113,
       "text": "study_id",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/import/SciImportSection.tsx",
-      "line": 175,
+      "line": 192,
       "text": "*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/import/SciImportSection.tsx",
-      "line": 223,
+      "line": 240,
       "text": "study_id",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/import/SciImportSection.tsx",
-      "line": 227,
+      "line": 244,
       "text": "study_id",
       "severity": "high"
     },
@@ -2489,21 +2496,21 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 261,
+      "line": 282,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 472,
+      "line": 493,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 3267,
+      "line": 3288,
       "text": "@",
       "severity": "high"
     },
