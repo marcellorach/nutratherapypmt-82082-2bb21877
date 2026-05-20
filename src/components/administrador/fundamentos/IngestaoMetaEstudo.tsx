@@ -253,6 +253,15 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
           kind: draft.kind,
           summary: draft.summary || null,
           key_claims: (draft.key_claims || []) as any,
+          architectural_patterns:  (draft.architectural_patterns  || []) as any,
+          methodological_recipes:  (draft.methodological_recipes  || []) as any,
+          vocabularies_standards:  (draft.vocabularies_standards  || []) as any,
+          quantitative_parameters: (draft.quantitative_parameters || []) as any,
+          anti_patterns_pitfalls:  (draft.anti_patterns_pitfalls  || []) as any,
+          evaluation_metrics:      (draft.evaluation_metrics      || []) as any,
+          open_questions:          (draft.open_questions          || []) as any,
+          proposed_rules:          (draft.proposed_rules          || []) as any,
+          extraction_schema_version: 'v2',
           curator_notes: curatorNotes.trim() || null,
         }])
         .select('id')
@@ -282,6 +291,42 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
           if (evErr) throw evErr;
         }
       }
+
+      // Promote any proposed_rules the curator marked as 'promote' into core_rules
+      // with origin='deductive' and provenance back to this meta-study.
+      const toPromote = (draft.proposed_rules || []).filter(p => p._action === 'promote');
+      if (toPromote.length) {
+        const { data: existing } = await supabase
+          .from('core_rules').select('rule_id').order('rule_id', { ascending: false }).limit(1);
+        let nextN = 1;
+        const lastCode = existing?.[0]?.rule_id;
+        if (lastCode && /^RC-\d+$/.test(lastCode)) {
+          nextN = parseInt(lastCode.slice(3), 10) + 1;
+        }
+        const { data: userData } = await supabase.auth.getUser();
+        const rows = toPromote.map((p, idx) => ({
+          rule_id: `RC-${String(nextN + idx).padStart(3, '0')}`,
+          title: p.proposed_title.slice(0, 200),
+          category: p.category || 'uncategorized',
+          status: 'active',
+          version: '1.0.0',
+          justification: p.enunciado,
+          application: p.suggested_application || null,
+          runtime_effect: 'doc_only',
+          origin: 'deductive',
+          proposed_from_meta_study: studyId,
+          promoted_at: new Date().toISOString(),
+          promoted_by: userData?.user?.id ?? null,
+        }));
+        const { error: rcErr } = await supabase.from('core_rules').insert(rows as any);
+        if (rcErr) {
+          console.warn('Falha ao promover RCs propostas:', rcErr);
+          toast.warning(`Meta-estudo salvo, mas ${toPromote.length} RC(s) propostas não foram promovidas: ${rcErr.message}`);
+        } else {
+          toast.success(`${toPromote.length} nova(s) RC(s) deduzida(s) promovida(s).`);
+        }
+      }
+
       toast.success('Meta-estudo aprovado e vinculado.');
       setDraft(null); setFile(null); setSourceUrl(''); setCuratorNotes(''); resetTrace();
       onSaved?.();
