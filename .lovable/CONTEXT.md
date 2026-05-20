@@ -1,20 +1,26 @@
 # Project context briefing (auto)
-Generated: 2026-05-19T13:54:54.648Z
+Generated: 2026-05-20T02:44:23.879Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.86.11
+## Latest i18n version: 1.87.0
 
 ## Changes by area (last 14 days)
 - **admin**: 21
 - **vet-ui**: 16
 - **tutor-ui**: 9
+- **meta**: 4
 - **curation**: 4
 - **clinical-pipeline**: 4
-- **meta**: 3
 - **i18n**: 1
 
 ## Top 10 recent entries
+### 2026-05-20 · [meta] ADDED — Governança de Regras-Core (RC-001, RC-002, RC-003 planejada)
+- Novo arquivo `docs/CORE_RULES.md` como fonte canônica auditável das regras-core do Senex AI. Cada regra tem `id` (RC-NNN), categoria, versão, status, justificativa, aplicação em código e evidências sustentadoras. Substitui o status anterior em que regras-core estavam dispersas entre `.lovable/memory/`, custom-knowledge e CHANGELOG.
+- RC-001 — Exclusão de trial ≠ Contraindicação: critério de exclusão indica lacuna de evidência, não risco demonstrado. Aplicada em (a) prompt do Stage 3 em `extract-study-entities` (regra #8 no system prompt), (b) banner amarelo no topo da seção "Contraindicações" do `ExtractedDataVisualization` lembrando o curador. Motivada pelo estudo PQQ humano que listou "Pregnancy and Nursing" e "Serious Chronic Diseases" como contraindicações, quando eram apenas exclusões do trial.
+- RC-002 — Eventos adversos: negação explícita ≠ ocorrência: quando estudo declara "no adverse events reported", `side_effects` é normalizado para `[]` e flag `explicitly_no_adverse_events=true` é setada. UI exibe badge verde "Sem eventos adversos reportados" em vez de contador "(1)" enganoso. Filtro via regex `NEGATIVE_AE_REGEX` no pós-Stage 3 + filtro espelhado no componente UI.
+_files: .lovable/memory/principles/exclusion-vs-contraindication.md, .lovable/memory/architecture/core-rules-governance.md, supabase/functions/extract-study-entities/index.ts, src/components/administrador/estudos/cards/EstudoCard.tsx…_
+
 ### 2026-05-19 · [curation] FIXED — Cards e modal de curadoria consistentes (derivação de triplets)
 - Causa-raiz identificada: cards "nus" em "Em Curadoria" (Spermidine, Vet Geroscience) ocorrem quando o Stage 1 do `extract-study-entities` retorna `extractedNutraceuticals/extractedConditions` vazios, mesmo com triplets válidos gerados pelo Stage 2 (14 e 23 triplets, respectivamente). Card e modal "Análise IA" leem só de `analysis_data` → ficam vazios.
 - Backfill imediato (data migration via UPDATE): 2 estudos afetados tiveram `extractedNutraceuticals` e `extractedConditions` derivados de `triplet_extractions` (Nutraceutical/Compound/Drug → nutracêuticos; Condition/Disease/Phenotype/Outcome → condições, dedup por nome lowercase, confidence padrão 3).
@@ -68,12 +74,6 @@ _files: src/components/administrador/configuracoes/ExtractionPromptsEditor.tsx_
 - Novo manifest `supabase/functions/_shared/system-prompts.ts` com o texto real de produção dos 24 prompts (Clinical Extraction, Clinical Reasoning, Conversational, External Lookup, KG Enrichment, KG Gap-Fill, KG Governance, RAG/Embeddings, Recommendation Orchestration, Study Ingestion, Taxonomy, Translation) + helper `getSystemPrompt(supabase, key)` no padrão override → default → manifest.
 - Nova edge function `sync-system-prompts` faz `UPDATE` em `default_content` a partir do manifest, sem tocar em `override_content`. Executada agora: 24/24 atualizados.
 _files: supabase/functions/_shared/system-prompts.ts, supabase/functions/sync-system-prompts/index.ts, src/components/administrador/configuracoes/SystemPromptsCatalog.tsx, src/components/administrador/PromptConfigurationTab.tsx…_
-
-### 2026-05-18 · [admin] CHANGED — Landing: AdminFooter unificado + scroll-indicator na 1ª dobra
-- `AdminFooter` agora renderiza o mesmo `Footer` da landing (versão Senex auto-lida, badge `Veterinary Geroscience`, copyright bilíngue, powered-by completo). Antes era um clone hardcoded em EN sem versão.
-- Index hero: reduzido espaço acima do botão "Scroll to discover our vision" (`mt-16` → `mt-4`, `mt-3` → `mt-2`) para caber na 1ª dobra.
-- Files: src/components/administrador/layout/AdminFooter.tsx, src/pages/Index.tsx
-_files: src/components/administrador/layout/AdminFooter.tsx, src/pages/Index.tsx_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
