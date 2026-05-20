@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-05-20T15:45:36.862Z",
+  "timestamp": "2026-05-20T16:14:13.107Z",
   "summary": {
-    "totalFiles": 885,
+    "totalFiles": 886,
     "totalIssues": 434,
     "hardcodedTexts": 49,
     "missingKeys": 383,
@@ -2496,21 +2496,21 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 451,
+      "line": 489,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 662,
+      "line": 700,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 3457,
+      "line": 3495,
       "text": "@",
       "severity": "high"
     },
@@ -2594,13 +2594,6 @@
     {
       "type": "missing-key",
       "file": "src/pages/administrador/FundamentosTab.tsx",
-      "line": 98,
-      "text": "*",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/pages/administrador/FundamentosTab.tsx",
       "line": 99,
       "text": "*",
       "severity": "high"
@@ -2616,6 +2609,13 @@
       "type": "missing-key",
       "file": "src/pages/administrador/FundamentosTab.tsx",
       "line": 101,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/pages/administrador/FundamentosTab.tsx",
+      "line": 102,
       "text": "*",
       "severity": "high"
     },
