@@ -373,6 +373,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'configuration',
     component: AboutSenexTab,
     description: 'Visão técnica detalhada do motor Senex AI: arquitetura em 6 fases, pilares científicos e princípios operacionais'
+  },
+  {
+    id: 'fundamentos',
+    label: 'Fundamentos Arquiteturais',
+    group: 'configuration',
+    component: FundamentosTab,
+    description: 'Meta-KG: catálogo auditável das Regras-Core (RC-NNN) + estudos arquiteturais que justificam cada decisão sensível do pipeline'
   }
 ];
 
