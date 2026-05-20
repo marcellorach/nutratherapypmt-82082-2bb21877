@@ -15,6 +15,18 @@ const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
 const MODEL = "google/gemini-3-pro-preview";
 
+// Model name mapping. The Lovable AI Gateway expects the `google/` prefix;
+// the direct Google AI API (generativelanguage.googleapis.com) rejects it
+// with 404 NOT_FOUND. Use these helpers everywhere instead of hand-stripping.
+function toGatewayModel(model: string): string {
+  return model.startsWith("google/") || model.includes("/") ? model : `google/${model}`;
+}
+function toDirectModel(model: string): string {
+  return model.replace(/^google\//, "");
+}
+const GATEWAY_MODEL = toGatewayModel(MODEL);
+const DIRECT_MODEL = toDirectModel(MODEL);
+
 // Conservative inline-PDF cap for the Lovable AI Gateway. The gateway has
 // historically rejected/dropped silently around ~8–10MB of inline file data,
 // so we fail FAST and LOUD above this threshold instead of silently truncating.
