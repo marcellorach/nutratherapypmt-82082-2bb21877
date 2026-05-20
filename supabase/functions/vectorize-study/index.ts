@@ -79,20 +79,50 @@ serve(async (req) => {
       throw new Error('GOOGLE_AI_API_KEY not configured');
     }
 
-    // 1. Buscar texto completo do estudo
-    console.log('📚 Buscando texto completo...');
-    const { data: study, error: studyError } = await supabase
-      .from('processed_studies')
-      .select('id, title, full_text_content, full_text_metadata')
-      .eq('id', studyId)
-      .single();
+    // 1. Buscar texto completo do estudo — com polling para evitar race condition
+    // com gemini-file-search (que popula full_text_content de forma assíncrona).
+    console.log('📚 Buscando texto completo (com retry)...');
+    let study: any = null;
+    let studyError: any = null;
+    const MAX_ATTEMPTS = 12; // 12 × 5s = 60s
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      const res = await supabase
+        .from('processed_studies')
+        .select('id, title, full_text_content, full_text_metadata')
+        .eq('id', studyId)
+        .single();
+      study = res.data;
+      studyError = res.error;
 
-    if (studyError || !study) {
-      throw new Error('Estudo não encontrado');
-    }
+      if (studyError || !study) {
+        throw new Error('Estudo não encontrado');
+      }
 
-    if (!study.full_text_content || study.full_text_content.trim().length === 0) {
-      throw new Error('Estudo não possui texto completo para vetorização');
+      if (study.full_text_content && study.full_text_content.trim().length > 0) {
+        if (attempt > 1) {
+          console.log(`✅ full_text_content disponível na tentativa ${attempt}`);
+        }
+        break;
+      }
+
+      if (attempt === MAX_ATTEMPTS) {
+        // Em vez de 500, retornar 202 sinalizando que vetorização deve ser re-tentada
+        // depois que gemini-file-search popular full_text_content.
+        console.warn(`⚠️ full_text_content ainda vazio após ${MAX_ATTEMPTS} tentativas — adiando vetorização`);
+        return new Response(
+          JSON.stringify({
+            success: false,
+            deferred: true,
+            studyId,
+            reason: 'full_text_content_not_ready',
+            message: 'Texto completo ainda não disponível. Reagende a vetorização após a extração de texto concluir.',
+          }),
+          { status: 202, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      console.log(`⏳ Tentativa ${attempt}/${MAX_ATTEMPTS}: full_text_content vazio, aguardando 5s...`);
+      await new Promise((r) => setTimeout(r, 5000));
     }
 
     console.log(`📊 Estudo: ${study.title}`);
