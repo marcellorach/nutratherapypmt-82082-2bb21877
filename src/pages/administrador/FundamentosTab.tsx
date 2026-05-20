@@ -15,8 +15,10 @@ interface CoreRule {
   title_en?: string | null;
   category: string;
   status: 'active' | 'planned' | 'deprecated' | string;
+  runtime_effect?: 'active' | 'doc_only' | 'planned' | string;
   version: string;
   justification: string;
+  justification_en?: string | null;
   application?: string | null;
   evidence_summary?: string | null;
   doc_anchor?: string | null;
@@ -55,6 +57,22 @@ const STATUS_COLOR: Record<string, string> = {
   active: 'bg-emerald-100 text-emerald-700 border-emerald-300',
   planned: 'bg-amber-100 text-amber-700 border-amber-300',
   deprecated: 'bg-slate-100 text-slate-600 border-slate-300',
+  documented: 'bg-slate-100 text-slate-600 border-slate-300',
+};
+const RUNTIME_COLOR: Record<string, string> = {
+  active: 'bg-blue-100 text-blue-700 border-blue-300',
+  doc_only: 'bg-slate-100 text-slate-600 border-slate-300',
+  planned: 'bg-amber-100 text-amber-700 border-amber-300',
+};
+const RUNTIME_LABEL_PT: Record<string, string> = {
+  active: 'runtime: ativo',
+  doc_only: 'runtime: só doc',
+  planned: 'runtime: planejado',
+};
+const RUNTIME_LABEL_EN: Record<string, string> = {
+  active: 'runtime: active',
+  doc_only: 'runtime: doc-only',
+  planned: 'runtime: planned',
 };
 const RELATION_COLOR: Record<string, string> = {
   supports: 'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -133,7 +151,7 @@ const FundamentosTab: React.FC = () => {
             <BookOpenCheck className="h-4 w-4 mr-1" /> {t('fundamentos.tabs.studies', 'Estudos Arquiteturais')} ({studies.length})
           </TabsTrigger>
           <TabsTrigger value="influences">
-            <GitBranch className="h-4 w-4 mr-1" /> {t('fundamentos.tabs.influences', 'Mapa de Influências')} ({evidence.length})
+            <GitBranch className="h-4 w-4 mr-1" /> {t('fundamentos.tabs.justifications', 'Justificativas')} ({evidence.length})
           </TabsTrigger>
         </TabsList>
 
@@ -144,6 +162,9 @@ const FundamentosTab: React.FC = () => {
           ) : rules.map((r) => {
             const evForRule = evidence.filter(e => e.rule_id === r.id);
             const modsForRule = modulators.filter(m => m.rule_id === r.id);
+            const runtimeKey = r.runtime_effect || 'doc_only';
+            const runtimeLabel = (lang === 'pt' ? RUNTIME_LABEL_PT : RUNTIME_LABEL_EN)[runtimeKey] || runtimeKey;
+            const just = lang === 'en' && r.justification_en ? r.justification_en : r.justification;
             return (
               <Card key={r.id} className="border-l-4 border-l-purple-400">
                 <CardHeader className="pb-2">
@@ -153,6 +174,7 @@ const FundamentosTab: React.FC = () => {
                         <Badge variant="outline" className="font-mono text-xs">{r.rule_id}</Badge>
                         <CardTitle className="text-base">{lang === 'en' && r.title_en ? r.title_en : r.title}</CardTitle>
                         <Badge className={STATUS_COLOR[r.status] || ''}>{r.status}</Badge>
+                        <Badge variant="outline" className={RUNTIME_COLOR[runtimeKey] || ''}>{runtimeLabel}</Badge>
                         <Badge variant="outline" className="text-xs">v{r.version}</Badge>
                         <Badge variant="secondary" className="text-xs">{r.category}</Badge>
                       </div>
@@ -167,7 +189,7 @@ const FundamentosTab: React.FC = () => {
                 <CardContent className="space-y-2 text-sm">
                   <div>
                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('fundamentos.justification', 'Justificativa')}</p>
-                    <p className="text-foreground">{r.justification}</p>
+                    <p className="text-foreground">{just}</p>
                   </div>
                   {r.application && (
                     <div>
@@ -266,45 +288,50 @@ const FundamentosTab: React.FC = () => {
         <TabsContent value="influences" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">{t('fundamentos.influencesTitle', 'Como estudos arquiteturais influenciam regras')}</CardTitle>
+              <CardTitle className="text-base">{t('fundamentos.justificationsTitle', 'Como cada Regra-Core é justificada')}</CardTitle>
               <CardDescription className="text-xs">
-                {t('fundamentos.influencesDesc', 'Tabela "achatada" do grafo Meta-KG. Cada linha é uma aresta tipada entre estudo e regra (versão simplificada — visualização em force-graph virá depois).')}
+                {t('fundamentos.justificationsDesc', 'Para cada Regra-Core, lista os estudos arquiteturais que a sustentam, contradizem ou modulam — com quote literal e peso. Regras sem evidência vinculada são governança apenas por convenção da equipe e estão sinalizadas.')}
               </CardDescription>
             </CardHeader>
-            <CardContent className="text-sm">
-              {evidence.length === 0 ? (
-                <p className="text-muted-foreground text-center py-4">{t('fundamentos.noEvidence', 'Nenhuma evidência vinculada ainda.')}</p>
+            <CardContent className="text-sm space-y-3">
+              {rules.length === 0 ? (
+                <p className="text-muted-foreground text-center py-4">{t('fundamentos.noRules', 'Nenhuma regra-core cadastrada ainda.')}</p>
               ) : (
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="border-b text-left">
-                      <th className="py-2 pr-2">{t('fundamentos.rule', 'Regra')}</th>
-                      <th className="py-2 pr-2">{t('fundamentos.relation', 'Relação')}</th>
-                      <th className="py-2 pr-2">{t('fundamentos.study', 'Estudo')}</th>
-                      <th className="py-2 pr-2">{t('fundamentos.weightCol', 'Peso')}</th>
-                      <th className="py-2 pr-2">{t('fundamentos.notes', 'Notas')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {evidence.map(ev => {
-                      const r = rules.find(x => x.id === ev.rule_id);
-                      const s = studies.find(x => x.id === ev.meta_study_id);
-                      return (
-                        <tr key={ev.id} className="border-b last:border-0">
-                          <td className="py-2 pr-2">
-                            <Badge variant="outline" className="font-mono">{r?.rule_id || '?'}</Badge> {r?.title?.slice(0, 30)}
-                          </td>
-                          <td className="py-2 pr-2">
-                            <Badge className={RELATION_COLOR[ev.relation]}>{ev.relation}</Badge>
-                          </td>
-                          <td className="py-2 pr-2">{s?.title?.slice(0, 50) || '?'}</td>
-                          <td className="py-2 pr-2 font-mono">{ev.weight}</td>
-                          <td className="py-2 pr-2 text-muted-foreground">{ev.notes || ev.quote || '—'}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                rules.map(r => {
+                  const evForRule = evidence.filter(e => e.rule_id === r.id);
+                  return (
+                    <div key={r.id} className="border rounded-md p-3">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <Badge variant="outline" className="font-mono text-xs">{r.rule_id}</Badge>
+                        <span className="font-medium text-sm">{lang === 'en' && r.title_en ? r.title_en : r.title}</span>
+                        <Badge variant="outline" className="text-[10px]">{evForRule.length} {t('fundamentos.evidenceCount', 'evidência(s)')}</Badge>
+                      </div>
+                      {evForRule.length === 0 ? (
+                        <p className="text-xs text-muted-foreground italic">
+                          {t('fundamentos.noEvidenceForRule', 'Sem estudo arquitetural vinculado — governança por convenção da equipe (documentada em docs/CORE_RULES.md).')}
+                        </p>
+                      ) : (
+                        <ul className="space-y-1.5 text-xs">
+                          {evForRule.map(ev => {
+                            const s = studies.find(x => x.id === ev.meta_study_id);
+                            return (
+                              <li key={ev.id} className="flex items-start gap-2">
+                                <Badge className={RELATION_COLOR[ev.relation]}>{ev.relation}</Badge>
+                                <div className="flex-1">
+                                  <div className="font-medium">{s?.title || '?'}</div>
+                                  {(ev.quote || ev.notes) && (
+                                    <div className="text-muted-foreground italic mt-0.5">"{ev.quote || ev.notes}"</div>
+                                  )}
+                                </div>
+                                <span className="text-[10px] font-mono text-muted-foreground shrink-0">w={ev.weight}</span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      )}
+                    </div>
+                  );
+                })
               )}
             </CardContent>
           </Card>
