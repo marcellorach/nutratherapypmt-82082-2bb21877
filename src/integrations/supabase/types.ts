@@ -3394,6 +3394,8 @@ export type Database = {
           authors: string[] | null
           content_hash: string | null
           created_at: string | null
+          curated_at: string | null
+          curated_by: string | null
           deleted_at: string | null
           deleted_by: string | null
           description: string | null
@@ -3407,6 +3409,7 @@ export type Database = {
           kanban_status: string | null
           original_filename: string
           prestige_tier: number | null
+          processed_at: string | null
           processed_by: string | null
           source_import_id: string | null
           storage_path: string
@@ -3424,6 +3427,8 @@ export type Database = {
           authors?: string[] | null
           content_hash?: string | null
           created_at?: string | null
+          curated_at?: string | null
+          curated_by?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
           description?: string | null
@@ -3437,6 +3442,7 @@ export type Database = {
           kanban_status?: string | null
           original_filename: string
           prestige_tier?: number | null
+          processed_at?: string | null
           processed_by?: string | null
           source_import_id?: string | null
           storage_path: string
@@ -3454,6 +3460,8 @@ export type Database = {
           authors?: string[] | null
           content_hash?: string | null
           created_at?: string | null
+          curated_at?: string | null
+          curated_by?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
           description?: string | null
@@ -3467,6 +3475,7 @@ export type Database = {
           kanban_status?: string | null
           original_filename?: string
           prestige_tier?: number | null
+          processed_at?: string | null
           processed_by?: string | null
           source_import_id?: string | null
           storage_path?: string
