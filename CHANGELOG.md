@@ -24,6 +24,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 5.1.0 -->
 
+### Added - 2026-05-20 — Meta-estudo: detecção de conflito com RCs ativas (governança)
+<!-- area: admin · status: entregue · i18n: 1.93.0 -->
+
+- **Stance classification em `proposed_rules`**: cada candidata agora é classificada pelo LLM como `confirms`, `extends`, `contradicts` ou `unrelated` em relação ao catálogo de Regras-Core ativas, com `conflicts_with[]` listando os `rule_id`s referenciados. Validação server-side rebaixa para `extends` se a stance reivindica conflito mas não cita rule_id válido.
+- **3 lanes na UI de Ingestão**: 🔴 Conflitos (vermelho, promoção bloqueada — só permite "Manter RC atual" como evidência de governança ou "Descartar") · 🟢 Confirmações (verde, vira `core_rule_evidence` com `relation='supports'` em vez de duplicar a RC) · 🔵 Extensões/Novas (purple, fluxo atual de promoção para nova RC).
+- **Salvaguarda**: o handler `approve` agora **bloqueia explicitamente** qualquer tentativa de promover proposta com `stance='contradicts'` para nova RC, exigindo resolução humana via "Manter RC atual" ou edição manual.
+- Files: supabase/functions/extract-meta-study/index.ts, src/components/administrador/fundamentos/IngestaoMetaEstudo.tsx
+- Próxima fase (não incluída): versionamento de RCs (`version`, `superseded_by`, `rc_revisions`) para permitir as ações "Substituir RC atual" e "Coexistir com escopo diferente".
+
 ### Added - 2026-05-20 — Meta-estudo: digestão profunda + RCs deduzidas
 <!-- area: admin · status: entregue · i18n: 1.93.0 -->
 
