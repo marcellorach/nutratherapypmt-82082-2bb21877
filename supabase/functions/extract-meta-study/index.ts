@@ -413,10 +413,16 @@ Deno.serve(async (req) => {
 
     const systemPrompt =
       "You curate architectural/methodological references for a veterinary geroprotector platform's Meta-KG. " +
-      "These are NOT clinical studies — they justify how the pipeline reasons (translational weighting, exclusion vs contraindication, fallback policies, etc.). " +
-      "Extract a faithful draft and propose links to EXISTING Core Rules only (use their rule_id verbatim). " +
-      "Use 'supports' when the study justifies the rule; 'contradicts' when it challenges it; 'modulates_weight' when it informs a numeric weight (e.g. canine→human translatability); 'inspires' when it motivated the rule conceptually. " +
-      "Quotes must be literal substrings of the source text (<=300 chars). If unsure, omit the link.";
+      "These are NOT clinical studies — they justify how the pipeline reasons (translational weighting, exclusion vs contraindication, retrieval strategy, chunking, controlled vocabularies, fallback policies, etc.).\n\n" +
+      "DEPTH REQUIREMENT — do not be lazy. An architectural paper typically yields 10-25 distinct lessons. " +
+      "Distribute them across the SEVEN typed sections (architectural_patterns, methodological_recipes, vocabularies_standards, quantitative_parameters, anti_patterns_pitfalls, evaluation_metrics, open_questions). " +
+      "Aim for a TOTAL of at least 10 items combined across these sections for any non-trivial paper. " +
+      "Each item must include a literal quote (<=300 chars) and, when possible, an `applies_to` pointer naming the subsystem it informs.\n\n" +
+      "key_claims is LEGACY — put only the 3-5 most load-bearing claims there; the real richness goes into the typed sections.\n\n" +
+      "TWO PARALLEL OUTPUTS for governance:\n" +
+      "(a) suggested_links → only to rule_ids present in the provided catalog. Relations: 'supports' (justifies), 'contradicts' (challenges), 'modulates_weight' (informs a numeric weight), 'inspires' (motivated the rule conceptually).\n" +
+      "(b) proposed_rules → candidate NEW Core Rules deduced from the paper that do NOT map to any existing rule_id. Be generous here: it is far better to propose a candidate (which the curator will accept/merge/discard) than to silently drop a teachable lesson. Aim for at least 2 proposed_rules on any substantial architectural paper.\n\n" +
+      "All quotes must be literal substrings of the source text. If unsure, omit.";
 
     const curatorBlock = curator_notes && curator_notes.trim()
       ? `\n\nCURATOR NOTES (treat as binding guidance — respect them):\n${curator_notes.trim().slice(0, 4000)}\n`
@@ -473,15 +479,15 @@ Deno.serve(async (req) => {
               }],
               tools: [{
                 functionDeclarations: [{
-                  name: TOOL.function.name,
-                  description: TOOL.function.description,
-                  parameters: TOOL.function.parameters,
+                  name: TOOL_V2.function.name,
+                  description: TOOL_V2.function.description,
+                  parameters: TOOL_V2.function.parameters,
                 }],
               }],
               toolConfig: {
                 functionCallingConfig: {
                   mode: "ANY",
-                  allowedFunctionNames: [TOOL.function.name],
+                  allowedFunctionNames: [TOOL_V2.function.name],
                 },
               },
             }),
@@ -522,7 +528,7 @@ Deno.serve(async (req) => {
 
         const json = await aiRes.json();
         await deleteGoogleAiFile(googleAiFile.name);
-        call = json.candidates?.[0]?.content?.parts?.find((part: any) => part.functionCall?.name === TOOL.function.name)?.functionCall;
+        call = json.candidates?.[0]?.content?.parts?.find((part: any) => part.functionCall?.name === TOOL_V2.function.name)?.functionCall;
         usage = json.usageMetadata || {};
       } else {
         const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -537,8 +543,8 @@ Deno.serve(async (req) => {
               { role: "system", content: systemPrompt },
               { role: "user", content: userContent },
             ],
-            tools: [TOOL],
-            tool_choice: { type: "function", function: { name: TOOL.function.name } },
+            tools: [TOOL_V2],
+            tool_choice: { type: "function", function: { name: TOOL_V2.function.name } },
           }),
           signal: ctrl.signal,
         });
@@ -624,10 +630,34 @@ Deno.serve(async (req) => {
       validRuleIds.has(l.rule_id)
     );
 
+    // Normalize all lesson sections to arrays (defensive against partial LLM outputs).
+    const LESSON_KEYS = [
+      "architectural_patterns",
+      "methodological_recipes",
+      "vocabularies_standards",
+      "quantitative_parameters",
+      "anti_patterns_pitfalls",
+      "evaluation_metrics",
+      "open_questions",
+      "proposed_rules",
+    ] as const;
+    for (const k of LESSON_KEYS) {
+      if (!Array.isArray(draft[k])) draft[k] = [];
+    }
+
+    const lessonTotal = LESSON_KEYS.slice(0, 7).reduce(
+      (n, k) => n + (Array.isArray(draft[k]) ? draft[k].length : 0),
+      0,
+    );
+
     pushTrace({
       stage: "structuring",
       status: "success",
-      detail: `${draft.key_claims?.length ?? 0} claims · ${draft.suggested_links?.length ?? 0} vínculos válidos`,
+      detail:
+        `${lessonTotal} lições estruturadas · ` +
+        `${draft.key_claims?.length ?? 0} claims legados · ` +
+        `${draft.suggested_links?.length ?? 0} vínculos a RCs existentes · ` +
+        `${draft.proposed_rules?.length ?? 0} RCs propostas`,
     });
 
     return new Response(
