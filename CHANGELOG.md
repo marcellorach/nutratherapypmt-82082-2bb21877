@@ -24,6 +24,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 5.1.0 -->
 
+### Changed - 2026-05-20 — Sidebar admin: nova família "Governança & IA"
+<!-- area: admin · status: entregue · i18n: 1.93.0 -->
+
+- Removido link órfão "Base de Conhecimento" (tab `knowledge-base-settings`) que não tinha conteúdo.
+- Criada nova seção lateral **"Governança & IA"** (`GovernanceAIGroup`) separada de Configuração, agrupando: AI Config, AI Prompts, Organograma, Conformidade FDA/EMA/AVMA, Auditorias Técnicas, About Senex AI e Fundamentos Arquiteturais.
+- Configuração mantém apenas: Ações, Analytics, Análise de ROI, Traduções, Design, Solicitações de Acesso.
+- i18n: `admin.sidebar.governanceAI.title` (PT/EN) + chave `configuration.fundamentos` formalizada; bump 1.92.0 → 1.93.0.
+- Files: src/components/administrador/sidebar/groups/GovernanceAIGroup.tsx, src/components/administrador/sidebar/groups/ConfigurationGroup.tsx, src/components/administrador/sidebar/AdminSidebarGroups.tsx, src/i18n.ts, src/locales/{pt,en}/translation.json
+
 ### Changed - 2026-05-20 — Ingestão de meta-estudos: Gemini 3 + drag&drop + log de digestão
 <!-- area: admin · status: entregue · i18n: 1.92.0 -->
 
