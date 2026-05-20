@@ -15,6 +15,18 @@ const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
 const MODEL = "google/gemini-3-pro-preview";
 
+// Model name mapping. The Lovable AI Gateway expects the `google/` prefix;
+// the direct Google AI API (generativelanguage.googleapis.com) rejects it
+// with 404 NOT_FOUND. Use these helpers everywhere instead of hand-stripping.
+function toGatewayModel(model: string): string {
+  return model.startsWith("google/") || model.includes("/") ? model : `google/${model}`;
+}
+function toDirectModel(model: string): string {
+  return model.replace(/^google\//, "");
+}
+const GATEWAY_MODEL = toGatewayModel(MODEL);
+const DIRECT_MODEL = toDirectModel(MODEL);
+
 // Conservative inline-PDF cap for the Lovable AI Gateway. The gateway has
 // historically rejected/dropped silently around ~8–10MB of inline file data,
 // so we fail FAST and LOUD above this threshold instead of silently truncating.
@@ -348,10 +360,8 @@ Deno.serve(async (req) => {
     let usage: any = {};
     try {
       if (googleAiFile) {
-        // Google AI direct API expects the model name without the `google/` gateway prefix
-        const directModel = MODEL.replace(/^google\//, "");
         const aiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${directModel}:generateContent?key=${googleAiApiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/${DIRECT_MODEL}:generateContent?key=${googleAiApiKey}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -388,15 +398,33 @@ Deno.serve(async (req) => {
 
         if (!aiRes.ok) {
           const errText = await aiRes.text();
-          console.error("Google AI direct error", aiRes.status, errText);
+          console.error(`[llm_analysis] Google AI direct error · model=${DIRECT_MODEL} · status=${aiRes.status}`, errText);
           const httpCode = aiRes.status === 429 || aiRes.status === 402 ? aiRes.status : 502;
-          const friendly = aiRes.status === 429
-            ? "Limite de requisições do Gemini excedido. Aguarde 1 min e tente novamente."
-            : aiRes.status === 402
-            ? "Créditos do provedor de IA esgotados."
-            : `Falha no processamento de PDF grande via Google AI (HTTP ${aiRes.status}).`;
+          const base = `[llm_analysis · Google AI direct · modelo ${DIRECT_MODEL} · HTTP ${aiRes.status}]`;
+          let friendly: string;
+          let options: string[] | undefined;
+          if (aiRes.status === 404) {
+            friendly = `${base} Modelo não encontrado no endpoint direto. O nome '${DIRECT_MODEL}' pode estar errado ou o modelo não está disponível na API pública do Google AI (apenas via gateway Lovable).`;
+            options = [
+              `Verifique se o modelo '${MODEL}' tem equivalente direto em generativelanguage.googleapis.com (ex: gemini-2.5-pro, gemini-2.0-flash-exp).`,
+              "Ajuste a constante MODEL em extract-meta-study/index.ts para um modelo suportado pela API direta — o helper toDirectModel() faz o strip do prefixo 'google/' automaticamente.",
+              "Alternativa: dividir o PDF para caber abaixo de 7MB e voltar a usar o gateway Lovable (que aceita previews).",
+            ];
+          } else if (aiRes.status === 413) {
+            friendly = `${base} Google AI rejeitou o arquivo por tamanho mesmo via File API.`;
+            options = [
+              "Dividir o PDF em partes menores (capítulos / abstract+métodos+discussão).",
+              "Extrair texto fora da plataforma e reenviar como .txt/.md.",
+            ];
+          } else if (aiRes.status === 429) {
+            friendly = `${base} Limite de requisições do Gemini excedido. Aguarde 1 min e tente novamente.`;
+          } else if (aiRes.status === 402) {
+            friendly = `${base} Créditos do provedor de IA esgotados.`;
+          } else {
+            friendly = `${base} Falha no processamento de PDF grande via Google AI direto.`;
+          }
           await deleteGoogleAiFile(googleAiFile.name);
-          return fail(httpCode, "llm_analysis", friendly, { detail: errText });
+          return fail(httpCode, "llm_analysis", friendly, { detail: errText, options });
         }
 
         const json = await aiRes.json();
@@ -424,16 +452,32 @@ Deno.serve(async (req) => {
 
         if (!aiRes.ok) {
           const errText = await aiRes.text();
-          console.error("Lovable AI error", aiRes.status, errText);
-          const httpCode = aiRes.status === 429 || aiRes.status === 402 ? aiRes.status : 502;
-          const friendly = aiRes.status === 429
-            ? "Limite de requisições do Gemini excedido. Aguarde 1 min e tente novamente."
-            : aiRes.status === 402
-            ? "Créditos do Lovable AI esgotados. Adicione créditos em Settings > Workspace > Usage."
-            : aiRes.status === 413 || /payload|too large|size/i.test(errText)
-            ? `Gateway rejeitou o PDF por tamanho (HTTP ${aiRes.status}). Reenvie em partes menores ou como texto.`
-            : `Falha no gateway de IA (HTTP ${aiRes.status}).`;
-          return fail(httpCode, "llm_analysis", friendly, { detail: errText });
+          console.error(`[llm_analysis] Lovable gateway error · model=${GATEWAY_MODEL} · status=${aiRes.status}`, errText);
+          const isOversize = aiRes.status === 413 || /payload|too large|size/i.test(errText);
+          const httpCode = aiRes.status === 429 || aiRes.status === 402 ? aiRes.status : (isOversize ? 413 : 502);
+          const base = `[llm_analysis · Lovable gateway · modelo ${GATEWAY_MODEL} · HTTP ${aiRes.status}]`;
+          let friendly: string;
+          let options: string[] | undefined;
+          if (aiRes.status === 404) {
+            friendly = `${base} Modelo não encontrado no gateway Lovable. Verifique o nome '${GATEWAY_MODEL}' — talvez o modelo tenha sido descontinuado ou esteja em preview restrito.`;
+            options = [
+              "Trocar para um modelo suportado pelo gateway (ex: google/gemini-2.5-pro, google/gemini-3-flash-preview).",
+              "Conferir a documentação Lovable AI para a lista atualizada de modelos.",
+            ];
+          } else if (isOversize) {
+            friendly = `${base} Gateway rejeitou o PDF por tamanho. O fallback para Google AI File API deveria ter sido acionado acima de ${(GATEWAY_PDF_LIMIT_BYTES / 1024 / 1024).toFixed(0)} MB — verifique se o PDF cai exatamente nessa faixa.`;
+            options = [
+              "Reduzir o limite GATEWAY_PDF_LIMIT_BYTES para forçar o fallback mais cedo.",
+              "Dividir o PDF ou reenviar como texto (.md/.txt).",
+            ];
+          } else if (aiRes.status === 429) {
+            friendly = `${base} Limite de requisições do Gemini excedido. Aguarde 1 min e tente novamente.`;
+          } else if (aiRes.status === 402) {
+            friendly = `${base} Créditos do Lovable AI esgotados. Adicione créditos em Settings > Workspace > Usage.`;
+          } else {
+            friendly = `${base} Falha no gateway de IA.`;
+          }
+          return fail(httpCode, "llm_analysis", friendly, { detail: errText, options });
         }
 
         const json = await aiRes.json();
@@ -470,7 +514,7 @@ Deno.serve(async (req) => {
       stage: "llm_analysis",
       status: "success",
       duration_ms: Math.round(performance.now() - tLlm),
-      detail: `${MODEL} · ${usage.total_tokens ?? usage.totalTokenCount ?? "?"} tokens`,
+      detail: `${googleAiFile ? DIRECT_MODEL + " (Google AI direct)" : GATEWAY_MODEL + " (gateway)"} · ${usage.total_tokens ?? usage.totalTokenCount ?? "?"} tokens`,
     });
 
     let draft: any;
