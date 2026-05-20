@@ -98,6 +98,8 @@ interface ExtractedDataVisualizationProps {
     mechanisms?: any[];
     conditions?: any[];
     interactions?: any[];
+    exclusion_criteria?: Array<{ population: string; quote?: string }>;
+    evidence_gaps?: string[];
   };
 }
 
@@ -155,8 +157,10 @@ const ExtractedDataVisualization: React.FC<ExtractedDataVisualizationProps> = ({
     side_effects, 
     contraindications, 
     drug_interactions, 
-    synergies 
+    synergies,
   } = analysisData || {};
+  const exclusion_criteria = (analysisData as any)?.exclusion_criteria || [];
+  const evidence_gaps = (analysisData as any)?.evidence_gaps || [];
 
   // Check if we have any expanded data
   const hasExpandedData = study_population || 
@@ -164,6 +168,8 @@ const ExtractedDataVisualization: React.FC<ExtractedDataVisualizationProps> = ({
     (biomarkers && biomarkers.length > 0) ||
     (side_effects && side_effects.length > 0) ||
     (contraindications && contraindications.length > 0) ||
+    exclusion_criteria.length > 0 ||
+    evidence_gaps.length > 0 ||
     (drug_interactions && drug_interactions.length > 0) ||
     (synergies && synergies.length > 0);
 
@@ -472,6 +478,63 @@ const ExtractedDataVisualization: React.FC<ExtractedDataVisualizationProps> = ({
             </CollapsibleContent>
           </Card>
         </Collapsible>
+      )}
+
+      {/* Exclusion criteria (RC-001) — population not studied = evidence gap, NOT a contraindication */}
+      {exclusion_criteria.length > 0 && (
+        <Card className="border-amber-500/30">
+          <CardHeader className="py-3">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-600" />
+              <CardTitle className="text-base">
+                {t('studies.extraction.exclusionCriteria', 'Critérios de Exclusão do Trial')} ({exclusion_criteria.length})
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="mb-3 p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-900 flex items-start gap-2">
+              <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+              <span>
+                <strong>{t('studies.extraction.rc001Title', 'RC-001 — Exclusão ≠ Contraindicação:')}</strong>{' '}
+                {t('studies.extraction.exclusionHint', 'Estas populações foram EXCLUÍDAS do trial. Representam lacunas de evidência (não foram testadas), e não risco demonstrado.')}
+              </span>
+            </div>
+            <div className="space-y-2">
+              {exclusion_criteria.map((ex: any, idx: number) => (
+                <div key={idx} className="p-3 bg-amber-50/40 rounded-lg border border-amber-200/60">
+                  <div className="font-medium text-sm">{ex.population}</div>
+                  {ex.quote && (
+                    <p className="text-xs text-muted-foreground italic mt-1">"{ex.quote}"</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Evidence gaps */}
+      {evidence_gaps.length > 0 && (
+        <Card className="border-slate-300">
+          <CardHeader className="py-3">
+            <div className="flex items-center gap-2">
+              <FlaskConical className="h-5 w-5 text-slate-500" />
+              <CardTitle className="text-base">
+                {t('studies.extraction.evidenceGaps', 'Lacunas de Evidência')} ({evidence_gaps.length})
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <p className="text-xs text-muted-foreground mb-2">
+              {t('studies.extraction.evidenceGapsHint', 'Áreas que o próprio estudo aponta como precisando de mais pesquisa.')}
+            </p>
+            <ul className="list-disc pl-5 space-y-1">
+              {evidence_gaps.map((gap: string, idx: number) => (
+                <li key={idx} className="text-sm text-foreground">{gap}</li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
       )}
 
       {/* Drug Interactions */}

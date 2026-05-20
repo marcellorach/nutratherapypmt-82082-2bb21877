@@ -322,6 +322,8 @@ serve(async (req) => {
       dosages: validatedDosages,
       side_effects: stage3Data.side_effects || [],
       contraindications: stage3Data.contraindications || [],
+      exclusion_criteria: stage3Data.exclusion_criteria || [],
+      evidence_gaps: stage3Data.evidence_gaps || [],
       clinical_outcomes: stage3Data.clinical_outcomes || [],
       study_assessment: stage3Data.study_assessment || {},
     };
@@ -1036,6 +1038,33 @@ function getStage3Tools() {
           },
           contraindications: {
             type: 'array',
+            description: 'PROVEN risks — only conditions where the text explicitly states harm, risk or recommends against use. RC-001.',
+            items: {
+              type: 'object',
+              properties: {
+                condition: { type: 'string' },
+                severity: { type: 'string', enum: ['absolute', 'relative', 'caution', 'unknown'] },
+                reason: { type: 'string' },
+                evidence_level: { type: 'string' }
+              },
+              required: ['condition']
+            }
+          },
+          exclusion_criteria: {
+            type: 'array',
+            description: 'Populations EXCLUDED from the trial (evidence gaps, NOT contraindications). RC-001.',
+            items: {
+              type: 'object',
+              properties: {
+                population: { type: 'string' },
+                quote: { type: 'string' }
+              },
+              required: ['population']
+            }
+          },
+          evidence_gaps: {
+            type: 'array',
+            description: 'Areas the study explicitly identifies as needing more research.',
             items: { type: 'string' }
           },
           clinical_outcomes: {
@@ -1140,6 +1169,8 @@ CRITICAL RULES - YOU MUST FOLLOW:
    - Only classify as a contraindication if the text EXPLICITLY states harm, risk, or recommends against use
      (e.g., "contraindicated in...", "should not be used in...", "caused adverse events in patients with...").
    - When in doubt, prefer to omit the contraindication rather than infer one from exclusion criteria.
+   - Place excluded populations under "exclusion_criteria" with a verbatim quote.
+   - Place "areas that need more research" (e.g., "no data in dogs", "long-term safety not assessed") under "evidence_gaps".
 9. ADVERSE EVENTS — explicit negation:
    - If the study explicitly reports that NO adverse events were observed, return side_effects as an EMPTY array [].
    - Do NOT create a side_effect entry whose name/description is "No adverse events reported" — that distorts downstream counts.`;

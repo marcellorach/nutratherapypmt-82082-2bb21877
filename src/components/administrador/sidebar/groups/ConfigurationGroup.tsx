@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bot, Database, Cpu, ChevronRight, Check, Languages, ListTree, ShieldCheck, FileSearch, CheckCircle2, Palette, UserCog, Zap, Gauge, Info } from "lucide-react";
+import { Bot, Database, Cpu, ChevronRight, Check, Languages, ListTree, ShieldCheck, FileSearch, CheckCircle2, Palette, UserCog, Zap, Gauge, Info, Sparkles } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useTranslation } from 'react-i18next';
 
@@ -277,6 +277,26 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
             </div>
             <div className="flex items-center ml-auto">
               {currentStep === "about-senex" && (
+                <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+              )}
+            </div>
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          isActive={currentStep === "fundamentos"}
+          onClick={() => handleStepClick("fundamentos")}
+          className={currentStep === "fundamentos" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Sparkles className={`h-4 w-4 mr-2 ${currentStep === "fundamentos" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.configuration.fundamentos', 'Fundamentos Arquiteturais')}</span>
+              <ConfiguredCheck />
+            </div>
+            <div className="flex items-center ml-auto">
+              {currentStep === "fundamentos" && (
                 <ChevronRight className="h-4 w-4 ml-auto text-primary" />
               )}
             </div>
