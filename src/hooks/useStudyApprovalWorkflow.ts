@@ -82,10 +82,15 @@ export const useStudyApprovalWorkflow = () => {
     setIsProcessing(true);
 
     try {
-      // Step 1: Update study status to approved
+      // Step 1: Update study status to approved + audit trail
+      const { data: userData } = await supabase.auth.getUser();
       const { error: updateError } = await supabase
         .from('processed_studies')
-        .update({ kanban_status: 'approved' })
+        .update({
+          kanban_status: 'approved',
+          curated_at: new Date().toISOString(),
+          curated_by: userData?.user?.id ?? null,
+        })
         .eq('id', studyId);
 
       if (updateError) throw updateError;
