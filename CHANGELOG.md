@@ -24,6 +24,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 5.1.0 -->
 
+### Changed - 2026-05-20 — Ingestão de meta-estudos: Gemini 3 + drag&drop + log de digestão
+<!-- area: admin · status: entregue · i18n: 1.92.0 -->
+
+- **Edge `extract-meta-study`**: trocado modelo para `google/gemini-3-pro-preview`; PDFs agora são enviados nativamente como anexo multimodal (não mais string-placeholder); aceita `curator_notes` como diretriz vinculante separada do conteúdo do estudo; retorna `trace[]` com telemetria por estágio (extraction · rules_catalog · llm_analysis · structuring) e mensagens de erro acionáveis por HTTP code (429/402/413/422).
+- **UI `IngestaoMetaEstudo.tsx`**: dropzone drag&drop com PDF/.md/.txt/.docx **obrigatório** (até 20MB); campo "Notas do curador" (até 4000 chars, markdown) substitui o textarea genérico de texto; DOI/URL movido para `<details>` colapsado; painel "Log de digestão" sempre visível com 5 estágios (upload + os 4 do edge), ícones de status, duração e detalhe — espelha o padrão do pipeline clínico.
+- **Schema**: nova coluna `meta_studies.curator_notes TEXT` persiste as diretrizes do curador junto com o estudo aprovado.
+- Files: supabase/functions/extract-meta-study/index.ts, src/components/administrador/fundamentos/IngestaoMetaEstudo.tsx, src/i18n.ts, supabase/migrations/*_curator_notes.sql
+
 ### Added - 2026-05-20 — Ingestão curada de meta-estudos arquiteturais (Fase 3.3)
 <!-- area: admin · status: entregue · i18n: 1.91.0 -->
 
