@@ -250,6 +250,12 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
     if (!draft) return;
     setSaving(true);
     try {
+      const { data: userDataPre } = await supabase.auth.getUser();
+      const actorId = userDataPre?.user?.id ?? null;
+      const justificationBase = curatorNotes.trim() || null;
+      const auditRows: any[] = [];
+      const ruleCodeToId = new Map<string, string>();
+
       const { data: inserted, error: insErr } = await supabase
         .from('meta_studies')
         .insert([{
@@ -279,6 +285,28 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
       if (insErr) throw insErr;
       const studyId = inserted.id;
 
+      // Audit: stance_detected for every proposed_rule that came back from the LLM,
+      // independent of the action chosen. This captures the IA's classification.
+      for (const p of (draft.proposed_rules || [])) {
+        if (!p.stance) continue;
+        for (const code of (p.conflicts_with && p.conflicts_with.length ? p.conflicts_with : [null as any])) {
+          auditRows.push({
+            rule_code: code,
+            meta_study_id: studyId,
+            action: 'stance_detected',
+            stance: p.stance,
+            actor_user_id: actorId,
+            justification: justificationBase,
+            payload: {
+              proposed_title: p.proposed_title,
+              enunciado: p.enunciado,
+              confidence: p.confidence ?? null,
+              quote: p.justification_quote ?? null,
+            },
+          });
+        }
+      }
+
       const enabledLinks = (draft.suggested_links || []).filter(l => l._enabled);
       if (enabledLinks.length) {
         const ruleIds = Array.from(new Set(enabledLinks.map(l => l.rule_id)));
@@ -286,6 +314,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
           .from('core_rules').select('id, rule_id').in('rule_id', ruleIds);
         if (rErr) throw rErr;
         const byCode = new Map((ruleRows || []).map((r: any) => [r.rule_id, r.id]));
+        byCode.forEach((v, k) => ruleCodeToId.set(k, v));
         const rows = enabledLinks
           .filter(l => byCode.has(l.rule_id))
           .map(l => ({
@@ -333,6 +362,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
           .from('core_rules').select('id, rule_id').in('rule_id', targetCodes);
         if (rErr) throw rErr;
         const byCode = new Map((ruleRows || []).map((r: any) => [r.rule_id, r.id]));
+        byCode.forEach((v, k) => ruleCodeToId.set(k, v));
         const evRows = toAttach.flatMap(p =>
           (p.conflicts_with || [])
             .filter(code => byCode.has(code))
@@ -355,6 +385,25 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
             toast.warning(`Meta-estudo salvo, mas ${evRows.length} evidência(s) de stance falharam: ${evErr.message}`);
           } else {
             toast.success(`${evRows.length} evidência(s) de stance anexada(s) a RCs existentes.`);
+          }
+        }
+        // Audit attach / resolve_keep actions
+        for (const p of toAttach) {
+          for (const code of (p.conflicts_with || [])) {
+            auditRows.push({
+              rule_id: byCode.get(code) ?? null,
+              rule_code: code,
+              meta_study_id: studyId,
+              action: p._action === 'resolve_keep' ? 'resolve_keep' : 'attach',
+              stance: p.stance ?? null,
+              actor_user_id: actorId,
+              justification: justificationBase,
+              payload: {
+                proposed_title: p.proposed_title,
+                enunciado: p.enunciado,
+                relation: p._action === 'resolve_keep' ? 'contradicts' : 'supports',
+              },
+            });
           }
         }
       }
@@ -382,12 +431,69 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
           promoted_at: new Date().toISOString(),
           promoted_by: userData?.user?.id ?? null,
         }));
-        const { error: rcErr } = await supabase.from('core_rules').insert(rows as any);
+        const { data: inserted, error: rcErr } = await supabase
+          .from('core_rules').insert(rows as any).select('id, rule_id');
         if (rcErr) {
           console.warn('Falha ao promover RCs propostas:', rcErr);
           toast.warning(`Meta-estudo salvo, mas ${toPromote.length} RC(s) propostas não foram promovidas: ${rcErr.message}`);
         } else {
           toast.success(`${toPromote.length} nova(s) RC(s) deduzida(s) promovida(s).`);
+          for (let i = 0; i < toPromote.length; i++) {
+            const p = toPromote[i];
+            const created = (inserted || [])[i];
+            auditRows.push({
+              rule_id: created?.id ?? null,
+              rule_code: created?.rule_id ?? rows[i].rule_id,
+              meta_study_id: studyId,
+              action: 'promote',
+              stance: p.stance ?? null,
+              actor_user_id: actorId,
+              justification: justificationBase,
+              payload: {
+                proposed_title: p.proposed_title,
+                enunciado: p.enunciado,
+                category: p.category ?? null,
+                confidence: p.confidence ?? null,
+              },
+            });
+          }
+        }
+      }
+
+      // Audit discards
+      for (const p of (draft.proposed_rules || []).filter(x => x._action === 'discard')) {
+        auditRows.push({
+          rule_code: (p.conflicts_with && p.conflicts_with[0]) || null,
+          meta_study_id: studyId,
+          action: 'discard',
+          stance: p.stance ?? null,
+          actor_user_id: actorId,
+          justification: justificationBase,
+          payload: { proposed_title: p.proposed_title, enunciado: p.enunciado },
+        });
+      }
+
+      // Top-level approve event
+      auditRows.push({
+        meta_study_id: studyId,
+        action: 'approve_meta_study',
+        actor_user_id: actorId,
+        justification: justificationBase,
+        payload: {
+          title: draft.title,
+          counts: {
+            proposed: (draft.proposed_rules || []).length,
+            promoted: toPromote.length,
+            attached: toAttach.length,
+          },
+        },
+      });
+
+      if (auditRows.length) {
+        const { error: alErr } = await supabase.from('core_rule_audit_log').insert(auditRows);
+        if (alErr) {
+          console.warn('Falha ao gravar audit log:', alErr);
+          toast.warning(`Meta-estudo salvo, mas log de auditoria falhou: ${alErr.message}`);
         }
       }
 
