@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-20T03:04:09.534Z
+// Última geração: 2026-05-20T03:24:47.770Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,26 @@ export const lastChangelogDate = "2026-05-20";
 export const senexVersion = "5.1.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-20",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Score explainability, harvest de RCs e Justificativas por regra (Fase 3.1+3.2+3.4)",
+    "bullets": [
+      "(7) Score explainability: `ScoreCriteriaPopover` agora mostra coluna de peso relativo (%) por critério, penalidades parciais (ex.: \"n<100 → potência limitada\", \"<6 meses → desfechos crônicos não capturados\", \"evidência humana → cão modulada por RC-003\") e bloco \"Por que este score?\" com rationale heurística (ou LLM se `study_assessment.score_rationale` estiver presente). Resposta explícita a \"por que 4.0/5 com todos os checks ✓\".",
+      "(1) Harvest de Regras-Core: 15 RCs já vigentes promovidas para `core_rules` (RC-004 a RC-018) — Canonical IDs, Bilinguismo, No-Mock, Curation Gatekeeper, Taxonomia SNOMED+UMLS, Cap Terapêutico=8, Escopo Metabólico/Degenerativo, Soft Delete, Vetorização pré-curadoria, Tiered Confidence, Predicate Normalization, Chunking, Sigmoid Engine, Condition Canonicalization, Demo Data. Todas com justificativa bilíngue PT/EN e referência ao código.",
+      "Schema: nova coluna `core_rules.runtime_effect` (`active` | `doc_only` | `planned`) tornando explícito quais RCs alteram pipeline em runtime vs. quais são governança auditável apenas. Renderizada como badge azul/cinza/âmbar em cada card.",
+      "(3) Aba \"Mapa de Influências\" → \"Justificativas\": reorganizada por regra (modo \"Por Regra\" como default). Cada RC mostra suas evidências vinculadas com quote literal + peso; RCs sem evidência mostram aviso explícito \"governança por convenção (documentada em CORE_RULES.md)\".",
+      "Files: src/components/administrador/tags/ScoreCriteriaPopover.tsx, src/pages/administrador/FundamentosTab.tsx, src/i18n.ts (→ 1.90.0), CHANGELOG.md + migration runtime_effect + seed 15 RCs."
+    ],
+    "files": [
+      "src/components/administrador/tags/ScoreCriteriaPopover.tsx",
+      "src/pages/administrador/FundamentosTab.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.90.0"
+  },
   {
     "date": "2026-05-20",
     "kind": "added",

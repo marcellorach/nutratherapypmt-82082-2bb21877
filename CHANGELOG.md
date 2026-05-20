@@ -24,6 +24,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 5.1.0 -->
 
+### Added - 2026-05-20 — Score explainability, harvest de RCs e Justificativas por regra (Fase 3.1+3.2+3.4)
+<!-- area: admin · status: entregue · i18n: 1.90.0 -->
+
+- **(7) Score explainability**: `ScoreCriteriaPopover` agora mostra coluna de **peso relativo (%)** por critério, **penalidades parciais** (ex.: "n<100 → potência limitada", "<6 meses → desfechos crônicos não capturados", "evidência humana → cão modulada por RC-003") e bloco "Por que este score?" com rationale heurística (ou LLM se `study_assessment.score_rationale` estiver presente). Resposta explícita a "por que 4.0/5 com todos os checks ✓".
+- **(1) Harvest de Regras-Core**: 15 RCs já vigentes promovidas para `core_rules` (RC-004 a RC-018) — Canonical IDs, Bilinguismo, No-Mock, Curation Gatekeeper, Taxonomia SNOMED+UMLS, Cap Terapêutico=8, Escopo Metabólico/Degenerativo, Soft Delete, Vetorização pré-curadoria, Tiered Confidence, Predicate Normalization, Chunking, Sigmoid Engine, Condition Canonicalization, Demo Data. Todas com justificativa bilíngue PT/EN e referência ao código.
+- **Schema**: nova coluna `core_rules.runtime_effect` (`active` | `doc_only` | `planned`) tornando explícito quais RCs alteram pipeline em runtime vs. quais são governança auditável apenas. Renderizada como badge azul/cinza/âmbar em cada card.
+- **(3) Aba "Mapa de Influências" → "Justificativas"**: reorganizada por regra (modo "Por Regra" como default). Cada RC mostra suas evidências vinculadas com quote literal + peso; RCs sem evidência mostram aviso explícito "governança por convenção (documentada em CORE_RULES.md)".
+- **Files**: src/components/administrador/tags/ScoreCriteriaPopover.tsx, src/pages/administrador/FundamentosTab.tsx, src/i18n.ts (→ 1.90.0), CHANGELOG.md + migration runtime_effect + seed 15 RCs.
+
 ### Added - 2026-05-20 — Timestamps de auditoria, popovers de critérios e i18n de enums LLM (Fase 1 b+c+d)
 <!-- area: admin · status: entregue · i18n: 1.88.0 -->
 - **(b) Timestamps de auditoria** em `processed_studies`: novas colunas `processed_at`, `curated_at` e `curated_by`. Trigger `set_processed_at_on_analysis` preenche `processed_at` automaticamente quando `analysis_data` é gravado pela primeira vez. Backfill aplicado a estudos já processados/aprovados. `useStudyApprovalWorkflow` agora grava `curated_at` + `curated_by = auth.uid()` no momento da aprovação.
