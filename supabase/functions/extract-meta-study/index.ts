@@ -12,6 +12,25 @@ const lovableApiKey = Deno.env.get("LOVABLE_API_KEY") || "";
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
 const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
+const MODEL = "google/gemini-3-pro-preview";
+
+type TraceEntry = {
+  stage: string;
+  status: "success" | "error" | "skipped";
+  duration_ms?: number;
+  detail?: string;
+};
+
+function bytesToBase64(bytes: Uint8Array): string {
+  // Chunked base64 encode to avoid call-stack issues on large PDFs
+  let binary = "";
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+  }
+  return btoa(binary);
+}
+
 const TOOL = {
   type: "function",
   function: {
@@ -70,51 +89,98 @@ const TOOL = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const trace: TraceEntry[] = [];
+  const pushTrace = (e: TraceEntry) => {
+    trace.push(e);
+    console.log(`[trace] ${e.stage} · ${e.status}${e.duration_ms ? ` · ${e.duration_ms}ms` : ""}${e.detail ? ` · ${e.detail}` : ""}`);
+  };
+  const fail = (status: number, stage: string, message: string, extra?: Record<string, unknown>) => {
+    pushTrace({ stage, status: "error", detail: message });
+    return new Response(
+      JSON.stringify({ error: message, stage, trace, ...extra }),
+      { status, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  };
+
   try {
     if (!lovableApiKey) {
-      return new Response(JSON.stringify({ error: "LOVABLE_API_KEY not configured" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return fail(500, "config", "LOVABLE_API_KEY not configured");
     }
 
     const body = await req.json();
-    let { text, pdf_storage_path, source_url } = body as {
+    const { text: rawText, pdf_storage_path, source_url, curator_notes, pdf_mime } = body as {
       text?: string;
       pdf_storage_path?: string;
       source_url?: string;
+      curator_notes?: string;
+      pdf_mime?: string;
     };
+    let text = rawText;
 
     const supabase = createClient(supabaseUrl, serviceKey);
 
     // Fetch existing Core Rules to give the model the catalog to map onto.
+    const tRules = performance.now();
     const { data: rules, error: rErr } = await supabase
       .from("core_rules")
       .select("rule_id, title, category, justification")
       .order("rule_id");
-    if (rErr) throw rErr;
+    if (rErr) return fail(500, "rules_catalog", rErr.message);
+    pushTrace({
+      stage: "rules_catalog",
+      status: "success",
+      duration_ms: Math.round(performance.now() - tRules),
+      detail: `${rules?.length ?? 0} regras disponíveis para vínculo`,
+    });
 
-    // If a PDF path was given, download and (best-effort) decode as text.
-    if (!text && pdf_storage_path) {
+    // Download the source document (PDF or text-like). For PDFs we attach as
+    // multimodal input to Gemini; for text-like we read as UTF-8.
+    let pdfBase64: string | null = null;
+    let pdfMime: string = pdf_mime || "application/pdf";
+    if (pdf_storage_path) {
+      const tDl = performance.now();
       const { data: file, error: dErr } = await supabase.storage
         .from("meta_studies_pdfs")
         .download(pdf_storage_path);
-      if (dErr) throw dErr;
-      // We send raw bytes as a marker; for true PDF parsing we rely on the
-      // user to paste extracted text. Keep this fallback short and explicit.
+      if (dErr) return fail(500, "extraction", `Falha ao baixar PDF do storage: ${dErr.message}`);
       const buf = new Uint8Array(await file.arrayBuffer());
-      text = `[PDF binary received: ${buf.byteLength} bytes at ${pdf_storage_path}. ` +
-        `If extraction quality is poor, paste the abstract/intro/conclusion as text.]`;
+      if (buf.byteLength === 0) return fail(422, "extraction", "PDF vazio.");
+      if (buf.byteLength > 20 * 1024 * 1024) {
+        return fail(413, "extraction", "Arquivo excede 20MB. Reduza o PDF ou cole abstract + conclusão como texto.");
+      }
+      // Treat .txt/.md as plain text
+      if (pdfMime.startsWith("text/") || /\.(md|txt)$/i.test(pdf_storage_path)) {
+        text = new TextDecoder().decode(buf);
+        pushTrace({
+          stage: "extraction",
+          status: "success",
+          duration_ms: Math.round(performance.now() - tDl),
+          detail: `Texto lido (${text.length} chars)`,
+        });
+      } else {
+        pdfBase64 = bytesToBase64(buf);
+        pushTrace({
+          stage: "extraction",
+          status: "success",
+          duration_ms: Math.round(performance.now() - tDl),
+          detail: `PDF anexado ao Gemini (${(buf.byteLength / 1024).toFixed(0)} KB · ${pdfMime})`,
+        });
+      }
+    } else if (text) {
+      pushTrace({
+        stage: "extraction",
+        status: "success",
+        detail: `Texto colado (${text.length} chars)`,
+      });
+    } else {
+      return fail(400, "extraction", "Anexe um documento (PDF/.md/.txt/.docx) ou cole o texto.");
     }
 
-    if (!text || text.length < 50) {
-      return new Response(
-        JSON.stringify({ error: "Provide 'text' (>=50 chars) or a valid 'pdf_storage_path'." }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+    if (!pdfBase64 && (!text || text.length < 50)) {
+      return fail(422, "extraction", "Texto extraído é muito curto (<50 chars). Pode ser PDF escaneado sem OCR.");
     }
 
-    const truncated = text.slice(0, 60_000);
+    const truncated = (text || "").slice(0, 60_000);
     const rulesCatalog = (rules || [])
       .map((r: any) => `- ${r.rule_id} [${r.category}] ${r.title} — ${r.justification?.slice(0, 180) || ""}`)
       .join("\n");
@@ -126,10 +192,25 @@ Deno.serve(async (req) => {
       "Use 'supports' when the study justifies the rule; 'contradicts' when it challenges it; 'modulates_weight' when it informs a numeric weight (e.g. canine→human translatability); 'inspires' when it motivated the rule conceptually. " +
       "Quotes must be literal substrings of the source text (<=300 chars). If unsure, omit the link.";
 
-    const userPrompt =
-      `EXISTING CORE RULES (link only to these rule_ids):\n${rulesCatalog || "(none)"}\n\n` +
-      `SOURCE${source_url ? ` (${source_url})` : ""}:\n${truncated}`;
+    const curatorBlock = curator_notes && curator_notes.trim()
+      ? `\n\nCURATOR NOTES (treat as binding guidance — respect them):\n${curator_notes.trim().slice(0, 4000)}\n`
+      : "";
 
+    const textPrompt =
+      `EXISTING CORE RULES (link only to these rule_ids):\n${rulesCatalog || "(none)"}\n${curatorBlock}\n` +
+      (pdfBase64
+        ? `SOURCE${source_url ? ` (${source_url})` : ""}: see attached PDF.`
+        : `SOURCE${source_url ? ` (${source_url})` : ""}:\n${truncated}`);
+
+    const userContent: any[] = [{ type: "text", text: textPrompt }];
+    if (pdfBase64) {
+      userContent.push({
+        type: "image_url",
+        image_url: { url: `data:${pdfMime};base64,${pdfBase64}` },
+      });
+    }
+
+    const tLlm = performance.now();
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -137,10 +218,10 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: MODEL,
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
+          { role: "user", content: userContent },
         ],
         tools: [TOOL],
         tool_choice: { type: "function", function: { name: TOOL.function.name } },
@@ -150,22 +231,34 @@ Deno.serve(async (req) => {
     if (!aiRes.ok) {
       const errText = await aiRes.text();
       console.error("Lovable AI error", aiRes.status, errText);
-      return new Response(
-        JSON.stringify({ error: `AI gateway failed: ${aiRes.status}`, detail: errText }),
-        { status: aiRes.status === 429 || aiRes.status === 402 ? aiRes.status : 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+      const httpCode = aiRes.status === 429 || aiRes.status === 402 ? aiRes.status : 502;
+      const friendly = aiRes.status === 429
+        ? "Limite de requisições do Gemini excedido. Aguarde 1 min e tente novamente."
+        : aiRes.status === 402
+        ? "Créditos do Lovable AI esgotados. Adicione créditos em Settings > Workspace > Usage."
+        : `Falha no gateway de IA (HTTP ${aiRes.status}).`;
+      return fail(httpCode, "llm_analysis", friendly, { detail: errText });
     }
 
     const json = await aiRes.json();
     const call = json.choices?.[0]?.message?.tool_calls?.[0];
     if (!call) {
-      return new Response(JSON.stringify({ error: "AI returned no structured draft" }), {
-        status: 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return fail(502, "llm_analysis", "Gemini não retornou rascunho estruturado (tool_call ausente). Tente novamente ou cole abstract+conclusão como texto.");
     }
+    const usage = json.usage || {};
+    pushTrace({
+      stage: "llm_analysis",
+      status: "success",
+      duration_ms: Math.round(performance.now() - tLlm),
+      detail: `${MODEL} · ${usage.total_tokens ?? "?"} tokens`,
+    });
 
-    const draft = JSON.parse(call.function.arguments);
+    let draft: any;
+    try {
+      draft = JSON.parse(call.function.arguments);
+    } catch (e: any) {
+      return fail(502, "structuring", `Falha ao parsear JSON do Gemini: ${e?.message || e}`);
+    }
 
     // Filter suggested links to rules that actually exist (defense in depth).
     const validRuleIds = new Set((rules || []).map((r: any) => r.rule_id));
@@ -173,13 +266,19 @@ Deno.serve(async (req) => {
       validRuleIds.has(l.rule_id)
     );
 
+    pushTrace({
+      stage: "structuring",
+      status: "success",
+      detail: `${draft.key_claims?.length ?? 0} claims · ${draft.suggested_links?.length ?? 0} vínculos válidos`,
+    });
+
     return new Response(
-      JSON.stringify({ draft, source_url, pdf_storage_path }),
+      JSON.stringify({ draft, source_url, pdf_storage_path, trace }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err: any) {
     console.error("extract-meta-study error", err);
-    return new Response(JSON.stringify({ error: err?.message || "Unknown error" }), {
+    return new Response(JSON.stringify({ error: err?.message || "Unknown error", trace }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
