@@ -2120,7 +2120,6 @@
       },
       "configuration": {
         "title": "Configuration",
-        "knowledgeBase": "Knowledge Base",
         "aiConfig": "AI Config",
         "aiPrompts": "AI Prompts",
         "translationAudit": "Translation Audit",
@@ -2131,7 +2130,11 @@
         "organograma": "Organogram",
         "complianceDashboard": "FDA/EMA/AVMA Compliance",
         "technicalAudits": "Technical Audits",
-        "aboutSenex": "About Senex AI"
+        "aboutSenex": "About Senex AI",
+        "fundamentos": "Architectural Foundations"
+      },
+      "governanceAI": {
+        "title": "Governance & AI"
       },
       "settingsButton": "Settings"
     },

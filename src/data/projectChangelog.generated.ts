@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-20T03:50:23.424Z
+// Última geração: 2026-05-20T04:17:31.034Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,27 @@ export const lastChangelogDate = "2026-05-20";
 export const senexVersion = "5.1.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-20",
+    "kind": "changed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Sidebar admin: nova família \"Governança & IA\"",
+    "bullets": [
+      "Removido link órfão \"Base de Conhecimento\" (tab `knowledge-base-settings`) que não tinha conteúdo.",
+      "Criada nova seção lateral \"Governança & IA\" (`GovernanceAIGroup`) separada de Configuração, agrupando: AI Config, AI Prompts, Organograma, Conformidade FDA/EMA/AVMA, Auditorias Técnicas, About Senex AI e Fundamentos Arquiteturais.",
+      "Configuração mantém apenas: Ações, Analytics, Análise de ROI, Traduções, Design, Solicitações de Acesso.",
+      "i18n: `admin.sidebar.governanceAI.title` (PT/EN) + chave `configuration.fundamentos` formalizada; bump 1.92.0 → 1.93.0.",
+      "Files: src/components/administrador/sidebar/groups/GovernanceAIGroup.tsx, src/components/administrador/sidebar/groups/ConfigurationGroup.tsx, src/components/administrador/sidebar/AdminSidebarGroups.tsx, src/i18n.ts, src/locales/{pt,en}/translation.json"
+    ],
+    "files": [
+      "src/components/administrador/sidebar/groups/GovernanceAIGroup.tsx",
+      "src/components/administrador/sidebar/groups/ConfigurationGroup.tsx",
+      "src/components/administrador/sidebar/AdminSidebarGroups.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.93.0"
+  },
   {
     "date": "2026-05-20",
     "kind": "changed",
