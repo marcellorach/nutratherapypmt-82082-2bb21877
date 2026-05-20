@@ -1,0 +1,1 @@
+ALTER TABLE public.meta_studies ADD COLUMN IF NOT EXISTS curator_notes TEXT;
