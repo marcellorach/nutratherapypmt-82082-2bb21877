@@ -1,88 +1,123 @@
-## Diagnóstico
+# Plano — Estudos: Polimento, Governança e Meta-KG
 
-### (a) Por que os cards variam de visual?
-Os 5 prints **não são variantes de extração diferentes** — todos os cards são renderizados pelo mesmo `EstudoCard.tsx`. O que muda é **o estado dos dados** de cada estudo:
+## Fase 1 — Polimento imediato do card/modal de estudos
 
-| Card no print | nutra/cond em `analysis_data` | triplets em `triplet_extractions` | embeddings | Resultado visual |
-|---|---|---|---|---|
-| Spermidine (foto 1) | **0 / 0** | 14 | 0 | só abstract + "Sem trechos indexados" |
-| Vet geroscience (foto 1) | **0 / 0** | 23 | 0 | idem |
-| Senolytic LY-D6/2 (foto 2) | 4 / 3 | 33 | 0 | tem "Análise Senex AI" + "Sem trechos indexados" |
-| Tramiprosate (foto 3) | 1 / 1 | 26 | 3 | tem análise + "RAG: 3" |
-| CoQ10 (foto 4) | 1 / 2 | 17 | 9 | análise + "RAG: 9" |
-| AAHA Diabetes (foto 5) | 8 / 4 | 78 | 4 | análise rica + "RAG: 4" |
+### 1.1 Renomear "Sem trechos indexados" e adicionar tooltip (item a)
+- Label vira **"RAG não indexado"** (PT) / **"RAG not indexed"** (EN), com tooltip:
+  > "Este estudo ainda não foi vetorizado. O curador não verá o 'Trecho de Origem'. Reprocessar para habilitar."
+- Adicionar botão **"Reprocessar vetorização"** que chama `vectorize-study`.
+- Arquivos: `EstudoCard.tsx`, `pt/translation.json`, `en/translation.json`.
 
-Confirmado no DB (`SELECT … FROM processed_studies …`). Ou seja:
-- Os badges (`RAG: N` vs `Sem trechos indexados`) refletem fielmente `embeddings_count` de cada estudo. Quem nunca foi vetorizado mostra o aviso amarelo (comportamento correto introduzido na Etapa 2 da governança).
-- O bloco "Análise Senex AI" e a linha de stats (`X Entidades · Y Triplets · …`) só aparece quando `analysis_data.extractedNutraceuticals` ou `extractedConditions` têm itens. Para Spermidine e Vet Geroscience, esses arrays vieram **vazios** do Stage 1 do `extract-study-entities`, mesmo havendo 14 e 23 triplets válidos (com `subject_type='Nutraceutical'` e `object_type='Condition'`) em `triplet_extractions`.
+### 1.2 Timeline de timestamps (item b)
+- **Migração**: adicionar `curated_at TIMESTAMPTZ`, `curated_by UUID` em `processed_studies`.
+- Nova seção **"Linha do tempo"** no modal e linha compacta no card:
+  - Publicação (`publication_year`) → Ingestão (`created_at`) → Stage 1/2/3 (`processed_at` + flags) → Vetorização (max `study_embeddings.created_at`) → Curadoria (`curated_at`).
+- Componente `StudyTimeline.tsx` em `detalhes/`.
 
-**Causa-raiz:** o pipeline grava `extractedNutraceuticals/extractedConditions` a partir do **Stage 1** (extração específica de "nutraceuticals/conditions" via LLM). Stage 1 às vezes falha em identificar entidades que Stage 2/3 (geração de triplets) captura corretamente. Resultado: card "nu" mesmo com triplets ricos.
+### 1.3 Bilinguismo completo (item c)
+- Auditoria do `EstudoCard.tsx` + `AnaliseTab.tsx` + `ExtractedDataVisualization.tsx`: substituir todo hardcoded por `t()`.
+- Dicionário PT de normalização de **valores enum vindos do LLM**: `moderate→moderado`, `low→baixo`, `caution→cautela`, `relative→relativa`, `double blind→duplo-cego`, `Human→Humano`, `12 weeks→12 semanas`, etc. — arquivo `src/utils/llmEnumLocalizer.ts`.
+- Bump `I18N_VERSION` em `src/i18n.ts`.
 
-### (b) Por que faltam infos no modal (fotos 6, 7, 8)?
-Mesma causa-raiz, propagada para o modal:
-- **Foto 6 "Visão Geral"**: lê `analysis_data.study_summary.summary` e `description`. Quando vazio → "Awaiting processing". Quality/Relevance/Novelty vêm de `analysis_data.studyAssessment` (que Stage 3 escreve só quando bem-sucedido).
-- **Foto 7 "Análise IA"**: `ExtractedDataVisualization.tsx:170` checa `hasExpandedData` lendo `study_population`, `structured_dosages`, `biomarkers`, `side_effects`, `contraindications`, `drug_interactions`, `synergies` — todos campos do Stage 3 (`analysis_data`). Se Stage 3 não persistiu, mostra "Dados expandidos não disponíveis".
-- **Foto 8 "Condições"**: funciona porque lê direto de `triplet_extractions` (mostra 14 relações para Spermidine — exatamente o que o card deveria refletir).
+### 1.4 Scores clicáveis com critérios detectados (item d)
+- Cada card (Qualidade Metodológica / Relevância Clínica / Novidade Científica) vira clicável.
+- Popover/modal exibe os critérios que entraram no cálculo, com ✓/✗ e peso:
+  - **Qualidade**: RCT (✓/✗), n≥30 (✓/✗), randomização, cegamento, placebo-controlado, p<0.05, duração ≥12 semanas, conflito de interesse declarado.
+  - **Relevância**: espécie canina (✓/✗), translacional humano→cão, dose realista, via oral, condição alvo metabólica/degenerativa.
+  - **Novidade**: ano de publicação, originalidade do mecanismo, primeira evidência em espécie.
+- Dados já estão em `analysis_data.study_assessment`; UI nova: `ScoreCriteriaPopover.tsx`.
 
-A "correção anterior" que você lembra funcionou para estudos cujo Stage 1 + Stage 3 rodaram com sucesso. Spermidine e Vet Geroscience são casos em que Stage 1/3 falharam silenciosamente apesar de Stage 2 ter gerado triplets bons.
+### 1.5 Fix "Efeitos Adversos (1)" vazio (item e)
+- Em `extract-study-entities`, detectar quando o único item de adverse events tem semântica negativa (`no adverse events`, `none reported`, `not observed`).
+- Setar `adverse_events_count = 0` + flag `explicitly_none_reported: true`.
+- UI: badge verde "Sem eventos adversos reportados" em vez de contador "(1)".
 
----
+### 1.6 Separar Exclusão vs Contraindicação vs Lacuna (item f) — REGRA-CORE
+- Novo schema em `analysis_data`:
+  ```
+  exclusion_criteria: []        // quem foi excluído do trial
+  contraindications: []         // contraindicação demonstrada
+  evidence_gaps: []             // população não estudada
+  ```
+- Atualizar prompt do Stage 3 com instrução explícita: "Critério de exclusão NÃO é contraindicação."
+- UI: três seções distintas no modal, cores e ícones diferentes.
+- Adicionar à `CORE_RULES.md` (ver Fase 2.1).
 
-## Plano de correção
-
-### Etapa 1 — Backfill imediato dos 2 estudos afetados
-Derivar `extractedNutraceuticals` e `extractedConditions` a partir dos triplets existentes para Spermidine e Vet Geroscience. Migração SQL:
-
-```sql
-UPDATE processed_studies ps
-SET analysis_data = ps.analysis_data
-  || jsonb_build_object(
-       'extractedNutraceuticals',
-         (SELECT jsonb_agg(DISTINCT jsonb_build_object('name', subject_name, 'confidence', 3))
-          FROM triplet_extractions
-          WHERE study_id = ps.id AND subject_type IN ('Nutraceutical','Compound')),
-       'extractedConditions',
-         (SELECT jsonb_agg(DISTINCT jsonb_build_object('name', object_name, 'confidence', 3))
-          FROM triplet_extractions
-          WHERE study_id = ps.id AND object_type IN ('Condition','Disease','Phenotype'))
-     )
-WHERE ps.id IN ('83592b04-…','0d0d9135-…')
-  AND ( COALESCE(jsonb_array_length(ps.analysis_data->'extractedNutraceuticals'),0) = 0
-     OR COALESCE(jsonb_array_length(ps.analysis_data->'extractedConditions'),0) = 0 );
-```
-
-Resultado esperado: cards de Spermidine e Vet Geroscience passam a mostrar a faixa "Análise Senex AI" e a linha de stats, igual aos demais. O badge "Sem trechos indexados" continua (até que sejam vetorizados).
-
-### Etapa 2 — Tornar a derivação automática no pipeline (correção definitiva)
-No `supabase/functions/extract-study-entities/index.ts` (linha ~552, bloco `frontendData`), antes do `UPDATE processed_studies`:
-1. Se `extractedNutraceuticals` veio vazio do Stage 1, popular a partir dos triplets recém-inseridos (`triplets` array já está no escopo da função). Idem para `extractedConditions`.
-2. Garantir que o `kanban_status` só vire `processed` quando pelo menos `extractedNutraceuticals` OU `extractedConditions` tiver itens (evita propagar estudo "nu" para a fila de curadoria).
-
-Isso elimina a divergência na origem — não importa se Stage 1 falhar, Stage 2 sempre repopula a vitrine.
-
-### Etapa 3 — Fallback no modal "Análise IA" (defensivo)
-`ExtractedDataVisualization.tsx:170` — quando `hasExpandedData=false`, em vez de mostrar só "Dados expandidos não disponíveis", buscar uma derivação mínima a partir de `triplet_extractions`:
-- Mostrar lista de compostos × condições com `predicate` agregado.
-- Mensagem secundária: "Resumo derivado dos triplets — Stage 3 (dosagens/biomarcadores) ainda não disponível. Clique em Reprocessar para detalhes completos."
-
-Assim o modal nunca fica vazio se há triplets aprovados.
-
-### Etapa 4 — Atualização do briefing
-- Entrada em `CHANGELOG.md` `[Unreleased]` → `Fixed`: "Cards de curadoria e modal de detalhes agora derivam entidades de `triplet_extractions` quando Stage 1 falha".
+### 1.7 Atualização documental obrigatória
+- `CHANGELOG.md` (entry com `<!-- area: estudos · status: shipped · i18n: 1.87.0 -->`).
 - `npm run sync:changelog`.
 
-### Fora de escopo (já discutido)
-- Re-vetorização em massa para popular embeddings dos estudos com badge "Sem trechos indexados" — você decidiu não fazer (smoke test passou, é débito documentado).
+---
+
+## Fase 2 — Governança de regras-core + Meta-KG arquitetural
+
+### 2.1 Fonte canônica: `docs/CORE_RULES.md` (item f.1)
+Estrutura:
+```markdown
+# Regras-Core do Senex AI
+
+## RC-001 — Exclusão ≠ Contraindicação
+- Categoria: clinical-semantics
+- Criada em: 2026-05-19
+- Justificada por: [discussão usuário, este turno]
+- Evidência sustentadora: (vazio até Fase 2.3)
+- Aplicação: extract-study-entities Stage 3 prompt, UI de detalhes do estudo
+
+## RC-002 — Vetorização é pré-curadoria
+...
+```
+Cada regra: `id`, `título`, `categoria`, `data`, `versão`, `justificativa`, `aplicação` (arquivos/funções afetados), `evidências` (lista de meta_studies).
+
+### 2.2 Tabela espelhada `core_rules` + `core_rule_evidence`
+Migração:
+```sql
+core_rules (id, code, title_pt, title_en, body_pt, body_en, category, version, is_active)
+meta_studies (id, title, authors, year, doi, pdf_storage_path, kind)
+  -- kind ∈ ('architectural','methodological','translational','epistemological')
+core_rule_evidence (rule_id, meta_study_id, relationship, weight)
+  -- relationship ∈ ('SUPPORTS','CONTRADICTS','MODULATES','INSPIRES')
+core_rule_modulators (rule_id, domain, source_species, target_species, weight, evidence_study_id)
+  -- ex: ('translational_cognition','human','canine',0.7, <id>)
+```
+Script `scripts/sync-core-rules.mjs` lê `docs/CORE_RULES.md` e sincroniza para a tabela (igual ao `sync-changelog`).
+
+### 2.3 Tab "Fundamentos Arquiteturais" no admin
+- Nova entrada em `src/config/admin-tabs.ts` (grupo "Governança").
+- Página com 3 abas:
+  - **Regras-Core**: lista + detalhe (renderiza MD + evidências linkadas).
+  - **Meta-Estudos**: upload PDF + extração leve (título, autores, ano, key claims). Armazena em bucket `meta_studies_pdfs`.
+  - **Mapa de Influências**: KG visual (force-graph 2D) ligando MetaStudy → CoreRule → Module afetado.
+- Atualizar `src/data/projectOrganograma.ts`.
+
+### 2.4 Seeding: ingerir PDF "Anti-aging strategies for dogs"
+- Copiar `user-uploads://Anti-aging_strategies_for_dogs-_current_insights_and_future_directions_copy_2.pdf` para bucket.
+- Extrair metadados e 5-10 key claims via Gemini.
+- Criar registro `meta_studies` com `kind='translational'`.
+- Vincular a **RC-003 — Translational Weighting Human→Canine** (relationship: `SUPPORTS`).
+
+### 2.5 Translational Weighting no hybrid-recommendation (item f-final)
+- `hybrid-recommendation` consulta `core_rule_modulators` quando triplet vem de estudo não-canino.
+- Lookup: `(domain=condition.domain, source_species=study.species, target_species='canine')` → `weight`.
+- Multiplica `confidence` do triplet por `weight` antes de entrar no score final.
+- UI mostra badge "Translação humano→cão: ×0.7 (RC-003)" com link para a regra.
+- Para o estudo PQQ humano: cognição translaciona razoavelmente; metabolismo hepático translaciona pior.
+
+### 2.6 Atualizar memória interna
+- `mem://principles/exclusion-vs-contraindication` (nova).
+- `mem://architecture/core-rules-governance` (nova).
+- `mem://architecture/meta-kg-translational-weighting` (nova).
+- Atualizar `mem://index.md`.
 
 ---
 
-## Arquivos impactados
-- `supabase/migrations/<timestamp>_backfill_analysis_data_from_triplets.sql` (novo)
-- `supabase/functions/extract-study-entities/index.ts` (~linha 552-598)
-- `src/components/administrador/estudos/visualization/ExtractedDataVisualization.tsx` (~linha 151-180)
-- `CHANGELOG.md`
+## Detalhes técnicos relevantes
 
-## Como validar
-1. Após Etapa 1: recarregar `/administrador → Estudos → Curadoria`. Os 2 cards "nus" devem mostrar Spermidine/Spermine/Putrescine como nutracêuticos e Cancer/Vascular Disease/All-cause mortality como condições, com `14` e `23` triplets na linha de stats.
-2. Abrir modal do Spermidine → "Análise IA" deve mostrar lista derivada dos triplets (não mais "Dados expandidos não disponíveis").
-3. Próximos uploads testados em isolado: forçar Stage 1 a falhar (mock) e confirmar que Stage 2 popula as listas via fallback.
+**Arquivos novos**: `src/components/administrador/estudos/detalhes/StudyTimeline.tsx`, `src/components/administrador/estudos/detalhes/ScoreCriteriaPopover.tsx`, `src/utils/llmEnumLocalizer.ts`, `src/pages/administrador/FundamentosTab.tsx`, `docs/CORE_RULES.md`, `scripts/sync-core-rules.mjs`.
+
+**Edge functions tocadas**: `extract-study-entities` (Stage 3 prompt + adverse events normalization), `hybrid-recommendation` (translational weighting), `ingest-meta-study` (nova, ingestão leve de PDFs arquiteturais).
+
+**Migrações**: (1) `processed_studies + curated_at/by`; (2) `core_rules`, `meta_studies`, `core_rule_evidence`, `core_rule_modulators` + RLS admin-only; (3) bucket `meta_studies_pdfs`.
+
+**Riscos**: Fase 2.5 muda confidence scoring — preciso validar que isso não degrada recomendações existentes. Solução: feature flag `enable_translational_weighting` inicialmente off, ativada após validação manual de 3-5 pets demo.
+
+**Estimativa de turnos**: Fase 1 ≈ 2-3 turnos. Fase 2 ≈ 3-4 turnos. Total 5-7 turnos.
