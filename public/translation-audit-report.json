@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-05-20T02:12:17.682Z",
+  "timestamp": "2026-05-20T15:45:36.862Z",
   "summary": {
-    "totalFiles": 879,
-    "totalIssues": 429,
+    "totalFiles": 885,
+    "totalIssues": 434,
     "hardcodedTexts": 49,
-    "missingKeys": 379,
-    "incompleteTranslations": 1
+    "missingKeys": 383,
+    "incompleteTranslations": 2
   },
   "issues": [
     {
@@ -1425,14 +1425,14 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/cards/EstudoCard.tsx",
-      "line": 119,
+      "line": 121,
       "text": "*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/cards/EstudoCard.tsx",
-      "line": 191,
+      "line": 193,
       "text": "\\n",
       "severity": "high"
     },
@@ -2496,21 +2496,21 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 282,
+      "line": 451,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 493,
+      "line": 662,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 3288,
+      "line": 3457,
       "text": "@",
       "severity": "high"
     },
@@ -2538,14 +2538,14 @@
     {
       "type": "missing-key",
       "file": "src/hooks/useStudyApprovalWorkflow.ts",
-      "line": 128,
+      "line": 133,
       "text": "curation_status, created_at, review_date",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/hooks/useStudyApprovalWorkflow.ts",
-      "line": 134,
+      "line": 139,
       "text": "created_at, kanban_status, analysis_data, full_text_metadata",
       "severity": "high"
     },
@@ -2589,6 +2589,34 @@
       "file": "src/pages/administrador/AdministradorPage.tsx",
       "line": 13,
       "text": "tab",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/pages/administrador/FundamentosTab.tsx",
+      "line": 98,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/pages/administrador/FundamentosTab.tsx",
+      "line": 99,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/pages/administrador/FundamentosTab.tsx",
+      "line": 100,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/pages/administrador/FundamentosTab.tsx",
+      "line": 101,
+      "text": "*",
       "severity": "high"
     },
     {
@@ -2659,6 +2687,13 @@
       "file": "src/pages/veterinario/RecommendationsList.tsx",
       "line": 53,
       "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "incomplete-translation",
+      "file": "src/locales/en/translation.json",
+      "line": 0,
+      "text": "Missing EN translation for: studies.approval._timeline_anchor_pt",
       "severity": "high"
     },
     {

@@ -35,7 +35,17 @@ interface ProposedRule {
   justification_quote?: string;
   suggested_application?: string;
   confidence?: number;
-  _action?: 'promote' | 'discard' | null;
+  stance?: 'confirms' | 'extends' | 'contradicts' | 'unrelated';
+  conflicts_with?: string[];
+  /**
+   * UI-only action chosen by the curator:
+   *  - 'promote'        → create a new RC (origin='deductive')
+   *  - 'attach'         → only valid when stance='confirms'; insert as core_rule_evidence on conflicts_with[0]
+   *  - 'resolve_keep'   → only valid when stance='contradicts'; keep existing RC, archive proposal as governance evidence
+   *  - 'discard'        → drop the proposal
+   *  - null             → leave as candidate inside meta_studies.proposed_rules (no action)
+   */
+  _action?: 'promote' | 'attach' | 'resolve_keep' | 'discard' | null;
 }
 interface Draft {
   title: string;
@@ -294,7 +304,61 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
 
       // Promote any proposed_rules the curator marked as 'promote' into core_rules
       // with origin='deductive' and provenance back to this meta-study.
-      const toPromote = (draft.proposed_rules || []).filter(p => p._action === 'promote');
+      const allProposed = draft.proposed_rules || [];
+      // Safety guard: contradicts are BLOCKED from promotion — they must go through
+      // human governance resolution (attach as evidence / supersede / coexist).
+      const blockedPromotions = allProposed.filter(
+        p => p._action === 'promote' && p.stance === 'contradicts',
+      );
+      if (blockedPromotions.length) {
+        toast.error(
+          `${blockedPromotions.length} proposta(s) em CONFLITO com RCs ativas não podem ser promovidas diretamente. Use "Manter RC atual" ou edite a stance.`,
+        );
+        setSaving(false);
+        return;
+      }
+      const toPromote = allProposed.filter(p => p._action === 'promote');
+      const toAttach = allProposed.filter(
+        p => (p._action === 'attach' || p._action === 'resolve_keep') &&
+             Array.isArray(p.conflicts_with) && p.conflicts_with.length > 0,
+      );
+
+      // Attach 'confirms' / 'resolve_keep' candidates as evidence on the targeted RC(s)
+      // instead of creating a duplicate rule.
+      if (toAttach.length) {
+        const targetCodes = Array.from(
+          new Set(toAttach.flatMap(p => p.conflicts_with || [])),
+        );
+        const { data: ruleRows, error: rErr } = await supabase
+          .from('core_rules').select('id, rule_id').in('rule_id', targetCodes);
+        if (rErr) throw rErr;
+        const byCode = new Map((ruleRows || []).map((r: any) => [r.rule_id, r.id]));
+        const evRows = toAttach.flatMap(p =>
+          (p.conflicts_with || [])
+            .filter(code => byCode.has(code))
+            .map(code => ({
+              rule_id: byCode.get(code),
+              meta_study_id: studyId,
+              relation: p._action === 'resolve_keep' ? 'contradicts' : 'supports',
+              weight: typeof p.confidence === 'number' ? p.confidence : 1.0,
+              quote: p.justification_quote || null,
+              notes:
+                p._action === 'resolve_keep'
+                  ? `[governance] Conflito revisado · RC mantida · proposta arquivada: ${p.proposed_title}${p.enunciado ? ` — ${p.enunciado}` : ''}`
+                  : `[auto] Confirma RC via proposta: ${p.proposed_title}${p.enunciado ? ` — ${p.enunciado}` : ''}`,
+            })),
+        );
+        if (evRows.length) {
+          const { error: evErr } = await supabase.from('core_rule_evidence').insert(evRows);
+          if (evErr) {
+            console.warn('Falha ao anexar evidências de stance:', evErr);
+            toast.warning(`Meta-estudo salvo, mas ${evRows.length} evidência(s) de stance falharam: ${evErr.message}`);
+          } else {
+            toast.success(`${evRows.length} evidência(s) de stance anexada(s) a RCs existentes.`);
+          }
+        }
+      }
+
       if (toPromote.length) {
         const { data: existing } = await supabase
           .from('core_rules').select('rule_id').order('rule_id', { ascending: false }).limit(1);
@@ -602,63 +666,197 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
             </div>
 
             {/* RCs deduzidas propostas pelo paper */}
+            {(() => {
+              const all = draft.proposed_rules || [];
+              const confirms = all.map((p, i) => ({ p, i })).filter(({ p }) => p.stance === 'confirms');
+              const contradicts = all.map((p, i) => ({ p, i })).filter(({ p }) => p.stance === 'contradicts');
+              const extendsOrOther = all.map((p, i) => ({ p, i })).filter(
+                ({ p }) => p.stance !== 'confirms' && p.stance !== 'contradicts',
+              );
+
+              const updateAction = (i: number, action: ProposedRule['_action']) => {
+                const copy = [...(draft.proposed_rules || [])];
+                copy[i] = { ...copy[i], _action: copy[i]._action === action ? null : action };
+                setDraft({ ...draft, proposed_rules: copy });
+              };
+
+              const renderHeader = (p: ProposedRule) => (
+                <>
+                  {p.category && <Badge variant="outline" className="text-[10px]">{p.category}</Badge>}
+                  {typeof p.confidence === 'number' && <Badge variant="outline" className="text-[10px]">conf={p.confidence.toFixed(2)}</Badge>}
+                </>
+              );
+              const renderBody = (p: ProposedRule) => (
+                <>
+                  <div className="font-medium">{p.proposed_title}</div>
+                  <div className="text-muted-foreground mt-0.5">{p.enunciado}</div>
+                  {p.justification_quote && <div className="text-muted-foreground italic mt-1">"{p.justification_quote}"</div>}
+                  {p.suggested_application && (
+                    <div className="text-[11px] mt-1"><span className="text-muted-foreground">Aplicação sugerida:</span> <code className="text-[10px]">{p.suggested_application}</code></div>
+                  )}
+                </>
+              );
+
+              if (all.length === 0) {
+                return (
+                  <div>
+                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5">
+                      <Sparkles className="h-3 w-3 text-purple-600" />
+                      Regras-Core deduzidas deste paper (0)
+                    </Label>
+                    <p className="text-xs text-muted-foreground italic mt-1">
+                      A IA não propôs novas regras — todas as lições já mapearam para RCs existentes (ou o paper é mais ilustrativo do que normativo).
+                    </p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="space-y-4">
+                  {/* 🔴 Conflitos — bloqueia auto-promoção */}
+                  {contradicts.length > 0 && (
+                    <div className="border border-red-300 rounded-md bg-red-50/40 p-2">
+                      <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5 text-red-800">
+                        <AlertTriangle className="h-3 w-3" />
+                        Conflitos com Regras-Core ativas ({contradicts.length})
+                        <span className="text-[10px] font-normal text-red-700/80 normal-case">
+                          — promoção bloqueada, requer decisão humana
+                        </span>
+                      </Label>
+                      <ul className="space-y-1.5 mt-1.5 text-xs">
+                        {contradicts.map(({ p, i }) => (
+                          <li key={i} className={`border border-red-200 rounded px-2 py-2 bg-white ${p._action === 'discard' ? 'opacity-40' : ''}`}>
+                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                              <Badge className="bg-red-100 text-red-800 border-red-300">CONTRADIZ</Badge>
+                              {(p.conflicts_with || []).map(rid => (
+                                <Badge key={rid} variant="outline" className="font-mono text-[10px] border-red-300 text-red-800">vs {rid}</Badge>
+                              ))}
+                              {renderHeader(p)}
+                            </div>
+                            {renderBody(p)}
+                            <div className="flex gap-1.5 mt-2 flex-wrap">
+                              <Button
+                                size="sm"
+                                variant={p._action === 'resolve_keep' ? 'default' : 'outline'}
+                                className="h-6 text-[11px]"
+                                onClick={() => updateAction(i, 'resolve_keep')}
+                              >
+                                {p._action === 'resolve_keep' ? '✓ Manter RC atual (arquivar proposta)' : 'Manter RC atual (arquivar)'}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant={p._action === 'discard' ? 'secondary' : 'ghost'}
+                                className="h-6 text-[11px]"
+                                onClick={() => updateAction(i, 'discard')}
+                              >
+                                {p._action === 'discard' ? '✓ Descartar' : 'Descartar'}
+                              </Button>
+                              <span className="text-[10px] text-red-700/80 italic self-center">
+                                Substituir/mesclar/coexistir → próxima fase (versionamento de RCs).
+                              </span>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* 🟢 Confirmações — vira evidência, não nova RC */}
+                  {confirms.length > 0 && (
+                    <div className="border border-emerald-300 rounded-md bg-emerald-50/40 p-2">
+                      <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5 text-emerald-800">
+                        <CheckCircle2 className="h-3 w-3" />
+                        Confirmações de RCs ativas ({confirms.length})
+                        <span className="text-[10px] font-normal text-emerald-700/80 normal-case">
+                          — anexar como evidência, não duplicar RC
+                        </span>
+                      </Label>
+                      <ul className="space-y-1.5 mt-1.5 text-xs">
+                        {confirms.map(({ p, i }) => (
+                          <li key={i} className={`border border-emerald-200 rounded px-2 py-2 bg-white ${p._action === 'attach' ? 'border-emerald-500' : ''} ${p._action === 'discard' ? 'opacity-40' : ''}`}>
+                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                              <Badge className="bg-emerald-100 text-emerald-800 border-emerald-300">CONFIRMA</Badge>
+                              {(p.conflicts_with || []).map(rid => (
+                                <Badge key={rid} variant="outline" className="font-mono text-[10px] border-emerald-300 text-emerald-800">→ {rid}</Badge>
+                              ))}
+                              {renderHeader(p)}
+                            </div>
+                            {renderBody(p)}
+                            <div className="flex gap-1.5 mt-2">
+                              <Button
+                                size="sm"
+                                variant={p._action === 'attach' ? 'default' : 'outline'}
+                                className="h-6 text-[11px]"
+                                onClick={() => updateAction(i, 'attach')}
+                              >
+                                {p._action === 'attach' ? '✓ Anexar como evidência' : 'Anexar como evidência'}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant={p._action === 'discard' ? 'secondary' : 'ghost'}
+                                className="h-6 text-[11px]"
+                                onClick={() => updateAction(i, 'discard')}
+                              >
+                                {p._action === 'discard' ? '✓ Descartar' : 'Descartar'}
+                              </Button>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* 🔵 Extensões / novas RCs */}
+                  <div>
+                    <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5">
+                      <Sparkles className="h-3 w-3 text-purple-600" />
+                      Novas Regras-Core propostas ({extendsOrOther.length})
+                      <span className="text-[10px] font-normal text-muted-foreground normal-case">
+                        — origem='deductive', sem conflito com catálogo atual
+                      </span>
+                    </Label>
+                    {extendsOrOther.length === 0 ? (
+                      <p className="text-xs text-muted-foreground italic mt-1">
+                        Nenhuma proposta inédita — tudo virou confirmação ou conflito.
+                      </p>
+                    ) : (
+                      <ul className="space-y-1.5 mt-1 text-xs">
+                        {extendsOrOther.map(({ p, i }) => (
+                          <li key={i} className={`border rounded px-2 py-2 ${p._action === 'promote' ? 'border-purple-400 bg-purple-50/40' : p._action === 'discard' ? 'opacity-40' : ''}`}>
+                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                              <Badge className="bg-purple-100 text-purple-800 border-purple-200">
+                                {p.stance === 'unrelated' ? 'NOVA (sem overlap)' : 'ESTENDE'}
+                              </Badge>
+                              {renderHeader(p)}
+                            </div>
+                            {renderBody(p)}
+                            <div className="flex gap-1.5 mt-2">
+                              <Button
+                                size="sm"
+                                variant={p._action === 'promote' ? 'default' : 'outline'}
+                                className="h-6 text-[11px]"
+                                onClick={() => updateAction(i, 'promote')}
+                              >
+                                {p._action === 'promote' ? '✓ Promover para nova RC' : 'Promover para nova RC'}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant={p._action === 'discard' ? 'secondary' : 'ghost'}
+                                className="h-6 text-[11px]"
+                                onClick={() => updateAction(i, 'discard')}
+                              >
+                                {p._action === 'discard' ? '✓ Descartar' : 'Descartar'}
+                              </Button>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
             <div>
-              <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5">
-                <Sparkles className="h-3 w-3 text-purple-600" />
-                Novas Regras-Core propostas ({(draft.proposed_rules || []).length})
-                <span className="text-[10px] font-normal text-muted-foreground normal-case">
-                  — deduzidas deste paper, origem='deductive'
-                </span>
-              </Label>
-              {(draft.proposed_rules || []).length === 0 ? (
-                <p className="text-xs text-muted-foreground italic mt-1">
-                  A IA não propôs novas regras — todas as lições já mapearam para RCs existentes (ou o paper é mais ilustrativo do que normativo).
-                </p>
-              ) : (
-                <ul className="space-y-1.5 mt-1 text-xs">
-                  {(draft.proposed_rules || []).map((p, i) => (
-                    <li key={i} className={`border rounded px-2 py-2 ${p._action === 'promote' ? 'border-emerald-400 bg-emerald-50/40' : p._action === 'discard' ? 'opacity-40' : ''}`}>
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <Badge className="bg-purple-100 text-purple-800 border-purple-200">PROPOSTA</Badge>
-                        {p.category && <Badge variant="outline" className="text-[10px]">{p.category}</Badge>}
-                        {typeof p.confidence === 'number' && <Badge variant="outline" className="text-[10px]">conf={p.confidence.toFixed(2)}</Badge>}
-                      </div>
-                      <div className="font-medium">{p.proposed_title}</div>
-                      <div className="text-muted-foreground mt-0.5">{p.enunciado}</div>
-                      {p.justification_quote && <div className="text-muted-foreground italic mt-1">"{p.justification_quote}"</div>}
-                      {p.suggested_application && (
-                        <div className="text-[11px] mt-1"><span className="text-muted-foreground">Aplicação sugerida:</span> <code className="text-[10px]">{p.suggested_application}</code></div>
-                      )}
-                      <div className="flex gap-1.5 mt-2">
-                        <Button
-                          size="sm"
-                          variant={p._action === 'promote' ? 'default' : 'outline'}
-                          className="h-6 text-[11px]"
-                          onClick={() => {
-                            const copy = [...(draft.proposed_rules || [])];
-                            copy[i] = { ...copy[i], _action: copy[i]._action === 'promote' ? null : 'promote' };
-                            setDraft({ ...draft, proposed_rules: copy });
-                          }}
-                        >
-                          {p._action === 'promote' ? '✓ Promover para nova RC' : 'Promover para nova RC'}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant={p._action === 'discard' ? 'secondary' : 'ghost'}
-                          className="h-6 text-[11px]"
-                          onClick={() => {
-                            const copy = [...(draft.proposed_rules || [])];
-                            copy[i] = { ...copy[i], _action: copy[i]._action === 'discard' ? null : 'discard' };
-                            setDraft({ ...draft, proposed_rules: copy });
-                          }}
-                        >
-                          {p._action === 'discard' ? '✓ Descartar' : 'Descartar'}
-                        </Button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
               <p className="text-[10px] text-muted-foreground mt-1.5 italic">
                 Não marcadas serão salvas no meta-estudo como candidatas (campo <code>proposed_rules</code>) sem virar RC ativa — você pode promovê-las depois.
               </p>
