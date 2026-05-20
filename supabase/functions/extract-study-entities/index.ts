@@ -322,6 +322,8 @@ serve(async (req) => {
       dosages: validatedDosages,
       side_effects: stage3Data.side_effects || [],
       contraindications: stage3Data.contraindications || [],
+      exclusion_criteria: stage3Data.exclusion_criteria || [],
+      evidence_gaps: stage3Data.evidence_gaps || [],
       clinical_outcomes: stage3Data.clinical_outcomes || [],
       study_assessment: stage3Data.study_assessment || {},
     };
