@@ -44,6 +44,7 @@ interface TraceLine {
   detail?: string;
   duration_ms?: number;
 }
+interface FailureInfo { stage: string; message: string; options?: string[] }
 
 const STAGES: Array<{ key: string; label: string }> = [
   { key: 'upload', label: 'Upload do documento' },
@@ -83,11 +84,15 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
   const [trace, setTrace] = useState<TraceLine[]>(
     STAGES.map(s => ({ stage: s.key, label: s.label, status: 'pending' as TraceStatus }))
   );
+  const [failure, setFailure] = useState<FailureInfo | null>(null);
 
   const setStage = (key: string, patch: Partial<TraceLine>) => {
     setTrace(prev => prev.map(t => t.stage === key ? { ...t, ...patch } : t));
   };
-  const resetTrace = () => setTrace(STAGES.map(s => ({ stage: s.key, label: s.label, status: 'pending' as TraceStatus })));
+  const resetTrace = () => {
+    setTrace(STAGES.map(s => ({ stage: s.key, label: s.label, status: 'pending' as TraceStatus })));
+    setFailure(null);
+  };
 
   const onFile = (f: File | null) => {
     if (!f) { setFile(null); return; }
@@ -155,6 +160,20 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
       if (error || data?.error) {
         setTrace(prev => prev.map(t => t.status === 'running' ? { ...t, status: 'error', detail: t.detail || 'Não executado' } : t));
         const msg = (data?.error as string) || (error as any)?.message || 'Falha desconhecida.';
+        // Try to surface options the edge function returned.
+        let opts: string[] | undefined;
+        let stg: string = data?.stage || 'llm_analysis';
+        try {
+          if (Array.isArray(data?.options)) opts = data.options;
+          // supabase.functions.invoke wraps non-2xx into error.context.body
+          const ctxBody = (error as any)?.context?.body;
+          if (!opts && ctxBody) {
+            const parsed = typeof ctxBody === 'string' ? JSON.parse(ctxBody) : ctxBody;
+            if (Array.isArray(parsed?.options)) opts = parsed.options;
+            if (parsed?.stage) stg = parsed.stage;
+          }
+        } catch { /* noop */ }
+        setFailure({ stage: stg, message: msg, options: opts });
         throw new Error(msg);
       }
 
@@ -358,6 +377,16 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                   </li>
                 ))}
               </ol>
+              {failure?.options && failure.options.length > 0 && (
+                <div className="mt-3 border border-amber-300 bg-amber-50 rounded p-2.5">
+                  <div className="text-[11px] font-semibold uppercase tracking-wide text-amber-800 mb-1.5 flex items-center gap-1">
+                    <AlertTriangle className="h-3 w-3" /> Opções para contornar (sem descartar parte do estudo)
+                  </div>
+                  <ul className="list-disc pl-5 space-y-1 text-[11px] text-amber-900">
+                    {failure.options.map((o, i) => <li key={i}>{o}</li>)}
+                  </ul>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
