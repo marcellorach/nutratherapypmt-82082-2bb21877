@@ -269,6 +269,21 @@ const TOOL_V2 = {
               justification_quote: { type: "string", description: "Literal supporting quote from the paper (<=300 chars)." },
               suggested_application: { type: "string", description: "Where in the codebase this rule would apply (file/function/UI surface)." },
               confidence: { type: "number", minimum: 0, maximum: 1 },
+              stance: {
+                type: "string",
+                enum: ["confirms", "extends", "contradicts", "unrelated"],
+                description:
+                  "Relation of this candidate vs the existing Core Rules catalog: " +
+                  "'confirms' = restates/reinforces an existing RC (should become evidence, not a new RC); " +
+                  "'extends' = adds a new practice the RC catalog does not cover (default for true novelty); " +
+                  "'contradicts' = challenges an existing active RC and requires human governance resolution (NEVER auto-promote); " +
+                  "'unrelated' = no overlap with any active RC.",
+              },
+              conflicts_with: {
+                type: "array",
+                description: "rule_ids (from the provided catalog) that this candidate CONFIRMS or CONTRADICTS. Required when stance is 'confirms' or 'contradicts'.",
+                items: { type: "string" },
+              },
             },
             required: ["proposed_title", "enunciado"],
           },
@@ -422,6 +437,13 @@ Deno.serve(async (req) => {
       "TWO PARALLEL OUTPUTS for governance:\n" +
       "(a) suggested_links → only to rule_ids present in the provided catalog. Relations: 'supports' (justifies), 'contradicts' (challenges), 'modulates_weight' (informs a numeric weight), 'inspires' (motivated the rule conceptually).\n" +
       "(b) proposed_rules → candidate NEW Core Rules deduced from the paper that do NOT map to any existing rule_id. Be generous here: it is far better to propose a candidate (which the curator will accept/merge/discard) than to silently drop a teachable lesson. Aim for at least 2 proposed_rules on any substantial architectural paper.\n\n" +
+      "STANCE CLASSIFICATION (mandatory on every proposed_rule):\n" +
+      "For each candidate, compare its enunciado against EVERY active Core Rule in the catalog and set `stance`:\n" +
+      "  - 'confirms'     → the candidate restates/reinforces an existing RC. List the rule_id(s) in `conflicts_with`. The curator will attach it as evidence instead of creating a duplicate RC.\n" +
+      "  - 'extends'      → genuinely new practice not covered by any active RC. This is the normal path to a new RC.\n" +
+      "  - 'contradicts'  → the candidate challenges or negates the prescription of an active RC. List the rule_id(s) in `conflicts_with`. NEVER ALSO emit a suggested_link with relation='contradicts' for the same idea — pick one channel. Contradictions are governance events: they will be BLOCKED from auto-promotion and require human resolution.\n" +
+      "  - 'unrelated'    → no overlap with any active RC.\n" +
+      "If unsure between 'confirms' and 'extends', prefer 'extends' (the curator can downgrade). If unsure between 'contradicts' and 'extends', prefer 'contradicts' (better to flag a false conflict than to silently overwrite a rule).\n\n" +
       "All quotes must be literal substrings of the source text. If unsure, omit.";
 
     const curatorBlock = curator_notes && curator_notes.trim()
@@ -630,6 +652,22 @@ Deno.serve(async (req) => {
       validRuleIds.has(l.rule_id)
     );
 
+    // Normalize proposed_rules: ensure stance is set, validate conflicts_with rule_ids exist.
+    const ALLOWED_STANCES = new Set(["confirms", "extends", "contradicts", "unrelated"]);
+    draft.proposed_rules = (draft.proposed_rules || []).map((p: any) => {
+      const stance = ALLOWED_STANCES.has(p?.stance) ? p.stance : "extends";
+      const conflicts_with = Array.isArray(p?.conflicts_with)
+        ? p.conflicts_with.filter((rid: any) => typeof rid === "string" && validRuleIds.has(rid))
+        : [];
+      // If model claims 'confirms' or 'contradicts' but listed no valid rule_id, downgrade to 'extends'
+      // so the curator UI shows it in the safe 'new RC' lane instead of the conflict lane with no target.
+      const safeStance =
+        (stance === "confirms" || stance === "contradicts") && conflicts_with.length === 0
+          ? "extends"
+          : stance;
+      return { ...p, stance: safeStance, conflicts_with };
+    });
+
     // Normalize all lesson sections to arrays (defensive against partial LLM outputs).
     const LESSON_KEYS = [
       "architectural_patterns",
@@ -650,6 +688,14 @@ Deno.serve(async (req) => {
       0,
     );
 
+    const stanceCounts = (draft.proposed_rules || []).reduce(
+      (acc: Record<string, number>, p: any) => {
+        acc[p.stance] = (acc[p.stance] || 0) + 1;
+        return acc;
+      },
+      { confirms: 0, extends: 0, contradicts: 0, unrelated: 0 },
+    );
+
     pushTrace({
       stage: "structuring",
       status: "success",
@@ -657,7 +703,8 @@ Deno.serve(async (req) => {
         `${lessonTotal} lições estruturadas · ` +
         `${draft.key_claims?.length ?? 0} claims legados · ` +
         `${draft.suggested_links?.length ?? 0} vínculos a RCs existentes · ` +
-        `${draft.proposed_rules?.length ?? 0} RCs propostas`,
+        `${draft.proposed_rules?.length ?? 0} RCs propostas ` +
+        `(✓${stanceCounts.confirms} confirma · +${stanceCounts.extends} estende · ⚠${stanceCounts.contradicts} contradiz · ·${stanceCounts.unrelated})`,
     });
 
     return new Response(
