@@ -1169,6 +1169,8 @@ CRITICAL RULES - YOU MUST FOLLOW:
    - Only classify as a contraindication if the text EXPLICITLY states harm, risk, or recommends against use
      (e.g., "contraindicated in...", "should not be used in...", "caused adverse events in patients with...").
    - When in doubt, prefer to omit the contraindication rather than infer one from exclusion criteria.
+   - Place excluded populations under "exclusion_criteria" with a verbatim quote.
+   - Place "areas that need more research" (e.g., "no data in dogs", "long-term safety not assessed") under "evidence_gaps".
 9. ADVERSE EVENTS — explicit negation:
    - If the study explicitly reports that NO adverse events were observed, return side_effects as an EMPTY array [].
    - Do NOT create a side_effect entry whose name/description is "No adverse events reported" — that distorts downstream counts.`;
