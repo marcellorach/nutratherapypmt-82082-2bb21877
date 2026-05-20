@@ -348,8 +348,10 @@ Deno.serve(async (req) => {
     let usage: any = {};
     try {
       if (googleAiFile) {
+        // Google AI direct API expects the model name without the `google/` gateway prefix
+        const directModel = MODEL.replace(/^google\//, "");
         const aiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${googleAiApiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/${directModel}:generateContent?key=${googleAiApiKey}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
