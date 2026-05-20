@@ -340,6 +340,11 @@ const FundamentosTab: React.FC = () => {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* === INGESTION === */}
+        <TabsContent value="ingest" className="mt-4">
+          <IngestaoMetaEstudo onSaved={load} />
+        </TabsContent>
       </Tabs>
     </div>
   );
