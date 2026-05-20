@@ -352,8 +352,36 @@ const ExtractedDataVisualization: React.FC<ExtractedDataVisualizationProps> = ({
         </Collapsible>
       )}
 
-      {/* Side Effects */}
-      {side_effects && side_effects.length > 0 && (
+      {/* Side Effects — filtra itens com semântica negativa ("no adverse events", "none reported") */}
+      {(() => {
+        const NEGATIVE_PATTERNS = /\b(no|none|not|sem|nenhum|nenhuma|n[ãa]o)\b.*\b(adverse|side[- ]?effect|event|reported|observed|reported|evento|efeito|adverso|reportado|observad)/i;
+        const isNegativeStatement = (e: any) =>
+          NEGATIVE_PATTERNS.test(`${e?.name || ''} ${e?.description || ''}`);
+        const realEffects = (side_effects || []).filter((e: any) => !isNegativeStatement(e));
+        const explicitlyNone =
+          (side_effects || []).length > 0 && realEffects.length === 0;
+
+        if (explicitlyNone) {
+          return (
+            <Card className="border-emerald-500/30 bg-emerald-50/40">
+              <CardHeader className="py-3">
+                <div className="flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-emerald-600" />
+                  <CardTitle className="text-base text-emerald-800">
+                    {t('studies.extraction.noAdverseEventsReported', 'Sem eventos adversos reportados')}
+                  </CardTitle>
+                </div>
+                <p className="text-xs text-emerald-700 mt-1">
+                  {(side_effects[0]?.description) || t('studies.extraction.noAdverseEventsHint', 'O estudo declara explicitamente que nenhum evento adverso foi observado durante o protocolo.')}
+                </p>
+              </CardHeader>
+            </Card>
+          );
+        }
+
+        if (realEffects.length === 0) return null;
+
+        return (
         <Collapsible open={expandedSections.sideEffects} onOpenChange={() => toggleSection('sideEffects')}>
           <Card className="border-amber-500/30">
             <CollapsibleTrigger asChild>
@@ -362,7 +390,7 @@ const ExtractedDataVisualization: React.FC<ExtractedDataVisualizationProps> = ({
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5 text-amber-500" />
                     <CardTitle className="text-base">
-                      {t('studies.extraction.sideEffects', 'Efeitos Adversos')} ({side_effects.length})
+                      {t('studies.extraction.sideEffects', 'Efeitos Adversos')} ({realEffects.length})
                     </CardTitle>
                   </div>
                   {expandedSections.sideEffects ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
@@ -372,7 +400,7 @@ const ExtractedDataVisualization: React.FC<ExtractedDataVisualizationProps> = ({
             <CollapsibleContent>
               <CardContent className="pt-0">
                 <div className="space-y-2">
-                  {side_effects.map((effect, idx) => (
+                  {realEffects.map((effect, idx) => (
                     <div key={idx} className="p-3 bg-muted/30 rounded-lg">
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-medium text-sm">{effect.name}</span>
@@ -394,7 +422,8 @@ const ExtractedDataVisualization: React.FC<ExtractedDataVisualizationProps> = ({
             </CollapsibleContent>
           </Card>
         </Collapsible>
-      )}
+        );
+      })()}
 
       {/* Contraindications */}
       {contraindications && contraindications.length > 0 && (
@@ -415,6 +444,14 @@ const ExtractedDataVisualization: React.FC<ExtractedDataVisualizationProps> = ({
             </CollapsibleTrigger>
             <CollapsibleContent>
               <CardContent className="pt-0">
+                {/* RC-001: alerta de governança — exclusão de trial ≠ contraindicação */}
+                <div className="mb-3 p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-900 flex items-start gap-2">
+                  <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                  <span>
+                    <strong>{t('studies.extraction.rc001Title', 'RC-001 — Exclusão ≠ Contraindicação:')}</strong>{' '}
+                    {t('studies.extraction.rc001Hint', 'Critérios de exclusão de um trial indicam apenas que essa população não foi estudada (lacuna de evidência), não que o composto seja contraindicado. Avalie o texto original antes de aplicar como restrição clínica.')}
+                  </span>
+                </div>
                 <div className="space-y-2">
                   {contraindications.map((contra, idx) => (
                     <div key={idx} className="p-3 bg-muted/30 rounded-lg">
