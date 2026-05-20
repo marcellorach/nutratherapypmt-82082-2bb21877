@@ -35,7 +35,17 @@ interface ProposedRule {
   justification_quote?: string;
   suggested_application?: string;
   confidence?: number;
-  _action?: 'promote' | 'discard' | null;
+  stance?: 'confirms' | 'extends' | 'contradicts' | 'unrelated';
+  conflicts_with?: string[];
+  /**
+   * UI-only action chosen by the curator:
+   *  - 'promote'        → create a new RC (origin='deductive')
+   *  - 'attach'         → only valid when stance='confirms'; insert as core_rule_evidence on conflicts_with[0]
+   *  - 'resolve_keep'   → only valid when stance='contradicts'; keep existing RC, archive proposal as governance evidence
+   *  - 'discard'        → drop the proposal
+   *  - null             → leave as candidate inside meta_studies.proposed_rules (no action)
+   */
+  _action?: 'promote' | 'attach' | 'resolve_keep' | 'discard' | null;
 }
 interface Draft {
   title: string;
