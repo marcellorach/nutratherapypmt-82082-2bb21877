@@ -877,6 +877,155 @@ export type Database = {
         }
         Relationships: []
       }
+      core_rule_evidence: {
+        Row: {
+          created_at: string
+          id: string
+          meta_study_id: string
+          notes: string | null
+          quote: string | null
+          relation: string
+          rule_id: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          meta_study_id: string
+          notes?: string | null
+          quote?: string | null
+          relation: string
+          rule_id: string
+          weight?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          meta_study_id?: string
+          notes?: string | null
+          quote?: string | null
+          relation?: string
+          rule_id?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_rule_evidence_meta_study_id_fkey"
+            columns: ["meta_study_id"]
+            isOneToOne: false
+            referencedRelation: "meta_studies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "core_rule_evidence_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "core_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      core_rule_modulators: {
+        Row: {
+          created_at: string
+          domain: string
+          id: string
+          is_active: boolean
+          rationale: string | null
+          rule_id: string
+          source_species: string
+          target_species: string
+          updated_at: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          domain: string
+          id?: string
+          is_active?: boolean
+          rationale?: string | null
+          rule_id: string
+          source_species: string
+          target_species: string
+          updated_at?: string
+          weight: number
+        }
+        Update: {
+          created_at?: string
+          domain?: string
+          id?: string
+          is_active?: boolean
+          rationale?: string | null
+          rule_id?: string
+          source_species?: string
+          target_species?: string
+          updated_at?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "core_rule_modulators_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "core_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      core_rules: {
+        Row: {
+          application: string | null
+          application_en: string | null
+          category: string
+          created_at: string
+          doc_anchor: string | null
+          evidence_summary: string | null
+          id: string
+          justification: string
+          justification_en: string | null
+          rule_id: string
+          status: string
+          title: string
+          title_en: string | null
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          application?: string | null
+          application_en?: string | null
+          category: string
+          created_at?: string
+          doc_anchor?: string | null
+          evidence_summary?: string | null
+          id?: string
+          justification: string
+          justification_en?: string | null
+          rule_id: string
+          status?: string
+          title: string
+          title_en?: string | null
+          updated_at?: string
+          version?: string
+        }
+        Update: {
+          application?: string | null
+          application_en?: string | null
+          category?: string
+          created_at?: string
+          doc_anchor?: string | null
+          evidence_summary?: string | null
+          id?: string
+          justification?: string
+          justification_en?: string | null
+          rule_id?: string
+          status?: string
+          title?: string
+          title_en?: string | null
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
       data_management_settings: {
         Row: {
           created_at: string | null
@@ -1787,6 +1936,57 @@ export type Database = {
           entity_type?: string
           id?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      meta_studies: {
+        Row: {
+          added_by: string | null
+          authors: string | null
+          created_at: string
+          doi: string | null
+          id: string
+          journal: string | null
+          key_claims: Json
+          kind: string
+          pdf_storage_path: string | null
+          source_url: string | null
+          summary: string | null
+          title: string
+          updated_at: string
+          year: number | null
+        }
+        Insert: {
+          added_by?: string | null
+          authors?: string | null
+          created_at?: string
+          doi?: string | null
+          id?: string
+          journal?: string | null
+          key_claims?: Json
+          kind?: string
+          pdf_storage_path?: string | null
+          source_url?: string | null
+          summary?: string | null
+          title: string
+          updated_at?: string
+          year?: number | null
+        }
+        Update: {
+          added_by?: string | null
+          authors?: string | null
+          created_at?: string
+          doi?: string | null
+          id?: string
+          journal?: string | null
+          key_claims?: Json
+          kind?: string
+          pdf_storage_path?: string | null
+          source_url?: string | null
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          year?: number | null
         }
         Relationships: []
       }
