@@ -24,6 +24,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 5.1.0 -->
 
+### Added - 2026-05-20 — Timestamps de auditoria, popovers de critérios e i18n de enums LLM (Fase 1 b+c+d)
+<!-- area: admin · status: entregue · i18n: 1.88.0 -->
+- **(b) Timestamps de auditoria** em `processed_studies`: novas colunas `processed_at`, `curated_at` e `curated_by`. Trigger `set_processed_at_on_analysis` preenche `processed_at` automaticamente quando `analysis_data` é gravado pela primeira vez. Backfill aplicado a estudos já processados/aprovados. `useStudyApprovalWorkflow` agora grava `curated_at` + `curated_by = auth.uid()` no momento da aprovação.
+- **Componente `StudyTimeline`** (`src/components/administrador/estudos/StudyTimeline.tsx`) com variantes `compact` (linha do tempo inline em cada card de "Em Curadoria") e `detailed` (lista vertical no topo da aba Visão Geral do detalhe do estudo). Exibe: publicação, ingestão, processamento IA, vetorização RAG (com contagem de chunks) e curadoria final.
+- **(c) Bilinguismo dos enums vindos do LLM** — novo utilitário `src/utils/llmEnumLocalizer.ts` com `localizeEnum`, `localizeDuration` e `localizeList`. Dicionário cobre blinding (`double_blind` → "duplo-cego"), methodology (`rct` → "Ensaio clínico randomizado"), species (`Human` → "Humano", `Canine` → "Cão"), severity (`moderate` → "moderado"), e durações (`12 weeks` → "12 semanas"). Aplicado no `VisaoGeralTab` (badges metodológicas) e no `EstudoCard` (severidade de efeitos colaterais).
+- **(d) Cards de score clicáveis** — novo `ScoreCriteriaPopover` envolve cada `ScoreSummaryCard` da Visão Geral (Qualidade Metodológica, Relevância Clínica, Novidade Científica). Ao clicar, abre popover listando os critérios detectados (RCT? n≥30? randomização? placebo? p<0,05? cegamento? duração? espécies? translacional? mecanismo novo? gap-filling?) com ✓ / ✗ / "não informado", lidos diretamente de `analysis_data.study_assessment`.
+- **i18n versão 1.88.0** — novas chaves `studies.timeline.*` (7 chaves) e `studies.criteria.*` (20 chaves) em PT e EN.
+- Files: supabase migration (processed_studies columns + trigger), src/hooks/useStudyApprovalWorkflow.ts, src/utils/llmEnumLocalizer.ts, src/components/administrador/estudos/StudyTimeline.tsx, src/components/administrador/tags/ScoreCriteriaPopover.tsx, src/components/administrador/estudos/detalhes/tabs/VisaoGeralTab.tsx, src/components/administrador/estudos/cards/EstudoCard.tsx, src/locales/{pt,en}/translation.json, src/i18n.ts.
+
 ### Added - 2026-05-20 — Governança de Regras-Core (RC-001, RC-002, RC-003 planejada)
 <!-- area: meta · status: entregue · i18n: 1.87.0 -->
 - **Novo arquivo `docs/CORE_RULES.md`** como fonte canônica auditável das regras-core do Senex AI. Cada regra tem `id` (RC-NNN), categoria, versão, status, justificativa, aplicação em código e evidências sustentadoras. Substitui o status anterior em que regras-core estavam dispersas entre `.lovable/memory/`, custom-knowledge e CHANGELOG.
