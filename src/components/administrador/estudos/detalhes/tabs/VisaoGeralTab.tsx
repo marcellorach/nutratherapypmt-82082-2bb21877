@@ -3,8 +3,11 @@ import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import ScoreSummaryCard from '../../../tags/ScoreSummaryCard';
+import ScoreCriteriaPopover from '../../../tags/ScoreCriteriaPopover';
+import StudyTimeline from '../../StudyTimeline';
 import { Target, Lightbulb, AlertTriangle, FlaskConical } from "lucide-react";
 import { useTranslation } from 'react-i18next';
+import { localizeEnum, localizeDuration } from '@/utils/llmEnumLocalizer';
 
 interface VisaoGeralTabProps {
   estudo: any;
@@ -16,7 +19,8 @@ interface VisaoGeralTabProps {
 }
 
 const VisaoGeralTab: React.FC<VisaoGeralTabProps> = ({ estudo, studyScores }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = (i18n.language?.startsWith('pt') ? 'pt' : 'en') as 'pt' | 'en';
   const analysisData = estudo.analysis_data || {};
   const studySummary = analysisData.study_summary || {};
   const studyAssessment = analysisData.study_assessment || {};
@@ -24,6 +28,11 @@ const VisaoGeralTab: React.FC<VisaoGeralTabProps> = ({ estudo, studyScores }) =>
   return (
     <div className="space-y-4">
       <div className="grid gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <StudyTimeline estudo={estudo} variant="detailed" />
+          </CardContent>
+        </Card>
         <Card>
           <CardContent className="pt-6">
             <div className="space-y-4">
@@ -88,7 +97,7 @@ const VisaoGeralTab: React.FC<VisaoGeralTabProps> = ({ estudo, studyScores }) =>
               </h4>
               <div className="flex flex-wrap gap-2">
                 {studyAssessment.methodology_type && (
-                  <Badge variant="outline">{studyAssessment.methodology_type}</Badge>
+                  <Badge variant="outline">{localizeEnum(studyAssessment.methodology_type, lang)}</Badge>
                 )}
                 {studyAssessment.sample_size && (
                   <Badge variant="outline">n={studyAssessment.sample_size}</Badge>
@@ -100,16 +109,16 @@ const VisaoGeralTab: React.FC<VisaoGeralTabProps> = ({ estudo, studyScores }) =>
                   <Badge variant="secondary">{t('visaoGeralTab.placeboControlled')}</Badge>
                 )}
                 {studyAssessment.blinding && studyAssessment.blinding !== 'none' && (
-                  <Badge variant="secondary">{studyAssessment.blinding.replace('_', ' ')}</Badge>
+                  <Badge variant="secondary">{localizeEnum(studyAssessment.blinding, lang)}</Badge>
                 )}
                 {studyAssessment.statistical_significance && (
                   <Badge className="bg-green-500/10 text-green-600 border-green-500/20">p&lt;0.05</Badge>
                 )}
                 {studyAssessment.follow_up_duration && (
-                  <Badge variant="outline">{studyAssessment.follow_up_duration}</Badge>
+                  <Badge variant="outline">{localizeDuration(studyAssessment.follow_up_duration, lang)}</Badge>
                 )}
                 {studyAssessment.species_tested?.map((species: string, idx: number) => (
-                  <Badge key={idx} variant="outline" className="capitalize">{species}</Badge>
+                  <Badge key={idx} variant="outline" className="capitalize">{localizeEnum(species, lang)}</Badge>
                 ))}
               </div>
             </CardContent>
@@ -117,21 +126,27 @@ const VisaoGeralTab: React.FC<VisaoGeralTabProps> = ({ estudo, studyScores }) =>
         )}
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <ScoreSummaryCard 
-            score={studyScores.qualityScore}
-            title={t('visaoGeralTab.methodologicalQuality')}
-            description={t('visaoGeralTab.methodologicalQualityDesc')}
-          />
-          <ScoreSummaryCard 
-            score={studyScores.relevanceScore}
-            title={t('visaoGeralTab.clinicalRelevance')}
-            description={t('visaoGeralTab.clinicalRelevanceDesc')}
-          />
-          <ScoreSummaryCard 
-            score={studyScores.noveltyScore}
-            title={t('visaoGeralTab.scientificNovelty')}
-            description={t('visaoGeralTab.scientificNoveltyDesc')}
-          />
+          <ScoreCriteriaPopover kind="quality" studyAssessment={studyAssessment} score={studyScores.qualityScore}>
+            <ScoreSummaryCard
+              score={studyScores.qualityScore}
+              title={t('visaoGeralTab.methodologicalQuality')}
+              description={t('visaoGeralTab.methodologicalQualityDesc')}
+            />
+          </ScoreCriteriaPopover>
+          <ScoreCriteriaPopover kind="relevance" studyAssessment={studyAssessment} score={studyScores.relevanceScore}>
+            <ScoreSummaryCard
+              score={studyScores.relevanceScore}
+              title={t('visaoGeralTab.clinicalRelevance')}
+              description={t('visaoGeralTab.clinicalRelevanceDesc')}
+            />
+          </ScoreCriteriaPopover>
+          <ScoreCriteriaPopover kind="novelty" studyAssessment={studyAssessment} score={studyScores.noveltyScore}>
+            <ScoreSummaryCard
+              score={studyScores.noveltyScore}
+              title={t('visaoGeralTab.scientificNovelty')}
+              description={t('visaoGeralTab.scientificNoveltyDesc')}
+            />
+          </ScoreCriteriaPopover>
         </div>
       </div>
     </div>

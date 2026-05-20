@@ -11,6 +11,8 @@ import { useTranslation } from 'react-i18next';
 import { useGeminiProcessing } from '@/hooks/useGeminiProcessing';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import StudyTimeline from '../StudyTimeline';
+import { localizeEnum } from '@/utils/llmEnumLocalizer';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -362,6 +364,11 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
             )}
           </div>
         )}
+
+        {/* Linha do tempo do estudo (ingestão → IA → vetorização → curadoria) */}
+        <div className="mt-3">
+          <StudyTimeline estudo={localEstudo} variant="compact" embeddingsCount={embeddingsCount} />
+        </div>
         
         {/* Progress Bar durante processamento */}
         {isProcessing && (
@@ -505,7 +512,7 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
                       variant="outline" 
                       className="bg-amber-50 text-amber-700 border-amber-200 text-xs"
                     >
-                      ⚠️ {effect.name} ({effect.severity})
+                      ⚠️ {effect.name} ({localizeEnum(effect.severity)})
                     </Badge>
                   ))}
                   {sideEffects.length > 2 && (
