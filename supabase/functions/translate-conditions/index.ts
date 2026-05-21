@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.23.0';
+import { callAITask } from "../_shared/ai-task-router.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,11 +14,6 @@ serve(async (req) => {
   }
 
   try {
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!openAIApiKey) {
-      throw new Error('OPENAI_API_KEY not configured');
-    }
-
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -66,35 +62,21 @@ Portuguese data:
 Example response format:
 {"name_en":"Kidney Disease","description_en":"Chronic kidney disease description","category_en":"Renal"}`;
 
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${openAIApiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'gpt-4o-mini',
-            messages: [
-              { 
-                role: 'system', 
-                content: 'You are a professional translator specializing in veterinary terminology. Always respond with valid JSON only, no markdown or code blocks.'
-              },
-              { role: 'user', content: prompt }
-            ],
+        let translationText = '';
+        try {
+          const result = await callAITask('translation_generic', {
+            caller: 'translate-conditions',
+            messages: [{ role: 'user', content: prompt }],
+            override_system_prompt: 'You are a professional translator specializing in veterinary terminology. Always respond with valid JSON only, no markdown or code blocks.',
             temperature: 0.3,
-            max_tokens: 500
-          }),
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`OpenAI API error for ${condition.name}:`, response.status, errorText);
+            fallback: { model_id: 'google/gemini-2.5-flash' },
+          });
+          translationText = (result.output || '').trim();
+        } catch (err) {
+          console.error(`Router error for ${condition.name}:`, err);
           errors++;
           continue;
         }
-
-        const data = await response.json();
-        const translationText = data.choices[0].message.content.trim();
         
         // Remove markdown code blocks se existirem
         const cleanedText = translationText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
