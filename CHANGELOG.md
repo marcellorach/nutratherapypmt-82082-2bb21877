@@ -22,7 +22,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ---
 
 ## [Unreleased]
-<!-- senex: 5.1.0 -->
+<!-- senex: 6.0.0 -->
+
+### Added - 2026-05-21 — Senex 6.0: Healthcheck de tarefas IA (Fase 4) + skin anatômica em camadas (primeira leva)
+<!-- area: admin · status: parcial · i18n: 1.97.0 -->
+
+- **Edge function `ai-task-healthcheck`** (cron-ready, `verify_jwt=false` + `x-cron-secret` opcional): para cada tarefa com prompt ativo, pinga o modelo configurado no Lovable AI Gateway com prompt mínimo, mede latência e grava em `ai_task_status` (já existente). Suporta override por `task_ids[]` no body.
+- **Painel de Governança IA** ganha banner "X de Y tarefas conectadas saudáveis · N falhando", botão **Rodar healthcheck** manual, badge vermelho **Falhando** (com erro no tooltip) e badge verde de latência em cada task card. Hooks `useAITaskStatus` + `useRunHealthcheck`.
+- **Skin anatômica em camadas (Gêmeo Digital)** — primeira leva: silhueta canina lateral (`dog_silhouette.png`) e sistema cardio-respiratório (`dog_heart_lungs.png`) gerados com Imagen premium em estilo de ilustração científica clean (1536×1024 PNG transparente), salvos em `src/assets/anatomy/`. Próximas camadas (fígado/GI, rins/urinário, articulações, cérebro/espinha, pâncreas, pele/pelo) e o componente `DogAnatomyLayered` que faz cross-fade conforme doença ativa ficam para a próxima volta.
+- **Bump versão pública** Senex AI → **6.0.0** (mudança estrutural: eixo de Fundamentos Arquiteturais + eixo de Governança IA por Tarefa consolidados).
+- **Diferido para a próxima volta** (escopo do plano 6.0 ainda em aberto): migração das 13 edge functions legacy para `callAITask()` (trabalho mecânico, fallback preservado garante zero regressão); 7 camadas anatômicas restantes; componente `DogAnatomyLayered`; documentação dos arquivos `ARCHITECTURE.md` / `docs/CURRENT_STATE.md` / `docs/STANFORD_DEMO.md` (revisão completa após fechar migrações).
+- Files: supabase/functions/ai-task-healthcheck/index.ts, supabase/config.toml, src/components/administrador/configuracoes/TaskModelGovernancePanel.tsx, src/hooks/useAITaskStatus.ts, src/assets/anatomy/dog_silhouette.png, src/assets/anatomy/dog_heart_lungs.png, .lovable/plan.md
 
 ### Added - 2026-05-21 — Governança de IA: editor de prompts por modelo, troca de modelo e testes lado a lado (Fase 2)
 <!-- area: admin · status: entregue · i18n: 1.95.0 -->
