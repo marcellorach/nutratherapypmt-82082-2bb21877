@@ -83,6 +83,170 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_model_radar: {
+        Row: {
+          capabilities: Json
+          context_window: number | null
+          created_at: string
+          discovered_at: string
+          dismissed_reason: string | null
+          display_name: string | null
+          id: string
+          model_id: string
+          pricing: Json
+          provider: string
+          recommendation_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          suggested_for_tasks: string[]
+          updated_at: string
+        }
+        Insert: {
+          capabilities?: Json
+          context_window?: number | null
+          created_at?: string
+          discovered_at?: string
+          dismissed_reason?: string | null
+          display_name?: string | null
+          id?: string
+          model_id: string
+          pricing?: Json
+          provider: string
+          recommendation_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          suggested_for_tasks?: string[]
+          updated_at?: string
+        }
+        Update: {
+          capabilities?: Json
+          context_window?: number | null
+          created_at?: string
+          discovered_at?: string
+          dismissed_reason?: string | null
+          display_name?: string | null
+          id?: string
+          model_id?: string
+          pricing?: Json
+          provider?: string
+          recommendation_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          suggested_for_tasks?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ai_prompt_test_runs: {
+        Row: {
+          cost_estimate: number | null
+          created_at: string
+          error: string | null
+          id: string
+          input_text: string | null
+          latency_ms: number | null
+          model_id: string
+          output_text: string | null
+          prompt_version_id: string | null
+          run_by: string | null
+          task_id: string
+          tokens_in: number | null
+          tokens_out: number | null
+        }
+        Insert: {
+          cost_estimate?: number | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          input_text?: string | null
+          latency_ms?: number | null
+          model_id: string
+          output_text?: string | null
+          prompt_version_id?: string | null
+          run_by?: string | null
+          task_id: string
+          tokens_in?: number | null
+          tokens_out?: number | null
+        }
+        Update: {
+          cost_estimate?: number | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          input_text?: string | null
+          latency_ms?: number | null
+          model_id?: string
+          output_text?: string | null
+          prompt_version_id?: string | null
+          run_by?: string | null
+          task_id?: string
+          tokens_in?: number | null
+          tokens_out?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_prompt_test_runs_prompt_version_id_fkey"
+            columns: ["prompt_version_id"]
+            isOneToOne: false
+            referencedRelation: "ai_prompt_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_prompt_versions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          highlighted_segments: Json
+          id: string
+          is_active: boolean
+          model_id: string | null
+          optimization_notes: string | null
+          optimized_for_model: boolean
+          source: string
+          system_prompt: string | null
+          task_id: string
+          updated_at: string
+          user_prompt: string | null
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          highlighted_segments?: Json
+          id?: string
+          is_active?: boolean
+          model_id?: string | null
+          optimization_notes?: string | null
+          optimized_for_model?: boolean
+          source?: string
+          system_prompt?: string | null
+          task_id: string
+          updated_at?: string
+          user_prompt?: string | null
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          highlighted_segments?: Json
+          id?: string
+          is_active?: boolean
+          model_id?: string | null
+          optimization_notes?: string | null
+          optimized_for_model?: boolean
+          source?: string
+          system_prompt?: string | null
+          task_id?: string
+          updated_at?: string
+          user_prompt?: string | null
+          version?: number
+        }
+        Relationships: []
+      }
       ai_system_prompts: {
         Row: {
           created_at: string
