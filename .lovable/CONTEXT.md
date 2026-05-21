@@ -1,13 +1,13 @@
 # Project context briefing (auto)
-Generated: 2026-05-21T16:37:18.762Z
+Generated: 2026-05-21T22:36:36.201Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.94.0
+## Latest i18n version: 1.97.0
 
 ## Changes by area (last 14 days)
-- **admin**: 31
-- **vet-ui**: 15
+- **admin**: 33
+- **vet-ui**: 16
 - **tutor-ui**: 9
 - **meta**: 4
 - **curation**: 4
@@ -15,6 +15,25 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **i18n**: 1
 
 ## Top 10 recent entries
+### 2026-05-21 · [vet-ui] ADDED — Senex 6.0: skin anatômica em camadas completa + componente DogAnatomyLayered
+- 4 novas camadas anatômicas geradas com Imagen premium em estilo ilustração científica clean (1024×768, PNG): `dog_digestive.png` (digestivo - estômago, intestinos, fígado), `dog_urinary.png` (rins + ureteres + bexiga), `dog_skeleton.png` (esqueleto completo lateral) e `dog_nervous.png` (cérebro + medula + nervos periféricos).
+- Componente `DogAnatomyLayered` (`src/components/pet/DogAnatomyLayered.tsx`): viewer empilhado que faz cross-fade entre camadas via CSS opacity (500ms transition) sobre a silhueta base. API: `activeLayers={['cardio', 'urinary']}`, `layerOpacity`, `showLegend`. Sem dependências 3D — substituível por `react-three-fiber` na fase 6.1 sem mudar a API consumidora.
+- Stack agora cobre os 6 sistemas mais usados no Gêmeo Digital (silhueta, cardio, digestivo, urinário, esquelético, nervoso). Próximos sistemas (endócrino/pâncreas, pele/pelo, linfático) ficam para 6.1 junto com o modo 3D opcional via Sketchfab CC-BY.
+_files: src/components/pet/DogAnatomyLayered.tsx_
+
+### 2026-05-21 · [admin] ADDED — Senex 6.0: Healthcheck de tarefas IA (Fase 4) + skin anatômica em camadas (primeira leva)
+_status: parcial_
+- Edge function `ai-task-healthcheck` (cron-ready, `verify_jwt=false` + `x-cron-secret` opcional): para cada tarefa com prompt ativo, pinga o modelo configurado no Lovable AI Gateway com prompt mínimo, mede latência e grava em `ai_task_status` (já existente). Suporta override por `task_ids[]` no body.
+- Painel de Governança IA ganha banner "X de Y tarefas conectadas saudáveis · N falhando", botão Rodar healthcheck manual, badge vermelho Falhando (com erro no tooltip) e badge verde de latência em cada task card. Hooks `useAITaskStatus` + `useRunHealthcheck`.
+- Skin anatômica em camadas (Gêmeo Digital) — primeira leva: silhueta canina lateral (`dog_silhouette.png`) e sistema cardio-respiratório (`dog_heart_lungs.png`) gerados com Imagen premium em estilo de ilustração científica clean (1536×1024 PNG transparente), salvos em `src/assets/anatomy/`. Próximas camadas (fígado/GI, rins/urinário, articulações, cérebro/espinha, pâncreas, pele/pelo) e o componente `DogAnatomyLayered` que faz cross-fade conforme doença ativa ficam para a próxima volta.
+_files: supabase/functions/ai-task-healthcheck/index.ts, src/components/administrador/configuracoes/TaskModelGovernancePanel.tsx, src/hooks/useAITaskStatus.ts, .lovable/plan.md_
+
+### 2026-05-21 · [admin] ADDED — Governança de IA: editor de prompts por modelo, troca de modelo e testes lado a lado (Fase 2)
+- Edge function `ai-task-test` (admin-only, `verify_jwt=true`): executa um prompt × modelo contra o Lovable AI Gateway, mede latência, tokens e custo estimado e grava em `ai_prompt_test_runs`. Suporta substituição de `{{input}}` no user prompt e passagem de `reasoning_effort` / `temperature`.
+- RPC `activate_ai_prompt_version` + trigger `trg_apv_single_active`: garantem que apenas uma versão fique ativa por `(task_id, model_id)`. Ativação atômica restrita a admins (SECURITY DEFINER + `is_admin()`).
+- Componente `TaskDetailSheet`: sheet lateral com 4 abas (Prompt, Modelo, Testar, Histórico). Editor com highlighting heurístico de segmentos model-specific (`<thinking>`, `reasoning_effort`, `context_caching`, delimitadores `===`, templates `{{var}}`). Botões "Salvar nova versão" e "Ativar" usam a RPC. Aba Testar roda Modelo A vs B em paralelo e exibe latência/tokens/custo. Histórico mostra as últimas 20 execuções da tarefa.
+_files: supabase/functions/ai-task-test/index.ts, src/components/administrador/configuracoes/TaskDetailSheet.tsx, src/components/administrador/configuracoes/TaskModelGovernancePanel.tsx, src/hooks/useAIPromptVersions.ts…_
+
 ### 2026-05-21 · [admin] ADDED — Governança de IA: registro central de Modelos & Prompts por Tarefa (Fase 1)
 - Schema `ai_prompt_versions` + `ai_prompt_test_runs` + `ai_model_radar`: novas tabelas (RLS admin-only) para versionar prompts por `(task_id, model_id)`, registrar execuções de teste lado a lado e acumular sugestões automáticas de novos modelos. Trigger `validate_ai_model_radar_status` impede status inválido. Trigger `update_updated_at_column` mantém `updated_at` sincronizado.
 - Seed inicial: 8 prompts do sistema (`extraction_stage1/2/3`, `triplet_extraction`, `relations_auditor`, `geroprotector_stack`, `lab_driven_adjustment`, `treatment_proposal_12m`) registrados como v1 ativos, criando baseline histórica.
@@ -56,24 +75,6 @@ _files: src/components/administrador/sidebar/groups/GovernanceAIGroup.tsx, src/c
 - UI `IngestaoMetaEstudo.tsx`: dropzone drag&drop com PDF/.md/.txt/.docx obrigatório (até 20MB); campo "Notas do curador" (até 4000 chars, markdown) substitui o textarea genérico de texto; DOI/URL movido para `<details>` colapsado; painel "Log de digestão" sempre visível com 5 estágios (upload + os 4 do edge), ícones de status, duração e detalhe — espelha o padrão do pipeline clínico.
 - Schema: nova coluna `meta_studies.curator_notes TEXT` persiste as diretrizes do curador junto com o estudo aprovado.
 _files: supabase/functions/extract-meta-study/index.ts, src/components/administrador/fundamentos/IngestaoMetaEstudo.tsx, src/i18n.ts_
-
-### 2026-05-20 · [admin] ADDED — Ingestão curada de meta-estudos arquiteturais (Fase 3.3)
-- Edge function `extract-meta-study`: recebe texto colado e/ou PDF do bucket `meta_studies_pdfs`, busca o catálogo atual de Regras-Core no DB e usa Gemini 2.5 Pro (tool-calling estruturado) para emitir um rascunho com `title/authors/year/kind/summary/key_claims[]` + `suggested_links[]` para RCs existentes (relations: `supports|contradicts|modulates_weight|inspires`). Não grava nada — apenas devolve o draft.
-- Componente `IngestaoMetaEstudo`: nova sub-aba "Ingestão" em Fundamentos. Permite colar texto/`.md` (mín. 50 chars) e/ou anexar PDF; faz upload em `meta_studies_pdfs`, chama a edge function, renderiza rascunho totalmente editável (todos os campos + checkbox por vínculo sugerido) e, ao aprovar, insere em `meta_studies` + `core_rule_evidence` (resolvendo `rule_id` texto → uuid). Recarrega a lista de fundamentos depois de salvar.
-- Política: estudos arquiteturais NÃO entram no KG clínico; ficam isolados no Meta-KG. Banner em destaque reforça que a aprovação é manual.
-_files: supabase/functions/extract-meta-study/index.ts, src/components/administrador/fundamentos/IngestaoMetaEstudo.tsx, src/pages/administrador/FundamentosTab.tsx, src/i18n.ts_
-
-### 2026-05-20 · [admin] ADDED — Score explainability, harvest de RCs e Justificativas por regra (Fase 3.1+3.2+3.4)
-- (7) Score explainability: `ScoreCriteriaPopover` agora mostra coluna de peso relativo (%) por critério, penalidades parciais (ex.: "n<100 → potência limitada", "<6 meses → desfechos crônicos não capturados", "evidência humana → cão modulada por RC-003") e bloco "Por que este score?" com rationale heurística (ou LLM se `study_assessment.score_rationale` estiver presente). Resposta explícita a "por que 4.0/5 com todos os checks ✓".
-- (1) Harvest de Regras-Core: 15 RCs já vigentes promovidas para `core_rules` (RC-004 a RC-018) — Canonical IDs, Bilinguismo, No-Mock, Curation Gatekeeper, Taxonomia SNOMED+UMLS, Cap Terapêutico=8, Escopo Metabólico/Degenerativo, Soft Delete, Vetorização pré-curadoria, Tiered Confidence, Predicate Normalization, Chunking, Sigmoid Engine, Condition Canonicalization, Demo Data. Todas com justificativa bilíngue PT/EN e referência ao código.
-- Schema: nova coluna `core_rules.runtime_effect` (`active` | `doc_only` | `planned`) tornando explícito quais RCs alteram pipeline em runtime vs. quais são governança auditável apenas. Renderizada como badge azul/cinza/âmbar em cada card.
-_files: src/components/administrador/tags/ScoreCriteriaPopover.tsx, src/pages/administrador/FundamentosTab.tsx, src/i18n.ts_
-
-### 2026-05-20 · [admin] ADDED — Timestamps de auditoria, popovers de critérios e i18n de enums LLM (Fase 1 b+c+d)
-- (b) Timestamps de auditoria em `processed_studies`: novas colunas `processed_at`, `curated_at` e `curated_by`. Trigger `set_processed_at_on_analysis` preenche `processed_at` automaticamente quando `analysis_data` é gravado pela primeira vez. Backfill aplicado a estudos já processados/aprovados. `useStudyApprovalWorkflow` agora grava `curated_at` + `curated_by = auth.uid()` no momento da aprovação.
-- Componente `StudyTimeline` (`src/components/administrador/estudos/StudyTimeline.tsx`) com variantes `compact` (linha do tempo inline em cada card de "Em Curadoria") e `detailed` (lista vertical no topo da aba Visão Geral do detalhe do estudo). Exibe: publicação, ingestão, processamento IA, vetorização RAG (com contagem de chunks) e curadoria final.
-- (c) Bilinguismo dos enums vindos do LLM — novo utilitário `src/utils/llmEnumLocalizer.ts` com `localizeEnum`, `localizeDuration` e `localizeList`. Dicionário cobre blinding (`double_blind` → "duplo-cego"), methodology (`rct` → "Ensaio clínico randomizado"), species (`Human` → "Humano", `Canine` → "Cão"), severity (`moderate` → "moderado"), e durações (`12 weeks` → "12 semanas"). Aplicado no `VisaoGeralTab` (badges metodológicas) e no `EstudoCard` (severidade de efeitos colaterais).
-_files: src/components/administrador/estudos/StudyTimeline.tsx, src/utils/llmEnumLocalizer.ts, src/hooks/useStudyApprovalWorkflow.ts, src/components/administrador/tags/ScoreCriteriaPopover.tsx…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
