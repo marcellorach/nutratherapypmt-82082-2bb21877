@@ -24,8 +24,9 @@
 4. [Design & UI](#-design--ui)
 5. [Visualizações](#-visualizações)
 6. [Segurança](#-segurança)
-7. [O Que NUNCA Fazer](#-o-que-nunca-fazer)
-8. [Histórico de Decisões](#-histórico-de-decisões)
+7. [AI Task Router (`callAITask`)](#-ai-task-router-callaitask)
+8. [O Que NUNCA Fazer](#-o-que-nunca-fazer)
+9. [Histórico de Decisões](#-histórico-de-decisões)
 
 ---
 
