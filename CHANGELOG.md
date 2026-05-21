@@ -24,6 +24,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 5.1.0 -->
 
+### Added - 2026-05-21 — Governança de IA: registro central de Modelos & Prompts por Tarefa (Fase 1)
+<!-- area: admin · status: entregue · i18n: 1.94.0 -->
+
+- **Schema `ai_prompt_versions` + `ai_prompt_test_runs` + `ai_model_radar`**: novas tabelas (RLS admin-only) para versionar prompts por `(task_id, model_id)`, registrar execuções de teste lado a lado e acumular sugestões automáticas de novos modelos. Trigger `validate_ai_model_radar_status` impede status inválido. Trigger `update_updated_at_column` mantém `updated_at` sincronizado.
+- **Seed inicial**: 8 prompts do sistema (`extraction_stage1/2/3`, `triplet_extraction`, `relations_auditor`, `geroprotector_stack`, `lab_driven_adjustment`, `treatment_proposal_12m`) registrados como v1 ativos, criando baseline histórica.
+- **Task Registry (`src/config/ai-tasks.ts`)**: mapeia 11 famílias de tarefa para o modelo recomendado no AI Gateway, modelos candidatos, parâmetros de routing (`reasoning_effort`, `temperature`, `context_caching`) e justificativa bilíngue PT/EN. Decisões registradas: meta-análise / auditoria de Core Rules → `openai/gpt-5.4` com `reasoning=high`; extração massiva de PDF → `google/gemini-3-pro-preview` com context caching; chat clínico factual → `google/gemini-2.5-pro` com caching; chat clínico crítico → `openai/gpt-5.4` reasoning=high.
+- **Painel "Modelos & Prompts por Tarefa"** (read-only) em `/administrador?tab=ai-config`, posicionado acima do `AIModelSelector` legado: KPIs (tarefas registradas, prompts semeados, roteadas para GPT-5.4, com reasoning=high), filtro por categoria (extração, meta-análise, inferência clínica, chat, auditoria) e accordion expansível com modelo recomendado, badges de routing, modelos candidatos, consumidores (edge functions) e justificativa.
+- **Hooks `useAIPromptVersions` / `useActiveAIPrompt`**: leitura via React Query da nova tabela, com staleTime de 30s.
+- Files: supabase/migrations/20260521160844_233e5785-acfa-4994-8725-7a45895634c0.sql, src/config/ai-tasks.ts, src/hooks/useAIPromptVersions.ts, src/components/administrador/configuracoes/TaskModelGovernancePanel.tsx, src/components/administrador/ConfiguracoesIATab.tsx, src/i18n.ts
+
 ### Added - 2026-05-20 — Fundamentos: histórico por Core Rule + audit log de governança
 <!-- area: admin · status: entregue · i18n: 1.93.0 -->
 
