@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { callAITask } from "../_shared/ai-task-router.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -25,6 +26,28 @@ serve(async (req) => {
     }
 
     console.log('Calling Lovable AI Gateway with', messages.length, 'messages, stream:', shouldStream);
+
+    // Quando o caller pede streaming preservamos o caminho legado (router não streamea),
+    // pois o front consome via EventSource. Para non-stream usamos o router → governança ativa.
+    if (!shouldStream) {
+      try {
+        // Separa eventuais system messages para passar ao router.
+        const systemMsgs = messages.filter((m: any) => m.role === 'system').map((m: any) => m.content).join('\n\n');
+        const turnMsgs = messages.filter((m: any) => m.role !== 'system');
+        const result = await callAITask('clinical_chat_factual', {
+          caller: 'chat',
+          messages: turnMsgs,
+          override_system_prompt: systemMsgs || undefined,
+          fallback: { model_id: 'google/gemini-2.5-flash' },
+        });
+        return new Response(JSON.stringify({ response: result.output }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } catch (routerErr) {
+        console.error('Router path failed, falling back to direct gateway:', routerErr);
+        // cai no fluxo direto abaixo
+      }
+    }
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
