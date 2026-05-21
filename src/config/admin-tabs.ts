@@ -44,6 +44,7 @@ const CustoBeneficioTab = lazy(() => import('@/components/administrador/CustoBen
 const PredictiveAnalysisSettingsTab = lazy(() => import('@/components/administrador/settings/PredictiveAnalysisSettingsTab'));
 const ConfiguracoesIATab = lazy(() => import('@/components/administrador/ConfiguracoesIATab'));
 const PromptConfigurationTab = lazy(() => import('@/components/administrador/PromptConfigurationTab'));
+const AIGovernanceTutorialTab = lazy(() => import('@/components/administrador/configuracoes/AIGovernanceTutorialTab'));
 const AnalyticsTab = lazy(() => import('@/components/administrador/AnalyticsTab'));
 const DesignConventionsTab = lazy(() => import('@/components/administrador/DesignConventionsTab'));
 const DatabaseMigrationsTab = lazy(() => import('@/components/administrador/migrations/DatabaseMigrationsTab'));
