@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-21T22:44:11.428Z
+// Última geração: 2026-05-21T22:54:43.008Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,23 @@ export const lastChangelogDate = "2026-05-21";
 export const senexVersion = "6.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-21",
+    "kind": "changed",
+    "area": "kg",
+    "status": "parcial",
+    "title": "Migração Curadoria/KG (lote 2/3): extract-meta-study no router",
+    "bullets": [
+      "`extract-meta-study` (caminho gateway) migrada para `callAITask('meta_study_analysis', ...)`, preservando `tools=[TOOL_V2]` + `tool_choice` forçado e fallback explícito (`google/gemini-3-pro-preview`, reasoning=high, temp=0.2). Caminho Google AI File API (PDFs > 7MB) mantido fora do router por usar `generativelanguage.googleapis.com` diretamente — fora do escopo do gateway.",
+      "Erros do gateway são re-mapeados (`429`/`402`/`413`/`404`/`502`) com a mesma UX anterior (mensagens e `options[]` no payload de falha).",
+      "Smoke test: `ai-task-healthcheck {meta_study_analysis}` → 200 OK em 907ms.",
+      "Files: supabase/functions/extract-meta-study/index.ts"
+    ],
+    "files": [
+      "supabase/functions/extract-meta-study/index.ts"
+    ],
+    "i18nVersion": "1.97.0"
+  },
   {
     "date": "2026-05-21",
     "kind": "changed",
