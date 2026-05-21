@@ -1,5 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { callAITask } from "../_shared/ai-task-router.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -84,25 +85,15 @@ async function getJournalTier(supabase: any, journal: string | null): Promise<nu
 }
 
 async function callGemini(prompt: string): Promise<any> {
-  const res = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'google/gemini-2.5-flash-lite',
-      messages: [
-        { role: 'system', content: 'You extract objective study metadata. Only tag what is explicitly stated in title/abstract/journal. Never invent.' },
-        { role: 'user', content: prompt },
-      ],
-      tools: [{ type: 'function', function: TAG_SCHEMA }],
-      tool_choice: { type: 'function', function: { name: 'extract_study_tags' } },
-    }),
+  const result = await callAITask('study_tagging', {
+    caller: 'auto-tag-studies',
+    messages: [{ role: 'user', content: prompt }],
+    override_system_prompt: 'You extract objective study metadata. Only tag what is explicitly stated in title/abstract/journal. Never invent.',
+    tools: [{ type: 'function', function: TAG_SCHEMA }],
+    tool_choice: { type: 'function', function: { name: 'extract_study_tags' } },
+    fallback: { model_id: 'google/gemini-2.5-flash-lite' },
   });
-  if (!res.ok) throw new Error(`AI gateway ${res.status}: ${await res.text()}`);
-  const json = await res.json();
-  const args = json?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+  const args = result.tool_calls?.[0]?.function?.arguments;
   if (!args) throw new Error('No tool call returned');
   return JSON.parse(args);
 }

@@ -148,7 +148,7 @@ export const AI_TASKS: AITaskDefinition[] = [
     consumers: ["enrich-triplet", "backfill-triplet-enrichment"],
     rationale_pt: "Gemini 2.5 Pro é custo-eficiente para enriquecer triplets em lote.",
     rationale_en: "Gemini 2.5 Pro is cost-efficient for batch triplet enrichment.",
-    status: "legacy",
+    status: "connected",
   },
 
   // ============== META-ANÁLISE & AUDITORIA ==============
@@ -198,7 +198,7 @@ export const AI_TASKS: AITaskDefinition[] = [
     consumers: ["auto-tag-studies"],
     rationale_pt: "Flash é rápido e barato para classificação multilabel sobre texto curto.",
     rationale_en: "Flash is fast and cheap for multilabel classification on short text.",
-    status: "legacy",
+    status: "connected",
   },
 
   // ============== INFERÊNCIA CLÍNICA ==============
@@ -361,10 +361,10 @@ export const AI_TASKS: AITaskDefinition[] = [
     candidate_models: ["google/gemini-2.5-flash", "openai/gpt-5.4-mini"],
     routing: { temperature: 0.1 },
     prompt_key: "translation_generic",
-    consumers: ["translate-text"],
+    consumers: ["translate-text", "translate-conditions"],
     rationale_pt: "Flash é barato e adequado para tradução de strings de UI.",
     rationale_en: "Flash is cheap and adequate for UI string translation.",
-    status: "legacy",
+    status: "connected",
   },
   {
     id: "translation_conditions",
