@@ -1,9 +1,9 @@
 {
-  "timestamp": "2026-05-21T15:54:56.739Z",
+  "timestamp": "2026-05-21T18:20:35.262Z",
   "summary": {
-    "totalFiles": 886,
-    "totalIssues": 434,
-    "hardcodedTexts": 49,
+    "totalFiles": 890,
+    "totalIssues": 436,
+    "hardcodedTexts": 51,
     "missingKeys": 383,
     "incompleteTranslations": 2
   },
@@ -2496,21 +2496,21 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 489,
+      "line": 513,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 700,
+      "line": 724,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 3495,
+      "line": 3519,
       "text": "@",
       "severity": "high"
     },
@@ -2848,6 +2848,20 @@
       "file": "src/components/administrador/base-knowledge/ExternalSearchPanel.tsx",
       "line": 102,
       "text": "PubChem",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/configuracoes/TaskDetailSheet.tsx",
+      "line": 42,
+      "text": "Sem prompt definido.",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/configuracoes/TaskDetailSheet.tsx",
+      "line": 245,
+      "text": "System prompt",
       "severity": "medium"
     },
     {
