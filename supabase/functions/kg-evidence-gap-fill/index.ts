@@ -14,6 +14,7 @@
 //   { pairs_searched, studies_added, triplets_pending, details: [...] }
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { callAITask } from '../_shared/ai-task-router.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
