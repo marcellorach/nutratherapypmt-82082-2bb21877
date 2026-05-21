@@ -24,6 +24,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 6.0.0 -->
 
+### Changed - 2026-05-21 — Docs: contrato `callAITask` em TECHNICAL_DECISIONS + GRAPHRAG
+<!-- area: meta · status: entregue · i18n: 1.97.0 -->
+
+- `docs/TECHNICAL_DECISIONS.md` v1.1.0: nova seção **AI Task Router (`callAITask`)** com contrato de chamada (taskId, caller, messages/input, tools+tool_choice, fallback, reasoning_effort, temperature), ordem de resolução (override em `ai_configurations` → prompt ativo em `ai_prompt_versions` → fallback do caller → default), telemetria automática (`ai_task_invocations` + `ai_task_status`), tratamento de 429/402/413/404/502 e regras de quando NÃO usar o router (Google AI File API direto: `gemini-file-search` e PDF > 7 MB do `extract-meta-study`). Entrada no Histórico de Decisões.
+- `docs/GRAPHRAG_ARCHITECTURE.md` v2.1.0: bloco de governança LLM no topo de Edge Functions com tabela das 4 funções Curadoria/KG roteadas via `callAITask` e a função fora de escopo.
+- Files: docs/TECHNICAL_DECISIONS.md, docs/GRAPHRAG_ARCHITECTURE.md
+
 ### Changed - 2026-05-21 — Consolidação Curadoria/KG no `ai-task-router` (relatório)
 <!-- area: meta · status: entregue · i18n: 1.97.0 -->
 
