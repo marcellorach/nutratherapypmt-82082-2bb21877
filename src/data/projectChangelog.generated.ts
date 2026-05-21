@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-21T16:37:18.757Z
+// Última geração: 2026-05-21T22:36:36.197Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -21,9 +21,70 @@ export interface ChangelogEntry {
 
 export const lastChangelogDate = "2026-05-21";
 
-export const senexVersion = "5.1.0";
+export const senexVersion = "6.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-21",
+    "kind": "added",
+    "area": "vet-ui",
+    "status": "entregue",
+    "title": "Senex 6.0: skin anatômica em camadas completa + componente DogAnatomyLayered",
+    "bullets": [
+      "4 novas camadas anatômicas geradas com Imagen premium em estilo ilustração científica clean (1024×768, PNG): `dog_digestive.png` (digestivo - estômago, intestinos, fígado), `dog_urinary.png` (rins + ureteres + bexiga), `dog_skeleton.png` (esqueleto completo lateral) e `dog_nervous.png` (cérebro + medula + nervos periféricos).",
+      "Componente `DogAnatomyLayered` (`src/components/pet/DogAnatomyLayered.tsx`): viewer empilhado que faz cross-fade entre camadas via CSS opacity (500ms transition) sobre a silhueta base. API: `activeLayers={['cardio', 'urinary']}`, `layerOpacity`, `showLegend`. Sem dependências 3D — substituível por `react-three-fiber` na fase 6.1 sem mudar a API consumidora.",
+      "Stack agora cobre os 6 sistemas mais usados no Gêmeo Digital (silhueta, cardio, digestivo, urinário, esquelético, nervoso). Próximos sistemas (endócrino/pâncreas, pele/pelo, linfático) ficam para 6.1 junto com o modo 3D opcional via Sketchfab CC-BY.",
+      "Files: src/components/pet/DogAnatomyLayered.tsx, src/assets/anatomy/dog_digestive.png, src/assets/anatomy/dog_urinary.png, src/assets/anatomy/dog_skeleton.png, src/assets/anatomy/dog_nervous.png"
+    ],
+    "files": [
+      "src/components/pet/DogAnatomyLayered.tsx"
+    ],
+    "i18nVersion": "1.97.0"
+  },
+  {
+    "date": "2026-05-21",
+    "kind": "added",
+    "area": "admin",
+    "status": "parcial",
+    "title": "Senex 6.0: Healthcheck de tarefas IA (Fase 4) + skin anatômica em camadas (primeira leva)",
+    "bullets": [
+      "Edge function `ai-task-healthcheck` (cron-ready, `verify_jwt=false` + `x-cron-secret` opcional): para cada tarefa com prompt ativo, pinga o modelo configurado no Lovable AI Gateway com prompt mínimo, mede latência e grava em `ai_task_status` (já existente). Suporta override por `task_ids[]` no body.",
+      "Painel de Governança IA ganha banner \"X de Y tarefas conectadas saudáveis · N falhando\", botão Rodar healthcheck manual, badge vermelho Falhando (com erro no tooltip) e badge verde de latência em cada task card. Hooks `useAITaskStatus` + `useRunHealthcheck`.",
+      "Skin anatômica em camadas (Gêmeo Digital) — primeira leva: silhueta canina lateral (`dog_silhouette.png`) e sistema cardio-respiratório (`dog_heart_lungs.png`) gerados com Imagen premium em estilo de ilustração científica clean (1536×1024 PNG transparente), salvos em `src/assets/anatomy/`. Próximas camadas (fígado/GI, rins/urinário, articulações, cérebro/espinha, pâncreas, pele/pelo) e o componente `DogAnatomyLayered` que faz cross-fade conforme doença ativa ficam para a próxima volta.",
+      "Bump versão pública Senex AI → 6.0.0 (mudança estrutural: eixo de Fundamentos Arquiteturais + eixo de Governança IA por Tarefa consolidados).",
+      "Diferido para a próxima volta (escopo do plano 6.0 ainda em aberto): migração das 13 edge functions legacy para `callAITask()` (trabalho mecânico, fallback preservado garante zero regressão); 7 camadas anatômicas restantes; componente `DogAnatomyLayered`; documentação dos arquivos `ARCHITECTURE.md` / `docs/CURRENT_STATE.md` / `docs/STANFORD_DEMO.md` (revisão completa após fechar migrações).",
+      "Files: supabase/functions/ai-task-healthcheck/index.ts, supabase/config.toml, src/components/administrador/configuracoes/TaskModelGovernancePanel.tsx, src/hooks/useAITaskStatus.ts, src/assets/anatomy/dog_silhouette.png, src/assets/anatomy/dog_heart_lungs.png, .lovable/plan.md"
+    ],
+    "files": [
+      "supabase/functions/ai-task-healthcheck/index.ts",
+      "src/components/administrador/configuracoes/TaskModelGovernancePanel.tsx",
+      "src/hooks/useAITaskStatus.ts",
+      ".lovable/plan.md"
+    ],
+    "i18nVersion": "1.97.0"
+  },
+  {
+    "date": "2026-05-21",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Governança de IA: editor de prompts por modelo, troca de modelo e testes lado a lado (Fase 2)",
+    "bullets": [
+      "Edge function `ai-task-test` (admin-only, `verify_jwt=true`): executa um prompt × modelo contra o Lovable AI Gateway, mede latência, tokens e custo estimado e grava em `ai_prompt_test_runs`. Suporta substituição de `{{input}}` no user prompt e passagem de `reasoning_effort` / `temperature`.",
+      "RPC `activate_ai_prompt_version` + trigger `trg_apv_single_active`: garantem que apenas uma versão fique ativa por `(task_id, model_id)`. Ativação atômica restrita a admins (SECURITY DEFINER + `is_admin()`).",
+      "Componente `TaskDetailSheet`: sheet lateral com 4 abas (Prompt, Modelo, Testar, Histórico). Editor com highlighting heurístico de segmentos model-specific (`<thinking>`, `reasoning_effort`, `context_caching`, delimitadores `===`, templates `{{var}}`). Botões \"Salvar nova versão\" e \"Ativar\" usam a RPC. Aba Testar roda Modelo A vs B em paralelo e exibe latência/tokens/custo. Histórico mostra as últimas 20 execuções da tarefa.",
+      "Hooks novos: `useCreatePromptVersion`, `useActivatePromptVersion`, `useTaskTestRun`, `useTaskTestHistory` (React Query, invalidação automática).",
+      "Files: supabase/functions/ai-task-test/index.ts, supabase/config.toml, src/components/administrador/configuracoes/TaskDetailSheet.tsx, src/components/administrador/configuracoes/TaskModelGovernancePanel.tsx, src/hooks/useAIPromptVersions.ts, src/i18n.ts"
+    ],
+    "files": [
+      "supabase/functions/ai-task-test/index.ts",
+      "src/components/administrador/configuracoes/TaskDetailSheet.tsx",
+      "src/components/administrador/configuracoes/TaskModelGovernancePanel.tsx",
+      "src/hooks/useAIPromptVersions.ts",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.95.0"
+  },
   {
     "date": "2026-05-21",
     "kind": "added",

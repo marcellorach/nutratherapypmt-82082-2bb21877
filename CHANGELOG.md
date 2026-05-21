@@ -24,6 +24,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 6.0.0 -->
 
+### Added - 2026-05-21 — Senex 6.0: skin anatômica em camadas completa + componente DogAnatomyLayered
+<!-- area: vet-ui · status: entregue · i18n: 1.97.0 -->
+
+- **4 novas camadas anatômicas** geradas com Imagen premium em estilo ilustração científica clean (1024×768, PNG): `dog_digestive.png` (digestivo - estômago, intestinos, fígado), `dog_urinary.png` (rins + ureteres + bexiga), `dog_skeleton.png` (esqueleto completo lateral) e `dog_nervous.png` (cérebro + medula + nervos periféricos).
+- **Componente `DogAnatomyLayered`** (`src/components/pet/DogAnatomyLayered.tsx`): viewer empilhado que faz cross-fade entre camadas via CSS opacity (500ms transition) sobre a silhueta base. API: `activeLayers={['cardio', 'urinary']}`, `layerOpacity`, `showLegend`. Sem dependências 3D — substituível por `react-three-fiber` na fase 6.1 sem mudar a API consumidora.
+- Stack agora cobre os 6 sistemas mais usados no Gêmeo Digital (silhueta, cardio, digestivo, urinário, esquelético, nervoso). Próximos sistemas (endócrino/pâncreas, pele/pelo, linfático) ficam para 6.1 junto com o modo 3D opcional via Sketchfab CC-BY.
+- Files: src/components/pet/DogAnatomyLayered.tsx, src/assets/anatomy/dog_digestive.png, src/assets/anatomy/dog_urinary.png, src/assets/anatomy/dog_skeleton.png, src/assets/anatomy/dog_nervous.png
+
 ### Added - 2026-05-21 — Senex 6.0: Healthcheck de tarefas IA (Fase 4) + skin anatômica em camadas (primeira leva)
 <!-- area: admin · status: parcial · i18n: 1.97.0 -->
 
