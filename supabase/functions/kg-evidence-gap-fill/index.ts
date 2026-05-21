@@ -14,6 +14,7 @@
 //   { pairs_searched, studies_added, triplets_pending, details: [...] }
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { callAITask } from '../_shared/ai-task-router.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -198,7 +199,8 @@ async function assessWithGemini(
           'cited_pmids must be a subset of the PMIDs above. llm_confidence in [0,1].',
       },
     ],
-    tools: [{
+  };
+  const tools = [{
       type: 'function',
       function: {
         name: 'assess_evidence',
@@ -219,25 +221,21 @@ async function assessWithGemini(
           additionalProperties: false,
         },
       },
-    }],
-    tool_choice: { type: 'function', function: { name: 'assess_evidence' } },
-  };
+  }];
 
-  const res = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    console.error('Gemini error', res.status, await res.text());
-    return null;
-  }
-  const json = await res.json();
-  const call = json?.choices?.[0]?.message?.tool_calls?.[0];
-  if (!call) return null;
   try {
+    const result = await callAITask('kg_gap_fill', {
+      caller: 'kg-evidence-gap-fill',
+      messages: body.messages as Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
+      tools,
+      tool_choice: { type: 'function', function: { name: 'assess_evidence' } },
+      fallback: { model_id: body.model },
+    });
+    const call = result.tool_calls?.[0];
+    if (!call) return null;
     return JSON.parse(call.function.arguments) as GeminiAssessment;
-  } catch {
+  } catch (err) {
+    console.error('Gemini error via router', err);
     return null;
   }
 }

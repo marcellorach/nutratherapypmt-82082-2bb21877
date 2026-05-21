@@ -24,6 +24,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 6.0.0 -->
 
+### Changed - 2026-05-21 — Migração Curadoria/KG (lote 1/3): kg-evidence-gap-fill plugada no router
+<!-- area: kg · status: parcial · i18n: 1.97.0 -->
+
+- **`kg-evidence-gap-fill`** migrada para `callAITask('kg_gap_fill', ...)` preservando tool calling (`assess_evidence`) e fallback explícito para `google/gemini-3-flash-preview`. Troca de modelo no painel Governança IA agora afeta esta tarefa em runtime, e cada invocação é registrada em `ai_task_invocations` + `ai_task_status` com latência, tokens e custo estimado.
+- **Smoke test em produção**: deploy + healthcheck POST `{task_ids:["kg_gap_fill"]}` → 200 OK em 870 ms.
+- **Status atualizado** em `src/config/ai-tasks.ts`: `kg_gap_fill` agora `connected`. Real: **9 connected · 11 legacy · 3 planned**.
+- **Análise** do lote Curadoria/KG restante: `consolidate-knowledge-graph` (380 linhas) não faz nenhuma chamada LLM — apenas metadata/Neo4j, fica fora do escopo do router. `extract-meta-study` (720 linhas) tem dupla via (Google AI File API direto para PDFs grandes + Lovable Gateway para pequenos) com tratamento de erro muito específico (413/429/402, friendly messages, abort signals) — migração precisa de turno dedicado para preservar essa semântica. `extract-study-entities` (1201), `generate-triplets` (1362) e `gemini-file-search` (2602) idem — cada um é trabalho de meio turno isolado.
+- Files: supabase/functions/kg-evidence-gap-fill/index.ts, src/config/ai-tasks.ts
+
 ### Fixed - 2026-05-21 — Healthcheck IA validado em produção + reconciliação de status
 <!-- area: admin · status: entregue · i18n: 1.97.0 -->
 
