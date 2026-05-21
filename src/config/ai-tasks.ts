@@ -312,7 +312,7 @@ export const AI_TASKS: AITaskDefinition[] = [
     consumers: ["kg-evidence-gap-fill"],
     rationale_pt: "Gemini Pro é eficiente para estruturação de literatura científica em massa.",
     rationale_en: "Gemini Pro is efficient for bulk structuring of scientific literature.",
-    status: "legacy",
+    status: "connected",
   },
 
   // ============== CHAT CLÍNICO ==============
