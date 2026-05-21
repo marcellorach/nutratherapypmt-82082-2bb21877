@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-05-21T23:19:19.175Z
+Generated: 2026-05-21T23:24:12.836Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
@@ -9,13 +9,20 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **admin**: 34
 - **vet-ui**: 16
 - **tutor-ui**: 9
+- **kg**: 4
 - **meta**: 4
 - **curation**: 4
 - **clinical-pipeline**: 4
-- **kg**: 3
 - **i18n**: 1
 
 ## Top 10 recent entries
+### 2026-05-21 · [kg] CHANGED — Migração Curadoria/KG: generate-triplets no router
+_status: parcial_
+- `generate-triplets` (Phase 1 discovery por chunk + Phase 2 structuring com tool calling) migrada para `callAITask('triplet_extraction', ...)`. Phase 2 preserva `tools=[extractTripletsToolDef]` + `tool_choice` forçado; resposta reconstruída no shape `phase2Data.choices[0].message.{content, tool_calls}` para manter o parser downstream intacto. Tratamento de 429/402 reintroduzido a partir das mensagens de erro do router.
+- Status reconciliado em `src/config/ai-tasks.ts`: `triplet_extraction` passa de `legacy` para `connected` (13 connected · 7 legacy · 3 planned).
+- Smoke test: `ai-task-healthcheck {triplet_extraction}` → 200 OK (827 ms).
+_files: src/config/ai-tasks.ts, supabase/functions/generate-triplets/index.ts_
+
 ### 2026-05-21 · [kg] CHANGED — Migração Curadoria/KG (lote 3/3): extract-study-entities no router
 _status: parcial_
 - `extract-study-entities` (Stage 1 + Stage 2 + Stage 3 + extração de título) migrada para `callAITask` via `ai-task-router`. Helper `callLovableAI` agora recebe `taskId` e roteia respectivamente para `extraction_stage1`, `extraction_stage2`, `extraction_stage3` (título reusa `extraction_stage1`). Preserva `tools` + `tool_choice` forçado e fallback (`google/gemini-3-pro-preview`, temp=0.1).
@@ -73,12 +80,6 @@ _files: src/config/ai-tasks.ts, supabase/migrations/20260521160844_233e5785-acfa
 - Aba "Histórico & Auditoria" em Fundamentos Arquiteturais: lista todas as RCs com busca (RC-ID/título/categoria) e filtros por stance (`confirms`/`extends`/`contradicts`/`unrelated`) e por ação. Cada RC expansível mostra evidências vinculadas + log de auditoria com proposta, stance, ator, timestamp e justificativa. Bloco extra para entradas órfãs (rule_code referenciado que não existe mais).
 - Approve handler instrumentado: `IngestaoMetaEstudo.approve()` agora grava em lote no audit log (1 entrada por stance detectada + 1 por ação tomada + 1 evento `approve_meta_study` agregado) usando `curatorNotes` como justificativa padrão.
 _files: src/components/administrador/fundamentos/CoreRuleHistory.tsx, src/components/administrador/fundamentos/IngestaoMetaEstudo.tsx, src/pages/administrador/FundamentosTab.tsx_
-
-### 2026-05-20 · [admin] ADDED — Meta-estudo: detecção de conflito com RCs ativas (governança)
-- Stance classification em `proposed_rules`: cada candidata agora é classificada pelo LLM como `confirms`, `extends`, `contradicts` ou `unrelated` em relação ao catálogo de Regras-Core ativas, com `conflicts_with[]` listando os `rule_id`s referenciados. Validação server-side rebaixa para `extends` se a stance reivindica conflito mas não cita rule_id válido.
-- 3 lanes na UI de Ingestão: 🔴 Conflitos (vermelho, promoção bloqueada — só permite "Manter RC atual" como evidência de governança ou "Descartar") · 🟢 Confirmações (verde, vira `core_rule_evidence` com `relation='supports'` em vez de duplicar a RC) · 🔵 Extensões/Novas (purple, fluxo atual de promoção para nova RC).
-- Salvaguarda: o handler `approve` agora bloqueia explicitamente qualquer tentativa de promover proposta com `stance='contradicts'` para nova RC, exigindo resolução humana via "Manter RC atual" ou edição manual.
-_files: supabase/functions/extract-meta-study/index.ts, src/components/administrador/fundamentos/IngestaoMetaEstudo.tsx_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

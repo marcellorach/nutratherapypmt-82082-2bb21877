@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-21T23:19:19.171Z
+// Última geração: 2026-05-21T23:24:12.832Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,24 @@ export const lastChangelogDate = "2026-05-21";
 export const senexVersion = "6.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-21",
+    "kind": "changed",
+    "area": "kg",
+    "status": "parcial",
+    "title": "Migração Curadoria/KG: generate-triplets no router",
+    "bullets": [
+      "`generate-triplets` (Phase 1 discovery por chunk + Phase 2 structuring com tool calling) migrada para `callAITask('triplet_extraction', ...)`. Phase 2 preserva `tools=[extractTripletsToolDef]` + `tool_choice` forçado; resposta reconstruída no shape `phase2Data.choices[0].message.{content, tool_calls}` para manter o parser downstream intacto. Tratamento de 429/402 reintroduzido a partir das mensagens de erro do router.",
+      "Status reconciliado em `src/config/ai-tasks.ts`: `triplet_extraction` passa de `legacy` para `connected` (13 connected · 7 legacy · 3 planned).",
+      "Smoke test: `ai-task-healthcheck {triplet_extraction}` → 200 OK (827 ms).",
+      "Files: supabase/functions/generate-triplets/index.ts, src/config/ai-tasks.ts"
+    ],
+    "files": [
+      "src/config/ai-tasks.ts",
+      "supabase/functions/generate-triplets/index.ts"
+    ],
+    "i18nVersion": "1.97.0"
+  },
   {
     "date": "2026-05-21",
     "kind": "changed",
