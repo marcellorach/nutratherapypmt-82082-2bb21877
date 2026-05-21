@@ -16,6 +16,7 @@ import Neo4jStatusCard from './configuracoes/Neo4jStatusCard';
 import AIModelSelector from './configuracoes/AIModelSelector';
 import PerplexityStatusCard from './configuracoes/PerplexityStatusCard';
 import ProviderHealthButton from './configuracoes/ProviderHealthButton';
+import TaskModelGovernancePanel from './configuracoes/TaskModelGovernancePanel';
 
 const ConfiguracoesIATab: React.FC = () => {
   const [openaiKey, setOpenaiKey] = useState<string>("");
@@ -369,6 +370,9 @@ const ConfiguracoesIATab: React.FC = () => {
       <ConfiguracoesAvisosIA />
       
       <div className="grid grid-cols-1 gap-6">
+        {/* Phase 1 — Modelos & Prompts por Tarefa (read-only) */}
+        <TaskModelGovernancePanel />
+
         {/* AI Model Selector - NEW */}
         <AIModelSelector />
 
