@@ -24,6 +24,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 6.0.0 -->
 
+### Changed - 2026-05-21 — Migração Curadoria/KG: fechamento (gemini-file-search fica fora do router)
+<!-- area: kg · status: entregue · i18n: 1.97.0 -->
+
+- **`gemini-file-search`** auditada: todas as chamadas LLM usam a **Google AI Direct API** (`generativelanguage.googleapis.com`) com `fileData.fileUri` referenciando arquivos da File API + corpora/file_search nativos. O Lovable Gateway não aceita esses URIs nem expõe File Search nativo, então a função permanece **fora do escopo do router** por design — análogo ao caminho Google AI File API do `extract-meta-study`. Sem mudanças de código.
+- Healthcheck pós-migração (Curadoria/KG): `ai-task-healthcheck` retornou **8/8 OK** — `extraction_stage1` (815ms), `extraction_stage2` (851ms), `extraction_stage3` (851ms), `triplet_extraction` (820ms), `relations_auditor` (2470ms), `geroprotector_stack` (812ms), `lab_driven_adjustment` (784ms), `treatment_proposal_12m` (864ms).
+- Vitest: 94/94 passando (1 suite com falha pré-existente de `localStorage` em Node, alheia ao router).
+- Files: CHANGELOG.md
+
 ### Changed - 2026-05-21 — Migração Curadoria/KG: generate-triplets no router
 <!-- area: kg · status: parcial · i18n: 1.97.0 -->
 
