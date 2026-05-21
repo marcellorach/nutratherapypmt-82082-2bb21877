@@ -358,7 +358,7 @@ export const AI_TASKS: AITaskDefinition[] = [
     description_en: "PT↔EN translation of short strings and paragraphs without specific clinical terminology.",
     category: "translation",
     recommended_model: "google/gemini-2.5-flash",
-    candidate_models: ["google/gemini-2.5-flash", "openai/gpt-5.4-nano"],
+    candidate_models: ["google/gemini-2.5-flash", "openai/gpt-5.4-mini"],
     routing: { temperature: 0.1 },
     prompt_key: "translation_generic",
     consumers: ["translate-text"],
