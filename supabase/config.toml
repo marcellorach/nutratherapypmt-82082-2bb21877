@@ -3,6 +3,9 @@ project_id = "kytkpkimzwazhpnxahxt"
 [functions.admin-create-user]
 verify_jwt = false
 
+[functions.ai-task-test]
+verify_jwt = true
+
 [functions.chat]
 verify_jwt = false
 
