@@ -24,6 +24,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 5.1.0 -->
 
+### Added - 2026-05-21 — Governança de IA: editor de prompts por modelo, troca de modelo e testes lado a lado (Fase 2)
+<!-- area: admin · status: entregue · i18n: 1.95.0 -->
+
+- **Edge function `ai-task-test`** (admin-only, `verify_jwt=true`): executa um prompt × modelo contra o Lovable AI Gateway, mede latência, tokens e custo estimado e grava em `ai_prompt_test_runs`. Suporta substituição de `{{input}}` no user prompt e passagem de `reasoning_effort` / `temperature`.
+- **RPC `activate_ai_prompt_version` + trigger `trg_apv_single_active`**: garantem que apenas uma versão fique ativa por `(task_id, model_id)`. Ativação atômica restrita a admins (SECURITY DEFINER + `is_admin()`).
+- **Componente `TaskDetailSheet`**: sheet lateral com 4 abas (Prompt, Modelo, Testar, Histórico). Editor com **highlighting heurístico** de segmentos model-specific (`<thinking>`, `reasoning_effort`, `context_caching`, delimitadores `===`, templates `{{var}}`). Botões "Salvar nova versão" e "Ativar" usam a RPC. Aba Testar roda Modelo A vs B em paralelo e exibe latência/tokens/custo. Histórico mostra as últimas 20 execuções da tarefa.
+- **Hooks novos**: `useCreatePromptVersion`, `useActivatePromptVersion`, `useTaskTestRun`, `useTaskTestHistory` (React Query, invalidação automática).
+- Files: supabase/functions/ai-task-test/index.ts, supabase/config.toml, src/components/administrador/configuracoes/TaskDetailSheet.tsx, src/components/administrador/configuracoes/TaskModelGovernancePanel.tsx, src/hooks/useAIPromptVersions.ts, src/i18n.ts
+
 ### Added - 2026-05-21 — Governança de IA: registro central de Modelos & Prompts por Tarefa (Fase 1)
 <!-- area: admin · status: entregue · i18n: 1.94.0 -->
 

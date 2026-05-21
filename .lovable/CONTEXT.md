@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-05-21T16:18:38.106Z
+Generated: 2026-05-21T16:37:18.762Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 

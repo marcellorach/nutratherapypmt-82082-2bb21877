@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Sparkles, Brain, Database, FlaskConical, Stethoscope, GitCompare, ShieldCheck } from "lucide-react";
+import { Sparkles, Brain, Database, FlaskConical, Stethoscope, GitCompare, ShieldCheck, Settings2 } from "lucide-react";
 import { AI_TASKS, type AITaskDefinition, type AITaskCategory } from "@/config/ai-tasks";
 import { useAIPromptVersions } from "@/hooks/useAIPromptVersions";
+import TaskDetailSheet from "./TaskDetailSheet";
 
 const CATEGORY_META: Record<AITaskCategory, { icon: React.ComponentType<{ className?: string }>; tone: string }> = {
   extraction: { icon: Database, tone: "bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300" },
@@ -25,7 +26,7 @@ function modelBadgeColor(model: string): string {
   return "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-900/40 dark:text-slate-300 dark:border-slate-800";
 }
 
-const TaskRow: React.FC<{ task: AITaskDefinition; hasActivePrompt: boolean; lang: string }> = ({ task, hasActivePrompt, lang }) => {
+const TaskRow: React.FC<{ task: AITaskDefinition; hasActivePrompt: boolean; lang: string; onOpen: (t: AITaskDefinition) => void }> = ({ task, hasActivePrompt, lang, onOpen }) => {
   const meta = CATEGORY_META[task.category];
   const Icon = meta.icon;
   const label = lang.startsWith("en") ? task.label_en : task.label_pt;
@@ -107,6 +108,13 @@ const TaskRow: React.FC<{ task: AITaskDefinition; hasActivePrompt: boolean; lang
           <code className="font-mono">task_id={task.id}</code> · <code className="font-mono">prompt_key={task.prompt_key}</code>
           {task.routing.temperature !== undefined && <> · temperature={task.routing.temperature}</>}
         </div>
+
+        <div className="pt-2">
+          <Button size="sm" variant="default" onClick={() => onOpen(task)}>
+            <Settings2 className="h-3 w-3 mr-1" />
+            {lang.startsWith("en") ? "Open editor & tests" : "Abrir editor & testes"}
+          </Button>
+        </div>
       </AccordionContent>
     </AccordionItem>
   );
@@ -116,6 +124,7 @@ const TaskModelGovernancePanel: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { data: prompts, isLoading, error } = useAIPromptVersions();
   const [filter, setFilter] = useState<AITaskCategory | "all">("all");
+  const [openTask, setOpenTask] = useState<AITaskDefinition | null>(null);
 
   const activeByTask = useMemo(() => {
     const m = new Map<string, boolean>();
@@ -218,6 +227,7 @@ const TaskModelGovernancePanel: React.FC = () => {
                   task={task}
                   hasActivePrompt={!!activeByTask.get(task.id)}
                   lang={i18n.language || "pt"}
+                  onOpen={setOpenTask}
                 />
               ))}
             </Accordion>
@@ -226,9 +236,11 @@ const TaskModelGovernancePanel: React.FC = () => {
 
         <p className="text-[11px] text-muted-foreground border-t pt-2">
           {isEn
-            ? "Phase 1 (read-only foundation). Phase 2 will add per-model prompt editing, side-by-side testing, and an automated model radar."
-            : "Fase 1 (fundação somente leitura). A Fase 2 adicionará edição de prompts por modelo, testes lado a lado e radar automatizado de modelos."}
+            ? "Phase 2: per-model prompt editing, model switcher and side-by-side testing. Phase 3 will add the automated model radar."
+            : "Fase 2: edição de prompts por modelo, troca de modelo e testes lado a lado. Fase 3 adicionará o radar automatizado de modelos."}
         </p>
+
+        <TaskDetailSheet task={openTask} onClose={() => setOpenTask(null)} />
       </CardContent>
     </Card>
   );

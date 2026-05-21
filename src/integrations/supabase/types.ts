@@ -4872,6 +4872,31 @@ export type Database = {
       }
     }
     Functions: {
+      activate_ai_prompt_version: {
+        Args: { p_version_id: string }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          highlighted_segments: Json
+          id: string
+          is_active: boolean
+          model_id: string | null
+          optimization_notes: string | null
+          optimized_for_model: boolean
+          source: string
+          system_prompt: string | null
+          task_id: string
+          updated_at: string
+          user_prompt: string | null
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ai_prompt_versions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       approve_access_request: {
         Args: { request_id: string }
         Returns: undefined
