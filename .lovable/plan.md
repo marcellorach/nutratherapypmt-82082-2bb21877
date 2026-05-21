@@ -1,89 +1,145 @@
-## Problema
+# Plano: Governança de Modelos AI por Tarefa
 
-A digestão atual reduz papers arquiteturais densos (ex.: MedGraphRAG) a ~4 "claims" planos e só sabe **vincular** a RCs que já existem. Lições novas (chunking, vocabulários controlados, U-Retrieval, anti-padrões) se perdem. Além disso, todas as RCs atuais nasceram de incidentes no chat (indução) — não há canal formal para regras **deduzidas de literatura**, que é justamente a razão de existir do meta-KG.
+Construir um centro de comando único onde cada tarefa de IA do sistema declara explicitamente: (1) qual modelo está rodando, (2) quais modelos são alternativas válidas com seus trade-offs, (3) qual prompt está ativo (otimizado para o modelo escolhido), (4) variantes de prompt versionadas com testes inline, e (5) sugestões automáticas de modelos novos/atualizados.
 
-## Princípio
+## Escopo
 
-Toda regra-core deve declarar sua **origem epistêmica**:
-- `inductive` — emergiu de incidente concreto / discussão usuário↔IA (ex.: RC-001, RC-002).
-- `deductive` — destilada de paper arquitetural/metodológico no meta-KG.
-- `hybrid` — incidente confirmado depois por literatura (ou vice-versa).
+Substituir o atual `AIModelSelector` (lista plana de 4 tarefas) por uma arquitetura **Tarefa → Modelo → Prompt** com versionamento, testes A/B e radar de novos modelos. Tudo dentro de `Administrador > Configurações`.
 
-Isso torna auditável "por que acreditamos nisso" e habilita workflows distintos de validação.
+## O que muda para o usuário
 
-## Mudanças propostas
+Uma nova aba **"Modelos & Prompts por Tarefa"** com:
 
-### 1. Schema rico de extração (`extract-meta-study`)
+- **Catálogo de tarefas** agrupado por família (Extração de Estudos, Meta-análise, Chat Clínico, Tradução, Embeddings, Auditoria de Relações, Gap-fill, Sync Neo4j).
+- Para cada tarefa: card mostrando **modelo atual**, **prompt ativo destacado** (highlighting das instruções otimizadas para aquele modelo), botão **"Testar"** com input livre, e histórico de versões de prompt.
+- **Seletor de modelo** por tarefa com 3-5 opções curadas, cada uma com chips de característica (latência, custo relativo, raciocínio, contexto, multimodal).
+- **Radar de novos modelos**: painel semanal que compara catálogo atual com o que está disponível no Lovable AI Gateway + provedores diretos, e sugere upgrades com justificativa.
+- **Origem do modelo** visível: badge "via Lovable AI" ou "API direta (OpenAI/Google)" — preparando o terreno para futura migração.
 
-Substituir `key_claims` plano por **seções tipadas**, cada uma com mínimo recomendado de itens (instrução no prompt, não constraint rígido):
+## Arquitetura técnica
+
+### 1. Registro declarativo de tarefas (`src/config/ai-tasks.ts`)
+
+Fonte única da verdade. Cada tarefa declara:
 
 ```text
-emit_meta_study_draft {
-  title, authors, year, journal, doi, kind, summary,
-
-  architectural_patterns[]     // padrões reutilizáveis (Triple Graph, U-Retrieval...)
-  methodological_recipes[]     // como fazer X (chunking 512 tokens, ...)
-  vocabularies_standards[]     // UMLS, SNOMED, MeSH adotados
-  quantitative_parameters[]    // chunk_size=512, top_k=10, weight=0.7
-  anti_patterns_pitfalls[]     // o que NÃO fazer + por quê
-  evaluation_metrics[]         // como medir sucesso (precision@k, ...)
-  open_questions[]             // lacunas reconhecidas pelos autores
-
-  // cada item = { statement, quote (literal ≤300 chars), weight 0–1, applies_to }
-
-  suggested_links[]            // (como hoje) vínculos a RCs existentes
-  proposed_rules[]             // NOVO: candidatos a RC deduzidos do paper
+{
+  id: 'meta_study_analysis',
+  family: 'meta_analysis',
+  label: { pt: 'Meta-análise cross-estudos', en: '...' },
+  edgeFunctions: ['extract-meta-study'],
+  candidateModels: [
+    { id: 'openai/gpt-5.4', via: 'lovable_ai', reasoning: 'high',
+      strengths: ['contradiction_detection','symbolic_reasoning'],
+      tradeoffs: ['cost_high'], recommended: true },
+    { id: 'google/gemini-2.5-pro', via: 'lovable_ai',
+      strengths: ['long_context_2M','multimodal_pdf'] },
+  ],
+  defaultModel: 'openai/gpt-5.4',
+  promptKeys: ['prompt_meta_study_system','prompt_meta_study_user'],
 }
 ```
 
-`proposed_rules[]` por item: `{ proposed_title, category, enunciado, justification_quote, suggested_application, confidence }` — status sempre `proposed`, **nunca grava direto em `core_rules`**.
+Famílias previstas (consolidando o que já existe): `extraction_stage1/2/3`, `triplet_extraction`, `meta_study_analysis`, `clinical_chat_factual`, `clinical_chat_critical`, `relations_auditor`, `translation`, `embeddings`, `kg_gap_fill`, `geroprotector_stack`, `treatment_proposal_12m`, `lab_driven_adjustment`.
 
-O prompt do sistema passa a exigir explicitamente: "extraia entre 8–20 lições no total entre as categorias acima; se uma lição não cabe em RC existente, emita em `proposed_rules`".
+### 2. Novas tabelas
 
-### 2. Coluna `origin` em `core_rules`
+```text
+ai_prompt_versions
+  id, task_id, model_id, version, content (jsonb: {system,user}),
+  optimized_for_model bool, optimization_notes text,
+  highlighted_segments jsonb (trechos marcados como model-specific),
+  is_active bool, created_by, created_at
 
-Migração:
-```sql
-alter table core_rules
-  add column origin text not null default 'inductive'
-    check (origin in ('inductive','deductive','hybrid')),
-  add column proposed_from_meta_study uuid references meta_studies(id),
-  add column promoted_at timestamptz,
-  add column promoted_by uuid;
+ai_prompt_test_runs
+  id, task_id, prompt_version_id, model_id, input, output,
+  latency_ms, tokens_in, tokens_out, cost_estimate, run_by, created_at
+
+ai_model_radar
+  id, provider, model_id, discovered_at, capabilities jsonb,
+  context_window, pricing jsonb, suggested_for_tasks text[],
+  status ('new'|'review'|'adopted'|'dismissed'),
+  recommendation_note, dismissed_reason
 ```
 
-Backfill: RC-001, RC-002 → `inductive`; RC-003 (planejada) → `deductive` quando promovida do paper de anti-aging.
+Modelos atuais por tarefa continuam em `ai_configurations` (`ai_model_<task>`), alimentados pelo registro declarativo.
 
-### 3. UI de revisão na Fundamentos > Ingestão
+### 3. Otimização de prompts por modelo
 
-Tabs no rascunho devolvido:
-- **Lições estruturadas** (7 categorias acima, com contadores)
-- **Vínculos a RCs existentes** (como hoje)
-- **🆕 Novas RCs propostas** — cada uma com botões `Promover para RC-NNN` / `Mesclar com RC existente` / `Descartar`. Promover gera nova linha em `core_rules` com `origin='deductive'` e `proposed_from_meta_study` apontando para o meta-study.
+Para cada `(task, model)` é possível guardar uma variante distinta. O editor destaca em cor diferente os blocos marcados como "model-specific" (ex.: tags de thinking para GPT-5.4, instruções de reasoning effort, formatação de tools para Gemini). Quando o admin troca o modelo, o sistema:
 
-### 4. `docs/CORE_RULES.md` — seção nova
+1. Procura prompt ativo para `(task, novo_model)`.
+2. Se não existir, propõe migrar o prompt atual e marca segmentos potencialmente sub-ótimos com aviso.
+3. Admin pode aceitar, editar manualmente ou gerar variante via IA (`gpt-5.4` reescrevendo o prompt otimizado para o modelo alvo).
 
-Adicionar bloco no topo "**Origem das regras**" explicando indutivo/dedutivo/híbrido + convenção: toda RC deve declarar origem no header. Adicionar campo `Origem:` ao template.
+### 4. Caixa de testes inline
 
-### 5. Pasta de "regras candidatas" (deduzidas, ainda não promovidas)
+Cada card de tarefa tem aba "Testar": input → executa `prompt_atual + modelo_atual` vs `prompt_anterior + modelo_atual` lado a lado, mostra latência, tokens, custo estimado e diff de saída. Resultados gravados em `ai_prompt_test_runs`.
 
-`docs/CORE_RULES_PROPOSED.md` — espelha automaticamente as `proposed_rules` ainda não revisadas, para visibilidade humana fora da UI. Sincronizado por extensão do `scripts/sync-core-rules.mjs` (Fase 2 já planejada).
+### 5. Radar de novos modelos
 
-## Não inclui (fora de escopo deste plano)
+Edge function `ai-model-radar` (cron semanal):
 
-- Re-extrair retroativamente meta-estudos já ingeridos (faremos botão "re-digerir com schema v2" depois).
-- Mudar pipeline de **estudos clínicos** (`extract-study-entities`) — este plano só toca o pipeline **arquitetural** (`extract-meta-study`).
-- Auto-promoção de regras deduzidas — toda promoção continua humana (consistente com a regra de Curadoria Gatekeeper).
+- Consulta catálogo do Lovable AI Gateway (lista versionada + `provider-health`).
+- Quando aparece modelo novo, usa `gpt-5.4` reasoning=high para classificar capacidades e sugerir em quais tarefas ele superaria o modelo atual.
+- Grava em `ai_model_radar` com status `new`. UI mostra badge no menu Administrador.
+- Admin revisa, marca `adopted` (cria entrada em `candidateModels` da tarefa) ou `dismissed` com justificativa.
 
-## Detalhes técnicos
+### 6. Roteamento em runtime
 
-**Arquivos a tocar:**
-- `supabase/functions/extract-meta-study/index.ts` — novo `TOOL.parameters`, novo `systemPrompt`, novo `trace` por categoria.
-- `supabase/migrations/<timestamp>_core_rules_origin.sql` — migração acima.
-- `src/components/administrador/fundamentos/IngestaoMetaEstudo.tsx` — renderizar 7 categorias + aba "Novas RCs propostas" com ações.
-- `docs/CORE_RULES.md` — seção "Origem das regras" + template atualizado.
-- `docs/CORE_RULES_PROPOSED.md` — arquivo novo (placeholder).
-- `CHANGELOG.md` + `npm run sync:changelog`.
+Novo helper `getModelForTask(taskId)` em `supabase/functions/_shared/ai-task-router.ts`:
 
-**Validação após implementação:**
-Re-ingerir o paper MedGraphRAG; esperar ≥10 lições distribuídas entre `architectural_patterns`, `methodological_recipes`, `vocabularies_standards`, `quantitative_parameters`, e ≥2 entradas em `proposed_rules` (ex.: "Chunking obrigatório acima de N tokens", "Vocabulário controlado UMLS-equivalente para entidades clínicas").
+- Lê override de `ai_configurations` → fallback no `defaultModel` do registro.
+- Retorna `{ model, via, reasoning?, promptSystem, promptUser, headers }`.
+- Edge functions (`extract-meta-study`, `chat`, `relations-auditor`, etc.) passam a usar esse helper — mudança backward-compatible.
+
+### 7. Preparação para APIs diretas
+
+Cada candidato tem `via: 'lovable_ai' | 'openai_direct' | 'google_direct' | 'anthropic_direct'`. Hoje só `lovable_ai` está habilitado. Quando o admin alternar, o roteador escolhe a chave correta (`OPENAI_API_KEY`, `GOOGLE_AI_API_KEY` já existem). Sem mudar essa fase agora — só deixar a porta aberta.
+
+## Fases de entrega
+
+**Fase 1 — Fundação (sem quebrar nada existente)**
+- `src/config/ai-tasks.ts` declarativo cobrindo as ~12 famílias.
+- Migration: tabelas `ai_prompt_versions`, `ai_prompt_test_runs`, `ai_model_radar` + RLS admin-only.
+- Seed: importar prompts atuais de `ai_configurations` como `version 1, is_active=true`.
+- Nova aba "Modelos & Prompts por Tarefa" mostrando o que existe hoje, agrupado por família, com modelo ativo e prompt destacado.
+
+**Fase 2 — Edição e testes**
+- Editor de prompt com highlighting de segmentos model-specific.
+- Seletor de modelo por tarefa com cards comparativos.
+- Caixa de testes inline com diff lado a lado.
+- Migrar `extract-meta-study`, `chat`, `relations-auditor`, `extract-study-entities` para o roteador.
+
+**Fase 3 — Radar automático**
+- Edge function `ai-model-radar` + cron semanal.
+- UI de revisão com aceitar/dispensar.
+- Notificação no menu Admin quando houver novidades.
+
+## Detalhes técnicos relevantes
+
+- **Modelos recomendados iniciais por família** (alinhado com a análise prévia):
+  - `meta_study_analysis` → `openai/gpt-5.4` reasoning=high
+  - `clinical_chat_factual` → `google/gemini-2.5-pro` + context caching
+  - `clinical_chat_critical` → `openai/gpt-5.4` reasoning=high
+  - `extraction_stage1/2/3` → `google/gemini-2.5-pro` (multimodal PDF + 2M ctx)
+  - `triplet_extraction` → `google/gemini-2.5-pro`
+  - `translation` → `google/gemini-2.5-flash`
+  - `embeddings` → `gemini-embedding-001@768d` (sem mudança)
+  - `relations_auditor` → `openai/gpt-5.4` reasoning=medium
+  - `kg_gap_fill` → `google/gemini-2.5-pro`
+
+- **i18n**: incrementar `I18N_VERSION` e adicionar chaves PT/EN para toda a nova UI.
+- **Organograma/Memory**: atualizar `projectOrganograma.ts` com a nova sub-aba, criar memória `mem://architecture/ai-task-model-prompt-governance`, registrar no `CHANGELOG.md` e rodar `npm run sync:changelog`.
+- **Sem mocks**: radar usa dados reais; se a consulta falhar mostra "última varredura: X" e botão de retry.
+- **Backward compatibility**: chaves `ai_model_<task>` em `ai_configurations` permanecem como override. Edge functions antigas continuam funcionando até serem migradas.
+
+## Riscos e mitigação
+
+- **Drift de prompt hard-coded em edge functions** → teste que falha se uma edge function referenciar prompt fora do registro (Fase 2).
+- **Custo do radar com gpt-5.4 semanal** → limitar a 10 modelos novos por execução e cachear classificações.
+- **Quebra ao migrar prompts** → Fase 1 é read-only; nada é reescrito até o admin salvar nova versão.
+
+## Pergunta aberta
+
+Implementar as 3 fases em sequência neste mesmo loop (mais demorado, entrega completa) ou parar após Fase 1 para você validar a estrutura antes de avançar?
