@@ -84,7 +84,7 @@ export const AI_TASKS: AITaskDefinition[] = [
     consumers: ["extract-study-entities", "gemini-file-search"],
     rationale_pt: "Gemini 3 Pro suporta PDF nativo + janela ampla e mantém alta fidelidade textual em extração estruturada.",
     rationale_en: "Gemini 3 Pro handles PDF natively with a large context window and high textual fidelity for structured extraction.",
-    status: "legacy",
+    status: "connected",
   },
   {
     id: "extraction_stage2",
@@ -100,7 +100,7 @@ export const AI_TASKS: AITaskDefinition[] = [
     consumers: ["extract-study-entities"],
     rationale_pt: "Mesma família do Estágio 1 para reaproveitar cache de contexto sobre o mesmo PDF.",
     rationale_en: "Same family as Stage 1 to reuse context caching over the same PDF.",
-    status: "legacy",
+    status: "connected",
   },
   {
     id: "extraction_stage3",
@@ -116,7 +116,7 @@ export const AI_TASKS: AITaskDefinition[] = [
     consumers: ["extract-study-entities"],
     rationale_pt: "Aproveita o mesmo cache de PDF dos estágios anteriores.",
     rationale_en: "Reuses the PDF cache from previous stages.",
-    status: "legacy",
+    status: "connected",
   },
   {
     id: "triplet_extraction",
