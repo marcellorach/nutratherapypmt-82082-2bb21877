@@ -2,6 +2,7 @@
 // sugere vínculos com Regras-Core existentes. NÃO grava nada — retorna
 // rascunho para revisão humana na FundamentosTab > Ingestão.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { callAITask } from "../_shared/ai-task-router.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -553,57 +554,43 @@ Deno.serve(async (req) => {
         call = json.candidates?.[0]?.content?.parts?.find((part: any) => part.functionCall?.name === TOOL_V2.function.name)?.functionCall;
         usage = json.usageMetadata || {};
       } else {
-        const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${lovableApiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: MODEL,
+        try {
+          const routed = await callAITask("meta_study_analysis", {
+            caller: "extract-meta-study",
             messages: [
-              { role: "system", content: systemPrompt },
-              { role: "user", content: userContent },
+              { role: "user", content: userContent as any },
             ],
+            override_system_prompt: systemPrompt,
             tools: [TOOL_V2],
             tool_choice: { type: "function", function: { name: TOOL_V2.function.name } },
-          }),
-          signal: ctrl.signal,
-        });
-
-        if (!aiRes.ok) {
-          const errText = await aiRes.text();
-          console.error(`[llm_analysis] Lovable gateway error · model=${GATEWAY_MODEL} · status=${aiRes.status}`, errText);
-          const isOversize = aiRes.status === 413 || /payload|too large|size/i.test(errText);
-          const httpCode = aiRes.status === 429 || aiRes.status === 402 ? aiRes.status : (isOversize ? 413 : 502);
-          const base = `[llm_analysis · Lovable gateway · modelo ${GATEWAY_MODEL} · HTTP ${aiRes.status}]`;
+            fallback: { model_id: MODEL, reasoning_effort: "high", temperature: 0.2 },
+          });
+          call = routed.tool_calls?.[0];
+          usage = { total_tokens: routed.tokens_in + routed.tokens_out, prompt_tokens: routed.tokens_in, completion_tokens: routed.tokens_out };
+        } catch (gwErr: any) {
+          const msg = String(gwErr?.message || gwErr);
+          const m = msg.match(/AI Gateway (\d+):/);
+          const status = m ? Number(m[1]) : 502;
+          const isOversize = status === 413 || /payload|too large|size/i.test(msg);
+          const httpCode = status === 429 || status === 402 ? status : (isOversize ? 413 : 502);
+          const base = `[llm_analysis · router · task meta_study_analysis · HTTP ${status}]`;
           let friendly: string;
           let options: string[] | undefined;
-          if (aiRes.status === 404) {
-            friendly = `${base} Modelo não encontrado no gateway Lovable. Verifique o nome '${GATEWAY_MODEL}' — talvez o modelo tenha sido descontinuado ou esteja em preview restrito.`;
-            options = [
-              "Trocar para um modelo suportado pelo gateway (ex: google/gemini-2.5-pro, google/gemini-3-flash-preview).",
-              "Conferir a documentação Lovable AI para a lista atualizada de modelos.",
-            ];
+          if (status === 404) {
+            friendly = `${base} Modelo não encontrado no gateway. Verifique o modelo ativo para meta_study_analysis.`;
+            options = ["Trocar para um modelo suportado (ex: google/gemini-2.5-pro, openai/gpt-5.4)."];
           } else if (isOversize) {
-            friendly = `${base} Gateway rejeitou o PDF por tamanho. O fallback para Google AI File API deveria ter sido acionado acima de ${(GATEWAY_PDF_LIMIT_BYTES / 1024 / 1024).toFixed(0)} MB — verifique se o PDF cai exatamente nessa faixa.`;
-            options = [
-              "Reduzir o limite GATEWAY_PDF_LIMIT_BYTES para forçar o fallback mais cedo.",
-              "Dividir o PDF ou reenviar como texto (.md/.txt).",
-            ];
-          } else if (aiRes.status === 429) {
-            friendly = `${base} Limite de requisições do Gemini excedido. Aguarde 1 min e tente novamente.`;
-          } else if (aiRes.status === 402) {
-            friendly = `${base} Créditos do Lovable AI esgotados. Adicione créditos em Settings > Workspace > Usage.`;
+            friendly = `${base} Gateway rejeitou o PDF por tamanho. O fallback para Google AI File API deveria ter sido acionado acima de ${(GATEWAY_PDF_LIMIT_BYTES / 1024 / 1024).toFixed(0)} MB.`;
+            options = ["Reduzir GATEWAY_PDF_LIMIT_BYTES.", "Dividir o PDF ou reenviar como texto (.md/.txt)."];
+          } else if (status === 429) {
+            friendly = `${base} Limite de requisições excedido. Aguarde 1 min e tente novamente.`;
+          } else if (status === 402) {
+            friendly = `${base} Créditos do Lovable AI esgotados.`;
           } else {
-            friendly = `${base} Falha no gateway de IA.`;
+            friendly = `${base} Falha no gateway de IA: ${msg.slice(0, 200)}`;
           }
-          return fail(httpCode, "llm_analysis", friendly, { detail: errText, options });
+          return fail(httpCode, "llm_analysis", friendly, { detail: msg, options });
         }
-
-        const json = await aiRes.json();
-        call = json.choices?.[0]?.message?.tool_calls?.[0];
-        usage = json.usage || {};
       }
     } catch (e: any) {
       clearTimeout(timeoutId);
