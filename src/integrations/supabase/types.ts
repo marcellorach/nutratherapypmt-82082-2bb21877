@@ -298,6 +298,89 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_task_invocations: {
+        Row: {
+          caller_function: string | null
+          cost_estimate: number | null
+          created_at: string
+          error: string | null
+          id: string
+          latency_ms: number | null
+          model_id: string
+          ok: boolean
+          prompt_version_id: string | null
+          task_id: string
+          tokens_in: number | null
+          tokens_out: number | null
+        }
+        Insert: {
+          caller_function?: string | null
+          cost_estimate?: number | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          latency_ms?: number | null
+          model_id: string
+          ok?: boolean
+          prompt_version_id?: string | null
+          task_id: string
+          tokens_in?: number | null
+          tokens_out?: number | null
+        }
+        Update: {
+          caller_function?: string | null
+          cost_estimate?: number | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          latency_ms?: number | null
+          model_id?: string
+          ok?: boolean
+          prompt_version_id?: string | null
+          task_id?: string
+          tokens_in?: number | null
+          tokens_out?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_task_invocations_prompt_version_id_fkey"
+            columns: ["prompt_version_id"]
+            isOneToOne: false
+            referencedRelation: "ai_prompt_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_task_status: {
+        Row: {
+          last_error: string | null
+          last_latency_ms: number | null
+          last_model_id: string | null
+          last_run_at: string | null
+          ok: boolean
+          task_id: string
+          updated_at: string
+        }
+        Insert: {
+          last_error?: string | null
+          last_latency_ms?: number | null
+          last_model_id?: string | null
+          last_run_at?: string | null
+          ok?: boolean
+          task_id: string
+          updated_at?: string
+        }
+        Update: {
+          last_error?: string | null
+          last_latency_ms?: number | null
+          last_model_id?: string | null
+          last_run_at?: string | null
+          ok?: boolean
+          task_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       api_usage_logs: {
         Row: {
           api_provider: string
