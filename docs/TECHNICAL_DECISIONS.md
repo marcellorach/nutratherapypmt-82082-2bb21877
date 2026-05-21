@@ -1,8 +1,8 @@
 # 🎯 NutraTherapy - Decisões Técnicas Obrigatórias
 
 ---
-**Versão:** 1.0.1  
-**Última Atualização:** 2026-05-13  
+**Versão:** 1.1.0  
+**Última Atualização:** 2026-05-21  
 **Responsável:** AI Assistant  
 **Status:** 🟢 Ativo  
 **Motor:** **Senex AI** · © **PetMoreTime** · 2025–presente · desenvolvimento e operação exclusivos · sucessor da arquitetura interna VetGraphRAG/VetMedGraph  
