@@ -380,7 +380,7 @@ export const AI_TASKS: AITaskDefinition[] = [
     consumers: ["translate-conditions", "translate-and-categorize-conditions"],
     rationale_pt: "Gemini Pro mantém precisão terminológica em vocabulário controlado.",
     rationale_en: "Gemini Pro preserves terminological precision over controlled vocabulary.",
-    status: "legacy",
+    status: "connected",
   },
 
   // ============== ENRIQUECIMENTO & TAXONOMIA ==============
