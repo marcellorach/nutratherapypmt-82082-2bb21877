@@ -24,6 +24,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 6.0.0 -->
 
+### Changed - 2026-05-21 — Migração Curadoria/KG: generate-triplets no router
+<!-- area: kg · status: parcial · i18n: 1.97.0 -->
+
+- **`generate-triplets`** (Phase 1 discovery por chunk + Phase 2 structuring com tool calling) migrada para `callAITask('triplet_extraction', ...)`. Phase 2 preserva `tools=[extractTripletsToolDef]` + `tool_choice` forçado; resposta reconstruída no shape `phase2Data.choices[0].message.{content, tool_calls}` para manter o parser downstream intacto. Tratamento de 429/402 reintroduzido a partir das mensagens de erro do router.
+- Status reconciliado em `src/config/ai-tasks.ts`: `triplet_extraction` passa de `legacy` para `connected` (13 connected · 7 legacy · 3 planned).
+- Smoke test: `ai-task-healthcheck {triplet_extraction}` → **200 OK** (827 ms).
+- Files: supabase/functions/generate-triplets/index.ts, src/config/ai-tasks.ts
+
 ### Changed - 2026-05-21 — Migração Curadoria/KG (lote 3/3): extract-study-entities no router
 <!-- area: kg · status: parcial · i18n: 1.97.0 -->
 

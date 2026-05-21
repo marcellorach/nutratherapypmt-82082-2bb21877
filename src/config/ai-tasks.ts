@@ -132,7 +132,7 @@ export const AI_TASKS: AITaskDefinition[] = [
     consumers: ["generate-triplets"],
     rationale_pt: "Gemini 2.5 Pro mantém compatibilidade com o schema atual em produção.",
     rationale_en: "Gemini 2.5 Pro keeps compatibility with the current production schema.",
-    status: "legacy",
+    status: "connected",
   },
   {
     id: "triplet_enrichment",
