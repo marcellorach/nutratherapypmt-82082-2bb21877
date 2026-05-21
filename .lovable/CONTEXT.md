@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-05-21T22:44:11.432Z
+Generated: 2026-05-21T22:54:43.016Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
@@ -12,10 +12,17 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **meta**: 4
 - **curation**: 4
 - **clinical-pipeline**: 4
-- **kg**: 1
+- **kg**: 2
 - **i18n**: 1
 
 ## Top 10 recent entries
+### 2026-05-21 · [kg] CHANGED — Migração Curadoria/KG (lote 2/3): extract-meta-study no router
+_status: parcial_
+- `extract-meta-study` (caminho gateway) migrada para `callAITask('meta_study_analysis', ...)`, preservando `tools=[TOOL_V2]` + `tool_choice` forçado e fallback explícito (`google/gemini-3-pro-preview`, reasoning=high, temp=0.2). Caminho Google AI File API (PDFs > 7MB) mantido fora do router por usar `generativelanguage.googleapis.com` diretamente — fora do escopo do gateway.
+- Erros do gateway são re-mapeados (`429`/`402`/`413`/`404`/`502`) com a mesma UX anterior (mensagens e `options[]` no payload de falha).
+- Smoke test: `ai-task-healthcheck {meta_study_analysis}` → 200 OK em 907ms.
+_files: supabase/functions/extract-meta-study/index.ts_
+
 ### 2026-05-21 · [kg] CHANGED — Migração Curadoria/KG (lote 1/3): kg-evidence-gap-fill plugada no router
 _status: parcial_
 - `kg-evidence-gap-fill` migrada para `callAITask('kg_gap_fill', ...)` preservando tool calling (`assess_evidence`) e fallback explícito para `google/gemini-3-flash-preview`. Troca de modelo no painel Governança IA agora afeta esta tarefa em runtime, e cada invocação é registrada em `ai_task_invocations` + `ai_task_status` com latência, tokens e custo estimado.
@@ -71,12 +78,6 @@ _files: supabase/functions/extract-meta-study/index.ts, src/components/administr
 - Canal para regras deduzidas: novo array `proposed_rules[]` permite ao paper sugerir candidatas a Regra-Core que não mapeiam para nenhuma RC existente, em vez de silenciosamente descartá-las. O prompt orienta gerar ≥2 propostas em papers arquiteturais substantivos.
 - Origem epistêmica nas RCs: tabela `core_rules` ganha coluna `origin` (`inductive` / `deductive` / `hybrid`) + provenance (`proposed_from_meta_study`, `promoted_at`, `promoted_by`). RC-001 e RC-002 marcadas como `inductive` (nasceram do chat); novas RCs promovidas via UI ganham `origin='deductive'`.
 _files: supabase/functions/extract-meta-study/index.ts, src/components/administrador/fundamentos/IngestaoMetaEstudo.tsx_
-
-### 2026-05-20 · [admin] FIXED — Meta-estudo: fallback automático para PDF grande
-- Edge `extract-meta-study` agora tenta fallback automático para PDFs acima do limite inline do gateway usando upload dedicado no Google AI File API, preservando o estudo completo sem truncamento silencioso.
-- Fluxo de análise: PDFs pequenos continuam no gateway atual; PDFs grandes passam por upload dedicado + chamada direta ao Gemini 3 Pro com o mesmo schema estruturado e o mesmo `trace[]` por estágio.
-- Falhas reais de PDF grande agora explicam se o bloqueio foi no fallback automático (upload/processamento do arquivo) antes de sugerir alternativas manuais.
-_files: supabase/functions/extract-meta-study/index.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
