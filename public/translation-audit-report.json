@@ -1,9 +1,9 @@
 {
-  "timestamp": "2026-05-21T18:20:35.262Z",
+  "timestamp": "2026-05-21T20:25:56.698Z",
   "summary": {
-    "totalFiles": 890,
-    "totalIssues": 436,
-    "hardcodedTexts": 51,
+    "totalFiles": 891,
+    "totalIssues": 437,
+    "hardcodedTexts": 52,
     "missingKeys": 383,
     "incompleteTranslations": 2
   },
@@ -2848,6 +2848,13 @@
       "file": "src/components/administrador/base-knowledge/ExternalSearchPanel.tsx",
       "line": 102,
       "text": "PubChem",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/configuracoes/AIGovernanceTutorialTab.tsx",
+      "line": 96,
+      "text": "Set Active",
       "severity": "medium"
     },
     {
