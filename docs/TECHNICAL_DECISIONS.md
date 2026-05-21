@@ -1,8 +1,8 @@
 # 🎯 NutraTherapy - Decisões Técnicas Obrigatórias
 
 ---
-**Versão:** 1.0.1  
-**Última Atualização:** 2026-05-13  
+**Versão:** 1.1.0  
+**Última Atualização:** 2026-05-21  
 **Responsável:** AI Assistant  
 **Status:** 🟢 Ativo  
 **Motor:** **Senex AI** · © **PetMoreTime** · 2025–presente · desenvolvimento e operação exclusivos · sucessor da arquitetura interna VetGraphRAG/VetMedGraph  
@@ -24,8 +24,9 @@
 4. [Design & UI](#-design--ui)
 5. [Visualizações](#-visualizações)
 6. [Segurança](#-segurança)
-7. [O Que NUNCA Fazer](#-o-que-nunca-fazer)
-8. [Histórico de Decisões](#-histórico-de-decisões)
+7. [AI Task Router (`callAITask`)](#-ai-task-router-callaitask)
+8. [O Que NUNCA Fazer](#-o-que-nunca-fazer)
+9. [Histórico de Decisões](#-histórico-de-decisões)
 
 ---
 
@@ -190,6 +191,73 @@ verify_jwt = true  # Para funções autenticadas
 
 ---
 
+## 🧭 AI Task Router (`callAITask`)
+
+Toda chamada LLM em edge functions DEVE passar pelo helper `callAITask` em
+`supabase/functions/_shared/ai-task-router.ts`. O router é o ponto único de
+governança de modelo + prompt + telemetria para tarefas IA.
+
+### Por que existe
+
+- **Troca de modelo em runtime** sem deploy (override em `ai_configurations.ai_model_<task_id>`).
+- **Prompt versionado por tarefa** em `ai_prompt_versions` (uma versão `is_active=true` por `(task_id, model_id)`, garantida por trigger).
+- **Telemetria automática** em `ai_task_invocations` + `ai_task_status` (latência, tokens, custo estimado, erros) — alimenta o painel Governança IA e o `ai-task-healthcheck`.
+- **Fallback seguro**: se nada estiver semeado em DB para a `task_id`, usa o `fallback` fornecido pelo caller — comportamento legado preservado.
+
+### Contrato de chamada
+
+```typescript
+import { callAITask } from "../_shared/ai-task-router.ts";
+
+const res = await callAITask("triplet_extraction", {
+  caller: "generate-triplets",                    // obrigatório (preenche caller_function)
+  messages: [{ role: "user", content: prompt }],  // OU { input, variables } com user_prompt do DB
+  tools: [extractTripletsToolDef],                // opcional — tool/function calling
+  tool_choice: { type: "function", function: { name: "extract_triplets" } },
+  temperature: 0.1,
+  reasoning_effort: "medium",                     // minimal|low|medium|high|xhigh
+  fallback: {                                      // usado se não houver prompt/model em DB
+    model_id: "google/gemini-3-pro-preview",
+    temperature: 0.1,
+  },
+});
+
+// res.output            → string (message.content)
+// res.tool_calls        → array (quando tools foram passados)
+// res.model_used        → modelo realmente usado
+// res.latency_ms, tokens_in, tokens_out, cost_estimate, prompt_version_id
+// res.raw               → resposta crua do gateway (preserve para parsers downstream)
+```
+
+### Resolução (ordem)
+
+1. `ai_configurations.ai_model_<task_id>` (override admin).
+2. `model_id` do prompt ativo em `ai_prompt_versions` (match exato com modelo override, senão genérico).
+3. `fallback.model_id` do caller.
+4. Default global: `google/gemini-3-flash-preview`.
+
+Cache in-memory de 30s por `task_id`. Use `invalidateRouterCache()` após mudanças via painel.
+
+### Tratamento de erros do Gateway
+
+O caller deve remapear códigos do Gateway preservando a UX legada:
+`429` (rate limit), `402` (créditos), `413` (payload), `404` (modelo), `502` (upstream).
+O router já registra o erro em `ai_task_invocations` e marca `ai_task_status.ok=false`.
+
+### Quando **NÃO** usar o router
+
+- **Google AI File API direto** (`generativelanguage.googleapis.com`) — usado quando o input depende de `fileData.fileUri` ou de `file_search` corpora nativos. O Lovable Gateway não aceita esses URIs. Casos atuais fora de escopo por design:
+  - `extract-meta-study` no caminho de PDF > 7 MB (caminho do Gateway segue no router).
+  - `gemini-file-search` (toda a função).
+- Funções não-LLM (CRUD, sync, parsers determinísticos).
+
+### Status atual (2026-05-21)
+
+`src/config/ai-tasks.ts` é a fonte de verdade do inventário (23 tasks): **13 connected · 7 legacy · 3 planned**.
+Healthcheck de produção: 8/8 OK em `ai-task-healthcheck`.
+
+---
+
 ## ⛔ O Que NUNCA Fazer
 
 ### 1. Modelos de IA
@@ -227,6 +295,11 @@ verify_jwt = true  # Para funções autenticadas
 ---
 
 ## 📜 Histórico de Decisões
+
+### 2026-05-21 - AI Task Router como ponto único de governança LLM
+- **Decisão**: Toda chamada LLM em edge functions passa por `callAITask` (`supabase/functions/_shared/ai-task-router.ts`).
+- **Motivo**: Troca de modelo/prompt em runtime, telemetria unificada, healthcheck centralizado.
+- **Impacto**: Curadoria/KG migrada (`kg-evidence-gap-fill`, `extract-meta-study` caminho Gateway, `extract-study-entities` Stage 1/2/3, `generate-triplets` Phase 1+2). `gemini-file-search` e PDF > 7 MB do `extract-meta-study` permanecem fora por usarem Google AI File API direto.
 
 ### 2025-12-03 - Padronização Gemini 3 Pro Preview
 - **Decisão**: Todas as edge functions devem usar `google/gemini-3-pro-preview`
