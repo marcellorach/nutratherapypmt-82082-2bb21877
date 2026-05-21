@@ -24,6 +24,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 6.0.0 -->
 
+### Changed - 2026-05-21 — Migração Curadoria/KG (lote 3/3): extract-study-entities no router
+<!-- area: kg · status: parcial · i18n: 1.97.0 -->
+
+- **`extract-study-entities`** (Stage 1 + Stage 2 + Stage 3 + extração de título) migrada para `callAITask` via `ai-task-router`. Helper `callLovableAI` agora recebe `taskId` e roteia respectivamente para `extraction_stage1`, `extraction_stage2`, `extraction_stage3` (título reusa `extraction_stage1`). Preserva `tools` + `tool_choice` forçado e fallback (`google/gemini-3-pro-preview`, temp=0.1).
+- Status reconciliado em `src/config/ai-tasks.ts`: `extraction_stage1/2/3` passam de `legacy` para `connected` (12 connected · 8 legacy · 3 planned).
+- Smoke test: `ai-task-healthcheck {extraction_stage1, extraction_stage2, extraction_stage3}` → **200 OK** (825/910/781 ms).
+- Files: supabase/functions/extract-study-entities/index.ts, src/config/ai-tasks.ts
+
 ### Changed - 2026-05-21 — Migração Curadoria/KG (lote 2/3): extract-meta-study no router
 <!-- area: kg · status: parcial · i18n: 1.97.0 -->
 

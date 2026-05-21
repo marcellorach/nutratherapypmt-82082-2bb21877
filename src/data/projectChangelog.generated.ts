@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-21T22:54:43.008Z
+// Última geração: 2026-05-21T23:19:19.171Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,24 @@ export const lastChangelogDate = "2026-05-21";
 export const senexVersion = "6.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-21",
+    "kind": "changed",
+    "area": "kg",
+    "status": "parcial",
+    "title": "Migração Curadoria/KG (lote 3/3): extract-study-entities no router",
+    "bullets": [
+      "`extract-study-entities` (Stage 1 + Stage 2 + Stage 3 + extração de título) migrada para `callAITask` via `ai-task-router`. Helper `callLovableAI` agora recebe `taskId` e roteia respectivamente para `extraction_stage1`, `extraction_stage2`, `extraction_stage3` (título reusa `extraction_stage1`). Preserva `tools` + `tool_choice` forçado e fallback (`google/gemini-3-pro-preview`, temp=0.1).",
+      "Status reconciliado em `src/config/ai-tasks.ts`: `extraction_stage1/2/3` passam de `legacy` para `connected` (12 connected · 8 legacy · 3 planned).",
+      "Smoke test: `ai-task-healthcheck {extraction_stage1, extraction_stage2, extraction_stage3}` → 200 OK (825/910/781 ms).",
+      "Files: supabase/functions/extract-study-entities/index.ts, src/config/ai-tasks.ts"
+    ],
+    "files": [
+      "src/config/ai-tasks.ts",
+      "supabase/functions/extract-study-entities/index.ts"
+    ],
+    "i18nVersion": "1.97.0"
+  },
   {
     "date": "2026-05-21",
     "kind": "changed",

@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.23.0';
+import { callAITask } from '../_shared/ai-task-router.ts';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
@@ -113,6 +114,7 @@ serve(async (req) => {
     let stage1Data: any = { nutraceuticals: [], conditions: [], mechanisms: [], findings: [], study_quality: {} };
     try {
       const stage1Result = await callLovableAI(
+        'extraction_stage1',
         prompts.stage1System,
         prompts.stage1User.replace('{{TEXT_CONTENT}}', textContent),
         getStage1Tools()
@@ -145,6 +147,7 @@ serve(async (req) => {
       console.log('📝 Stage 2 User Prompt (first 500 chars):', stage2UserPrompt.substring(0, 500));
       
       const stage2Result = await callLovableAI(
+        'extraction_stage2',
         prompts.stage2System,
         stage2UserPrompt,
         getStage2Tools()
@@ -168,6 +171,7 @@ serve(async (req) => {
     // ==================== STAGE 3: Clinical Context ====================
     console.log('🟡 [STAGE 3/3] Extraindo contexto clínico (dosagens, efeitos colaterais)...');
     const stage3Result = await callLovableAI(
+      'extraction_stage3',
       prompts.stage3System,
       prompts.stage3User.replace('{{TEXT_CONTENT}}', textContent).replace('{{STAGE1_NUTRACEUTICALS}}', JSON.stringify(stage1Data.nutraceuticals || [])),
       getStage3Tools()
@@ -372,6 +376,7 @@ serve(async (req) => {
         try {
           const titlePrompt = `Extract ONLY the title of this scientific study. Return just the title text, nothing else. First 2000 characters of document:\n\n${textContent.substring(0, 2000)}`;
           const titleResult = await callLovableAI(
+            'extraction_stage1',
             'You are a title extractor. Return ONLY the exact title of the scientific paper, nothing else.',
             titlePrompt,
             [{
@@ -677,32 +682,26 @@ serve(async (req) => {
 });
 
 // Helper: Call Lovable AI Gateway
-async function callLovableAI(systemPrompt: string, userPrompt: string, tools: any[]) {
-  const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${lovableApiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'google/gemini-3-pro-preview',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-      ],
+// Helper: Call Lovable AI Gateway via ai-task-router (Fase 2.5)
+async function callLovableAI(taskId: string, systemPrompt: string, userPrompt: string, tools: any[]) {
+  try {
+    const result = await callAITask(taskId, {
+      caller: 'extract-study-entities',
+      override_system_prompt: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
       tools,
-      tool_choice: { type: 'function', function: { name: tools[0].function.name } }
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('Lovable AI error:', response.status, errorText);
-    throw new Error(`AI extraction failed: ${errorText}`);
+      tool_choice: { type: 'function', function: { name: tools[0].function.name } },
+      temperature: 0.1,
+      fallback: {
+        model_id: 'google/gemini-3-pro-preview',
+        temperature: 0.1,
+      },
+    });
+    return result.tool_calls?.[0] || null;
+  } catch (e: any) {
+    console.error(`Lovable AI error (${taskId}):`, e?.message || e);
+    throw new Error(`AI extraction failed: ${e?.message || e}`);
   }
-
-  const result = await response.json();
-  return result.choices[0]?.message?.tool_calls?.[0] || null;
 }
 
 // Helper: Extract text from parsed content - PRIORIZA full_text_content da coluna separada
