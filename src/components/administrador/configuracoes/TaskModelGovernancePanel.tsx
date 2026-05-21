@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Sparkles, Brain, Database, FlaskConical, Stethoscope, GitCompare, ShieldCheck, Settings2 } from "lucide-react";
+import { Sparkles, Brain, Database, FlaskConical, Stethoscope, GitCompare, ShieldCheck, Settings2, Languages, Wand2, CheckCircle2 } from "lucide-react";
 import { AI_TASKS, type AITaskDefinition, type AITaskCategory } from "@/config/ai-tasks";
 import { useAIPromptVersions } from "@/hooks/useAIPromptVersions";
 import TaskDetailSheet from "./TaskDetailSheet";
@@ -18,6 +18,8 @@ const CATEGORY_META: Record<AITaskCategory, { icon: React.ComponentType<{ classN
   clinical_chat: { icon: Stethoscope, tone: "bg-teal-100 text-teal-800 dark:bg-teal-950/40 dark:text-teal-300" },
   clinical_inference: { icon: Brain, tone: "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300" },
   auditing: { icon: FlaskConical, tone: "bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300" },
+  translation: { icon: Languages, tone: "bg-indigo-100 text-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-300" },
+  enrichment: { icon: Wand2, tone: "bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-950/40 dark:text-fuchsia-300" },
 };
 
 function modelBadgeColor(model: string): string {
@@ -58,6 +60,15 @@ const TaskRow: React.FC<{ task: AITaskDefinition; hasActivePrompt: boolean; lang
                 <Badge className="text-[10px] bg-emerald-600 hover:bg-emerald-700">prompt v1 ativo</Badge>
               ) : (
                 <Badge variant="outline" className="text-[10px] text-amber-700 border-amber-300">planejado</Badge>
+              )}
+              {task.status === "connected" && (
+                <Badge className="text-[10px] bg-emerald-600 hover:bg-emerald-700 gap-1"><CheckCircle2 className="h-2.5 w-2.5" />Conectado</Badge>
+              )}
+              {task.status === "legacy" && (
+                <Badge variant="outline" className="text-[10px] text-amber-700 border-amber-300">Legacy</Badge>
+              )}
+              {task.status === "planned" && (
+                <Badge variant="outline" className="text-[10px] text-slate-600 border-slate-300">Planejado</Badge>
               )}
             </div>
             <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{description}</p>
