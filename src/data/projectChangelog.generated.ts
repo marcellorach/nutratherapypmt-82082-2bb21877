@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-21T22:40:24.862Z
+// Última geração: 2026-05-21T22:44:11.428Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,25 @@ export const lastChangelogDate = "2026-05-21";
 export const senexVersion = "6.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-21",
+    "kind": "changed",
+    "area": "kg",
+    "status": "parcial",
+    "title": "Migração Curadoria/KG (lote 1/3): kg-evidence-gap-fill plugada no router",
+    "bullets": [
+      "`kg-evidence-gap-fill` migrada para `callAITask('kg_gap_fill', ...)` preservando tool calling (`assess_evidence`) e fallback explícito para `google/gemini-3-flash-preview`. Troca de modelo no painel Governança IA agora afeta esta tarefa em runtime, e cada invocação é registrada em `ai_task_invocations` + `ai_task_status` com latência, tokens e custo estimado.",
+      "Smoke test em produção: deploy + healthcheck POST `{task_ids:[\"kg_gap_fill\"]}` → 200 OK em 870 ms.",
+      "Status atualizado em `src/config/ai-tasks.ts`: `kg_gap_fill` agora `connected`. Real: 9 connected · 11 legacy · 3 planned.",
+      "Análise do lote Curadoria/KG restante: `consolidate-knowledge-graph` (380 linhas) não faz nenhuma chamada LLM — apenas metadata/Neo4j, fica fora do escopo do router. `extract-meta-study` (720 linhas) tem dupla via (Google AI File API direto para PDFs grandes + Lovable Gateway para pequenos) com tratamento de erro muito específico (413/429/402, friendly messages, abort signals) — migração precisa de turno dedicado para preservar essa semântica. `extract-study-entities` (1201), `generate-triplets` (1362) e `gemini-file-search` (2602) idem — cada um é trabalho de meio turno isolado.",
+      "Files: supabase/functions/kg-evidence-gap-fill/index.ts, src/config/ai-tasks.ts"
+    ],
+    "files": [
+      "src/config/ai-tasks.ts",
+      "supabase/functions/kg-evidence-gap-fill/index.ts"
+    ],
+    "i18nVersion": "1.97.0"
+  },
   {
     "date": "2026-05-21",
     "kind": "fixed",
