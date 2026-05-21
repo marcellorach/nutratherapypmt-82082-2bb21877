@@ -1,13 +1,13 @@
 # Project context briefing (auto)
-Generated: 2026-05-20T15:59:03.632Z
+Generated: 2026-05-21T16:18:38.106Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.93.0
+## Latest i18n version: 1.94.0
 
 ## Changes by area (last 14 days)
-- **admin**: 30
-- **vet-ui**: 16
+- **admin**: 31
+- **vet-ui**: 15
 - **tutor-ui**: 9
 - **meta**: 4
 - **curation**: 4
@@ -15,6 +15,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **i18n**: 1
 
 ## Top 10 recent entries
+### 2026-05-21 · [admin] ADDED — Governança de IA: registro central de Modelos & Prompts por Tarefa (Fase 1)
+- Schema `ai_prompt_versions` + `ai_prompt_test_runs` + `ai_model_radar`: novas tabelas (RLS admin-only) para versionar prompts por `(task_id, model_id)`, registrar execuções de teste lado a lado e acumular sugestões automáticas de novos modelos. Trigger `validate_ai_model_radar_status` impede status inválido. Trigger `update_updated_at_column` mantém `updated_at` sincronizado.
+- Seed inicial: 8 prompts do sistema (`extraction_stage1/2/3`, `triplet_extraction`, `relations_auditor`, `geroprotector_stack`, `lab_driven_adjustment`, `treatment_proposal_12m`) registrados como v1 ativos, criando baseline histórica.
+- Task Registry (`src/config/ai-tasks.ts`): mapeia 11 famílias de tarefa para o modelo recomendado no AI Gateway, modelos candidatos, parâmetros de routing (`reasoning_effort`, `temperature`, `context_caching`) e justificativa bilíngue PT/EN. Decisões registradas: meta-análise / auditoria de Core Rules → `openai/gpt-5.4` com `reasoning=high`; extração massiva de PDF → `google/gemini-3-pro-preview` com context caching; chat clínico factual → `google/gemini-2.5-pro` com caching; chat clínico crítico → `openai/gpt-5.4` reasoning=high.
+_files: src/config/ai-tasks.ts, supabase/migrations/20260521160844_233e5785-acfa-4994-8725-7a45895634c0.sql, src/hooks/useAIPromptVersions.ts, src/components/administrador/configuracoes/TaskModelGovernancePanel.tsx…_
+
 ### 2026-05-20 · [admin] ADDED — Fundamentos: histórico por Core Rule + audit log de governança
 - Nova tabela `core_rule_audit_log`: registra cada `stance_detected` produzido pelo LLM e cada ação de governança (`promote`, `attach`, `resolve_keep`, `discard`, `approve_meta_study`) com `actor_user_id`, `created_at`, `justification` (curator notes) e `payload` JSON com snapshot da proposta. RLS: admin-only.
 - Aba "Histórico & Auditoria" em Fundamentos Arquiteturais: lista todas as RCs com busca (RC-ID/título/categoria) e filtros por stance (`confirms`/`extends`/`contradicts`/`unrelated`) e por ação. Cada RC expansível mostra evidências vinculadas + log de auditoria com proposta, stance, ator, timestamp e justificativa. Bloco extra para entradas órfãs (rule_code referenciado que não existe mais).
@@ -68,12 +74,6 @@ _files: src/components/administrador/tags/ScoreCriteriaPopover.tsx, src/pages/ad
 - Componente `StudyTimeline` (`src/components/administrador/estudos/StudyTimeline.tsx`) com variantes `compact` (linha do tempo inline em cada card de "Em Curadoria") e `detailed` (lista vertical no topo da aba Visão Geral do detalhe do estudo). Exibe: publicação, ingestão, processamento IA, vetorização RAG (com contagem de chunks) e curadoria final.
 - (c) Bilinguismo dos enums vindos do LLM — novo utilitário `src/utils/llmEnumLocalizer.ts` com `localizeEnum`, `localizeDuration` e `localizeList`. Dicionário cobre blinding (`double_blind` → "duplo-cego"), methodology (`rct` → "Ensaio clínico randomizado"), species (`Human` → "Humano", `Canine` → "Cão"), severity (`moderate` → "moderado"), e durações (`12 weeks` → "12 semanas"). Aplicado no `VisaoGeralTab` (badges metodológicas) e no `EstudoCard` (severidade de efeitos colaterais).
 _files: src/components/administrador/estudos/StudyTimeline.tsx, src/utils/llmEnumLocalizer.ts, src/hooks/useStudyApprovalWorkflow.ts, src/components/administrador/tags/ScoreCriteriaPopover.tsx…_
-
-### 2026-05-20 · [meta] ADDED — Governança de Regras-Core (RC-001, RC-002, RC-003 planejada)
-- Novo arquivo `docs/CORE_RULES.md` como fonte canônica auditável das regras-core do Senex AI. Cada regra tem `id` (RC-NNN), categoria, versão, status, justificativa, aplicação em código e evidências sustentadoras. Substitui o status anterior em que regras-core estavam dispersas entre `.lovable/memory/`, custom-knowledge e CHANGELOG.
-- RC-001 — Exclusão de trial ≠ Contraindicação: critério de exclusão indica lacuna de evidência, não risco demonstrado. Aplicada em (a) prompt do Stage 3 em `extract-study-entities` (regra #8 no system prompt), (b) banner amarelo no topo da seção "Contraindicações" do `ExtractedDataVisualization` lembrando o curador. Motivada pelo estudo PQQ humano que listou "Pregnancy and Nursing" e "Serious Chronic Diseases" como contraindicações, quando eram apenas exclusões do trial.
-- RC-002 — Eventos adversos: negação explícita ≠ ocorrência: quando estudo declara "no adverse events reported", `side_effects` é normalizado para `[]` e flag `explicitly_no_adverse_events=true` é setada. UI exibe badge verde "Sem eventos adversos reportados" em vez de contador "(1)" enganoso. Filtro via regex `NEGATIVE_AE_REGEX` no pós-Stage 3 + filtro espelhado no componente UI.
-_files: .lovable/memory/principles/exclusion-vs-contraindication.md, .lovable/memory/architecture/core-rules-governance.md, supabase/functions/extract-study-entities/index.ts, src/components/administrador/estudos/cards/EstudoCard.tsx…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

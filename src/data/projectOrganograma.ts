@@ -31,7 +31,7 @@ export interface OrganogramaArea extends OrganogramaNode {
   linksTo?: OrganogramaAreaKey[];
 }
 
-export const organogramaLastUpdated = "2026-05-20";
+export const organogramaLastUpdated = "2026-05-21";
 
 export const organogramaConvencoes: { label: string; label_en: string; value: string; value_en: string }[] = [
   { label: "Idioma", label_en: "Language", value: "PT-BR + EN obrigatórios — incrementar I18N_VERSION em src/i18n.ts a cada mudança de string", value_en: "PT-BR + EN mandatory — increment I18N_VERSION in src/i18n.ts on every string change" },
@@ -408,6 +408,19 @@ export const organograma: OrganogramaArea[] = [
         files: [
           "src/components/administrador/pet-food/PetFoodCoverageTab.tsx",
           "supabase/functions/bulk-enrich-pet-food/index.ts",
+        ],
+      },
+      {
+        title: "Governança de IA — Modelos & Prompts por Tarefa (Fase 1)",
+        title_en: "AI Governance — Models & Prompts by Task (Phase 1)",
+        description: "Registro central que mapeia cada família de tarefa (extração, meta-análise, chat clínico, inferência clínica, auditoria) ao modelo do AI Gateway, parâmetros de routing (reasoning, temperature, context caching) e prompt versionado em banco. Painel read-only em /administrador?tab=ai-config.",
+        description_en: "Central registry mapping each task family (extraction, meta-analysis, clinical chat, clinical inference, auditing) to its AI Gateway model, routing parameters (reasoning, temperature, context caching) and DB-versioned prompt. Read-only panel at /administrador?tab=ai-config.",
+        files: [
+          "src/config/ai-tasks.ts",
+          "src/hooks/useAIPromptVersions.ts",
+          "src/components/administrador/configuracoes/TaskModelGovernancePanel.tsx",
+          "src/components/administrador/ConfiguracoesIATab.tsx",
+          "supabase/migrations/20260521160844_233e5785-acfa-4994-8725-7a45895634c0.sql",
         ],
       },
     ],
