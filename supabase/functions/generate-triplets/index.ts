@@ -815,42 +815,43 @@ IMPORTANT: The pathway_chains array should show the complete discovered chains i
       }
     };
 
-    const phase2Response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-3-pro-preview',
-        messages: [
-          { role: 'system', content: phase2SystemPrompt },
-          { role: 'user', content: phase2UserPrompt }
-        ],
+    let phase2Data: any;
+    try {
+      const phase2 = await callAITask('triplet_extraction', {
+        caller: 'generate-triplets',
+        override_system_prompt: phase2SystemPrompt,
+        messages: [{ role: 'user', content: phase2UserPrompt }],
         tools: [extractTripletsToolDef],
-        tool_choice: { type: "function", function: { name: "extract_triplets" } }
-      }),
-    });
-
-    if (!phase2Response.ok) {
-      if (phase2Response.status === 429) {
+        tool_choice: { type: 'function', function: { name: 'extract_triplets' } },
+        temperature: 0.1,
+        fallback: { model_id: 'google/gemini-3-pro-preview', temperature: 0.1 },
+      });
+      // Reconstruct minimal phase2Data shape expected by downstream parser
+      phase2Data = {
+        choices: [{
+          message: {
+            content: phase2.output,
+            tool_calls: phase2.tool_calls,
+          },
+        }],
+      };
+    } catch (e: any) {
+      const msg = String(e?.message || e);
+      if (msg.includes('429')) {
         return new Response(
           JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      if (phase2Response.status === 402) {
+      if (msg.includes('402')) {
         return new Response(
           JSON.stringify({ error: 'Payment required. Please add credits to your workspace.' }),
           { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      const errorText = await phase2Response.text();
-      console.error('Phase 2 AI error:', phase2Response.status, errorText);
-      throw new Error(`Phase 2 AI request failed: ${phase2Response.status}`);
+      console.error('Phase 2 AI error:', msg);
+      throw new Error(`Phase 2 AI request failed: ${msg}`);
     }
-
-    const phase2Data = await phase2Response.json();
     console.log('Phase 2 raw response:', JSON.stringify(phase2Data, null, 2).substring(0, 1000));
     
     // Parse AI response from tool call
