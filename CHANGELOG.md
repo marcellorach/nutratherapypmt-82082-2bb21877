@@ -24,6 +24,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 6.0.0 -->
 
+### Changed - 2026-05-21 — Consolidação Curadoria/KG no `ai-task-router` (relatório)
+<!-- area: meta · status: entregue · i18n: 1.97.0 -->
+
+- Fechamento do ciclo de migração Curadoria/KG. Funções roteadas via `callAITask`: `kg-evidence-gap-fill` (`kg_gap_fill`), `extract-meta-study` (`meta_study_analysis`, caminho Google AI File API mantido fora do router), `extract-study-entities` (`extraction_stage1/2/3`, com `tools`+`tool_choice` e fallback `google/gemini-3-pro-preview` temp=0.1), `generate-triplets` (`triplet_extraction`, Phase 1 discovery + Phase 2 tool calling, resposta reconstruída para preservar parser downstream, tratamento 429/402 reintroduzido).
+- **`gemini-file-search`** auditada e formalmente fora do escopo: usa Google AI Direct API com `fileData.fileUri` + corpora `file_search` nativos, incompatíveis com o Gateway.
+- Estado final em `src/config/ai-tasks.ts`: **13 connected · 7 legacy · 3 planned** (23 tasks). `lab_driven_adjustment` e `treatment_proposal_12m` respondem no router (healthcheck OK) mas seguem `planned` porque os consumidores clínicos ainda usam o caminho legado — alvo do próximo lote.
+- Validação: `ai-task-healthcheck` **8/8 OK** (815/851/851/820/2470/812/784/864 ms); Vitest **94/94** passando (falha pré-existente de `localStorage` em Node ignorada).
+- Relatório consolidado gerado em `/mnt/documents/RELATORIO_MIGRACAO_AI_ROUTER_2026-05-21.md` com padrão `callAITask` de referência para os próximos lotes (Clínico + legados a deprecar).
+- Files: CHANGELOG.md, /mnt/documents/RELATORIO_MIGRACAO_AI_ROUTER_2026-05-21.md
+
 ### Changed - 2026-05-21 — Migração Curadoria/KG: fechamento (gemini-file-search fica fora do router)
 <!-- area: kg · status: entregue · i18n: 1.97.0 -->
 
