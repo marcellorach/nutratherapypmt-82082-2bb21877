@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Sparkles, Brain, Database, FlaskConical, Stethoscope, GitCompare, ShieldCheck, Settings2, Languages, Wand2, CheckCircle2 } from "lucide-react";
+import { Sparkles, Brain, Database, FlaskConical, Stethoscope, GitCompare, ShieldCheck, Settings2, Languages, Wand2, CheckCircle2, Activity, AlertTriangle, Loader2 } from "lucide-react";
 import { AI_TASKS, type AITaskDefinition, type AITaskCategory } from "@/config/ai-tasks";
 import { useAIPromptVersions } from "@/hooks/useAIPromptVersions";
+import { useAITaskStatus, useRunHealthcheck } from "@/hooks/useAITaskStatus";
+import { useToast } from "@/hooks/use-toast";
 import TaskDetailSheet from "./TaskDetailSheet";
 
 const CATEGORY_META: Record<AITaskCategory, { icon: React.ComponentType<{ className?: string }>; tone: string }> = {
@@ -28,7 +30,7 @@ function modelBadgeColor(model: string): string {
   return "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-900/40 dark:text-slate-300 dark:border-slate-800";
 }
 
-const TaskRow: React.FC<{ task: AITaskDefinition; hasActivePrompt: boolean; lang: string; onOpen: (t: AITaskDefinition) => void }> = ({ task, hasActivePrompt, lang, onOpen }) => {
+const TaskRow: React.FC<{ task: AITaskDefinition; hasActivePrompt: boolean; healthOk: boolean | null; lastLatency: number | null; lastError: string | null; lang: string; onOpen: (t: AITaskDefinition) => void }> = ({ task, hasActivePrompt, healthOk, lastLatency, lastError, lang, onOpen }) => {
   const meta = CATEGORY_META[task.category];
   const Icon = meta.icon;
   const label = lang.startsWith("en") ? task.label_en : task.label_pt;
@@ -69,6 +71,16 @@ const TaskRow: React.FC<{ task: AITaskDefinition; hasActivePrompt: boolean; lang
               )}
               {task.status === "planned" && (
                 <Badge variant="outline" className="text-[10px] text-slate-600 border-slate-300">Planejado</Badge>
+              )}
+              {task.status === "connected" && healthOk === false && (
+                <Badge variant="destructive" className="text-[10px] gap-1" title={lastError ?? undefined}>
+                  <AlertTriangle className="h-2.5 w-2.5" />{lang.startsWith("en") ? "Failing" : "Falhando"}
+                </Badge>
+              )}
+              {task.status === "connected" && healthOk === true && lastLatency !== null && (
+                <Badge variant="outline" className="text-[10px] text-emerald-700 border-emerald-300">
+                  {lastLatency}ms
+                </Badge>
               )}
             </div>
             <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{description}</p>
@@ -134,6 +146,9 @@ const TaskRow: React.FC<{ task: AITaskDefinition; hasActivePrompt: boolean; lang
 const TaskModelGovernancePanel: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { data: prompts, isLoading, error } = useAIPromptVersions();
+  const { data: statuses } = useAITaskStatus();
+  const runHealth = useRunHealthcheck();
+  const { toast } = useToast();
   const [filter, setFilter] = useState<AITaskCategory | "all">("all");
   const [openTask, setOpenTask] = useState<AITaskDefinition | null>(null);
 
@@ -142,6 +157,12 @@ const TaskModelGovernancePanel: React.FC = () => {
     (prompts ?? []).filter((p) => p.is_active).forEach((p) => m.set(p.task_id, true));
     return m;
   }, [prompts]);
+
+  const statusByTask = useMemo(() => {
+    const m = new Map<string, { ok: boolean; latency: number | null; error: string | null }>();
+    (statuses ?? []).forEach((s) => m.set(s.task_id, { ok: s.ok, latency: s.last_latency_ms, error: s.last_error }));
+    return m;
+  }, [statuses]);
 
   const filteredTasks = useMemo(
     () => (filter === "all" ? AI_TASKS : AI_TASKS.filter((t) => t.category === filter)),
@@ -164,8 +185,31 @@ const TaskModelGovernancePanel: React.FC = () => {
     const seeded = AI_TASKS.filter((t) => activeByTask.get(t.id)).length;
     const gpt54 = AI_TASKS.filter((t) => t.recommended_model === "openai/gpt-5.4").length;
     const reasoning = AI_TASKS.filter((t) => t.routing.reasoning_effort === "high").length;
-    return { total, seeded, gpt54, reasoning };
-  }, [activeByTask]);
+    const connected = AI_TASKS.filter((t) => t.status === "connected");
+    const healthy = connected.filter((t) => statusByTask.get(t.id)?.ok === true).length;
+    const failing = connected.filter((t) => statusByTask.get(t.id)?.ok === false).length;
+    return { total, seeded, gpt54, reasoning, connectedCount: connected.length, healthy, failing };
+  }, [activeByTask, statusByTask]);
+
+  const handleRunHealth = async () => {
+    try {
+      const result = await runHealth.mutateAsync(undefined);
+      const failing = result.results.filter((r) => !r.ok);
+      toast({
+        title: isEn ? "Healthcheck complete" : "Healthcheck concluído",
+        description: isEn
+          ? `${result.checked} tasks · ${failing.length} failing`
+          : `${result.checked} tarefas · ${failing.length} falhando`,
+        variant: failing.length > 0 ? "destructive" : "default",
+      });
+    } catch (e) {
+      toast({
+        title: isEn ? "Healthcheck failed" : "Healthcheck falhou",
+        description: (e as Error).message,
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <Card>
@@ -182,6 +226,28 @@ const TaskModelGovernancePanel: React.FC = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Healthcheck banner */}
+        <div className="rounded-md border bg-muted/20 p-3 flex items-center gap-3">
+          <Activity className={`h-5 w-5 ${stats.failing > 0 ? "text-destructive" : "text-emerald-600"}`} />
+          <div className="flex-1 text-sm">
+            <div className="font-medium">
+              {isEn
+                ? `${stats.healthy} of ${stats.connectedCount} connected tasks healthy`
+                : `${stats.healthy} de ${stats.connectedCount} tarefas conectadas saudáveis`}
+              {stats.failing > 0 && (
+                <span className="text-destructive ml-2">· {stats.failing} {isEn ? "failing" : "falhando"}</span>
+              )}
+            </div>
+            <div className="text-[11px] text-muted-foreground">
+              {isEn ? "Ping each active model with a minimal prompt and log latency / errors." : "Pinga cada modelo ativo com prompt mínimo e registra latência / erros."}
+            </div>
+          </div>
+          <Button size="sm" variant="outline" disabled={runHealth.isPending} onClick={handleRunHealth}>
+            {runHealth.isPending ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Activity className="h-3.5 w-3.5 mr-1" />}
+            {isEn ? "Run healthcheck" : "Rodar healthcheck"}
+          </Button>
+        </div>
+
         {/* KPIs */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-center">
           <div className="rounded-md border bg-muted/30 p-2">
@@ -237,6 +303,9 @@ const TaskModelGovernancePanel: React.FC = () => {
                   key={task.id}
                   task={task}
                   hasActivePrompt={!!activeByTask.get(task.id)}
+                  healthOk={statusByTask.get(task.id)?.ok ?? null}
+                  lastLatency={statusByTask.get(task.id)?.latency ?? null}
+                  lastError={statusByTask.get(task.id)?.error ?? null}
                   lang={i18n.language || "pt"}
                   onOpen={setOpenTask}
                 />
