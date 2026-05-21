@@ -24,6 +24,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 6.0.0 -->
 
+### Fixed - 2026-05-21 — Healthcheck IA validado em produção + reconciliação de status
+<!-- area: admin · status: entregue · i18n: 1.97.0 -->
+
+- **Smoke test do `ai-task-healthcheck` em produção**: deploy + POST `{task_ids:["translation_conditions"]}` → 200 OK em 884 ms (`google/gemini-3-flash-preview`). Pipeline ponta-a-ponta validado (router resolve modelo + prompt ativo, grava em `ai_task_status`, retorna telemetria).
+- **Reconciliação `ai-tasks.ts`**: `translation_conditions` marcado como `connected` (a função `translate-conditions` já chama `callAITask()` desde a Fase 2.5 — status estava desatualizado). Contagem real agora: **8 connected · 12 legacy · 3 planned**.
+- Files: src/config/ai-tasks.ts
+
 ### Added - 2026-05-21 — Senex 6.0: skin anatômica em camadas completa + componente DogAnatomyLayered
 <!-- area: vet-ui · status: entregue · i18n: 1.97.0 -->
 
