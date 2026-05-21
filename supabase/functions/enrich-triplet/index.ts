@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { callAITask } from "../_shared/ai-task-router.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -140,48 +141,36 @@ ${contextText.substring(0, 3000)}
 
 If you cannot find a verbatim supporting quote, return intensity ≤ 0.2 and write: 'Source excerpt: not found in provided text.'`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [{ role: "user", content: prompt }],
-        tools: [{
-          type: "function",
-          function: {
-            name: "enrich_triplet",
-            description: "Provide enriched metadata for the triplet",
-            parameters: {
-              type: "object",
-              properties: {
-                evidence_level: { 
-                  type: "string", 
-                  enum: ["meta_analysis", "rct", "cohort", "case_control", "case_report", "in_vivo", "animal_study", "in_vitro", "expert_opinion"]
-                },
-                intensity: { type: "number", description: "Effect strength 0.0-1.0" },
-                confidence_rationale: { type: "string", description: "1-2 sentences ending with a literal Source excerpt quote from the text" },
-                self_confidence: { type: "number", description: "Your self-confidence in this judgment, 0.0 to 1.0. Be honest: low if excerpt is vague, high if excerpt explicitly states design and magnitude." },
-                source_quote: { type: "string", description: "The verbatim quote (≤300 chars) from source text that supports the judgment. Empty string if none found." }
-              },
-              required: ["evidence_level", "intensity", "confidence_rationale", "self_confidence", "source_quote"]
-            }
-          }
-        }],
-        tool_choice: { type: "function", function: { name: "enrich_triplet" } }
-      }),
+    const tools = [{
+      type: "function",
+      function: {
+        name: "enrich_triplet",
+        description: "Provide enriched metadata for the triplet",
+        parameters: {
+          type: "object",
+          properties: {
+            evidence_level: {
+              type: "string",
+              enum: ["meta_analysis", "rct", "cohort", "case_control", "case_report", "in_vivo", "animal_study", "in_vitro", "expert_opinion"]
+            },
+            intensity: { type: "number", description: "Effect strength 0.0-1.0" },
+            confidence_rationale: { type: "string", description: "1-2 sentences ending with a literal Source excerpt quote from the text" },
+            self_confidence: { type: "number", description: "Your self-confidence in this judgment, 0.0 to 1.0." },
+            source_quote: { type: "string", description: "Verbatim quote ≤300 chars from source text or empty." }
+          },
+          required: ["evidence_level", "intensity", "confidence_rationale", "self_confidence", "source_quote"]
+        }
+      }
+    }];
+
+    const routerResult = await callAITask('triplet_enrichment', {
+      caller: 'enrich-triplet',
+      messages: [{ role: 'user', content: prompt }],
+      tools,
+      tool_choice: { type: 'function', function: { name: 'enrich_triplet' } },
+      fallback: { model_id: 'google/gemini-2.5-flash' },
     });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error('AI gateway error:', response.status, errText);
-      throw new Error(`AI gateway error: ${response.status}`);
-    }
-
-    const aiResult = await response.json();
-    const toolCall = aiResult.choices?.[0]?.message?.tool_calls?.[0];
+    const toolCall = routerResult.tool_calls?.[0];
     
     if (!toolCall) {
       throw new Error('No tool call in AI response');
