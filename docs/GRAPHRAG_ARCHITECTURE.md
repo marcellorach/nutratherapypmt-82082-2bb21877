@@ -350,6 +350,18 @@ CREATE INDEX study_grade IF NOT EXISTS
 
 ## ⚙️ Edge Functions
 
+> **Governança LLM**: todas as edge functions LLM listadas abaixo (exceto onde indicado) passam por `callAITask` (`supabase/functions/_shared/ai-task-router.ts`). Ver detalhes em [TECHNICAL_DECISIONS.md → AI Task Router](./TECHNICAL_DECISIONS.md#-ai-task-router-callaitask).
+>
+> Pipeline Curadoria/KG roteado (2026-05-21):
+>
+> | Edge Function | Task ID | Notas |
+> |---|---|---|
+> | `kg-evidence-gap-fill` | `kg_gap_fill` | tool calling `assess_evidence`, fallback `gemini-3-flash-preview` |
+> | `extract-meta-study` | `meta_study_analysis` | apenas caminho Gateway; PDF > 7 MB fica fora (Google AI File API direto) |
+> | `extract-study-entities` | `extraction_stage1`/`_stage2`/`_stage3` | tool calling + fallback `gemini-3-pro-preview` temp=0.1 |
+> | `generate-triplets` | `triplet_extraction` | Phase 1 discovery + Phase 2 tool calling; `raw` reconstruído para preservar parser |
+> | `gemini-file-search` | — | **fora do router** (usa `fileData.fileUri` + `file_search` corpora nativos) |
+
 ### 1. **neo4j-sync** (Novo)
 
 **Responsabilidade**: Espelhar dados extraídos pelo `gemini-file-search` no Neo4j.
