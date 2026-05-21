@@ -1,7 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+import { callAITask } from "../_shared/ai-task-router.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -60,34 +59,23 @@ serve(async (req) => {
       ? `You are a professional veterinary medical translator. Translate the following text from Portuguese to English. ${contextPrompt} Return ONLY the translated text, without any additional explanation or formatting.`
       : `You are a professional veterinary medical translator. Translate the following text from English to Portuguese. ${contextPrompt} Return ONLY the translated text, without any additional explanation or formatting.`;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: text }
-        ],
-        temperature: 0.3, // Lower temperature for more consistent translations
-        max_tokens: 500
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('OpenAI API error:', response.status, errorData);
+    let translatedText = '';
+    try {
+      const result = await callAITask('translation_generic', {
+        caller: 'translate-text',
+        messages: [{ role: 'user', content: text }],
+        override_system_prompt: systemPrompt,
+        temperature: 0.3,
+        fallback: { model_id: 'google/gemini-2.5-flash' },
+      });
+      translatedText = (result.output || '').trim();
+    } catch (err) {
+      console.error('Router call failed:', err);
       return new Response(
         JSON.stringify({ error: 'Translation service error' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-
-    const data = await response.json();
-    const translatedText = data.choices[0].message.content.trim();
 
     console.log('Translation successful:', { original: text, translated: translatedText });
 
