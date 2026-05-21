@@ -296,6 +296,11 @@ Healthcheck de produção: 8/8 OK em `ai-task-healthcheck`.
 
 ## 📜 Histórico de Decisões
 
+### 2026-05-21 - AI Task Router como ponto único de governança LLM
+- **Decisão**: Toda chamada LLM em edge functions passa por `callAITask` (`supabase/functions/_shared/ai-task-router.ts`).
+- **Motivo**: Troca de modelo/prompt em runtime, telemetria unificada, healthcheck centralizado.
+- **Impacto**: Curadoria/KG migrada (`kg-evidence-gap-fill`, `extract-meta-study` caminho Gateway, `extract-study-entities` Stage 1/2/3, `generate-triplets` Phase 1+2). `gemini-file-search` e PDF > 7 MB do `extract-meta-study` permanecem fora por usarem Google AI File API direto.
+
 ### 2025-12-03 - Padronização Gemini 3 Pro Preview
 - **Decisão**: Todas as edge functions devem usar `google/gemini-3-pro-preview`
 - **Motivo**: Multi-hop reasoning superior para extração de cadeias biológicas complexas
