@@ -276,6 +276,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     description: 'Configurações de IA'
   },
   {
+    id: 'tutorial-ia',
+    label: 'Tutorial — Governança IA',
+    group: 'configuration',
+    component: AIGovernanceTutorialTab,
+    description: 'Passo-a-passo de como usar Modelos & Prompts por Tarefa'
+  },
+  {
     id: 'prompts',
     label: 'AI Prompts',
     group: 'configuration',
