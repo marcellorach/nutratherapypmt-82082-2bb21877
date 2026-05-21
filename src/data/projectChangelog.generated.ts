@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-21T23:28:53.245Z
+// Última geração: 2026-05-21T23:37:30.709Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,19 @@ export const lastChangelogDate = "2026-05-21";
 export const senexVersion = "6.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-21",
+    "kind": "changed",
+    "area": "meta",
+    "status": "entregue",
+    "title": "Docs: contrato `callAITask` em TECHNICAL_DECISIONS + GRAPHRAG",
+    "bullets": [
+      "`docs/TECHNICAL_DECISIONS.md` v1.1.0: nova seção AI Task Router (`callAITask`) com contrato de chamada (taskId, caller, messages/input, tools+tool_choice, fallback, reasoning_effort, temperature), ordem de resolução (override em `ai_configurations` → prompt ativo em `ai_prompt_versions` → fallback do caller → default), telemetria automática (`ai_task_invocations` + `ai_task_status`), tratamento de 429/402/413/404/502 e regras de quando NÃO usar o router (Google AI File API direto: `gemini-file-search` e PDF > 7 MB do `extract-meta-study`). Entrada no Histórico de Decisões.",
+      "`docs/GRAPHRAG_ARCHITECTURE.md` v2.1.0: bloco de governança LLM no topo de Edge Functions com tabela das 4 funções Curadoria/KG roteadas via `callAITask` e a função fora de escopo.",
+      "Files: docs/TECHNICAL_DECISIONS.md, docs/GRAPHRAG_ARCHITECTURE.md"
+    ],
+    "i18nVersion": "1.97.0"
+  },
   {
     "date": "2026-05-21",
     "kind": "changed",
