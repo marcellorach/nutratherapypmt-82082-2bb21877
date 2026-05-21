@@ -1,8 +1,79 @@
-# Governança de Modelos de IA — Implementação Completa (Fases 2.5 → 4)
+# Senex AI 6.0 — Fechamento da Governança IA + Gêmeos Digitais Anatômicos
 
-## Objetivo
+## Por que 6.0
 
-Garantir que o painel **"Modelos & Prompts por Tarefa"** (`/administrador?tab=config-ia`) seja a **única fonte da verdade** para qual modelo e qual prompt cada chamada de IA do sistema usa — sem precisar mexer em código nem fazer deploy. Inclui um **tutorial visual dentro do admin** explicando onde fica e como usar, para que qualquer pessoa do time (e a banca da Stanford) consiga entender em 60 segundos.
+Nos últimos dias entregamos uma mudança **estrutural**, não incremental: a plataforma ganhou um eixo de **Fundamentos Arquiteturais** (Regras-Core deduzidas/induzidas, meta-estudos digeridos com governança de conflito, audit log por RC) e um eixo de **Governança IA por Tarefa** (registro central de prompts × modelos, editor com teste A/B, router universal, logging por invocação). Isso justifica bump para `senex: 6.0.0`.
+
+## Parte A — Revisão do que falta fechar (Governança IA)
+
+### Status real hoje
+
+- **Fase 1 (registro central)** — ✅ entregue. Painel "Modelos & Prompts por Tarefa" no admin.
+- **Fase 2 (editor + A/B + histórico)** — ✅ entregue. `TaskDetailSheet` + `ai-task-test` + RPC de ativação.
+- **Fase 2.5 (router universal + cobertura total)** — 🟡 parcial. **7 tarefas conectadas, 13 legacy, 3 planejadas.** Faltam 13 edge functions migrar para `callAITask()`.
+- **Fase 3 (aba Tutorial)** — ✅ entregue (`AIGovernanceTutorialTab`).
+- **Fase 4 (healthcheck diário)** — ❌ não iniciado. Sem cron e sem badge "Falhando".
+
+### O que entra no 6.0
+
+1. **Migrar as 13 legacy restantes** para o router (lote por área, com fallback preservado):
+   - Curadoria/KG: `extract-meta-study`, `extract-study-entities`, `generate-triplets`, `gemini-file-search`, `consolidate-knowledge-graph`, `kg-evidence-gap-fill`.
+   - Pet/Clínica: `extract-pet-clinical-data`, `parse-pet-exam-pdf`, `condition-insights`, `hybrid-recommendation`.
+   - Catálogo: `enrich-pet-food-product`, `process-nutraceutical-spreadsheet`, `web-dosage-lookup`.
+2. **Seed dos prompts faltantes** em `ai_prompt_versions` (v1, `source='migrated'`) extraídos do código atual de cada função, para que a edição passe a funcionar sem deploy.
+3. **Fase 4 — Healthcheck**: edge `ai-task-healthcheck` (cron diário) + badge vermelho "Falhando" + KPI "X de Y tarefas saudáveis" no topo do painel.
+4. **Smoke test consolidado**: script admin (botão "Rodar smoke") que invoca cada tarefa conectada com input mínimo e mostra latência/custo — usado como gate antes da Stanford.
+5. **Documentação**: bump de versão para 6.0.0 em `ARCHITECTURE.md`, `docs/CURRENT_STATE.md`, `docs/STANFORD_DEMO.md`, marcador `<!-- senex: 6.0.0 -->` no `[Unreleased]` do `CHANGELOG.md`, entrada estruturada descrevendo o fechamento, `npm run sync:changelog`.
+
+## Parte B — Dar vida ao Gêmeo Digital (anatomia canina realista)
+
+Hoje `DigitalTwinDog` + `DogAnatomySVG` usam SVG estilizado próprio (silhueta + 12 regiões coloríveis). Funciona para tingir órgãos por doença, mas é "plano" e pouco impressionante para banca.
+
+### Opções avaliadas
+
+| Fonte | Licença prática | Encaixe técnico | Veredito |
+|---|---|---|---|
+| **BioRender MCP** (link enviado) | Conteúdo pago; export é para uso editorial/educacional do *assinante* — **não há licença web-app embeddable**. MCP é só para gerar figuras dentro do BioRender. | Não há SDK de runtime para incorporar a arte gerada em aplicação SaaS. | ❌ Não usar como fonte de assets embarcados. Pode ser usado por nós **manualmente** para gerar PNGs de referência (uso interno). |
+| **Smart-Servier Medical Art** (humana, CC-BY 3.0) | ✅ permissiva, atribuição. | Útil para órgãos isolados (fígado, rim, coração). Não é canino. | ✅ Banco de órgãos genéricos com atribuição. |
+| **Anatomography / BodyParts3D** (humano, CC-BY-SA 2.1 JP) | ✅ permissiva. | Modelos 3D OBJ/STL de órgãos. | ✅ Para visões 3D de órgãos individuais. |
+| **Sketchfab — modelos caninos CC** (busca `dog anatomy license:cc`) | Varia por autor; filtrar `CC-BY` / `CC0`. | glTF/GLB → carregamento direto via `three`/`react-three-fiber` (já temos `three` no projeto). | ✅ **Melhor caminho** para corpo canino completo. |
+| **Zygote / Visible Body / 3D4Medical** | Licenças comerciais caras, sem self-serve. | Top qualidade. | ⏸ Considerar depois da banca, caso haja patrocínio. |
+| **AI generativo (Gemini 3 image / Imagen)** | OK para ilustrações 2D estilizadas próprias. | Não gera modelos 3D editáveis. | ✅ Útil para *skins* 2D consistentes em estilo (substitui o SVG atual por uma série de PNGs anatômicos próprios e licença clara). |
+
+### Recomendação técnica (entra no 6.0)
+
+**Pipeline híbrido em dois passos**, sem dependência de licença BioRender:
+
+1. **Skin 2D melhorada (curto prazo, baixo risco)**: gerar com Imagen/Gemini 3 uma série de ilustrações anatômicas de cão em vista lateral com camadas separadas (silhueta, esqueleto, sistema digestivo, urinário, articular, cardio, nervoso). Salvar em `src/assets/anatomy/` como PNG transparente. Substituir o atual SVG inline por componente `<DogAnatomyLayered>` que cross-fade entre camadas conforme a doença ativa. Mantém performance e ganha realismo imediato.
+2. **Vista 3D opcional (Phase 6.1)**: integrar **react-three-fiber** + `<Canvas>` com um modelo canino glTF CC-BY de Sketchfab carregado via `useGLTF`. Toggle "2D ⇄ 3D" no painel do twin. Highlight de órgãos por `traverse` + mudança de material, alimentado pelo mesmo mapa `anatomy-region-map.ts`. Não bloqueia o 6.0 — fica como spike adicional.
+
+### Camadas iniciais a gerar (Passo 1)
+
+`body_silhouette`, `skeleton`, `heart_lungs`, `liver_gi`, `kidneys_urinary`, `joints_hips`, `brain_spine`, `endocrine_pancreas`, `skin_coat`. Cada uma como PNG 1536×1024 transparente, estilo "ilustração científica clean, traços finos pretos, fill pastel" (alinhado ao design system).
+
+## Parte C — Sugestões de próximos passos (pós-6.0)
+
+1. **Cron de healthcheck + alertas Slack** quando uma tarefa fica vermelha por >2 ciclos.
+2. **Custo acumulado por tarefa/dia** (view materializada sobre `ai_task_invocations`) com gráfico no painel.
+3. **Versionamento de Regras-Core** (`version`, `superseded_by`, `rc_revisions`) — já marcado como próxima fase no changelog do dia 20.
+4. **Vista 3D do twin** (item B.2 acima) com toggle 2D/3D.
+5. **"Replay" do pipeline** numa consulta: ver exatamente qual prompt × modelo × versão foi usado em cada etapa daquele pet (já temos `ai_task_invocations`; falta link no Prontuário).
+6. **Exportar pacote demo Stanford**: PDF gerado a partir do organograma + changelog + screenshots do twin e do painel de governança.
+
+## Risco e mitigação
+
+- **Migração das 13 legacy**: trabalho mecânico, fallback preservado, baixo risco. Smoke test obrigatório por lote.
+- **Modelos 3D Sketchfab**: licença varia — fixar lista final com URLs e nomes dos autores em `docs/ASSET_LICENSES.md` antes de subir.
+- **Geração de PNGs anatômicos**: validar visualmente antes de commitar; manter `body_silhouette` atual como fallback caso o estilo gerado não case.
+
+## Sequência sugerida (ordem de execução após aprovação)
+
+1. Migrar lote Curadoria/KG (6 funções) + seed prompts + smoke.
+2. Migrar lote Pet/Clínica (4 funções) + seed prompts + smoke.
+3. Migrar lote Catálogo (3 funções) + seed prompts + smoke.
+4. Healthcheck (cron + badge + KPI).
+5. Gerar PNGs anatômicos e plugar `DogAnatomyLayered`.
+6. Bump versão 6.0.0 em todos os docs + entrada `CHANGELOG.md` + `npm run sync:changelog`.
 
 ## Escopo (o que entra)
 
