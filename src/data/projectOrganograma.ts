@@ -410,6 +410,19 @@ export const organograma: OrganogramaArea[] = [
           "supabase/functions/bulk-enrich-pet-food/index.ts",
         ],
       },
+      {
+        title: "Governança de IA — Modelos & Prompts por Tarefa (Fase 1)",
+        title_en: "AI Governance — Models & Prompts by Task (Phase 1)",
+        description: "Registro central que mapeia cada família de tarefa (extração, meta-análise, chat clínico, inferência clínica, auditoria) ao modelo do AI Gateway, parâmetros de routing (reasoning, temperature, context caching) e prompt versionado em banco. Painel read-only em /administrador?tab=ai-config.",
+        description_en: "Central registry mapping each task family (extraction, meta-analysis, clinical chat, clinical inference, auditing) to its AI Gateway model, routing parameters (reasoning, temperature, context caching) and DB-versioned prompt. Read-only panel at /administrador?tab=ai-config.",
+        files: [
+          "src/config/ai-tasks.ts",
+          "src/hooks/useAIPromptVersions.ts",
+          "src/components/administrador/configuracoes/TaskModelGovernancePanel.tsx",
+          "src/components/administrador/ConfiguracoesIATab.tsx",
+          "supabase/migrations/20260521160844_233e5785-acfa-4994-8725-7a45895634c0.sql",
+        ],
+      },
     ],
   },
   {
