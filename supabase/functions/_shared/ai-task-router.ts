@@ -53,6 +53,9 @@ export interface CallAITaskOptions {
   caller: string;
   /** Plain messages para chat multi-turn — quando passado, substitui o user_prompt resolvido. */
   messages?: Array<{ role: "system" | "user" | "assistant"; content: string }>;
+  /** Tool / function calling — quando passado, a chamada usa tool calls e o resultado vem em `tool_calls`. */
+  tools?: any[];
+  tool_choice?: any;
   /** Fallback caso resolveTask não encontre nada (preserva comportamento legado). */
   fallback?: {
     model_id: string;
@@ -72,6 +75,7 @@ export interface CallAITaskResult {
   tokens_out: number;
   cost_estimate: number;
   prompt_version_id: string | null;
+  tool_calls?: any[];
   raw: any;
 }
 
@@ -219,6 +223,8 @@ export async function callAITask(
   };
   if (reasoning) payload.reasoning = { effort: reasoning };
   if (typeof temperature === "number") payload.temperature = temperature;
+  if (opts.tools && opts.tools.length > 0) payload.tools = opts.tools;
+  if (opts.tool_choice) payload.tool_choice = opts.tool_choice;
 
   const started = Date.now();
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -250,6 +256,7 @@ export async function callAITask(
 
   const json = await resp.json();
   const output: string = json?.choices?.[0]?.message?.content ?? "";
+  const toolCalls = json?.choices?.[0]?.message?.tool_calls;
   const tIn: number = json?.usage?.prompt_tokens ?? 0;
   const tOut: number = json?.usage?.completion_tokens ?? 0;
   const cost = estimateCost(modelId, tIn, tOut);
@@ -275,6 +282,7 @@ export async function callAITask(
     tokens_out: tOut,
     cost_estimate: cost,
     prompt_version_id: resolved.prompt_version_id,
+    tool_calls: toolCalls,
     raw: json,
   };
 }
