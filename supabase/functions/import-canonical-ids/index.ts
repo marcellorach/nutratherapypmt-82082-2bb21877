@@ -62,11 +62,11 @@ Deno.serve(async (req) => {
       const q = c.name_en || c.name;
       let id: string | null = null; let src = '';
       const omia = await lookupOls(q, 'omia');
-      if (omia) { id = omia; src = 'OMIA'; }
+      if (omia) { id = omia; src = 'omia'; }
       else {
         await sleep(350);
         const mesh = await lookupMesh(q);
-        if (mesh) { id = mesh; src = 'MeSH'; }
+        if (mesh) { id = mesh; src = 'mesh'; }
       }
       if (id) condUpdates.push({ id: c.id, canonical_id: id, canonical_source: src, matched_name: q });
       else condUnmatched.push({ id: c.id, name: c.name, name_en: c.name_en });
@@ -87,11 +87,11 @@ Deno.serve(async (req) => {
       const q = n.name_en || n.name;
       let id: string | null = null; let src = '';
       const chebi = await lookupOls(q, 'chebi');
-      if (chebi) { id = chebi; src = 'ChEBI'; }
+      if (chebi) { id = chebi; src = 'chebi'; }
       else {
         await sleep(350);
         const mesh = await lookupMesh(q);
-        if (mesh) { id = mesh; src = 'MeSH'; }
+        if (mesh) { id = mesh; src = 'mesh'; }
       }
       if (id) nutraUpdates.push({ id: n.id, canonical_id: id, canonical_source: src, matched_name: q });
       else nutraUnmatched.push({ id: n.id, name: n.name, name_en: n.name_en });
