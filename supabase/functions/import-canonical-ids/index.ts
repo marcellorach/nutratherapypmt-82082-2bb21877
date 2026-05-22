@@ -41,6 +41,7 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     const dryRun = body.dry_run === true;
+    const batchSize = Math.min(Math.max(Number(body.batch_size) || 20, 1), 50);
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
@@ -50,7 +51,9 @@ Deno.serve(async (req) => {
     const { data: conds, error: cerr } = await supabase
       .from('health_conditions')
       .select('id, name, name_en, canonical_id')
-      .is('canonical_id', null);
+      .is('canonical_id', null)
+      .order('id')
+      .limit(batchSize);
     if (cerr) throw cerr;
 
     const condUpdates: any[] = [];
@@ -73,7 +76,9 @@ Deno.serve(async (req) => {
     const { data: nutras, error: nerr } = await supabase
       .from('nutraceuticals')
       .select('id, name, name_en, canonical_id')
-      .is('canonical_id', null);
+      .is('canonical_id', null)
+      .order('id')
+      .limit(batchSize);
     if (nerr) throw nerr;
 
     const nutraUpdates: any[] = [];
@@ -108,6 +113,8 @@ Deno.serve(async (req) => {
 
     return new Response(JSON.stringify({
       dry_run: dryRun,
+      batch_size: batchSize,
+      has_more: (conds?.length ?? 0) >= batchSize || (nutras?.length ?? 0) >= batchSize,
       conditions: {
         total: conds?.length ?? 0,
         matched: condUpdates.length,
