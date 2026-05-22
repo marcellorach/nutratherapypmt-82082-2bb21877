@@ -5090,7 +5090,7 @@
         "allConditions": "Todas as condições",
         "allResponses": "Todas as respostas",
         "matches": "{{count}} pacientes encontrados",
-        "page": "Página {{page}} de {{total}}",
+        "page": "Página {{current}} de {{total}}",
         "open": "Abrir",
         "col": {
           "id": "ID",

@@ -5089,7 +5089,7 @@
         "allConditions": "All conditions",
         "allResponses": "All responses",
         "matches": "{{count}} patients found",
-        "page": "Page {{page}} of {{total}}",
+        "page": "Page {{current}} of {{total}}",
         "open": "Open",
         "col": {
           "id": "ID",
