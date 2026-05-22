@@ -24,6 +24,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 6.0.0 -->
 
+### Changed - 2026-05-22 — Observatório Clínico v2.1: filtros globais, métricas NNT/HR/TTR, fluxo mensal e caminhos biológicos
+<!-- area: admin · status: entregue · i18n: 1.103.0 -->
+- Coorte sintética rebalanceada para totais não-redondos: 8.473 tratados / 13.916 espelho / 8.473 gêmeos digitais (1 twin por tratado). Helpers novos em `syntheticCohort.ts`: `meanTrajectoryWithCI` (IC95%), `computeNNT`, `computeHazardRatio`, `computeTimeToResponse` (mediana + IQR), `computeMonthlyFlow` (active/joined/churned).
+- `ClinicalFiltersBar` sticky no topo da tab com 7 filtros (condição, raça, idade, região, adesão, janela de protocolo, resposta) + hook `useFilteredCohort` que propaga a coorte filtrada para todas as sub-abas.
+- `CohortObservatory`: novo bloco "Métricas de impacto clínico" (NNT/HR/TTR) e `AdherenceMonthlyStack` substitui o funil 0-3-6m por barras empilhadas mensais (24 meses) com churn negativo abaixo do eixo.
+- `LongitudinalTrajectories`: banda IC 95% nas trajetórias de tratados (Area + média).
+- `ModelFeedbackLoop` agora conversa com os 4 modelos reais de `predictiveModelsData`: tabela com acurácia atual, drift sintético derivado do gemeo×real, Δ aprendizado mensal e link "Ver evolução" → `/administrador?tab=modelos-preditivos`. Cards superiores reagem aos modelos (média de acurácia).
+- Nova 6ª aba **Caminhos Biológicos** (`BiologicalPathways.tsx` + `src/data/biologicalPathways.ts`): SVG nativo com 4 trilhas (Composto → Mecanismo → Processo → Desfecho) para 8 condições, largura da seta ∝ evidência sintética, notação `→ ⊣ ⇢`.
+- i18n: +~60 chaves em `clinicalMonitoring.v2.{filters, metrics, monthlyFlow, pathways, loopModels}` (PT+EN). I18N_VERSION 1.102.0 → 1.103.0.
+- Files: src/utils/syntheticCohort.ts, src/hooks/useFilteredCohort.ts, src/data/biologicalPathways.ts, src/components/administrador/clinical-monitoring/{ClinicalMonitoringTab,ClinicalFiltersBar,CohortObservatory,AdherenceMonthlyStack,LongitudinalTrajectories,ModelFeedbackLoop,BiologicalPathways}.tsx, src/locales/{pt,en}/translation.json, src/i18n.ts
+
 ### Changed - 2026-05-22 — Monitoramento Clínico vira Observatório Longitudinal (coorte sintética 10k+16k+10k)
 <!-- area: admin · status: entregue · i18n: 1.102.0 -->
 - `ClinicalMonitoringTab` reescrita em 5 abas: Observatório da Coorte, Trajetórias Longitudinais, Explorador de Pacientes, Sinais de Descoberta e Loop de Modelos.
