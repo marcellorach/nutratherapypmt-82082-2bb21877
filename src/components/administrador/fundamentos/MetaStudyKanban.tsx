@@ -512,19 +512,6 @@ const MetaStudyKanban: React.FC = () => {
                             <MessageSquare className="h-2.5 w-2.5" />
                             {t('fundamentos.kanban.card.chatShort', 'chat')}
                           </button>
-                          {!row.cover_image_url && (
-                            <button
-                              className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground hover:text-foreground px-1.5 py-0.5 rounded border border-dashed"
-                              onClick={() => generateCover(row.id)}
-                              disabled={coverId === row.id}
-                              title={t('fundamentos.kanban.card.generateCover', 'Gerar ilustração')}
-                            >
-                              {coverId === row.id
-                                ? <Loader2 className="h-2.5 w-2.5 animate-spin" />
-                                : <ImageIcon className="h-2.5 w-2.5" />}
-                              {t('fundamentos.kanban.card.cover', 'capa')}
-                            </button>
-                          )}
                         </div>
                         {/* Mini barra de contribuição */}
                         {filledCount > 0 && (
