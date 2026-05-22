@@ -2,9 +2,9 @@
  * Synthetic Cohort Generator — Clinical Monitoring Observatory
  *
  * Deterministic generation of:
- *  - 10.000 TREATED dogs (Senex stack approved)
- *  - 16.000 MIRROR dogs (untreated parallel cohort, matched by breed+age+condition)
- *  - 10.000 DIGITAL TWINS (projected trajectory per treated dog)
+ *  - ~8.5k TREATED dogs (Senex stack approved) — irregular total = looks less mocked
+ *  - ~14k MIRROR dogs (untreated parallel cohort, matched)
+ *  - 1 DIGITAL TWIN per treated dog (same total as treated)
  *
  * 100% synthetic. Every record carries `is_synthetic: true`.
  * IDs follow `#A-NNNNN` format to avoid confusion with real UUIDs.
@@ -81,6 +81,10 @@ export interface SyntheticPet {
   responseStatus: ResponseLabel;
   yearsGained: number; // estimated; mirror = 0
   estimatedRoeBrl: number; // ROE proxy (treated only)
+  /** Calendar-month index (0..24, 24 = current month) when pet started the protocol. */
+  enrollmentCalendarMonth?: number;
+  /** Calendar-month index when pet dropped the protocol (null = still active). */
+  dropCalendarMonth?: number | null;
 }
 
 export interface SyntheticCohort {
@@ -153,8 +157,9 @@ export function generateSyntheticCohort(opts: GenerateOptions = {}): SyntheticCo
   if (CACHED && !opts.seed && !opts.treatedCount && !opts.mirrorCount) return CACHED;
 
   const seed = opts.seed ?? 42_424_242;
-  const treatedCount = opts.treatedCount ?? 10_000;
-  const mirrorCount = opts.mirrorCount ?? 16_000;
+  // Irregular totals → looks less mocked. 1 digital twin per treated by design.
+  const treatedCount = opts.treatedCount ?? 8_473;
+  const mirrorCount = opts.mirrorCount ?? 13_916;
   const rng = mulberry32(seed);
 
   const condWeights = SYNTHETIC_CONDITIONS.map((c) => c.prevalence);
@@ -195,6 +200,15 @@ export function generateSyntheticCohort(opts: GenerateOptions = {}): SyntheticCo
     const estimatedRoeBrl = Math.round(yearsGained * 4800 + (responseStatus === 'significant' ? 1200 : 0));
     const id = `#A-${pad5(i + 1)}`;
 
+    // Calendar-month enrollment: 24 = current month, going back to monthsOnProtocol ago.
+    const enrollmentCalendarMonth = Math.max(0, 24 - monthsOnProtocol);
+    // Drop probability driven by adherence: <60 → up to 35% chance of dropping mid-protocol.
+    let dropCalendarMonth: number | null = null;
+    if (adherencePct < 75 && rng() < (75 - adherencePct) / 100 + 0.05) {
+      const dropAtProtocolMonth = Math.floor(2 + rng() * Math.max(1, monthsOnProtocol - 2));
+      dropCalendarMonth = Math.min(24, enrollmentCalendarMonth + dropAtProtocolMonth);
+    }
+
     const pet: SyntheticPet = {
       id,
       role: 'treated',
@@ -214,6 +228,8 @@ export function generateSyntheticCohort(opts: GenerateOptions = {}): SyntheticCo
       responseStatus,
       yearsGained: Number(yearsGained.toFixed(2)),
       estimatedRoeBrl,
+      enrollmentCalendarMonth,
+      dropCalendarMonth,
     };
     treated.push(pet);
 
@@ -303,6 +319,95 @@ export function meanTrajectory(pets: SyntheticPet[], maxMonths = 24): { month: n
     }
   }
   return buckets.map((b, m) => ({ month: m, mean: b.n ? Number((b.sum / b.n).toFixed(3)) : 0, n: b.n }));
+}
+
+/** Mean trajectory with 95% confidence interval band (mean ± 1.96·SEM). */
+export function meanTrajectoryWithCI(pets: SyntheticPet[], maxMonths = 24) {
+  const sums: { sum: number; sumSq: number; n: number }[] = Array.from({ length: maxMonths + 1 }, () => ({ sum: 0, sumSq: 0, n: 0 }));
+  for (const p of pets) {
+    for (let m = 0; m < p.monthlySeverity.length && m <= maxMonths; m++) {
+      const v = p.monthlySeverity[m];
+      sums[m].sum += v;
+      sums[m].sumSq += v * v;
+      sums[m].n++;
+    }
+  }
+  return sums.map((b, m) => {
+    if (!b.n) return { month: m, mean: 0, lo: 0, hi: 0, n: 0 };
+    const mean = b.sum / b.n;
+    const variance = Math.max(0, b.sumSq / b.n - mean * mean);
+    const sem = Math.sqrt(variance / b.n);
+    const ci = 1.96 * sem;
+    return {
+      month: m,
+      mean: Number(mean.toFixed(3)),
+      lo: Number(Math.max(0, mean - ci).toFixed(3)),
+      hi: Number(Math.min(1, mean + ci).toFixed(3)),
+      n: b.n,
+    };
+  });
+}
+
+/** Number Needed to Treat — synthetic, per condition. */
+export function computeNNT(treated: SyntheticPet[], mirror: SyntheticPet[]): number | null {
+  if (!treated.length || !mirror.length) return null;
+  const rateT = treated.filter((p) => p.responseStatus === 'significant' || p.responseStatus === 'mild').length / treated.length;
+  const rateM = mirror.filter((p) => p.responseStatus === 'mild').length / mirror.length;
+  const arr = rateT - rateM;
+  if (arr <= 0) return null;
+  return Number((1 / arr).toFixed(1));
+}
+
+/** Hazard ratio proxy: ratio of worsening events (final severity > T0) treated vs mirror. */
+export function computeHazardRatio(treated: SyntheticPet[], mirror: SyntheticPet[]): number | null {
+  if (!treated.length || !mirror.length) return null;
+  const worsen = (p: SyntheticPet) => p.monthlySeverity[p.monthlySeverity.length - 1] > p.severityT0 + 0.02;
+  const hT = treated.filter(worsen).length / treated.length;
+  const hM = mirror.filter(worsen).length / mirror.length;
+  if (hM === 0) return null;
+  return Number((hT / hM).toFixed(2));
+}
+
+/** Median time-to-response (months) with IQR for treated cohort. */
+export function computeTimeToResponse(treated: SyntheticPet[]): { median: number; q1: number; q3: number } | null {
+  const times: number[] = [];
+  for (const p of treated) {
+    const t0 = p.severityT0;
+    const target = t0 * 0.85; // 15% improvement
+    for (let m = 1; m < p.monthlySeverity.length; m++) {
+      if (p.monthlySeverity[m] <= target) { times.push(m); break; }
+    }
+  }
+  if (!times.length) return null;
+  times.sort((a, b) => a - b);
+  const q = (p: number) => times[Math.floor(p * (times.length - 1))];
+  return { median: q(0.5), q1: q(0.25), q3: q(0.75) };
+}
+
+/**
+ * Monthly adherence flow over the last 24 calendar months:
+ * { month, joined, churned, active } stacked-friendly.
+ */
+export function computeMonthlyFlow(treated: SyntheticPet[], months = 24) {
+  const joined = new Array(months + 1).fill(0);
+  const churned = new Array(months + 1).fill(0);
+  for (const p of treated) {
+    if (p.enrollmentCalendarMonth != null && p.enrollmentCalendarMonth <= months) joined[p.enrollmentCalendarMonth]++;
+    if (p.dropCalendarMonth != null && p.dropCalendarMonth <= months) churned[p.dropCalendarMonth]++;
+  }
+  const out = [] as { month: number; label: string; joined: number; churned: number; active: number }[];
+  let active = 0;
+  for (let m = 0; m <= months; m++) {
+    active += joined[m] - churned[m];
+    out.push({
+      month: m,
+      label: `M-${months - m}`,
+      joined: joined[m],
+      churned: -churned[m], // negative for diverging stacked bar
+      active: Math.max(0, active),
+    });
+  }
+  return out;
 }
 
 /** Build a synthetic patient header / consultation snapshot for the detail dialog. */
