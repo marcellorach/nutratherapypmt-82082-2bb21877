@@ -5,112 +5,127 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const BUCKET = 'ontology-indexes';
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-function norm(s: string | null | undefined): string | null {
-  if (!s) return null;
-  const t = s.trim().toLowerCase();
-  return t.length ? t : null;
+// NCBI MeSH via E-utilities (free, no key; ~3 req/s)
+async function lookupMesh(name: string): Promise<string | null> {
+  try {
+    const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=mesh&retmode=json&retmax=1&term=${encodeURIComponent(name + '[MeSH Terms]')}`;
+    const r = await fetch(url);
+    if (!r.ok) return null;
+    const j = await r.json();
+    const uid = j?.esearchresult?.idlist?.[0];
+    if (!uid) return null;
+    const r2 = await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=mesh&retmode=json&id=${uid}`);
+    if (!r2.ok) return uid;
+    const j2 = await r2.json();
+    return j2?.result?.[uid]?.ds_meshui || uid;
+  } catch { return null; }
 }
 
-function lookup(
-  indices: Array<{ source: string; map: Record<string, string> }>,
-  candidates: (string | null)[],
-): { canonical_id: string; canonical_source: string } | null {
-  for (const cand of candidates) {
-    if (!cand) continue;
-    for (const idx of indices) {
-      const hit = idx.map[cand];
-      if (hit) return { canonical_id: hit, canonical_source: idx.source };
-    }
-  }
-  return null;
-}
-
-async function loadJson(supabase: any, path: string): Promise<Record<string, string>> {
-  const { data, error } = await supabase.storage.from(BUCKET).download(path);
-  if (error) throw new Error(`download ${path}: ${error.message}`);
-  const text = await data.text();
-  return JSON.parse(text);
+// EBI OLS4 (free, no key) — works for chebi, omia, etc.
+async function lookupOls(name: string, ontology: 'chebi' | 'omia'): Promise<string | null> {
+  try {
+    const url = `https://www.ebi.ac.uk/ols4/api/search?q=${encodeURIComponent(name)}&ontology=${ontology}&exact=false&rows=1&fieldList=obo_id,short_form,label`;
+    const r = await fetch(url);
+    if (!r.ok) return null;
+    const j = await r.json();
+    const doc = j?.response?.docs?.[0];
+    return doc?.obo_id || doc?.short_form || null;
+  } catch { return null; }
 }
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
-    const dryRun = !!body.dry_run;
+    const body = await req.json().catch(() => ({}));
+    const dryRun = body.dry_run === true;
 
-    const supabase = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+    );
 
-    console.log('Loading JSONs from storage…');
-    const [omia, mesh, chebi] = await Promise.all([
-      loadJson(supabase, 'omia-canine.json'),
-      loadJson(supabase, 'mesh.json'),
-      loadJson(supabase, 'chebi.json'),
-    ]);
-    console.log(`OMIA=${Object.keys(omia).length} MeSH=${Object.keys(mesh).length} ChEBI=${Object.keys(chebi).length}`);
-
-    const condIdx = [
-      { source: 'omia', map: omia },
-      { source: 'mesh', map: mesh },
-    ];
-    const nutIdx = [
-      { source: 'chebi', map: chebi },
-      { source: 'mesh', map: mesh },
-    ];
-
-    // ---- health_conditions ----
-    const { data: conditions, error: cErr } = await supabase
+    const { data: conds, error: cerr } = await supabase
       .from('health_conditions')
-      .select('id, name, name_en')
+      .select('id, name, name_en, canonical_id')
       .is('canonical_id', null);
-    if (cErr) throw cErr;
+    if (cerr) throw cerr;
 
-    const condUnmatched: string[] = [];
-    let condMatched = 0;
-    for (const row of conditions ?? []) {
-      const hit = lookup(condIdx, [norm(row.name_en), norm(row.name)]);
-      if (!hit) { condUnmatched.push(row.name_en ?? row.name); continue; }
-      condMatched++;
-      if (!dryRun) {
-        await supabase.from('health_conditions')
-          .update({ canonical_id: hit.canonical_id, canonical_source: hit.canonical_source })
-          .eq('id', row.id);
+    const condUpdates: any[] = [];
+    const condUnmatched: any[] = [];
+    for (const c of conds ?? []) {
+      const q = c.name_en || c.name;
+      let id: string | null = null; let src = '';
+      const omia = await lookupOls(q, 'omia');
+      if (omia) { id = omia; src = 'OMIA'; }
+      else {
+        await sleep(350);
+        const mesh = await lookupMesh(q);
+        if (mesh) { id = mesh; src = 'MeSH'; }
       }
+      if (id) condUpdates.push({ id: c.id, canonical_id: id, canonical_source: src, matched_name: q });
+      else condUnmatched.push({ id: c.id, name: c.name, name_en: c.name_en });
+      await sleep(150);
     }
 
-    // ---- nutraceuticals ----
-    const { data: nutras, error: nErr } = await supabase
+    const { data: nutras, error: nerr } = await supabase
       .from('nutraceuticals')
-      .select('id, name, name_en')
+      .select('id, name, name_en, canonical_id')
       .is('canonical_id', null);
-    if (nErr) throw nErr;
+    if (nerr) throw nerr;
 
-    const nutUnmatched: string[] = [];
-    let nutMatched = 0;
-    for (const row of nutras ?? []) {
-      const hit = lookup(nutIdx, [norm(row.name_en), norm(row.name)]);
-      if (!hit) { nutUnmatched.push(row.name_en ?? row.name); continue; }
-      nutMatched++;
-      if (!dryRun) {
+    const nutraUpdates: any[] = [];
+    const nutraUnmatched: any[] = [];
+    for (const n of nutras ?? []) {
+      const q = n.name_en || n.name;
+      let id: string | null = null; let src = '';
+      const chebi = await lookupOls(q, 'chebi');
+      if (chebi) { id = chebi; src = 'ChEBI'; }
+      else {
+        await sleep(350);
+        const mesh = await lookupMesh(q);
+        if (mesh) { id = mesh; src = 'MeSH'; }
+      }
+      if (id) nutraUpdates.push({ id: n.id, canonical_id: id, canonical_source: src, matched_name: q });
+      else nutraUnmatched.push({ id: n.id, name: n.name, name_en: n.name_en });
+      await sleep(150);
+    }
+
+    if (!dryRun) {
+      for (const u of condUpdates) {
+        await supabase.from('health_conditions')
+          .update({ canonical_id: u.canonical_id, canonical_source: u.canonical_source })
+          .eq('id', u.id);
+      }
+      for (const u of nutraUpdates) {
         await supabase.from('nutraceuticals')
-          .update({ canonical_id: hit.canonical_id, canonical_source: hit.canonical_source })
-          .eq('id', row.id);
+          .update({ canonical_id: u.canonical_id, canonical_source: u.canonical_source })
+          .eq('id', u.id);
       }
     }
 
     return new Response(JSON.stringify({
       dry_run: dryRun,
-      indices: { omia: Object.keys(omia).length, mesh: Object.keys(mesh).length, chebi: Object.keys(chebi).length },
-      health_conditions: { matched: condMatched, unmatched: condUnmatched.length, unmatched_sample: condUnmatched.slice(0, 30) },
-      nutraceuticals: { matched: nutMatched, unmatched: nutUnmatched.length, unmatched_sample: nutUnmatched.slice(0, 30) },
+      conditions: {
+        total: conds?.length ?? 0,
+        matched: condUpdates.length,
+        unmatched: condUnmatched.length,
+        samples_matched: condUpdates.slice(0, 10),
+        samples_unmatched: condUnmatched.slice(0, 20),
+      },
+      nutraceuticals: {
+        total: nutras?.length ?? 0,
+        matched: nutraUpdates.length,
+        unmatched: nutraUnmatched.length,
+        samples_matched: nutraUpdates.slice(0, 10),
+        samples_unmatched: nutraUnmatched.slice(0, 20),
+      },
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-  } catch (err) {
-    console.error(err);
-    return new Response(JSON.stringify({ error: String(err) }), {
+  } catch (e: any) {
+    console.error('Error:', e);
+    return new Response(JSON.stringify({ error: e.message }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
