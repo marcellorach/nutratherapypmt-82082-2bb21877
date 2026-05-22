@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-21T23:37:30.709Z
+// Última geração: 2026-05-22T01:36:00.327Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,36 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-05-21";
+export const lastChangelogDate = "2026-05-22";
 
 export const senexVersion = "6.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-22",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Fundamentos: Sandbox (lifecycle) + Confiabilidade dos meta-estudos (Fase A)",
+    "bullets": [
+      "`meta_studies` ganhou coluna `lifecycle_status` (enum `meta_study_lifecycle`: inbox / triaged / in_review / approved / archived). Novos uploads caem em `inbox` por padrão.",
+      "5 dimensões de confiabilidade 0–5 (`reliability_methodology`, `reliability_evidence_base`, `reliability_applicability`, `reliability_reproducibility`, `reliability_relevance`) + `reliability_suggested` JSONB + `reliability_overall` (coluna gerada = média das notas preenchidas).",
+      "Backfill seguro: estudos com `proposed_rules`/`key_claims` → `triaged`; estudos já com `core_rule_evidence` vinculada → `approved`.",
+      "Nova aba \"Sandbox / Kanban\" em Fundamentos com 4 colunas (Inbox · Triados · Em revisão · Aprovados) + filtro de arquivados. Cards mostram título, ano, kind, nº de regras propostas e badge de confiabilidade colorida.",
+      "Diálogo de edição: 5 sliders 0–5 com descrição por dimensão, botões para avançar/voltar estado, recálculo automático da nota geral.",
+      "Card \"Roadmap do Meta-KG\" fixo no topo da aba Ingestão lembrando Fase B (lições como entidades + tripletes arquiteturais + RC↔lição) e Fase C (RAG do meta-KG quando ≥30 estudos).",
+      "Promoção a `approved` permanece bloqueada pela curadoria das `proposed_rules` existente (regra de segurança preservada).",
+      "I18N_VERSION: 1.97.0 → 1.98.0.",
+      "Files: supabase/migrations/<lifecycle+reliability>, src/components/administrador/fundamentos/MetaStudyKanban.tsx, src/components/administrador/fundamentos/MetaKgRoadmapCard.tsx, src/pages/administrador/FundamentosTab.tsx, src/i18n.ts"
+    ],
+    "files": [
+      "src/components/administrador/fundamentos/MetaStudyKanban.tsx",
+      "src/components/administrador/fundamentos/MetaKgRoadmapCard.tsx",
+      "src/pages/administrador/FundamentosTab.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.98.0"
+  },
   {
     "date": "2026-05-21",
     "kind": "changed",

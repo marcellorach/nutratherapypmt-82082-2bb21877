@@ -2278,11 +2278,19 @@ export type Database = {
           journal: string | null
           key_claims: Json
           kind: string
+          lifecycle_status: Database["public"]["Enums"]["meta_study_lifecycle"]
           methodological_recipes: Json
           open_questions: Json
           pdf_storage_path: string | null
           proposed_rules: Json
           quantitative_parameters: Json
+          reliability_applicability: number | null
+          reliability_evidence_base: number | null
+          reliability_methodology: number | null
+          reliability_overall: number | null
+          reliability_relevance: number | null
+          reliability_reproducibility: number | null
+          reliability_suggested: Json
           source_url: string | null
           summary: string | null
           title: string
@@ -2304,11 +2312,19 @@ export type Database = {
           journal?: string | null
           key_claims?: Json
           kind?: string
+          lifecycle_status?: Database["public"]["Enums"]["meta_study_lifecycle"]
           methodological_recipes?: Json
           open_questions?: Json
           pdf_storage_path?: string | null
           proposed_rules?: Json
           quantitative_parameters?: Json
+          reliability_applicability?: number | null
+          reliability_evidence_base?: number | null
+          reliability_methodology?: number | null
+          reliability_overall?: number | null
+          reliability_relevance?: number | null
+          reliability_reproducibility?: number | null
+          reliability_suggested?: Json
           source_url?: string | null
           summary?: string | null
           title: string
@@ -2330,11 +2346,19 @@ export type Database = {
           journal?: string | null
           key_claims?: Json
           kind?: string
+          lifecycle_status?: Database["public"]["Enums"]["meta_study_lifecycle"]
           methodological_recipes?: Json
           open_questions?: Json
           pdf_storage_path?: string | null
           proposed_rules?: Json
           quantitative_parameters?: Json
+          reliability_applicability?: number | null
+          reliability_evidence_base?: number | null
+          reliability_methodology?: number | null
+          reliability_overall?: number | null
+          reliability_relevance?: number | null
+          reliability_reproducibility?: number | null
+          reliability_suggested?: Json
           source_url?: string | null
           summary?: string | null
           title?: string
@@ -5085,6 +5109,12 @@ export type Database = {
         | "species"
         | "age_group"
         | "study"
+      meta_study_lifecycle:
+        | "inbox"
+        | "triaged"
+        | "in_review"
+        | "approved"
+        | "archived"
       relationship_type_expanded:
         | "INHIBITS"
         | "ACTIVATES"
@@ -5271,6 +5301,13 @@ export const Constants = {
         "species",
         "age_group",
         "study",
+      ],
+      meta_study_lifecycle: [
+        "inbox",
+        "triaged",
+        "in_review",
+        "approved",
+        "archived",
       ],
       relationship_type_expanded: [
         "INHIBITS",
