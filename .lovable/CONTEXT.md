@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-05-22T14:48:32.018Z
+Generated: 2026-05-22T16:04:53.773Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.101.0
+## Latest i18n version: 1.102.0
 
 ## Changes by area (last 14 days)
-- **admin**: 38
+- **admin**: 39
 - **vet-ui**: 16
 - **kg**: 6
 - **meta**: 6
@@ -16,6 +16,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **i18n**: 1
 
 ## Top 10 recent entries
+### 2026-05-22 · [admin] CHANGED — Monitoramento Clínico vira Observatório Longitudinal (coorte sintética 10k+16k+10k)
+- `ClinicalMonitoringTab` reescrita em 5 abas: Observatório da Coorte, Trajetórias Longitudinais, Explorador de Pacientes, Sinais de Descoberta e Loop de Modelos.
+- Novo `src/utils/syntheticCohort.ts`: gerador determinístico (PRNG mulberry32, seed fixa) de 10.000 cães tratados + 16.000 pares observacionais (coorte-espelho) + 10.000 gêmeos digitais projetados. Todos os registros carregam `is_synthetic: true` e IDs `#A-NNNNN` / `#M-NNNNN`. Modelagem por 8 condições (OA, DRC, CDS, hepato, cardio, obesidade, IBD, sarcopenia) com curva sigmoide amortecida por adesão.
+- `PatientDetailDialog`: drill-down com snapshot T0, stack Senex aprovado, proposta ao tutor (custo/anos ganhos/ROE), trajetória real × gêmeo digital × espelho, tabela de pares observacionais e linha do tempo de ajustes de protocolo.
+_files: src/utils/syntheticCohort.ts, src/i18n.ts_
+
 ### 2026-05-22 · [admin] CHANGED — Depósito de estudos arquiteturais ganha citações ricas; ilustrações do Kanban removidas
 - Novo `MetaStudyDetailedCard.tsx` na aba "Estudos Arquiteturais": exibe selo de confiabilidade ★ X/5 (popover com as 5 dimensões), links Fonte + DOI + chat contextual, e seção colapsável "Citações & excertos detalhados" que renderiza `quantitative_parameters` (fórmulas/λ/thresholds), `evaluation_metrics`, `architectural_patterns`, `methodological_recipes` e `anti_patterns_pitfalls` — cada item com statement, quote literal, `applies_to` e weight.
 - Kanban: ilustrações geradas por IA removidas (não representavam o conteúdo dos papers). `CoverThumb` agora sempre renderiza ícone temático por `kind` sobre gradiente. Botões "Gerar capas" (header) e "capa" (por card) eliminados.
@@ -69,13 +75,6 @@ _status: parcial_
 - Status reconciliado em `src/config/ai-tasks.ts`: `triplet_extraction` passa de `legacy` para `connected` (13 connected · 7 legacy · 3 planned).
 - Smoke test: `ai-task-healthcheck {triplet_extraction}` → 200 OK (827 ms).
 _files: src/config/ai-tasks.ts, supabase/functions/generate-triplets/index.ts_
-
-### 2026-05-21 · [kg] CHANGED — Migração Curadoria/KG (lote 3/3): extract-study-entities no router
-_status: parcial_
-- `extract-study-entities` (Stage 1 + Stage 2 + Stage 3 + extração de título) migrada para `callAITask` via `ai-task-router`. Helper `callLovableAI` agora recebe `taskId` e roteia respectivamente para `extraction_stage1`, `extraction_stage2`, `extraction_stage3` (título reusa `extraction_stage1`). Preserva `tools` + `tool_choice` forçado e fallback (`google/gemini-3-pro-preview`, temp=0.1).
-- Status reconciliado em `src/config/ai-tasks.ts`: `extraction_stage1/2/3` passam de `legacy` para `connected` (12 connected · 8 legacy · 3 planned).
-- Smoke test: `ai-task-healthcheck {extraction_stage1, extraction_stage2, extraction_stage3}` → 200 OK (825/910/781 ms).
-_files: src/config/ai-tasks.ts, supabase/functions/extract-study-entities/index.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

@@ -5029,6 +5029,134 @@
       "errorNetwork": "Connection error. Check your internet.",
       "errorAlreadyProcessed": "Study already processed. Use 'Reset' to reprocess.",
       "errorCriticalData": "Document was not analyzed correctly. Missing data in analysis_data."
+    },
+    "v2": {
+      "title": "Longitudinal Clinical Observatory",
+      "subtitle": "Synthetic cohort of 10,000 treated dogs, 16,000 observational pairs and 10,000 projected digital twins — for trend analysis, signal discovery and model feedback.",
+      "tabs": {
+        "observatory": "Cohort Observatory",
+        "trajectories": "Longitudinal Trajectories",
+        "explorer": "Patient Explorer",
+        "discovery": "Discovery Signals",
+        "loop": "Model Loop"
+      },
+      "syntheticBadge": {
+        "title": "Synthetic data",
+        "counts": "{{treated}} treated · {{mirror}} mirror cohort · {{twins}} digital twins",
+        "compact": "Synthetic"
+      },
+      "kpi": {
+        "treated": "Treated dogs",
+        "treatedSub": "On active Senex protocol",
+        "mirror": "Mirror cohort",
+        "mirrorSub": "Observational pairs (untreated)",
+        "twins": "Digital twins",
+        "twinsSub": "Counterfactual projections",
+        "avgFollow": "Avg. follow-up",
+        "avgFollowSub": "Months on protocol",
+        "positive": "Positive response",
+        "positiveSub": "% with ≥10pp improvement",
+        "roe": "Avg. annual ROE",
+        "roeSub": "Return on expected savings (BRL)"
+      },
+      "byCondition": {
+        "title": "Distribution by condition (treated × mirror)",
+        "treated": "Treated",
+        "mirror": "Mirror"
+      },
+      "respDist": {
+        "title": "Clinical response distribution"
+      },
+      "adoption": {
+        "title": "Adherence funnel",
+        "subtitle": "From indication to protocol maintenance"
+      },
+      "trajectories": {
+        "title": "Longitudinal trajectories",
+        "subtitle": "Mean severity over time: treated × mirror × digital twin",
+        "xAxis": "Months on protocol",
+        "yAxis": "Severity (0–1)",
+        "month": "Month",
+        "legendTreated": "Treated (mean)",
+        "legendMirror": "Mirror cohort (mean)",
+        "legendTwin": "Digital twin (projection)",
+        "note": "Expected plateau ~M{{plateau}} for this condition."
+      },
+      "explorer": {
+        "search": "Search by ID, breed or region...",
+        "condition": "Condition",
+        "response": "Response",
+        "allConditions": "All conditions",
+        "allResponses": "All responses",
+        "matches": "{{count}} patients found",
+        "page": "Page {{current}} of {{total}}",
+        "open": "Open",
+        "col": {
+          "id": "ID",
+          "breed": "Breed",
+          "age": "Age",
+          "condition": "Condition",
+          "months": "Months",
+          "adherence": "Adherence",
+          "response": "Response",
+          "years": "+Years"
+        }
+      },
+      "discovery": {
+        "intro": "Emergent signals crossing the treated cohort, digital twins and curated literature.",
+        "overperformingTitle": "Overperforming compounds",
+        "overperformingDesc": "Compounds whose observed clinical response exceeds the digital-twin projection.",
+        "overperformingItem": "{{compound}} · Δ +{{delta}}pp",
+        "synergyTitle": "Synergistic pairs",
+        "synergyDesc": "Combinations with aggregate response greater than the sum of their parts.",
+        "synergyItem": "{{a}} + {{b}} · synergy {{score}}",
+        "repurposeTitle": "Repurposing candidates",
+        "repurposeDesc": "Architectural and clinical studies suggesting new uses for catalogued compounds.",
+        "noStudies": "No curated meta-studies available."
+      },
+      "loop": {
+        "driftTitle": "Predicted × observed drift",
+        "driftSubtitle": "Difference between digital-twin projection and real trajectory (monthly mean)",
+        "driftLegend": "Drift (pp)",
+        "driftNote": "Positive drift = patient responded better than projected.",
+        "accuracy": "Digital twin accuracy",
+        "accuracySub": "1 − mean MAE of projections",
+        "kgUpdates": "Knowledge Graph updates",
+        "kgUpdatesSub": "Triplets adjusted from clinical evidence",
+        "gapfill": "Detected gaps",
+        "gapfillSub": "Pairs (compound × condition) with weak evidence"
+      },
+      "detail": {
+        "startedAgo": "Started protocol {{months}} months ago",
+        "t0Title": "T0 Snapshot (at intake)",
+        "reason": "Reason for visit",
+        "physicalExam": "Physical exam",
+        "diagnoses": "Diagnoses",
+        "severityT0": "Severity T0",
+        "currentSeverity": "Current severity",
+        "adherence": "Adherence",
+        "severity": "severity",
+        "stackTitle": "Approved Senex stack",
+        "stackSubtitle": "Nutraceutical composition recommended by AI and validated by the vet",
+        "proposalTitle": "Tutor proposal",
+        "annualCost": "Annual cost",
+        "yearsGained": "Estimated years gained",
+        "roe": "Projected ROE",
+        "trajectoryTitle": "Real trajectory × digital twin × mirror",
+        "trajectorySubtitle": "Compared with {{n}} similar observational pairs",
+        "thisPatient": "This patient",
+        "twin": "Digital twin",
+        "mirrorMean": "Mirror mean",
+        "mirrorTitle": "Observational pairs (mirror cohort)",
+        "mirrorSubtitle": "Similar pets without the protocol, for counterfactual baseline",
+        "adjustmentsTitle": "Protocol adjustments",
+        "adj": {
+          "addCoq10": "Added CoQ10 200mg/day after mitochondrial fatigue signals",
+          "tuneDose": "Tuned omega-3 dose (+30%) due to persistent inflammatory markers"
+        },
+        "contributionTitle": "Contribution to aggregate signals",
+        "contributionText": "This patient reinforces the efficacy signal of {{compound}} in {{condition}}, feeding the Model Loop."
+      }
     }
   },
   "curation": {

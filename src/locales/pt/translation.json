@@ -5030,6 +5030,134 @@
       "errorNetwork": "Erro de conexão. Verifique sua internet.",
       "errorAlreadyProcessed": "Estudo já processado. Use 'Resetar' para reprocessar.",
       "errorCriticalData": "Documento não foi analisado corretamente. Dados faltantes no analysis_data."
+    },
+    "v2": {
+      "title": "Observatório Clínico Longitudinal",
+      "subtitle": "Coorte sintética de 10.000 cães tratados, 16.000 pares observacionais e 10.000 gêmeos digitais projetados — para análise de tendências, descoberta de sinais e retroalimentação de modelos.",
+      "tabs": {
+        "observatory": "Observatório da Coorte",
+        "trajectories": "Trajetórias Longitudinais",
+        "explorer": "Explorador de Pacientes",
+        "discovery": "Sinais de Descoberta",
+        "loop": "Loop de Modelos"
+      },
+      "syntheticBadge": {
+        "title": "Dados sintéticos",
+        "counts": "{{treated}} tratados · {{mirror}} coorte-espelho · {{twins}} gêmeos digitais",
+        "compact": "Sintético"
+      },
+      "kpi": {
+        "treated": "Cães tratados",
+        "treatedSub": "Em protocolo Senex ativo",
+        "mirror": "Coorte-espelho",
+        "mirrorSub": "Pares observacionais (sem tratamento)",
+        "twins": "Gêmeos digitais",
+        "twinsSub": "Projeções contrafactuais",
+        "avgFollow": "Seguimento médio",
+        "avgFollowSub": "Meses sob protocolo",
+        "positive": "Resposta positiva",
+        "positiveSub": "% com melhora ≥ 10pp",
+        "roe": "ROE médio anual",
+        "roeSub": "Retorno em economia esperada (R$)"
+      },
+      "byCondition": {
+        "title": "Distribuição por condição (tratados × espelho)",
+        "treated": "Tratados",
+        "mirror": "Espelho"
+      },
+      "respDist": {
+        "title": "Distribuição de resposta clínica"
+      },
+      "adoption": {
+        "title": "Funil de adesão",
+        "subtitle": "Da indicação à manutenção do protocolo"
+      },
+      "trajectories": {
+        "title": "Trajetórias longitudinais",
+        "subtitle": "Severidade média ao longo do tempo: tratados × espelho × gêmeo digital",
+        "xAxis": "Meses sob protocolo",
+        "yAxis": "Severidade (0–1)",
+        "month": "Mês",
+        "legendTreated": "Tratados (média)",
+        "legendMirror": "Coorte-espelho (média)",
+        "legendTwin": "Gêmeo digital (projeção)",
+        "note": "Platô esperado ~M{{plateau}} para esta condição."
+      },
+      "explorer": {
+        "search": "Buscar por ID, raça ou região...",
+        "condition": "Condição",
+        "response": "Resposta",
+        "allConditions": "Todas as condições",
+        "allResponses": "Todas as respostas",
+        "matches": "{{count}} pacientes encontrados",
+        "page": "Página {{current}} de {{total}}",
+        "open": "Abrir",
+        "col": {
+          "id": "ID",
+          "breed": "Raça",
+          "age": "Idade",
+          "condition": "Condição",
+          "months": "Meses",
+          "adherence": "Adesão",
+          "response": "Resposta",
+          "years": "+Anos"
+        }
+      },
+      "discovery": {
+        "intro": "Sinais emergentes cruzados entre coorte tratada, gêmeos digitais e literatura curada.",
+        "overperformingTitle": "Compostos com sobreperformance",
+        "overperformingDesc": "Compostos cuja resposta clínica observada supera a projetada pelo gêmeo digital.",
+        "overperformingItem": "{{compound}} · Δ +{{delta}}pp",
+        "synergyTitle": "Pares sinérgicos",
+        "synergyDesc": "Combinações com resposta agregada superior à soma das partes.",
+        "synergyItem": "{{a}} + {{b}} · sinergia {{score}}",
+        "repurposeTitle": "Candidatos a reposicionamento",
+        "repurposeDesc": "Estudos arquiteturais e clínicos que sugerem novos usos para compostos já catalogados.",
+        "noStudies": "Nenhum meta-estudo curado disponível."
+      },
+      "loop": {
+        "driftTitle": "Drift previsto × observado",
+        "driftSubtitle": "Diferença entre projeção do gêmeo digital e trajetória real (média mensal)",
+        "driftLegend": "Drift (pp)",
+        "driftNote": "Drift positivo = paciente respondeu melhor que o projetado.",
+        "accuracy": "Acurácia do gêmeo digital",
+        "accuracySub": "1 − MAE médio das projeções",
+        "kgUpdates": "Atualizações no Knowledge Graph",
+        "kgUpdatesSub": "Triplets ajustados a partir de evidência clínica",
+        "gapfill": "Lacunas detectadas",
+        "gapfillSub": "Pares (composto × condição) sem evidência forte"
+      },
+      "detail": {
+        "startedAgo": "Iniciou protocolo há {{months}} meses",
+        "t0Title": "Snapshot T0 (na captação)",
+        "reason": "Motivo da consulta",
+        "physicalExam": "Exame físico",
+        "diagnoses": "Diagnósticos",
+        "severityT0": "Severidade T0",
+        "currentSeverity": "Severidade atual",
+        "adherence": "Adesão",
+        "severity": "severidade",
+        "stackTitle": "Stack Senex aprovado",
+        "stackSubtitle": "Composição nutracêutica recomendada pela IA e validada pelo veterinário",
+        "proposalTitle": "Proposta ao tutor",
+        "annualCost": "Custo anual",
+        "yearsGained": "Anos ganhos estimados",
+        "roe": "ROE projetado",
+        "trajectoryTitle": "Trajetória real × gêmeo digital × espelho",
+        "trajectorySubtitle": "Comparado com {{n}} pares observacionais semelhantes",
+        "thisPatient": "Este paciente",
+        "twin": "Gêmeo digital",
+        "mirrorMean": "Média do espelho",
+        "mirrorTitle": "Pares observacionais (coorte-espelho)",
+        "mirrorSubtitle": "Pets semelhantes que não receberam o protocolo, para baseline contrafactual",
+        "adjustmentsTitle": "Ajustes de protocolo",
+        "adj": {
+          "addCoq10": "Adicionado CoQ10 200mg/dia após sinais de fadiga mitocondrial",
+          "tuneDose": "Ajustada dose de ômega-3 (+30%) por marcadores inflamatórios persistentes"
+        },
+        "contributionTitle": "Contribuição para sinais agregados",
+        "contributionText": "Este paciente reforça o sinal de eficácia de {{compound}} em {{condition}}, alimentando o Loop de Modelos."
+      }
     }
   },
   "curation": {

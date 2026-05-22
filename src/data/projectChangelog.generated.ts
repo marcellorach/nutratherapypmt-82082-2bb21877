@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-22T14:48:32.013Z
+// Última geração: 2026-05-22T16:04:53.765Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,28 @@ export const lastChangelogDate = "2026-05-22";
 export const senexVersion = "6.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-22",
+    "kind": "changed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Monitoramento Clínico vira Observatório Longitudinal (coorte sintética 10k+16k+10k)",
+    "bullets": [
+      "`ClinicalMonitoringTab` reescrita em 5 abas: Observatório da Coorte, Trajetórias Longitudinais, Explorador de Pacientes, Sinais de Descoberta e Loop de Modelos.",
+      "Novo `src/utils/syntheticCohort.ts`: gerador determinístico (PRNG mulberry32, seed fixa) de 10.000 cães tratados + 16.000 pares observacionais (coorte-espelho) + 10.000 gêmeos digitais projetados. Todos os registros carregam `is_synthetic: true` e IDs `#A-NNNNN` / `#M-NNNNN`. Modelagem por 8 condições (OA, DRC, CDS, hepato, cardio, obesidade, IBD, sarcopenia) com curva sigmoide amortecida por adesão.",
+      "`PatientDetailDialog`: drill-down com snapshot T0, stack Senex aprovado, proposta ao tutor (custo/anos ganhos/ROE), trajetória real × gêmeo digital × espelho, tabela de pares observacionais e linha do tempo de ajustes de protocolo.",
+      "`DiscoverySignals` cruza coorte sintética com `meta_studies` reais (candidatos a reposicionamento puxados do banco curado).",
+      "`ModelFeedbackLoop` exibe drift previsto × observado, acurácia do gêmeo digital, atualizações no KG e lacunas detectadas.",
+      "`SyntheticDataBadge` ostensivo no topo + chip \"Sintético\" em cada card de paciente.",
+      "i18n: adicionado namespace completo `clinicalMonitoring.v2.*` em PT/EN (88 chaves novas). I18N_VERSION 1.101.0 → 1.102.0.",
+      "Files: src/utils/syntheticCohort.ts, src/components/administrador/clinical-monitoring/*, src/locales/{pt,en}/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "src/utils/syntheticCohort.ts",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.102.0"
+  },
   {
     "date": "2026-05-22",
     "kind": "changed",

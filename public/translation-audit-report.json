@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-05-22T05:04:39.357Z",
+  "timestamp": "2026-05-22T16:01:35.492Z",
   "summary": {
-    "totalFiles": 896,
-    "totalIssues": 439,
+    "totalFiles": 907,
+    "totalIssues": 540,
     "hardcodedTexts": 52,
-    "missingKeys": 385,
+    "missingKeys": 486,
     "incompleteTranslations": 2
   },
   "issues": [
@@ -508,15 +508,694 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/clinical-monitoring/ClinicalMonitoringTab.tsx",
-      "line": 36,
-      "text": "-",
+      "line": 33,
+      "text": "clinicalMonitoring.v2.title",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/clinical-monitoring/ClinicalMonitoringTab.tsx",
-      "line": 41,
-      "text": "-",
+      "line": 36,
+      "text": "clinicalMonitoring.v2.subtitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/ClinicalMonitoringTab.tsx",
+      "line": 49,
+      "text": "clinicalMonitoring.v2.tabs.observatory",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/ClinicalMonitoringTab.tsx",
+      "line": 50,
+      "text": "clinicalMonitoring.v2.tabs.trajectories",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/ClinicalMonitoringTab.tsx",
+      "line": 51,
+      "text": "clinicalMonitoring.v2.tabs.explorer",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/ClinicalMonitoringTab.tsx",
+      "line": 52,
+      "text": "clinicalMonitoring.v2.tabs.discovery",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/ClinicalMonitoringTab.tsx",
+      "line": 53,
+      "text": "clinicalMonitoring.v2.tabs.loop",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/CohortObservatory.tsx",
+      "line": 97,
+      "text": "clinicalMonitoring.v2.kpi.treated",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/CohortObservatory.tsx",
+      "line": 97,
+      "text": "clinicalMonitoring.v2.kpi.treatedSub",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/CohortObservatory.tsx",
+      "line": 98,
+      "text": "clinicalMonitoring.v2.kpi.mirror",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/CohortObservatory.tsx",
+      "line": 98,
+      "text": "clinicalMonitoring.v2.kpi.mirrorSub",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/CohortObservatory.tsx",
+      "line": 99,
+      "text": "clinicalMonitoring.v2.kpi.twins",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/CohortObservatory.tsx",
+      "line": 99,
+      "text": "clinicalMonitoring.v2.kpi.twinsSub",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/CohortObservatory.tsx",
+      "line": 100,
+      "text": "clinicalMonitoring.v2.kpi.avgFollow",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/CohortObservatory.tsx",
+      "line": 100,
+      "text": "clinicalMonitoring.v2.kpi.avgFollowSub",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/CohortObservatory.tsx",
+      "line": 101,
+      "text": "clinicalMonitoring.v2.kpi.positive",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/CohortObservatory.tsx",
+      "line": 101,
+      "text": "clinicalMonitoring.v2.kpi.positiveSub",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/CohortObservatory.tsx",
+      "line": 102,
+      "text": "clinicalMonitoring.v2.kpi.roe",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/CohortObservatory.tsx",
+      "line": 108,
+      "text": "clinicalMonitoring.v2.byCondition.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/CohortObservatory.tsx",
+      "line": 118,
+      "text": "clinicalMonitoring.v2.byCondition.treated",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/CohortObservatory.tsx",
+      "line": 119,
+      "text": "clinicalMonitoring.v2.byCondition.mirror",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/CohortObservatory.tsx",
+      "line": 127,
+      "text": "clinicalMonitoring.v2.respDist.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/CohortObservatory.tsx",
+      "line": 147,
+      "text": "clinicalMonitoring.v2.adoption.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/CohortObservatory.tsx",
+      "line": 148,
+      "text": "clinicalMonitoring.v2.adoption.subtitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/DiscoverySignals.tsx",
+      "line": 23,
+      "text": "id, title, source_url, kind, summary",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/DiscoverySignals.tsx",
+      "line": 103,
+      "text": "clinicalMonitoring.v2.discovery.intro",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/DiscoverySignals.tsx",
+      "line": 112,
+      "text": "clinicalMonitoring.v2.discovery.overperformingTitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/DiscoverySignals.tsx",
+      "line": 114,
+      "text": "clinicalMonitoring.v2.discovery.overperformingDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/DiscoverySignals.tsx",
+      "line": 135,
+      "text": "clinicalMonitoring.v2.discovery.synergyTitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/DiscoverySignals.tsx",
+      "line": 137,
+      "text": "clinicalMonitoring.v2.discovery.synergyDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/DiscoverySignals.tsx",
+      "line": 159,
+      "text": "clinicalMonitoring.v2.discovery.repurposeTitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/DiscoverySignals.tsx",
+      "line": 161,
+      "text": "clinicalMonitoring.v2.discovery.repurposeDesc",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/DiscoverySignals.tsx",
+      "line": 165,
+      "text": "clinicalMonitoring.v2.discovery.noStudies",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/LongitudinalTrajectories.tsx",
+      "line": 47,
+      "text": "clinicalMonitoring.v2.trajectories.title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/LongitudinalTrajectories.tsx",
+      "line": 48,
+      "text": "clinicalMonitoring.v2.trajectories.subtitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/LongitudinalTrajectories.tsx",
+      "line": 66,
+      "text": "clinicalMonitoring.v2.trajectories.legendTreated",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/LongitudinalTrajectories.tsx",
+      "line": 70,
+      "text": "clinicalMonitoring.v2.trajectories.legendMirror",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/LongitudinalTrajectories.tsx",
+      "line": 74,
+      "text": "clinicalMonitoring.v2.trajectories.legendTwin",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/LongitudinalTrajectories.tsx",
+      "line": 81,
+      "text": "clinicalMonitoring.v2.trajectories.xAxis",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/LongitudinalTrajectories.tsx",
+      "line": 82,
+      "text": "clinicalMonitoring.v2.trajectories.yAxis",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/LongitudinalTrajectories.tsx",
+      "line": 85,
+      "text": "clinicalMonitoring.v2.trajectories.month",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/LongitudinalTrajectories.tsx",
+      "line": 88,
+      "text": "clinicalMonitoring.v2.trajectories.legendMirror",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/LongitudinalTrajectories.tsx",
+      "line": 89,
+      "text": "clinicalMonitoring.v2.trajectories.legendTreated",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/LongitudinalTrajectories.tsx",
+      "line": 90,
+      "text": "clinicalMonitoring.v2.trajectories.legendTwin",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/ModelFeedbackLoop.tsx",
+      "line": 43,
+      "text": "clinicalMonitoring.v2.loop.kgUpdates",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/ModelFeedbackLoop.tsx",
+      "line": 45,
+      "text": "clinicalMonitoring.v2.loop.kgUpdatesSub",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/ModelFeedbackLoop.tsx",
+      "line": 53,
+      "text": "clinicalMonitoring.v2.loop.accuracy",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/ModelFeedbackLoop.tsx",
+      "line": 55,
+      "text": "clinicalMonitoring.v2.loop.accuracySub",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/ModelFeedbackLoop.tsx",
+      "line": 63,
+      "text": "clinicalMonitoring.v2.loop.gapfill",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/ModelFeedbackLoop.tsx",
+      "line": 65,
+      "text": "clinicalMonitoring.v2.loop.gapfillSub",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/ModelFeedbackLoop.tsx",
+      "line": 73,
+      "text": "clinicalMonitoring.v2.loop.driftTitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/ModelFeedbackLoop.tsx",
+      "line": 74,
+      "text": "clinicalMonitoring.v2.loop.driftSubtitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/ModelFeedbackLoop.tsx",
+      "line": 84,
+      "text": "clinicalMonitoring.v2.loop.driftLegend",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/ModelFeedbackLoop.tsx",
+      "line": 87,
+      "text": "clinicalMonitoring.v2.loop.driftNote",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 66,
+      "text": "clinicalMonitoring.v2.detail.adj.addCoq10",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 67,
+      "text": "clinicalMonitoring.v2.detail.adj.tuneDose",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 79,
+      "text": "clinicalMonitoring.v2.syntheticBadge.compact",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 91,
+      "text": "clinicalMonitoring.v2.detail.t0Title",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 94,
+      "text": "clinicalMonitoring.v2.detail.reason",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 98,
+      "text": "clinicalMonitoring.v2.detail.physicalExam",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 102,
+      "text": "clinicalMonitoring.v2.detail.diagnoses",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 113,
+      "text": "clinicalMonitoring.v2.detail.severityT0",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 117,
+      "text": "clinicalMonitoring.v2.detail.currentSeverity",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 121,
+      "text": "clinicalMonitoring.v2.detail.adherence",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 129,
+      "text": "clinicalMonitoring.v2.detail.stackTitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 130,
+      "text": "clinicalMonitoring.v2.detail.stackSubtitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 139,
+      "text": "clinicalMonitoring.v2.detail.proposalTitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 142,
+      "text": "clinicalMonitoring.v2.detail.annualCost",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 146,
+      "text": "clinicalMonitoring.v2.detail.yearsGained",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 150,
+      "text": "clinicalMonitoring.v2.detail.roe",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 157,
+      "text": "clinicalMonitoring.v2.detail.trajectoryTitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 162,
+      "text": "clinicalMonitoring.v2.trajectories.xAxis",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 166,
+      "text": "clinicalMonitoring.v2.detail.mirrorMean",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 167,
+      "text": "clinicalMonitoring.v2.detail.thisPatient",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 168,
+      "text": "clinicalMonitoring.v2.detail.twin",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 174,
+      "text": "clinicalMonitoring.v2.detail.mirrorTitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 175,
+      "text": "clinicalMonitoring.v2.detail.mirrorSubtitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 181,
+      "text": "clinicalMonitoring.v2.explorer.col.breed",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 182,
+      "text": "clinicalMonitoring.v2.explorer.col.age",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 183,
+      "text": "clinicalMonitoring.v2.detail.severity",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 205,
+      "text": "clinicalMonitoring.v2.detail.adjustmentsTitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientDetailDialog.tsx",
+      "line": 218,
+      "text": "clinicalMonitoring.v2.detail.contributionTitle",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientExplorer.tsx",
+      "line": 56,
+      "text": "clinicalMonitoring.v2.explorer.search",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientExplorer.tsx",
+      "line": 63,
+      "text": "clinicalMonitoring.v2.explorer.condition",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientExplorer.tsx",
+      "line": 65,
+      "text": "clinicalMonitoring.v2.explorer.allConditions",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientExplorer.tsx",
+      "line": 72,
+      "text": "clinicalMonitoring.v2.explorer.response",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientExplorer.tsx",
+      "line": 74,
+      "text": "clinicalMonitoring.v2.explorer.allResponses",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientExplorer.tsx",
+      "line": 82,
+      "text": "clinicalMonitoring.v2.explorer.matches",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientExplorer.tsx",
+      "line": 94,
+      "text": "clinicalMonitoring.v2.explorer.col.id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientExplorer.tsx",
+      "line": 95,
+      "text": "clinicalMonitoring.v2.explorer.col.condition",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientExplorer.tsx",
+      "line": 96,
+      "text": "clinicalMonitoring.v2.explorer.col.breed",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientExplorer.tsx",
+      "line": 97,
+      "text": "clinicalMonitoring.v2.explorer.col.age",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientExplorer.tsx",
+      "line": 98,
+      "text": "clinicalMonitoring.v2.explorer.col.months",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientExplorer.tsx",
+      "line": 99,
+      "text": "clinicalMonitoring.v2.explorer.col.adherence",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientExplorer.tsx",
+      "line": 100,
+      "text": "clinicalMonitoring.v2.explorer.col.response",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientExplorer.tsx",
+      "line": 101,
+      "text": "clinicalMonitoring.v2.explorer.col.years",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/PatientExplorer.tsx",
+      "line": 122,
+      "text": "clinicalMonitoring.v2.explorer.open",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/SyntheticDataBadge.tsx",
+      "line": 19,
+      "text": "clinicalMonitoring.v2.syntheticBadge.compact",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/clinical-monitoring/SyntheticDataBadge.tsx",
+      "line": 27,
+      "text": "clinicalMonitoring.v2.syntheticBadge.title",
       "severity": "high"
     },
     {
@@ -1599,16 +2278,44 @@
     },
     {
       "type": "missing-key",
-      "file": "src/components/administrador/fundamentos/MetaStudyKanban.tsx",
-      "line": 86,
-      "text": "id,title,authors,year,kind,lifecycle_status,reliability_methodology,reliability_evidence_base,reliability_applicability,reliability_reproducibility,reliability_relevance,reliability_overall,proposed_rules,created_at",
+      "file": "src/components/administrador/fundamentos/CoreRulesEvidenceBadge.tsx",
+      "line": 37,
+      "text": "relation, weight, quote, rule_id, core_rules!inner(title, rule_id)",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/fundamentos/MetaStudyKanban.tsx",
-      "line": 132,
+      "line": 163,
+      "text": "id,title,authors,year,kind,source_url,cover_image_url,lifecycle_status,reliability_methodology,reliability_evidence_base,reliability_applicability,reliability_reproducibility,reliability_relevance,reliability_overall,proposed_rules,created_at",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/fundamentos/MetaStudyKanban.tsx",
+      "line": 173,
+      "text": "meta_study_id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/fundamentos/MetaStudyKanban.tsx",
+      "line": 220,
       "text": "reliability_overall",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/fundamentos/MetaStudyKanban.tsx",
+      "line": 249,
+      "text": "reliability_overall",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/fundamentos/MetaStudyKanban.tsx",
+      "line": 287,
+      "text": "id,reliability_methodology,reliability_evidence_base,reliability_applicability,reliability_reproducibility,reliability_relevance,reliability_overall",
       "severity": "high"
     },
     {
@@ -2510,21 +3217,21 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 753,
+      "line": 813,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 964,
+      "line": 1024,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 3759,
+      "line": 3819,
       "text": "@",
       "severity": "high"
     },
@@ -2608,13 +3315,6 @@
     {
       "type": "missing-key",
       "file": "src/pages/administrador/FundamentosTab.tsx",
-      "line": 101,
-      "text": "*",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/pages/administrador/FundamentosTab.tsx",
       "line": 102,
       "text": "*",
       "severity": "high"
@@ -2630,6 +3330,13 @@
       "type": "missing-key",
       "file": "src/pages/administrador/FundamentosTab.tsx",
       "line": 104,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/pages/administrador/FundamentosTab.tsx",
+      "line": 105,
       "text": "*",
       "severity": "high"
     },
