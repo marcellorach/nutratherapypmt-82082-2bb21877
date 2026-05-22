@@ -1,94 +1,121 @@
-## Objetivo
+## Reforma do Observatório Clínico (Clinical Monitoring v2.1)
 
-Transformar os cards de meta-estudos arquiteturais (FundamentosTab) em "vitrines Stanford-grade" sem inventar triplets clínicos. Foco: ilustração consistente, prova de impacto arquitetural, e chat contextual.
+Cinco eixos de melhoria para sair do aspecto "amador" e aproximar do nível de produção, mantendo dados 100% sintéticos rotulados.
 
-## O que vamos construir
+---
 
-### 1. Ilustração consistente por paper (1x no ingest)
+### a) Números realistas (não mais redondos)
 
-- Nova coluna `meta_studies.cover_image_url` (text, nullable).
-- Edge function `generate-meta-study-cover`:
-  - Recebe `meta_study_id`.
-  - Monta prompt com **style guide fixo** (ex: "isometric scientific illustration, muted academic palette #1a2942/#c9a84c/#f5f0e8, abstract geometric shapes representing graphs/retrieval/agents, no text, no people, flat vector style, white background").
-  - Concatena com tema derivado do `kind` + `title` (ex: "graph-based retrieval system" para MedGraphRAG).
-  - Chama `google/gemini-2.5-flash-image` via AI Gateway.
-  - Faz upload para bucket `meta-study-covers` (público) e salva URL.
-- Disparo: automático no `ingest-meta-study` (após salvar), e botão "Gerar capas faltantes" no admin para backfill (3 papers atuais).
-- Custo: ~$0.04/paper, 1x. Total backfill: ~$0.12.
+Hoje: `10.000 / 16.000 / 10.000` — visivelmente arbitrário.
 
-### 2. Badge "Apoia N Core Rules" (zero IA)
+Novo:
+- **Tratados:** `8.473` (fração levemente irregular, ainda na casa dos 10k).
+- **Cohort-espelho:** `13.916` (≠ múltiplo perfeito).
+- **Gêmeos Digitais:** mesmo `#` de Tratados → `8.473` (1 twin por tratado, conforme regra).
+- KPIs derivados (ROE, anos ganhos, médias) recalculados automaticamente — não há números mágicos no UI.
+- Geração no `syntheticCohort.ts`: trocar constantes `TREATED=10000 / MIRROR=16000 / TWIN=10000` por `TREATED=8473 / MIRROR=13916 / TWIN=TREATED`. PRNG já garante variação realista.
 
-- Query existente em `architectural_evidence` agrupada por `meta_study_id` + `relation` (`supports`/`contradicts`/`modulates_weight`).
-- No card: badge clicável `"✓ Apoia 3 regras · ⚠ Modula 1"`.
-- Click abre popover lateral listando as Core Rules afetadas com a citação textual (`quote` + `weight`).
-- Já temos os dados; só falta UI.
+---
 
-### 3. Chat contextual por paper
+### b) Model Feedback Loop ↔ DL Predictive Models
 
-- Edge function `chat-meta-study`:
-  - Input: `meta_study_id`, `messages`.
-  - Carrega `meta_study` (summary, key_claims, architectural_evidence) como contexto de sistema.
-  - Streaming via `google/gemini-3-flash-preview`.
-  - Sem RAG novo — contexto é o próprio registro (já curado).
-- UI: botão `"Conversar sobre este paper"` no card → abre `Dialog` com chat. Botão secundário `"Abrir paper original"` (link `source_url` existente).
+Hoje: KPIs "soltos" (87.4% accuracy, 42 gap-fill) sem ligação ao módulo de Modelos Preditivos.
 
-### 4. Visual do card (presentation polish)
+Novo (`ModelFeedbackLoop.tsx`):
+- Importar `useTranslatedPredictiveModels()` (mesma fonte que a aba Deep Learning).
+- Tabela "Models receiving signal" listando os 4 modelos (`PetLove Nutra`, `CuBe`, `Trat`, `Prev`) com:
+  - Accuracy atual (do módulo real)
+  - **Drift observado** (calculado da cohort sintética por condição, agregado por área do modelo)
+  - **Delta de aprendizado mensal** vinculado ao `monthlyGrowthRate` de cada modelo
+  - Botão "Ver evolução" → navega para `/administrador?tab=modelos-preditivos`
+- Card "Sinais enviados nos últimos 30d" com breakdown: novos triplets KG, ajustes de peso por modelo, gap-fills disparados.
 
-Reorganizar `FundamentosTab` card para layout horizontal:
+---
+
+### c) Adoption/Adherence — funil mensal empilhado
+
+Hoje: barras 0-3m / 3-6m / … só com "count" total (12-18m maior que 0-3m, contraintuitivo).
+
+Novo (`CohortObservatory.tsx` → novo componente `AdherenceMonthlyStack.tsx`):
+- Eixo X: **meses 0 → 24** (resolução mensal real).
+- Stacked `BarChart` por mês com 3 séries:
+  - **Ativos residuais** (continuam no protocolo) — primary
+  - **Novas adesões** no mês — emerald
+  - **Desistências/churn** no mês — destructive (com sinal negativo abaixo do eixo, para leitura clara)
+- Tooltip mostra retenção acumulada % e razão de churn (ex. "efeito-platô percebido").
+- Gerador: adicionar `monthlyFlow: { active, joined, churned }[]` por pet → agregado deterministicamente no util.
+
+---
+
+### d) Filtros globais + densificação de dados
+
+Hoje: cada aba consome a cohort inteira; nenhum filtro.
+
+Novo:
+- **Barra de filtros** no topo da `ClinicalMonitoringTab` (sticky), com Shadcn `Select`/`Combobox`:
+  - Condição (8 opções)
+  - Raça (top 15)
+  - Faixa etária (Sênior 7-10 / Geriátrico 10+ / Adulto)
+  - Região (5)
+  - Adesão (Alta ≥80% / Média 50-79% / Baixa <50%)
+  - Janela de protocolo (0-6m, 6-12m, 12-24m)
+  - Botões: **Aplicar / Limpar / Salvar visão**
+- `useFilteredCohort(filters)` hook → memoiza filtragem; KPIs, charts, explorer e drawer todos reagem.
+- Novas métricas para tirar a sensação de "superfície":
+  - **NNT sintético** (number needed to treat) por condição
+  - **Time-to-response mediano** com IQR
+  - **Hazard ratio simulado** treated vs mirror
+  - **Faixa de confiança 95%** nas trajetórias (banda Area no `LongitudinalTrajectories`)
+- Patient Explorer ganha colunas: `responseStatus`, `monthsOnProtocol`, `adherencePct`, `ROE` + ordenação por coluna.
+
+---
+
+### f) Caminhos biológicos mocados
+
+Nova aba **"Pathways"** (6ª tab) ou seção dentro de Discovery Signals — **decidido: nova tab**, mais visível e fácil de evoluir.
+
+Componente `BiologicalPathways.tsx`:
+- Para cada condição (selector), renderizar um diagrama dirigido **SVG nativo** (sem libs novas) representando:
+  - Nó **Composto** (esquerda) → **Mecanismo molecular** (mTOR, NRF2, AMPK, NF-κB, SIRT1, telomerase…) → **Processo celular** (autofagia, inflamação, estresse oxidativo) → **Outcome clínico** (mobilidade, função renal, cognição).
+  - Setas com notação biomédica padrão da memória do projeto (`→` ativa, `⊣` inibe, `⇢` modula).
+  - Largura da seta proporcional ao "n de evidência sintética" da cohort.
+- Hover no nó: tooltip com `n pets tratados que tocam este caminho`, `Δ severidade médio`, `meta-studies relacionados` (link para tab Fundamentos).
+- Banner amarelo "Mapa biológico simulado — gerado a partir da cohort sintética + estudos curados".
+- Dados: novo arquivo `src/data/biologicalPathways.ts` com 8 caminhos bilíngue (PT/EN), referenciando IDs reais dos `SYNTHETIC_CONDITIONS` e estudos da tabela `meta_studies`.
+
+---
+
+### Arquivos afetados
 
 ```text
-┌─────────────────────────────────────────────────┐
-│ [cover 120x120]  TÍTULO                  ★4.4   │
-│                  authors · year · venue          │
-│                  ───────────────────             │
-│                  "1-line summary…"               │
-│                  [✓ 3 regras] [📄 paper] [💬]   │
-└─────────────────────────────────────────────────┘
+src/utils/syntheticCohort.ts                 (números + monthlyFlow + helpers)
+src/hooks/useFilteredCohort.ts               (novo)
+src/data/biologicalPathways.ts               (novo, bilíngue)
+src/components/administrador/clinical-monitoring/
+  ClinicalMonitoringTab.tsx                  (filtros sticky + nova tab)
+  ClinicalFiltersBar.tsx                     (novo)
+  CohortObservatory.tsx                      (novas métricas, NNT/HR/CI)
+  AdherenceMonthlyStack.tsx                  (novo — substitui adoptionFunnel)
+  LongitudinalTrajectories.tsx               (banda CI 95%)
+  PatientExplorer.tsx                        (colunas + sort)
+  ModelFeedbackLoop.tsx                      (integração com DL models)
+  BiologicalPathways.tsx                     (novo)
+  SyntheticDataBadge.tsx                     (números atualizados)
+src/locales/{pt,en}/translation.json         (+ ~60 chaves novas)
+src/i18n.ts                                  (I18N_VERSION → 1.103.0)
+CHANGELOG.md + projectChangelog.generated.ts (sync)
 ```
 
-- Cover à esquerda (fallback: gradient + ícone Lucide por `kind` enquanto não gerada).
-- Rating estelar canto sup. direito.
-- Footer com 3 ações: badge core-rules · link paper · chat.
-- Expansão (click no card) mostra `key_claims` com quote highlight.
+---
 
-## Mudanças no banco
+### Notas técnicas
 
-- `meta_studies.cover_image_url TEXT` (nullable).
-- Bucket storage `meta-study-covers` (público, read-only para anon).
+- Sem novas dependências (Recharts já cobre stacked + Area; SVG nativo para pathways).
+- Tudo continua determinístico via `mulberry32` (mesmo seed = mesma cohort).
+- `is_synthetic: true` mantido em todos os registros; badge sempre visível.
+- Filtros não tocam o gerador — só `useMemo` por cima da cohort base.
+- Integração com Modelos Preditivos é leitura-only (sem mutar `predictiveModelsData`).
+- I18n: incrementar versão e adicionar TODAS as chaves em PT+EN simultaneamente (regra do projeto).
+- CHANGELOG.md → entrada `[Unreleased] Changed: Clinical Monitoring v2.1` + `npm run sync:changelog`.
 
-## Mudanças no código
-
-- **DB**: 1 migration (coluna + bucket + policies).
-- **Edge functions** (2 novas):
-  - `generate-meta-study-cover/index.ts`
-  - `chat-meta-study/index.ts`
-- **Edge function alterada**: `ingest-meta-study` (disparar cover async via `EdgeRuntime.waitUntil`).
-- **Frontend**:
-  - `FundamentosTab.tsx`: novo layout de card.
-  - `MetaStudyCard.tsx` (extrair em componente próprio).
-  - `MetaStudyChat.tsx` (dialog + streaming).
-  - `CoreRulesBadge.tsx` (popover).
-  - Botão "Backfill covers" em `IngestaoMetaEstudo.tsx`.
-- **i18n**: incrementar `I18N_VERSION`, adicionar chaves `fundamentos.card.*` em PT/EN.
-
-## Não-objetivos (deixar fora)
-
-- Triplets clínicos para papers arquiteturais (poluiria KG — conforme discussão anterior).
-- Promover lessons → entities (Phase B, refactor estrutural).
-- RAG vetorial novo (o contexto cabe no system prompt).
-
-## Documentação
-
-- `CHANGELOG.md` → entrada em `[Unreleased]` com `area: fundamentos · status: feature · i18n: yes`.
-- `npm run sync:changelog` após.
-- Sem mudança em sidebar/admin-tabs → organograma não muda.
-
-## Estimativa
-
-- Migration + bucket: 5 min
-- 2 edge functions: 30 min
-- Card redesign + 3 componentes: 45 min
-- Backfill 3 covers: 1 min (1 clique)
-- i18n + changelog: 10 min
-
-Total: ~90 min para demo-ready.
+Estimativa: ~3h. Tudo dentro de `clinical-monitoring/` — sem impacto em outras telas.
