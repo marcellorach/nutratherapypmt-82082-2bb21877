@@ -59,7 +59,7 @@ async function parseOmia(path){
     parser.on('closetag', name=>{
       if(name==='field') pendingField=null;
       else if(name==='row' && inRow){
-        if(currentTable==='Phenes_table' && row.gb_species_id==='9615'){
+        if(currentTable==='Phene' && row.gb_species_id==='9615'){
           const phene=(row.phene_name??'').trim(), id=(row.phene_id??'').trim();
           if(phene && id){ const k=phene.toLowerCase(); if(!byName.has(k)) byName.set(k,`${id}-9615`); total++; }
         }
