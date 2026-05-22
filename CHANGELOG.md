@@ -24,6 +24,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 6.0.0 -->
 
+### Added - 2026-05-22 — Meta-Estudos "Stanford-grade": capas IA, badge de Core Rules e chat contextual
+<!-- area: admin · status: entregue · i18n: 1.100.0 -->
+- Coluna `meta_studies.cover_image_url` + bucket público `meta-study-covers`. Style-guide fixo (paleta navy/gold/parchment, isométrico editorial) garante consistência visual entre papers.
+- Edge function `generate-meta-study-cover` (Gemini image): gera 1x por paper, bucket público, com tema derivado do `kind`. Backfill via botão "Gerar capas" no Kanban (5/5 papers atuais já cobertos).
+- Edge function `chat-meta-study`: chat streaming com contexto = summary + key_claims + proposed_rules + core_rule_evidence do próprio registro (sem RAG novo).
+- Componente `CoreRulesEvidenceBadge`: popover com agregação por relação (`supports`/`contradicts`/`modulates_weight`) listando regras impactadas + citações textuais.
+- Card do Kanban redesenhado: thumbnail de capa 56×56, badges de Core Rules, botões inline `paper` (link externo) e `chat`.
+- Files: supabase/functions/generate-meta-study-cover/index.ts, supabase/functions/chat-meta-study/index.ts, src/components/administrador/fundamentos/MetaStudyChatDialog.tsx, src/components/administrador/fundamentos/CoreRulesEvidenceBadge.tsx, src/components/administrador/fundamentos/MetaStudyKanban.tsx
+
 ### Changed - 2026-05-22 — Kanban Meta-Estudos: breakdown de confiabilidade inline
 <!-- area: admin · status: entregue · i18n: 1.99.0 -->
 - Card do Kanban agora exibe breakdown das 5 dimensões de confiabilidade com sliders inline (expansível) e recálculo do `reliability_overall` em tempo real (mesma fórmula da coluna gerada no DB).
