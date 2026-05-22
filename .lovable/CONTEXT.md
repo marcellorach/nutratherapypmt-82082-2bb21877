@@ -1,21 +1,28 @@
 # Project context briefing (auto)
-Generated: 2026-05-22T01:36:00.330Z
+Generated: 2026-05-22T02:14:08.643Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.98.0
+## Latest i18n version: 1.99.0
 
 ## Changes by area (last 14 days)
 - **admin**: 35
 - **vet-ui**: 16
+- **kg**: 6
 - **meta**: 6
-- **kg**: 5
 - **curation**: 4
 - **clinical-pipeline**: 4
 - **tutor-ui**: 2
 - **i18n**: 1
 
 ## Top 10 recent entries
+### 2026-05-22 · [kg] ADDED — Fase 1: identidade canônica + evidência negativa
+_status: parcial_
+- Colunas `canonical_id` + `canonical_source` em `health_conditions` e `nutraceuticals` (com índice único parcial e CHECK de fonte).
+- Coluna `evidence_polarity` em `triplet_extractions` (`positive` default; aceita `negative`, `neutral`, `inconclusive`). Backfill marca tripletes com predicates `fails_to_treat*`/`no_effect*`/`worsens*`/`contraindicat*` como `negative`.
+- Documento `docs/ONTOLOGY_SOURCES.md` com URLs oficiais de OMIA, MeSH, ChEBI, Mondo + licenças + procedimento de import + lista de papers de fundamentação.
+_files: scripts/import-ontology-dump.ts, src/i18n.ts_
+
 ### 2026-05-22 · [admin] ADDED — Fundamentos: Sandbox (lifecycle) + Confiabilidade dos meta-estudos (Fase A)
 - `meta_studies` ganhou coluna `lifecycle_status` (enum `meta_study_lifecycle`: inbox / triaged / in_review / approved / archived). Novos uploads caem em `inbox` por padrão.
 - 5 dimensões de confiabilidade 0–5 (`reliability_methodology`, `reliability_evidence_base`, `reliability_applicability`, `reliability_reproducibility`, `reliability_relevance`) + `reliability_suggested` JSONB + `reliability_overall` (coluna gerada = média das notas preenchidas).
@@ -71,12 +78,6 @@ _files: src/config/ai-tasks.ts, supabase/functions/kg-evidence-gap-fill/index.ts
 - Reconciliação `ai-tasks.ts`: `translation_conditions` marcado como `connected` (a função `translate-conditions` já chama `callAITask()` desde a Fase 2.5 — status estava desatualizado). Contagem real agora: 8 connected · 12 legacy · 3 planned.
 - Files: src/config/ai-tasks.ts
 _files: src/config/ai-tasks.ts_
-
-### 2026-05-21 · [vet-ui] ADDED — Senex 6.0: skin anatômica em camadas completa + componente DogAnatomyLayered
-- 4 novas camadas anatômicas geradas com Imagen premium em estilo ilustração científica clean (1024×768, PNG): `dog_digestive.png` (digestivo - estômago, intestinos, fígado), `dog_urinary.png` (rins + ureteres + bexiga), `dog_skeleton.png` (esqueleto completo lateral) e `dog_nervous.png` (cérebro + medula + nervos periféricos).
-- Componente `DogAnatomyLayered` (`src/components/pet/DogAnatomyLayered.tsx`): viewer empilhado que faz cross-fade entre camadas via CSS opacity (500ms transition) sobre a silhueta base. API: `activeLayers={['cardio', 'urinary']}`, `layerOpacity`, `showLegend`. Sem dependências 3D — substituível por `react-three-fiber` na fase 6.1 sem mudar a API consumidora.
-- Stack agora cobre os 6 sistemas mais usados no Gêmeo Digital (silhueta, cardio, digestivo, urinário, esquelético, nervoso). Próximos sistemas (endócrino/pâncreas, pele/pelo, linfático) ficam para 6.1 junto com o modo 3D opcional via Sketchfab CC-BY.
-_files: src/components/pet/DogAnatomyLayered.tsx_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
