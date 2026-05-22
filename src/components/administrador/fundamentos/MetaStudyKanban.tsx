@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import {
   Inbox, Filter, ClipboardList, ShieldCheck, Archive, Loader2, ChevronRight, ChevronLeft, Sparkles,
+  ChevronDown, ChevronUp, Link2, ListChecks,
 } from 'lucide-react';
 
 type Lifecycle = 'inbox' | 'triaged' | 'in_review' | 'approved' | 'archived';
@@ -63,6 +64,42 @@ function reliabilityBadgeClass(score: number | null) {
   return 'bg-red-100 text-red-700 border-red-300';
 }
 
+const DIM_KEYS: Array<keyof MetaStudyRow> = [
+  'reliability_methodology',
+  'reliability_evidence_base',
+  'reliability_applicability',
+  'reliability_reproducibility',
+  'reliability_relevance',
+];
+
+const DIM_SHORT: Record<string, string> = {
+  reliability_methodology: 'Metod.',
+  reliability_evidence_base: 'Evid.',
+  reliability_applicability: 'Aplic.',
+  reliability_reproducibility: 'Reprod.',
+  reliability_relevance: 'Relev.',
+};
+
+const DIM_COLOR: Record<string, string> = {
+  reliability_methodology: 'bg-indigo-500',
+  reliability_evidence_base: 'bg-emerald-500',
+  reliability_applicability: 'bg-amber-500',
+  reliability_reproducibility: 'bg-sky-500',
+  reliability_relevance: 'bg-fuchsia-500',
+};
+
+function computeOverall(scores: Record<string, number | null>): number | null {
+  const filled = DIM_KEYS
+    .map(k => scores[k as string])
+    .filter((v): v is number => v != null);
+  if (filled.length === 0) return null;
+  return filled.reduce((a, b) => a + b, 0) / filled.length;
+}
+
+function ageInDays(createdAt: string): number {
+  return Math.floor((Date.now() - new Date(createdAt).getTime()) / 86_400_000);
+}
+
 const MetaStudyKanban: React.FC = () => {
   const { t } = useTranslation();
   const [rows, setRows] = useState<MetaStudyRow[]>([]);
@@ -70,6 +107,10 @@ const MetaStudyKanban: React.FC = () => {
   const [showArchived, setShowArchived] = useState(false);
   const [selected, setSelected] = useState<MetaStudyRow | null>(null);
   const [saving, setSaving] = useState(false);
+  const [tripletCounts, setTripletCounts] = useState<Record<string, number>>({});
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [edits, setEdits] = useState<Record<string, Partial<Record<keyof MetaStudyRow, number | null>>>>({});
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   const STATUS_LABEL: Record<Lifecycle, string> = {
     inbox: t('fundamentos.kanban.status.inbox', 'Caixa de entrada'),
@@ -89,6 +130,17 @@ const MetaStudyKanban: React.FC = () => {
       toast.error(t('fundamentos.kanban.loadError', 'Falha ao carregar Kanban'));
     } else {
       setRows((data as any) || []);
+    }
+    // Carregar contagem de evidências (tripletes) vinculadas a cada meta-estudo
+    const { data: evRows } = await supabase
+      .from('core_rule_evidence')
+      .select('meta_study_id');
+    if (evRows) {
+      const map: Record<string, number> = {};
+      (evRows as Array<{ meta_study_id: string | null }>).forEach(r => {
+        if (r.meta_study_id) map[r.meta_study_id] = (map[r.meta_study_id] || 0) + 1;
+      });
+      setTripletCounts(map);
     }
     setLoading(false);
   };
@@ -142,6 +194,59 @@ const MetaStudyKanban: React.FC = () => {
     toast.success(t('fundamentos.kanban.saved', 'Confiabilidade salva'));
   };
 
+  // Salvar edição inline (do card)
+  const saveInline = async (row: MetaStudyRow) => {
+    const patch = edits[row.id];
+    if (!patch) return;
+    setSavingId(row.id);
+    const merged = { ...row, ...patch } as MetaStudyRow;
+    const { data, error } = await supabase
+      .from('meta_studies')
+      .update({
+        reliability_methodology: merged.reliability_methodology,
+        reliability_evidence_base: merged.reliability_evidence_base,
+        reliability_applicability: merged.reliability_applicability,
+        reliability_reproducibility: merged.reliability_reproducibility,
+        reliability_relevance: merged.reliability_relevance,
+      })
+      .eq('id', row.id)
+      .select('reliability_overall')
+      .maybeSingle();
+    setSavingId(null);
+    if (error) {
+      toast.error(t('fundamentos.kanban.saveError', 'Falha ao salvar confiabilidade'));
+      return;
+    }
+    const dbOverall = (data as any)?.reliability_overall ?? null;
+    const localOverall = computeOverall(merged as any);
+    setRows(prev => prev.map(r => r.id === row.id ? { ...merged, reliability_overall: dbOverall } : r));
+    setEdits(prev => { const n = { ...prev }; delete n[row.id]; return n; });
+    if (dbOverall != null && localOverall != null && Math.abs(Number(dbOverall) - localOverall) > 0.05) {
+      toast.warning(t('fundamentos.kanban.driftWarn', 'Overall salvo difere do preview ({{db}} vs {{local}})', {
+        db: Number(dbOverall).toFixed(2), local: localOverall.toFixed(2),
+      }));
+    } else {
+      toast.success(t('fundamentos.kanban.saved', 'Confiabilidade salva'));
+    }
+  };
+
+  const discardInline = (rowId: string) => {
+    setEdits(prev => { const n = { ...prev }; delete n[rowId]; return n; });
+  };
+
+  const setEdit = (rowId: string, key: keyof MetaStudyRow, value: number | null) => {
+    setEdits(prev => ({ ...prev, [rowId]: { ...(prev[rowId] || {}), [key]: value } }));
+  };
+
+  const effectiveScores = (row: MetaStudyRow): Record<string, number | null> => {
+    const patch = edits[row.id] || {};
+    const out: Record<string, number | null> = {};
+    DIM_KEYS.forEach(k => {
+      out[k as string] = (k in patch ? patch[k] : (row as any)[k]) ?? null;
+    });
+    return out;
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -181,41 +286,139 @@ const MetaStudyKanban: React.FC = () => {
                     {t('fundamentos.kanban.empty', 'Vazio')}
                   </div>
                 )}
-                {list.map(row => (
-                  <Card key={row.id} className="hover:border-primary/40 cursor-pointer transition-colors" onClick={() => setSelected(row)}>
-                    <CardContent className="p-3 space-y-2">
-                      <div className="text-sm font-medium line-clamp-2">{row.title}</div>
-                      <div className="flex items-center gap-1 flex-wrap text-[10px] text-muted-foreground">
-                        {row.year && <span>{row.year}</span>}
-                        <Badge variant="outline" className="text-[9px] py-0">{row.kind}</Badge>
-                        {row.proposed_rules?.length > 0 && (
-                          <Badge variant="outline" className="text-[9px] py-0 bg-purple-50 text-purple-700 border-purple-200">
-                            {row.proposed_rules.length} {t('fundamentos.kanban.proposed', 'propostas')}
+                {list.map(row => {
+                  const scores = effectiveScores(row);
+                  const livePreview = computeOverall(scores);
+                  const hasEdits = !!edits[row.id];
+                  const filledCount = DIM_KEYS.filter(k => scores[k as string] != null).length;
+                  const isExpanded = !!expanded[row.id];
+                  const tripletN = tripletCounts[row.id] || 0;
+                  const days = ageInDays(row.created_at);
+                  const overallDisplay = hasEdits ? livePreview : row.reliability_overall;
+                  return (
+                    <Card key={row.id} className="hover:border-primary/40 cursor-pointer transition-colors" onClick={() => setSelected(row)}>
+                      <CardContent className="p-3 space-y-2">
+                        <div className="text-sm font-medium line-clamp-2">{row.title}</div>
+                        <div className="flex items-center gap-1 flex-wrap text-[10px] text-muted-foreground">
+                          {row.year && <span>{row.year}</span>}
+                          <Badge variant="outline" className="text-[9px] py-0">{row.kind}</Badge>
+                          {row.proposed_rules?.length > 0 && (
+                            <Badge variant="outline" className="text-[9px] py-0 bg-purple-50 text-purple-700 border-purple-200">
+                              <ListChecks className="h-2.5 w-2.5 mr-0.5" />
+                              {row.proposed_rules.length}
+                            </Badge>
+                          )}
+                          <Badge variant="outline" className="text-[9px] py-0 bg-sky-50 text-sky-700 border-sky-200">
+                            <Link2 className="h-2.5 w-2.5 mr-0.5" />
+                            {tripletN} {t('fundamentos.kanban.card.triplets', 'tripletes')}
                           </Badge>
-                        )}
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Badge variant="outline" className={reliabilityBadgeClass(row.reliability_overall)}>
-                          {row.reliability_overall != null
-                            ? `★ ${Number(row.reliability_overall).toFixed(1)}/5`
-                            : t('fundamentos.kanban.noScore', 'sem nota')}
-                        </Badge>
-                        <div className="flex items-center gap-0.5">
-                          {PREV[status] && (
-                            <Button size="icon" variant="ghost" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); moveTo(row, PREV[status]!); }}>
-                              <ChevronLeft className="h-3 w-3" />
-                            </Button>
-                          )}
-                          {NEXT[status] && (
-                            <Button size="icon" variant="ghost" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); moveTo(row, NEXT[status]!); }}>
-                              <ChevronRight className="h-3 w-3" />
-                            </Button>
-                          )}
+                          <span className="text-[9px] opacity-70">· {days}d</span>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                        {/* Mini barra de contribuição */}
+                        {filledCount > 0 && (
+                          <div className="flex h-1 rounded overflow-hidden bg-muted">
+                            {DIM_KEYS.map(k => {
+                              const v = scores[k as string];
+                              if (v == null) return null;
+                              return (
+                                <div
+                                  key={k as string}
+                                  className={DIM_COLOR[k as string]}
+                                  style={{ flex: v }}
+                                  title={`${DIM_SHORT[k as string]} ${v.toFixed(1)}`}
+                                />
+                              );
+                            })}
+                          </div>
+                        )}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1">
+                            <Badge variant="outline" className={reliabilityBadgeClass(overallDisplay)}>
+                              {overallDisplay != null
+                                ? `★ ${Number(overallDisplay).toFixed(1)}/5`
+                                : t('fundamentos.kanban.noScore', 'sem nota')}
+                            </Badge>
+                            <span className="text-[9px] text-muted-foreground">{filledCount}/5</span>
+                            {hasEdits && (
+                              <Badge className="text-[9px] py-0 bg-amber-500 text-white border-amber-600">
+                                {t('fundamentos.kanban.card.unsaved', 'não salvo')}
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-0.5">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6"
+                              onClick={(e) => { e.stopPropagation(); setExpanded(p => ({ ...p, [row.id]: !p[row.id] })); }}
+                              title={t('fundamentos.kanban.card.expandReliability', 'Ajustar confiabilidade')}
+                            >
+                              {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                            </Button>
+                            {PREV[status] && (
+                              <Button size="icon" variant="ghost" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); moveTo(row, PREV[status]!); }}>
+                                <ChevronLeft className="h-3 w-3" />
+                              </Button>
+                            )}
+                            {NEXT[status] && (
+                              <Button size="icon" variant="ghost" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); moveTo(row, NEXT[status]!); }}>
+                                <ChevronRight className="h-3 w-3" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                        {/* Painel expansível com sliders inline */}
+                        {isExpanded && (
+                          <div
+                            className="pt-2 border-t space-y-1.5"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {DIM_KEYS.map(k => {
+                              const v = scores[k as string];
+                              return (
+                                <div key={k as string} className="flex items-center gap-2">
+                                  <span className="text-[10px] font-medium w-12 text-muted-foreground">{DIM_SHORT[k as string]}</span>
+                                  <Slider
+                                    className="flex-1"
+                                    value={[v ?? 0]}
+                                    min={0}
+                                    max={5}
+                                    step={0.5}
+                                    onValueChange={(arr) => setEdit(row.id, k, arr[0])}
+                                  />
+                                  <span className="text-[10px] font-mono w-7 text-right">{v != null ? v.toFixed(1) : '—'}</span>
+                                  {v != null && (
+                                    <button
+                                      className="text-[9px] text-muted-foreground hover:text-foreground"
+                                      onClick={() => setEdit(row.id, k, null)}
+                                      title={t('fundamentos.kanban.clear', 'limpar')}
+                                    >×</button>
+                                  )}
+                                </div>
+                              );
+                            })}
+                            <div className="flex items-center justify-end gap-1 pt-1">
+                              {hasEdits && (
+                                <Button size="sm" variant="ghost" className="h-6 text-[10px]" onClick={() => discardInline(row.id)}>
+                                  {t('fundamentos.kanban.discard', 'descartar')}
+                                </Button>
+                              )}
+                              <Button
+                                size="sm"
+                                className="h-6 text-[10px]"
+                                disabled={!hasEdits || savingId === row.id}
+                                onClick={() => saveInline(row)}
+                              >
+                                {savingId === row.id && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
+                                {t('fundamentos.kanban.save', 'Salvar')}
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             </div>
           );
