@@ -11,6 +11,7 @@ import IngestaoMetaEstudo from '@/components/administrador/fundamentos/IngestaoM
 import CoreRuleHistory from '@/components/administrador/fundamentos/CoreRuleHistory';
 import MetaStudyKanban from '@/components/administrador/fundamentos/MetaStudyKanban';
 import MetaKgRoadmapCard from '@/components/administrador/fundamentos/MetaKgRoadmapCard';
+import MetaStudyDetailedCard, { MetaStudyDetailed } from '@/components/administrador/fundamentos/MetaStudyDetailedCard';
 
 interface CoreRule {
   id: string;
