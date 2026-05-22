@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const OntologyAuditTab = lazy(() => import('@/components/administrador/auditoria/OntologyAuditTab'));
 const OntologyMappingTab = lazy(() => import('@/components/administrador/OntologyMappingTab'));
+const OntologyBulkImportTab = lazy(() => import('@/components/administrador/OntologyBulkImportTab'));
 
 const OntologyHub: React.FC = () => {
   const { t } = useTranslation();
@@ -14,6 +15,7 @@ const OntologyHub: React.FC = () => {
         <TabsList>
           <TabsTrigger value="audit">{t('admin.sidebar.knowledgeBase.ontologyAudit')}</TabsTrigger>
           <TabsTrigger value="mapping">{t('admin.sidebar.knowledgeBase.ontologyMapping')}</TabsTrigger>
+          <TabsTrigger value="bulk-import">Importar IDs (OMIA/MeSH/ChEBI)</TabsTrigger>
         </TabsList>
         <TabsContent value="audit" className="mt-4">
           <Suspense fallback={<Skeleton className="h-96 w-full" />}>
@@ -23,6 +25,11 @@ const OntologyHub: React.FC = () => {
         <TabsContent value="mapping" className="mt-4">
           <Suspense fallback={<Skeleton className="h-96 w-full" />}>
             <OntologyMappingTab />
+          </Suspense>
+        </TabsContent>
+        <TabsContent value="bulk-import" className="mt-4">
+          <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+            <OntologyBulkImportTab />
           </Suspense>
         </TabsContent>
       </Tabs>
