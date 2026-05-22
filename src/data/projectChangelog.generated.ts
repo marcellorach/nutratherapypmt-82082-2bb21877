@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-22T01:36:00.327Z
+// Última geração: 2026-05-22T02:14:08.639Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,26 @@ export const lastChangelogDate = "2026-05-22";
 export const senexVersion = "6.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-22",
+    "kind": "added",
+    "area": "kg",
+    "status": "parcial",
+    "title": "Fase 1: identidade canônica + evidência negativa",
+    "bullets": [
+      "Colunas `canonical_id` + `canonical_source` em `health_conditions` e `nutraceuticals` (com índice único parcial e CHECK de fonte).",
+      "Coluna `evidence_polarity` em `triplet_extractions` (`positive` default; aceita `negative`, `neutral`, `inconclusive`). Backfill marca tripletes com predicates `fails_to_treat*`/`no_effect*`/`worsens*`/`contraindicat*` como `negative`.",
+      "Documento `docs/ONTOLOGY_SOURCES.md` com URLs oficiais de OMIA, MeSH, ChEBI, Mondo + licenças + procedimento de import + lista de papers de fundamentação.",
+      "Script `scripts/import-ontology-dump.ts` (skeleton): parser do `omia.txt` filtrando taxonomy 9615 (Canis), gancho para parser MeSH XML.",
+      "Pendente nesta fase: parser MeSH completo (precisa lib `sax`), UI de badge \"Evidência negativa\" nos cards de triplete, seed manual dos 5–10 pares `FAILS_TO_TREAT` canônicos, integração da polaridade no scoring de recomendação.",
+      "Files: supabase/migrations/*, docs/ONTOLOGY_SOURCES.md, scripts/import-ontology-dump.ts, src/i18n.ts"
+    ],
+    "files": [
+      "scripts/import-ontology-dump.ts",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.99.0"
+  },
   {
     "date": "2026-05-22",
     "kind": "added",

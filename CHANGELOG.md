@@ -24,6 +24,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 6.0.0 -->
 
+### Added - 2026-05-22 — Fase 1: identidade canônica + evidência negativa
+<!-- area: kg · status: parcial · i18n: 1.99.0 -->
+- Colunas `canonical_id` + `canonical_source` em `health_conditions` e `nutraceuticals` (com índice único parcial e CHECK de fonte).
+- Coluna `evidence_polarity` em `triplet_extractions` (`positive` default; aceita `negative`, `neutral`, `inconclusive`). Backfill marca tripletes com predicates `fails_to_treat*`/`no_effect*`/`worsens*`/`contraindicat*` como `negative`.
+- Documento `docs/ONTOLOGY_SOURCES.md` com URLs oficiais de OMIA, MeSH, ChEBI, Mondo + licenças + procedimento de import + lista de papers de fundamentação.
+- Script `scripts/import-ontology-dump.ts` (skeleton): parser do `omia.txt` filtrando taxonomy 9615 (Canis), gancho para parser MeSH XML.
+- Pendente nesta fase: parser MeSH completo (precisa lib `sax`), UI de badge "Evidência negativa" nos cards de triplete, seed manual dos 5–10 pares `FAILS_TO_TREAT` canônicos, integração da polaridade no scoring de recomendação.
+- Files: supabase/migrations/*, docs/ONTOLOGY_SOURCES.md, scripts/import-ontology-dump.ts, src/i18n.ts
+
 ### Added - 2026-05-22 — Fundamentos: Sandbox (lifecycle) + Confiabilidade dos meta-estudos (Fase A)
 <!-- area: admin · status: entregue · i18n: 1.98.0 -->
 
