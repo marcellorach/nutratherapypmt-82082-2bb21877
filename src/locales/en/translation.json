@@ -5032,13 +5032,14 @@
     },
     "v2": {
       "title": "Longitudinal Clinical Observatory",
-      "subtitle": "Synthetic cohort of 10,000 treated dogs, 16,000 observational pairs and 10,000 projected digital twins — for trend analysis, signal discovery and model feedback.",
+      "subtitle": "Synthetic cohort of 8,473 treated dogs, 13,916 observational pairs and 8,473 digital twins — for trend analysis, signal discovery and model feedback.",
       "tabs": {
         "observatory": "Cohort Observatory",
         "trajectories": "Longitudinal Trajectories",
         "explorer": "Patient Explorer",
         "discovery": "Discovery Signals",
-        "loop": "Model Loop"
+        "loop": "Model Loop",
+        "pathways": "Biological Pathways"
       },
       "syntheticBadge": {
         "title": "Synthetic data",
@@ -5156,6 +5157,63 @@
         },
         "contributionTitle": "Contribution to aggregate signals",
         "contributionText": "This patient reinforces the efficacy signal of {{compound}} in {{condition}}, feeding the Model Loop."
+      },
+      "filters": {
+        "title": "Global filters",
+        "apply": "Apply",
+        "clear": "Clear",
+        "all": "All",
+        "condition": "Condition",
+        "breed": "Breed",
+        "age": "Age range",
+        "region": "Region",
+        "adherence": "Adherence",
+        "window": "Protocol window",
+        "response": "Clinical response",
+        "showing": "Showing {{n}} of {{total}} treated pets",
+        "ageBuckets": { "any": "Any age", "adult": "Adult (5-7y)", "senior": "Senior (7-10y)", "geriatric": "Geriatric (10+y)" },
+        "adherenceBuckets": { "any": "Any adherence", "high": "High (≥80%)", "mid": "Medium (50-79%)", "low": "Low (<50%)" },
+        "windowBuckets": { "any": "Any window", "early": "0-6 months", "mid": "6-12 months", "long": "12-24 months" }
+      },
+      "metrics": {
+        "title": "Clinical impact metrics",
+        "subtitle": "Computed on the filtered cohort — treated × mirror comparison",
+        "nnt": "Synthetic NNT",
+        "nntSub": "Number Needed to Treat for 1 clinical response",
+        "hr": "Hazard Ratio",
+        "hrSub": "Worsening risk: treated ÷ mirror",
+        "ttr": "Time to response",
+        "ttrSub": "Median (IQR {{q1}}-{{q3}} months)",
+        "na": "Insufficient evidence",
+        "months": "months"
+      },
+      "monthlyFlow": {
+        "title": "Monthly adherence flow (last 24 months)",
+        "subtitle": "Residual active, new adhesions and dropouts per month — churn negative below axis",
+        "active": "Residual active",
+        "joined": "New adhesions",
+        "churned": "Dropouts",
+        "retention": "Cumulative retention: {{pct}}%"
+      },
+      "pathways": {
+        "title": "Simulated biological pathways",
+        "subtitle": "Compound → Molecular mechanism → Cellular process → Clinical outcome (width ∝ synthetic evidence)",
+        "warning": "Illustrative biological map generated from the synthetic cohort and curated studies. Not real clinical evidence.",
+        "selectCondition": "Condition",
+        "evidence": "{{n}} treated pets walk this pathway",
+        "deltaAvg": "Mean severity Δ: {{delta}}",
+        "legend": "→ activates  ·  ⊣ inhibits  ·  ⇢ modulates",
+        "noPath": "Biological pathway not mapped for this condition."
+      },
+      "loopModels": {
+        "title": "Predictive models receiving signal",
+        "subtitle": "Deep Learning wired to the Observatory — synthetic drift and monthly delta per model",
+        "view": "View evolution",
+        "signals30d": "Signals sent (last 30d)",
+        "newTriplets": "New KG triplets",
+        "weightAdjusts": "Weight adjustments",
+        "gapfills": "Gap-fills triggered",
+        "col": { "model": "Model", "accuracy": "Current accuracy", "drift": "Synthetic drift", "growth": "Δ learning/month" }
       }
     }
   },
