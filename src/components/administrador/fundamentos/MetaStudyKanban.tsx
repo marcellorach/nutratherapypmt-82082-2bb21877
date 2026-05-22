@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import {
   Inbox, Filter, ClipboardList, ShieldCheck, Archive, Loader2, ChevronRight, ChevronLeft, Sparkles,
-  ChevronDown, ChevronUp, Link2, ListChecks, MessageSquare, ExternalLink, ImageIcon, Network, Layers, FlaskConical, Microscope, BookOpen,
+  ChevronDown, ChevronUp, Link2, ListChecks, MessageSquare, ExternalLink, Network, Layers, FlaskConical, Microscope, BookOpen,
 } from 'lucide-react';
 import CoreRulesEvidenceBadge from './CoreRulesEvidenceBadge';
 import MetaStudyChatDialog from './MetaStudyChatDialog';
@@ -147,8 +147,6 @@ const MetaStudyKanban: React.FC = () => {
   const [aiId, setAiId] = useState<string | null>(null);
   const [bulkAi, setBulkAi] = useState(false);
   const [chatId, setChatId] = useState<{ id: string; title: string } | null>(null);
-  const [coverId, setCoverId] = useState<string | null>(null);
-  const [bulkCover, setBulkCover] = useState(false);
 
   const STATUS_LABEL: Record<Lifecycle, string> = {
     inbox: t('fundamentos.kanban.status.inbox', 'Caixa de entrada'),
@@ -333,57 +331,6 @@ const MetaStudyKanban: React.FC = () => {
       }));
     } finally {
       setBulkAi(false);
-    }
-  };
-
-  const generateCover = async (rowId: string, overwrite = false) => {
-    setCoverId(rowId);
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-meta-study-cover', {
-        body: { study_ids: [rowId], overwrite },
-      });
-      if (error) throw error;
-      const r = (data as any)?.results?.[0];
-      if (!r?.ok) throw new Error(r?.error || 'falhou');
-      setRows(prev => prev.map(x => x.id === rowId ? { ...x, cover_image_url: r.url } : x));
-      toast.success(t('fundamentos.kanban.coverDone', 'Capa gerada'));
-    } catch (e) {
-      toast.error(t('fundamentos.kanban.coverError', 'Falha ao gerar capa: {{m}}', {
-        m: e instanceof Error ? e.message : String(e),
-      }));
-    } finally {
-      setCoverId(null);
-    }
-  };
-
-  const backfillCovers = async () => {
-    const missing = rows.filter(r => !r.cover_image_url);
-    if (missing.length === 0) {
-      toast.info(t('fundamentos.kanban.coverNoPending', 'Todos os papers já têm capa'));
-      return;
-    }
-    if (!confirm(t('fundamentos.kanban.coverBackfillConfirm', 'Gerar capas para {{n}} papers? (~{{s}}s)', {
-      n: missing.length, s: missing.length * 6,
-    }))) return;
-    setBulkCover(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-meta-study-cover', {
-        body: { all_missing: true },
-      });
-      if (error) throw error;
-      const results = ((data as any)?.results || []) as Array<{ id: string; ok: boolean; url?: string }>;
-      const ok = results.filter(r => r.ok).length;
-      setRows(prev => prev.map(r => {
-        const m = results.find(x => x.id === r.id && x.ok);
-        return m ? { ...r, cover_image_url: m.url } : r;
-      }));
-      toast.success(t('fundamentos.kanban.coverBackfillDone', '{{ok}}/{{total}} capas geradas', { ok, total: results.length }));
-    } catch (e) {
-      toast.error(t('fundamentos.kanban.coverError', 'Falha ao gerar capa: {{m}}', {
-        m: e instanceof Error ? e.message : String(e),
-      }));
-    } finally {
-      setBulkCover(false);
     }
   };
 
