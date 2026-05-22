@@ -8,21 +8,42 @@ import { toast } from 'sonner';
 const OntologyBulkImportTab: React.FC = () => {
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [progress, setProgress] = useState<string>('');
 
   const run = async (dryRun: boolean) => {
     setRunning(true);
     setResult(null);
+    setProgress('');
     try {
-      const { data, error } = await supabase.functions.invoke('import-canonical-ids', {
-        body: { dry_run: dryRun },
-      });
-      if (error) throw error;
-      setResult(data);
+      const totals = {
+        conditions: { total: 0, matched: 0, unmatched: 0, samples_matched: [] as any[], samples_unmatched: [] as any[] },
+        nutraceuticals: { total: 0, matched: 0, unmatched: 0, samples_matched: [] as any[], samples_unmatched: [] as any[] },
+      };
+      let batch = 0;
+      while (true) {
+        batch++;
+        setProgress(`Lote ${batch}…`);
+        const { data, error } = await supabase.functions.invoke('import-canonical-ids', {
+          body: { dry_run: dryRun, batch_size: 20 },
+        });
+        if (error) throw error;
+        for (const k of ['conditions', 'nutraceuticals'] as const) {
+          totals[k].total += data[k]?.total ?? 0;
+          totals[k].matched += data[k]?.matched ?? 0;
+          totals[k].unmatched += data[k]?.unmatched ?? 0;
+          if (totals[k].samples_matched.length < 10) totals[k].samples_matched.push(...(data[k]?.samples_matched ?? []));
+          if (totals[k].samples_unmatched.length < 20) totals[k].samples_unmatched.push(...(data[k]?.samples_unmatched ?? []));
+        }
+        setResult({ ...totals, dry_run: dryRun, batches: batch });
+        if (!data.has_more) break;
+        if (dryRun) break; // preview only does 1 batch
+      }
       toast.success(dryRun ? 'Pré-visualização concluída' : 'IDs canônicos aplicados');
     } catch (e: any) {
       toast.error(e.message);
     } finally {
       setRunning(false);
+      setProgress('');
     }
   };
 
@@ -45,12 +66,13 @@ const OntologyBulkImportTab: React.FC = () => {
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => run(true)} disabled={running}>
               {running ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Play className="h-4 w-4 mr-2" />}
-              Pré-visualizar (não grava)
+              Pré-visualizar 1 lote (não grava)
             </Button>
             <Button onClick={() => run(false)} disabled={running}>
               {running ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Play className="h-4 w-4 mr-2" />}
               Buscar e aplicar
             </Button>
+            {progress && <span className="text-sm text-muted-foreground self-center">{progress}</span>}
           </div>
 
           {result && (
