@@ -267,7 +267,7 @@ interface EditorProps {
   onChange: (row: MetaStudyRow) => void;
   onSave: () => void;
   onMove: (target: Lifecycle) => void;
-  t: (key: string, fallback?: string, opts?: any) => string;
+  t: any;
   statusLabels: Record<Lifecycle, string>;
 }
 
