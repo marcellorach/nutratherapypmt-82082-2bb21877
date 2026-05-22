@@ -42,6 +42,7 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const dryRun = body.dry_run === true;
     const batchSize = Math.min(Math.max(Number(body.batch_size) || 20, 1), 50);
+    const offset = Math.max(Number(body.offset) || 0, 0);
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
@@ -53,7 +54,7 @@ Deno.serve(async (req) => {
       .select('id, name, name_en, canonical_id')
       .is('canonical_id', null)
       .order('id')
-      .limit(batchSize);
+      .range(offset, offset + batchSize - 1)
     if (cerr) throw cerr;
 
     const condUpdates: any[] = [];
@@ -62,11 +63,11 @@ Deno.serve(async (req) => {
       const q = c.name_en || c.name;
       let id: string | null = null; let src = '';
       const omia = await lookupOls(q, 'omia');
-      if (omia) { id = omia; src = 'OMIA'; }
+      if (omia) { id = omia; src = 'omia'; }
       else {
         await sleep(350);
         const mesh = await lookupMesh(q);
-        if (mesh) { id = mesh; src = 'MeSH'; }
+        if (mesh) { id = mesh; src = 'mesh'; }
       }
       if (id) condUpdates.push({ id: c.id, canonical_id: id, canonical_source: src, matched_name: q });
       else condUnmatched.push({ id: c.id, name: c.name, name_en: c.name_en });
@@ -78,7 +79,7 @@ Deno.serve(async (req) => {
       .select('id, name, name_en, canonical_id')
       .is('canonical_id', null)
       .order('id')
-      .limit(batchSize);
+      .range(offset, offset + batchSize - 1)
     if (nerr) throw nerr;
 
     const nutraUpdates: any[] = [];
@@ -87,11 +88,11 @@ Deno.serve(async (req) => {
       const q = n.name_en || n.name;
       let id: string | null = null; let src = '';
       const chebi = await lookupOls(q, 'chebi');
-      if (chebi) { id = chebi; src = 'ChEBI'; }
+      if (chebi) { id = chebi; src = 'chebi'; }
       else {
         await sleep(350);
         const mesh = await lookupMesh(q);
-        if (mesh) { id = mesh; src = 'MeSH'; }
+        if (mesh) { id = mesh; src = 'mesh'; }
       }
       if (id) nutraUpdates.push({ id: n.id, canonical_id: id, canonical_source: src, matched_name: q });
       else nutraUnmatched.push({ id: n.id, name: n.name, name_en: n.name_en });
