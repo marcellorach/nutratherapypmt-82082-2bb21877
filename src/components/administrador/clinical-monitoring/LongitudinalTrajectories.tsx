@@ -2,8 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTranslation } from 'react-i18next';
-import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid, Area, ComposedChart } from 'recharts';
-import { SyntheticCohort, SYNTHETIC_CONDITIONS, meanTrajectory } from '@/utils/syntheticCohort';
+import { Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid, Area, ComposedChart } from 'recharts';
+import { SyntheticCohort, SYNTHETIC_CONDITIONS, meanTrajectory, meanTrajectoryWithCI } from '@/utils/syntheticCohort';
 
 interface Props {
   cohort: SyntheticCohort;
@@ -22,18 +22,20 @@ const LongitudinalTrajectories: React.FC<Props> = ({ cohort }) => {
       const src = cohort.treated.find((p) => p.id === t.twinOfId);
       return src?.primaryConditionId === conditionId;
     });
-    const tT = meanTrajectory(treated);
+    const tT = meanTrajectoryWithCI(treated);
     const tM = meanTrajectory(mirror);
     const tD = meanTrajectory(twins);
     const maxLen = Math.max(tT.length, tM.length, tD.length);
     const rows = [];
     for (let m = 0; m < maxLen; m++) {
+      const ci = tT[m];
       rows.push({
         month: m,
-        treated: tT[m]?.mean ?? null,
+        treated: ci?.mean ?? null,
+        treatedBand: ci ? [ci.lo, ci.hi] : null,
         mirror: tM[m]?.mean ?? null,
         twin: tD[m]?.mean ?? null,
-        nTreated: tT[m]?.n ?? 0,
+        nTreated: ci?.n ?? 0,
       });
     }
     return { rows, nTreated: treated.length, nMirror: mirror.length, nTwins: twins.length };
@@ -85,6 +87,7 @@ const LongitudinalTrajectories: React.FC<Props> = ({ cohort }) => {
                 labelFormatter={(m) => `${t('clinicalMonitoring.v2.trajectories.month')} ${m}`}
               />
               <Legend />
+              <Area type="monotone" dataKey="treatedBand" stroke="none" fill="hsl(var(--primary))" fillOpacity={0.12} name="IC 95%" isAnimationActive={false} />
               <Line type="monotone" dataKey="mirror" stroke="#94a3b8" strokeWidth={2} dot={false} name={t('clinicalMonitoring.v2.trajectories.legendMirror')} strokeDasharray="6 4" />
               <Line type="monotone" dataKey="treated" stroke="hsl(var(--primary))" strokeWidth={3} dot={false} name={t('clinicalMonitoring.v2.trajectories.legendTreated')} />
               <Line type="monotone" dataKey="twin" stroke="#10b981" strokeWidth={2} dot={false} name={t('clinicalMonitoring.v2.trajectories.legendTwin')} strokeDasharray="2 4" />

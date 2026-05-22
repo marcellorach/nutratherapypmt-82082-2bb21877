@@ -5033,13 +5033,14 @@
     },
     "v2": {
       "title": "Observatório Clínico Longitudinal",
-      "subtitle": "Coorte sintética de 10.000 cães tratados, 16.000 pares observacionais e 10.000 gêmeos digitais projetados — para análise de tendências, descoberta de sinais e retroalimentação de modelos.",
+      "subtitle": "Coorte sintética de 8.473 cães tratados, 13.916 pares observacionais e 8.473 gêmeos digitais — para análise de tendências, descoberta de sinais e retroalimentação dos modelos.",
       "tabs": {
         "observatory": "Observatório da Coorte",
         "trajectories": "Trajetórias Longitudinais",
         "explorer": "Explorador de Pacientes",
         "discovery": "Sinais de Descoberta",
-        "loop": "Loop de Modelos"
+        "loop": "Loop de Modelos",
+        "pathways": "Caminhos Biológicos"
       },
       "syntheticBadge": {
         "title": "Dados sintéticos",
@@ -5157,6 +5158,63 @@
         },
         "contributionTitle": "Contribuição para sinais agregados",
         "contributionText": "Este paciente reforça o sinal de eficácia de {{compound}} em {{condition}}, alimentando o Loop de Modelos."
+      },
+      "filters": {
+        "title": "Filtros globais",
+        "apply": "Aplicar",
+        "clear": "Limpar",
+        "all": "Todos",
+        "condition": "Condição",
+        "breed": "Raça",
+        "age": "Faixa etária",
+        "region": "Região",
+        "adherence": "Adesão",
+        "window": "Janela de protocolo",
+        "response": "Resposta clínica",
+        "showing": "Exibindo {{n}} de {{total}} pets tratados",
+        "ageBuckets": { "any": "Qualquer idade", "adult": "Adulto (5-7a)", "senior": "Sênior (7-10a)", "geriatric": "Geriátrico (10+a)" },
+        "adherenceBuckets": { "any": "Qualquer adesão", "high": "Alta (≥80%)", "mid": "Média (50-79%)", "low": "Baixa (<50%)" },
+        "windowBuckets": { "any": "Qualquer janela", "early": "0-6 meses", "mid": "6-12 meses", "long": "12-24 meses" }
+      },
+      "metrics": {
+        "title": "Métricas de impacto clínico",
+        "subtitle": "Calculadas sobre a coorte filtrada — comparação tratados × espelho",
+        "nnt": "NNT sintético",
+        "nntSub": "Number Needed to Treat para 1 resposta clínica",
+        "hr": "Hazard Ratio",
+        "hrSub": "Risco de piora: tratados ÷ espelho",
+        "ttr": "Tempo até resposta",
+        "ttrSub": "Mediana (IQR {{q1}}-{{q3}} meses)",
+        "na": "Sem evidência suficiente",
+        "months": "meses"
+      },
+      "monthlyFlow": {
+        "title": "Fluxo mensal de adesão (últimos 24 meses)",
+        "subtitle": "Ativos residuais, novas adesões e desistências por mês — churn negativo abaixo do eixo",
+        "active": "Ativos residuais",
+        "joined": "Novas adesões",
+        "churned": "Desistências",
+        "retention": "Retenção acumulada: {{pct}}%"
+      },
+      "pathways": {
+        "title": "Caminhos biológicos simulados",
+        "subtitle": "Composto → Mecanismo molecular → Processo celular → Desfecho clínico (largura ∝ evidência sintética)",
+        "warning": "Mapa biológico ilustrativo gerado a partir da coorte sintética e dos estudos curados. Não é evidência clínica real.",
+        "selectCondition": "Condição",
+        "evidence": "{{n}} pets tratados percorrem este caminho",
+        "deltaAvg": "Δ severidade médio: {{delta}}",
+        "legend": "→ ativa  ·  ⊣ inibe  ·  ⇢ modula",
+        "noPath": "Caminho biológico não mapeado para esta condição."
+      },
+      "loopModels": {
+        "title": "Modelos preditivos recebendo sinal",
+        "subtitle": "Deep Learning conectado ao Observatório — drift sintético e delta mensal por modelo",
+        "view": "Ver evolução",
+        "signals30d": "Sinais enviados (últimos 30d)",
+        "newTriplets": "Novos triplets KG",
+        "weightAdjusts": "Ajustes de peso",
+        "gapfills": "Gap-fills disparados",
+        "col": { "model": "Modelo", "accuracy": "Acurácia atual", "drift": "Drift sintético", "growth": "Δ aprendizado/mês" }
       }
     }
   },

@@ -8,7 +8,10 @@ import DiscoverySignals from './DiscoverySignals';
 import ModelFeedbackLoop from './ModelFeedbackLoop';
 import PatientDetailDialog from './PatientDetailDialog';
 import SyntheticDataBadge from './SyntheticDataBadge';
+import BiologicalPathways from './BiologicalPathways';
+import ClinicalFiltersBar from './ClinicalFiltersBar';
 import { generateSyntheticCohort } from '@/utils/syntheticCohort';
+import { useFilteredCohort, DEFAULT_FILTERS, CohortFilters } from '@/hooks/useFilteredCohort';
 
 // Kept for backwards compatibility with FilterPanel imports.
 export interface ClinicalFilters {
@@ -22,7 +25,9 @@ export interface ClinicalFilters {
 
 const ClinicalMonitoringTab: React.FC = () => {
   const { t } = useTranslation();
-  const cohort = useMemo(() => generateSyntheticCohort(), []);
+  const baseCohort = useMemo(() => generateSyntheticCohort(), []);
+  const [filters, setFilters] = useState<CohortFilters>(DEFAULT_FILTERS);
+  const cohort = useFilteredCohort(baseCohort, filters);
   const [openPatientId, setOpenPatientId] = useState<string | null>(null);
 
   return (
@@ -39,18 +44,26 @@ const ClinicalMonitoringTab: React.FC = () => {
       </div>
 
       <SyntheticDataBadge
-        treated={cohort.meta.treatedCount}
-        mirror={cohort.meta.mirrorCount}
-        twins={cohort.meta.twinCount}
+        treated={baseCohort.meta.treatedCount}
+        mirror={baseCohort.meta.mirrorCount}
+        twins={baseCohort.meta.twinCount}
+      />
+
+      <ClinicalFiltersBar
+        filters={filters}
+        onChange={setFilters}
+        shown={cohort.meta.treatedCount}
+        total={baseCohort.meta.treatedCount}
       />
 
       <Tabs defaultValue="observatory" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-6">
           <TabsTrigger value="observatory">{t('clinicalMonitoring.v2.tabs.observatory')}</TabsTrigger>
           <TabsTrigger value="trajectories">{t('clinicalMonitoring.v2.tabs.trajectories')}</TabsTrigger>
           <TabsTrigger value="explorer">{t('clinicalMonitoring.v2.tabs.explorer')}</TabsTrigger>
           <TabsTrigger value="discovery">{t('clinicalMonitoring.v2.tabs.discovery')}</TabsTrigger>
           <TabsTrigger value="loop">{t('clinicalMonitoring.v2.tabs.loop')}</TabsTrigger>
+          <TabsTrigger value="pathways">{t('clinicalMonitoring.v2.tabs.pathways')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="observatory" className="space-y-4 mt-4">
@@ -68,10 +81,13 @@ const ClinicalMonitoringTab: React.FC = () => {
         <TabsContent value="loop" className="space-y-4 mt-4">
           <ModelFeedbackLoop cohort={cohort} />
         </TabsContent>
+        <TabsContent value="pathways" className="space-y-4 mt-4">
+          <BiologicalPathways cohort={cohort} />
+        </TabsContent>
       </Tabs>
 
       <PatientDetailDialog
-        cohort={cohort}
+        cohort={baseCohort}
         patientId={openPatientId}
         onClose={() => setOpenPatientId(null)}
       />
