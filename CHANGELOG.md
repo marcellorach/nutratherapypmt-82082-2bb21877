@@ -24,6 +24,19 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 6.0.0 -->
 
+### Added - 2026-05-22 — Fundamentos: Sandbox (lifecycle) + Confiabilidade dos meta-estudos (Fase A)
+<!-- area: admin · status: entregue · i18n: 1.98.0 -->
+
+- `meta_studies` ganhou coluna `lifecycle_status` (enum `meta_study_lifecycle`: inbox / triaged / in_review / approved / archived). Novos uploads caem em `inbox` por padrão.
+- 5 dimensões de confiabilidade 0–5 (`reliability_methodology`, `reliability_evidence_base`, `reliability_applicability`, `reliability_reproducibility`, `reliability_relevance`) + `reliability_suggested` JSONB + `reliability_overall` (coluna gerada = média das notas preenchidas).
+- Backfill seguro: estudos com `proposed_rules`/`key_claims` → `triaged`; estudos já com `core_rule_evidence` vinculada → `approved`.
+- Nova aba "Sandbox / Kanban" em Fundamentos com 4 colunas (Inbox · Triados · Em revisão · Aprovados) + filtro de arquivados. Cards mostram título, ano, kind, nº de regras propostas e badge de confiabilidade colorida.
+- Diálogo de edição: 5 sliders 0–5 com descrição por dimensão, botões para avançar/voltar estado, recálculo automático da nota geral.
+- Card "Roadmap do Meta-KG" fixo no topo da aba Ingestão lembrando Fase B (lições como entidades + tripletes arquiteturais + RC↔lição) e Fase C (RAG do meta-KG quando ≥30 estudos).
+- Promoção a `approved` permanece bloqueada pela curadoria das `proposed_rules` existente (regra de segurança preservada).
+- I18N_VERSION: 1.97.0 → 1.98.0.
+- Files: supabase/migrations/<lifecycle+reliability>, src/components/administrador/fundamentos/MetaStudyKanban.tsx, src/components/administrador/fundamentos/MetaKgRoadmapCard.tsx, src/pages/administrador/FundamentosTab.tsx, src/i18n.ts
+
 ### Changed - 2026-05-21 — Docs: contrato `callAITask` em TECHNICAL_DECISIONS + GRAPHRAG
 <!-- area: meta · status: entregue · i18n: 1.97.0 -->
 
