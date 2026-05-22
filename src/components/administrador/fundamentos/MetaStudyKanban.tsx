@@ -111,6 +111,8 @@ const MetaStudyKanban: React.FC = () => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [edits, setEdits] = useState<Record<string, Partial<Record<keyof MetaStudyRow, number | null>>>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [aiId, setAiId] = useState<string | null>(null);
+  const [bulkAi, setBulkAi] = useState(false);
 
   const STATUS_LABEL: Record<Lifecycle, string> = {
     inbox: t('fundamentos.kanban.status.inbox', 'Caixa de entrada'),
@@ -234,6 +236,70 @@ const MetaStudyKanban: React.FC = () => {
     setEdits(prev => { const n = { ...prev }; delete n[rowId]; return n; });
   };
 
+  // Avalia 1 estudo via IA e atualiza linha localmente
+  const aiEvaluate = async (row: MetaStudyRow, overwrite = true) => {
+    setAiId(row.id);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        'evaluate-meta-study-reliability',
+        { body: { study_ids: [row.id], overwrite } },
+      );
+      if (error) throw error;
+      const res = (data as any)?.results?.[0];
+      if (!res?.ok) throw new Error(res?.error || 'falhou');
+      // Recarrega só essa linha
+      const { data: fresh } = await supabase
+        .from('meta_studies')
+        .select('id,reliability_methodology,reliability_evidence_base,reliability_applicability,reliability_reproducibility,reliability_relevance,reliability_overall')
+        .eq('id', row.id)
+        .maybeSingle();
+      if (fresh) {
+        setRows(prev => prev.map(r => r.id === row.id ? { ...r, ...(fresh as any) } : r));
+      }
+      toast.success(t('fundamentos.kanban.aiDone', 'Avaliação IA aplicada (★ {{n}})', {
+        n: res.overall != null ? Number(res.overall).toFixed(1) : '—',
+      }));
+    } catch (e) {
+      toast.error(t('fundamentos.kanban.aiError', 'Falha na avaliação IA: {{m}}', {
+        m: e instanceof Error ? e.message : String(e),
+      }));
+    } finally {
+      setAiId(null);
+    }
+  };
+
+  // Backfill: avalia todos sem nota
+  const aiBackfill = async () => {
+    const pending = rows.filter(r => r.reliability_overall == null && r.lifecycle_status !== 'archived');
+    if (pending.length === 0) {
+      toast.info(t('fundamentos.kanban.aiNoPending', 'Nenhum estudo sem avaliação'));
+      return;
+    }
+    if (!confirm(t('fundamentos.kanban.aiBackfillConfirm', 'Avaliar {{n}} estudos via IA? (pode levar ~{{s}}s)', {
+      n: pending.length, s: pending.length * 4,
+    }))) return;
+    setBulkAi(true);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        'evaluate-meta-study-reliability',
+        { body: { study_ids: pending.map(r => r.id), overwrite: false } },
+      );
+      if (error) throw error;
+      const results = ((data as any)?.results || []) as Array<{ id: string; ok: boolean; overall?: number }>;
+      const okCount = results.filter(r => r.ok).length;
+      toast.success(t('fundamentos.kanban.aiBackfillDone', '{{ok}}/{{total}} avaliados', {
+        ok: okCount, total: results.length,
+      }));
+      await load();
+    } catch (e) {
+      toast.error(t('fundamentos.kanban.aiError', 'Falha na avaliação IA: {{m}}', {
+        m: e instanceof Error ? e.message : String(e),
+      }));
+    } finally {
+      setBulkAi(false);
+    }
+  };
+
   const setEdit = (rowId: string, key: keyof MetaStudyRow, value: number | null) => {
     setEdits(prev => ({ ...prev, [rowId]: { ...(prev[rowId] || {}), [key]: value } }));
   };
@@ -261,12 +327,27 @@ const MetaStudyKanban: React.FC = () => {
         <div className="text-xs text-muted-foreground">
           {t('fundamentos.kanban.intro', 'Sandbox de estudos arquiteturais: caixa de entrada → triados → em revisão → aprovados. Aprovação real continua exigindo curadoria das regras propostas na aba Ingestão.')}
         </div>
-        <Button variant="outline" size="sm" onClick={() => setShowArchived(s => !s)}>
-          <Archive className="h-3 w-3 mr-1" />
-          {showArchived
-            ? t('fundamentos.kanban.hideArchived', 'Ocultar arquivados')
-            : t('fundamentos.kanban.showArchived', 'Ver arquivados ({{n}})', { n: byStatus.archived.length })}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={aiBackfill}
+            disabled={bulkAi}
+            className="border-primary/40"
+            title={t('fundamentos.kanban.aiBackfillHint', 'Usa IA para preencher as 5 dimensões dos estudos sem nota')}
+          >
+            {bulkAi
+              ? <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+              : <Sparkles className="h-3 w-3 mr-1 text-primary" />}
+            {t('fundamentos.kanban.aiBackfill', 'Avaliar pendentes (IA)')}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setShowArchived(s => !s)}>
+            <Archive className="h-3 w-3 mr-1" />
+            {showArchived
+              ? t('fundamentos.kanban.hideArchived', 'Ocultar arquivados')
+              : t('fundamentos.kanban.showArchived', 'Ver arquivados ({{n}})', { n: byStatus.archived.length })}
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
@@ -346,6 +427,20 @@ const MetaStudyKanban: React.FC = () => {
                             )}
                           </div>
                           <div className="flex items-center gap-0.5">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6"
+                              disabled={aiId === row.id}
+                              onClick={(e) => { e.stopPropagation(); aiEvaluate(row, true); }}
+                              title={row.reliability_overall != null
+                                ? t('fundamentos.kanban.card.aiReSuggest', 'Re-avaliar com IA')
+                                : t('fundamentos.kanban.card.aiSuggest', 'Sugerir notas com IA')}
+                            >
+                              {aiId === row.id
+                                ? <Loader2 className="h-3 w-3 animate-spin" />
+                                : <Sparkles className="h-3 w-3 text-primary" />}
+                            </Button>
                             <Button
                               size="icon"
                               variant="ghost"
