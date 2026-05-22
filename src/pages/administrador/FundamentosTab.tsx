@@ -5,10 +5,12 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useTranslation } from 'react-i18next';
-import { Shield, BookOpenCheck, GitBranch, Loader2, ExternalLink, Sparkles, AlertTriangle, Upload, History } from 'lucide-react';
+import { Shield, BookOpenCheck, GitBranch, Loader2, ExternalLink, Sparkles, AlertTriangle, Upload, History, Kanban } from 'lucide-react';
 import { toast } from 'sonner';
 import IngestaoMetaEstudo from '@/components/administrador/fundamentos/IngestaoMetaEstudo';
 import CoreRuleHistory from '@/components/administrador/fundamentos/CoreRuleHistory';
+import MetaStudyKanban from '@/components/administrador/fundamentos/MetaStudyKanban';
+import MetaKgRoadmapCard from '@/components/administrador/fundamentos/MetaKgRoadmapCard';
 
 interface CoreRule {
   id: string;
@@ -151,6 +153,9 @@ const FundamentosTab: React.FC = () => {
           </TabsTrigger>
           <TabsTrigger value="studies">
             <BookOpenCheck className="h-4 w-4 mr-1" /> {t('fundamentos.tabs.studies', 'Estudos Arquiteturais')} ({studies.length})
+          </TabsTrigger>
+          <TabsTrigger value="kanban">
+            <Kanban className="h-4 w-4 mr-1" /> {t('fundamentos.tabs.kanban', 'Sandbox / Kanban')}
           </TabsTrigger>
           <TabsTrigger value="influences">
             <GitBranch className="h-4 w-4 mr-1" /> {t('fundamentos.tabs.justifications', 'Justificativas')} ({evidence.length})
@@ -347,12 +352,20 @@ const FundamentosTab: React.FC = () => {
 
         {/* === INGESTION === */}
         <TabsContent value="ingest" className="mt-4">
+          <div className="mb-3">
+            <MetaKgRoadmapCard />
+          </div>
           <IngestaoMetaEstudo onSaved={load} />
         </TabsContent>
 
         {/* === HISTORY & AUDIT === */}
         <TabsContent value="history" className="mt-4">
           <CoreRuleHistory />
+        </TabsContent>
+
+        {/* === KANBAN / SANDBOX === */}
+        <TabsContent value="kanban" className="mt-4">
+          <MetaStudyKanban />
         </TabsContent>
       </Tabs>
     </div>
