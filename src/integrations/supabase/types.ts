@@ -2278,6 +2278,8 @@ export type Database = {
           anti_patterns_pitfalls: Json
           architectural_patterns: Json
           authors: string | null
+          cover_generated_at: string | null
+          cover_image_url: string | null
           created_at: string
           curator_notes: string | null
           doi: string | null
@@ -2312,6 +2314,8 @@ export type Database = {
           anti_patterns_pitfalls?: Json
           architectural_patterns?: Json
           authors?: string | null
+          cover_generated_at?: string | null
+          cover_image_url?: string | null
           created_at?: string
           curator_notes?: string | null
           doi?: string | null
@@ -2346,6 +2350,8 @@ export type Database = {
           anti_patterns_pitfalls?: Json
           architectural_patterns?: Json
           authors?: string | null
+          cover_generated_at?: string | null
+          cover_image_url?: string | null
           created_at?: string
           curator_notes?: string | null
           doi?: string | null

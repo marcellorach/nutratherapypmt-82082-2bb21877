@@ -1,69 +1,94 @@
 ## Objetivo
-Tornar a confiabilidade auditável direto no card do Kanban (sem precisar abrir o diálogo) e permitir ajustar as 5 dimensões com **preview em tempo real do `reliability_overall`** + métricas auxiliares (tripletes derivados do estudo, propostas, idade).
 
-## Onde mexer
-Arquivo único: `src/components/administrador/fundamentos/MetaStudyKanban.tsx`
-(+ chaves i18n em `src/locales/{pt,en}/translation.json` e bump de `I18N_VERSION` em `src/i18n.ts`)
+Transformar os cards de meta-estudos arquiteturais (FundamentosTab) em "vitrines Stanford-grade" sem inventar triplets clínicos. Foco: ilustração consistente, prova de impacto arquitetural, e chat contextual.
 
-Nenhuma mudança de schema. `reliability_overall` continua como coluna gerada no Postgres (média das dimensões preenchidas) — o preview no card replica essa mesma fórmula em JS para feedback imediato.
+## O que vamos construir
 
-## Mudanças no card
+### 1. Ilustração consistente por paper (1x no ingest)
 
-1. **Header compacto sempre visível**
-   - Título + ano + kind (como hoje)
-   - Badge `★ overall/5` com cor por faixa (já existe)
-   - **Novos chips de métrica:** `n tripletes`, `n propostas`, idade do estudo (`há Xd`)
+- Nova coluna `meta_studies.cover_image_url` (text, nullable).
+- Edge function `generate-meta-study-cover`:
+  - Recebe `meta_study_id`.
+  - Monta prompt com **style guide fixo** (ex: "isometric scientific illustration, muted academic palette #1a2942/#c9a84c/#f5f0e8, abstract geometric shapes representing graphs/retrieval/agents, no text, no people, flat vector style, white background").
+  - Concatena com tema derivado do `kind` + `title` (ex: "graph-based retrieval system" para MedGraphRAG).
+  - Chama `google/gemini-2.5-flash-image` via AI Gateway.
+  - Faz upload para bucket `meta-study-covers` (público) e salva URL.
+- Disparo: automático no `ingest-meta-study` (após salvar), e botão "Gerar capas faltantes" no admin para backfill (3 papers atuais).
+- Custo: ~$0.04/paper, 1x. Total backfill: ~$0.12.
 
-2. **Botão "Confiabilidade" expansível no próprio card** (chevron)
-   - Ao expandir, mostra as 5 dimensões em linha condensada: nome curto + valor + mini-slider (`h-1`, step 0.5)
-   - Ao arrastar qualquer slider:
-     - estado local atualiza
-     - **`overall` recalculado na hora** (`sum / countFilled`) e badge superior pisca/anima
-     - chip "não salvo" aparece
-   - Dois botões: **Salvar** (persist + refetch do `reliability_overall` real do DB para confirmar) e **Descartar**
-   - Stop propagation para não abrir o diálogo
+### 2. Badge "Apoia N Core Rules" (zero IA)
 
-3. **Breakdown visual de contribuição**
-   - Mini barra horizontal mostrando contribuição de cada dimensão para a média (5 segmentos coloridos proporcionais)
-   - Tooltip por segmento com nome da dimensão e valor
+- Query existente em `architectural_evidence` agrupada por `meta_study_id` + `relation` (`supports`/`contradicts`/`modulates_weight`).
+- No card: badge clicável `"✓ Apoia 3 regras · ⚠ Modula 1"`.
+- Click abre popover lateral listando as Core Rules afetadas com a citação textual (`quote` + `weight`).
+- Já temos os dados; só falta UI.
 
-4. **Métricas auxiliares (read-only no card expandido)**
-   - `Tripletes vinculados`: `SELECT count FROM extracted_triplets WHERE meta_study_id = ?`
-   - `Propostas`: `row.proposed_rules.length` (já temos)
-   - `Dimensões preenchidas`: `x/5`
-   - Essas métricas **não entram no `overall`** (que segue a fórmula do DB), só dão contexto ao curador.
+### 3. Chat contextual por paper
 
-## Carregamento de tripletes
-Após o `load()` atual, fazer uma query agregada única:
-```ts
-supabase.from('extracted_triplets')
-  .select('meta_study_id', { count: 'exact', head: false })
-```
-e agrupar client-side em um `Map<studyId, count>`. Passar como prop pro card. Se a coluna não existir em todos os estudos (legado), default 0.
+- Edge function `chat-meta-study`:
+  - Input: `meta_study_id`, `messages`.
+  - Carrega `meta_study` (summary, key_claims, architectural_evidence) como contexto de sistema.
+  - Streaming via `google/gemini-3-flash-preview`.
+  - Sem RAG novo — contexto é o próprio registro (já curado).
+- UI: botão `"Conversar sobre este paper"` no card → abre `Dialog` com chat. Botão secundário `"Abrir paper original"` (link `source_url` existente).
 
-## Persistência
-- `saveReliability` continua igual (update das 5 colunas, select do `reliability_overall` gerado)
-- Após salvar, comparar o `overall` previsto local vs. o retornado do DB → se divergir, toast de aviso (defensivo)
+### 4. Visual do card (presentation polish)
 
-## i18n (novas chaves PT/EN)
-- `fundamentos.kanban.card.expandReliability` / `collapseReliability`
-- `fundamentos.kanban.card.unsaved`
-- `fundamentos.kanban.card.dimsFilled` ("{{n}}/5 dimensões")
-- `fundamentos.kanban.card.triplets` ("{{n}} tripletes")
-- `fundamentos.kanban.card.contributionTooltip`
-- Labels curtos para sliders inline (`Metod.`, `Evid.`, `Aplic.`, `Reprod.`, `Relev.`)
+Reorganizar `FundamentosTab` card para layout horizontal:
 
-Incrementar `I18N_VERSION` em `src/i18n.ts`.
-
-## Detalhes técnicos
 ```text
-overall = sum(filled) / count(filled)   // idêntico à coluna gerada do DB
+┌─────────────────────────────────────────────────┐
+│ [cover 120x120]  TÍTULO                  ★4.4   │
+│                  authors · year · venue          │
+│                  ───────────────────             │
+│                  "1-line summary…"               │
+│                  [✓ 3 regras] [📄 paper] [💬]   │
+└─────────────────────────────────────────────────┘
 ```
-- Slider local em estado `editingScores` (Record<studyId, Partial<scores>>) para não conflitar com `selected`
-- Sliders param o `e.stopPropagation()` no click/drag para não abrir o diálogo
-- Manter o diálogo atual (`ReliabilityEditor`) intacto como visão "full" para quem prefere
+
+- Cover à esquerda (fallback: gradient + ícone Lucide por `kind` enquanto não gerada).
+- Rating estelar canto sup. direito.
+- Footer com 3 ações: badge core-rules · link paper · chat.
+- Expansão (click no card) mostra `key_claims` com quote highlight.
+
+## Mudanças no banco
+
+- `meta_studies.cover_image_url TEXT` (nullable).
+- Bucket storage `meta-study-covers` (público, read-only para anon).
+
+## Mudanças no código
+
+- **DB**: 1 migration (coluna + bucket + policies).
+- **Edge functions** (2 novas):
+  - `generate-meta-study-cover/index.ts`
+  - `chat-meta-study/index.ts`
+- **Edge function alterada**: `ingest-meta-study` (disparar cover async via `EdgeRuntime.waitUntil`).
+- **Frontend**:
+  - `FundamentosTab.tsx`: novo layout de card.
+  - `MetaStudyCard.tsx` (extrair em componente próprio).
+  - `MetaStudyChat.tsx` (dialog + streaming).
+  - `CoreRulesBadge.tsx` (popover).
+  - Botão "Backfill covers" em `IngestaoMetaEstudo.tsx`.
+- **i18n**: incrementar `I18N_VERSION`, adicionar chaves `fundamentos.card.*` em PT/EN.
+
+## Não-objetivos (deixar fora)
+
+- Triplets clínicos para papers arquiteturais (poluiria KG — conforme discussão anterior).
+- Promover lessons → entities (Phase B, refactor estrutural).
+- RAG vetorial novo (o contexto cabe no system prompt).
 
 ## Documentação
-- `CHANGELOG.md` → `[Unreleased]` → Changed: "Kanban Meta-Estudos: breakdown de confiabilidade inline no card com preview em tempo real do reliability_overall e chips de tripletes/propostas/idade"
-- Rodar `npm run sync:changelog` ao final
-- Sem mudança de organograma (mesma tab, mesmo componente)
+
+- `CHANGELOG.md` → entrada em `[Unreleased]` com `area: fundamentos · status: feature · i18n: yes`.
+- `npm run sync:changelog` após.
+- Sem mudança em sidebar/admin-tabs → organograma não muda.
+
+## Estimativa
+
+- Migration + bucket: 5 min
+- 2 edge functions: 30 min
+- Card redesign + 3 componentes: 45 min
+- Backfill 3 covers: 1 min (1 clique)
+- i18n + changelog: 10 min
+
+Total: ~90 min para demo-ready.
