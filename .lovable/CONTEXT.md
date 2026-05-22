@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-05-22T02:14:08.643Z
+Generated: 2026-05-22T13:46:22.466Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
 ## Latest i18n version: 1.99.0
 
 ## Changes by area (last 14 days)
-- **admin**: 35
+- **admin**: 36
 - **vet-ui**: 16
 - **kg**: 6
 - **meta**: 6
@@ -16,6 +16,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **i18n**: 1
 
 ## Top 10 recent entries
+### 2026-05-22 · [admin] CHANGED — Kanban Meta-Estudos: breakdown de confiabilidade inline
+- Card do Kanban agora exibe breakdown das 5 dimensões de confiabilidade com sliders inline (expansível) e recálculo do `reliability_overall` em tempo real (mesma fórmula da coluna gerada no DB).
+- Mini barra de contribuição colorida por dimensão + chips com nº de tripletes vinculados (`core_rule_evidence.meta_study_id`), nº de propostas e idade do estudo.
+- Salvamento inline (Salvar/Descartar) com aviso de drift se overall salvo divergir do preview local.
+_files: src/components/administrador/fundamentos/MetaStudyKanban.tsx_
+
 ### 2026-05-22 · [kg] ADDED — Fase 1: identidade canônica + evidência negativa
 _status: parcial_
 - Colunas `canonical_id` + `canonical_source` em `health_conditions` e `nutraceuticals` (com índice único parcial e CHECK de fonte).
@@ -72,12 +78,6 @@ _status: parcial_
 - Smoke test em produção: deploy + healthcheck POST `{task_ids:["kg_gap_fill"]}` → 200 OK em 870 ms.
 - Status atualizado em `src/config/ai-tasks.ts`: `kg_gap_fill` agora `connected`. Real: 9 connected · 11 legacy · 3 planned.
 _files: src/config/ai-tasks.ts, supabase/functions/kg-evidence-gap-fill/index.ts_
-
-### 2026-05-21 · [admin] FIXED — Healthcheck IA validado em produção + reconciliação de status
-- Smoke test do `ai-task-healthcheck` em produção: deploy + POST `{task_ids:["translation_conditions"]}` → 200 OK em 884 ms (`google/gemini-3-flash-preview`). Pipeline ponta-a-ponta validado (router resolve modelo + prompt ativo, grava em `ai_task_status`, retorna telemetria).
-- Reconciliação `ai-tasks.ts`: `translation_conditions` marcado como `connected` (a função `translate-conditions` já chama `callAITask()` desde a Fase 2.5 — status estava desatualizado). Contagem real agora: 8 connected · 12 legacy · 3 planned.
-- Files: src/config/ai-tasks.ts
-_files: src/config/ai-tasks.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
