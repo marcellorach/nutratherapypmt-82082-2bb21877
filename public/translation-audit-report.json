@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-05-22T01:23:10.101Z",
+  "timestamp": "2026-05-22T02:49:48.212Z",
   "summary": {
-    "totalFiles": 893,
-    "totalIssues": 437,
+    "totalFiles": 895,
+    "totalIssues": 439,
     "hardcodedTexts": 52,
-    "missingKeys": 383,
+    "missingKeys": 385,
     "incompleteTranslations": 2
   },
   "issues": [
@@ -1599,6 +1599,20 @@
     },
     {
       "type": "missing-key",
+      "file": "src/components/administrador/fundamentos/MetaStudyKanban.tsx",
+      "line": 86,
+      "text": "id,title,authors,year,kind,lifecycle_status,reliability_methodology,reliability_evidence_base,reliability_applicability,reliability_reproducibility,reliability_relevance,reliability_overall,proposed_rules,created_at",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/fundamentos/MetaStudyKanban.tsx",
+      "line": 132,
+      "text": "reliability_overall",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/administrador/lab-references/LabReferencesTab.tsx",
       "line": 43,
       "text": "*",
@@ -2496,21 +2510,21 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 708,
+      "line": 753,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 919,
+      "line": 964,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 3714,
+      "line": 3759,
       "text": "@",
       "severity": "high"
     },
@@ -2594,20 +2608,6 @@
     {
       "type": "missing-key",
       "file": "src/pages/administrador/FundamentosTab.tsx",
-      "line": 99,
-      "text": "*",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/pages/administrador/FundamentosTab.tsx",
-      "line": 100,
-      "text": "*",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/pages/administrador/FundamentosTab.tsx",
       "line": 101,
       "text": "*",
       "severity": "high"
@@ -2616,6 +2616,20 @@
       "type": "missing-key",
       "file": "src/pages/administrador/FundamentosTab.tsx",
       "line": 102,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/pages/administrador/FundamentosTab.tsx",
+      "line": 103,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/pages/administrador/FundamentosTab.tsx",
+      "line": 104,
       "text": "*",
       "severity": "high"
     },
