@@ -108,26 +108,15 @@ const KIND_GRADIENT: Record<string, string> = {
   ontological: 'from-slate-200 to-zinc-300',
 };
 
-const CoverThumb: React.FC<{ url?: string | null; kind: string; size?: number }> = ({ url, kind, size = 56 }) => {
+const CoverThumb: React.FC<{ url?: string | null; kind: string; size?: number }> = ({ kind, size = 56 }) => {
   const Icon = KIND_ICON[kind] || Network;
   const gradient = KIND_GRADIENT[kind] || KIND_GRADIENT.architectural;
-  if (url) {
-    return (
-      <img
-        src={url}
-        alt=""
-        loading="lazy"
-        style={{ width: size, height: size }}
-        className="rounded-md object-cover border shrink-0"
-      />
-    );
-  }
   return (
     <div
       style={{ width: size, height: size }}
       className={`rounded-md border shrink-0 bg-gradient-to-br ${gradient} flex items-center justify-center`}
     >
-      <Icon className="h-5 w-5 text-white/80" />
+      <Icon className="h-6 w-6 text-white/90" />
     </div>
   );
 };
