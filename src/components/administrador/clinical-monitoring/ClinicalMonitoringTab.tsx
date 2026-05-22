@@ -1,13 +1,16 @@
-import React, { useState, useMemo } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card } from "@/components/ui/card";
+import React, { useMemo, useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTranslation } from 'react-i18next';
-import ClinicalDashboard from './ClinicalDashboard';
-import ConditionAnalysisCards from './ConditionAnalysisCards';
-import ResponseTimeline from './ResponseTimeline';
-import FilterPanel from './FilterPanel';
-import { generateMockPets, HEALTH_CONDITIONS } from '@/utils/mockClinicalData';
+import CohortObservatory from './CohortObservatory';
+import LongitudinalTrajectories from './LongitudinalTrajectories';
+import PatientExplorer from './PatientExplorer';
+import DiscoverySignals from './DiscoverySignals';
+import ModelFeedbackLoop from './ModelFeedbackLoop';
+import PatientDetailDialog from './PatientDetailDialog';
+import SyntheticDataBadge from './SyntheticDataBadge';
+import { generateSyntheticCohort } from '@/utils/syntheticCohort';
 
+// Kept for backwards compatibility with FilterPanel imports.
 export interface ClinicalFilters {
   breed?: string;
   condition?: string;
@@ -19,74 +22,59 @@ export interface ClinicalFilters {
 
 const ClinicalMonitoringTab: React.FC = () => {
   const { t } = useTranslation();
-  const [filters, setFilters] = useState<ClinicalFilters>({});
-  
-  // Generate mock pets data (memoized)
-  const allPets = useMemo(() => generateMockPets(), []);
-  
-  // Filter pets based on selected filters
-  const filteredPets = useMemo(() => {
-    return allPets.filter(pet => {
-      if (filters.breed && pet.breed !== filters.breed) return false;
-      if (filters.condition && !pet.conditions.includes(filters.condition)) return false;
-      if (filters.responseStatus && pet.responseStatus !== filters.responseStatus) return false;
-      if (filters.region && pet.region !== filters.region) return false;
-      
-      if (filters.treatmentDuration) {
-        const [min, max] = filters.treatmentDuration.split('-').map(Number);
-        if (pet.followUpMonths < min || (max && pet.followUpMonths > max)) return false;
-      }
-      
-      if (filters.ageRange) {
-        const [min, max] = filters.ageRange.split('-').map(Number);
-        if (pet.age < min || (max && pet.age > max)) return false;
-      }
-      
-      return true;
-    });
-  }, [allPets, filters]);
+  const cohort = useMemo(() => generateSyntheticCohort(), []);
+  const [openPatientId, setOpenPatientId] = useState<string | null>(null);
 
   return (
     <div className="space-y-6 p-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">
-          {t('clinicalMonitoring.title')}
-        </h1>
-        <p className="text-muted-foreground">
-          {t('clinicalMonitoring.subtitle')}
-        </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            {t('clinicalMonitoring.v2.title')}
+          </h1>
+          <p className="text-muted-foreground max-w-3xl">
+            {t('clinicalMonitoring.v2.subtitle')}
+          </p>
+        </div>
       </div>
 
-      {/* Filters */}
-      <FilterPanel filters={filters} onFiltersChange={setFilters} totalPets={allPets.length} />
+      <SyntheticDataBadge
+        treated={cohort.meta.treatedCount}
+        mirror={cohort.meta.mirrorCount}
+        twins={cohort.meta.twinCount}
+      />
 
-      {/* Main Content */}
-      <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="dashboard">
-            {t('clinicalMonitoring.tabs.dashboard')}
-          </TabsTrigger>
-          <TabsTrigger value="byCondition">
-            {t('clinicalMonitoring.tabs.byCondition')}
-          </TabsTrigger>
-          <TabsTrigger value="timeline">
-            {t('clinicalMonitoring.tabs.timeline')}
-          </TabsTrigger>
+      <Tabs defaultValue="observatory" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5">
+          <TabsTrigger value="observatory">{t('clinicalMonitoring.v2.tabs.observatory')}</TabsTrigger>
+          <TabsTrigger value="trajectories">{t('clinicalMonitoring.v2.tabs.trajectories')}</TabsTrigger>
+          <TabsTrigger value="explorer">{t('clinicalMonitoring.v2.tabs.explorer')}</TabsTrigger>
+          <TabsTrigger value="discovery">{t('clinicalMonitoring.v2.tabs.discovery')}</TabsTrigger>
+          <TabsTrigger value="loop">{t('clinicalMonitoring.v2.tabs.loop')}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="dashboard" className="space-y-4">
-          <ClinicalDashboard pets={filteredPets} />
+        <TabsContent value="observatory" className="space-y-4 mt-4">
+          <CohortObservatory cohort={cohort} />
         </TabsContent>
-
-        <TabsContent value="byCondition" className="space-y-4">
-          <ConditionAnalysisCards pets={filteredPets} conditions={HEALTH_CONDITIONS} />
+        <TabsContent value="trajectories" className="space-y-4 mt-4">
+          <LongitudinalTrajectories cohort={cohort} />
         </TabsContent>
-
-        <TabsContent value="timeline" className="space-y-4">
-          <ResponseTimeline pets={filteredPets} />
+        <TabsContent value="explorer" className="space-y-4 mt-4">
+          <PatientExplorer cohort={cohort} onOpenPatient={setOpenPatientId} />
+        </TabsContent>
+        <TabsContent value="discovery" className="space-y-4 mt-4">
+          <DiscoverySignals cohort={cohort} />
+        </TabsContent>
+        <TabsContent value="loop" className="space-y-4 mt-4">
+          <ModelFeedbackLoop cohort={cohort} />
         </TabsContent>
       </Tabs>
+
+      <PatientDetailDialog
+        cohort={cohort}
+        patientId={openPatientId}
+        onClose={() => setOpenPatientId(null)}
+      />
     </div>
   );
 };
