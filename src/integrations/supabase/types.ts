@@ -1849,6 +1849,9 @@ export type Database = {
       }
       health_conditions: {
         Row: {
+          canonical_id: string | null
+          canonical_mapped_at: string | null
+          canonical_source: string | null
           category: string | null
           category_en: string | null
           created_at: string | null
@@ -1867,6 +1870,9 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          canonical_id?: string | null
+          canonical_mapped_at?: string | null
+          canonical_source?: string | null
           category?: string | null
           category_en?: string | null
           created_at?: string | null
@@ -1885,6 +1891,9 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          canonical_id?: string | null
+          canonical_mapped_at?: string | null
+          canonical_source?: string | null
           category?: string | null
           category_en?: string | null
           created_at?: string | null
@@ -2727,6 +2736,9 @@ export type Database = {
       }
       nutraceuticals: {
         Row: {
+          canonical_id: string | null
+          canonical_mapped_at: string | null
+          canonical_source: string | null
           chemical_compound: string | null
           created_at: string | null
           description: string | null
@@ -2747,6 +2759,9 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          canonical_id?: string | null
+          canonical_mapped_at?: string | null
+          canonical_source?: string | null
           chemical_compound?: string | null
           created_at?: string | null
           description?: string | null
@@ -2767,6 +2782,9 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          canonical_id?: string | null
+          canonical_mapped_at?: string | null
+          canonical_source?: string | null
           chemical_compound?: string | null
           created_at?: string | null
           description?: string | null
@@ -4728,6 +4746,7 @@ export type Database = {
           enrichment_needs_review: boolean | null
           enrichment_source: string | null
           evidence_level: string | null
+          evidence_polarity: string
           extraction_confidence: number | null
           hallucination_flag: boolean | null
           id: string
@@ -4769,6 +4788,7 @@ export type Database = {
           enrichment_needs_review?: boolean | null
           enrichment_source?: string | null
           evidence_level?: string | null
+          evidence_polarity?: string
           extraction_confidence?: number | null
           hallucination_flag?: boolean | null
           id?: string
@@ -4810,6 +4830,7 @@ export type Database = {
           enrichment_needs_review?: boolean | null
           enrichment_source?: string | null
           evidence_level?: string | null
+          evidence_polarity?: string
           extraction_confidence?: number | null
           hallucination_flag?: boolean | null
           id?: string
