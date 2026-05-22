@@ -42,6 +42,7 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const dryRun = body.dry_run === true;
     const batchSize = Math.min(Math.max(Number(body.batch_size) || 20, 1), 50);
+    const offset = Math.max(Number(body.offset) || 0, 0);
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
@@ -53,7 +54,7 @@ Deno.serve(async (req) => {
       .select('id, name, name_en, canonical_id')
       .is('canonical_id', null)
       .order('id')
-      .limit(batchSize);
+      .range(offset, offset + batchSize - 1)
     if (cerr) throw cerr;
 
     const condUpdates: any[] = [];
@@ -78,7 +79,7 @@ Deno.serve(async (req) => {
       .select('id, name, name_en, canonical_id')
       .is('canonical_id', null)
       .order('id')
-      .limit(batchSize);
+      .range(offset, offset + batchSize - 1)
     if (nerr) throw nerr;
 
     const nutraUpdates: any[] = [];
