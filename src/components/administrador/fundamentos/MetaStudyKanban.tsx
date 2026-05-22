@@ -710,6 +710,15 @@ const MetaStudyKanban: React.FC = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {chatId && (
+        <MetaStudyChatDialog
+          open={!!chatId}
+          onOpenChange={(o) => !o && setChatId(null)}
+          metaStudyId={chatId.id}
+          title={chatId.title}
+        />
+      )}
     </div>
   );
 };
