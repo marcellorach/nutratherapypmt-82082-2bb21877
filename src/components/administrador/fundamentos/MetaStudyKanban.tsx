@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import {
   Inbox, Filter, ClipboardList, ShieldCheck, Archive, Loader2, ChevronRight, ChevronLeft, Sparkles,
-  ChevronDown, ChevronUp, Link2, ListChecks, MessageSquare, ExternalLink, ImageIcon, Network, Layers, FlaskConical, Microscope, BookOpen,
+  ChevronDown, ChevronUp, Link2, ListChecks, MessageSquare, ExternalLink, Network, Layers, FlaskConical, Microscope, BookOpen,
 } from 'lucide-react';
 import CoreRulesEvidenceBadge from './CoreRulesEvidenceBadge';
 import MetaStudyChatDialog from './MetaStudyChatDialog';
@@ -108,26 +108,15 @@ const KIND_GRADIENT: Record<string, string> = {
   ontological: 'from-slate-200 to-zinc-300',
 };
 
-const CoverThumb: React.FC<{ url?: string | null; kind: string; size?: number }> = ({ url, kind, size = 56 }) => {
+const CoverThumb: React.FC<{ url?: string | null; kind: string; size?: number }> = ({ kind, size = 56 }) => {
   const Icon = KIND_ICON[kind] || Network;
   const gradient = KIND_GRADIENT[kind] || KIND_GRADIENT.architectural;
-  if (url) {
-    return (
-      <img
-        src={url}
-        alt=""
-        loading="lazy"
-        style={{ width: size, height: size }}
-        className="rounded-md object-cover border shrink-0"
-      />
-    );
-  }
   return (
     <div
       style={{ width: size, height: size }}
       className={`rounded-md border shrink-0 bg-gradient-to-br ${gradient} flex items-center justify-center`}
     >
-      <Icon className="h-5 w-5 text-white/80" />
+      <Icon className="h-6 w-6 text-white/90" />
     </div>
   );
 };
@@ -158,8 +147,6 @@ const MetaStudyKanban: React.FC = () => {
   const [aiId, setAiId] = useState<string | null>(null);
   const [bulkAi, setBulkAi] = useState(false);
   const [chatId, setChatId] = useState<{ id: string; title: string } | null>(null);
-  const [coverId, setCoverId] = useState<string | null>(null);
-  const [bulkCover, setBulkCover] = useState(false);
 
   const STATUS_LABEL: Record<Lifecycle, string> = {
     inbox: t('fundamentos.kanban.status.inbox', 'Caixa de entrada'),
@@ -347,57 +334,6 @@ const MetaStudyKanban: React.FC = () => {
     }
   };
 
-  const generateCover = async (rowId: string, overwrite = false) => {
-    setCoverId(rowId);
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-meta-study-cover', {
-        body: { study_ids: [rowId], overwrite },
-      });
-      if (error) throw error;
-      const r = (data as any)?.results?.[0];
-      if (!r?.ok) throw new Error(r?.error || 'falhou');
-      setRows(prev => prev.map(x => x.id === rowId ? { ...x, cover_image_url: r.url } : x));
-      toast.success(t('fundamentos.kanban.coverDone', 'Capa gerada'));
-    } catch (e) {
-      toast.error(t('fundamentos.kanban.coverError', 'Falha ao gerar capa: {{m}}', {
-        m: e instanceof Error ? e.message : String(e),
-      }));
-    } finally {
-      setCoverId(null);
-    }
-  };
-
-  const backfillCovers = async () => {
-    const missing = rows.filter(r => !r.cover_image_url);
-    if (missing.length === 0) {
-      toast.info(t('fundamentos.kanban.coverNoPending', 'Todos os papers já têm capa'));
-      return;
-    }
-    if (!confirm(t('fundamentos.kanban.coverBackfillConfirm', 'Gerar capas para {{n}} papers? (~{{s}}s)', {
-      n: missing.length, s: missing.length * 6,
-    }))) return;
-    setBulkCover(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-meta-study-cover', {
-        body: { all_missing: true },
-      });
-      if (error) throw error;
-      const results = ((data as any)?.results || []) as Array<{ id: string; ok: boolean; url?: string }>;
-      const ok = results.filter(r => r.ok).length;
-      setRows(prev => prev.map(r => {
-        const m = results.find(x => x.id === r.id && x.ok);
-        return m ? { ...r, cover_image_url: m.url } : r;
-      }));
-      toast.success(t('fundamentos.kanban.coverBackfillDone', '{{ok}}/{{total}} capas geradas', { ok, total: results.length }));
-    } catch (e) {
-      toast.error(t('fundamentos.kanban.coverError', 'Falha ao gerar capa: {{m}}', {
-        m: e instanceof Error ? e.message : String(e),
-      }));
-    } finally {
-      setBulkCover(false);
-    }
-  };
-
   const setEdit = (rowId: string, key: keyof MetaStudyRow, value: number | null) => {
     setEdits(prev => ({ ...prev, [rowId]: { ...(prev[rowId] || {}), [key]: value } }));
   };
@@ -426,19 +362,6 @@ const MetaStudyKanban: React.FC = () => {
           {t('fundamentos.kanban.intro', 'Sandbox de estudos arquiteturais: caixa de entrada → triados → em revisão → aprovados. Aprovação real continua exigindo curadoria das regras propostas na aba Ingestão.')}
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={backfillCovers}
-            disabled={bulkCover}
-            className="border-primary/40"
-            title={t('fundamentos.kanban.coverBackfillHint', 'Gera ilustração consistente para papers sem capa')}
-          >
-            {bulkCover
-              ? <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-              : <ImageIcon className="h-3 w-3 mr-1 text-primary" />}
-            {t('fundamentos.kanban.coverBackfill', 'Gerar capas')}
-          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -536,19 +459,6 @@ const MetaStudyKanban: React.FC = () => {
                             <MessageSquare className="h-2.5 w-2.5" />
                             {t('fundamentos.kanban.card.chatShort', 'chat')}
                           </button>
-                          {!row.cover_image_url && (
-                            <button
-                              className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground hover:text-foreground px-1.5 py-0.5 rounded border border-dashed"
-                              onClick={() => generateCover(row.id)}
-                              disabled={coverId === row.id}
-                              title={t('fundamentos.kanban.card.generateCover', 'Gerar ilustração')}
-                            >
-                              {coverId === row.id
-                                ? <Loader2 className="h-2.5 w-2.5 animate-spin" />
-                                : <ImageIcon className="h-2.5 w-2.5" />}
-                              {t('fundamentos.kanban.card.cover', 'capa')}
-                            </button>
-                          )}
                         </div>
                         {/* Mini barra de contribuição */}
                         {filledCount > 0 && (

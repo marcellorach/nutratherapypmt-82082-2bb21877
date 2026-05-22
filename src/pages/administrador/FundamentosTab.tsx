@@ -11,6 +11,7 @@ import IngestaoMetaEstudo from '@/components/administrador/fundamentos/IngestaoM
 import CoreRuleHistory from '@/components/administrador/fundamentos/CoreRuleHistory';
 import MetaStudyKanban from '@/components/administrador/fundamentos/MetaStudyKanban';
 import MetaKgRoadmapCard from '@/components/administrador/fundamentos/MetaKgRoadmapCard';
+import MetaStudyDetailedCard, { MetaStudyDetailed } from '@/components/administrador/fundamentos/MetaStudyDetailedCard';
 
 interface CoreRule {
   id: string;
@@ -260,40 +261,7 @@ const FundamentosTab: React.FC = () => {
           {studies.length === 0 ? (
             <Card><CardContent className="py-8 text-center text-muted-foreground">{t('fundamentos.noStudies', 'Nenhum estudo arquitetural cadastrado.')}</CardContent></Card>
           ) : studies.map(s => (
-            <Card key={s.id}>
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1">
-                    <CardTitle className="text-base">{s.title}</CardTitle>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {s.authors} {s.year ? `· ${s.year}` : ''} · <Badge variant="outline" className="text-xs">{s.kind}</Badge>
-                    </div>
-                  </div>
-                  {s.source_url && (
-                    <a href={s.source_url} target="_blank" rel="noreferrer" className="text-xs text-muted-foreground hover:text-primary inline-flex items-center gap-1">
-                      <ExternalLink className="h-3 w-3" /> {t('fundamentos.source', 'Fonte')}
-                    </a>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="text-sm space-y-2">
-                {s.summary && <p className="text-muted-foreground">{s.summary}</p>}
-                {s.key_claims?.length > 0 && (
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">{t('fundamentos.keyClaims', 'Claims-chave')}</p>
-                    <ul className="list-disc pl-5 space-y-1">
-                      {s.key_claims.map((c, i) => (
-                        <li key={i}>
-                          <span className="font-medium">{c.claim}</span>
-                          {c.quote && <span className="text-muted-foreground italic"> — "{c.quote}"</span>}
-                          {typeof c.weight === 'number' && <Badge variant="outline" className="ml-1 text-[10px]">w={c.weight}</Badge>}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <MetaStudyDetailedCard key={s.id} study={s as unknown as MetaStudyDetailed} />
           ))}
         </TabsContent>
 

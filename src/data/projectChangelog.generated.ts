@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-22T14:35:01.140Z
+// Última geração: 2026-05-22T14:48:32.013Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,49 @@ export const lastChangelogDate = "2026-05-22";
 export const senexVersion = "6.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-22",
+    "kind": "changed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Depósito de estudos arquiteturais ganha citações ricas; ilustrações do Kanban removidas",
+    "bullets": [
+      "Novo `MetaStudyDetailedCard.tsx` na aba \"Estudos Arquiteturais\": exibe selo de confiabilidade ★ X/5 (popover com as 5 dimensões), links Fonte + DOI + chat contextual, e seção colapsável \"Citações & excertos detalhados\" que renderiza `quantitative_parameters` (fórmulas/λ/thresholds), `evaluation_metrics`, `architectural_patterns`, `methodological_recipes` e `anti_patterns_pitfalls` — cada item com statement, quote literal, `applies_to` e weight.",
+      "Kanban: ilustrações geradas por IA removidas (não representavam o conteúdo dos papers). `CoverThumb` agora sempre renderiza ícone temático por `kind` sobre gradiente. Botões \"Gerar capas\" (header) e \"capa\" (por card) eliminados.",
+      "Edge function `generate-meta-study-cover` e coluna `cover_image_url` permanecem no banco (sem uso na UI), permitindo reativação futura caso queiramos diagramas reais do conteúdo.",
+      "Files: src/components/administrador/fundamentos/MetaStudyDetailedCard.tsx, src/pages/administrador/FundamentosTab.tsx, src/components/administrador/fundamentos/MetaStudyKanban.tsx, src/i18n.ts"
+    ],
+    "files": [
+      "src/components/administrador/fundamentos/MetaStudyDetailedCard.tsx",
+      "src/pages/administrador/FundamentosTab.tsx",
+      "src/components/administrador/fundamentos/MetaStudyKanban.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.101.0"
+  },
+  {
+    "date": "2026-05-22",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Meta-Estudos \"Stanford-grade\": capas IA, badge de Core Rules e chat contextual",
+    "bullets": [
+      "Coluna `meta_studies.cover_image_url` + bucket público `meta-study-covers`. Style-guide fixo (paleta navy/gold/parchment, isométrico editorial) garante consistência visual entre papers.",
+      "Edge function `generate-meta-study-cover` (Gemini image): gera 1x por paper, bucket público, com tema derivado do `kind`. Backfill via botão \"Gerar capas\" no Kanban (5/5 papers atuais já cobertos).",
+      "Edge function `chat-meta-study`: chat streaming com contexto = summary + key_claims + proposed_rules + core_rule_evidence do próprio registro (sem RAG novo).",
+      "Componente `CoreRulesEvidenceBadge`: popover com agregação por relação (`supports`/`contradicts`/`modulates_weight`) listando regras impactadas + citações textuais.",
+      "Card do Kanban redesenhado: thumbnail de capa 56×56, badges de Core Rules, botões inline `paper` (link externo) e `chat`.",
+      "Files: supabase/functions/generate-meta-study-cover/index.ts, supabase/functions/chat-meta-study/index.ts, src/components/administrador/fundamentos/MetaStudyChatDialog.tsx, src/components/administrador/fundamentos/CoreRulesEvidenceBadge.tsx, src/components/administrador/fundamentos/MetaStudyKanban.tsx"
+    ],
+    "files": [
+      "supabase/functions/generate-meta-study-cover/index.ts",
+      "supabase/functions/chat-meta-study/index.ts",
+      "src/components/administrador/fundamentos/MetaStudyChatDialog.tsx",
+      "src/components/administrador/fundamentos/CoreRulesEvidenceBadge.tsx",
+      "src/components/administrador/fundamentos/MetaStudyKanban.tsx"
+    ],
+    "i18nVersion": "1.100.0"
+  },
   {
     "date": "2026-05-22",
     "kind": "changed",
