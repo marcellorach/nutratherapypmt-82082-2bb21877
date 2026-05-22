@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-05-22T14:35:01.147Z
+Generated: 2026-05-22T14:48:32.018Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.99.0
+## Latest i18n version: 1.101.0
 
 ## Changes by area (last 14 days)
-- **admin**: 36
+- **admin**: 38
 - **vet-ui**: 16
 - **kg**: 6
 - **meta**: 6
@@ -16,6 +16,18 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **i18n**: 1
 
 ## Top 10 recent entries
+### 2026-05-22 · [admin] CHANGED — Depósito de estudos arquiteturais ganha citações ricas; ilustrações do Kanban removidas
+- Novo `MetaStudyDetailedCard.tsx` na aba "Estudos Arquiteturais": exibe selo de confiabilidade ★ X/5 (popover com as 5 dimensões), links Fonte + DOI + chat contextual, e seção colapsável "Citações & excertos detalhados" que renderiza `quantitative_parameters` (fórmulas/λ/thresholds), `evaluation_metrics`, `architectural_patterns`, `methodological_recipes` e `anti_patterns_pitfalls` — cada item com statement, quote literal, `applies_to` e weight.
+- Kanban: ilustrações geradas por IA removidas (não representavam o conteúdo dos papers). `CoverThumb` agora sempre renderiza ícone temático por `kind` sobre gradiente. Botões "Gerar capas" (header) e "capa" (por card) eliminados.
+- Edge function `generate-meta-study-cover` e coluna `cover_image_url` permanecem no banco (sem uso na UI), permitindo reativação futura caso queiramos diagramas reais do conteúdo.
+_files: src/components/administrador/fundamentos/MetaStudyDetailedCard.tsx, src/pages/administrador/FundamentosTab.tsx, src/components/administrador/fundamentos/MetaStudyKanban.tsx, src/i18n.ts_
+
+### 2026-05-22 · [admin] ADDED — Meta-Estudos "Stanford-grade": capas IA, badge de Core Rules e chat contextual
+- Coluna `meta_studies.cover_image_url` + bucket público `meta-study-covers`. Style-guide fixo (paleta navy/gold/parchment, isométrico editorial) garante consistência visual entre papers.
+- Edge function `generate-meta-study-cover` (Gemini image): gera 1x por paper, bucket público, com tema derivado do `kind`. Backfill via botão "Gerar capas" no Kanban (5/5 papers atuais já cobertos).
+- Edge function `chat-meta-study`: chat streaming com contexto = summary + key_claims + proposed_rules + core_rule_evidence do próprio registro (sem RAG novo).
+_files: supabase/functions/generate-meta-study-cover/index.ts, supabase/functions/chat-meta-study/index.ts, src/components/administrador/fundamentos/MetaStudyChatDialog.tsx, src/components/administrador/fundamentos/CoreRulesEvidenceBadge.tsx…_
+
 ### 2026-05-22 · [admin] CHANGED — Kanban Meta-Estudos: breakdown de confiabilidade inline
 - Card do Kanban agora exibe breakdown das 5 dimensões de confiabilidade com sliders inline (expansível) e recálculo do `reliability_overall` em tempo real (mesma fórmula da coluna gerada no DB).
 - Mini barra de contribuição colorida por dimensão + chips com nº de tripletes vinculados (`core_rule_evidence.meta_study_id`), nº de propostas e idade do estudo.
@@ -64,20 +76,6 @@ _status: parcial_
 - Status reconciliado em `src/config/ai-tasks.ts`: `extraction_stage1/2/3` passam de `legacy` para `connected` (12 connected · 8 legacy · 3 planned).
 - Smoke test: `ai-task-healthcheck {extraction_stage1, extraction_stage2, extraction_stage3}` → 200 OK (825/910/781 ms).
 _files: src/config/ai-tasks.ts, supabase/functions/extract-study-entities/index.ts_
-
-### 2026-05-21 · [kg] CHANGED — Migração Curadoria/KG (lote 2/3): extract-meta-study no router
-_status: parcial_
-- `extract-meta-study` (caminho gateway) migrada para `callAITask('meta_study_analysis', ...)`, preservando `tools=[TOOL_V2]` + `tool_choice` forçado e fallback explícito (`google/gemini-3-pro-preview`, reasoning=high, temp=0.2). Caminho Google AI File API (PDFs > 7MB) mantido fora do router por usar `generativelanguage.googleapis.com` diretamente — fora do escopo do gateway.
-- Erros do gateway são re-mapeados (`429`/`402`/`413`/`404`/`502`) com a mesma UX anterior (mensagens e `options[]` no payload de falha).
-- Smoke test: `ai-task-healthcheck {meta_study_analysis}` → 200 OK em 907ms.
-_files: supabase/functions/extract-meta-study/index.ts_
-
-### 2026-05-21 · [kg] CHANGED — Migração Curadoria/KG (lote 1/3): kg-evidence-gap-fill plugada no router
-_status: parcial_
-- `kg-evidence-gap-fill` migrada para `callAITask('kg_gap_fill', ...)` preservando tool calling (`assess_evidence`) e fallback explícito para `google/gemini-3-flash-preview`. Troca de modelo no painel Governança IA agora afeta esta tarefa em runtime, e cada invocação é registrada em `ai_task_invocations` + `ai_task_status` com latência, tokens e custo estimado.
-- Smoke test em produção: deploy + healthcheck POST `{task_ids:["kg_gap_fill"]}` → 200 OK em 870 ms.
-- Status atualizado em `src/config/ai-tasks.ts`: `kg_gap_fill` agora `connected`. Real: 9 connected · 11 legacy · 3 planned.
-_files: src/config/ai-tasks.ts, supabase/functions/kg-evidence-gap-fill/index.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
