@@ -418,19 +418,6 @@ const MetaStudyKanban: React.FC = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={backfillCovers}
-            disabled={bulkCover}
-            className="border-primary/40"
-            title={t('fundamentos.kanban.coverBackfillHint', 'Gera ilustração consistente para papers sem capa')}
-          >
-            {bulkCover
-              ? <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-              : <ImageIcon className="h-3 w-3 mr-1 text-primary" />}
-            {t('fundamentos.kanban.coverBackfill', 'Gerar capas')}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
             onClick={aiBackfill}
             disabled={bulkAi}
             className="border-primary/40"
