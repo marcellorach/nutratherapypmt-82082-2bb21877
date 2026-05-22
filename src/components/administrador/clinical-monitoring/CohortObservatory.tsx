@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslation } from 'react-i18next';
 import { Activity, TrendingUp, DollarSign, Users, Clock, ShieldCheck } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell, PieChart, Pie, Legend } from 'recharts';
-import { SyntheticCohort, SYNTHETIC_CONDITIONS, aggregateResponse } from '@/utils/syntheticCohort';
+import { SyntheticCohort, SYNTHETIC_CONDITIONS, aggregateResponse, computeNNT, computeHazardRatio, computeTimeToResponse } from '@/utils/syntheticCohort';
+import AdherenceMonthlyStack from './AdherenceMonthlyStack';
 
 interface Props {
   cohort: SyntheticCohort;
@@ -65,16 +66,11 @@ const CohortObservatory: React.FC<Props> = ({ cohort }) => {
     ];
   }, [cohort, t]);
 
-  const adoptionFunnel = useMemo(() => {
-    // Treated buckets by months on protocol → emulates async adoption
-    const buckets = [0, 3, 6, 9, 12, 18, 24];
-    const series = buckets.slice(0, -1).map((b, idx) => {
-      const next = buckets[idx + 1];
-      const count = cohort.treated.filter((p) => p.monthsOnProtocol >= b && p.monthsOnProtocol < next).length;
-      return { label: `${b}-${next}m`, count };
-    });
-    return series;
-  }, [cohort]);
+  const impact = useMemo(() => ({
+    nnt: computeNNT(cohort.treated, cohort.mirror),
+    hr: computeHazardRatio(cohort.treated, cohort.mirror),
+    ttr: computeTimeToResponse(cohort.treated),
+  }), [cohort]);
 
   const metric = (icon: React.ReactNode, label: string, value: string, sub?: string) => (
     <Card>
@@ -142,23 +138,25 @@ const CohortObservatory: React.FC<Props> = ({ cohort }) => {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">{t('clinicalMonitoring.v2.adoption.title')}</CardTitle>
-          <p className="text-xs text-muted-foreground">{t('clinicalMonitoring.v2.adoption.subtitle')}</p>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={adoptionFunnel}>
-              <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-              <XAxis dataKey="label" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="count" fill="hsl(var(--primary))" />
-            </BarChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+      <div>
+        <div className="mb-2">
+          <h3 className="text-sm font-semibold">{t('clinicalMonitoring.v2.metrics.title')}</h3>
+          <p className="text-xs text-muted-foreground">{t('clinicalMonitoring.v2.metrics.subtitle')}</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {metric(<ShieldCheck className="h-5 w-5" />, t('clinicalMonitoring.v2.metrics.nnt'),
+            impact.nnt != null ? String(impact.nnt) : t('clinicalMonitoring.v2.metrics.na'),
+            t('clinicalMonitoring.v2.metrics.nntSub'))}
+          {metric(<Activity className="h-5 w-5" />, t('clinicalMonitoring.v2.metrics.hr'),
+            impact.hr != null ? String(impact.hr) : t('clinicalMonitoring.v2.metrics.na'),
+            t('clinicalMonitoring.v2.metrics.hrSub'))}
+          {metric(<Clock className="h-5 w-5" />, t('clinicalMonitoring.v2.metrics.ttr'),
+            impact.ttr ? `${impact.ttr.median} ${t('clinicalMonitoring.v2.metrics.months')}` : t('clinicalMonitoring.v2.metrics.na'),
+            impact.ttr ? t('clinicalMonitoring.v2.metrics.ttrSub', { q1: impact.ttr.q1, q3: impact.ttr.q3 }) : undefined)}
+        </div>
+      </div>
+
+      <AdherenceMonthlyStack treated={cohort.treated} />
     </div>
   );
 };
