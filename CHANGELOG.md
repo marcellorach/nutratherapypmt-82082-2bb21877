@@ -24,6 +24,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 6.0.0 -->
 
+### Changed - 2026-05-22 — Kanban Meta-Estudos: breakdown de confiabilidade inline
+<!-- area: admin · status: entregue · i18n: 1.99.0 -->
+- Card do Kanban agora exibe breakdown das 5 dimensões de confiabilidade com sliders inline (expansível) e recálculo do `reliability_overall` em tempo real (mesma fórmula da coluna gerada no DB).
+- Mini barra de contribuição colorida por dimensão + chips com nº de tripletes vinculados (`core_rule_evidence.meta_study_id`), nº de propostas e idade do estudo.
+- Salvamento inline (Salvar/Descartar) com aviso de drift se overall salvo divergir do preview local.
+- Files: src/components/administrador/fundamentos/MetaStudyKanban.tsx
+
 ### Added - 2026-05-22 — Fase 1: identidade canônica + evidência negativa
 <!-- area: kg · status: parcial · i18n: 1.99.0 -->
 - Colunas `canonical_id` + `canonical_source` em `health_conditions` e `nutraceuticals` (com índice único parcial e CHECK de fonte).
