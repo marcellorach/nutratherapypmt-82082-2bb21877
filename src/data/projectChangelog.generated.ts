@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-25T22:36:35.399Z
+// Última geração: 2026-05-25T23:14:23.498Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,23 @@ export const lastChangelogDate = "2026-05-25";
 export const senexVersion = "6.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-25",
+    "kind": "fixed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Cohort travado sem heartbeat volta a poder ser destravado",
+    "bullets": [
+      "`CohortAISuggester` agora considera a última atividade disponível (`last_heartbeat_at`, último log ou `created_at`) para detectar travamentos. Isso corrige os cohorts antigos que ficavam presos em `generating` sem heartbeat e nunca exibiam o botão Forçar finalização.",
+      "Após a finalização manual, o card local é atualizado imediatamente para `ready`/`failed`, sem depender do próximo ciclo de polling.",
+      "O cohort travado `SRD sênior (8+) com OA em uso crônico de AINEs vs. Bedinvetmab` foi destravado no backend e marcado como `ready` com 175/200 pets preservados.",
+      "Files: src/components/administrador/priorizacoes/CohortAISuggester.tsx"
+    ],
+    "files": [
+      "src/components/administrador/priorizacoes/CohortAISuggester.tsx"
+    ],
+    "i18nVersion": "1.111.0"
+  },
   {
     "date": "2026-05-25",
     "kind": "changed",
