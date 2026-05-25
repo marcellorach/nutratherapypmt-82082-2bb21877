@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Eye, RotateCcw, Code2, Copy } from 'lucide-react';
+import { Eye, RotateCcw, Code2, Copy, CheckSquare, Square } from 'lucide-react';
 import {
   ROLE_VIEWS,
   AdminSidebarGroup,
@@ -74,6 +74,27 @@ const RoleViewEditor: React.FC = () => {
       const hidden = cur.hiddenAdminTabs.includes(tabId)
         ? cur.hiddenAdminTabs.filter((t) => t !== tabId)
         : [...cur.hiddenAdminTabs, tabId];
+      return { ...prev, [viewId]: { ...cur, hiddenAdminTabs: hidden } };
+    });
+  };
+
+  /** Marca/desmarca TODAS as tabs (de todos os grupos) para este perfil. */
+  const setAllTabs = (viewId: RoleViewId, visible: boolean) => {
+    setOverrides((prev) => {
+      const cur = prev[viewId];
+      const hidden = visible ? [] : adminTabsConfig.map((t) => t.id);
+      return { ...prev, [viewId]: { ...cur, hiddenAdminTabs: hidden } };
+    });
+  };
+
+  /** Marca/desmarca todas as tabs de UM grupo. */
+  const setGroupTabs = (viewId: RoleViewId, group: string, visible: boolean) => {
+    setOverrides((prev) => {
+      const cur = prev[viewId];
+      const groupTabIds = adminTabsConfig.filter((t) => t.group === group).map((t) => t.id);
+      const hidden = visible
+        ? cur.hiddenAdminTabs.filter((t) => !groupTabIds.includes(t))
+        : Array.from(new Set([...cur.hiddenAdminTabs, ...groupTabIds]));
       return { ...prev, [viewId]: { ...cur, hiddenAdminTabs: hidden } };
     });
   };
@@ -167,29 +188,65 @@ const RoleViewEditor: React.FC = () => {
                   )}
                 </div>
 
-                <details className="text-[11px]">
-                  <summary className="cursor-pointer font-semibold text-gray-700">
-                    Tabs específicas a esconder ({ov.hiddenAdminTabs.length})
-                  </summary>
-                  <div className="mt-2 space-y-2 max-h-[200px] overflow-y-auto pr-2">
-                    {Object.entries(tabsByGroup).map(([group, tabs]) => (
-                      <div key={group}>
-                        <div className="text-[10px] uppercase text-gray-400 font-mono">{group}</div>
-                        <div className="grid grid-cols-2 gap-0.5">
-                          {tabs.map((t) => (
-                            <label key={t.id} className="flex items-center gap-1 text-[10px] cursor-pointer hover:bg-gray-50 rounded px-1">
-                              <Checkbox
-                                checked={ov.hiddenAdminTabs.includes(t.id)}
-                                onCheckedChange={() => toggleTab(v.id, t.id)}
-                              />
-                              <span className="truncate">{t.label}</span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
+                <div className="text-[11px]">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="font-semibold text-gray-700">
+                      Tabs visíveis ({adminTabsConfig.length - ov.hiddenAdminTabs.length}/{adminTabsConfig.length})
+                    </div>
+                    <div className="flex gap-1">
+                      <Button size="sm" variant="ghost" className="h-6 px-2 text-[10px]" onClick={() => setAllTabs(v.id, true)}>
+                        <CheckSquare className="h-3 w-3 mr-1" /> Marcar todas
+                      </Button>
+                      <Button size="sm" variant="ghost" className="h-6 px-2 text-[10px]" onClick={() => setAllTabs(v.id, false)}>
+                        <Square className="h-3 w-3 mr-1" /> Desmarcar todas
+                      </Button>
+                    </div>
                   </div>
-                </details>
+                  <div className="space-y-2 max-h-[360px] overflow-y-auto pr-2 border rounded p-2 bg-gray-50/50">
+                    {Object.entries(tabsByGroup).map(([group, tabs]) => {
+                      const groupIds = tabs.map((t) => t.id);
+                      const visibleInGroup = groupIds.filter((id) => !ov.hiddenAdminTabs.includes(id)).length;
+                      const allOn = visibleInGroup === groupIds.length;
+                      return (
+                        <div key={group} className="bg-white rounded p-1.5 border">
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="text-[10px] uppercase text-gray-500 font-mono">
+                              {group} <span className="text-gray-400 normal-case">({visibleInGroup}/{groupIds.length})</span>
+                            </div>
+                            <button
+                              type="button"
+                              className="text-[10px] text-primary hover:underline"
+                              onClick={() => setGroupTabs(v.id, group, !allOn)}
+                            >
+                              {allOn ? 'desmarcar grupo' : 'marcar grupo'}
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-2 gap-0.5">
+                            {tabs.map((t) => {
+                              const visible = !ov.hiddenAdminTabs.includes(t.id);
+                              return (
+                                <label
+                                  key={t.id}
+                                  className="flex items-center gap-1 text-[10px] cursor-pointer hover:bg-gray-50 rounded px-1"
+                                  title={t.id}
+                                >
+                                  <Checkbox
+                                    checked={visible}
+                                    onCheckedChange={() => toggleTab(v.id, t.id)}
+                                  />
+                                  <span className="truncate">{t.label}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[10px] text-gray-500 mt-1.5 italic">
+                    Marcado = visível para esse perfil. Desmarcado = escondido.
+                  </p>
+                </div>
               </CardContent>
             </Card>
           );
