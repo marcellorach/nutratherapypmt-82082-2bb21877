@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-05-25T21:39:42.458Z",
+  "timestamp": "2026-05-25T23:02:01.727Z",
   "summary": {
-    "totalFiles": 929,
-    "totalIssues": 447,
-    "hardcodedTexts": 53,
-    "missingKeys": 392,
+    "totalFiles": 931,
+    "totalIssues": 455,
+    "hardcodedTexts": 54,
+    "missingKeys": 399,
     "incompleteTranslations": 2
   },
   "issues": [
@@ -1928,6 +1928,48 @@
     },
     {
       "type": "missing-key",
+      "file": "src/components/administrador/priorizacoes/CohortPatientsDialog.tsx",
+      "line": 128,
+      "text": "id, name, breed, sex, age_years, weight_kg, notes, created_at",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/priorizacoes/CohortPatientsDialog.tsx",
+      "line": 163,
+      "text": "id, name, breed, sex, age_years, weight_kg, notes, created_at",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/priorizacoes/CohortPatientsDialog.tsx",
+      "line": 168,
+      "text": "id, condition_name, severity, status, diagnosis_date, origin",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/priorizacoes/CohortPatientsDialog.tsx",
+      "line": 173,
+      "text": "id, exam_type, exam_date, flags_abnormal, results",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/priorizacoes/CohortPatientsDialog.tsx",
+      "line": 178,
+      "text": "id, consultation_date, chief_complaint, clinical_exam, assessment, plan, weight_kg_at_visit, body_condition_score, is_latest",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/priorizacoes/CohortPatientsDialog.tsx",
+      "line": 183,
+      "text": "id, medication_name, dosage, frequency, status",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/administrador/priorizacoes/CohortRequestGenerator.tsx",
       "line": 99,
       "text": "a",
@@ -1952,6 +1994,13 @@
       "file": "src/components/administrador/priorizacoes/PopulationInsightsV0.tsx",
       "line": 128,
       "text": " ",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/priorizacoes/SyntheticCohortsManager.tsx",
+      "line": 62,
+      "text": "*",
       "severity": "high"
     },
     {
@@ -2559,21 +2608,21 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 904,
+      "line": 969,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 1115,
+      "line": 1180,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 3910,
+      "line": 3975,
       "text": "@",
       "severity": "high"
     },
@@ -3030,6 +3079,13 @@
       "file": "src/components/administrador/pet-food/PetFoodCatalogTab.tsx",
       "line": 517,
       "text": "Fase de vida",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/priorizacoes/CohortPatientsDialog.tsx",
+      "line": 384,
+      "text": "Sem consultas registradas.",
       "severity": "medium"
     },
     {
