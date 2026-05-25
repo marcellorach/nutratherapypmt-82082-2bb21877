@@ -95,7 +95,7 @@ async function petHistoryProvider(input: ResolverInput): Promise<SourceResult> {
   try {
     const { data: pet } = await supabase
       .from('pet_profiles')
-      .select('name, breed, age_years, conditions, current_medications')
+      .select('name, breed, age_years, notes')
       .eq('id', input.petId)
       .maybeSingle();
     if (!pet) return { kind: 'petHistory', weight: WEIGHTS.petHistory, claim: null, confidence: 0 };
@@ -126,7 +126,7 @@ async function cohortProvider(input: ResolverInput): Promise<SourceResult> {
   try {
     let query = supabase
       .from('pet_profiles')
-      .select('breed, age_years, conditions', { count: 'exact' })
+      .select('breed, age_years, notes', { count: 'exact' })
       .eq('is_synthetic', true);
     if (input.cohortId) query = query.eq('cohort_id', input.cohortId);
     const { data, count, error } = await query.limit(200);
@@ -137,7 +137,7 @@ async function cohortProvider(input: ResolverInput): Promise<SourceResult> {
     const kws = extractKeywords(input.question);
     const rows = (data ?? []) as Array<any>;
     const matching = rows.filter((p) => {
-      const blob = `${p.breed ?? ''} ${JSON.stringify(p.conditions ?? [])}`.toLowerCase();
+      const blob = `${p.breed ?? ''} ${p.notes ?? ''}`.toLowerCase();
       return kws.some((k) => blob.includes(k));
     });
     const pct = rows.length > 0 ? Math.round((matching.length / rows.length) * 100) : 0;
