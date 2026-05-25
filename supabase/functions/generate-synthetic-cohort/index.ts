@@ -25,7 +25,6 @@ function buildTool(batchSize: number) {
           pets: {
             type: "array",
             minItems: batchSize,
-            maxItems: batchSize,
             items: {
               type: "object",
               properties: {
@@ -53,24 +52,21 @@ function buildTool(batchSize: number) {
                     type: "object",
                     properties: {
                       exam_type: { type: "string", description: "ex.: CBC, Bioquímico hepático, Bioquímico renal, Urinálise" },
-                      results: {
-                        type: "object",
-                        description: "Mapa marcador -> { value, unit, ref_min, ref_max }",
-                        additionalProperties: true
+                      results_json: {
+                        type: "string",
+                        description: "JSON string mapeando marcador -> { value, unit, ref_min, ref_max }. Ex.: '{\"ALT\":{\"value\":120,\"unit\":\"U/L\",\"ref_min\":10,\"ref_max\":100}}'"
                       },
                       flags_abnormal: { type: "array", items: { type: "string" } }
                     },
-                    required: ["exam_type", "results"]
+                    required: ["exam_type", "results_json"]
                   }
                 }
               },
-              required: ["name", "breed", "sex", "age_years", "weight_kg", "conditions", "exams"],
-              additionalProperties: false
+              required: ["name", "breed", "sex", "age_years", "weight_kg", "conditions", "exams"]
             }
           }
         },
-        required: ["pets"],
-        additionalProperties: false
+        required: ["pets"]
       }
     }
   };
@@ -108,6 +104,23 @@ severidade das condições, e padrões laboratoriais. Para cada pet, inclua entr
   const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
   const parsed = typeof args === "string" ? JSON.parse(args) : args;
   return parsed?.pets ?? [];
+}
+
+async function appendLog(service: any, cohortId: string, level: "info" | "warn" | "error", message: string, extra: any = {}) {
+  const entry = { ts: new Date().toISOString(), level, message, ...extra };
+  console.log(`[cohort ${cohortId}] ${level.toUpperCase()} ${message}`, extra);
+  try {
+    const { data: row } = await service
+      .from("synthetic_cohorts")
+      .select("progress_log")
+      .eq("id", cohortId).single();
+    const next = Array.isArray(row?.progress_log) ? [...row.progress_log, entry] : [entry];
+    // keep last 80 entries to bound size
+    const trimmed = next.slice(-80);
+    await service.from("synthetic_cohorts").update({ progress_log: trimmed }).eq("id", cohortId);
+  } catch (e) {
+    console.error("appendLog failed", e);
+  }
 }
 
 Deno.serve(async (req) => {
