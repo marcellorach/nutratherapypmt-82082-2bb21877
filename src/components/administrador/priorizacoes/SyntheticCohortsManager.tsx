@@ -119,21 +119,39 @@ const SyntheticCohortsManager: React.FC = () => {
         </CardContent>
       </Card>
 
-      <div className="flex justify-between items-center">
-        <h3 className="text-sm font-semibold">Cohorts ({cohorts.length})</h3>
-        <Button size="sm" variant="outline" onClick={fetchCohorts} disabled={loading}>
-          <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${loading ? 'animate-spin' : ''}`} /> Atualizar
-        </Button>
+      {(() => null)()}
+      <div className="flex justify-between items-center flex-wrap gap-2">
+        <h3 className="text-sm font-semibold">
+          Cohorts ({cohorts.filter((c) => showGenerating || c.status !== 'generating').length}
+          {cohorts.filter((c) => c.status === 'generating').length > 0 && !showGenerating && (
+            <span className="text-gray-500 font-normal">
+              {' '}· {cohorts.filter((c) => c.status === 'generating').length} em geração
+            </span>
+          )})
+        </h3>
+        <div className="flex items-center gap-3">
+          {cohorts.some((c) => c.status === 'generating') && (
+            <div className="flex items-center gap-1.5">
+              <Switch id="show-generating" checked={showGenerating} onCheckedChange={setShowGenerating} />
+              <Label htmlFor="show-generating" className="text-xs text-gray-600 cursor-pointer">
+                Mostrar em geração
+              </Label>
+            </div>
+          )}
+          <Button size="sm" variant="outline" onClick={fetchCohorts} disabled={loading}>
+            <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${loading ? 'animate-spin' : ''}`} /> Atualizar
+          </Button>
+        </div>
       </div>
 
-      {cohorts.length === 0 && !loading && (
+      {cohorts.filter((c) => showGenerating || c.status !== 'generating').length === 0 && !loading && (
         <Card><CardContent className="p-6 text-center text-sm text-gray-500">
-          Nenhum cohort sintético ainda. Vá em <b>Gerador de Cohort</b> → gere sugestões com IA → clique em "Gerar cohort sintético".
+          Nenhum cohort sintético finalizado ainda. Vá em <b>Gerador de Sugestão de Cohort</b> → gere sugestões com IA → clique em "Gerar cohort".
         </CardContent></Card>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        {cohorts.map((c) => (
+        {cohorts.filter((c) => showGenerating || c.status !== 'generating').map((c) => (
           <Card key={c.id}>
             <CardContent className="p-3 space-y-2">
               <div className="flex justify-between items-start gap-2">
@@ -157,34 +175,8 @@ const SyntheticCohortsManager: React.FC = () => {
               {c.generation_error && (
                 <p className="text-[11px] text-red-700 bg-red-50 p-1.5 rounded">⚠ {c.generation_error}</p>
               )}
-              {(c.progress_log && c.progress_log.length > 0) && (
-                <div className="border rounded">
-                  <button
-                    type="button"
-                    onClick={() => setExpandedLog((m) => ({ ...m, [c.id]: !m[c.id] }))}
-                    className="w-full flex items-center justify-between px-2 py-1 text-[11px] text-gray-700 hover:bg-gray-50"
-                  >
-                    <span className="flex items-center gap-1.5">
-                      <ScrollText className="h-3 w-3" />
-                      Log de execução ({c.progress_log.length})
-                    </span>
-                    {expandedLog[c.id] ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                  </button>
-                  {expandedLog[c.id] && (
-                    <div className="max-h-40 overflow-y-auto px-2 py-1.5 text-[10px] font-mono space-y-0.5 bg-gray-50 border-t">
-                      {c.progress_log.slice().reverse().map((entry, i) => (
-                        <div key={i} className={
-                          entry.level === 'error' ? 'text-red-700'
-                          : entry.level === 'warn' ? 'text-amber-700'
-                          : 'text-gray-700'
-                        }>
-                          <span className="text-gray-400">{entry.ts.slice(11, 19)}</span>{' '}
-                          [{entry.level}] {entry.message}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+              {c.progress_log && c.progress_log.length > 0 && (
+                <CohortProgressLog entries={c.progress_log as ProgressLogEntry[]} />
               )}
               <div className="flex gap-1.5 pt-1 border-t">
                 <Button
