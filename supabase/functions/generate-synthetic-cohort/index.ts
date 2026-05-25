@@ -474,10 +474,18 @@ Deno.serve(async (req) => {
               });
             }
           });
-          if (condRows.length) await service.from("pet_conditions").insert(condRows);
-          if (examRows.length) await service.from("pet_exams").insert(examRows);
-          if (medRows.length) await service.from("pet_medications").insert(medRows);
-          if (noteRows.length) await service.from("pet_clinical_notes").insert(noteRows);
+          const insertWithLog = async (table: string, rows: any[]) => {
+            if (!rows.length) return;
+            const { error } = await service.from(table).insert(rows);
+            if (error) {
+              console.error(`[cohort ${cohortId}] insert ${table} failed:`, error.message);
+              await appendLog(service, cohortId, "warn", `Falha ao inserir ${rows.length} ${table}: ${error.message}`);
+            }
+          };
+          await insertWithLog("pet_conditions", condRows);
+          await insertWithLog("pet_exams", examRows);
+          await insertWithLog("pet_medications", medRows);
+          await insertWithLog("pet_clinical_notes", noteRows);
 
           generated += createdPets.length;
           await service.from("synthetic_cohorts")
