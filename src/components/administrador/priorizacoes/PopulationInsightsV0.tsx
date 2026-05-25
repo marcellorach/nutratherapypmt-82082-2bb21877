@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Sparkles, GitBranch, FlaskConical, Database } from 'lucide-react';
+import { AlertTriangle, Sparkles, GitBranch, FlaskConical, Database, FlaskRound } from 'lucide-react';
 import {
   POPULATION_INSIGHTS_SEED,
   InsightStage,
@@ -50,9 +50,11 @@ const PopulationInsightsV0: React.FC = () => {
         <CardContent className="p-3 text-xs text-amber-900 flex items-start gap-2">
           <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
           <div>
-            <b>Population Insights v0 — esqueleto.</b> Os insights abaixo vêm de cohort sintético + gaps do Meta-KG + conflict-detection.
-            Marcados como <b>"aguardando PetLove"</b> serão re-pontuados quando o cohort histórico real chegar (card #7 do board).
-            Score = (prevalence_delta + kg_gap + actionability) normalizado 0–100.
+            <b>Population Insights v0 — esqueleto com DADOS DE EXEMPLO.</b> Os 4 cards abaixo são <b>seed manual</b>
+            (arquivo <code>populationInsightsSeed.ts</code>), <u>não</u> são insights reais calculados — servem apenas
+            para validar o layout e a taxonomia (origem, score, estágio). Quando o cohort histórico real do parceiro
+            clínico chegar (card #7 do board), esta página passa a consultar tabelas reais e os scores são calculados
+            de fato: <code>prevalence_delta + kg_gap + actionability</code> normalizado 0–100.
           </div>
         </CardContent>
       </Card>
@@ -93,11 +95,9 @@ const PopulationInsightsV0: React.FC = () => {
                           </span>
                         )}
                       </div>
-                      {c.awaiting_real_cohort && (
-                        <div className="text-[10px] text-amber-700 italic flex items-center gap-1 pt-1 border-t">
-                          <AlertTriangle className="h-2.5 w-2.5" /> Aguardando cohort PetLove para re-pontuar
-                        </div>
-                      )}
+                      <div className="text-[10px] text-amber-700 italic flex items-center gap-1 pt-1 border-t">
+                        <FlaskRound className="h-2.5 w-2.5" /> Exemplo (seed) — aguardando cohort real
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
