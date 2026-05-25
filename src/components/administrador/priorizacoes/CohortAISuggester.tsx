@@ -53,7 +53,7 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
   // Carrega sugestões persistidas ao montar (até as 10 mais recentes ativas).
   useEffect(() => {
     (async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('cohort_suggestions')
         .select('id, title, rationale, suggested_criteria, discoverable, kind, impact_score, viability_score')
         .eq('status', 'active')
@@ -100,7 +100,7 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
       setSuggestionIds(new Array(newCohorts.length).fill(null));
       // Re-fetch IDs from DB (suggestions were just persisted by the edge function)
       if (newCohorts.length) {
-        const { data: persisted } = await supabase
+        const { data: persisted } = await (supabase as any)
           .from('cohort_suggestions')
           .select('id, title')
           .eq('status', 'active')
@@ -129,7 +129,7 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
   const dismissSuggestion = async (idx: number) => {
     const id = suggestionIds[idx];
     if (id) {
-      await supabase.from('cohort_suggestions').update({ status: 'dismissed' }).eq('id', id);
+      await (supabase as any).from('cohort_suggestions').update({ status: 'dismissed' }).eq('id', id);
     }
     setCohorts((prev) => prev.filter((_, i) => i !== idx));
     setSuggestionIds((prev) => prev.filter((_, i) => i !== idx));
@@ -159,7 +159,7 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
       // Mark suggestion as used and link to the generated cohort
       const sid = suggestionIds[idx];
       if (sid && data?.cohort_id) {
-        await supabase.from('cohort_suggestions')
+        await (supabase as any).from('cohort_suggestions')
           .update({ status: 'used', used_cohort_id: data.cohort_id })
           .eq('id', sid);
       }
