@@ -962,6 +962,68 @@ export type Database = {
           },
         ]
       }
+      cohort_insights: {
+        Row: {
+          cohort_id: string | null
+          confidence: number | null
+          created_at: string
+          created_by: string | null
+          evidence: Json
+          id: string
+          kind: string
+          signals: Json | null
+          source_model: string | null
+          stage: string
+          summary: string
+          summary_en: string | null
+          title: string
+          title_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          cohort_id?: string | null
+          confidence?: number | null
+          created_at?: string
+          created_by?: string | null
+          evidence?: Json
+          id?: string
+          kind: string
+          signals?: Json | null
+          source_model?: string | null
+          stage?: string
+          summary: string
+          summary_en?: string | null
+          title: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cohort_id?: string | null
+          confidence?: number | null
+          created_at?: string
+          created_by?: string | null
+          evidence?: Json
+          id?: string
+          kind?: string
+          signals?: Json | null
+          source_model?: string | null
+          stage?: string
+          summary?: string
+          summary_en?: string | null
+          title?: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cohort_insights_cohort_id_fkey"
+            columns: ["cohort_id"]
+            isOneToOne: false
+            referencedRelation: "synthetic_cohorts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       compliance_audit_runs: {
         Row: {
           created_at: string
@@ -3879,10 +3941,12 @@ export type Database = {
           birth_date: string | null
           breed: string
           chip_number: string | null
+          cohort_id: string | null
           created_at: string
           created_by: string | null
           id: string
           is_demo: boolean
+          is_synthetic: boolean
           name: string
           neutered: boolean
           notes: string | null
@@ -3900,10 +3964,12 @@ export type Database = {
           birth_date?: string | null
           breed: string
           chip_number?: string | null
+          cohort_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           is_demo?: boolean
+          is_synthetic?: boolean
           name: string
           neutered?: boolean
           notes?: string | null
@@ -3921,10 +3987,12 @@ export type Database = {
           birth_date?: string | null
           breed?: string
           chip_number?: string | null
+          cohort_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           is_demo?: boolean
+          is_synthetic?: boolean
           name?: string
           neutered?: boolean
           notes?: string | null
@@ -3937,7 +4005,15 @@ export type Database = {
           veterinarian_id?: string | null
           weight_kg?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "pet_profiles_cohort_id_fkey"
+            columns: ["cohort_id"]
+            isOneToOne: false
+            referencedRelation: "synthetic_cohorts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pet_trajectory_projections: {
         Row: {
@@ -4521,6 +4597,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      synthetic_cohorts: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          criteria: Json
+          generated_n: number
+          generation_error: string | null
+          id: string
+          kind: string
+          name: string
+          rationale: string | null
+          status: string
+          target_n: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          criteria?: Json
+          generated_n?: number
+          generation_error?: string | null
+          id?: string
+          kind: string
+          name: string
+          rationale?: string | null
+          status?: string
+          target_n?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          criteria?: Json
+          generated_n?: number
+          generation_error?: string | null
+          id?: string
+          kind?: string
+          name?: string
+          rationale?: string | null
+          status?: string
+          target_n?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       taxonomy_dictionaries: {
         Row: {
