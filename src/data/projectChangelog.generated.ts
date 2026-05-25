@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-25T21:44:51.769Z
+// Última geração: 2026-05-25T22:36:35.399Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,27 @@ export const lastChangelogDate = "2026-05-25";
 export const senexVersion = "6.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-25",
+    "kind": "changed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Cohorts sintéticos: geração clínica rica + painel estatístico",
+    "bullets": [
+      "`generate-synthetic-cohort` agora emite pets clinicamente completos: 1-4 condições (com severidade/status/origem), 2-5 exames (com `results_json` e `flags_abnormal`), 1-3 consultas cronológicas (`chief_complaint`, `assessment`, `plan`, peso, BCS, última marcada `is_latest=true`), 0-3 medicações vinculadas à consulta e 1-2 notas clínicas (anamnese livre) — inspirado na geração de pacientes de exemplo.",
+      "Validação descarta e regenera pets sem condições ou sem exames antes do insert; `BATCH_SIZE` reduzido de 25 → 10 para evitar timeout no último batch.",
+      "Novo painel estatístico colapsável dentro de cada card de cohort `ready` (`CohortStatsPanel`): demografia (idade/peso médios, % macho/fêmea, % castrado), top 5 raças, top 8 condições com distribuição de severidade, cobertura clínica (condições/exames/consultas por pet) e flags laboratoriais — alimentado pela nova RPC `get_cohort_stats(p_cohort_id)` (SECURITY DEFINER, admin-only).",
+      "`CohortPatientsDialog` agora exibe consultas e medicações além de perfil/condições/exames.",
+      "I18N_VERSION 1.110.0 → 1.111.0 com chaves `prioritization.syntheticExplorer.stats.*` em PT/EN.",
+      "Files: supabase/functions/generate-synthetic-cohort/index.ts, supabase/migrations/20260525222733_get_cohort_stats.sql, src/components/administrador/priorizacoes/{CohortStatsPanel,CohortPatientsDialog,SyntheticCohortsManager}.tsx, src/locales/{pt,en}/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "supabase/functions/generate-synthetic-cohort/index.ts",
+      "supabase/migrations/20260525222733_get_cohort_stats.sql",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.111.0"
+  },
   {
     "date": "2026-05-25",
     "kind": "changed",
