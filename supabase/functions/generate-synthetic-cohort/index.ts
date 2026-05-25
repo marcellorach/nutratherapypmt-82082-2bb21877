@@ -24,15 +24,14 @@ function buildTool(batchSize: number) {
         properties: {
           pets: {
             type: "array",
-            minItems: batchSize,
             items: {
               type: "object",
               properties: {
                 name: { type: "string" },
                 breed: { type: "string" },
                 sex: { type: "string", enum: ["male", "female"] },
-                age_years: { type: "number", minimum: 0.5, maximum: 18 },
-                weight_kg: { type: "number", minimum: 1, maximum: 80 },
+                age_years: { type: "number", description: "Idade em anos, entre 0.5 e 18" },
+                weight_kg: { type: "number", description: "Peso em kg, entre 1 e 80" },
                 neutered: { type: "boolean" },
                 conditions: {
                   type: "array",
