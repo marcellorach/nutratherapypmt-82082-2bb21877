@@ -1,14 +1,26 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Sparkles, GitBranch, FlaskConical, Database, FlaskRound } from 'lucide-react';
-import {
-  POPULATION_INSIGHTS_SEED,
-  InsightStage,
-  InsightOrigin,
-  PopulationInsight,
-} from '@/data/populationInsightsSeed';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle, Sparkles, GitBranch, FlaskConical, Database, RefreshCw, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+
+type InsightStage = 'discovery' | 'hypothesis' | 'proposed_meta_study' | 'approved';
+interface DbInsight {
+  id: string;
+  cohort_id: string | null;
+  kind: string;
+  stage: InsightStage;
+  title: string;
+  title_en: string | null;
+  summary: string;
+  summary_en: string | null;
+  evidence: any;
+  confidence: number;
+  signals: string[] | null;
+  created_at: string;
+}
 
 const STAGES: { id: InsightStage; label: string; color: string; icon: React.ComponentType<any> }[] = [
   { id: 'discovery', label: 'Descobertas', color: 'bg-blue-50 border-blue-200', icon: Sparkles },
@@ -17,47 +29,61 @@ const STAGES: { id: InsightStage; label: string; color: string; icon: React.Comp
   { id: 'approved', label: 'Aprovados', color: 'bg-emerald-50 border-emerald-200', icon: Database },
 ];
 
-const ORIGIN_LABEL: Record<InsightOrigin, string> = {
-  synthetic_cohort: 'Cohort sintético',
-  kg_gap: 'Gap do KG',
-  conflict_detection: 'Conflito detectado',
-  literature_news: 'Literatura recente',
-};
-
-const ORIGIN_COLOR: Record<InsightOrigin, string> = {
-  synthetic_cohort: 'bg-blue-100 text-blue-800',
-  kg_gap: 'bg-fuchsia-100 text-fuchsia-800',
-  conflict_detection: 'bg-red-100 text-red-800',
-  literature_news: 'bg-emerald-100 text-emerald-800',
-};
-
 const PopulationInsightsV0: React.FC = () => {
   const { i18n } = useTranslation();
   const isPt = i18n.language?.startsWith('pt');
+  const [insights, setInsights] = useState<DbInsight[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchInsights = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('cohort_insights')
+      .select('*')
+      .order('confidence', { ascending: false })
+      .limit(200);
+    if (!error) setInsights((data ?? []) as DbInsight[]);
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchInsights(); }, []);
 
   const grouped = useMemo(() => {
-    const map: Record<InsightStage, PopulationInsight[]> = {
+    const map: Record<InsightStage, DbInsight[]> = {
       discovery: [], hypothesis: [], proposed_meta_study: [], approved: [],
     };
-    POPULATION_INSIGHTS_SEED.forEach((i) => map[i.stage].push(i));
-    Object.values(map).forEach((arr) => arr.sort((a, b) => b.discovery_score - a.discovery_score));
+    insights.forEach((i) => { if (map[i.stage]) map[i.stage].push(i); });
     return map;
-  }, []);
+  }, [insights]);
+
+  const moveStage = async (id: string, stage: InsightStage) => {
+    setInsights((curr) => curr.map((i) => i.id === id ? { ...i, stage } : i));
+    await supabase.from('cohort_insights').update({ stage }).eq('id', id);
+  };
 
   return (
     <div className="space-y-4">
-      <Card className="border-dashed border-amber-300 bg-amber-50/60">
+      <Card className="border-dashed border-emerald-300 bg-emerald-50/60">
         <CardContent className="p-3 text-xs text-amber-900 flex items-start gap-2">
-          <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
-          <div>
-            <b>Population Insights v0 — esqueleto com DADOS DE EXEMPLO.</b> Os 4 cards abaixo são <b>seed manual</b>
-            (arquivo <code>populationInsightsSeed.ts</code>), <u>não</u> são insights reais calculados — servem apenas
-            para validar o layout e a taxonomia (origem, score, estágio). Quando o cohort histórico real do parceiro
-            clínico chegar (card #7 do board), esta página passa a consultar tabelas reais e os scores são calculados
-            de fato: <code>prevalence_delta + kg_gap + actionability</code> normalizado 0–100.
+          <Database className="h-4 w-4 shrink-0 mt-0.5 text-emerald-700" />
+          <div className="text-emerald-900 flex-1">
+            <b>Population Insights v0 — alimentado por cohorts sintéticos reais.</b> Os insights abaixo vêm da tabela
+            <code> cohort_insights</code>, gerados pelo edge function <code>analyze-cohort-patterns</code>.
+            Quando o cohort histórico real do parceiro clínico chegar, os mesmos pipelines passam a consumi-lo —
+            cohorts sintéticos continuam marcados para distinção. Arraste mover via menu de estágio.
           </div>
+          <Button size="sm" variant="outline" onClick={fetchInsights} disabled={loading}>
+            {loading ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5 mr-1" />}
+            Atualizar
+          </Button>
         </CardContent>
       </Card>
+
+      {insights.length === 0 && !loading && (
+        <Card><CardContent className="p-6 text-center text-sm text-gray-500">
+          Nenhum insight ainda. Gere um cohort sintético na aba <b>Gerador de Cohort</b> → "Gerar cohort" → depois clique em <b>Analisar padrões</b> em <b>Cohorts sintéticos</b>.
+        </CardContent></Card>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         {STAGES.map((s) => {
@@ -81,22 +107,27 @@ const PopulationInsightsV0: React.FC = () => {
                   <Card key={c.id} className="bg-white">
                     <CardContent className="p-2.5 space-y-1.5">
                       <div className="flex items-start justify-between gap-1.5">
-                        <h4 className="text-xs font-semibold leading-tight">{isPt ? c.title_pt : c.title_en}</h4>
-                        <Badge variant="outline" className="text-[10px] font-mono shrink-0">{c.discovery_score}</Badge>
+                        <h4 className="text-xs font-semibold leading-tight">{isPt ? c.title : (c.title_en || c.title)}</h4>
+                        <Badge variant="outline" className="text-[10px] font-mono shrink-0">{Math.round((c.confidence ?? 0) * 100)}</Badge>
                       </div>
-                      <p className="text-[11px] text-gray-700 leading-snug">{isPt ? c.summary_pt : c.summary_en}</p>
-                      <div className="flex flex-wrap items-center gap-1 pt-1">
-                        <Badge variant="outline" className={`text-[10px] ${ORIGIN_COLOR[c.origin]}`}>
-                          {ORIGIN_LABEL[c.origin]}
-                        </Badge>
-                        {c.cohort_hint && (
-                          <span className="text-[10px] text-gray-500 truncate" title={c.cohort_hint}>
-                            🧬 {c.cohort_hint}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-[10px] text-amber-700 italic flex items-center gap-1 pt-1 border-t">
-                        <FlaskRound className="h-2.5 w-2.5" /> Exemplo (seed) — aguardando cohort real
+                      <p className="text-[11px] text-gray-700 leading-snug">{isPt ? c.summary : (c.summary_en || c.summary)}</p>
+                      {(c.signals?.length ?? 0) > 0 && (
+                        <div className="flex flex-wrap gap-1 pt-1">
+                          {c.signals!.slice(0, 4).map((sig, k) => (
+                            <Badge key={k} variant="outline" className="text-[10px] bg-gray-50">{sig}</Badge>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex gap-1 pt-1 border-t flex-wrap">
+                        {STAGES.filter((st) => st.id !== c.stage).map((st) => (
+                          <Button
+                            key={st.id} size="sm" variant="ghost"
+                            className="h-5 text-[10px] px-1.5"
+                            onClick={() => moveStage(c.id, st.id)}
+                          >
+                            → {st.label.split(' ')[0]}
+                          </Button>
+                        ))}
                       </div>
                     </CardContent>
                   </Card>
