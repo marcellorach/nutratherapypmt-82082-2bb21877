@@ -8412,5 +8412,52 @@
       "metric2": "Redundant lessons across studies (no cross-link)",
       "metric3": "Conflicts detected between recipe and anti-pattern"
     }
+  },
+  "prioritization": {
+    "title": "Prioritization",
+    "subtitle": "Single source of the operational roadmap. Board order = suggested execution order. Each card declares area, effort, strategic value and dependencies.",
+    "lastUpdated": "Updated on",
+    "deliveredIn": "Delivered in",
+    "tabs": {
+      "board": "Kanban",
+      "cohort": "Cohort Generator"
+    },
+    "status": {
+      "backlog": "Backlog",
+      "next": "Next",
+      "in_progress": "In progress",
+      "in_test": "In test",
+      "done": "Done"
+    },
+    "area": {
+      "patient": "Patient",
+      "curation": "Curation",
+      "population": "Population",
+      "governance": "Governance",
+      "skills": "Skills",
+      "infra": "Infra"
+    },
+    "cohort": {
+      "title": "Cohort Request Generator",
+      "subtitle": "Produces a structured document to send to PetLove requesting a specific slice of their historical database.",
+      "name": "Cohort name",
+      "targetN": "Target N",
+      "rationale": "Objective / rationale",
+      "breeds": "Breed(s)",
+      "weight": "Weight range",
+      "ageMin": "Min age (years)",
+      "ageMax": "Max age (years)",
+      "conditions": "Known conditions",
+      "meds": "Current medication",
+      "exclude": "Exclusion criteria",
+      "minData": "Minimum data per animal",
+      "delivery": "Delivery format",
+      "privacy": "Privacy",
+      "showPreview": "Show Markdown preview",
+      "hidePreview": "Hide preview",
+      "copy": "Copy",
+      "copied": "Copied to clipboard",
+      "download": "Download .md"
+    }
   }
 }
