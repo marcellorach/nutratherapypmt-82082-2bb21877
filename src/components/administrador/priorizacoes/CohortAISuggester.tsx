@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, Loader2, Wand2 } from 'lucide-react';
+import { Sparkles, Loader2, Wand2, Database } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useRoleView } from '@/contexts/RoleViewContext';
@@ -44,6 +44,7 @@ const KIND_COLOR: Record<SuggestedCohort['kind'], string> = {
 const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
   const [loading, setLoading] = useState(false);
   const [cohorts, setCohorts] = useState<SuggestedCohort[]>([]);
+  const [generating, setGenerating] = useState<number | null>(null);
   const { viewId } = useRoleView();
   // Tag de modelo é dado interno — só Arquiteto da Plataforma vê.
   const showModelTag = viewId === 'platform_architect';
@@ -78,6 +79,38 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const generateRealCohort = async (s: SuggestedCohort, idx: number) => {
+    const targetN = Number(s.suggested_criteria.target_n) || 200;
+    const safeN = Math.min(targetN, 200);
+    if (!window.confirm(
+      `Gerar cohort sintético "${s.title}" com ${safeN} pets?\n\n` +
+      `Tempo estimado: ${Math.ceil(safeN / 25)} batches (~${Math.ceil(safeN / 60)} min).\n` +
+      `Os pets serão marcados como is_synthetic=true e não contaminam dados reais.`,
+    )) return;
+    setGenerating(idx);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-synthetic-cohort', {
+        body: {
+          name: s.title,
+          kind: s.kind,
+          rationale: s.rationale,
+          target_n: safeN,
+          criteria: s.suggested_criteria,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({
+        title: 'Geração iniciada',
+        description: `Cohort criado (${data?.cohort_id?.slice(0, 8)}…). Acompanhe em "Cohorts sintéticos".`,
+      });
+    } catch (e: any) {
+      toast({ title: 'Falha ao gerar', description: e?.message ?? 'Erro', variant: 'destructive' });
+    } finally {
+      setGenerating(null);
     }
   };
 
@@ -133,9 +166,21 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
                       <div className="text-[10px] text-gray-500">
                         Impacto {c.impact_score} · Viabilidade {c.viability_score}
                       </div>
-                      <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => onUseSuggestion(c)}>
-                        Usar esta sugestão →
-                      </Button>
+                      <div className="flex gap-1.5">
+                        <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => onUseSuggestion(c)}>
+                          Pré-preencher
+                        </Button>
+                        <Button
+                          size="sm" className="h-7 text-xs"
+                          disabled={generating !== null}
+                          onClick={() => generateRealCohort(c, i)}
+                        >
+                          {generating === i
+                            ? <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                            : <Database className="h-3 w-3 mr-1" />}
+                          Gerar cohort
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
