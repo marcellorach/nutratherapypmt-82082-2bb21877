@@ -8,60 +8,29 @@ const corsHeaders = {
 };
 
 interface ConsolidationRequest {
-  mode: 'full' | 'incremental' | 'by_entity' | 'by_study';
+  mode?: 'full' | 'incremental' | 'by_entity' | 'by_study';
   entityId?: string;
   studyId?: string;
   minConfidence?: number;
   minEvidenceCount?: number;
+  async?: boolean;
 }
 
-interface ConsolidatedEdge {
-  source_id: string;
-  source_type: string;
-  source_layer: string;
-  target_id: string;
-  target_type: string;
-  target_layer: string;
-  relationship: string;
-  aggregated_confidence: number;
-  evidence_count: number;
-  study_ids: string[];
-  evidence_level: string;
-  dose_range?: object;
-  species_validated: string[];
-}
-
-interface TripletGroup {
-  key: string;
-  triplets: any[];
-  source_name: string;
-  target_name: string;
-  predicate: string;
-}
-
-// Calculate aggregated confidence using weighted average
 function calculateAggregatedConfidence(triplets: any[]): number {
   if (triplets.length === 0) return 0;
-  
   let totalWeight = 0;
   let weightedSum = 0;
-  
-  for (const triplet of triplets) {
-    const confidence = triplet.extraction_confidence || 0.5;
-    const llmConfidence = triplet.llm_confidence || 0.5;
-    const kgMatchScore = triplet.kg_match_score || 0;
-    
-    // Weight by LLM confidence and KG match score
-    const weight = (llmConfidence + (kgMatchScore > 0 ? 0.3 : 0)) * (triplet.auto_approved ? 1.2 : 1);
-    
+  for (const t of triplets) {
+    const confidence = t.extraction_confidence || 0.5;
+    const llmConfidence = t.llm_confidence || 0.5;
+    const kgMatchScore = t.kg_match_score || 0;
+    const weight = (llmConfidence + (kgMatchScore > 0 ? 0.3 : 0)) * (t.auto_approved ? 1.2 : 1);
     weightedSum += confidence * weight;
     totalWeight += weight;
   }
-  
   return totalWeight > 0 ? weightedSum / totalWeight : 0;
 }
 
-// Determine evidence level based on study count and confidence
 function determineEvidenceLevel(evidenceCount: number, confidence: number): string {
   if (evidenceCount >= 5 && confidence >= 0.8) return 'high';
   if (evidenceCount >= 3 && confidence >= 0.6) return 'moderate';
@@ -69,97 +38,171 @@ function determineEvidenceLevel(evidenceCount: number, confidence: number): stri
   return 'preliminary';
 }
 
-// Aggregate dose ranges from multiple triplets
 function aggregateDoseRanges(triplets: any[]): object | null {
-  const ranges = triplets
-    .filter(t => t.dose_range && typeof t.dose_range === 'object')
-    .map(t => t.dose_range);
-  
+  const ranges = triplets.filter(t => t.dose_range && typeof t.dose_range === 'object').map(t => t.dose_range);
   if (ranges.length === 0) return null;
-  
-  // Merge dose ranges
-  const merged: any = {
-    min: null,
-    max: null,
-    unit: null,
-    sources: []
-  };
-  
-  for (const range of ranges) {
-    if (range.min !== undefined && (merged.min === null || range.min < merged.min)) {
-      merged.min = range.min;
-    }
-    if (range.max !== undefined && (merged.max === null || range.max > merged.max)) {
-      merged.max = range.max;
-    }
-    if (range.unit && !merged.unit) {
-      merged.unit = range.unit;
-    }
-    if (range.value) {
-      merged.sources.push(range.value);
-    }
+  const merged: any = { min: null, max: null, unit: null, sources: [] };
+  for (const r of ranges) {
+    if (r.min !== undefined && (merged.min === null || r.min < merged.min)) merged.min = r.min;
+    if (r.max !== undefined && (merged.max === null || r.max > merged.max)) merged.max = r.max;
+    if (r.unit && !merged.unit) merged.unit = r.unit;
+    if (r.value) merged.sources.push(r.value);
   }
-  
   return merged.min !== null || merged.max !== null ? merged : null;
 }
 
-// Aggregate species from triplets
 function aggregateSpecies(triplets: any[]): string[] {
-  const speciesSet = new Set<string>();
-  
-  for (const triplet of triplets) {
-    if (triplet.species_context && Array.isArray(triplet.species_context)) {
-      triplet.species_context.forEach((s: string) => speciesSet.add(s));
-    }
+  const set = new Set<string>();
+  for (const t of triplets) {
+    if (Array.isArray(t.species_context)) t.species_context.forEach((s: string) => set.add(s));
   }
-  
-  return Array.from(speciesSet);
+  return Array.from(set);
 }
 
-// Group triplets by relationship key
-function groupTriplets(triplets: any[]): Map<string, TripletGroup> {
-  const groups = new Map<string, TripletGroup>();
-  
-  for (const triplet of triplets) {
-    // Create a normalized key for grouping
-    const key = `${triplet.subject_type}:${triplet.subject_name.toLowerCase()}:${triplet.predicate}:${triplet.object_type}:${triplet.object_name.toLowerCase()}`;
-    
-    if (!groups.has(key)) {
-      groups.set(key, {
-        key,
-        triplets: [],
-        source_name: triplet.subject_name,
-        target_name: triplet.object_name,
-        predicate: triplet.predicate
-      });
-    }
-    
-    groups.get(key)!.triplets.push(triplet);
+function groupTriplets(triplets: any[]) {
+  const groups = new Map<string, { triplets: any[]; source_name: string; target_name: string; predicate: string }>();
+  for (const t of triplets) {
+    const key = `${t.subject_type}:${(t.subject_name || '').toLowerCase()}:${t.predicate}:${t.object_type}:${(t.object_name || '').toLowerCase()}`;
+    if (!groups.has(key)) groups.set(key, { triplets: [], source_name: t.subject_name, target_name: t.object_name, predicate: t.predicate });
+    groups.get(key)!.triplets.push(t);
   }
-  
   return groups;
 }
 
-// Map entity type to layer
 function getLayerForType(type: string): string {
-  const typeToLayer: Record<string, string> = {
-    'nutraceutical': 'layer_0_compound',
-    'drug': 'layer_0_compound',
-    'chemical_compound': 'layer_0_compound',
-    'pathway': 'layer_1_target',
-    'receptor': 'layer_1_target',
-    'enzyme': 'layer_1_target',
-    'gene_protein': 'layer_1_target',
-    'mechanism': 'layer_2_mechanism',
-    'signaling_cascade': 'layer_2_mechanism',
-    'biological_effect': 'layer_3_effect',
-    'side_effect': 'layer_3_effect',
-    'clinical_outcome': 'layer_4_outcome',
-    'condition': 'layer_4_outcome',
-    'disease': 'layer_4_outcome'
+  const map: Record<string, string> = {
+    nutraceutical: 'layer_0_compound', drug: 'layer_0_compound', chemical_compound: 'layer_0_compound',
+    pathway: 'layer_1_target', receptor: 'layer_1_target', enzyme: 'layer_1_target', gene_protein: 'layer_1_target',
+    mechanism: 'layer_2_mechanism', signaling_cascade: 'layer_2_mechanism',
+    biological_effect: 'layer_3_effect', side_effect: 'layer_3_effect',
+    clinical_outcome: 'layer_4_outcome', condition: 'layer_4_outcome', disease: 'layer_4_outcome',
   };
-  
-  return typeToLayer[type.toLowerCase()] || 'layer_0_compound';
+  return map[(type || '').toLowerCase()] || 'layer_0_compound';
+}
+
+async function runConsolidation(supabase: any, request: ConsolidationRequest) {
+  const { mode = 'incremental', entityId, studyId, minConfidence = 0.5, minEvidenceCount = 1 } = request;
+  console.log(`[consolidate-knowledge-graph] Starting consolidation mode: ${mode}`);
+
+  // Paginated fetch (bypass default 1000-row cap)
+  const PAGE = 1000;
+  const triplets: any[] = [];
+  for (let from = 0; ; from += PAGE) {
+    let q = supabase
+      .from('triplet_extractions')
+      .select('*')
+      .eq('curation_status', 'approved')
+      .eq('hallucination_flag', false)
+      .range(from, from + PAGE - 1);
+    if (mode === 'by_study' && studyId) q = q.eq('study_id', studyId);
+    else if (mode === 'by_entity' && entityId) q = q.or(`subject_id.eq.${entityId},object_id.eq.${entityId}`);
+    const { data, error } = await q;
+    if (error) throw error;
+    if (!data || data.length === 0) break;
+    triplets.push(...data);
+    if (data.length < PAGE) break;
+  }
+  console.log(`[consolidate-knowledge-graph] Found ${triplets.length} approved triplets`);
+  if (triplets.length === 0) return { processed: 0, created: 0, updated: 0, skipped: 0, edges_created: 0 };
+
+  const groups = groupTriplets(triplets);
+  console.log(`[consolidate-knowledge-graph] Grouped into ${groups.size} unique relationships`);
+
+  // Pre-fetch ALL hierarchical_edges once and index by key — avoids per-group SELECT.
+  const existingByKey = new Map<string, any>();
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await supabase
+      .from('hierarchical_edges')
+      .select('id, source_type, target_type, relationship, source_id, target_id, evidence_count, study_ids')
+      .range(from, from + PAGE - 1);
+    if (error) throw error;
+    if (!data || data.length === 0) break;
+    for (const e of data) {
+      const k = `${e.source_type}:${(e.source_id || '').toLowerCase()}:${e.relationship}:${e.target_type}:${(e.target_id || '').toLowerCase()}`;
+      existingByKey.set(k, e);
+    }
+    if (data.length < PAGE) break;
+  }
+
+  const toInsert: any[] = [];
+  const toUpdate: { id: string; patch: any }[] = [];
+  let skipped = 0;
+
+  for (const [, group] of groups) {
+    const { triplets: gt, predicate } = group;
+    const aggregatedConfidence = calculateAggregatedConfidence(gt);
+    const evidenceCount = gt.length;
+    if (aggregatedConfidence < minConfidence || evidenceCount < minEvidenceCount) { skipped++; continue; }
+
+    const studyIds = [...new Set(gt.map((t: any) => t.study_id).filter(Boolean))];
+    const evidenceLevel = determineEvidenceLevel(evidenceCount, aggregatedConfidence);
+    const doseRange = aggregateDoseRanges(gt);
+    const speciesValidated = aggregateSpecies(gt);
+    const first = gt[0];
+    const sourceType = first.subject_type;
+    const targetType = first.object_type;
+    const sourceLayer = first.subject_layer || getLayerForType(sourceType);
+    const targetLayer = first.object_layer || getLayerForType(targetType);
+    const sourceId = first.subject_id || crypto.randomUUID();
+    const targetId = first.object_id || crypto.randomUUID();
+    const lookupKey = `${sourceType}:${(first.subject_id || '').toLowerCase()}:${predicate}:${targetType}:${(first.object_id || '').toLowerCase()}`;
+    const existingEdge = existingByKey.get(lookupKey);
+
+    const edgeData: any = {
+      source_type: sourceType, source_layer: sourceLayer,
+      target_type: targetType, target_layer: targetLayer,
+      relationship: predicate,
+      confidence: aggregatedConfidence,
+      evidence_count: evidenceCount,
+      evidence_level: evidenceLevel,
+      study_ids: studyIds,
+      dose_range: doseRange,
+      species_validated: speciesValidated,
+      triplet_id: first.id,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (existingEdge) {
+      const mergedStudyIds = [...new Set([...(existingEdge.study_ids || []), ...studyIds])];
+      toUpdate.push({
+        id: existingEdge.id,
+        patch: { ...edgeData, study_ids: mergedStudyIds, evidence_count: Math.max(evidenceCount, existingEdge.evidence_count || 0) },
+      });
+    } else {
+      toInsert.push({ ...edgeData, source_id: sourceId, target_id: targetId, created_at: new Date().toISOString() });
+    }
+  }
+
+  // Batched insert
+  let created = 0;
+  const BATCH = 500;
+  for (let i = 0; i < toInsert.length; i += BATCH) {
+    const slice = toInsert.slice(i, i + BATCH);
+    const { error } = await supabase.from('hierarchical_edges').insert(slice);
+    if (error) console.error('[consolidate-knowledge-graph] insert batch error:', error);
+    else created += slice.length;
+  }
+  // Parallel updates in chunks
+  let updated = 0;
+  for (let i = 0; i < toUpdate.length; i += 25) {
+    const chunk = toUpdate.slice(i, i + 25);
+    const results = await Promise.all(chunk.map(u => supabase.from('hierarchical_edges').update(u.patch).eq('id', u.id)));
+    for (const r of results) {
+      if (r.error) console.error('[consolidate-knowledge-graph] update error:', r.error);
+      else updated++;
+    }
+  }
+
+  const stats = {
+    totalTriplets: triplets.length,
+    uniqueRelationships: groups.size,
+    created,
+    updated,
+    skipped,
+    edges_created: created,
+  };
+  console.log('[consolidate-knowledge-graph] Consolidation complete:', stats);
+  return stats;
 }
 
 serve(async (req) => {
@@ -171,210 +214,33 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const request: ConsolidationRequest = await req.json().catch(() => ({}));
 
-    const request: ConsolidationRequest = await req.json();
-    const { 
-      mode = 'incremental', 
-      entityId, 
-      studyId,
-      minConfidence = 0.5,
-      minEvidenceCount = 1
-    } = request;
-
-    console.log(`[consolidate-knowledge-graph] Starting consolidation mode: ${mode}`);
-
-    // Build query for triplet extractions
-    let query = supabase
-      .from('triplet_extractions')
-      .select('*')
-      .eq('curation_status', 'approved')
-      .eq('hallucination_flag', false);
-
-    // Apply filters based on mode
-    if (mode === 'by_study' && studyId) {
-      query = query.eq('study_id', studyId);
-    } else if (mode === 'by_entity' && entityId) {
-      query = query.or(`subject_id.eq.${entityId},object_id.eq.${entityId}`);
-    }
-
-    const { data: triplets, error: tripletError } = await query;
-
-    if (tripletError) {
-      console.error('[consolidate-knowledge-graph] Error fetching triplets:', tripletError);
-      throw tripletError;
-    }
-
-    console.log(`[consolidate-knowledge-graph] Found ${triplets?.length || 0} approved triplets`);
-
-    if (!triplets || triplets.length === 0) {
-      return new Response(JSON.stringify({
-        success: true,
-        message: 'No approved triplets to consolidate',
-        stats: { processed: 0, created: 0, updated: 0 }
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    // Default: run async in background to avoid 150s edge timeout.
+    const runAsync = request.async !== false;
+    if (runAsync) {
+      // @ts-ignore EdgeRuntime is provided by Supabase runtime
+      EdgeRuntime.waitUntil(
+        runConsolidation(supabase, request).catch(err =>
+          console.error('[consolidate-knowledge-graph] background error:', err)
+        )
+      );
+      return new Response(JSON.stringify({ success: true, queued: true, message: 'Consolidation running in background' }), {
+        status: 202,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Group triplets by relationship
-    const groups = groupTriplets(triplets);
-    console.log(`[consolidate-knowledge-graph] Grouped into ${groups.size} unique relationships`);
-
-    // Process each group and create/update hierarchical edges
-    const consolidatedEdges: ConsolidatedEdge[] = [];
-    let created = 0;
-    let updated = 0;
-    let skipped = 0;
-
-    for (const [key, group] of groups) {
-      const { triplets: groupTriplets, source_name, target_name, predicate } = group;
-      
-      // Calculate aggregated metrics
-      const aggregatedConfidence = calculateAggregatedConfidence(groupTriplets);
-      const evidenceCount = groupTriplets.length;
-      
-      // Apply filters
-      if (aggregatedConfidence < minConfidence || evidenceCount < minEvidenceCount) {
-        skipped++;
-        continue;
-      }
-
-      const studyIds = [...new Set(groupTriplets.map(t => t.study_id).filter(Boolean))];
-      const evidenceLevel = determineEvidenceLevel(evidenceCount, aggregatedConfidence);
-      const doseRange = aggregateDoseRanges(groupTriplets);
-      const speciesValidated = aggregateSpecies(groupTriplets);
-
-      // Get source and target info from first triplet
-      const firstTriplet = groupTriplets[0];
-      const sourceType = firstTriplet.subject_type;
-      const targetType = firstTriplet.object_type;
-      const sourceLayer = firstTriplet.subject_layer || getLayerForType(sourceType);
-      const targetLayer = firstTriplet.object_layer || getLayerForType(targetType);
-
-      // Check if edge already exists
-      const { data: existingEdge } = await supabase
-        .from('hierarchical_edges')
-        .select('id, evidence_count, study_ids')
-        .eq('source_type', sourceType)
-        .eq('target_type', targetType)
-        .eq('relationship', predicate)
-        .ilike('source_id', `%${source_name.toLowerCase().substring(0, 10)}%`)
-        .ilike('target_id', `%${target_name.toLowerCase().substring(0, 10)}%`)
-        .maybeSingle();
-
-      const edgeData = {
-        source_type: sourceType,
-        source_layer: sourceLayer,
-        target_type: targetType,
-        target_layer: targetLayer,
-        relationship: predicate,
-        confidence: aggregatedConfidence,
-        evidence_count: evidenceCount,
-        evidence_level: evidenceLevel,
-        study_ids: studyIds,
-        dose_range: doseRange,
-        species_validated: speciesValidated,
-        triplet_id: firstTriplet.id,
-        updated_at: new Date().toISOString()
-      };
-
-      if (existingEdge) {
-        // Update existing edge with merged data
-        const mergedStudyIds = [...new Set([...(existingEdge.study_ids || []), ...studyIds])];
-        
-        const { error: updateError } = await supabase
-          .from('hierarchical_edges')
-          .update({
-            ...edgeData,
-            study_ids: mergedStudyIds,
-            evidence_count: Math.max(evidenceCount, existingEdge.evidence_count || 0)
-          })
-          .eq('id', existingEdge.id);
-
-        if (updateError) {
-          console.error(`[consolidate-knowledge-graph] Error updating edge:`, updateError);
-        } else {
-          updated++;
-        }
-      } else {
-        // Create new edge - need to generate proper source_id and target_id
-        const sourceId = firstTriplet.subject_id || crypto.randomUUID();
-        const targetId = firstTriplet.object_id || crypto.randomUUID();
-
-        const { error: insertError } = await supabase
-          .from('hierarchical_edges')
-          .insert({
-            ...edgeData,
-            source_id: sourceId,
-            target_id: targetId,
-            created_at: new Date().toISOString()
-          });
-
-        if (insertError) {
-          console.error(`[consolidate-knowledge-graph] Error inserting edge:`, insertError);
-        } else {
-          created++;
-        }
-      }
-
-      consolidatedEdges.push({
-        source_id: firstTriplet.subject_id || '',
-        source_type: sourceType,
-        source_layer: sourceLayer,
-        target_id: firstTriplet.object_id || '',
-        target_type: targetType,
-        target_layer: targetLayer,
-        relationship: predicate,
-        aggregated_confidence: aggregatedConfidence,
-        evidence_count: evidenceCount,
-        study_ids: studyIds,
-        evidence_level: evidenceLevel,
-        dose_range: doseRange || undefined,
-        species_validated: speciesValidated
-      });
-    }
-
-    // Generate meta-graph statistics
-    const stats = {
-      totalTriplets: triplets.length,
-      uniqueRelationships: groups.size,
-      created,
-      updated,
-      skipped,
-      byEvidenceLevel: {
-        high: consolidatedEdges.filter(e => e.evidence_level === 'high').length,
-        moderate: consolidatedEdges.filter(e => e.evidence_level === 'moderate').length,
-        low: consolidatedEdges.filter(e => e.evidence_level === 'low').length,
-        preliminary: consolidatedEdges.filter(e => e.evidence_level === 'preliminary').length
-      },
-      avgConfidence: consolidatedEdges.length > 0 
-        ? consolidatedEdges.reduce((sum, e) => sum + e.aggregated_confidence, 0) / consolidatedEdges.length 
-        : 0,
-      avgEvidenceCount: consolidatedEdges.length > 0
-        ? consolidatedEdges.reduce((sum, e) => sum + e.evidence_count, 0) / consolidatedEdges.length
-        : 0
-    };
-
-    console.log(`[consolidate-knowledge-graph] Consolidation complete:`, stats);
-
-    return new Response(JSON.stringify({
-      success: true,
-      message: `Consolidated ${groups.size} relationships from ${triplets.length} triplets`,
-      stats,
-      edges: consolidatedEdges.slice(0, 50) // Return first 50 for preview
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    const stats = await runConsolidation(supabase, request);
+    return new Response(JSON.stringify({ success: true, stats, edges_created: stats.created }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
-
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('[consolidate-knowledge-graph] Error:', error);
-    return new Response(JSON.stringify({
-      success: false,
-      error: errorMessage
-    }), {
+    return new Response(JSON.stringify({ success: false, error: errorMessage }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
