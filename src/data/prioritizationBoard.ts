@@ -20,7 +20,7 @@ export type PrioritizationArea =
   | 'skills'
   | 'infra';
 
-export type StrategicValue = 'PetLove' | 'Stanford' | 'Interno';
+export type StrategicValue = 'ClinicalPartner' | 'AcademicPartner' | 'Internal';
 
 export type EffortSize = 'S' | 'M' | 'L' | 'XL';
 
@@ -45,6 +45,13 @@ export interface PrioritizationCard {
 
 export const PRIORITIZATION_BOARD_LAST_UPDATED = '2026-05-25';
 
+/** Labels neutras — nunca exibir nomes de parceiros não-oficiais (PetLove, Stanford, etc.) na UI pública. */
+export const STRATEGIC_VALUE_LABEL: Record<StrategicValue, { pt: string; en: string }> = {
+  ClinicalPartner: { pt: 'Parceiro Clínico', en: 'Clinical Partner' },
+  AcademicPartner: { pt: 'Parceiro Acadêmico', en: 'Academic Partner' },
+  Internal: { pt: 'Interno', en: 'Internal' },
+};
+
 export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
   {
     id: 'role-view-layer',
@@ -57,7 +64,7 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
       'Declarative filter (5 profiles) over sidebar and admin tabs. Not security — it reduces cognitive load. Real RLS waits for first PetLove vet.',
     area: 'governance',
     effort: 'S',
-    value: ['Interno', 'PetLove'],
+    value: ['Internal', 'ClinicalPartner'],
     status: 'in_progress',
     rationale_pt: 'Destrava uso real pela vet interna e por convidados sem reescrever auth.',
     rationale_en: 'Unlocks real use by internal vet and guests without rewriting auth.',
@@ -71,10 +78,10 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
     description_en: 'Kanban with 5 columns as single source of the roadmap. Effectively replaces docs/STANFORD_DEMO.md.',
     area: 'governance',
     effort: 'M',
-    value: ['Interno', 'PetLove'],
+    value: ['Internal', 'ClinicalPartner'],
     status: 'in_progress',
-    rationale_pt: 'Fonte única para discutir tudo abaixo com PetLove e equipe técnica.',
-    rationale_en: 'Single source to discuss everything below with PetLove and tech team.',
+    rationale_pt: 'Fonte única para discutir tudo abaixo com parceiros e equipe técnica.',
+    rationale_en: 'Single source to discuss everything below with partners and tech team.',
   },
   {
     id: 'cohort-request-generator',
@@ -82,12 +89,12 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
     title_pt: 'Gerador de Sugestões de Cohort',
     title_en: 'Cohort Request Generator',
     description_pt:
-      'Formulário guiado que produz documento estruturado (Markdown/PDF) para enviar à PetLove pedindo recortes específicos.',
+      'Formulário guiado que produz documento estruturado (Markdown/PDF) para enviar ao parceiro clínico pedindo recortes específicos.',
     description_en:
-      'Guided form that produces a structured document (Markdown/PDF) to send to PetLove requesting specific cohorts.',
+      'Guided form that produces a structured document (Markdown/PDF) to send to the clinical partner requesting specific cohorts.',
     area: 'population',
     effort: 'M',
-    value: ['PetLove'],
+    value: ['ClinicalPartner'],
     status: 'in_progress',
     dependsOn: ['prioritization-panel'],
     rationale_pt: 'Acelera a chegada de dados reais — quanto mais cedo, mais Population Insights v1 vira realidade.',
@@ -99,16 +106,16 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
     title_pt: 'Population Insights — esqueleto (sem cohort real)',
     title_en: 'Population Insights — skeleton (no real cohort yet)',
     description_pt:
-      'Kanban "Descobertas → Hipóteses → Meta-estudos propostos → Aprovados". Reaproveita kg-evidence-gap-fill + syntheticCohort com label "aguardando PetLove".',
+      'Kanban "Descobertas → Hipóteses → Meta-estudos propostos → Aprovados". Reaproveita kg-evidence-gap-fill + syntheticCohort com label "aguardando parceiro clínico".',
     description_en:
-      'Kanban "Discoveries → Hypotheses → Proposed meta-studies → Approved". Reuses kg-evidence-gap-fill + syntheticCohort labelled "awaiting PetLove".',
+      'Kanban "Discoveries → Hypotheses → Proposed meta-studies → Approved". Reuses kg-evidence-gap-fill + syntheticCohort labelled "awaiting clinical partner".',
     area: 'population',
     effort: 'L',
-    value: ['PetLove', 'Stanford'],
+    value: ['ClinicalPartner', 'AcademicPartner'],
     status: 'next',
     dependsOn: ['prioritization-panel'],
-    rationale_pt: 'Pronto para plugar dados PetLove no dia 1 que chegarem.',
-    rationale_en: 'Ready to plug PetLove data in on day 1.',
+    rationale_pt: 'Pronto para plugar dados do parceiro clínico no dia 1 que chegarem.',
+    rationale_en: 'Ready to plug clinical-partner data in on day 1.',
   },
   {
     id: 'real-vet-pilot',
@@ -121,7 +128,7 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
       'Internal vet + 1 guest use the platform with "Vet — Pet Caregiver" profile on real pets. Systematic friction collection.',
     area: 'patient',
     effort: 'M',
-    value: ['Interno'],
+    value: ['Internal'],
     status: 'next',
     dependsOn: ['role-view-layer'],
     rationale_pt: 'Valida o "view do veterinário" antes de escalar.',
@@ -138,7 +145,7 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
       'curate-study, evaluate-meta-study-reliability, audit-triplet-citation. Turns existing code into contracts discussable with vet-curator.',
     area: 'skills',
     effort: 'M',
-    value: ['Interno', 'Stanford'],
+    value: ['Internal', 'AcademicPartner'],
     status: 'backlog',
     rationale_pt: 'Contrato com o papel "vet-curador" — preparação para curador externo.',
     rationale_en: 'Contract with the "vet-curator" role — preparation for external curator.',
@@ -146,15 +153,15 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
   {
     id: 'population-insights-real',
     order: 7,
-    title_pt: 'Population Insights — integração com cohort PetLove real',
-    title_en: 'Population Insights — real PetLove cohort integration',
+    title_pt: 'Population Insights — integração com cohort clínico real',
+    title_en: 'Population Insights — real clinical-partner cohort integration',
     description_pt:
-      'Modela tabelas para cohort histórico, ETL dos dados PetLove, scoring real (prevalence_delta + kg_gap + actionability).',
+      'Modela tabelas para cohort histórico, ETL dos dados do parceiro clínico, scoring real (prevalence_delta + kg_gap + actionability).',
     description_en:
-      'Models tables for historical cohort, ETL of PetLove data, real scoring (prevalence_delta + kg_gap + actionability).',
+      'Models tables for historical cohort, ETL of clinical-partner data, real scoring (prevalence_delta + kg_gap + actionability).',
     area: 'population',
     effort: 'XL',
-    value: ['PetLove', 'Stanford'],
+    value: ['ClinicalPartner', 'AcademicPartner'],
     status: 'backlog',
     dependsOn: ['population-insights-skeleton', 'cohort-request-generator'],
     rationale_pt: 'Quando os dados chegarem — esqueleto já estará pronto para receber.',
@@ -171,7 +178,7 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
       'Investigative chat orchestrating relations-auditor + chat-meta-study + KG. Multiplies utility of existing Auditor.',
     area: 'skills',
     effort: 'L',
-    value: ['Interno', 'PetLove'],
+    value: ['Internal', 'ClinicalPartner'],
     status: 'backlog',
     dependsOn: ['internal-skills-3'],
   },
@@ -186,10 +193,10 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
       'Expands app_role enum (vet_curador, vet_responsavel, rnd_lead, platform_architect), rewrites policies, migrates data.',
     area: 'infra',
     effort: 'XL',
-    value: ['PetLove'],
+    value: ['ClinicalPartner'],
     status: 'backlog',
-    rationale_pt: 'Quando entrar o 1º vet PetLove externo. Hoje é overkill.',
-    rationale_en: 'When the 1st external PetLove vet joins. Overkill today.',
+    rationale_pt: 'Quando entrar o 1º vet externo do parceiro clínico. Hoje é overkill.',
+    rationale_en: 'When the 1st external clinical-partner vet joins. Overkill today.',
   },
   {
     id: 'meta-kg-phase-b',
@@ -202,11 +209,11 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
       'Agents debating hypotheses on the Meta-KG. Quantitative triggers already implemented in MetaKgRoadmapCard.',
     area: 'governance',
     effort: 'XL',
-    value: ['Stanford'],
+    value: ['AcademicPartner'],
     status: 'backlog',
     dependsOn: ['population-insights-real'],
-    rationale_pt: 'Depois que houver descobertas reais no cohort PetLove.',
-    rationale_en: 'After real discoveries from the PetLove cohort exist.',
+    rationale_pt: 'Depois que houver descobertas reais no cohort do parceiro clínico.',
+    rationale_en: 'After real discoveries from the clinical-partner cohort exist.',
   },
 ];
 
