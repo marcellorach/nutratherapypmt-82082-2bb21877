@@ -6,22 +6,29 @@ const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const MODEL = "google/gemini-3.5-flash";
-const BATCH_SIZE = 25;
+const BATCH_SIZE = 10;
 const LLM_TIMEOUT_MS = 90_000;
 const MAX_RETRIES = 2;
 const INTER_BATCH_DELAY_MS = 300;
 
-const SYSTEM_PROMPT = `Você é um gerador de dados clínicos sintéticos para cães, calibrado em medicina veterinária real.
-Para cada pet, produza um perfil verossímil e internamente coerente: raça/idade/peso compatíveis,
-condições alinhadas ao recorte solicitado, exames laboratoriais com valores plausíveis (e correlatos com as condições).
-Variabilidade obrigatória: não repita o mesmo perfil. Distribua severidades. Use unidades vet padrão (mg/dL, U/L, %, etc).`;
+const SYSTEM_PROMPT = `Você é um gerador de prontuários veterinários sintéticos para cães, calibrado em medicina real.
+Cada pet deve ter um prontuário COMPLETO e INTERNAMENTE COERENTE — como se fosse um caso real do "Gerar Pacientes de Exemplo":
+- perfil (raça/idade/peso/sexo/castração) compatíveis com o recorte
+- 1 a 4 condições clínicas alinhadas ao recorte (NUNCA zero — todo pet do cohort PRECISA estar dentro do recorte clínico solicitado)
+- 1 a 3 consultas em ordem cronológica (a última é a mais recente) com chief_complaint, clinical_exam, assessment e plan em português, redigidos como um veterinário escreveria
+- 2 a 5 exames laboratoriais com valores plausíveis (use unidades vet padrão: mg/dL, U/L, %, ng/mL) e flags marcando o que está fora do range
+- 0 a 3 medicações se clinicamente indicadas (com dosagem e frequência)
+- 1 anamnese curta (clinical_note) com 1–2 frases de contexto livre
+- 1 notes_summary curto (1 linha) descrevendo o perfil do paciente
+Variabilidade obrigatória: NÃO repita perfis. Distribua severidades (mild/moderate/severe). Correlacione achados laboratoriais com as condições (ex.: ALT/AST elevados em hepatopatia, creatinina/ureia em DRC, glicemia em diabetes).
+REGRA CRÍTICA: pet sem condições ou sem exames será DESCARTADO. Sempre preencha ambos.`;
 
 function buildTool(batchSize: number) {
   return {
     type: "function",
     function: {
       name: "emit_synthetic_pets",
-      description: "Retorna um lote de pets sintéticos coerentes com o recorte.",
+      description: "Retorna um lote de prontuários sintéticos completos coerentes com o recorte do cohort.",
       parameters: {
         type: "object",
         properties: {
@@ -36,20 +43,59 @@ function buildTool(batchSize: number) {
                 age_years: { type: "number", description: "Idade em anos, entre 0.5 e 18" },
                 weight_kg: { type: "number", description: "Peso em kg, entre 1 e 80" },
                 neutered: { type: "boolean" },
+                notes_summary: { type: "string", description: "1 linha descrevendo o perfil clínico do paciente (ex.: 'Labrador sênior obeso com OA bilateral')." },
                 conditions: {
                   type: "array",
+                  minItems: 1,
+                  maxItems: 4,
                   items: {
                     type: "object",
                     properties: {
                       condition_name: { type: "string" },
                       severity: { type: "string", enum: ["mild", "moderate", "severe"] },
-                      status: { type: "string", enum: ["active", "controlled", "resolved"] }
+                      status: { type: "string", enum: ["active", "controlled", "resolved", "monitoring"] }
                     },
                     required: ["condition_name", "severity", "status"]
                   }
                 },
+                consultations: {
+                  type: "array",
+                  minItems: 1,
+                  maxItems: 3,
+                  description: "Histórico de consultas em ordem cronológica (mais antiga primeiro). A última é a consulta atual.",
+                  items: {
+                    type: "object",
+                    properties: {
+                      days_ago: { type: "integer", description: "Quantos dias atrás ocorreu a consulta (0 = hoje, 180 = 6 meses atrás)." },
+                      chief_complaint: { type: "string", description: "Motivo da consulta (ex.: 'Rigidez matinal e dificuldade para subir escadas')." },
+                      clinical_exam: { type: "string", description: "Achados do exame físico, ECC, mucosas, palpação." },
+                      weight_kg_at_visit: { type: "number" },
+                      body_condition_score: { type: "integer", description: "ECC 1–9" },
+                      assessment: { type: "string", description: "Raciocínio clínico do veterinário em 1–2 frases, primeira pessoa." },
+                      plan: { type: "string", description: "Conduta proposta (exames pedidos, medicação iniciada, retorno)." }
+                    },
+                    required: ["days_ago", "chief_complaint", "assessment", "plan"]
+                  }
+                },
+                medications: {
+                  type: "array",
+                  maxItems: 3,
+                  items: {
+                    type: "object",
+                    properties: {
+                      medication_name: { type: "string" },
+                      dosage: { type: "string", description: "ex.: '0.1mg/kg', '5mg'" },
+                      frequency: { type: "string", description: "ex.: 'Once daily', 'BID', 'SID'" },
+                      status: { type: "string", enum: ["active", "suspended", "completed"] }
+                    },
+                    required: ["medication_name"]
+                  }
+                },
+                clinical_note: { type: "string", description: "Anamnese livre de 1–2 frases (contexto do tutor, hábitos, histórico relevante)." },
                 exams: {
                   type: "array",
+                  minItems: 2,
+                  maxItems: 5,
                   items: {
                     type: "object",
                     properties: {
@@ -64,7 +110,7 @@ function buildTool(batchSize: number) {
                   }
                 }
               },
-              required: ["name", "breed", "sex", "age_years", "weight_kg", "conditions", "exams"]
+              required: ["name", "breed", "sex", "age_years", "weight_kg", "conditions", "exams", "consultations"]
             }
           }
         },
@@ -80,9 +126,34 @@ async function callLLM(criteria: any, batchSize: number, batchIndex: number) {
 ${JSON.stringify(criteria, null, 2)}
 \`\`\`
 
-Gere EXATAMENTE ${batchSize} pets sintéticos (lote ${batchIndex + 1}). Varie raça dentro do recorte, idade dentro da faixa,
-severidade das condições, e padrões laboratoriais. Para cada pet, inclua entre 2 e 4 exames pertinentes às condições
-(ex.: ALT/AST elevados em hepatopatia, creatinina/ureia em DRC, glicemia em diabetes).`;
+Gere EXATAMENTE ${batchSize} prontuários sintéticos COMPLETOS (lote ${batchIndex + 1}).
+Para cada pet:
+- 1 a 4 condições alinhadas ao recorte (NUNCA vazio)
+- 1 a 3 consultas cronológicas (a última = atual, days_ago = 5..30; as anteriores = 90..540 dias atrás)
+- 2 a 5 exames laboratoriais coerentes com as condições, com flags marcando o que está alterado
+- 0 a 3 medicações se clinicamente indicadas
+- 1 anamnese curta (clinical_note) + 1 notes_summary (1 linha)
+
+Exemplo de qualidade esperada (NÃO copie, apenas inspire-se):
+\`\`\`
+{ "name":"Rex", "breed":"Labrador Retriever", "sex":"male", "age_years":8, "weight_kg":32, "neutered":true,
+  "notes_summary":"Labrador sênior obeso com OA bilateral em controle nutracêutico.",
+  "conditions":[
+    {"condition_name":"Osteoarthritis","severity":"moderate","status":"active"},
+    {"condition_name":"Obesity","severity":"moderate","status":"controlled"}
+  ],
+  "consultations":[
+    {"days_ago":365,"chief_complaint":"Ganho de peso progressivo","assessment":"Cão acima do peso, ECC 7/9. Janela boa pra agir antes de complicar.","plan":"Dieta de controle. Reavaliar em 90 dias.","weight_kg_at_visit":36,"body_condition_score":7,"clinical_exam":"Sobrepeso evidente. Sem queixa locomotora."},
+    {"days_ago":21,"chief_complaint":"Reavaliação OA e peso","assessment":"OA mexendo bastante. Peso vem caindo bem.","plan":"Manter Meloxicam. Adicionar protocolo nutracêutico articular.","weight_kg_at_visit":32,"body_condition_score":6,"clinical_exam":"Locomoção melhor. Crepitação articular bilateral."}
+  ],
+  "medications":[{"medication_name":"Meloxicam","dosage":"0.1mg/kg","frequency":"Once daily","status":"active"}],
+  "clinical_note":"Tutora relata melhora locomotora após dieta + Meloxicam. Cão mais ativo nos passeios.",
+  "exams":[
+    {"exam_type":"Body Condition Score","results_json":"{\"bcs\":{\"value\":6,\"unit\":\"/9\",\"ref_min\":4,\"ref_max\":5}}","flags_abnormal":["bcs"]},
+    {"exam_type":"X-Ray (Hip)","results_json":"{\"grade\":{\"value\":3,\"unit\":\"FCI\",\"ref_min\":0,\"ref_max\":1},\"degeneration\":{\"value\":\"moderate\"}}","flags_abnormal":["grade"]}
+  ]
+}
+\`\`\``;
 
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), LLM_TIMEOUT_MS);
