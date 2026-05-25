@@ -24,6 +24,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 6.0.0 -->
 
+### Changed - 2026-05-25 — Cohorts sintéticos: geração clínica rica + painel estatístico
+<!-- area: admin · status: entregue · i18n: 1.111.0 -->
+- `generate-synthetic-cohort` agora emite pets clinicamente completos: 1-4 condições (com severidade/status/origem), 2-5 exames (com `results_json` e `flags_abnormal`), 1-3 **consultas** cronológicas (`chief_complaint`, `assessment`, `plan`, peso, BCS, última marcada `is_latest=true`), 0-3 **medicações** vinculadas à consulta e 1-2 **notas clínicas** (anamnese livre) — inspirado na geração de pacientes de exemplo.
+- Validação descarta e regenera pets sem condições ou sem exames antes do insert; `BATCH_SIZE` reduzido de 25 → 10 para evitar timeout no último batch.
+- Novo **painel estatístico** colapsável dentro de cada card de cohort `ready` (`CohortStatsPanel`): demografia (idade/peso médios, % macho/fêmea, % castrado), top 5 raças, top 8 condições com distribuição de severidade, cobertura clínica (condições/exames/consultas por pet) e flags laboratoriais — alimentado pela nova RPC `get_cohort_stats(p_cohort_id)` (SECURITY DEFINER, admin-only).
+- `CohortPatientsDialog` agora exibe consultas e medicações além de perfil/condições/exames.
+- I18N_VERSION 1.110.0 → 1.111.0 com chaves `prioritization.syntheticExplorer.stats.*` em PT/EN.
+- Files: supabase/functions/generate-synthetic-cohort/index.ts, supabase/migrations/20260525222733_get_cohort_stats.sql, src/components/administrador/priorizacoes/{CohortStatsPanel,CohortPatientsDialog,SyntheticCohortsManager}.tsx, src/locales/{pt,en}/translation.json, src/i18n.ts
+
 ### Changed - 2026-05-25 — Cohorts sintéticos: explorador de pacientes por cohort
 <!-- area: admin · status: entregue · i18n: 1.110.0 -->
 - Aba **Cohorts sintéticos** agora tem botão **"Ver pacientes"** em cada cohort para abrir um dialog com lista pesquisável dos pets gerados naquele cohort e drill-down individual com perfil, condições e exames sintéticos reais gravados no banco.
