@@ -5172,9 +5172,24 @@
         "window": "Janela de protocolo",
         "response": "Resposta clínica",
         "showing": "Exibindo {{n}} de {{total}} pets tratados",
-        "ageBuckets": { "any": "Qualquer idade", "adult": "Adulto (5-7a)", "senior": "Sênior (7-10a)", "geriatric": "Geriátrico (10+a)" },
-        "adherenceBuckets": { "any": "Qualquer adesão", "high": "Alta (≥80%)", "mid": "Média (50-79%)", "low": "Baixa (<50%)" },
-        "windowBuckets": { "any": "Qualquer janela", "early": "0-6 meses", "mid": "6-12 meses", "long": "12-24 meses" }
+        "ageBuckets": {
+          "any": "Qualquer idade",
+          "adult": "Adulto (5-7a)",
+          "senior": "Sênior (7-10a)",
+          "geriatric": "Geriátrico (10+a)"
+        },
+        "adherenceBuckets": {
+          "any": "Qualquer adesão",
+          "high": "Alta (≥80%)",
+          "mid": "Média (50-79%)",
+          "low": "Baixa (<50%)"
+        },
+        "windowBuckets": {
+          "any": "Qualquer janela",
+          "early": "0-6 meses",
+          "mid": "6-12 meses",
+          "long": "12-24 meses"
+        }
       },
       "metrics": {
         "title": "Métricas de impacto clínico",
@@ -5214,7 +5229,12 @@
         "newTriplets": "Novos triplets KG",
         "weightAdjusts": "Ajustes de peso",
         "gapfills": "Gap-fills disparados",
-        "col": { "model": "Modelo", "accuracy": "Acurácia atual", "drift": "Drift sintético", "growth": "Δ aprendizado/mês" }
+        "col": {
+          "model": "Modelo",
+          "accuracy": "Acurácia atual",
+          "drift": "Drift sintético",
+          "growth": "Δ aprendizado/mês"
+        }
       }
     }
   },
@@ -8373,6 +8393,27 @@
       "requestSuccessDesc": "O escopo foi registrado. O agente Lovable irá gerar a auditoria na próxima sessão dedicada.",
       "saveError": "Erro ao salvar",
       "scopeUpdated": "Escopo atualizado"
+    }
+  },
+  "fundamentos": {
+    "roadmap": {
+      "title": "Roadmap do Meta-KG",
+      "phaseAActive": "Fase A ativa",
+      "description": "Lembrete permanente das próximas evoluções desta área. Não esquecer.",
+      "phaseB": "Fase B",
+      "phaseBTitle": "Meta-KG navegável",
+      "phaseBBody": "Promover lições (padrões, recipes, anti-padrões) a entidades de primeira classe; criar tripletes arquiteturais entre elas; vínculo bidirecional RC ↔ lição.",
+      "phaseC": "Fase C",
+      "phaseCTitle": "RAG do meta-KG",
+      "phaseCBody": "Embedding + busca semântica sobre meta-estudos quando atingirmos ≥30 estudos arquiteturais para justificar o custo.",
+      "note": "Fase A entrega sandbox (lifecycle) + confiabilidade 0–5 por estudo, sem refatorar a modelagem atual.",
+      "phaseBTriggers": "Gatilhos para acionar a Fase B",
+      "unlocked": "Pronto para iniciar",
+      "locked": "Aguardando massa crítica",
+      "loadingMetrics": "Calculando métricas…",
+      "metric1": "Meta-estudos aprovados (fora do sandbox)",
+      "metric2": "Lições redundantes entre estudos (sem cross-link)",
+      "metric3": "Conflitos detectados entre recipe e anti-padrão"
     }
   }
 }
