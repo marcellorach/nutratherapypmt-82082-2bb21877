@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-22T16:38:55.037Z
+// Última geração: 2026-05-25T04:16:42.505Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,54 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-05-22";
+export const lastChangelogDate = "2026-05-25";
 
 export const senexVersion = "6.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-25",
+    "kind": "added",
+    "area": "meta",
+    "status": "entregue",
+    "title": "Roadmap Meta-KG: gatilhos quantitativos para acionar a Fase B",
+    "bullets": [
+      "`MetaKgRoadmapCard` agora exibe 3 métricas vivas que destravam a Fase B: (1) meta-estudos aprovados ≥ 10, (2) lições redundantes entre estudos ≥ 3, (3) conflitos recipe↔anti-padrão ≥ 1. Cada métrica renderiza barra de progresso e selo verde quando o alvo é atingido. Card mostra badge global \"Pronto para iniciar\" / \"Aguardando massa crítica\".",
+      "Novo hook `useMetaKgPhaseBMetrics`: query React-Query sobre `meta_studies` (apenas `lifecycle_status='approved'`), normaliza statements de `architectural_patterns`/`methodological_recipes`/`anti_patterns_pitfalls` (lowercase, slice 120 chars) e calcula redundância (mesmo statement em ≥2 estudos por bucket) + conflito (mesmo statement como recipe e anti-padrão).",
+      "i18n: +13 chaves em `fundamentos.roadmap.*` (PT+EN). I18N_VERSION 1.103.0 → 1.104.0.",
+      "Files: src/components/administrador/fundamentos/MetaKgRoadmapCard.tsx, src/hooks/useMetaKgPhaseBMetrics.ts, src/locales/{pt,en}/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "src/components/administrador/fundamentos/MetaKgRoadmapCard.tsx",
+      "src/hooks/useMetaKgPhaseBMetrics.ts",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.104.0"
+  },
+  {
+    "date": "2026-05-22",
+    "kind": "changed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Observatório Clínico v2.1: filtros globais, métricas NNT/HR/TTR, fluxo mensal e caminhos biológicos",
+    "bullets": [
+      "Coorte sintética rebalanceada para totais não-redondos: 8.473 tratados / 13.916 espelho / 8.473 gêmeos digitais (1 twin por tratado). Helpers novos em `syntheticCohort.ts`: `meanTrajectoryWithCI` (IC95%), `computeNNT`, `computeHazardRatio`, `computeTimeToResponse` (mediana + IQR), `computeMonthlyFlow` (active/joined/churned).",
+      "`ClinicalFiltersBar` sticky no topo da tab com 7 filtros (condição, raça, idade, região, adesão, janela de protocolo, resposta) + hook `useFilteredCohort` que propaga a coorte filtrada para todas as sub-abas.",
+      "`CohortObservatory`: novo bloco \"Métricas de impacto clínico\" (NNT/HR/TTR) e `AdherenceMonthlyStack` substitui o funil 0-3-6m por barras empilhadas mensais (24 meses) com churn negativo abaixo do eixo.",
+      "`LongitudinalTrajectories`: banda IC 95% nas trajetórias de tratados (Area + média).",
+      "`ModelFeedbackLoop` agora conversa com os 4 modelos reais de `predictiveModelsData`: tabela com acurácia atual, drift sintético derivado do gemeo×real, Δ aprendizado mensal e link \"Ver evolução\" → `/administrador?tab=modelos-preditivos`. Cards superiores reagem aos modelos (média de acurácia).",
+      "Nova 6ª aba Caminhos Biológicos (`BiologicalPathways.tsx` + `src/data/biologicalPathways.ts`): SVG nativo com 4 trilhas (Composto → Mecanismo → Processo → Desfecho) para 8 condições, largura da seta ∝ evidência sintética, notação `→ ⊣ ⇢`.",
+      "i18n: +~60 chaves em `clinicalMonitoring.v2.{filters, metrics, monthlyFlow, pathways, loopModels}` (PT+EN). I18N_VERSION 1.102.0 → 1.103.0.",
+      "Files: src/utils/syntheticCohort.ts, src/hooks/useFilteredCohort.ts, src/data/biologicalPathways.ts, src/components/administrador/clinical-monitoring/{ClinicalMonitoringTab,ClinicalFiltersBar,CohortObservatory,AdherenceMonthlyStack,LongitudinalTrajectories,ModelFeedbackLoop,BiologicalPathways}.tsx, src/locales/{pt,en}/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "src/data/biologicalPathways.ts",
+      "src/utils/syntheticCohort.ts",
+      "src/hooks/useFilteredCohort.ts",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.103.0"
+  },
   {
     "date": "2026-05-22",
     "kind": "changed",

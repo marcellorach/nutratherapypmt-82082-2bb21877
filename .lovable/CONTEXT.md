@@ -1,21 +1,33 @@
 # Project context briefing (auto)
-Generated: 2026-05-22T16:38:55.042Z
+Generated: 2026-05-25T04:16:42.510Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.102.0
+## Latest i18n version: 1.104.0
 
 ## Changes by area (last 14 days)
 - **admin**: 39
 - **vet-ui**: 16
+- **meta**: 7
 - **kg**: 6
-- **meta**: 6
 - **curation**: 4
 - **clinical-pipeline**: 4
 - **tutor-ui**: 2
 - **i18n**: 1
 
 ## Top 10 recent entries
+### 2026-05-25 · [meta] ADDED — Roadmap Meta-KG: gatilhos quantitativos para acionar a Fase B
+- `MetaKgRoadmapCard` agora exibe 3 métricas vivas que destravam a Fase B: (1) meta-estudos aprovados ≥ 10, (2) lições redundantes entre estudos ≥ 3, (3) conflitos recipe↔anti-padrão ≥ 1. Cada métrica renderiza barra de progresso e selo verde quando o alvo é atingido. Card mostra badge global "Pronto para iniciar" / "Aguardando massa crítica".
+- Novo hook `useMetaKgPhaseBMetrics`: query React-Query sobre `meta_studies` (apenas `lifecycle_status='approved'`), normaliza statements de `architectural_patterns`/`methodological_recipes`/`anti_patterns_pitfalls` (lowercase, slice 120 chars) e calcula redundância (mesmo statement em ≥2 estudos por bucket) + conflito (mesmo statement como recipe e anti-padrão).
+- i18n: +13 chaves em `fundamentos.roadmap.*` (PT+EN). I18N_VERSION 1.103.0 → 1.104.0.
+_files: src/components/administrador/fundamentos/MetaKgRoadmapCard.tsx, src/hooks/useMetaKgPhaseBMetrics.ts, src/i18n.ts_
+
+### 2026-05-22 · [admin] CHANGED — Observatório Clínico v2.1: filtros globais, métricas NNT/HR/TTR, fluxo mensal e caminhos biológicos
+- Coorte sintética rebalanceada para totais não-redondos: 8.473 tratados / 13.916 espelho / 8.473 gêmeos digitais (1 twin por tratado). Helpers novos em `syntheticCohort.ts`: `meanTrajectoryWithCI` (IC95%), `computeNNT`, `computeHazardRatio`, `computeTimeToResponse` (mediana + IQR), `computeMonthlyFlow` (active/joined/churned).
+- `ClinicalFiltersBar` sticky no topo da tab com 7 filtros (condição, raça, idade, região, adesão, janela de protocolo, resposta) + hook `useFilteredCohort` que propaga a coorte filtrada para todas as sub-abas.
+- `CohortObservatory`: novo bloco "Métricas de impacto clínico" (NNT/HR/TTR) e `AdherenceMonthlyStack` substitui o funil 0-3-6m por barras empilhadas mensais (24 meses) com churn negativo abaixo do eixo.
+_files: src/data/biologicalPathways.ts, src/utils/syntheticCohort.ts, src/hooks/useFilteredCohort.ts, src/i18n.ts_
+
 ### 2026-05-22 · [admin] CHANGED — Monitoramento Clínico vira Observatório Longitudinal (coorte sintética 10k+16k+10k)
 - `ClinicalMonitoringTab` reescrita em 5 abas: Observatório da Coorte, Trajetórias Longitudinais, Explorador de Pacientes, Sinais de Descoberta e Loop de Modelos.
 - Novo `src/utils/syntheticCohort.ts`: gerador determinístico (PRNG mulberry32, seed fixa) de 10.000 cães tratados + 16.000 pares observacionais (coorte-espelho) + 10.000 gêmeos digitais projetados. Todos os registros carregam `is_synthetic: true` e IDs `#A-NNNNN` / `#M-NNNNN`. Modelagem por 8 condições (OA, DRC, CDS, hepato, cardio, obesidade, IBD, sarcopenia) com curva sigmoide amortecida por adesão.
@@ -63,18 +75,6 @@ _files: src/components/administrador/fundamentos/MetaStudyKanban.tsx, src/compon
 - `gemini-file-search` auditada e formalmente fora do escopo: usa Google AI Direct API com `fileData.fileUri` + corpora `file_search` nativos, incompatíveis com o Gateway.
 - Estado final em `src/config/ai-tasks.ts`: 13 connected · 7 legacy · 3 planned (23 tasks). `lab_driven_adjustment` e `treatment_proposal_12m` respondem no router (healthcheck OK) mas seguem `planned` porque os consumidores clínicos ainda usam o caminho legado — alvo do próximo lote.
 _files: src/config/ai-tasks.ts_
-
-### 2026-05-21 · [kg] CHANGED — Migração Curadoria/KG: fechamento (gemini-file-search fica fora do router)
-- `gemini-file-search` auditada: todas as chamadas LLM usam a Google AI Direct API (`generativelanguage.googleapis.com`) com `fileData.fileUri` referenciando arquivos da File API + corpora/file_search nativos. O Lovable Gateway não aceita esses URIs nem expõe File Search nativo, então a função permanece fora do escopo do router por design — análogo ao caminho Google AI File API do `extract-meta-study`. Sem mudanças de código.
-- Healthcheck pós-migração (Curadoria/KG): `ai-task-healthcheck` retornou 8/8 OK — `extraction_stage1` (815ms), `extraction_stage2` (851ms), `extraction_stage3` (851ms), `triplet_extraction` (820ms), `relations_auditor` (2470ms), `geroprotector_stack` (812ms), `lab_driven_adjustment` (784ms), `treatment_proposal_12m` (864ms).
-- Vitest: 94/94 passando (1 suite com falha pré-existente de `localStorage` em Node, alheia ao router).
-
-### 2026-05-21 · [kg] CHANGED — Migração Curadoria/KG: generate-triplets no router
-_status: parcial_
-- `generate-triplets` (Phase 1 discovery por chunk + Phase 2 structuring com tool calling) migrada para `callAITask('triplet_extraction', ...)`. Phase 2 preserva `tools=[extractTripletsToolDef]` + `tool_choice` forçado; resposta reconstruída no shape `phase2Data.choices[0].message.{content, tool_calls}` para manter o parser downstream intacto. Tratamento de 429/402 reintroduzido a partir das mensagens de erro do router.
-- Status reconciliado em `src/config/ai-tasks.ts`: `triplet_extraction` passa de `legacy` para `connected` (13 connected · 7 legacy · 3 planned).
-- Smoke test: `ai-task-healthcheck {triplet_extraction}` → 200 OK (827 ms).
-_files: src/config/ai-tasks.ts, supabase/functions/generate-triplets/index.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
