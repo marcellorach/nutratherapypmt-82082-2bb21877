@@ -304,6 +304,18 @@ Deno.serve(async (req) => {
             continue;
           }
 
+          // Validation: discard pets without conditions or exams
+          const validPets = pets.filter((p: any) =>
+            Array.isArray(p?.conditions) && p.conditions.length > 0 &&
+            Array.isArray(p?.exams) && p.exams.length > 0
+          );
+          const discarded = pets.length - validPets.length;
+          if (discarded > 0) {
+            await appendLog(service, cohortId, "warn", `Batch ${b + 1} · ${discarded} pets descartados (sem condições ou exames)`);
+          }
+          if (validPets.length === 0) continue;
+          pets = validPets;
+
           // Insert pet_profiles
           const profileRows = pets.map((p: any) => ({
             name: String(p.name).slice(0, 60),
@@ -317,7 +329,9 @@ Deno.serve(async (req) => {
             is_demo: false,
             cohort_id: cohortId,
             created_by: user.id,
-            notes: `Pet sintético · cohort "${name}" · gerado por IA`,
+            notes: p.notes_summary
+              ? `${String(p.notes_summary).slice(0, 240)} · cohort "${name}" · sintético`
+              : `Pet sintético · cohort "${name}" · gerado por IA`,
           }));
           const { data: createdPets, error: petsErr } = await service
             .from("pet_profiles").insert(profileRows).select("id");
@@ -326,17 +340,73 @@ Deno.serve(async (req) => {
             continue;
           }
 
-          // Insert pet_conditions + pet_exams
-          const condRows: any[] = [];
-          const examRows: any[] = [];
+          // Insert consultations first (we need the IDs to link condition/exam/medication to the latest visit)
+          const todayMs = Date.now();
+          const toDate = (daysAgo: number) =>
+            new Date(todayMs - Math.max(0, Number(daysAgo) || 0) * 86_400_000).toISOString().slice(0, 10);
+
+          // Build consultation rows and remember the index in `pets` they belong to
+          const consultPlan: Array<{ petIdx: number; isLatest: boolean; row: any }> = [];
           createdPets.forEach((row: any, idx: number) => {
             const src = pets[idx];
+            const cs = Array.isArray(src.consultations) && src.consultations.length
+              ? [...src.consultations].sort((a: any, z: any) => (Number(z.days_ago) || 0) - (Number(a.days_ago) || 0))
+              : [{ days_ago: 7, chief_complaint: "Consulta inicial sintética", assessment: "—", plan: "—" }];
+            cs.forEach((c: any, cIdx: number) => {
+              const isLatest = cIdx === cs.length - 1;
+              consultPlan.push({
+                petIdx: idx,
+                isLatest,
+                row: {
+                  pet_id: row.id,
+                  consultation_date: toDate(c.days_ago),
+                  chief_complaint: c.chief_complaint ? String(c.chief_complaint).slice(0, 1000) : null,
+                  clinical_exam: c.clinical_exam ? String(c.clinical_exam).slice(0, 2000) : null,
+                  weight_kg_at_visit: c.weight_kg_at_visit != null ? Number(c.weight_kg_at_visit) : null,
+                  body_condition_score: c.body_condition_score != null
+                    ? Math.max(1, Math.min(9, Math.round(Number(c.body_condition_score))))
+                    : null,
+                  assessment: c.assessment ? String(c.assessment).slice(0, 2000) : null,
+                  plan: c.plan ? String(c.plan).slice(0, 2000) : null,
+                  is_latest: isLatest,
+                  created_by: user.id,
+                  tags: ["synthetic"],
+                },
+              });
+            });
+          });
+
+          const { data: createdConsults, error: consultErr } = await service
+            .from("pet_consultations").insert(consultPlan.map((c) => c.row)).select("id, pet_id, is_latest");
+          if (consultErr) {
+            await appendLog(service, cohortId, "warn", `Falha ao gravar consultas batch ${b + 1}: ${consultErr.message}`);
+          }
+
+          // Map pet_id -> latest consultation_id (fallback to any consultation for that pet)
+          const latestByPet: Record<string, string> = {};
+          (createdConsults ?? []).forEach((c: any) => {
+            if (c.is_latest && !latestByPet[c.pet_id]) latestByPet[c.pet_id] = c.id;
+          });
+          (createdConsults ?? []).forEach((c: any) => {
+            if (!latestByPet[c.pet_id]) latestByPet[c.pet_id] = c.id;
+          });
+
+          // Insert pet_conditions + pet_exams + pet_medications + pet_clinical_notes
+          const condRows: any[] = [];
+          const examRows: any[] = [];
+          const medRows: any[] = [];
+          const noteRows: any[] = [];
+          createdPets.forEach((row: any, idx: number) => {
+            const src = pets[idx];
+            const consultId = latestByPet[row.id] ?? null;
             (src.conditions ?? []).forEach((c: any) => {
               condRows.push({
                 pet_id: row.id,
                 condition_name: String(c.condition_name).slice(0, 120),
-                severity: c.severity, status: c.status, origin: "synthetic",
+                severity: c.severity, status: c.status === "monitoring" ? "active" : c.status,
+                origin: "synthetic",
                 diagnosis_date: new Date().toISOString().slice(0, 10),
+                consultation_id: consultId,
               });
             });
             (src.exams ?? []).forEach((e: any) => {
@@ -354,11 +424,34 @@ Deno.serve(async (req) => {
                 flags_abnormal: Array.isArray(e.flags_abnormal) ? e.flags_abnormal : [],
                 extraction_status: "synthetic",
                 approved: true,
+                consultation_id: consultId,
               });
             });
+            (Array.isArray(src.medications) ? src.medications : []).forEach((m: any) => {
+              if (!m?.medication_name) return;
+              medRows.push({
+                pet_id: row.id,
+                medication_name: String(m.medication_name).slice(0, 120),
+                dosage: m.dosage ? String(m.dosage).slice(0, 60) : null,
+                frequency: m.frequency ? String(m.frequency).slice(0, 60) : null,
+                status: ["active", "suspended", "completed"].includes(m.status) ? m.status : "active",
+                consultation_id: consultId,
+              });
+            });
+            if (src.clinical_note && String(src.clinical_note).trim()) {
+              noteRows.push({
+                pet_id: row.id,
+                note_type: "observation",
+                content: String(src.clinical_note).slice(0, 2000),
+                consultation_id: consultId,
+                created_by: user.id,
+              });
+            }
           });
           if (condRows.length) await service.from("pet_conditions").insert(condRows);
           if (examRows.length) await service.from("pet_exams").insert(examRows);
+          if (medRows.length) await service.from("pet_medications").insert(medRows);
+          if (noteRows.length) await service.from("pet_clinical_notes").insert(noteRows);
 
           generated += createdPets.length;
           await service.from("synthetic_cohorts")
