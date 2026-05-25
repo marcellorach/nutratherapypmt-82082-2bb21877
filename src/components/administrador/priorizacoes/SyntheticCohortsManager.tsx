@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Database, Loader2, Trash2, RefreshCw, FlaskConical, CheckCircle2, AlertTriangle, ChevronDown, ChevronUp, ScrollText } from 'lucide-react';
+import { Database, Loader2, Trash2, RefreshCw, FlaskConical, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useRoleView } from '@/contexts/RoleViewContext';
+import CohortProgressLog, { ProgressLogEntry } from './CohortProgressLog';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 interface CohortRow {
   id: string;
@@ -17,7 +20,7 @@ interface CohortRow {
   status: 'pending' | 'generating' | 'ready' | 'failed' | 'archived';
   generation_error: string | null;
   created_at: string;
-  progress_log?: Array<{ ts: string; level: 'info' | 'warn' | 'error'; message: string }> | null;
+  progress_log?: ProgressLogEntry[] | null;
 }
 
 const KIND_LABEL: Record<CohortRow['kind'], string> = {
@@ -39,7 +42,7 @@ const SyntheticCohortsManager: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
-  const [expandedLog, setExpandedLog] = useState<Record<string, boolean>>({});
+  const [showGenerating, setShowGenerating] = useState(false);
   const { viewId } = useRoleView();
   const showModelTag = viewId === 'platform_architect';
 
