@@ -7,6 +7,9 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const MODEL = "google/gemini-3.5-flash";
 const BATCH_SIZE = 25;
+const LLM_TIMEOUT_MS = 90_000;
+const MAX_RETRIES = 2;
+const INTER_BATCH_DELAY_MS = 300;
 
 const SYSTEM_PROMPT = `Você é um gerador de dados clínicos sintéticos para cães, calibrado em medicina veterinária real.
 Para cada pet, produza um perfil verossímil e internamente coerente: raça/idade/peso compatíveis,
@@ -81,28 +84,62 @@ Gere EXATAMENTE ${batchSize} pets sintéticos (lote ${batchIndex + 1}). Varie ra
 severidade das condições, e padrões laboratoriais. Para cada pet, inclua entre 2 e 4 exames pertinentes às condições
 (ex.: ALT/AST elevados em hepatopatia, creatinina/ureia em DRC, glicemia em diabetes).`;
 
-  const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: userPrompt },
-      ],
-      tools: [buildTool(batchSize)],
-      tool_choice: { type: "function", function: { name: "emit_synthetic_pets" } },
-    }),
-  });
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), LLM_TIMEOUT_MS);
+  try {
+    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: userPrompt },
+        ],
+        tools: [buildTool(batchSize)],
+        tool_choice: { type: "function", function: { name: "emit_synthetic_pets" } },
+      }),
+      signal: ac.signal,
+    });
 
-  if (!resp.ok) {
-    const t = await resp.text();
-    throw new Error(`AI gateway ${resp.status}: ${t.slice(0, 500)}`);
+    if (!resp.ok) {
+      const t = await resp.text();
+      const err: any = new Error(`AI gateway ${resp.status}: ${t.slice(0, 500)}`);
+      err.status = resp.status;
+      throw err;
+    }
+    const data = await resp.json();
+    const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+    const parsed = typeof args === "string" ? JSON.parse(args) : args;
+    return parsed?.pets ?? [];
+  } finally {
+    clearTimeout(timer);
   }
-  const data = await resp.json();
-  const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
-  const parsed = typeof args === "string" ? JSON.parse(args) : args;
-  return parsed?.pets ?? [];
+}
+
+async function callLLMWithRetry(service: any, cohortId: string, criteria: any, batchSize: number, batchIndex: number) {
+  let lastErr: any = null;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      await service.from("synthetic_cohorts")
+        .update({ last_heartbeat_at: new Date().toISOString() })
+        .eq("id", cohortId);
+      return await callLLM(criteria, batchSize, batchIndex);
+    } catch (e: any) {
+      lastErr = e;
+      const isAbort = e?.name === "AbortError";
+      const isRetryable = isAbort || e?.status === 429 || (e?.status >= 500 && e?.status < 600);
+      if (attempt < MAX_RETRIES && isRetryable) {
+        const backoff = 1500 * Math.pow(2, attempt);
+        await appendLog(service, cohortId, "warn",
+          `Batch ${batchIndex + 1} tentativa ${attempt + 1} falhou (${isAbort ? "timeout" : `status ${e?.status ?? "?"}`}) · retry em ${backoff}ms`);
+        await new Promise((r) => setTimeout(r, backoff));
+        continue;
+      }
+      throw lastErr;
+    }
+  }
+  throw lastErr;
 }
 
 async function appendLog(service: any, cohortId: string, level: "info" | "warn" | "error", message: string, extra: any = {}) {
@@ -178,6 +215,7 @@ Deno.serve(async (req) => {
     await appendLog(service, cohortId, "info", `Cohort criado · alvo ${targetN} pets em ${batches} batches de ${BATCH_SIZE}`, { model: MODEL });
 
     const runGeneration = async () => {
+      let fatal: any = null;
       try {
         for (let b = 0; b < batches; b++) {
           const remaining = targetN - generated;
@@ -185,10 +223,10 @@ Deno.serve(async (req) => {
           await appendLog(service, cohortId, "info", `Batch ${b + 1}/${batches} · solicitando ${size} pets ao modelo`);
           let pets: any[] = [];
           try {
-            pets = await callLLM({ ...criteria, kind, cohort_name: name }, size, b);
+            pets = await callLLMWithRetry(service, cohortId, { ...criteria, kind, cohort_name: name }, size, b);
           } catch (e: any) {
-            await appendLog(service, cohortId, "error", `Batch ${b + 1} falhou no LLM: ${String(e?.message ?? e).slice(0, 240)}`);
-            throw e;
+            await appendLog(service, cohortId, "error", `Batch ${b + 1} falhou no LLM após retries: ${String(e?.message ?? e).slice(0, 240)} · pulando`);
+            continue;
           }
           if (!Array.isArray(pets) || pets.length === 0) {
             await appendLog(service, cohortId, "warn", `Batch ${b + 1} retornou vazio · pulando`);
@@ -253,18 +291,36 @@ Deno.serve(async (req) => {
 
           generated += createdPets.length;
           await service.from("synthetic_cohorts")
-            .update({ generated_n: generated }).eq("id", cohortId);
+            .update({ generated_n: generated, last_heartbeat_at: new Date().toISOString() })
+            .eq("id", cohortId);
           await appendLog(service, cohortId, "info", `Batch ${b + 1} ok · +${createdPets.length} pets (total ${generated}/${targetN})`);
+          if (b < batches - 1) await new Promise((r) => setTimeout(r, INTER_BATCH_DELAY_MS));
         }
-        await service.from("synthetic_cohorts")
-          .update({ status: "ready", generated_n: generated }).eq("id", cohortId);
-        await appendLog(service, cohortId, "info", `Geração concluída · ${generated} pets sintéticos prontos`);
       } catch (e: any) {
         console.error("generation error", e);
+        fatal = e;
+      } finally {
+        // Sempre finaliza o status — evita ficar pendurado em "generating".
+        const ratio = generated / Math.max(1, targetN);
+        const finalStatus = fatal ? "failed" : (ratio >= 0.8 ? "ready" : (generated > 0 ? "ready" : "failed"));
+        const errMsg = fatal
+          ? String(fatal?.message ?? fatal).slice(0, 500)
+          : (generated < targetN ? `Apenas ${generated}/${targetN} pets gerados (alguns batches falharam)` : null);
         await service.from("synthetic_cohorts")
-          .update({ status: "failed", generation_error: String(e?.message ?? e), generated_n: generated })
+          .update({
+            status: finalStatus,
+            generated_n: generated,
+            generation_error: errMsg,
+            last_heartbeat_at: new Date().toISOString(),
+          })
           .eq("id", cohortId);
-        await appendLog(service, cohortId, "error", `Geração interrompida: ${String(e?.message ?? e).slice(0, 240)}`);
+        await appendLog(
+          service, cohortId,
+          finalStatus === "ready" ? "info" : "error",
+          finalStatus === "ready"
+            ? `Geração concluída · ${generated} pets sintéticos prontos`
+            : `Geração interrompida: ${errMsg ?? "erro desconhecido"}`,
+        );
       }
     };
 

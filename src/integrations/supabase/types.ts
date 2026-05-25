@@ -4669,6 +4669,7 @@ export type Database = {
           generation_error: string | null
           id: string
           kind: string
+          last_heartbeat_at: string | null
           name: string
           progress_log: Json
           rationale: string | null
@@ -4684,6 +4685,7 @@ export type Database = {
           generation_error?: string | null
           id?: string
           kind: string
+          last_heartbeat_at?: string | null
           name: string
           progress_log?: Json
           rationale?: string | null
@@ -4699,6 +4701,7 @@ export type Database = {
           generation_error?: string | null
           id?: string
           kind?: string
+          last_heartbeat_at?: string | null
           name?: string
           progress_log?: Json
           rationale?: string | null
