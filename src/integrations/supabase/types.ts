@@ -1024,6 +1024,68 @@ export type Database = {
           },
         ]
       }
+      cohort_suggestions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          discoverable: string | null
+          id: string
+          impact_score: number | null
+          kind: string
+          rationale: string | null
+          signals: Json
+          source_model: string | null
+          status: string
+          suggested_criteria: Json
+          title: string
+          updated_at: string
+          used_cohort_id: string | null
+          viability_score: number | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          discoverable?: string | null
+          id?: string
+          impact_score?: number | null
+          kind: string
+          rationale?: string | null
+          signals?: Json
+          source_model?: string | null
+          status?: string
+          suggested_criteria?: Json
+          title: string
+          updated_at?: string
+          used_cohort_id?: string | null
+          viability_score?: number | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          discoverable?: string | null
+          id?: string
+          impact_score?: number | null
+          kind?: string
+          rationale?: string | null
+          signals?: Json
+          source_model?: string | null
+          status?: string
+          suggested_criteria?: Json
+          title?: string
+          updated_at?: string
+          used_cohort_id?: string | null
+          viability_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cohort_suggestions_used_cohort_id_fkey"
+            columns: ["used_cohort_id"]
+            isOneToOne: false
+            referencedRelation: "synthetic_cohorts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       compliance_audit_runs: {
         Row: {
           created_at: string
@@ -4608,6 +4670,7 @@ export type Database = {
           id: string
           kind: string
           name: string
+          progress_log: Json
           rationale: string | null
           status: string
           target_n: number
@@ -4622,6 +4685,7 @@ export type Database = {
           id?: string
           kind: string
           name: string
+          progress_log?: Json
           rationale?: string | null
           status?: string
           target_n?: number
@@ -4636,6 +4700,7 @@ export type Database = {
           id?: string
           kind?: string
           name?: string
+          progress_log?: Json
           rationale?: string | null
           status?: string
           target_n?: number

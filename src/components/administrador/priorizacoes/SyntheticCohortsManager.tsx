@@ -50,7 +50,7 @@ const SyntheticCohortsManager: React.FC = () => {
       .select('*')
       .order('created_at', { ascending: false });
     if (error) toast({ title: 'Erro ao listar cohorts', description: error.message, variant: 'destructive' });
-    setCohorts((data ?? []) as CohortRow[]);
+    setCohorts((data ?? []) as unknown as CohortRow[]);
     setLoading(false);
   };
 
