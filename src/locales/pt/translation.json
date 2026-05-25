@@ -2135,7 +2135,8 @@
         "fundamentos": "Fundamentos Arquiteturais"
       },
       "governanceAI": {
-        "title": "Governança & IA"
+        "title": "Governança & IA",
+        "priorizacoes": "Priorizações"
       },
       "settingsButton": "Configurações"
     },
