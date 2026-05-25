@@ -1,6 +1,14 @@
 {
   "knowledgeGraph": {
-    "_fundamentosRoadmapAnchor": "_",
+    "fundamentosRoadmap_unused": {
+      "phaseBTriggers": "Gatilhos para acionar a Fase B",
+      "unlocked": "Pronto para iniciar",
+      "locked": "Aguardando massa crítica",
+      "loadingMetrics": "Calculando métricas…",
+      "metric1": "Meta-estudos aprovados (fora do sandbox)",
+      "metric2": "Lições redundantes entre estudos (sem cross-link)",
+      "metric3": "Conflitos detectados entre recipe e anti-padrão"
+    },
     "title": "Visualização do Grafo de Conhecimento",
     "description": "Visualização interativa do grafo de conhecimento médico",
     "testConnection": "Testar Conexão Neo4j",
