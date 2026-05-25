@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-25T19:12:47.422Z
+// Última geração: 2026-05-25T21:44:51.769Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,50 @@ export const lastChangelogDate = "2026-05-25";
 export const senexVersion = "6.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-25",
+    "kind": "changed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Cohorts sintéticos: explorador de pacientes por cohort",
+    "bullets": [
+      "Aba Cohorts sintéticos agora tem botão \"Ver pacientes\" em cada cohort para abrir um dialog com lista pesquisável dos pets gerados naquele cohort e drill-down individual com perfil, condições e exames sintéticos reais gravados no banco.",
+      "O fluxo resolve a lacuna de inspeção operacional: após a geração parcial (ex.: 175/200), já é possível auditar os registros efetivamente persistidos sem sair da aba de priorizações.",
+      "I18N_VERSION 1.109.0 → 1.110.0 com novas chaves `prioritization.syntheticExplorer.*` em PT/EN.",
+      "Files: src/components/administrador/priorizacoes/{SyntheticCohortsManager,CohortPatientsDialog}.tsx, src/locales/{pt,en}/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.110.0"
+  },
+  {
+    "date": "2026-05-25",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Playground Multi-Fonte + SourcePanel (fundação #8)",
+    "bullets": [
+      "Serviço `MultiSourceResolver` (`src/services/multi-source-resolver.ts`) com 5 providers independentes: KG curado (peso 1.0, via RPC `get_relations_graph_data`), histórico do cão (0.95), cohort sintético (0.7), cães tratados (0.6, stub) e internet via Perplexity (0.3). Detecção automática de conflito quando ≥ 2 fontes de peso ≥ 0.6 retornam claims com polaridade divergente.",
+      "Edge function `query-perplexity` (modelo `sonar`, escopo canino restrito, extração de confidence high/medium/low, citações).",
+      "Componente `<SourcePanel />` em `src/components/clinical/SourcePanel.tsx`: visibilidade híbrida por `useRoleView()` — tutor vê só síntese + nota neutra; vet vê painel colapsável com badge de peso, confiança e conflito; arquiteto vê também tags de modelo.",
+      "Nova sub-aba \"Playground multi-fonte\" em `/administrador?tab=priorizacoes` para validar a fundação antes de plugar nas telas clínicas reais.",
+      "Chaves i18n PT/EN sob `prioritization.multiSource.*` + `prioritization.tabs.{synthetic,population,roles,playground}`. I18N_VERSION → 1.108.0.",
+      "Remoção do `src/data/populationInsightsSeed.ts` (não usado desde a migração para `cohort_insights`).",
+      "Files: src/services/multi-source-resolver.ts, src/components/clinical/SourcePanel.tsx, src/components/administrador/priorizacoes/MultiSourcePlayground.tsx, src/pages/administrador/PriorizacoesTab.tsx, supabase/functions/query-perplexity/index.ts, supabase/config.toml, src/i18n.ts, src/locales/{pt,en}/translation.json, src/data/projectOrganograma.ts"
+    ],
+    "files": [
+      "src/services/multi-source-resolver.ts",
+      "src/components/clinical/SourcePanel.tsx",
+      "src/data/populationInsightsSeed.ts",
+      "src/components/administrador/priorizacoes/MultiSourcePlayground.tsx",
+      "src/pages/administrador/PriorizacoesTab.tsx",
+      "supabase/functions/query-perplexity/index.ts",
+      "src/i18n.ts",
+      "src/data/projectOrganograma.ts"
+    ],
+    "i18nVersion": "1.108.0"
+  },
   {
     "date": "2026-05-25",
     "kind": "added",
