@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-05-25T18:12:31.190Z",
+  "timestamp": "2026-05-25T18:56:32.722Z",
   "summary": {
-    "totalFiles": 921,
+    "totalFiles": 925,
     "totalIssues": 443,
     "hardcodedTexts": 52,
     "missingKeys": 389,
@@ -1929,7 +1929,7 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/priorizacoes/CohortRequestGenerator.tsx",
-      "line": 98,
+      "line": 99,
       "text": "a",
       "severity": "high"
     },
