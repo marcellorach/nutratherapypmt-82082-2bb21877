@@ -8487,6 +8487,48 @@
         "internet": "Internet (Perplexity)",
         "treatedDogs": "Dogs treated on the platform"
       }
+    },
+    "syntheticExplorer": {
+      "title": "Cohort pets",
+      "subtitle": "{{count}} synthetic records from cohort \"{{cohort}}\".",
+      "openPatients": "View patients",
+      "searchPlaceholder": "Search by ID, name, or breed…",
+      "listCount": "{{shown}} of {{total}} patients",
+      "loadingList": "Loading cohort patients…",
+      "loadingDetail": "Loading patient details…",
+      "emptyList": "No patients found for this filter.",
+      "emptyDetail": "Select a patient to inspect the generated synthetic clinical data.",
+      "profileTitle": "Profile",
+      "metadataTitle": "Metadata",
+      "notesTitle": "Notes",
+      "noNotes": "No additional notes.",
+      "conditionsTitle": "Conditions",
+      "noConditions": "No conditions recorded for this patient.",
+      "examsTitle": "Exams",
+      "noExams": "No exams recorded for this patient.",
+      "noStructuredResults": "No structured results in this exam.",
+      "conditionMeta": "Origin: {{origin}} · Date: {{date}}",
+      "examDate": "Exam date: {{date}}",
+      "close": "Close",
+      "profile": {
+        "breed": "Breed",
+        "sex": "Sex",
+        "age": "Age",
+        "weight": "Weight"
+      },
+      "metadata": {
+        "createdAt": "Generated on",
+        "conditions": "Conditions",
+        "exams": "Exams"
+      },
+      "sex": {
+        "male": "Male",
+        "female": "Female"
+      },
+      "errors": {
+        "loadListTitle": "Error loading cohort patients",
+        "loadDetailTitle": "Error loading patient details"
+      }
     }
   }
 }
