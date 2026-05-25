@@ -37,7 +37,7 @@ const PriorizacoesTab: React.FC = () => {
       <Tabs defaultValue="board" className="w-full">
         <TabsList>
           <TabsTrigger value="board">{t('prioritization.tabs.board', 'Kanban')}</TabsTrigger>
-          <TabsTrigger value="cohort">{t('prioritization.tabs.cohort', 'Gerador de Cohort')}</TabsTrigger>
+          <TabsTrigger value="cohort">{t('prioritization.tabs.cohort', 'Gerador de Sugestão de Cohort')}</TabsTrigger>
           <TabsTrigger value="synthetic">{t('prioritization.tabs.synthetic', 'Cohorts sintéticos')}</TabsTrigger>
           <TabsTrigger value="population">{t('prioritization.tabs.population', 'Population Insights v0')}</TabsTrigger>
           <TabsTrigger value="playground">{t('prioritization.tabs.playground', 'Playground multi-fonte')}</TabsTrigger>
