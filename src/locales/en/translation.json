@@ -8420,7 +8420,7 @@
     "deliveredIn": "Delivered in",
     "tabs": {
       "board": "Kanban",
-      "cohort": "Cohort Generator",
+      "cohort": "Cohort Suggestion Generator",
       "synthetic": "Synthetic cohorts",
       "population": "Population Insights v0",
       "roles": "Role views",

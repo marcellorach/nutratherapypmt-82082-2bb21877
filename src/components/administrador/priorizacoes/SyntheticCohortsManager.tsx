@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Database, Loader2, Trash2, Sparkles, RefreshCw, FlaskConical, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Database, Loader2, Trash2, RefreshCw, FlaskConical, CheckCircle2, AlertTriangle, ChevronDown, ChevronUp, ScrollText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useRoleView } from '@/contexts/RoleViewContext';
@@ -17,6 +17,7 @@ interface CohortRow {
   status: 'pending' | 'generating' | 'ready' | 'failed' | 'archived';
   generation_error: string | null;
   created_at: string;
+  progress_log?: Array<{ ts: string; level: 'info' | 'warn' | 'error'; message: string }> | null;
 }
 
 const KIND_LABEL: Record<CohortRow['kind'], string> = {
@@ -38,6 +39,7 @@ const SyntheticCohortsManager: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [expandedLog, setExpandedLog] = useState<Record<string, boolean>>({});
   const { viewId } = useRoleView();
   const showModelTag = viewId === 'platform_architect';
 
@@ -151,6 +153,35 @@ const SyntheticCohortsManager: React.FC = () => {
               {c.rationale && <p className="text-[11px] text-gray-600 line-clamp-3">{c.rationale}</p>}
               {c.generation_error && (
                 <p className="text-[11px] text-red-700 bg-red-50 p-1.5 rounded">⚠ {c.generation_error}</p>
+              )}
+              {(c.progress_log && c.progress_log.length > 0) && (
+                <div className="border rounded">
+                  <button
+                    type="button"
+                    onClick={() => setExpandedLog((m) => ({ ...m, [c.id]: !m[c.id] }))}
+                    className="w-full flex items-center justify-between px-2 py-1 text-[11px] text-gray-700 hover:bg-gray-50"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <ScrollText className="h-3 w-3" />
+                      Log de execução ({c.progress_log.length})
+                    </span>
+                    {expandedLog[c.id] ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                  </button>
+                  {expandedLog[c.id] && (
+                    <div className="max-h-40 overflow-y-auto px-2 py-1.5 text-[10px] font-mono space-y-0.5 bg-gray-50 border-t">
+                      {c.progress_log.slice().reverse().map((entry, i) => (
+                        <div key={i} className={
+                          entry.level === 'error' ? 'text-red-700'
+                          : entry.level === 'warn' ? 'text-amber-700'
+                          : 'text-gray-700'
+                        }>
+                          <span className="text-gray-400">{entry.ts.slice(11, 19)}</span>{' '}
+                          [{entry.level}] {entry.message}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
               <div className="flex gap-1.5 pt-1 border-t">
                 <Button
