@@ -112,14 +112,13 @@ const SyntheticCohortsManager: React.FC = () => {
         <CardContent className="p-3 text-xs text-blue-900 flex items-start gap-2">
           <Database className="h-4 w-4 shrink-0 mt-0.5" />
           <div>
-            <b>Cohorts sintéticos reais.</b> Pets gerados por IA com flag <code>is_synthetic=true</code> — não contaminam dados reais futuros.
-            Use o botão "Gerar cohort sintético" no <b>Gerador de Cohort</b> para criar novos.
+            <b>Cohorts sintéticos reais.</b> Pets gerados por IA com flag <code>is_synthetic=true</code> — não contaminam dados reais.
+            Cohorts aparecem aqui após o término da geração. Acompanhe o progresso ao vivo no <b>Gerador de Sugestão de Cohort</b>.
             {showModelTag && <> Modelo: <code className="text-[10px] bg-white px-1 rounded">google/gemini-3.5-flash</code>.</>}
           </div>
         </CardContent>
       </Card>
 
-      {(() => null)()}
       <div className="flex justify-between items-center flex-wrap gap-2">
         <h3 className="text-sm font-semibold">
           Cohorts ({cohorts.filter((c) => showGenerating || c.status !== 'generating').length}
