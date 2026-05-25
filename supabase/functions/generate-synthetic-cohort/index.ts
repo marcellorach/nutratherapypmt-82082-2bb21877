@@ -448,7 +448,7 @@ Deno.serve(async (req) => {
                 exam_date: new Date().toISOString().slice(0, 10),
                 results,
                 flags_abnormal: Array.isArray(e.flags_abnormal) ? e.flags_abnormal : [],
-                extraction_status: "synthetic",
+                extraction_status: "done",
                 approved: true,
                 consultation_id: consultId,
               });
