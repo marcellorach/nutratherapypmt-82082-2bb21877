@@ -33,12 +33,12 @@ const PrioritizationBoard: React.FC = () => {
   }, []);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 w-full">
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3 w-full">
       {PRIORITIZATION_STATUSES.map((status) => {
         const style = STATUS_STYLES[status];
         const cards = grouped[status];
         return (
-          <div key={status} className={`rounded-lg border ${style.bg} p-2 flex flex-col min-h-[200px]`}>
+          <div key={status} className={`rounded-lg border ${style.bg} p-2 flex flex-col min-h-[200px] min-w-0`}>
             <div className="flex items-center justify-between mb-2 px-1">
               <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-700">
                 {t(`prioritization.status.${status}`, style.label)}

@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Copy, Download, FileText } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import CohortAISuggester, { SuggestedCohort } from './CohortAISuggester';
 
 interface CohortForm {
   cohortName: string;
@@ -103,8 +104,30 @@ const CohortRequestGenerator: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
+  const applySuggestion = (s: SuggestedCohort) => {
+    const c = s.suggested_criteria;
+    const ageMatch = c.age_range?.match(/(\d+)\s*[–-]\s*(\d+)/);
+    setForm({
+      ...form,
+      cohortName: s.title,
+      rationale: `${s.rationale}\n\nO que poderíamos descobrir: ${s.discoverable}`,
+      breeds: c.breeds ?? '',
+      ageMin: ageMatch?.[1] ?? '',
+      ageMax: ageMatch?.[2] ?? '',
+      weightRange: c.weight_range ?? '',
+      conditions: c.conditions ?? '',
+      currentMeds: c.current_meds ?? '',
+      excludeCriteria: c.exclusion ?? '',
+      targetN: c.target_n ?? form.targetN,
+    });
+    toast({ title: 'Sugestão aplicada', description: `Formulário preenchido com "${s.title}".` });
+    document.getElementById('cohort-form-anchor')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
-    <Card className="border-dashed">
+    <div className="space-y-4">
+      <CohortAISuggester onUseSuggestion={applySuggestion} />
+      <Card className="border-dashed" id="cohort-form-anchor">
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <FileText className="h-4 w-4" />
@@ -256,7 +279,8 @@ const CohortRequestGenerator: React.FC = () => {
           </pre>
         )}
       </CardContent>
-    </Card>
+      </Card>
+    </div>
   );
 };
 
