@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-05-25T03:07:59.550Z",
+  "timestamp": "2026-05-25T15:00:07.701Z",
   "summary": {
-    "totalFiles": 912,
+    "totalFiles": 913,
     "totalIssues": 442,
     "hardcodedTexts": 52,
     "missingKeys": 388,
@@ -2531,21 +2531,21 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 835,
+      "line": 878,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 1046,
+      "line": 1089,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 3841,
+      "line": 3884,
       "text": "@",
       "severity": "high"
     },
@@ -2566,21 +2566,21 @@
     {
       "type": "missing-key",
       "file": "src/hooks/useStudyApprovalWorkflow.ts",
-      "line": 32,
+      "line": 41,
       "text": "id",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/hooks/useStudyApprovalWorkflow.ts",
-      "line": 133,
+      "line": 156,
       "text": "curation_status, created_at, review_date",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/hooks/useStudyApprovalWorkflow.ts",
-      "line": 139,
+      "line": 162,
       "text": "created_at, kanban_status, analysis_data, full_text_metadata",
       "severity": "high"
     },
