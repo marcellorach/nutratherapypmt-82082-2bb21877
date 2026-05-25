@@ -136,7 +136,7 @@ const CohortRequestGenerator: React.FC = () => {
         <p className="text-xs text-gray-600">
           {t(
             'prioritization.cohort.subtitle',
-            'Produz um documento estruturado para enviar à PetLove pedindo um recorte específico do banco histórico.',
+            'Produz um documento estruturado para enviar ao parceiro clínico pedindo um recorte específico do banco histórico.',
           )}
         </p>
       </CardHeader>
