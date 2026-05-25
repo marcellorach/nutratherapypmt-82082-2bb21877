@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-05-25T17:32:38.023Z",
+  "timestamp": "2026-05-25T18:12:31.190Z",
   "summary": {
-    "totalFiles": 913,
-    "totalIssues": 442,
+    "totalFiles": 921,
+    "totalIssues": 443,
     "hardcodedTexts": 52,
-    "missingKeys": 388,
+    "missingKeys": 389,
     "incompleteTranslations": 2
   },
   "issues": [
@@ -1928,6 +1928,13 @@
     },
     {
       "type": "missing-key",
+      "file": "src/components/administrador/priorizacoes/CohortRequestGenerator.tsx",
+      "line": 98,
+      "text": "a",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/administrador/relations/RelationsAuditorChat.tsx",
       "line": 81,
       "text": "subject_name, predicate, object_name, subject_type, object_type, extraction_confidence, curation_status, intensity, evidence_level",
@@ -2321,7 +2328,7 @@
     {
       "type": "missing-key",
       "file": "src/components/layout/Header.tsx",
-      "line": 96,
+      "line": 98,
       "text": " ",
       "severity": "high"
     },
@@ -2531,21 +2538,21 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 878,
+      "line": 904,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 1089,
+      "line": 1115,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 3884,
+      "line": 3910,
       "text": "@",
       "severity": "high"
     },
