@@ -13,6 +13,8 @@ import ConfigurationGroup from './groups/ConfigurationGroup';
 import GovernanceAIGroup from './groups/GovernanceAIGroup';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useRoleView } from '@/contexts/RoleViewContext';
+import { AdminSidebarGroup, isAdminGroupAllowed } from '@/config/role-views';
 
 interface AdminSidebarGroupsProps {
   currentStep: string;
@@ -22,6 +24,9 @@ interface AdminSidebarGroupsProps {
 const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, setCurrentStep }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useTranslation();
+  const { view } = useRoleView();
+
+  const show = (group: AdminSidebarGroup) => isAdminGroupAllowed(view, group);
   
   const handleStepClick = (step: string) => {
     setCurrentStep(step);
@@ -31,6 +36,7 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
   return (
     <>
       {/* Base Conhecimento/Relacional */}
+      {show('knowledge-base') && (
       <SidebarGroup>
         <SidebarGroupLabel className="text-orange-500">
           {t('admin.sidebar.knowledgeBase.title')}
@@ -44,8 +50,10 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
+      )}
       
       {/* Processamento de Dados */}
+      {show('data-processing') && (
       <SidebarGroup>
         <SidebarGroupLabel className="text-orange-500">
           {t('admin.sidebar.dataProcessing.title')}
@@ -59,8 +67,10 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
+      )}
 
       {/* Pesquisa e Desenvolvimento */}
+      {show('research') && (
       <SidebarGroup>
         <SidebarGroupLabel className="text-orange-500">
           {t('admin.sidebar.research.title')}
@@ -74,8 +84,10 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
+      )}
       
       {/* Configuração */}
+      {show('configuration') && (
       <SidebarGroup>
         <SidebarGroupLabel className="text-orange-500">
           {t('admin.sidebar.configuration.title')}
@@ -89,8 +101,10 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
+      )}
 
       {/* Governança & IA */}
+      {show('governance-ai') && (
       <SidebarGroup>
         <SidebarGroupLabel className="text-orange-500">
           {t('admin.sidebar.governanceAI.title', 'Governança & IA')}
@@ -104,6 +118,7 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
+      )}
     </>
   );
 };
