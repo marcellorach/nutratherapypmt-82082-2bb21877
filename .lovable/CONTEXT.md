@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-05-25T04:16:42.510Z
+Generated: 2026-05-25T17:37:03.977Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.104.0
+## Latest i18n version: 1.105.0
 
 ## Changes by area (last 14 days)
-- **admin**: 39
+- **admin**: 40
 - **vet-ui**: 16
 - **meta**: 7
 - **kg**: 6
@@ -16,6 +16,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **i18n**: 1
 
 ## Top 10 recent entries
+### 2026-05-25 · [admin] ADDED — Painel de Priorizações + Camada de Visualização de Papéis
+- Nova aba `/administrador?tab=priorizacoes` em "Governança & IA": Kanban com 5 colunas (Backlog · Próximo · Em curso · Em teste · Entregue) seedado com 10 cards ordenados (role-view-layer → meta-kg-phase-b). Cada card declara `area | effort | value[] | dependsOn[] | rationale`. Fonte única do roadmap operacional — substitui na prática `docs/STANFORD_DEMO.md`.
+- Sub-tab Gerador de Sugestões de Cohort: formulário guiado (raça, idade, peso, condições, medicação, N-alvo, exclusões, formato de entrega, privacidade) que exporta Markdown copiável / downloadable para enviar à PetLove pedindo recortes específicos do banco histórico (1M+ cães).
+- Camada de visualização de papéis (não é segurança — é redução de ruído): `src/config/role-views.ts` declara 5 perfis (`platform_architect`, `rnd_lead`, `vet_curador`, `vet_responsavel`, `tutor`) com `allowedAdminGroups` e `defaultRoute`. `RoleViewContext` persiste seleção em localStorage. `RoleViewSwitcher` no Header só aparece para admin real e filtra grupos da sidebar admin via `AdminSidebarGroups`. RLS real fica para quando entrar o 1º vet PetLove externo (card #9 do board).
+_files: src/config/role-views.ts, src/pages/administrador/PriorizacoesTab.tsx, src/data/prioritizationBoard.ts, src/contexts/RoleViewContext.tsx…_
+
 ### 2026-05-25 · [meta] ADDED — Roadmap Meta-KG: gatilhos quantitativos para acionar a Fase B
 - `MetaKgRoadmapCard` agora exibe 3 métricas vivas que destravam a Fase B: (1) meta-estudos aprovados ≥ 10, (2) lições redundantes entre estudos ≥ 3, (3) conflitos recipe↔anti-padrão ≥ 1. Cada métrica renderiza barra de progresso e selo verde quando o alvo é atingido. Card mostra badge global "Pronto para iniciar" / "Aguardando massa crítica".
 - Novo hook `useMetaKgPhaseBMetrics`: query React-Query sobre `meta_studies` (apenas `lifecycle_status='approved'`), normaliza statements de `architectural_patterns`/`methodological_recipes`/`anti_patterns_pitfalls` (lowercase, slice 120 chars) e calcula redundância (mesmo statement em ≥2 estudos por bucket) + conflito (mesmo statement como recipe e anti-padrão).
@@ -69,12 +75,6 @@ _files: src/components/administrador/fundamentos/MetaStudyKanban.tsx, src/compon
 - `docs/TECHNICAL_DECISIONS.md` v1.1.0: nova seção AI Task Router (`callAITask`) com contrato de chamada (taskId, caller, messages/input, tools+tool_choice, fallback, reasoning_effort, temperature), ordem de resolução (override em `ai_configurations` → prompt ativo em `ai_prompt_versions` → fallback do caller → default), telemetria automática (`ai_task_invocations` + `ai_task_status`), tratamento de 429/402/413/404/502 e regras de quando NÃO usar o router (Google AI File API direto: `gemini-file-search` e PDF > 7 MB do `extract-meta-study`). Entrada no Histórico de Decisões.
 - `docs/GRAPHRAG_ARCHITECTURE.md` v2.1.0: bloco de governança LLM no topo de Edge Functions com tabela das 4 funções Curadoria/KG roteadas via `callAITask` e a função fora de escopo.
 - Files: docs/TECHNICAL_DECISIONS.md, docs/GRAPHRAG_ARCHITECTURE.md
-
-### 2026-05-21 · [meta] CHANGED — Consolidação Curadoria/KG no `ai-task-router` (relatório)
-- Fechamento do ciclo de migração Curadoria/KG. Funções roteadas via `callAITask`: `kg-evidence-gap-fill` (`kg_gap_fill`), `extract-meta-study` (`meta_study_analysis`, caminho Google AI File API mantido fora do router), `extract-study-entities` (`extraction_stage1/2/3`, com `tools`+`tool_choice` e fallback `google/gemini-3-pro-preview` temp=0.1), `generate-triplets` (`triplet_extraction`, Phase 1 discovery + Phase 2 tool calling, resposta reconstruída para preservar parser downstream, tratamento 429/402 reintroduzido).
-- `gemini-file-search` auditada e formalmente fora do escopo: usa Google AI Direct API com `fileData.fileUri` + corpora `file_search` nativos, incompatíveis com o Gateway.
-- Estado final em `src/config/ai-tasks.ts`: 13 connected · 7 legacy · 3 planned (23 tasks). `lab_driven_adjustment` e `treatment_proposal_12m` respondem no router (healthcheck OK) mas seguem `planned` porque os consumidores clínicos ainda usam o caminho legado — alvo do próximo lote.
-_files: src/config/ai-tasks.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

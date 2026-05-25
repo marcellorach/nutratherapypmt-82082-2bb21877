@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-25T04:16:42.505Z
+// Última geração: 2026-05-25T17:37:03.972Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,32 @@ export const lastChangelogDate = "2026-05-25";
 export const senexVersion = "6.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-25",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Painel de Priorizações + Camada de Visualização de Papéis",
+    "bullets": [
+      "Nova aba `/administrador?tab=priorizacoes` em \"Governança & IA\": Kanban com 5 colunas (Backlog · Próximo · Em curso · Em teste · Entregue) seedado com 10 cards ordenados (role-view-layer → meta-kg-phase-b). Cada card declara `area | effort | value[] | dependsOn[] | rationale`. Fonte única do roadmap operacional — substitui na prática `docs/STANFORD_DEMO.md`.",
+      "Sub-tab Gerador de Sugestões de Cohort: formulário guiado (raça, idade, peso, condições, medicação, N-alvo, exclusões, formato de entrega, privacidade) que exporta Markdown copiável / downloadable para enviar à PetLove pedindo recortes específicos do banco histórico (1M+ cães).",
+      "Camada de visualização de papéis (não é segurança — é redução de ruído): `src/config/role-views.ts` declara 5 perfis (`platform_architect`, `rnd_lead`, `vet_curador`, `vet_responsavel`, `tutor`) com `allowedAdminGroups` e `defaultRoute`. `RoleViewContext` persiste seleção em localStorage. `RoleViewSwitcher` no Header só aparece para admin real e filtra grupos da sidebar admin via `AdminSidebarGroups`. RLS real fica para quando entrar o 1º vet PetLove externo (card #9 do board).",
+      "i18n: +~40 chaves em `prioritization.*` + `admin.sidebar.governanceAI.priorizacoes` (PT+EN). I18N_VERSION 1.104.0 → 1.105.0.",
+      "Organograma: novo nó \"Painel de Priorizações + Camada de Visualização de Papéis\" sob `admin`.",
+      "Files: src/pages/administrador/PriorizacoesTab.tsx, src/components/administrador/priorizacoes/{PrioritizationBoard,PrioritizationCard,CohortRequestGenerator}.tsx, src/data/prioritizationBoard.ts, src/config/role-views.ts, src/contexts/RoleViewContext.tsx, src/components/layout/{RoleViewSwitcher,Header}.tsx, src/components/administrador/sidebar/{AdminSidebarGroups,groups/GovernanceAIGroup}.tsx, src/config/admin-tabs.ts, src/App.tsx, src/i18n.ts, src/locales/{pt,en}/translation.json, src/data/projectOrganograma.ts"
+    ],
+    "files": [
+      "src/config/role-views.ts",
+      "src/pages/administrador/PriorizacoesTab.tsx",
+      "src/data/prioritizationBoard.ts",
+      "src/contexts/RoleViewContext.tsx",
+      "src/config/admin-tabs.ts",
+      "src/App.tsx",
+      "src/i18n.ts",
+      "src/data/projectOrganograma.ts"
+    ],
+    "i18nVersion": "1.105.0"
+  },
   {
     "date": "2026-05-25",
     "kind": "added",

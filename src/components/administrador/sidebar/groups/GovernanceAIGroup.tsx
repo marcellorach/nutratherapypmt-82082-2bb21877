@@ -1,5 +1,5 @@
 import React from 'react';
-import { Cpu, Bot, ListTree, ShieldCheck, FileSearch, Info, Sparkles, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Cpu, Bot, ListTree, ShieldCheck, FileSearch, Info, Sparkles, ChevronRight, CheckCircle2, LayoutGrid } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useTranslation } from 'react-i18next';
 
@@ -9,6 +9,7 @@ interface Props {
 }
 
 const items = [
+  { id: 'priorizacoes', icon: LayoutGrid, key: 'admin.sidebar.governanceAI.priorizacoes', fallback: 'Priorizações' },
   { id: 'config-ia', icon: Cpu, key: 'admin.sidebar.configuration.aiConfig' },
   { id: 'prompts', icon: Bot, key: 'admin.sidebar.configuration.aiPrompts' },
   { id: 'organograma', icon: ListTree, key: 'admin.sidebar.configuration.organograma' },

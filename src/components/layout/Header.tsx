@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import PendingAccessBadge from './PendingAccessBadge';
 import { useAuth } from '@/contexts/AuthContext';
+import RoleViewSwitcher from './RoleViewSwitcher';
 import { SENEX_VERSION, SENEX_LAST_UPDATE } from '@/config/senex-version';
 
 const Header: React.FC = () => {
@@ -62,6 +63,7 @@ const Header: React.FC = () => {
           
           {isAuthenticated ? (
             <div className="flex items-center gap-4">
+              {isAdmin && <RoleViewSwitcher />}
               {isAdmin && (
                 <>
                   <PendingAccessBadge />

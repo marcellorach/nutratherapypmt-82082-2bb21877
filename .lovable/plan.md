@@ -1,121 +1,132 @@
-## Reforma do Observatório Clínico (Clinical Monitoring v2.1)
 
-Cinco eixos de melhoria para sair do aspecto "amador" e aproximar do nível de produção, mantendo dados 100% sintéticos rotulados.
+# Plano: Camada de Visualização + Painel de Priorizações
 
----
+Resposta direta às suas perguntas antes do plano:
 
-### a) Números realistas (não mais redondos)
-
-Hoje: `10.000 / 16.000 / 10.000` — visivelmente arbitrário.
-
-Novo:
-- **Tratados:** `8.473` (fração levemente irregular, ainda na casa dos 10k).
-- **Cohort-espelho:** `13.916` (≠ múltiplo perfeito).
-- **Gêmeos Digitais:** mesmo `#` de Tratados → `8.473` (1 twin por tratado, conforme regra).
-- KPIs derivados (ROE, anos ganhos, médias) recalculados automaticamente — não há números mágicos no UI.
-- Geração no `syntheticCohort.ts`: trocar constantes `TREATED=10000 / MIRROR=16000 / TWIN=10000` por `TREATED=8473 / MIRROR=13916 / TWIN=TREATED`. PRNG já garante variação realista.
+- **Esperar dados PetLove?** Sim para os scorings reais de cohort, **não** para a infraestrutura. Construir o esqueleto agora (fontes externas + UI) e plugar o cohort real quando chegar evita 2 semanas paradas.
+- **Vets reais usando agora?** Sim, mas 1–2 só (sua veterinária + 1 amigo). Mais que isso sem o "view do veterinário" pronto = ruído. O view vem na Semana 1 justamente para destravar isso.
+- **Skills = ganho real?** Sim, principalmente as 3 internas (`curate-study`, `evaluate-meta-study-reliability`, `audit-triplet-citation`). Elas transformam código que já existe em contratos discutíveis com a equipe técnica veterinária (papel c).
+- **Dr. Claw é resposta para descobertas longitudinais PetLove?** Sim — o padrão "scoring multi-fonte + Kanban de descobertas + chat investigativo" é exatamente o que falta para transformar 1M de cães em insights publicáveis. Isso passa a ser **frente prioritária**, não exploratória.
+- **Onde fica o planejamento?** Nova aba **"Priorizações"** dentro do grupo "Governança & IA" do `/administrador`. Vira a fonte única de verdade do roadmap (substitui o `docs/STANFORD_DEMO.md` na prática, mantém o `.md` como espelho gerado).
 
 ---
 
-### b) Model Feedback Loop ↔ DL Predictive Models
+## Entrega 1 — Camada de Visualização de Papéis (Semana 1, ~1 dia)
 
-Hoje: KPIs "soltos" (87.4% accuracy, 42 gap-fill) sem ligação ao módulo de Modelos Preditivos.
-
-Novo (`ModelFeedbackLoop.tsx`):
-- Importar `useTranslatedPredictiveModels()` (mesma fonte que a aba Deep Learning).
-- Tabela "Models receiving signal" listando os 4 modelos (`PetLove Nutra`, `CuBe`, `Trat`, `Prev`) com:
-  - Accuracy atual (do módulo real)
-  - **Drift observado** (calculado da cohort sintética por condição, agregado por área do modelo)
-  - **Delta de aprendizado mensal** vinculado ao `monthlyGrowthRate` de cada modelo
-  - Botão "Ver evolução" → navega para `/administrador?tab=modelos-preditivos`
-- Card "Sinais enviados nos últimos 30d" com breakdown: novos triplets KG, ajustes de peso por modelo, gap-fills disparados.
-
----
-
-### c) Adoption/Adherence — funil mensal empilhado
-
-Hoje: barras 0-3m / 3-6m / … só com "count" total (12-18m maior que 0-3m, contraintuitivo).
-
-Novo (`CohortObservatory.tsx` → novo componente `AdherenceMonthlyStack.tsx`):
-- Eixo X: **meses 0 → 24** (resolução mensal real).
-- Stacked `BarChart` por mês com 3 séries:
-  - **Ativos residuais** (continuam no protocolo) — primary
-  - **Novas adesões** no mês — emerald
-  - **Desistências/churn** no mês — destructive (com sinal negativo abaixo do eixo, para leitura clara)
-- Tooltip mostra retenção acumulada % e razão de churn (ex. "efeito-platô percebido").
-- Gerador: adicionar `monthlyFlow: { active, joined, churned }[]` por pet → agregado deterministicamente no util.
-
----
-
-### d) Filtros globais + densificação de dados
-
-Hoje: cada aba consome a cohort inteira; nenhum filtro.
-
-Novo:
-- **Barra de filtros** no topo da `ClinicalMonitoringTab` (sticky), com Shadcn `Select`/`Combobox`:
-  - Condição (8 opções)
-  - Raça (top 15)
-  - Faixa etária (Sênior 7-10 / Geriátrico 10+ / Adulto)
-  - Região (5)
-  - Adesão (Alta ≥80% / Média 50-79% / Baixa <50%)
-  - Janela de protocolo (0-6m, 6-12m, 12-24m)
-  - Botões: **Aplicar / Limpar / Salvar visão**
-- `useFilteredCohort(filters)` hook → memoiza filtragem; KPIs, charts, explorer e drawer todos reagem.
-- Novas métricas para tirar a sensação de "superfície":
-  - **NNT sintético** (number needed to treat) por condição
-  - **Time-to-response mediano** com IQR
-  - **Hazard ratio simulado** treated vs mirror
-  - **Faixa de confiança 95%** nas trajetórias (banda Area no `LongitudinalTrajectories`)
-- Patient Explorer ganha colunas: `responseStatus`, `monthsOnProtocol`, `adherencePct`, `ROE` + ordenação por coluna.
-
----
-
-### f) Caminhos biológicos mocados
-
-Nova aba **"Pathways"** (6ª tab) ou seção dentro de Discovery Signals — **decidido: nova tab**, mais visível e fácil de evoluir.
-
-Componente `BiologicalPathways.tsx`:
-- Para cada condição (selector), renderizar um diagrama dirigido **SVG nativo** (sem libs novas) representando:
-  - Nó **Composto** (esquerda) → **Mecanismo molecular** (mTOR, NRF2, AMPK, NF-κB, SIRT1, telomerase…) → **Processo celular** (autofagia, inflamação, estresse oxidativo) → **Outcome clínico** (mobilidade, função renal, cognição).
-  - Setas com notação biomédica padrão da memória do projeto (`→` ativa, `⊣` inibe, `⇢` modula).
-  - Largura da seta proporcional ao "n de evidência sintética" da cohort.
-- Hover no nó: tooltip com `n pets tratados que tocam este caminho`, `Δ severidade médio`, `meta-studies relacionados` (link para tab Fundamentos).
-- Banner amarelo "Mapa biológico simulado — gerado a partir da cohort sintética + estudos curados".
-- Dados: novo arquivo `src/data/biologicalPathways.ts` com 8 caminhos bilíngue (PT/EN), referenciando IDs reais dos `SYNTHETIC_CONDITIONS` e estudos da tabela `meta_studies`.
-
----
-
-### Arquivos afetados
+Arquivo único novo: `src/config/role-views.ts` declarando 5 perfis de trabalho:
 
 ```text
-src/utils/syntheticCohort.ts                 (números + monthlyFlow + helpers)
-src/hooks/useFilteredCohort.ts               (novo)
-src/data/biologicalPathways.ts               (novo, bilíngue)
-src/components/administrador/clinical-monitoring/
-  ClinicalMonitoringTab.tsx                  (filtros sticky + nova tab)
-  ClinicalFiltersBar.tsx                     (novo)
-  CohortObservatory.tsx                      (novas métricas, NNT/HR/CI)
-  AdherenceMonthlyStack.tsx                  (novo — substitui adoptionFunnel)
-  LongitudinalTrajectories.tsx               (banda CI 95%)
-  PatientExplorer.tsx                        (colunas + sort)
-  ModelFeedbackLoop.tsx                      (integração com DL models)
-  BiologicalPathways.tsx                     (novo)
-  SyntheticDataBadge.tsx                     (números atualizados)
-src/locales/{pt,en}/translation.json         (+ ~60 chaves novas)
-src/i18n.ts                                  (I18N_VERSION → 1.103.0)
-CHANGELOG.md + projectChangelog.generated.ts (sync)
+TUTOR              → /tutor
+VET_RESPONSAVEL    → /veterinario (lista de pets sob sua tutela)
+VET_CURADOR        → /administrador (estudos, triplets, ontologia, simulações)
+RND_LEAD           → /administrador (priorizações, population insights, propostas)
+PLATFORM_ARCHITECT → tudo (você)
 ```
+
+Cada perfil declara: `allowedSidebarGroups`, `allowedAdminTabs`, `defaultRoute`, `label PT/EN`.
+
+Mudanças mínimas:
+- `AdminSidebarGroups.tsx` filtra grupos/itens pelo perfil ativo.
+- `Header.tsx` ganha um seletor "Visualizar como…" (só visível para `admin` real) que persiste em localStorage.
+- `VeterinarioPage` ganha modo "simplificado" para `VET_RESPONSAVEL` (oculta tabs científicas pesadas que sua vet já reclamou).
+
+**Não é segurança** — é redução de ruído cognitivo. RLS real fica para quando entrar o primeiro vet externo da PetLove.
 
 ---
 
-### Notas técnicas
+## Entrega 2 — Aba "Priorizações" (Semana 1, ~1.5 dia)
 
-- Sem novas dependências (Recharts já cobre stacked + Area; SVG nativo para pathways).
-- Tudo continua determinístico via `mulberry32` (mesmo seed = mesma cohort).
-- `is_synthetic: true` mantido em todos os registros; badge sempre visível.
-- Filtros não tocam o gerador — só `useMemo` por cima da cohort base.
-- Integração com Modelos Preditivos é leitura-only (sem mutar `predictiveModelsData`).
-- I18n: incrementar versão e adicionar TODAS as chaves em PT+EN simultaneamente (regra do projeto).
-- CHANGELOG.md → entrada `[Unreleased] Changed: Clinical Monitoring v2.1` + `npm run sync:changelog`.
+Nova aba `/administrador?tab=priorizacoes` no grupo "Governança & IA".
 
-Estimativa: ~3h. Tudo dentro de `clinical-monitoring/` — sem impacto em outras telas.
+Estrutura: Kanban com 5 colunas — **Backlog · Próximo · Em curso · Em teste · Entregue**.
+
+Cada card tem: título, área (`patient | curation | population | governance | skills`), esforço (S/M/L/XL), valor estratégico (`PetLove | Stanford | Interno`), dependências, link para CHANGELOG quando entregue.
+
+Seeded com os cards já combinados, na ordem sugerida abaixo. Dados ficam em `src/data/prioritizationBoard.ts` (manual, à la organograma) — sem tabela Supabase nessa primeira versão, porque a fonte de verdade é o seu critério.
+
+**Ordem inicial sugerida (justificada):**
+
+| # | Card | Por que nessa ordem |
+|---|---|---|
+| 1 | Camada de visualização de papéis | Destrava uso real pela sua vet e por convidados sem reescrever auth |
+| 2 | Painel de Priorizações (esta aba) | Fonte única para discutir tudo abaixo com PetLove |
+| 3 | Population Insights — esqueleto (sem cohort) | Pronto para plugar dados PetLove no dia 1 que chegarem |
+| 4 | Gerador de Sugestões de Cohort | Documento que você manda à PetLove pedindo o recorte ideal |
+| 5 | Pilot com 1–2 vets reais (sua vet + 1) | Valida o "view do veterinário" antes de escalar |
+| 6 | 3 SKILL.md internas (`curate-study`, `evaluate-meta-study-reliability`, `audit-triplet-citation`) | Contrato com o papel (c) — preparação para vet-curador externo |
+| 7 | Population Insights — integração com cohort PetLove real | Quando os dados chegarem |
+| 8 | `investigate-clinical-question` skill (chat investigativo Dr. Claw-style) | Multiplica utilidade do Conversational Auditor |
+| 9 | RLS real + papéis no banco | Quando entrar o primeiro vet PetLove externo |
+| 10 | Fase B meta-KG | Depois que houver descobertas reais no cohort |
+
+---
+
+## Entrega 3 — Gerador de Sugestões de Cohort (Semana 1–2, ~1 dia)
+
+Subpágina dentro de "Priorizações" (ou aba irmã, decidimos na implementação). Formulário guiado que produz **um documento estruturado** para você enviar à PetLove:
+
+- Recorte por raça(s), idade, peso, condições conhecidas, medicação atual
+- N alvo por estrato
+- Dados mínimos por animal (anamnese, exames, histórico de consultas, alimentação)
+- Formato de entrega (CSV, JSON, FHIR)
+- Termo de uso de dados / anonimização
+- Output: PDF + Markdown copiável
+
+Permite gerar 3–5 cohorts paralelos (ex: "Golden 8+ com elevação de ALT", "Yorkshire <5kg com cardiopatia precoce", etc.) — cada um virando um card no Kanban de Population Insights depois.
+
+---
+
+## Entrega 4 — Population Insights v0 (Semana 2, ~3 dias do esqueleto)
+
+Só o esqueleto agora; scoring real espera cohort PetLove.
+
+- **Fonte externa funcional**: reaproveita 100% `kg-evidence-gap-fill` para puxar arXiv/PubMed novos relevantes ao Senex.
+- **Fonte interna (mock honesto)**: usa `syntheticCohort.ts` mas com label explícito "Cohort sintético — aguardando dados PetLove".
+- **Scoring**: `prevalence_delta + kg_gap + actionability` com pesos editáveis na própria UI.
+- **UI**: Kanban "Descobertas → Hipóteses → Meta-estudos propostos → Aprovados", reaproveitando `MetaStudyKanban` + `MetaStudyDetailedCard`.
+- **Botão "Investigar com IA"**: abre `relations-auditor` com contexto pré-carregado.
+
+Quando o cohort PetLove chegar: trocar a fonte interna por queries reais nas tabelas que vamos modelar (parte do card #7).
+
+---
+
+## Detalhes técnicos
+
+**Arquivos novos:**
+- `src/config/role-views.ts`
+- `src/components/layout/RoleViewSwitcher.tsx`
+- `src/pages/administrador/PriorizacoesTab.tsx`
+- `src/components/administrador/priorizacoes/PrioritizationBoard.tsx`
+- `src/components/administrador/priorizacoes/PrioritizationCard.tsx`
+- `src/data/prioritizationBoard.ts` (seed manual)
+- `src/components/administrador/priorizacoes/CohortRequestGenerator.tsx`
+
+**Arquivos editados:**
+- `src/components/administrador/sidebar/groups/GovernanceAIGroup.tsx` (adiciona item "Priorizações")
+- `src/config/admin-tabs.ts` (registra `priorizacoes`)
+- `src/components/administrador/sidebar/AdminSidebarGroups.tsx` (filtro por perfil)
+- `src/components/layout/Header.tsx` (RoleViewSwitcher só para admin real)
+- `src/i18n.ts` (incrementar `I18N_VERSION`)
+- `src/locales/{pt,en}/translation.json` (chaves novas)
+- `CHANGELOG.md` + `npm run sync:changelog` no fim
+- `src/data/projectOrganograma.ts` (registra nova aba + grupo "Governança & IA" atualizado)
+
+**Sem migrations** nesta fase — dados de prioridades e cohorts ficam em arquivos `.ts` versionados.
+
+**Bilíngue obrigatório**: todos os cards de prioridades têm `title_pt/title_en`, `description_pt/description_en`, conforme Core Rules.
+
+---
+
+## Fora deste plano (mas vão para o Kanban como cards futuros)
+
+- Refactor RLS real (card #9)
+- Fase B meta-KG / agentes debatendo hipóteses
+- Skills "academic research" do Dr. Claw (descartadas)
+- Multi-backend (já temos AI Gateway)
+
+---
+
+## Próximo passo
+
+Se aprovar, implemento **Entrega 1 + 2 + 3** em sequência (provavelmente 1 mensagem grande para 1+2 e outra para 3). A Entrega 4 fica para uma mensagem separada depois que validarmos o Kanban funcionando.
+
