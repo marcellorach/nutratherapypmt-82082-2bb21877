@@ -377,14 +377,6 @@ const CohortPatientsDialog: React.FC<Props> = ({ cohortId, cohortName, open, onO
 
                   <div className="rounded-md border p-4 bg-card">
                     <div className="flex items-center gap-2 text-sm font-medium mb-3">
-                      <Stethoscope className="h-4 w-4 text-primary" />
-                      {t('prioritization.syntheticExplorer.conditionsTitle')}
-                    </div>
-                  </div>
-                  {/* anchor */}
-                  <div className="hidden" />
-                  <div className="rounded-md border p-4 bg-card -mt-4">
-                    <div className="flex items-center gap-2 text-sm font-medium mb-3">
                       <ClipboardList className="h-4 w-4 text-primary" />
                       Consultas ({detail.consultations.length})
                     </div>
