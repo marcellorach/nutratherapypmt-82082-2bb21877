@@ -7,6 +7,7 @@ import CohortRequestGenerator from '@/components/administrador/priorizacoes/Coho
 import RoleViewEditor from '@/components/administrador/priorizacoes/RoleViewEditor';
 import PopulationInsightsV0 from '@/components/administrador/priorizacoes/PopulationInsightsV0';
 import SyntheticCohortsManager from '@/components/administrador/priorizacoes/SyntheticCohortsManager';
+import MultiSourcePlayground from '@/components/administrador/priorizacoes/MultiSourcePlayground';
 import { PRIORITIZATION_BOARD_LAST_UPDATED } from '@/data/prioritizationBoard';
 
 const PriorizacoesTab: React.FC = () => {
@@ -39,6 +40,7 @@ const PriorizacoesTab: React.FC = () => {
           <TabsTrigger value="cohort">{t('prioritization.tabs.cohort', 'Gerador de Cohort')}</TabsTrigger>
           <TabsTrigger value="synthetic">{t('prioritization.tabs.synthetic', 'Cohorts sintéticos')}</TabsTrigger>
           <TabsTrigger value="population">{t('prioritization.tabs.population', 'Population Insights v0')}</TabsTrigger>
+          <TabsTrigger value="playground">{t('prioritization.tabs.playground', 'Playground multi-fonte')}</TabsTrigger>
           <TabsTrigger value="roles">{t('prioritization.tabs.roles', 'Perfis de Visualização')}</TabsTrigger>
         </TabsList>
 
@@ -56,6 +58,10 @@ const PriorizacoesTab: React.FC = () => {
 
         <TabsContent value="population" className="mt-4">
           <PopulationInsightsV0 />
+        </TabsContent>
+
+        <TabsContent value="playground" className="mt-4">
+          <MultiSourcePlayground />
         </TabsContent>
 
         <TabsContent value="roles" className="mt-4">

@@ -8420,7 +8420,11 @@
     "deliveredIn": "Delivered in",
     "tabs": {
       "board": "Kanban",
-      "cohort": "Cohort Generator"
+      "cohort": "Cohort Generator",
+      "synthetic": "Synthetic cohorts",
+      "population": "Population Insights v0",
+      "roles": "Role views",
+      "playground": "Multi-source playground"
     },
     "status": {
       "backlog": "Backlog",
@@ -8458,6 +8462,31 @@
       "copy": "Copy",
       "copied": "Copied to clipboard",
       "download": "Download .md"
+    },
+    "multiSource": {
+      "title": "Multi-source playground",
+      "subtitle": "Ask a clinical question and see how Senex AI queries multiple sources (curated KG, history, synthetic cohort, internet) with weighted hierarchy and conflict detection.",
+      "questionPlaceholder": "Ex.: Is curcumin safe for a Golden Retriever with mild ALT elevation?",
+      "investigate": "Investigate",
+      "investigating": "Querying sources…",
+      "synthesis": "Synthesis",
+      "synthesisNote": "Synthesis based on multiple scientific sources.",
+      "sourcesPanel": "Consulted sources",
+      "showSources": "Show sources",
+      "hideSources": "Hide sources",
+      "conflict": "Conflict",
+      "conflictTooltip": "Two or more high-weight sources returned divergent claims.",
+      "weight": "Weight",
+      "confidence": "Confidence",
+      "notImplemented": "Provider not implemented yet",
+      "noResults": "No source returned a relevant result.",
+      "sources": {
+        "kg": "Curated Knowledge Graph",
+        "petHistory": "Dog history",
+        "cohort": "Synthetic cohort",
+        "internet": "Internet (Perplexity)",
+        "treatedDogs": "Dogs treated on the platform"
+      }
     }
   }
 }

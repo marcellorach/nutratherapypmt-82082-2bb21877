@@ -24,6 +24,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 6.0.0 -->
 
+### Added - 2026-05-25 — Playground Multi-Fonte + SourcePanel (fundação #8)
+<!-- area: admin · status: entregue · i18n: 1.108.0 -->
+- Serviço `MultiSourceResolver` (`src/services/multi-source-resolver.ts`) com 5 providers independentes: KG curado (peso 1.0, via RPC `get_relations_graph_data`), histórico do cão (0.95), cohort sintético (0.7), cães tratados (0.6, stub) e internet via Perplexity (0.3). Detecção automática de conflito quando ≥ 2 fontes de peso ≥ 0.6 retornam claims com polaridade divergente.
+- Edge function `query-perplexity` (modelo `sonar`, escopo canino restrito, extração de confidence high/medium/low, citações).
+- Componente `<SourcePanel />` em `src/components/clinical/SourcePanel.tsx`: visibilidade híbrida por `useRoleView()` — tutor vê só síntese + nota neutra; vet vê painel colapsável com badge de peso, confiança e conflito; arquiteto vê também tags de modelo.
+- Nova sub-aba **"Playground multi-fonte"** em `/administrador?tab=priorizacoes` para validar a fundação antes de plugar nas telas clínicas reais.
+- Chaves i18n PT/EN sob `prioritization.multiSource.*` + `prioritization.tabs.{synthetic,population,roles,playground}`. I18N_VERSION → 1.108.0.
+- Remoção do `src/data/populationInsightsSeed.ts` (não usado desde a migração para `cohort_insights`).
+- Files: src/services/multi-source-resolver.ts, src/components/clinical/SourcePanel.tsx, src/components/administrador/priorizacoes/MultiSourcePlayground.tsx, src/pages/administrador/PriorizacoesTab.tsx, supabase/functions/query-perplexity/index.ts, supabase/config.toml, src/i18n.ts, src/locales/{pt,en}/translation.json, src/data/projectOrganograma.ts
+
 ### Added - 2026-05-25 — Painel de Priorizações + Camada de Visualização de Papéis
 <!-- area: admin · status: entregue · i18n: 1.105.0 -->
 - Nova aba `/administrador?tab=priorizacoes` em "Governança & IA": Kanban com 5 colunas (Backlog · Próximo · Em curso · Em teste · Entregue) seedado com 10 cards ordenados (role-view-layer → meta-kg-phase-b). Cada card declara `area | effort | value[] | dependsOn[] | rationale`. Fonte única do roadmap operacional — substitui na prática `docs/STANFORD_DEMO.md`.

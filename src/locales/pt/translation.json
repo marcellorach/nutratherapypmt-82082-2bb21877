@@ -8424,7 +8424,11 @@
     "deliveredIn": "Entregue em",
     "tabs": {
       "board": "Kanban",
-      "cohort": "Gerador de Cohort"
+      "cohort": "Gerador de Cohort",
+      "synthetic": "Cohorts sintéticos",
+      "population": "Population Insights v0",
+      "roles": "Perfis de Visualização",
+      "playground": "Playground multi-fonte"
     },
     "status": {
       "backlog": "Backlog",
@@ -8462,6 +8466,31 @@
       "copy": "Copiar",
       "copied": "Copiado para a área de transferência",
       "download": "Baixar .md"
+    },
+    "multiSource": {
+      "title": "Playground multi-fonte",
+      "subtitle": "Faça uma pergunta clínica e veja como o Senex AI consulta múltiplas fontes (KG curado, histórico, cohort sintético, internet) com hierarquia de pesos e detecção de conflitos.",
+      "questionPlaceholder": "Ex.: Curcumina é segura para Golden Retriever com elevação leve de ALT?",
+      "investigate": "Investigar",
+      "investigating": "Investigando fontes…",
+      "synthesis": "Síntese",
+      "synthesisNote": "Síntese baseada em múltiplas fontes científicas.",
+      "sourcesPanel": "Fontes consultadas",
+      "showSources": "Ver fontes",
+      "hideSources": "Esconder fontes",
+      "conflict": "Conflito",
+      "conflictTooltip": "Duas ou mais fontes de peso alto retornaram afirmações divergentes.",
+      "weight": "Peso",
+      "confidence": "Confiança",
+      "notImplemented": "Provider ainda não implementado",
+      "noResults": "Nenhuma fonte retornou resultado relevante.",
+      "sources": {
+        "kg": "Knowledge Graph curado",
+        "petHistory": "Histórico do cão",
+        "cohort": "Cohort sintético",
+        "internet": "Internet (Perplexity)",
+        "treatedDogs": "Cães tratados na plataforma"
+      }
     }
   }
 }
