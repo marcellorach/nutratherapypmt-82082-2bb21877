@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useTranslation } from 'react-i18next';
 import CohortPatientsDialog from './CohortPatientsDialog';
+import CohortStatsPanel from './CohortStatsPanel';
 
 interface CohortRow {
   id: string;
@@ -185,6 +186,7 @@ const SyntheticCohortsManager: React.FC = () => {
               {c.progress_log && c.progress_log.length > 0 && (
                 <CohortProgressLog entries={c.progress_log as ProgressLogEntry[]} />
               )}
+              <CohortStatsPanel cohortId={c.id} cohortReady={c.status === 'ready' && c.generated_n > 0} />
               <div className="flex gap-1.5 pt-1 border-t">
                 <Button
                   size="sm" variant="outline" className="h-7 text-xs"

@@ -5225,6 +5225,7 @@ export type Database = {
         Returns: undefined
       }
       count_pending_access_requests: { Args: never; Returns: number }
+      get_cohort_stats: { Args: { p_cohort_id: string }; Returns: Json }
       get_conditions_with_treatability: {
         Args: never
         Returns: {

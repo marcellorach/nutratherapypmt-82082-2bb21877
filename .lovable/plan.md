@@ -1,61 +1,65 @@
-## Objetivo
+## Problema observado
 
-Tornar a geração de cohort sintético mais transparente (logs no card de origem) e mais robusta (sem travas no último batch), com feedback claro de quais botões estão gerando vs. esperando.
+Os pets sintéticos estão sendo criados com `0 condições` e `0 exames` (ver Floquinho na captura). O schema do tool atual exige `conditions` e `exams`, mas o modelo está retornando arrays vazios e o código não rejeita — apenas insere o perfil "vazio". Além disso, faltam **consultas (anamnese)**, **medicações** e **notas clínicas**, que são justamente o que dá riqueza aos pacientes do "Gerar Pacientes de Exemplo".
 
-## a) Log ao vivo no card de "Sugestões ativas" (e ocultar dos "Cohorts sintéticos" enquanto gera)
+E não existe nenhuma visão estatística do cohort dentro do card — só contagem total e status.
 
-**`CohortAISuggester.tsx`**
-- Ao clicar em "Gerar cohort", guardar `cohort_id` em `generatingCohortIds[idx] = cohortId` (não só `generating` index).
-- Iniciar polling (a cada 3s) em `synthetic_cohorts` selecionando `status`, `generated_n`, `target_n`, `progress_log`, `generation_error` para os IDs ativos.
-- Renderizar dentro do card da sugestão:
-  - Barra de progresso `generated_n / target_n`.
-  - Painel colapsável "Log de execução (N)" igual ao do manager (componente extraído `<CohortProgressLog />` reutilizável).
-  - Mensagem final: "Concluído · N pets prontos · ver em Cohorts sintéticos" com link de tab.
-- Parar polling quando status vir a `ready` ou `failed`.
+## O que vou fazer
 
-**`SyntheticCohortsManager.tsx`**
-- Por padrão filtrar fora `status === 'generating'` da listagem ("Aparecerá aqui quando a geração terminar").
-- Adicionar toggle "Mostrar em geração" para o Arquiteto, caso queira inspecionar.
-- Remover o log inline dos cards `generating` (já fica no Suggester); manter para `failed`/`ready` (auditoria).
+### 1) Enriquecer geração (edge function `generate-synthetic-cohort`)
 
-## b) Estado de botões: "Gerando" / "Em espera"
+**Schema do tool ampliado** — cada pet sintético passa a ter:
+- `conditions` (1–4, obrigatórias e não-vazias) com `severity`, `status` e `origin`
+- `exams` (2–5) com `results_json` plausível e `flags_abnormal`
+- `consultations` (1–3) com `days_ago`, `chief_complaint`, `clinical_exam`, `weight_kg_at_visit`, `body_condition_score`, `assessment`, `plan` — a última marcada `is_latest=true` (espelha SAMPLE_PETS / Luna, Rex etc.)
+- `medications` (0–3) ligadas à consulta correspondente quando fizer sentido clínico
+- `clinical_notes` (1–2 frases de anamnese livre, tipo "observation")
+- `notes` (texto livre no perfil, estilo "Cavalier sênior multissistêmico…")
 
-No `CohortAISuggester`:
-- `anyGenerating = generatingCohortIds.some(Boolean)`.
-- Botão "Gerar cohort" do card ativo: spinner + label "Gerando batch X/Y".
-- Botões "Gerar cohort" dos outros cards: `disabled`, label "Em espera" (tooltip: "Aguardando o cohort atual terminar").
-- "Pré-preencher" continua liberado.
-- "Gerar 5 sugestões" também fica desabilitado durante geração ativa (evita reset de IDs).
+**Prompt reforçado**: pede coerência clínica (raça × idade × condições × labs), pede variabilidade entre pets, e — crucial — instrui o modelo a NUNCA retornar `conditions` vazio. Inclui 1 exemplo few-shot curto baseado em "Rex" (Labrador OA + obesidade).
 
-## c) Travamento no último batch
+**Validação server-side**: pet com `conditions.length === 0` é descartado antes de inserir, e o batch tenta um retry curto até atingir o `size` pedido. Loga `n descartados por estarem vazios`.
 
-Causa provável: chamada ao LLM sem timeout — se o gateway demora ou retorna stream parcial, o `await callLLM` fica pendurado e a função nunca avança/finaliza. Correções no `generate-synthetic-cohort/index.ts`:
+**Persistência ampliada**: além de `pet_profiles + pet_conditions + pet_exams`, agora também grava em `pet_consultations` (marcando a mais recente como `is_latest`), `pet_medications` (com `consultation_id`) e `pet_clinical_notes`. Conditions e exams passam a referenciar a consulta correspondente via `consultation_id` quando indicado.
 
-1. **Timeout por batch**: envolver `callLLM` com `AbortController` (90s). Em timeout, logar `warn`, fazer 1 retry; se falhar, marcar batch como pulado e seguir.
-2. **Retry com backoff** (até 2 tentativas) para erros 429/5xx do gateway.
-3. **Heartbeat de progresso**: antes de cada `fetch` ao LLM, atualizar `synthetic_cohorts.last_heartbeat_at = now()` (nova coluna). Permite o cliente detectar "stalled > 3min" e oferecer botão "Marcar como falho e finalizar".
-4. **Finalização garantida**: mover o `update({ status: 'ready' })` para um `finally` que sempre roda, mesmo que algum batch jogue. Se `generated >= targetN * 0.8`, marca `ready`; senão `failed` com mensagem.
-5. **Pequena pausa entre batches** (300ms) para evitar rate-limit no gateway.
+**BATCH_SIZE reduzido** de 25 → 12: payload por pet ficou ~3× maior; mantém o timeout de 90s viável e ajuda o último batch a não estourar (que é onde sempre trava).
 
-## Migração
+### 2) Estatísticas do cohort no card
 
-```sql
-ALTER TABLE public.synthetic_cohorts
-  ADD COLUMN IF NOT EXISTS last_heartbeat_at timestamptz;
-```
+Novo componente `CohortStatsPanel` exibido **dentro** do card de cada cohort `ready` (colapsável, fechado por padrão para não poluir):
 
-## UI auxiliar
+- Demografia: idade média/mediana, peso médio, % macho/fêmea, % castrados
+- Top 5 raças (barra horizontal)
+- Top 8 condições com contagem + distribuição de severidade (mild/moderate/severe)
+- Cobertura: % pets com ≥1 condição, % com ≥1 exame, % com ≥1 consulta, média de exames/pet
+- Flags laboratoriais mais comuns (top 5)
 
-- Novo componente `src/components/administrador/priorizacoes/CohortProgressLog.tsx` — usado pelo Suggester e (em modo auditoria) pelo Manager.
-- Botão "Forçar finalização" no card do Suggester aparece se `now() - last_heartbeat_at > 180s` e status ainda `generating` — chama uma nova action no edge (`finalize-stalled-cohort`) que seta `status='failed'` com nota "Travado · finalizado manualmente".
+Dados via 1 RPC nova `get_cohort_stats(cohort_id uuid)` que agrega tudo em SQL (mais barato que puxar 175 pets pro client). Retorna JSON.
 
-## Arquivos afetados
+### 3) Atualizar o `CohortPatientsDialog`
 
-- `supabase/functions/generate-synthetic-cohort/index.ts` (timeout + retry + heartbeat + finally)
-- `supabase/functions/finalize-stalled-cohort/index.ts` (novo)
-- `supabase/migrations/<novo>.sql` (coluna heartbeat)
-- `src/components/administrador/priorizacoes/CohortAISuggester.tsx` (polling, log inline, estados de botão)
-- `src/components/administrador/priorizacoes/SyntheticCohortsManager.tsx` (esconder `generating` por padrão)
-- `src/components/administrador/priorizacoes/CohortProgressLog.tsx` (novo, compartilhado)
-- `src/i18n.ts` (+ chaves PT/EN para "Em espera", "Gerando batch X/Y", "Forçar finalização", "Mostrar em geração")
-- `CHANGELOG.md` + `projectOrganograma.ts` (entrada da mudança)
+Mostrar as **consultas** (timeline) e **medicações** do pet, não só conditions+exams — para refletir o que agora é gerado.
+
+### 4) Plumbing
+
+- Migration: criar função `get_cohort_stats(uuid)` (SECURITY DEFINER, restrita a admin via `is_admin()`)
+- i18n PT/EN: novas chaves em `prioritization.cohortStats.*` e `prioritization.syntheticExplorer.consultations` / `.medications`; bump `I18N_VERSION`
+- CHANGELOG.md + organograma + sync
+
+## Detalhes técnicos
+
+**Arquivos editados**
+- `supabase/functions/generate-synthetic-cohort/index.ts` — schema, prompt, batch size, validação, persistência ampliada
+- `src/components/administrador/priorizacoes/CohortPatientsDialog.tsx` — mostrar consultas + medicações
+- `src/components/administrador/priorizacoes/SyntheticCohortsManager.tsx` — embed `<CohortStatsPanel />`
+- `src/i18n.ts`, `src/locales/{pt,en}/translation.json`
+- `CHANGELOG.md`, `src/data/projectOrganograma.ts`
+
+**Arquivos novos**
+- `src/components/administrador/priorizacoes/CohortStatsPanel.tsx`
+- `supabase/migrations/<ts>_cohort_stats_rpc.sql`
+
+**Não muda**
+- `synthetic_cohorts` schema, geração de sugestões (`suggest-cohort-ideas`), UI de "Gerador de sugestão", finalização de stalled, autenticação/RLS.
+
+Posso seguir com a implementação?

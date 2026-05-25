@@ -8529,6 +8529,23 @@
         "loadListTitle": "Error loading cohort patients",
         "loadDetailTitle": "Error loading patient details"
       }
+    },
+    "cohortStats": {
+      "title": "Cohort statistics",
+      "loading": "Computing statistics…",
+      "empty": "No pets in this cohort yet.",
+      "avgAge": "Avg age",
+      "avgWeight": "Avg weight",
+      "sexSplit": "Sex",
+      "neutered": "Neutered",
+      "coverage": "Clinical coverage",
+      "withCondition": "With condition",
+      "withExam": "With exam",
+      "withConsultation": "With consultation",
+      "avgPerPet": "Per pet avg: {{exams}} exams · {{cons}} consultations · {{meds}} total medications",
+      "topBreeds": "Most frequent breeds",
+      "topConditions": "Most frequent conditions",
+      "topFlags": "Most common lab flags"
     }
   }
 }

@@ -8533,6 +8533,23 @@
         "loadListTitle": "Erro ao carregar pacientes do cohort",
         "loadDetailTitle": "Erro ao carregar detalhe do paciente"
       }
+    },
+    "cohortStats": {
+      "title": "Estatísticas do cohort",
+      "loading": "Calculando estatísticas…",
+      "empty": "Sem pets neste cohort ainda.",
+      "avgAge": "Idade média",
+      "avgWeight": "Peso médio",
+      "sexSplit": "Sexo",
+      "neutered": "Castrados",
+      "coverage": "Cobertura clínica",
+      "withCondition": "Com condição",
+      "withExam": "Com exame",
+      "withConsultation": "Com consulta",
+      "avgPerPet": "Média por pet: {{exams}} exames · {{cons}} consultas · {{meds}} medicações no total",
+      "topBreeds": "Raças mais frequentes",
+      "topConditions": "Condições mais frequentes",
+      "topFlags": "Flags laboratoriais mais comuns"
     }
   }
 }
