@@ -72,8 +72,8 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
     (async () => {
       const { data, error } = await (supabase as any)
         .from('cohort_suggestions')
-        .select('id, title, rationale, suggested_criteria, discoverable, kind, impact_score, viability_score')
-        .eq('status', 'active')
+        .select('id, title, rationale, suggested_criteria, discoverable, kind, impact_score, viability_score, status, used_cohort_id')
+        .in('status', ['active', 'used'])
         .order('created_at', { ascending: false })
         .limit(10);
       if (error) {
@@ -91,6 +91,38 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
           viability_score: Number(r.viability_score ?? 0),
         })));
         setSuggestionIds(data.map((r: any) => r.id));
+        // Re-hidrata jobs em andamento (ou recém-concluídos) a partir do banco,
+        // para que ao voltar de outra aba o card de progresso reapareça.
+        const usedCohortIds = data
+          .map((r: any) => r.used_cohort_id)
+          .filter((x: string | null) => !!x);
+        if (usedCohortIds.length) {
+          const { data: cohortRows } = await supabase
+            .from('synthetic_cohorts')
+            .select('id, status, generated_n, target_n, progress_log, generation_error, last_heartbeat_at')
+            .in('id', usedCohortIds);
+          if (cohortRows && cohortRows.length) {
+            const rebuilt: Record<number, ActiveJob> = {};
+            data.forEach((r: any, idx: number) => {
+              if (!r.used_cohort_id) return;
+              const row = cohortRows.find((c: any) => c.id === r.used_cohort_id);
+              if (!row) return;
+              // só rehidrata se ainda gerando, falhou, ou concluiu recentemente
+              rebuilt[idx] = {
+                cohort_id: row.id,
+                status: row.status as ActiveJob['status'],
+                generated_n: Number(row.generated_n ?? 0),
+                target_n: Number(row.target_n ?? 0),
+                progress_log: Array.isArray(row.progress_log)
+                  ? (row.progress_log as unknown as ProgressLogEntry[])
+                  : [],
+                generation_error: row.generation_error ?? null,
+                last_heartbeat_at: row.last_heartbeat_at ?? null,
+              };
+            });
+            if (Object.keys(rebuilt).length) setJobs(rebuilt);
+          }
+        }
       }
     })();
   }, []);
