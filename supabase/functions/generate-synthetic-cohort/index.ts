@@ -426,10 +426,15 @@ Deno.serve(async (req) => {
             const src = pets[idx];
             const consultId = latestByPet[row.id] ?? null;
             (src.conditions ?? []).forEach((c: any) => {
+              const sevRaw = String(c.severity ?? "").toLowerCase();
+              const severity = ["mild", "moderate", "severe"].includes(sevRaw) ? sevRaw : "moderate";
+              const statRaw = String(c.status ?? "").toLowerCase();
+              const status = ["active", "resolved", "monitoring"].includes(statRaw) ? statRaw : "active";
               condRows.push({
                 pet_id: row.id,
                 condition_name: String(c.condition_name).slice(0, 120),
-                severity: c.severity, status: c.status === "monitoring" ? "active" : c.status,
+                severity,
+                status,
                 origin: "synthetic",
                 diagnosis_date: new Date().toISOString().slice(0, 10),
                 consultation_id: consultId,
