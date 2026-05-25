@@ -8424,7 +8424,7 @@
     "deliveredIn": "Entregue em",
     "tabs": {
       "board": "Kanban",
-      "cohort": "Gerador de Cohort",
+      "cohort": "Gerador de Sugestão de Cohort",
       "synthetic": "Cohorts sintéticos",
       "population": "Population Insights v0",
       "roles": "Perfis de Visualização",
