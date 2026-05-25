@@ -39,6 +39,7 @@ interface ActiveJob {
   progress_log: ProgressLogEntry[];
   generation_error: string | null;
   last_heartbeat_at: string | null;
+  created_at: string | null;
 }
 
 const KIND_LABEL: Record<SuggestedCohort['kind'], string> = {
@@ -99,7 +100,7 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
         if (usedCohortIds.length) {
           const { data: cohortRows } = await supabase
             .from('synthetic_cohorts')
-            .select('id, status, generated_n, target_n, progress_log, generation_error, last_heartbeat_at')
+            .select('id, status, generated_n, target_n, progress_log, generation_error, last_heartbeat_at, created_at')
             .in('id', usedCohortIds);
           if (cohortRows && cohortRows.length) {
             const rebuilt: Record<number, ActiveJob> = {};
@@ -118,6 +119,7 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
                   : [],
                 generation_error: row.generation_error ?? null,
                 last_heartbeat_at: row.last_heartbeat_at ?? null,
+                created_at: row.created_at ?? null,
               };
             });
             if (Object.keys(rebuilt).length) setJobs(rebuilt);
@@ -182,7 +184,7 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
     const t = setInterval(async () => {
       const { data, error } = await supabase
         .from('synthetic_cohorts')
-        .select('id, status, generated_n, target_n, progress_log, generation_error, last_heartbeat_at')
+        .select('id, status, generated_n, target_n, progress_log, generation_error, last_heartbeat_at, created_at')
         .in('id', activeIds);
       if (error || !data) return;
       setJobs((prev) => {
@@ -198,6 +200,7 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
               progress_log: Array.isArray(row.progress_log) ? (row.progress_log as unknown as ProgressLogEntry[]) : [],
               generation_error: row.generation_error ?? null,
               last_heartbeat_at: row.last_heartbeat_at ?? null,
+              created_at: row.created_at ?? j.created_at,
             };
           }
         }
@@ -216,6 +219,23 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      setJobs((prev) => {
+        const next = { ...prev };
+        Object.entries(next).forEach(([idx, job]) => {
+          if (job.cohort_id !== cohortId) return;
+          next[Number(idx)] = {
+            ...job,
+            status: data?.status === 'failed' ? 'failed' : 'ready',
+            generated_n: Number(data?.generated ?? job.generated_n),
+            generation_error:
+              data?.status === 'failed'
+                ? `Travado · finalizado manualmente (${data?.generated ?? job.generated_n}/${job.target_n} pets)`
+                : job.generation_error,
+            last_heartbeat_at: new Date().toISOString(),
+          };
+        });
+        return next;
+      });
       toast({ title: 'Cohort finalizado', description: `Marcado como ${data?.status}.` });
     } catch (e: any) {
       toast({ title: 'Falha ao finalizar', description: e?.message ?? 'Erro', variant: 'destructive' });
@@ -281,6 +301,7 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
             progress_log: [],
             generation_error: null,
             last_heartbeat_at: new Date().toISOString(),
+            created_at: new Date().toISOString(),
           },
         }));
       }
@@ -330,9 +351,13 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
               const isThisFailed = job?.status === 'failed';
               const isOtherGenerating = anyGenerating && !isThisGenerating;
               const progressPct = job ? Math.round((job.generated_n / Math.max(1, job.target_n)) * 100) : 0;
-              const stalledMs = job?.last_heartbeat_at
-                ? Date.now() - new Date(job.last_heartbeat_at).getTime()
-                : 0;
+               const latestLogTs = job?.progress_log?.length
+                 ? job.progress_log[job.progress_log.length - 1]?.ts
+                 : null;
+               const lastActivityAt = job?.last_heartbeat_at ?? latestLogTs ?? job?.created_at ?? null;
+               const stalledMs = lastActivityAt
+                 ? Date.now() - new Date(lastActivityAt).getTime()
+                 : 0;
               const isStalled = isThisGenerating && stalledMs > 180_000;
               // Detecta batch atual a partir do último log "solicitando ... ao modelo"
               const lastBatchLog = job?.progress_log?.slice().reverse().find((e) => /Batch \d+\/\d+/.test(e.message));
