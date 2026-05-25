@@ -43,7 +43,7 @@ const DEFAULT_FORM: CohortForm = {
 };
 
 const buildMarkdown = (f: CohortForm): string => {
-  return `# Solicitação de Cohort — Senex AI × PetLove
+  return `# Solicitação de Cohort — Senex AI
 
 **Cohort:** ${f.cohortName || '(sem nome)'}
 **Data:** ${new Date().toISOString().slice(0, 10)}
