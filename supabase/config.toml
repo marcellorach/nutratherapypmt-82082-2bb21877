@@ -134,3 +134,6 @@ verify_jwt = true
 
 [functions.enrich-pet-food-product]
 verify_jwt = true
+
+[functions.finalize-stalled-cohort]
+verify_jwt = true
