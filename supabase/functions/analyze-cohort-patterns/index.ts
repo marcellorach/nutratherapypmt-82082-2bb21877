@@ -1,0 +1,199 @@
+// deno-lint-ignore-file no-explicit-any
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { createClient } from "npm:@supabase/supabase-js@2";
+
+const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const MODEL = "google/gemini-3.5-flash";
+
+const SYSTEM_PROMPT = `Você é um epidemiologista veterinário lendo um cohort canino para descobrir
+padrões longitudinais que destravem decisões clínicas. Foque em comorbidades cruzadas, padrões
+laboratoriais (combinações de marcadores), prevalência por raça/idade, e oportunidades de prevenção.
+
+Para cada padrão relevante, retorne 1 insight categorizado:
+- 'discovery': observação estatística forte e nova
+- 'hypothesis': hipótese causal/mecanística derivada da observação
+- 'proposed_meta_study': meta-estudo que validaria a hipótese
+
+Gere pelo menos 6 insights bem distribuídos. Cada insight deve incluir título PT e EN,
+resumo PT e EN (até 280 chars), evidência quantitativa, confiança 0–1, e sinais (marcadores envolvidos).`;
+
+const TOOL = {
+  type: "function",
+  function: {
+    name: "emit_cohort_insights",
+    description: "Retorna insights derivados de um cohort canino.",
+    parameters: {
+      type: "object",
+      properties: {
+        insights: {
+          type: "array",
+          minItems: 6,
+          maxItems: 12,
+          items: {
+            type: "object",
+            properties: {
+              kind: { type: "string", enum: ["discovery", "hypothesis", "proposed_meta_study"] },
+              title: { type: "string" },
+              title_en: { type: "string" },
+              summary: { type: "string" },
+              summary_en: { type: "string" },
+              evidence: {
+                type: "object",
+                description: "ex.: { n: 200, prevalence: 0.72, comparison: '...' }",
+                additionalProperties: true,
+              },
+              confidence: { type: "number", minimum: 0, maximum: 1 },
+              signals: { type: "array", items: { type: "string" } }
+            },
+            required: ["kind", "title", "title_en", "summary", "summary_en", "evidence", "confidence", "signals"],
+            additionalProperties: false
+          }
+        }
+      },
+      required: ["insights"],
+      additionalProperties: false
+    }
+  }
+};
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  try {
+    const authHeader = req.headers.get("Authorization") ?? "";
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Missing Authorization" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const userClient = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY")!, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: userData } = await userClient.auth.getUser();
+    const user = userData?.user;
+    if (!user) {
+      return new Response(JSON.stringify({ error: "Unauthenticated" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { data: adminFlag } = await userClient.rpc("is_admin");
+    if (!adminFlag) {
+      return new Response(JSON.stringify({ error: "Admin only" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { cohort_id } = await req.json();
+    if (!cohort_id) {
+      return new Response(JSON.stringify({ error: "cohort_id required" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const service = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // load cohort + sample of pets (compacted for prompt size)
+    const { data: cohort } = await service.from("synthetic_cohorts").select("*").eq("id", cohort_id).single();
+    if (!cohort) {
+      return new Response(JSON.stringify({ error: "Cohort not found" }), {
+        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { data: pets } = await service
+      .from("pet_profiles")
+      .select("id, breed, sex, age_years, weight_kg")
+      .eq("cohort_id", cohort_id);
+    const petIds = (pets ?? []).map((p: any) => p.id);
+
+    const { data: conditions } = await service
+      .from("pet_conditions")
+      .select("pet_id, condition_name, severity, status")
+      .in("pet_id", petIds);
+
+    const { data: exams } = await service
+      .from("pet_exams")
+      .select("pet_id, exam_type, flags_abnormal")
+      .in("pet_id", petIds);
+
+    // compact aggregates to feed the LLM
+    const byBreed: Record<string, number> = {};
+    const ageBuckets: Record<string, number> = { "0-3": 0, "4-7": 0, "8+": 0 };
+    pets?.forEach((p: any) => {
+      byBreed[p.breed] = (byBreed[p.breed] ?? 0) + 1;
+      const a = Number(p.age_years);
+      if (a <= 3) ageBuckets["0-3"]++;
+      else if (a <= 7) ageBuckets["4-7"]++;
+      else ageBuckets["8+"]++;
+    });
+    const conditionFreq: Record<string, number> = {};
+    conditions?.forEach((c: any) => {
+      conditionFreq[c.condition_name] = (conditionFreq[c.condition_name] ?? 0) + 1;
+    });
+    const flagFreq: Record<string, number> = {};
+    exams?.forEach((e: any) => {
+      (e.flags_abnormal ?? []).forEach((f: string) => {
+        flagFreq[f] = (flagFreq[f] ?? 0) + 1;
+      });
+    });
+
+    const summary = {
+      cohort: { name: cohort.name, kind: cohort.kind, n: pets?.length ?? 0, criteria: cohort.criteria },
+      by_breed: byBreed,
+      by_age: ageBuckets,
+      condition_frequency: conditionFreq,
+      abnormal_flag_frequency: flagFreq,
+    };
+
+    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: `Agregados do cohort:\n\n\`\`\`json\n${JSON.stringify(summary, null, 2)}\n\`\`\`\n\nProduza insights bilíngues acionáveis.` },
+        ],
+        tools: [TOOL],
+        tool_choice: { type: "function", function: { name: "emit_cohort_insights" } },
+      }),
+    });
+
+    if (!resp.ok) {
+      const t = await resp.text();
+      throw new Error(`AI gateway ${resp.status}: ${t.slice(0, 400)}`);
+    }
+    const data = await resp.json();
+    const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+    const parsed = typeof args === "string" ? JSON.parse(args) : args;
+    const insights = parsed?.insights ?? [];
+
+    if (!insights.length) {
+      return new Response(JSON.stringify({ error: "Empty LLM response" }), {
+        status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const rows = insights.map((i: any) => ({
+      cohort_id,
+      kind: i.kind, stage: i.kind === "proposed_meta_study" ? "proposed_meta_study" : i.kind,
+      title: i.title, title_en: i.title_en,
+      summary: i.summary, summary_en: i.summary_en,
+      evidence: i.evidence ?? {}, confidence: i.confidence ?? 0,
+      signals: i.signals ?? [], source_model: MODEL,
+      created_by: user.id,
+    }));
+    const { error: insErr } = await service.from("cohort_insights").insert(rows);
+    if (insErr) throw insErr;
+
+    return new Response(JSON.stringify({ ok: true, generated: rows.length, model: MODEL }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (e: any) {
+    console.error(e);
+    return new Response(JSON.stringify({ error: e?.message ?? "Unknown" }), {
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});
