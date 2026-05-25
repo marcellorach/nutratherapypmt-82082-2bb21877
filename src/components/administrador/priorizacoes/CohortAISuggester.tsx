@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, Loader2, Wand2, Database, Trash2 } from 'lucide-react';
+import { Sparkles, Loader2, Wand2, Database, Trash2, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useRoleView } from '@/contexts/RoleViewContext';
+import CohortProgressLog, { ProgressLogEntry } from './CohortProgressLog';
+import { Progress } from '@/components/ui/progress';
 
 export interface SuggestedCohort {
   title: string;
@@ -29,6 +31,16 @@ interface Props {
   onUseSuggestion: (s: SuggestedCohort) => void;
 }
 
+interface ActiveJob {
+  cohort_id: string;
+  status: 'generating' | 'ready' | 'failed';
+  generated_n: number;
+  target_n: number;
+  progress_log: ProgressLogEntry[];
+  generation_error: string | null;
+  last_heartbeat_at: string | null;
+}
+
 const KIND_LABEL: Record<SuggestedCohort['kind'], string> = {
   prevention: 'Prevenção',
   treatment_validation: 'Validação de tratamento',
@@ -46,9 +58,14 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
   const [cohorts, setCohorts] = useState<SuggestedCohort[]>([]);
   const [suggestionIds, setSuggestionIds] = useState<(string | null)[]>([]);
   const [generating, setGenerating] = useState<number | null>(null);
+  // idx -> ActiveJob (mantém histórico até o usuário descartar)
+  const [jobs, setJobs] = useState<Record<number, ActiveJob>>({});
+  const [finalizing, setFinalizing] = useState<string | null>(null);
   const { viewId } = useRoleView();
   // Tag de modelo é dado interno — só Arquiteto da Plataforma vê.
   const showModelTag = viewId === 'platform_architect';
+
+  const anyGenerating = Object.values(jobs).some((j) => j.status === 'generating');
 
   // Carrega sugestões persistidas ao montar (até as 10 mais recentes ativas).
   useEffect(() => {
@@ -126,6 +143,55 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
     }
   };
 
+  // Polling: a cada 3s, atualiza qualquer job em "generating".
+  useEffect(() => {
+    const activeIds = Object.values(jobs).filter((j) => j.status === 'generating').map((j) => j.cohort_id);
+    if (activeIds.length === 0) return;
+    const t = setInterval(async () => {
+      const { data, error } = await supabase
+        .from('synthetic_cohorts')
+        .select('id, status, generated_n, target_n, progress_log, generation_error, last_heartbeat_at')
+        .in('id', activeIds);
+      if (error || !data) return;
+      setJobs((prev) => {
+        const next = { ...prev };
+        for (const [k, j] of Object.entries(next)) {
+          const row = data.find((r: any) => r.id === j.cohort_id);
+          if (row) {
+            next[Number(k)] = {
+              ...j,
+              status: row.status as ActiveJob['status'],
+              generated_n: Number(row.generated_n ?? 0),
+              target_n: Number(row.target_n ?? j.target_n),
+              progress_log: Array.isArray(row.progress_log) ? row.progress_log as ProgressLogEntry[] : [],
+              generation_error: row.generation_error ?? null,
+              last_heartbeat_at: row.last_heartbeat_at ?? null,
+            };
+          }
+        }
+        return next;
+      });
+    }, 3000);
+    return () => clearInterval(t);
+  }, [jobs]);
+
+  const forceFinalize = async (cohortId: string) => {
+    if (!window.confirm('Marcar este cohort como finalizado manualmente? Os pets já gerados serão mantidos.')) return;
+    setFinalizing(cohortId);
+    try {
+      const { data, error } = await supabase.functions.invoke('finalize-stalled-cohort', {
+        body: { cohort_id: cohortId },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({ title: 'Cohort finalizado', description: `Marcado como ${data?.status}.` });
+    } catch (e: any) {
+      toast({ title: 'Falha ao finalizar', description: e?.message ?? 'Erro', variant: 'destructive' });
+    } finally {
+      setFinalizing(null);
+    }
+  };
+
   const dismissSuggestion = async (idx: number) => {
     const id = suggestionIds[idx];
     if (id) {
@@ -133,6 +199,15 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
     }
     setCohorts((prev) => prev.filter((_, i) => i !== idx));
     setSuggestionIds((prev) => prev.filter((_, i) => i !== idx));
+    setJobs((prev) => {
+      const next: Record<number, ActiveJob> = {};
+      Object.entries(prev).forEach(([k, j]) => {
+        const n = Number(k);
+        if (n < idx) next[n] = j;
+        else if (n > idx) next[n - 1] = j;
+      });
+      return next;
+    });
   };
 
   const generateRealCohort = async (s: SuggestedCohort, idx: number) => {
@@ -163,9 +238,23 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
           .update({ status: 'used', used_cohort_id: data.cohort_id })
           .eq('id', sid);
       }
+      if (data?.cohort_id) {
+        setJobs((prev) => ({
+          ...prev,
+          [idx]: {
+            cohort_id: data.cohort_id,
+            status: 'generating',
+            generated_n: 0,
+            target_n: Number(data.target_n ?? safeN),
+            progress_log: [],
+            generation_error: null,
+            last_heartbeat_at: new Date().toISOString(),
+          },
+        }));
+      }
       toast({
         title: 'Geração iniciada',
-        description: `Cohort criado (${data?.cohort_id?.slice(0, 8)}…). Acompanhe em "Cohorts sintéticos".`,
+        description: `Cohort criado (${data?.cohort_id?.slice(0, 8)}…). Acompanhe o log abaixo.`,
       });
     } catch (e: any) {
       toast({ title: 'Falha ao gerar', description: e?.message ?? 'Erro', variant: 'destructive' });
@@ -193,9 +282,9 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
               )}
             </p>
           </div>
-          <Button size="sm" onClick={fetchSuggestions} disabled={loading}>
+          <Button size="sm" onClick={fetchSuggestions} disabled={loading || anyGenerating}>
             {loading ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5 mr-1.5" />}
-            {loading ? 'Gerando…' : (cohorts.length ? 'Gerar novamente' : 'Gerar 5 sugestões')}
+            {loading ? 'Gerando…' : anyGenerating ? 'Em espera' : (cohorts.length ? 'Gerar novamente' : 'Gerar 5 sugestões')}
           </Button>
         </div>
 
@@ -203,6 +292,19 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
             {cohorts.map((c, i) => {
               const score = Math.round((c.impact_score + c.viability_score) / 2);
+              const job = jobs[i];
+              const isThisGenerating = job?.status === 'generating';
+              const isThisReady = job?.status === 'ready';
+              const isThisFailed = job?.status === 'failed';
+              const isOtherGenerating = anyGenerating && !isThisGenerating;
+              const progressPct = job ? Math.round((job.generated_n / Math.max(1, job.target_n)) * 100) : 0;
+              const stalledMs = job?.last_heartbeat_at
+                ? Date.now() - new Date(job.last_heartbeat_at).getTime()
+                : 0;
+              const isStalled = isThisGenerating && stalledMs > 180_000;
+              // Detecta batch atual a partir do último log "solicitando ... ao modelo"
+              const lastBatchLog = job?.progress_log?.slice().reverse().find((e) => /Batch \d+\/\d+/.test(e.message));
+              const batchLabel = lastBatchLog?.message?.match(/Batch (\d+)\/(\d+)/);
               return (
                 <Card key={i} className="bg-white">
                   <CardContent className="p-3 space-y-2">
@@ -222,12 +324,55 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
                     <p className="text-[11px] italic text-emerald-700">
                       <b>Descobrível:</b> {c.discoverable}
                     </p>
+                    {job && (
+                      <div className="space-y-1.5 border-t pt-2">
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="font-medium text-gray-700">
+                            {isThisGenerating && <Loader2 className="h-3 w-3 mr-1 inline animate-spin text-blue-600" />}
+                            {isThisReady && <CheckCircle2 className="h-3 w-3 mr-1 inline text-emerald-600" />}
+                            {isThisFailed && <AlertTriangle className="h-3 w-3 mr-1 inline text-red-600" />}
+                            {isThisGenerating ? 'Gerando…' : isThisReady ? 'Concluído' : 'Falhou'}
+                          </span>
+                          <span className="font-mono text-gray-600">{job.generated_n}/{job.target_n} pets</span>
+                        </div>
+                        <Progress value={progressPct} className="h-1.5" />
+                        {isStalled && (
+                          <div className="flex items-center justify-between gap-2 bg-amber-50 border border-amber-200 rounded p-1.5">
+                            <span className="text-[10px] text-amber-800">
+                              ⚠ Sem progresso há &gt;3min — pode estar travado.
+                            </span>
+                            <Button
+                              size="sm" variant="outline" className="h-6 text-[10px]"
+                              disabled={finalizing === job.cohort_id}
+                              onClick={() => forceFinalize(job.cohort_id)}
+                            >
+                              {finalizing === job.cohort_id
+                                ? <Loader2 className="h-2.5 w-2.5 mr-1 animate-spin" />
+                                : null}
+                              Forçar finalização
+                            </Button>
+                          </div>
+                        )}
+                        {isThisReady && (
+                          <p className="text-[10px] text-emerald-700">
+                            Disponível em "Cohorts sintéticos" para análise de padrões.
+                          </p>
+                        )}
+                        {isThisFailed && job.generation_error && (
+                          <p className="text-[10px] text-red-700 bg-red-50 p-1 rounded">⚠ {job.generation_error}</p>
+                        )}
+                        <CohortProgressLog entries={job.progress_log} defaultOpen={isThisGenerating} />
+                      </div>
+                    )}
                     <div className="flex justify-between items-center pt-1">
                       <div className="text-[10px] text-gray-500">
                         Impacto {c.impact_score} · Viabilidade {c.viability_score}
                       </div>
                       <div className="flex gap-1.5">
-                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-gray-400 hover:text-red-600" onClick={() => dismissSuggestion(i)} title="Descartar sugestão">
+                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-gray-400 hover:text-red-600"
+                          onClick={() => dismissSuggestion(i)}
+                          disabled={isThisGenerating}
+                          title="Descartar sugestão">
                           <Trash2 className="h-3 w-3" />
                         </Button>
                         <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => onUseSuggestion(c)}>
@@ -235,13 +380,18 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
                         </Button>
                         <Button
                           size="sm" className="h-7 text-xs"
-                          disabled={generating !== null}
+                          disabled={generating !== null || isOtherGenerating || isThisGenerating || isThisReady}
                           onClick={() => generateRealCohort(c, i)}
+                          title={isOtherGenerating ? 'Aguardando o cohort atual terminar' : undefined}
                         >
-                          {generating === i
+                          {(generating === i || isThisGenerating)
                             ? <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                             : <Database className="h-3 w-3 mr-1" />}
-                          Gerar cohort
+                          {isThisGenerating
+                            ? (batchLabel ? `Gerando batch ${batchLabel[1]}/${batchLabel[2]}` : 'Gerando…')
+                            : isThisReady ? 'Gerado'
+                            : isOtherGenerating ? 'Em espera'
+                            : 'Gerar cohort'}
                         </Button>
                       </div>
                     </div>
