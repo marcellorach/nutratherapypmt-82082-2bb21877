@@ -70,6 +70,7 @@ const ComplianceDashboard = lazy(() => import('@/components/administrador/compli
 const TechnicalAuditsTab = lazy(() => import('@/components/administrador/audits/TechnicalAuditsTab'));
 const AboutSenexTab = lazy(() => import('@/components/administrador/AboutSenexTab'));
 const FundamentosTab = lazy(() => import('@/pages/administrador/FundamentosTab'));
+const PriorizacoesTab = lazy(() => import('@/pages/administrador/PriorizacoesTab'));
 
 export const adminTabsConfig: AdminTabConfig[] = [
   // Base de Conhecimento
@@ -388,6 +389,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'configuration',
     component: FundamentosTab,
     description: 'Meta-KG: catálogo auditável das Regras-Core (RC-NNN) + estudos arquiteturais que justificam cada decisão sensível do pipeline'
+  },
+  {
+    id: 'priorizacoes',
+    label: 'Priorizações',
+    group: 'governance-ai',
+    component: PriorizacoesTab,
+    description: 'Painel Kanban: roadmap operacional do Senex AI + Gerador de Sugestões de Cohort para a PetLove'
   }
 ];
 

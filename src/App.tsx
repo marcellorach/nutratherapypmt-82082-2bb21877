@@ -16,6 +16,7 @@ import { TooltipProvider } from './components/ui/tooltip';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { SiteVariantProvider } from './contexts/SiteVariantContext';
+import { RoleViewProvider } from './contexts/RoleViewContext';
 
 // Criar instância do QueryClient
 const queryClient = new QueryClient({
@@ -35,6 +36,7 @@ function App() {
           <Router>
             <AuthProvider>
               <SiteVariantProvider>
+              <RoleViewProvider>
               <Routes>
                 {/* Public auth routes */}
                 <Route path="/auth" element={<AuthPage />} />
@@ -51,6 +53,7 @@ function App() {
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              </RoleViewProvider>
               </SiteVariantProvider>
             </AuthProvider>
           </Router>
