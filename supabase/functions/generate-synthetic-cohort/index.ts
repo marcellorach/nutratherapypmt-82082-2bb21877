@@ -176,13 +176,25 @@ Deno.serve(async (req) => {
     const batches = Math.ceil(targetN / BATCH_SIZE);
     let generated = 0;
 
+    await appendLog(service, cohortId, "info", `Cohort criado · alvo ${targetN} pets em ${batches} batches de ${BATCH_SIZE}`, { model: MODEL });
+
     const runGeneration = async () => {
       try {
         for (let b = 0; b < batches; b++) {
           const remaining = targetN - generated;
           const size = Math.min(BATCH_SIZE, remaining);
-          const pets = await callLLM({ ...criteria, kind, cohort_name: name }, size, b);
-          if (!Array.isArray(pets) || pets.length === 0) continue;
+          await appendLog(service, cohortId, "info", `Batch ${b + 1}/${batches} · solicitando ${size} pets ao modelo`);
+          let pets: any[] = [];
+          try {
+            pets = await callLLM({ ...criteria, kind, cohort_name: name }, size, b);
+          } catch (e: any) {
+            await appendLog(service, cohortId, "error", `Batch ${b + 1} falhou no LLM: ${String(e?.message ?? e).slice(0, 240)}`);
+            throw e;
+          }
+          if (!Array.isArray(pets) || pets.length === 0) {
+            await appendLog(service, cohortId, "warn", `Batch ${b + 1} retornou vazio · pulando`);
+            continue;
+          }
 
           // Insert pet_profiles
           const profileRows = pets.map((p: any) => ({
@@ -201,7 +213,10 @@ Deno.serve(async (req) => {
           }));
           const { data: createdPets, error: petsErr } = await service
             .from("pet_profiles").insert(profileRows).select("id");
-          if (petsErr) { console.error("Pets insert error", petsErr); continue; }
+          if (petsErr) {
+            await appendLog(service, cohortId, "error", `Falha ao inserir pets do batch ${b + 1}: ${petsErr.message}`);
+            continue;
+          }
 
           // Insert pet_conditions + pet_exams
           const condRows: any[] = [];
@@ -217,11 +232,17 @@ Deno.serve(async (req) => {
               });
             });
             (src.exams ?? []).forEach((e: any) => {
+              let results: any = {};
+              try {
+                results = e.results_json ? JSON.parse(e.results_json) : (e.results ?? {});
+              } catch {
+                results = { _raw: String(e.results_json ?? "").slice(0, 500) };
+              }
               examRows.push({
                 pet_id: row.id,
                 exam_type: String(e.exam_type).slice(0, 60),
                 exam_date: new Date().toISOString().slice(0, 10),
-                results: e.results ?? {},
+                results,
                 flags_abnormal: Array.isArray(e.flags_abnormal) ? e.flags_abnormal : [],
                 extraction_status: "synthetic",
                 approved: true,
@@ -234,14 +255,17 @@ Deno.serve(async (req) => {
           generated += createdPets.length;
           await service.from("synthetic_cohorts")
             .update({ generated_n: generated }).eq("id", cohortId);
+          await appendLog(service, cohortId, "info", `Batch ${b + 1} ok · +${createdPets.length} pets (total ${generated}/${targetN})`);
         }
         await service.from("synthetic_cohorts")
           .update({ status: "ready", generated_n: generated }).eq("id", cohortId);
+        await appendLog(service, cohortId, "info", `Geração concluída · ${generated} pets sintéticos prontos`);
       } catch (e: any) {
         console.error("generation error", e);
         await service.from("synthetic_cohorts")
           .update({ status: "failed", generation_error: String(e?.message ?? e), generated_n: generated })
           .eq("id", cohortId);
+        await appendLog(service, cohortId, "error", `Geração interrompida: ${String(e?.message ?? e).slice(0, 240)}`);
       }
     };
 
