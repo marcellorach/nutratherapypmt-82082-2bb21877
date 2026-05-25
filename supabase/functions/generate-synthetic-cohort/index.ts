@@ -269,6 +269,22 @@ Deno.serve(async (req) => {
 
     const service = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // Mutex: só permite UM cohort em geração por usuário ao mesmo tempo.
+    const { data: alreadyRunning } = await service
+      .from("synthetic_cohorts")
+      .select("id, name")
+      .eq("created_by", user.id)
+      .eq("status", "generating")
+      .limit(1);
+    if (alreadyRunning && alreadyRunning.length > 0) {
+      return new Response(JSON.stringify({
+        error: `Já existe um cohort em geração ("${alreadyRunning[0].name}"). Aguarde terminar ou finalize-o antes de iniciar outro.`,
+        busy_cohort_id: alreadyRunning[0].id,
+      }), {
+        status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // create cohort row
     const { data: cohort, error: insertErr } = await service
       .from("synthetic_cohorts")
@@ -287,8 +303,18 @@ Deno.serve(async (req) => {
 
     const runGeneration = async () => {
       let fatal: any = null;
+      let cancelled = false;
       try {
         for (let b = 0; b < batches; b++) {
+          // Checa se o cohort foi finalizado/cancelado externamente (ex.: "Forçar finalização")
+          const { data: cur } = await service.from("synthetic_cohorts")
+            .select("status").eq("id", cohortId).single();
+          if (cur && cur.status !== "generating") {
+            cancelled = true;
+            await appendLog(service, cohortId, "warn",
+              `Geração interrompida externamente (status=${cur.status}) antes do batch ${b + 1} · abortando background`);
+            break;
+          }
           const remaining = targetN - generated;
           const size = Math.min(BATCH_SIZE, remaining);
           await appendLog(service, cohortId, "info", `Batch ${b + 1}/${batches} · solicitando ${size} pets ao modelo`);
@@ -464,27 +490,36 @@ Deno.serve(async (req) => {
         console.error("generation error", e);
         fatal = e;
       } finally {
-        // Sempre finaliza o status — evita ficar pendurado em "generating".
-        const ratio = generated / Math.max(1, targetN);
-        const finalStatus = fatal ? "failed" : (ratio >= 0.8 ? "ready" : (generated > 0 ? "ready" : "failed"));
-        const errMsg = fatal
-          ? String(fatal?.message ?? fatal).slice(0, 500)
-          : (generated < targetN ? `Apenas ${generated}/${targetN} pets gerados (alguns batches falharam)` : null);
-        await service.from("synthetic_cohorts")
-          .update({
-            status: finalStatus,
-            generated_n: generated,
-            generation_error: errMsg,
-            last_heartbeat_at: new Date().toISOString(),
-          })
-          .eq("id", cohortId);
-        await appendLog(
-          service, cohortId,
-          finalStatus === "ready" ? "info" : "error",
-          finalStatus === "ready"
-            ? `Geração concluída · ${generated} pets sintéticos prontos`
-            : `Geração interrompida: ${errMsg ?? "erro desconhecido"}`,
-        );
+        if (cancelled) {
+          // Respeita o status definido pela finalização manual — só atualiza o generated_n
+          await service.from("synthetic_cohorts")
+            .update({ generated_n: generated, last_heartbeat_at: new Date().toISOString() })
+            .eq("id", cohortId);
+          await appendLog(service, cohortId, "warn",
+            `Background encerrado após cancelamento manual · ${generated} pets gerados`);
+        } else {
+          // Sempre finaliza o status — evita ficar pendurado em "generating".
+          const ratio = generated / Math.max(1, targetN);
+          const finalStatus = fatal ? "failed" : (ratio >= 0.8 ? "ready" : (generated > 0 ? "ready" : "failed"));
+          const errMsg = fatal
+            ? String(fatal?.message ?? fatal).slice(0, 500)
+            : (generated < targetN ? `Apenas ${generated}/${targetN} pets gerados (alguns batches falharam)` : null);
+          await service.from("synthetic_cohorts")
+            .update({
+              status: finalStatus,
+              generated_n: generated,
+              generation_error: errMsg,
+              last_heartbeat_at: new Date().toISOString(),
+            })
+            .eq("id", cohortId);
+          await appendLog(
+            service, cohortId,
+            finalStatus === "ready" ? "info" : "error",
+            finalStatus === "ready"
+              ? `Geração concluída · ${generated} pets sintéticos prontos`
+              : `Geração interrompida: ${errMsg ?? "erro desconhecido"}`,
+          );
+        }
       }
     };
 
