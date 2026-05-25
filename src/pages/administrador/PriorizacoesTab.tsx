@@ -4,6 +4,8 @@ import { LayoutGrid, Info } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PrioritizationBoard from '@/components/administrador/priorizacoes/PrioritizationBoard';
 import CohortRequestGenerator from '@/components/administrador/priorizacoes/CohortRequestGenerator';
+import RoleViewEditor from '@/components/administrador/priorizacoes/RoleViewEditor';
+import PopulationInsightsV0 from '@/components/administrador/priorizacoes/PopulationInsightsV0';
 import { PRIORITIZATION_BOARD_LAST_UPDATED } from '@/data/prioritizationBoard';
 
 const PriorizacoesTab: React.FC = () => {
@@ -34,6 +36,8 @@ const PriorizacoesTab: React.FC = () => {
         <TabsList>
           <TabsTrigger value="board">{t('prioritization.tabs.board', 'Kanban')}</TabsTrigger>
           <TabsTrigger value="cohort">{t('prioritization.tabs.cohort', 'Gerador de Cohort')}</TabsTrigger>
+          <TabsTrigger value="population">{t('prioritization.tabs.population', 'Population Insights v0')}</TabsTrigger>
+          <TabsTrigger value="roles">{t('prioritization.tabs.roles', 'Perfis de Visualização')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="board" className="mt-4">
@@ -42,6 +46,14 @@ const PriorizacoesTab: React.FC = () => {
 
         <TabsContent value="cohort" className="mt-4">
           <CohortRequestGenerator />
+        </TabsContent>
+
+        <TabsContent value="population" className="mt-4">
+          <PopulationInsightsV0 />
+        </TabsContent>
+
+        <TabsContent value="roles" className="mt-4">
+          <RoleViewEditor />
         </TabsContent>
       </Tabs>
     </div>
