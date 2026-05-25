@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, Loader2, Wand2, Database } from 'lucide-react';
+import { Sparkles, Loader2, Wand2, Database, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useRoleView } from '@/contexts/RoleViewContext';
@@ -44,10 +44,39 @@ const KIND_COLOR: Record<SuggestedCohort['kind'], string> = {
 const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
   const [loading, setLoading] = useState(false);
   const [cohorts, setCohorts] = useState<SuggestedCohort[]>([]);
+  const [suggestionIds, setSuggestionIds] = useState<(string | null)[]>([]);
   const [generating, setGenerating] = useState<number | null>(null);
   const { viewId } = useRoleView();
   // Tag de modelo é dado interno — só Arquiteto da Plataforma vê.
   const showModelTag = viewId === 'platform_architect';
+
+  // Carrega sugestões persistidas ao montar (até as 10 mais recentes ativas).
+  useEffect(() => {
+    (async () => {
+      const { data, error } = await supabase
+        .from('cohort_suggestions')
+        .select('id, title, rationale, suggested_criteria, discoverable, kind, impact_score, viability_score')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(10);
+      if (error) {
+        console.warn('Falha ao carregar sugestões persistidas', error);
+        return;
+      }
+      if (data && data.length) {
+        setCohorts(data.map((r: any) => ({
+          title: r.title,
+          rationale: r.rationale ?? '',
+          suggested_criteria: r.suggested_criteria ?? {},
+          discoverable: r.discoverable ?? '',
+          kind: r.kind,
+          impact_score: Number(r.impact_score ?? 0),
+          viability_score: Number(r.viability_score ?? 0),
+        })));
+        setSuggestionIds(data.map((r: any) => r.id));
+      }
+    })();
+  }, []);
 
   const fetchSuggestions = async () => {
     setLoading(true);
@@ -66,8 +95,23 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      setCohorts(data?.cohorts ?? []);
-      if (!data?.cohorts?.length) {
+      const newCohorts: SuggestedCohort[] = data?.cohorts ?? [];
+      setCohorts(newCohorts);
+      setSuggestionIds(new Array(newCohorts.length).fill(null));
+      // Re-fetch IDs from DB (suggestions were just persisted by the edge function)
+      if (newCohorts.length) {
+        const { data: persisted } = await supabase
+          .from('cohort_suggestions')
+          .select('id, title')
+          .eq('status', 'active')
+          .order('created_at', { ascending: false })
+          .limit(newCohorts.length);
+        if (persisted) {
+          // map by title (best-effort)
+          setSuggestionIds(newCohorts.map((c) => persisted.find((p: any) => p.title === c.title)?.id ?? null));
+        }
+      }
+      if (!newCohorts.length) {
         toast({ title: 'IA retornou vazio', description: 'Tente novamente.', variant: 'destructive' });
       }
     } catch (e: any) {
@@ -80,6 +124,15 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const dismissSuggestion = async (idx: number) => {
+    const id = suggestionIds[idx];
+    if (id) {
+      await supabase.from('cohort_suggestions').update({ status: 'dismissed' }).eq('id', id);
+    }
+    setCohorts((prev) => prev.filter((_, i) => i !== idx));
+    setSuggestionIds((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const generateRealCohort = async (s: SuggestedCohort, idx: number) => {
@@ -103,6 +156,13 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      // Mark suggestion as used and link to the generated cohort
+      const sid = suggestionIds[idx];
+      if (sid && data?.cohort_id) {
+        await supabase.from('cohort_suggestions')
+          .update({ status: 'used', used_cohort_id: data.cohort_id })
+          .eq('id', sid);
+      }
       toast({
         title: 'Geração iniciada',
         description: `Cohort criado (${data?.cohort_id?.slice(0, 8)}…). Acompanhe em "Cohorts sintéticos".`,
@@ -167,6 +227,9 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
                         Impacto {c.impact_score} · Viabilidade {c.viability_score}
                       </div>
                       <div className="flex gap-1.5">
+                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-gray-400 hover:text-red-600" onClick={() => dismissSuggestion(i)} title="Descartar sugestão">
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
                         <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => onUseSuggestion(c)}>
                           Pré-preencher
                         </Button>
