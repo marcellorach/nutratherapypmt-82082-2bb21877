@@ -11,8 +11,17 @@ interface WorkflowResult {
 
 export const useStudyApprovalWorkflow = () => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [logs, setLogs] = useState<Array<{ ts: string; level: 'info' | 'success' | 'warn' | 'error'; message: string }>>([]);
   const { toast } = useToast();
   const { t } = useTranslation();
+
+  const pushLog = (level: 'info' | 'success' | 'warn' | 'error', message: string) => {
+    const ts = new Date().toLocaleTimeString();
+    // eslint-disable-next-line no-console
+    console.log(`[ApprovalWorkflow ${level.toUpperCase()}] ${message}`);
+    setLogs(prev => [...prev, { ts, level, message }]);
+  };
+  const clearLogs = () => setLogs([]);
 
   /**
    * Auto-approves high-confidence triplets for a specific study
@@ -80,9 +89,12 @@ export const useStudyApprovalWorkflow = () => {
    */
   const executeApprovalWorkflow = async (studyId: string, threshold: number = 0.7): Promise<WorkflowResult> => {
     setIsProcessing(true);
+    clearLogs();
+    const t0 = Date.now();
 
     try {
       // Step 1: Update study status to approved + audit trail
+      pushLog('info', `[1/4] Atualizando status do estudo para 'approved'…`);
       const { data: userData } = await supabase.auth.getUser();
       const { error: updateError } = await supabase
         .from('processed_studies')
@@ -94,29 +106,40 @@ export const useStudyApprovalWorkflow = () => {
         .eq('id', studyId);
 
       if (updateError) throw updateError;
+      pushLog('success', `[1/4] Status atualizado (estudo ${studyId.slice(0, 8)}…)`);
 
       // Step 2: Auto-approve high-confidence triplets
+      pushLog('info', `[2/4] Auto-aprovando triplets com confiança ≥ ${(threshold * 100).toFixed(0)}%…`);
       const tripletsApproved = await autoApproveTriplets(studyId, threshold);
+      pushLog('success', `[2/4] ${tripletsApproved} triplet(s) auto-aprovado(s)`);
 
       // Step 3: Consolidate knowledge graph
       let edgesCreated = 0;
       try {
+        pushLog('info', `[3/4] Consolidando knowledge graph (edge function)…`);
         edgesCreated = await consolidateKnowledgeGraph();
+        pushLog('success', `[3/4] Consolidação concluída — ${edgesCreated} edge(s) processada(s)`);
       } catch (e) {
         console.warn('Consolidation skipped or failed:', e);
+        pushLog('warn', `[3/4] Consolidação falhou/ignorada: ${e instanceof Error ? e.message : String(e)}`);
       }
 
       // Step 4: Sync to Neo4j
       let tripletsSynced = 0;
       try {
+        pushLog('info', `[4/4] Sincronizando com Neo4j…`);
         tripletsSynced = await syncToNeo4j(studyId);
+        pushLog('success', `[4/4] Sync Neo4j concluído — ${tripletsSynced} triplet(s) sincronizado(s)`);
       } catch (e) {
         console.warn('Neo4j sync skipped or failed:', e);
+        pushLog('warn', `[4/4] Sync Neo4j falhou/ignorado: ${e instanceof Error ? e.message : String(e)}`);
       }
 
+      pushLog('success', `Workflow concluído em ${((Date.now() - t0) / 1000).toFixed(1)}s`);
       return { tripletsApproved, edgesCreated, tripletsSynced };
     } catch (error) {
       console.error('Error in approval workflow:', error);
+      pushLog('error', `Workflow abortado: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     } finally {
       setIsProcessing(false);
@@ -186,6 +209,8 @@ export const useStudyApprovalWorkflow = () => {
 
   return {
     isProcessing,
+    logs,
+    clearLogs,
     executeApprovalWorkflow,
     autoApproveTriplets,
     consolidateKnowledgeGraph,
