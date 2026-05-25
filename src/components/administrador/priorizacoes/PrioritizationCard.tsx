@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Lock } from 'lucide-react';
-import { PrioritizationCard as Card_ } from '@/data/prioritizationBoard';
+import { PrioritizationCard as Card_, STRATEGIC_VALUE_LABEL } from '@/data/prioritizationBoard';
 
 interface Props {
   card: Card_;
@@ -60,7 +60,7 @@ const PrioritizationCardItem: React.FC<Props> = ({ card }) => {
           </Badge>
           {card.value.map((v) => (
             <Badge key={v} variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-white">
-              {v}
+              {isPt ? STRATEGIC_VALUE_LABEL[v].pt : STRATEGIC_VALUE_LABEL[v].en}
             </Badge>
           ))}
           {card.dependsOn?.length ? (

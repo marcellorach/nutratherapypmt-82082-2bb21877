@@ -43,7 +43,7 @@ const DEFAULT_FORM: CohortForm = {
 };
 
 const buildMarkdown = (f: CohortForm): string => {
-  return `# Solicitação de Cohort — Senex AI × PetLove
+  return `# Solicitação de Cohort — Senex AI
 
 **Cohort:** ${f.cohortName || '(sem nome)'}
 **Data:** ${new Date().toISOString().slice(0, 10)}
@@ -136,7 +136,7 @@ const CohortRequestGenerator: React.FC = () => {
         <p className="text-xs text-gray-600">
           {t(
             'prioritization.cohort.subtitle',
-            'Produz um documento estruturado para enviar à PetLove pedindo um recorte específico do banco histórico.',
+            'Produz um documento estruturado para enviar ao parceiro clínico pedindo um recorte específico do banco histórico.',
           )}
         </p>
       </CardHeader>
