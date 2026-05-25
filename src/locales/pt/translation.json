@@ -1,5 +1,6 @@
 {
   "knowledgeGraph": {
+    "_fundamentosRoadmapAnchor": "_",
     "title": "Visualização do Grafo de Conhecimento",
     "description": "Visualização interativa do grafo de conhecimento médico",
     "testConnection": "Testar Conexão Neo4j",
