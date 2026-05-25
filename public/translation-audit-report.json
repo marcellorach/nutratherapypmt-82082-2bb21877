@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-05-25T18:56:32.722Z",
+  "timestamp": "2026-05-25T20:09:24.293Z",
   "summary": {
-    "totalFiles": 925,
-    "totalIssues": 443,
-    "hardcodedTexts": 52,
-    "missingKeys": 389,
+    "totalFiles": 928,
+    "totalIssues": 447,
+    "hardcodedTexts": 53,
+    "missingKeys": 392,
     "incompleteTranslations": 2
   },
   "issues": [
@@ -1935,6 +1935,27 @@
     },
     {
       "type": "missing-key",
+      "file": "src/components/administrador/priorizacoes/MultiSourcePlayground.tsx",
+      "line": 25,
+      "text": "id, name",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/priorizacoes/PopulationInsightsV0.tsx",
+      "line": 42,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/priorizacoes/PopulationInsightsV0.tsx",
+      "line": 128,
+      "text": " ",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/administrador/relations/RelationsAuditorChat.tsx",
       "line": 81,
       "text": "subject_name, predicate, object_name, subject_type, object_type, extraction_confidence, curation_status, intensity, evidence_level",
@@ -3009,6 +3030,13 @@
       "file": "src/components/administrador/pet-food/PetFoodCatalogTab.tsx",
       "line": 517,
       "text": "Fase de vida",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/priorizacoes/PopulationInsightsV0.tsx",
+      "line": 84,
+      "text": "Gerador de Cohort",
       "severity": "medium"
     },
     {
