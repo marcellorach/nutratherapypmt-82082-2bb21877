@@ -37,16 +37,16 @@ const PrioritizationCardItem: React.FC<Props> = ({ card }) => {
     <Card className="border-l-4 border-l-primary/40 shadow-sm hover:shadow-md transition-shadow">
       <CardContent className="p-3 space-y-2">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-[10px] font-mono text-gray-400 tabular-nums">#{card.order}</span>
-            <h4 className="text-sm font-semibold leading-tight text-gray-800 truncate">{title}</h4>
+          <div className="flex items-start gap-1.5 min-w-0 flex-1">
+            <span className="text-[10px] font-mono text-gray-400 tabular-nums mt-0.5 shrink-0">#{card.order}</span>
+            <h4 className="text-sm font-semibold leading-tight text-gray-800 break-words">{title}</h4>
           </div>
-          <Badge className={`text-[10px] px-1.5 py-0 h-4 ${EFFORT_COLORS[card.effort]}`} variant="secondary">
+          <Badge className={`text-[10px] px-1.5 py-0 h-4 shrink-0 ${EFFORT_COLORS[card.effort]}`} variant="secondary">
             {card.effort}
           </Badge>
         </div>
 
-        <p className="text-xs text-gray-600 leading-snug line-clamp-3">{description}</p>
+        <p className="text-xs text-gray-600 leading-snug">{description}</p>
 
         {rationale && (
           <div className="text-[10px] italic text-gray-500 border-l-2 border-gray-200 pl-2">
