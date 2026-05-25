@@ -5171,9 +5171,24 @@
         "window": "Protocol window",
         "response": "Clinical response",
         "showing": "Showing {{n}} of {{total}} treated pets",
-        "ageBuckets": { "any": "Any age", "adult": "Adult (5-7y)", "senior": "Senior (7-10y)", "geriatric": "Geriatric (10+y)" },
-        "adherenceBuckets": { "any": "Any adherence", "high": "High (≥80%)", "mid": "Medium (50-79%)", "low": "Low (<50%)" },
-        "windowBuckets": { "any": "Any window", "early": "0-6 months", "mid": "6-12 months", "long": "12-24 months" }
+        "ageBuckets": {
+          "any": "Any age",
+          "adult": "Adult (5-7y)",
+          "senior": "Senior (7-10y)",
+          "geriatric": "Geriatric (10+y)"
+        },
+        "adherenceBuckets": {
+          "any": "Any adherence",
+          "high": "High (≥80%)",
+          "mid": "Medium (50-79%)",
+          "low": "Low (<50%)"
+        },
+        "windowBuckets": {
+          "any": "Any window",
+          "early": "0-6 months",
+          "mid": "6-12 months",
+          "long": "12-24 months"
+        }
       },
       "metrics": {
         "title": "Clinical impact metrics",
@@ -5213,7 +5228,12 @@
         "newTriplets": "New KG triplets",
         "weightAdjusts": "Weight adjustments",
         "gapfills": "Gap-fills triggered",
-        "col": { "model": "Model", "accuracy": "Current accuracy", "drift": "Synthetic drift", "growth": "Δ learning/month" }
+        "col": {
+          "model": "Model",
+          "accuracy": "Current accuracy",
+          "drift": "Synthetic drift",
+          "growth": "Δ learning/month"
+        }
       }
     }
   },
@@ -8369,6 +8389,27 @@
       "requestSuccessDesc": "Scope recorded. The Lovable agent will generate the audit in the next dedicated session.",
       "saveError": "Error saving",
       "scopeUpdated": "Scope updated"
+    }
+  },
+  "fundamentos": {
+    "roadmap": {
+      "title": "Meta-KG Roadmap",
+      "phaseAActive": "Phase A active",
+      "description": "Permanent reminder of upcoming evolutions for this area. Do not forget.",
+      "phaseB": "Phase B",
+      "phaseBTitle": "Navigable Meta-KG",
+      "phaseBBody": "Promote lessons (patterns, recipes, anti-patterns) to first-class entities; create architectural triplets between them; bidirectional RC ↔ lesson links.",
+      "phaseC": "Phase C",
+      "phaseCTitle": "Meta-KG RAG",
+      "phaseCBody": "Embedding + semantic search over meta-studies once we reach ≥30 architectural studies to justify the cost.",
+      "note": "Phase A delivers sandbox (lifecycle) + 0–5 reliability per study, without refactoring the current modeling.",
+      "phaseBTriggers": "Triggers to activate Phase B",
+      "unlocked": "Ready to start",
+      "locked": "Awaiting critical mass",
+      "loadingMetrics": "Computing metrics…",
+      "metric1": "Approved meta-studies (outside sandbox)",
+      "metric2": "Redundant lessons across studies (no cross-link)",
+      "metric3": "Conflicts detected between recipe and anti-pattern"
     }
   }
 }
