@@ -163,7 +163,7 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
               status: row.status as ActiveJob['status'],
               generated_n: Number(row.generated_n ?? 0),
               target_n: Number(row.target_n ?? j.target_n),
-              progress_log: Array.isArray(row.progress_log) ? row.progress_log as ProgressLogEntry[] : [],
+              progress_log: Array.isArray(row.progress_log) ? (row.progress_log as unknown as ProgressLogEntry[]) : [],
               generation_error: row.generation_error ?? null,
               last_heartbeat_at: row.last_heartbeat_at ?? null,
             };
