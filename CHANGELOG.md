@@ -24,6 +24,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 6.0.0 -->
 
+### Fixed - 2026-05-25 — Cohort travado sem heartbeat volta a poder ser destravado
+<!-- area: admin · status: entregue · i18n: 1.111.0 -->
+- `CohortAISuggester` agora considera a última atividade disponível (`last_heartbeat_at`, último log ou `created_at`) para detectar travamentos. Isso corrige os cohorts antigos que ficavam presos em `generating` sem heartbeat e nunca exibiam o botão **Forçar finalização**.
+- Após a finalização manual, o card local é atualizado imediatamente para `ready`/`failed`, sem depender do próximo ciclo de polling.
+- O cohort travado `SRD sênior (8+) com OA em uso crônico de AINEs vs. Bedinvetmab` foi destravado no backend e marcado como `ready` com 175/200 pets preservados.
+- Files: src/components/administrador/priorizacoes/CohortAISuggester.tsx
+
 ### Changed - 2026-05-25 — Cohorts sintéticos: geração clínica rica + painel estatístico
 <!-- area: admin · status: entregue · i18n: 1.111.0 -->
 - `generate-synthetic-cohort` agora emite pets clinicamente completos: 1-4 condições (com severidade/status/origem), 2-5 exames (com `results_json` e `flags_abnormal`), 1-3 **consultas** cronológicas (`chief_complaint`, `assessment`, `plan`, peso, BCS, última marcada `is_latest=true`), 0-3 **medicações** vinculadas à consulta e 1-2 **notas clínicas** (anamnese livre) — inspirado na geração de pacientes de exemplo.
