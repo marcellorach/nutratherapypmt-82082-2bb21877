@@ -380,6 +380,62 @@ const CohortPatientsDialog: React.FC<Props> = ({ cohortId, cohortName, open, onO
                       <Stethoscope className="h-4 w-4 text-primary" />
                       {t('prioritization.syntheticExplorer.conditionsTitle')}
                     </div>
+                  </div>
+                  {/* anchor */}
+                  <div className="hidden" />
+                  <div className="rounded-md border p-4 bg-card -mt-4">
+                    <div className="flex items-center gap-2 text-sm font-medium mb-3">
+                      <ClipboardList className="h-4 w-4 text-primary" />
+                      Consultas ({detail.consultations.length})
+                    </div>
+                    {detail.consultations.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">Sem consultas registradas.</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {detail.consultations.map((c) => (
+                          <div key={c.id} className="rounded-md border p-3 space-y-1 text-sm">
+                            <div className="flex justify-between gap-2 flex-wrap">
+                              <span className="font-medium">{formatDate(c.consultation_date, i18n.language)}</span>
+                              {c.is_latest && <Badge variant="outline" className="text-[10px]">Última</Badge>}
+                            </div>
+                            {c.chief_complaint && <div><span className="text-xs text-muted-foreground">Motivo: </span>{c.chief_complaint}</div>}
+                            {c.clinical_exam && <div className="text-xs text-muted-foreground">Exame: {c.clinical_exam}</div>}
+                            {c.assessment && <div className="text-xs"><span className="text-muted-foreground">Assessment: </span>{c.assessment}</div>}
+                            {c.plan && <div className="text-xs"><span className="text-muted-foreground">Plano: </span>{c.plan}</div>}
+                            {(c.weight_kg_at_visit || c.body_condition_score) && (
+                              <div className="text-[11px] text-muted-foreground">
+                                {c.weight_kg_at_visit && `${c.weight_kg_at_visit} kg`}{c.weight_kg_at_visit && c.body_condition_score ? ' · ' : ''}
+                                {c.body_condition_score && `ECC ${c.body_condition_score}/9`}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {detail.medications.length > 0 && (
+                    <div className="rounded-md border p-4 bg-card">
+                      <div className="flex items-center gap-2 text-sm font-medium mb-3">
+                        <Pill className="h-4 w-4 text-primary" />
+                        Medicações ({detail.medications.length})
+                      </div>
+                      <div className="space-y-1.5">
+                        {detail.medications.map((m) => (
+                          <div key={m.id} className="flex justify-between gap-2 text-sm border rounded p-2">
+                            <span className="font-medium">{m.medication_name}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {[m.dosage, m.frequency, m.status].filter(Boolean).join(' · ')}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div className="rounded-md border p-4 bg-card">
+                    <div className="flex items-center gap-2 text-sm font-medium mb-3">
+                      <Stethoscope className="h-4 w-4 text-primary" />
+                      {t('prioritization.syntheticExplorer.conditionsTitle')} (reaberto)
+                    </div>
                     {detail.conditions.length === 0 ? (
                       <p className="text-sm text-muted-foreground">{t('prioritization.syntheticExplorer.noConditions')}</p>
                     ) : (
