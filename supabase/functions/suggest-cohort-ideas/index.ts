@@ -1,7 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const MODEL = "google/gemini-3.5-flash";
 
 const SYSTEM_PROMPT = `Você é um pesquisador sênior em medicina veterinária focado em longevidade canina.
@@ -75,6 +78,7 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     const signals = body?.signals ?? {};
+    const authHeader = req.headers.get("Authorization") ?? "";
 
     const userPrompt = `Sinais atuais da plataforma Senex AI:
 
@@ -128,10 +132,43 @@ validação de tratamento e descoberta exploratória.`;
     try { parsed = typeof args === "string" ? JSON.parse(args) : (args ?? {}); }
     catch (e) { console.error("Failed to parse tool args", e, args); }
 
+    const cohorts: any[] = parsed?.cohorts ?? [];
+
+    // Persist suggestions (best-effort, admin-only). Requires service role to bypass RLS safely.
+    let persisted = 0;
+    try {
+      if (cohorts.length && authHeader) {
+        const userClient = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY")!, {
+          global: { headers: { Authorization: authHeader } },
+        });
+        const { data: userData } = await userClient.auth.getUser();
+        const userId = userData?.user?.id ?? null;
+        const service = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+        const rows = cohorts.map((c: any) => ({
+          title: String(c.title ?? "(sem título)").slice(0, 240),
+          rationale: c.rationale ?? null,
+          suggested_criteria: c.suggested_criteria ?? {},
+          discoverable: c.discoverable ?? null,
+          kind: c.kind ?? "exploratory",
+          impact_score: c.impact_score ?? null,
+          viability_score: c.viability_score ?? null,
+          source_model: MODEL,
+          signals,
+          created_by: userId,
+        }));
+        const { error: insErr } = await service.from("cohort_suggestions").insert(rows);
+        if (insErr) console.error("Persist suggestions failed", insErr);
+        else persisted = rows.length;
+      }
+    } catch (e) {
+      console.error("Persist suggestions exception", e);
+    }
+
     return new Response(JSON.stringify({
       ok: true,
       model: MODEL,
-      cohorts: parsed?.cohorts ?? [],
+      cohorts,
+      persisted,
       generated_at: new Date().toISOString(),
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
