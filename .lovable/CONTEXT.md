@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-05-25T22:36:35.405Z
+Generated: 2026-05-25T23:14:23.504Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
 ## Latest i18n version: 1.111.0
 
 ## Changes by area (last 14 days)
-- **admin**: 43
+- **admin**: 44
 - **vet-ui**: 16
 - **meta**: 7
 - **kg**: 6
@@ -16,6 +16,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **i18n**: 1
 
 ## Top 10 recent entries
+### 2026-05-25 · [admin] FIXED — Cohort travado sem heartbeat volta a poder ser destravado
+- `CohortAISuggester` agora considera a última atividade disponível (`last_heartbeat_at`, último log ou `created_at`) para detectar travamentos. Isso corrige os cohorts antigos que ficavam presos em `generating` sem heartbeat e nunca exibiam o botão Forçar finalização.
+- Após a finalização manual, o card local é atualizado imediatamente para `ready`/`failed`, sem depender do próximo ciclo de polling.
+- O cohort travado `SRD sênior (8+) com OA em uso crônico de AINEs vs. Bedinvetmab` foi destravado no backend e marcado como `ready` com 175/200 pets preservados.
+_files: src/components/administrador/priorizacoes/CohortAISuggester.tsx_
+
 ### 2026-05-25 · [admin] CHANGED — Cohorts sintéticos: geração clínica rica + painel estatístico
 - `generate-synthetic-cohort` agora emite pets clinicamente completos: 1-4 condições (com severidade/status/origem), 2-5 exames (com `results_json` e `flags_abnormal`), 1-3 consultas cronológicas (`chief_complaint`, `assessment`, `plan`, peso, BCS, última marcada `is_latest=true`), 0-3 medicações vinculadas à consulta e 1-2 notas clínicas (anamnese livre) — inspirado na geração de pacientes de exemplo.
 - Validação descarta e regenera pets sem condições ou sem exames antes do insert; `BATCH_SIZE` reduzido de 25 → 10 para evitar timeout no último batch.
@@ -69,12 +75,6 @@ _files: src/components/administrador/fundamentos/MetaStudyDetailedCard.tsx, src/
 - Edge function `generate-meta-study-cover` (Gemini image): gera 1x por paper, bucket público, com tema derivado do `kind`. Backfill via botão "Gerar capas" no Kanban (5/5 papers atuais já cobertos).
 - Edge function `chat-meta-study`: chat streaming com contexto = summary + key_claims + proposed_rules + core_rule_evidence do próprio registro (sem RAG novo).
 _files: supabase/functions/generate-meta-study-cover/index.ts, supabase/functions/chat-meta-study/index.ts, src/components/administrador/fundamentos/MetaStudyChatDialog.tsx, src/components/administrador/fundamentos/CoreRulesEvidenceBadge.tsx…_
-
-### 2026-05-22 · [admin] CHANGED — Kanban Meta-Estudos: breakdown de confiabilidade inline
-- Card do Kanban agora exibe breakdown das 5 dimensões de confiabilidade com sliders inline (expansível) e recálculo do `reliability_overall` em tempo real (mesma fórmula da coluna gerada no DB).
-- Mini barra de contribuição colorida por dimensão + chips com nº de tripletes vinculados (`core_rule_evidence.meta_study_id`), nº de propostas e idade do estudo.
-- Salvamento inline (Salvar/Descartar) com aviso de drift se overall salvo divergir do preview local.
-_files: src/components/administrador/fundamentos/MetaStudyKanban.tsx_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
