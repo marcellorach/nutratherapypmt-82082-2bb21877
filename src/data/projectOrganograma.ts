@@ -426,8 +426,8 @@ export const organograma: OrganogramaArea[] = [
       {
         title: "Painel de Priorizações + Camada de Visualização de Papéis",
         title_en: "Prioritization Panel + Role Visualization Layer",
-        description: "Aba 'Priorizações' com 6 sub-abas: Kanban (5 colunas) · Gerador de Cohort (Markdown para parceiros) · Cohorts Sintéticos (geração IA real de até 200 pets/cohort com is_synthetic=true) · Population Insights v0 (Descobertas/Hipóteses/Meta-estudos a partir dos cohorts) · Playground multi-fonte (MultiSourceResolver: KG > histórico > cohort > internet com badge de conflito) · Perfis de Visualização. Camada de visualização declarativa filtra a sidebar via RoleViewSwitcher no Header.",
-        description_en: "'Prioritization' tab with 6 sub-tabs: Kanban (5 columns) · Cohort Generator (Markdown for partners) · Synthetic Cohorts (real AI generation up to 200 pets/cohort with is_synthetic=true) · Population Insights v0 (Discoveries/Hypotheses/Meta-studies from cohorts) · Multi-source playground (MultiSourceResolver: KG > history > cohort > internet with conflict badge) · Role Views. Declarative role visualization layer filters the sidebar via RoleViewSwitcher.",
+        description: "Aba 'Priorizações' com 6 sub-abas: Kanban (5 colunas) · Gerador de Cohort (Markdown para parceiros) · Cohorts Sintéticos (geração IA real de até 200 pets/cohort com is_synthetic=true, ricos em condições/exames/consultas/medicações/notas clínicas, com explorador de pacientes e painel estatístico do cohort via RPC get_cohort_stats) · Population Insights v0 (Descobertas/Hipóteses/Meta-estudos a partir dos cohorts) · Playground multi-fonte (MultiSourceResolver: KG > histórico > cohort > internet com badge de conflito) · Perfis de Visualização. Camada de visualização declarativa filtra a sidebar via RoleViewSwitcher no Header.",
+        description_en: "'Prioritization' tab with 6 sub-tabs: Kanban (5 columns) · Cohort Generator (Markdown for partners) · Synthetic Cohorts (real AI generation up to 200 pets/cohort with is_synthetic=true, rich with conditions/exams/consultations/medications/clinical notes, with patient explorer and cohort stats panel via RPC get_cohort_stats) · Population Insights v0 (Discoveries/Hypotheses/Meta-studies from cohorts) · Multi-source playground (MultiSourceResolver: KG > history > cohort > internet with conflict badge) · Role Views. Declarative role visualization layer filters the sidebar via RoleViewSwitcher.",
         files: [
           "src/pages/administrador/PriorizacoesTab.tsx",
           "src/components/administrador/priorizacoes/PrioritizationBoard.tsx",
@@ -435,6 +435,9 @@ export const organograma: OrganogramaArea[] = [
           "src/components/administrador/priorizacoes/CohortRequestGenerator.tsx",
           "src/components/administrador/priorizacoes/CohortAISuggester.tsx",
           "src/components/administrador/priorizacoes/SyntheticCohortsManager.tsx",
+          "src/components/administrador/priorizacoes/CohortPatientsDialog.tsx",
+          "src/components/administrador/priorizacoes/CohortStatsPanel.tsx",
+          "src/components/administrador/priorizacoes/CohortProgressLog.tsx",
           "src/components/administrador/priorizacoes/PopulationInsightsV0.tsx",
           "src/components/administrador/priorizacoes/MultiSourcePlayground.tsx",
           "src/components/administrador/priorizacoes/RoleViewEditor.tsx",
@@ -445,6 +448,7 @@ export const organograma: OrganogramaArea[] = [
           "src/contexts/RoleViewContext.tsx",
           "src/components/layout/RoleViewSwitcher.tsx",
           "supabase/functions/generate-synthetic-cohort/index.ts",
+          "supabase/functions/finalize-stalled-cohort/index.ts",
           "supabase/functions/analyze-cohort-patterns/index.ts",
           "supabase/functions/query-perplexity/index.ts",
         ],
