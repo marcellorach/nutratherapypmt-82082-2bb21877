@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Sparkles, Loader2, Wand2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { useRoleView } from '@/contexts/RoleViewContext';
 
 export interface SuggestedCohort {
   title: string;
@@ -43,6 +44,9 @@ const KIND_COLOR: Record<SuggestedCohort['kind'], string> = {
 const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
   const [loading, setLoading] = useState(false);
   const [cohorts, setCohorts] = useState<SuggestedCohort[]>([]);
+  const { viewId } = useRoleView();
+  // Tag de modelo é dado interno — só Arquiteto da Plataforma vê.
+  const showModelTag = viewId === 'platform_architect';
 
   const fetchSuggestions = async () => {
     setLoading(true);
@@ -87,9 +91,13 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
               Sugestões ativas (IA)
             </h3>
             <p className="text-xs text-gray-600 mt-1">
-              A IA lê sinais da plataforma (gaps do Meta-KG, conflitos, condições sub-representadas)
-              e propõe 5 cohorts que a PetLove poderia compartilhar.
-              Modelo: <code className="text-[10px] bg-white px-1 rounded">google/gemini-3.5-flash</code>.
+              A Senex AI lê sinais da plataforma (gaps do Meta-KG, conflitos, condições sub-representadas)
+              e propõe 5 cohorts que o parceiro clínico poderia compartilhar.
+              {showModelTag && (
+                <>
+                  {' '}Modelo: <code className="text-[10px] bg-white px-1 rounded">google/gemini-3.5-flash</code>.
+                </>
+              )}
             </p>
           </div>
           <Button size="sm" onClick={fetchSuggestions} disabled={loading}>
