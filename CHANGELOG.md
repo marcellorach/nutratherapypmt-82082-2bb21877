@@ -24,6 +24,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 6.0.0 -->
 
+### Changed - 2026-05-25 — Cohorts sintéticos: explorador de pacientes por cohort
+<!-- area: admin · status: entregue · i18n: 1.110.0 -->
+- Aba **Cohorts sintéticos** agora tem botão **"Ver pacientes"** em cada cohort para abrir um dialog com lista pesquisável dos pets gerados naquele cohort e drill-down individual com perfil, condições e exames sintéticos reais gravados no banco.
+- O fluxo resolve a lacuna de inspeção operacional: após a geração parcial (ex.: 175/200), já é possível auditar os registros efetivamente persistidos sem sair da aba de priorizações.
+- I18N_VERSION 1.109.0 → 1.110.0 com novas chaves `prioritization.syntheticExplorer.*` em PT/EN.
+- Files: src/components/administrador/priorizacoes/{SyntheticCohortsManager,CohortPatientsDialog}.tsx, src/locales/{pt,en}/translation.json, src/i18n.ts
+
 ### Added - 2026-05-25 — Playground Multi-Fonte + SourcePanel (fundação #8)
 <!-- area: admin · status: entregue · i18n: 1.108.0 -->
 - Serviço `MultiSourceResolver` (`src/services/multi-source-resolver.ts`) com 5 providers independentes: KG curado (peso 1.0, via RPC `get_relations_graph_data`), histórico do cão (0.95), cohort sintético (0.7), cães tratados (0.6, stub) e internet via Perplexity (0.3). Detecção automática de conflito quando ≥ 2 fontes de peso ≥ 0.6 retornam claims com polaridade divergente.

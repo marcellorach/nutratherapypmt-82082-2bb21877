@@ -9,6 +9,8 @@ import { useRoleView } from '@/contexts/RoleViewContext';
 import CohortProgressLog, { ProgressLogEntry } from './CohortProgressLog';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { useTranslation } from 'react-i18next';
+import CohortPatientsDialog from './CohortPatientsDialog';
 
 interface CohortRow {
   id: string;
@@ -38,13 +40,19 @@ const STATUS_COLOR: Record<CohortRow['status'], string> = {
 };
 
 const SyntheticCohortsManager: React.FC = () => {
+  const { t } = useTranslation();
   const [cohorts, setCohorts] = useState<CohortRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [showGenerating, setShowGenerating] = useState(false);
+  const [selectedCohortId, setSelectedCohortId] = useState<string | null>(null);
   const { viewId } = useRoleView();
   const showModelTag = viewId === 'platform_architect';
+  const selectedCohort = useMemo(
+    () => cohorts.find((cohort) => cohort.id === selectedCohortId) ?? null,
+    [cohorts, selectedCohortId],
+  );
 
   const fetchCohorts = async () => {
     setLoading(true);
@@ -180,6 +188,13 @@ const SyntheticCohortsManager: React.FC = () => {
               <div className="flex gap-1.5 pt-1 border-t">
                 <Button
                   size="sm" variant="outline" className="h-7 text-xs"
+                  disabled={c.generated_n === 0}
+                  onClick={() => setSelectedCohortId(c.id)}
+                >
+                  {t('prioritization.syntheticExplorer.openPatients')}
+                </Button>
+                <Button
+                  size="sm" variant="outline" className="h-7 text-xs"
                   disabled={c.status !== 'ready' || analyzing === c.id}
                   onClick={() => runAnalysis(c.id)}
                 >
@@ -203,6 +218,15 @@ const SyntheticCohortsManager: React.FC = () => {
           </Card>
         ))}
       </div>
+
+      <CohortPatientsDialog
+        cohortId={selectedCohort?.id ?? null}
+        cohortName={selectedCohort?.name ?? null}
+        open={!!selectedCohortId}
+        onOpenChange={(open) => {
+          if (!open) setSelectedCohortId(null);
+        }}
+      />
     </div>
   );
 };

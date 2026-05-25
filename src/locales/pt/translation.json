@@ -8491,6 +8491,48 @@
         "internet": "Internet (Perplexity)",
         "treatedDogs": "Cães tratados na plataforma"
       }
+    },
+    "syntheticExplorer": {
+      "title": "Pets do cohort",
+      "subtitle": "{{count}} registros sintéticos do cohort \"{{cohort}}\".",
+      "openPatients": "Ver pacientes",
+      "searchPlaceholder": "Buscar por ID, nome ou raça…",
+      "listCount": "{{shown}} de {{total}} pacientes",
+      "loadingList": "Carregando pacientes do cohort…",
+      "loadingDetail": "Carregando detalhe do paciente…",
+      "emptyList": "Nenhum paciente encontrado para este filtro.",
+      "emptyDetail": "Selecione um paciente para ver os dados clínicos sintéticos gerados.",
+      "profileTitle": "Perfil",
+      "metadataTitle": "Metadados",
+      "notesTitle": "Observações",
+      "noNotes": "Sem observações adicionais.",
+      "conditionsTitle": "Condições",
+      "noConditions": "Nenhuma condição registrada para este paciente.",
+      "examsTitle": "Exames",
+      "noExams": "Nenhum exame registrado para este paciente.",
+      "noStructuredResults": "Sem resultados estruturados neste exame.",
+      "conditionMeta": "Origem: {{origin}} · Data: {{date}}",
+      "examDate": "Data do exame: {{date}}",
+      "close": "Fechar",
+      "profile": {
+        "breed": "Raça",
+        "sex": "Sexo",
+        "age": "Idade",
+        "weight": "Peso"
+      },
+      "metadata": {
+        "createdAt": "Gerado em",
+        "conditions": "Condições",
+        "exams": "Exames"
+      },
+      "sex": {
+        "male": "Macho",
+        "female": "Fêmea"
+      },
+      "errors": {
+        "loadListTitle": "Erro ao carregar pacientes do cohort",
+        "loadDetailTitle": "Erro ao carregar detalhe do paciente"
+      }
     }
   }
 }
