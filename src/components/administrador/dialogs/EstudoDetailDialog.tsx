@@ -51,7 +51,7 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
     const saved = localStorage.getItem('triplet_approval_threshold');
     return saved ? parseInt(saved, 10) : 50;
   });
-  const { executeApprovalWorkflow } = useStudyApprovalWorkflow();
+  const { executeApprovalWorkflow, logs: workflowLogs } = useStudyApprovalWorkflow();
 
   // Fetch triplet summary when dialog opens, estudo changes, or tab changes
   useEffect(() => {
@@ -253,6 +253,34 @@ const EstudoDetailDialog: React.FC<EstudoDetailDialogProps> = ({
         </Tabs>
 
         <DialogFooter className="gap-2">
+          {(isApproving || workflowLogs.length > 0) && (
+            <div className="w-full mr-auto max-h-40 overflow-y-auto rounded-md border bg-muted/40 p-2 font-mono text-[11px] leading-relaxed">
+              <div className="mb-1 flex items-center gap-2 text-xs font-semibold text-foreground">
+                {isApproving && <Loader2 className="h-3 w-3 animate-spin" />}
+                {t('studies.approval.processingLog', 'Log do processamento')}
+              </div>
+              {workflowLogs.length === 0 ? (
+                <div className="text-muted-foreground">{t('studies.approval.waitingLogs', 'Aguardando início…')}</div>
+              ) : (
+                workflowLogs.map((l, i) => (
+                  <div
+                    key={i}
+                    className={
+                      l.level === 'error'
+                        ? 'text-red-600'
+                        : l.level === 'warn'
+                        ? 'text-amber-600'
+                        : l.level === 'success'
+                        ? 'text-green-600'
+                        : 'text-foreground'
+                    }
+                  >
+                    <span className="text-muted-foreground">[{l.ts}]</span> {l.message}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
           <Button 
             variant="outline" 
             size="sm" 
