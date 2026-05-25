@@ -24,6 +24,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 6.0.0 -->
 
+### Added - 2026-05-25 — Painel de Priorizações + Camada de Visualização de Papéis
+<!-- area: admin · status: entregue · i18n: 1.105.0 -->
+- Nova aba `/administrador?tab=priorizacoes` em "Governança & IA": Kanban com 5 colunas (Backlog · Próximo · Em curso · Em teste · Entregue) seedado com 10 cards ordenados (role-view-layer → meta-kg-phase-b). Cada card declara `area | effort | value[] | dependsOn[] | rationale`. Fonte única do roadmap operacional — substitui na prática `docs/STANFORD_DEMO.md`.
+- Sub-tab **Gerador de Sugestões de Cohort**: formulário guiado (raça, idade, peso, condições, medicação, N-alvo, exclusões, formato de entrega, privacidade) que exporta Markdown copiável / downloadable para enviar à PetLove pedindo recortes específicos do banco histórico (1M+ cães).
+- **Camada de visualização de papéis** (não é segurança — é redução de ruído): `src/config/role-views.ts` declara 5 perfis (`platform_architect`, `rnd_lead`, `vet_curador`, `vet_responsavel`, `tutor`) com `allowedAdminGroups` e `defaultRoute`. `RoleViewContext` persiste seleção em localStorage. `RoleViewSwitcher` no Header só aparece para admin real e filtra grupos da sidebar admin via `AdminSidebarGroups`. RLS real fica para quando entrar o 1º vet PetLove externo (card #9 do board).
+- i18n: +~40 chaves em `prioritization.*` + `admin.sidebar.governanceAI.priorizacoes` (PT+EN). I18N_VERSION 1.104.0 → 1.105.0.
+- Organograma: novo nó "Painel de Priorizações + Camada de Visualização de Papéis" sob `admin`.
+- Files: src/pages/administrador/PriorizacoesTab.tsx, src/components/administrador/priorizacoes/{PrioritizationBoard,PrioritizationCard,CohortRequestGenerator}.tsx, src/data/prioritizationBoard.ts, src/config/role-views.ts, src/contexts/RoleViewContext.tsx, src/components/layout/{RoleViewSwitcher,Header}.tsx, src/components/administrador/sidebar/{AdminSidebarGroups,groups/GovernanceAIGroup}.tsx, src/config/admin-tabs.ts, src/App.tsx, src/i18n.ts, src/locales/{pt,en}/translation.json, src/data/projectOrganograma.ts
+
 ### Added - 2026-05-25 — Roadmap Meta-KG: gatilhos quantitativos para acionar a Fase B
 <!-- area: meta · status: entregue · i18n: 1.104.0 -->
 - `MetaKgRoadmapCard` agora exibe 3 métricas vivas que destravam a Fase B: (1) meta-estudos aprovados ≥ 10, (2) lições redundantes entre estudos ≥ 3, (3) conflitos recipe↔anti-padrão ≥ 1. Cada métrica renderiza barra de progresso e selo verde quando o alvo é atingido. Card mostra badge global "Pronto para iniciar" / "Aguardando massa crítica".

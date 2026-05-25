@@ -423,6 +423,22 @@ export const organograma: OrganogramaArea[] = [
           "supabase/migrations/20260521160844_233e5785-acfa-4994-8725-7a45895634c0.sql",
         ],
       },
+      {
+        title: "Painel de Priorizações + Camada de Visualização de Papéis",
+        title_en: "Prioritization Panel + Role Visualization Layer",
+        description: "Aba 'Priorizações' (Kanban com 5 colunas) como fonte única do roadmap operacional + Gerador de Sugestões de Cohort para a PetLove. Camada de visualização declarativa (5 perfis: Arquiteto, Líder P&D, Vet-Curador, Vet-Responsável, Tutor) filtra grupos da sidebar via RoleViewSwitcher no Header. NÃO é segurança — é redução de ruído cognitivo.",
+        description_en: "'Prioritization' tab (5-column Kanban) as single source of the operational roadmap + Cohort Request Generator for PetLove. Declarative role visualization layer (5 profiles) filters sidebar groups via RoleViewSwitcher in the Header. NOT security — cognitive load reduction.",
+        files: [
+          "src/pages/administrador/PriorizacoesTab.tsx",
+          "src/components/administrador/priorizacoes/PrioritizationBoard.tsx",
+          "src/components/administrador/priorizacoes/PrioritizationCard.tsx",
+          "src/components/administrador/priorizacoes/CohortRequestGenerator.tsx",
+          "src/data/prioritizationBoard.ts",
+          "src/config/role-views.ts",
+          "src/contexts/RoleViewContext.tsx",
+          "src/components/layout/RoleViewSwitcher.tsx",
+        ],
+      },
     ],
   },
   {
