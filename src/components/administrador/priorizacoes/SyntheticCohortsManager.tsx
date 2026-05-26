@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Database, Loader2, Trash2, RefreshCw, FlaskConical, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Database, Loader2, Trash2, RefreshCw, FlaskConical, CheckCircle2, AlertTriangle, Layers, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useRoleView } from '@/contexts/RoleViewContext';
@@ -51,6 +51,7 @@ const SyntheticCohortsManager: React.FC = () => {
   const [cohorts, setCohorts] = useState<CohortRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState<string | null>(null);
+  const [analyzingAll, setAnalyzingAll] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [showGenerating, setShowGenerating] = useState(false);
   const [selectedCohortId, setSelectedCohortId] = useState<string | null>(null);
@@ -74,15 +75,15 @@ const SyntheticCohortsManager: React.FC = () => {
 
   useEffect(() => {
     fetchCohorts();
-    // poll while any cohort is generating
+    // poll while any cohort is generating OR being analyzed
     const t = setInterval(() => {
       setCohorts((curr) => {
-        if (curr.some((c) => c.status === 'generating')) fetchCohorts();
+        if (curr.some((c) => c.status === 'generating') || analyzing) fetchCohorts();
         return curr;
       });
-    }, 5000);
+    }, 3000);
     return () => clearInterval(t);
-  }, []);
+  }, [analyzing]);
 
   const runAnalysis = async (cohortId: string) => {
     const cohort = cohorts.find((c) => c.id === cohortId);
@@ -111,6 +112,26 @@ const SyntheticCohortsManager: React.FC = () => {
       toast({ title: 'Falha na análise', description: e?.message ?? 'Erro', variant: 'destructive' });
     } finally {
       setAnalyzing(null);
+    }
+  };
+
+  const runCrossCohortAnalysis = async () => {
+    const readyCount = cohorts.filter((c) => c.status === 'ready').length;
+    if (readyCount < 2) {
+      toast({ title: 'Necessário 2+ cohorts prontos', description: 'Análise pan-populacional precisa de ao menos 2 cohorts com status ready.', variant: 'destructive' });
+      return;
+    }
+    if (!window.confirm(`Analisar TODOS os ${readyCount} cohorts prontos juntos? Isso usa o LLM para procurar padrões que cruzam cohorts (insights ficam marcados [Pan-cohort]).`)) return;
+    setAnalyzingAll(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-all-cohorts-patterns', { body: {} });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({ title: 'Análise pan-cohort concluída', description: `${data?.generated ?? 0} insights cruzando ${data?.cohorts ?? readyCount} cohorts. Veja em Population Insights.` });
+    } catch (e: any) {
+      toast({ title: 'Falha na análise pan-cohort', description: e?.message ?? 'Erro', variant: 'destructive' });
+    } finally {
+      setAnalyzingAll(false);
     }
   };
 
@@ -155,6 +176,10 @@ const SyntheticCohortsManager: React.FC = () => {
           )})
         </h3>
         <div className="flex items-center gap-3">
+          <Button size="sm" variant="default" onClick={runCrossCohortAnalysis} disabled={analyzingAll || cohorts.filter((c)=>c.status==='ready').length < 2}>
+            {analyzingAll ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Layers className="h-3.5 w-3.5 mr-1.5" />}
+            Analisar TODOS juntos ({cohorts.filter((c)=>c.status==='ready').length})
+          </Button>
           {cohorts.some((c) => c.status === 'generating') && (
             <div className="flex items-center gap-1.5">
               <Switch id="show-generating" checked={showGenerating} onCheckedChange={setShowGenerating} />
@@ -195,6 +220,12 @@ const SyntheticCohortsManager: React.FC = () => {
                     </Badge>
                   </div>
                 </div>
+                {typeof c.last_analysis_insights_count === 'number' && c.last_analysis_insights_count > 0 && (
+                  <Badge variant="outline" className="text-[10px] bg-emerald-50 border-emerald-300 text-emerald-800 flex items-center gap-1 shrink-0">
+                    <Sparkles className="h-2.5 w-2.5" />
+                    {c.last_analysis_insights_count} insights
+                  </Badge>
+                )}
               </div>
               {c.rationale && <p className="text-[11px] text-gray-600 line-clamp-3">{c.rationale}</p>}
               {c.generation_error && (
@@ -205,7 +236,12 @@ const SyntheticCohortsManager: React.FC = () => {
               )}
               {c.analysis_log && c.analysis_log.length > 0 && (
                 <div className="space-y-1">
-                  <CohortProgressLog entries={c.analysis_log as ProgressLogEntry[]} />
+                  <CohortProgressLog
+                    entries={c.analysis_log as ProgressLogEntry[]}
+                    title="Log de Análise"
+                    forceOpen={analyzing === c.id}
+                    defaultOpen={analyzing === c.id}
+                  />
                   {c.last_analyzed_at && (
                     <div className="flex items-center justify-between text-[10px] text-gray-500 px-1">
                       <span>
