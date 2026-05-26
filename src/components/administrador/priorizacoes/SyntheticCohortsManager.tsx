@@ -272,6 +272,24 @@ const SyntheticCohortsManager: React.FC = () => {
                   )}
                 </div>
               )}
+              {(insightsByCohort[c.id]?.length ?? 0) > 0 && (
+                <div className="rounded border border-emerald-200 bg-emerald-50/40 p-2 space-y-1">
+                  <div className="text-[10px] font-semibold text-emerald-800 uppercase tracking-wide flex items-center gap-1">
+                    <Sparkles className="h-2.5 w-2.5" /> Insights gerados ({insightsByCohort[c.id].length})
+                  </div>
+                  <ul className="space-y-0.5">
+                    {insightsByCohort[c.id].map((ins) => (
+                      <li key={ins.id} className="text-[11px] text-gray-800 leading-snug flex items-start gap-1.5">
+                        <span className="text-emerald-700 mt-0.5">•</span>
+                        <span className="flex-1">{ins.title}</span>
+                        <Badge variant="outline" className="text-[9px] font-mono shrink-0 h-4 px-1">
+                          {Math.round((ins.confidence ?? 0) * 100)}
+                        </Badge>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               <CohortStatsPanel cohortId={c.id} cohortReady={c.status === 'ready' && c.generated_n > 0} />
               <div className="flex gap-1.5 pt-1 border-t">
                 <Button
