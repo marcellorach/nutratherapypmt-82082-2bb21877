@@ -233,6 +233,37 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
     return () => clearInterval(t);
   }, [jobs]);
 
+  // Polling de originalidade: enquanto houver sugestões com score=null e id válido, recarrega a cada 4s.
+  useEffect(() => {
+    const pendingIdx = Object.entries(originality)
+      .filter(([i, o]) => o.score == null && o.status !== 'error' && suggestionIds[Number(i)])
+      .map(([i]) => Number(i));
+    if (!pendingIdx.length) return;
+    const ids = pendingIdx.map((i) => suggestionIds[i]).filter(Boolean) as string[];
+    const t = setInterval(async () => {
+      const { data } = await (supabase as any)
+        .from('cohort_suggestions')
+        .select('id, originality_score, originality_status, originality_breakdown')
+        .in('id', ids);
+      if (!data) return;
+      setOriginality((prev) => {
+        const next = { ...prev };
+        pendingIdx.forEach((i) => {
+          const row = data.find((r: any) => r.id === suggestionIds[i]);
+          if (row && (row.originality_score != null || row.originality_status)) {
+            next[i] = {
+              score: row.originality_score != null ? Number(row.originality_score) : null,
+              status: row.originality_status ?? null,
+              breakdown: row.originality_breakdown ?? null,
+            };
+          }
+        });
+        return next;
+      });
+    }, 4000);
+    return () => clearInterval(t);
+  }, [originality, suggestionIds]);
+
   const forceFinalize = async (cohortId: string) => {
     if (!window.confirm('Marcar este cohort como finalizado manualmente? Os pets já gerados serão mantidos.')) return;
     setFinalizing(cohortId);
