@@ -4149,6 +4149,33 @@ export type Database = {
         }
         Relationships: []
       }
+      prioritization_history: {
+        Row: {
+          card_id: string
+          from_status: string | null
+          id: string
+          moved_at: string
+          note: string | null
+          to_status: string
+        }
+        Insert: {
+          card_id: string
+          from_status?: string | null
+          id?: string
+          moved_at?: string
+          note?: string | null
+          to_status: string
+        }
+        Update: {
+          card_id?: string
+          from_status?: string | null
+          id?: string
+          moved_at?: string
+          note?: string | null
+          to_status?: string
+        }
+        Relationships: []
+      }
       prioritization_overrides: {
         Row: {
           card_id: string

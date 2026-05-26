@@ -2,11 +2,19 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Lock } from 'lucide-react';
+import { Lock, History, ChevronDown, ChevronRight } from 'lucide-react';
 import { PrioritizationCard as Card_, STRATEGIC_VALUE_LABEL } from '@/data/prioritizationBoard';
+
+export interface HistoryEntry {
+  from_status: string | null;
+  to_status: string;
+  moved_at: string;
+  note: string | null;
+}
 
 interface Props {
   card: Card_;
+  history?: HistoryEntry[];
 }
 
 const AREA_COLORS: Record<string, string> = {
@@ -25,8 +33,22 @@ const EFFORT_COLORS: Record<string, string> = {
   XL: 'bg-red-100 text-red-800',
 };
 
-const PrioritizationCardItem: React.FC<Props> = ({ card }) => {
+const STATUS_LABEL: Record<string, string> = {
+  backlog: 'Backlog',
+  next: 'Próximo',
+  in_progress: 'Em curso',
+  in_test: 'Em teste',
+  done: 'Entregue',
+};
+
+const formatDate = (iso: string) => {
+  const d = new Date(iso);
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+};
+
+const PrioritizationCardItem: React.FC<Props> = ({ card, history = [] }) => {
   const { i18n, t } = useTranslation();
+  const [showHistory, setShowHistory] = React.useState(false);
   const isPt = i18n.language?.startsWith('pt');
 
   const title = isPt ? card.title_pt : card.title_en;
@@ -74,6 +96,36 @@ const PrioritizationCardItem: React.FC<Props> = ({ card }) => {
         {card.deliveredVersion && (
           <div className="text-[10px] text-emerald-600">
             ✓ {t('prioritization.deliveredIn', 'Entregue em')} v{card.deliveredVersion}
+          </div>
+        )}
+
+        {history.length > 0 && (
+          <div className="pt-1 border-t border-gray-100">
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setShowHistory((v) => !v); }}
+              onPointerDown={(e) => e.stopPropagation()}
+              className="flex items-center gap-1 text-[10px] text-gray-500 hover:text-gray-700 w-full"
+            >
+              {showHistory ? <ChevronDown className="h-2.5 w-2.5" /> : <ChevronRight className="h-2.5 w-2.5" />}
+              <History className="h-2.5 w-2.5" />
+              <span>Criado {formatDate(history[0].moved_at)}</span>
+              {history.length > 1 && <span className="text-gray-400">· {history.length - 1} mov.</span>}
+            </button>
+            {showHistory && (
+              <ul className="mt-1 space-y-0.5 pl-3">
+                {history.map((h, i) => (
+                  <li key={i} className="text-[10px] text-gray-600 leading-tight">
+                    <span className="font-mono text-gray-400">{formatDate(h.moved_at)}</span>
+                    {' · '}
+                    {h.from_status
+                      ? <>{STATUS_LABEL[h.from_status] ?? h.from_status} → <span className="font-medium">{STATUS_LABEL[h.to_status] ?? h.to_status}</span></>
+                      : <span className="italic">criado em {STATUS_LABEL[h.to_status] ?? h.to_status}</span>}
+                    {h.note && <div className="text-gray-500 italic pl-2">{h.note}</div>}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
       </CardContent>

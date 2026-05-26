@@ -21,6 +21,22 @@ const STATUS_STYLES: Record<PrioritizationStatus, { bg: string; label: string }>
 const PrioritizationBoard: React.FC = () => {
   const { t } = useTranslation();
   const [overrides, setOverrides] = useState<Record<string, PrioritizationStatus>>({});
+  const [history, setHistory] = useState<Record<string, Array<{ from_status: string | null; to_status: string; moved_at: string; note: string | null }>>>({});
+
+  const loadHistory = async () => {
+    const { data } = await supabase
+      .from('prioritization_history')
+      .select('card_id, from_status, to_status, moved_at, note')
+      .order('moved_at', { ascending: true });
+    if (data) {
+      const map: typeof history = {};
+      data.forEach((h: any) => {
+        if (!map[h.card_id]) map[h.card_id] = [];
+        map[h.card_id].push(h);
+      });
+      setHistory(map);
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -30,6 +46,7 @@ const PrioritizationBoard: React.FC = () => {
         data.forEach((o: any) => (map[o.card_id] = o.status));
         setOverrides(map);
       }
+      loadHistory();
     })();
   }, []);
 
@@ -72,7 +89,15 @@ const PrioritizationBoard: React.FC = () => {
         else next[cardId] = current;
         return next;
       });
+      return;
     }
+    await supabase.from('prioritization_history').insert({
+      card_id: cardId,
+      from_status: current,
+      to_status: newStatus,
+      note: null,
+    });
+    loadHistory();
   };
 
   return (
@@ -101,7 +126,7 @@ const PrioritizationBoard: React.FC = () => {
               ) : (
                 cards.map((card) => (
                   <DraggableCard key={card.id} id={card.id}>
-                    <PrioritizationCardItem card={card} />
+                    <PrioritizationCardItem card={card} history={history[card.id] ?? []} />
                   </DraggableCard>
                 ))
               )}
