@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, BookOpen, Sparkles, ExternalLink, FlaskConical, ChevronDown, ChevronRight, Pill, Activity, Microscope } from 'lucide-react';
+import { Loader2, Sparkles, FlaskConical, ChevronDown, ChevronRight, Pill, Activity, Microscope } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
@@ -381,32 +381,9 @@ const InsightDrillDownDialog: React.FC<Props> = ({ insight, open, onOpenChange }
                 </CardContent>
               </Card>
 
-              {insight.originality_evidence && (
-                <Card className="border-purple-200 bg-purple-50/40">
-                  <CardContent className="p-3 space-y-2">
-                    <h5 className="text-xs font-semibold flex items-center gap-1.5">
-                      <BookOpen className="h-4 w-4 text-purple-700" />
-                      Originalidade na literatura
-                      <Badge variant="outline" className="text-[10px]">
-                        {insight.originality_status}
-                      </Badge>
-                      <span className="text-[10px] text-muted-foreground font-normal">
-                        via {insight.originality_evidence?.provider}
-                      </span>
-                    </h5>
-                    <p className="text-[11px] whitespace-pre-wrap leading-relaxed">{insight.originality_evidence?.answer}</p>
-                    {(insight.originality_evidence?.citations ?? []).length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 pt-1 border-t">
-                        {insight.originality_evidence.citations.map((c: string, i: number) => (
-                          <a key={i} href={c} target="_blank" rel="noopener noreferrer" className="text-[10px] text-purple-700 hover:underline flex items-center gap-0.5">
-                            <ExternalLink className="h-2.5 w-2.5" /> [{i + 1}]
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
+              <p className="text-[10px] text-muted-foreground italic text-center pt-1">
+                Para evidências da literatura científica, clique no badge de originalidade no card do insight.
+              </p>
             </>
           )}
         </div>
