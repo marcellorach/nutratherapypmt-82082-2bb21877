@@ -115,7 +115,18 @@ const PopulationInsightsV0: React.FC = () => {
       known:   { color: 'bg-gray-100 border-gray-300 text-gray-700',          label: '⌖ já publicado' },
     };
     const v = map[c.originality_status]; if (!v) return null;
-    return <Badge variant="outline" className={`text-[9px] ${v.color}`}>{v.label}</Badge>;
+    const nCites = (c.originality_evidence?.citations ?? []).length;
+    return (
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); setDrillDownInsight(c); }}
+        title="Ver evidências e citações da busca na literatura"
+      >
+        <Badge variant="outline" className={`text-[9px] cursor-pointer hover:brightness-95 ${v.color}`}>
+          {v.label}{nCites > 0 ? ` · ${nCites} ref` : ''}
+        </Badge>
+      </button>
+    );
   };
 
   return (
