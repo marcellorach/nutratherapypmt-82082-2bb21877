@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, BookOpen, Sparkles, ExternalLink, FlaskConical } from 'lucide-react';
+import { Loader2, BookOpen, Sparkles, ExternalLink, FlaskConical, ChevronDown, ChevronRight, Pill, Activity, Microscope } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
@@ -32,7 +32,9 @@ const InsightDrillDownDialog: React.FC<Props> = ({ insight, open, onOpenChange }
   const [pets, setPets] = useState<any[]>([]);
   const [conditions, setConditions] = useState<any[]>([]);
   const [exams, setExams] = useState<any[]>([]);
+  const [medications, setMedications] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [expandedPet, setExpandedPet] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open || !insight) return;
@@ -45,14 +47,16 @@ const InsightDrillDownDialog: React.FC<Props> = ({ insight, open, onOpenChange }
       setPets(petsData ?? []);
 
       if (petIds.length) {
-        const [{ data: condData }, { data: examData }] = await Promise.all([
+        const [{ data: condData }, { data: examData }, { data: medData }] = await Promise.all([
           supabase.from('pet_conditions').select('pet_id, condition_name, severity, status').in('pet_id', petIds),
-          supabase.from('pet_exams').select('pet_id, exam_type, flags_abnormal').in('pet_id', petIds),
+          supabase.from('pet_exams').select('pet_id, exam_type, exam_date, flags_abnormal, results, clinical_comments, lab_name').in('pet_id', petIds),
+          supabase.from('pet_medications').select('pet_id, medication_name, dosage, frequency, status').in('pet_id', petIds),
         ]);
         setConditions(condData ?? []);
         setExams(examData ?? []);
+        setMedications(medData ?? []);
       } else {
-        setConditions([]); setExams([]);
+        setConditions([]); setExams([]); setMedications([]);
       }
       setLoading(false);
     })();
@@ -226,25 +230,132 @@ const InsightDrillDownDialog: React.FC<Props> = ({ insight, open, onOpenChange }
 
               <Card>
                 <CardContent className="p-3">
-                  <h5 className="text-xs font-semibold mb-2">Pets que sustentam ({matchingPets.length})</h5>
-                  <div className="max-h-48 overflow-y-auto">
-                    <table className="w-full text-[11px]">
-                      <thead className="sticky top-0 bg-white border-b">
-                        <tr className="text-left text-muted-foreground">
-                          <th className="py-1">Nome</th><th>Raça</th><th>Idade</th><th>Sexo</th><th>Peso</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {matchingPets.slice(0, 100).map((p) => (
-                          <tr key={p.id} className="border-b last:border-0 hover:bg-muted/30">
-                            <td className="py-1">{p.name ?? p.id.slice(0, 8)}</td>
-                            <td>{p.breed}</td><td>{p.age_years}a</td><td>{p.sex}</td><td>{p.weight_kg}kg</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    {matchingPets.length > 100 && <p className="text-[10px] text-muted-foreground italic pt-1">+ {matchingPets.length - 100} pets…</p>}
+                  <h5 className="text-xs font-semibold mb-2">
+                    Pets que sustentam ({matchingPets.length}) — clique para expandir e ver dados reais
+                  </h5>
+                  <div className="max-h-[420px] overflow-y-auto divide-y border rounded">
+                    {matchingPets.slice(0, 200).map((p) => {
+                      const petConds = conditions.filter((c) => c.pet_id === p.id);
+                      const petExams = exams.filter((e) => e.pet_id === p.id);
+                      const petMeds = medications.filter((m) => m.pet_id === p.id);
+                      const isOpen = expandedPet === p.id;
+                      return (
+                        <div key={p.id} className="bg-white">
+                          <button
+                            type="button"
+                            onClick={() => setExpandedPet(isOpen ? null : p.id)}
+                            className="w-full text-left flex items-center gap-2 px-2 py-1.5 text-[11px] hover:bg-muted/40"
+                          >
+                            {isOpen ? <ChevronDown className="h-3 w-3 shrink-0" /> : <ChevronRight className="h-3 w-3 shrink-0" />}
+                            <span className="font-medium w-28 truncate">{p.name ?? p.id.slice(0, 8)}</span>
+                            <span className="w-32 truncate text-muted-foreground">{p.breed}</span>
+                            <span className="w-12 text-muted-foreground">{p.age_years}a</span>
+                            <span className="w-14 text-muted-foreground">{p.sex}</span>
+                            <span className="w-16 text-muted-foreground">{p.weight_kg}kg</span>
+                            <div className="ml-auto flex items-center gap-1">
+                              {petConds.length > 0 && <Badge variant="outline" className="text-[9px] bg-rose-50 border-rose-200 text-rose-700">{petConds.length} cond</Badge>}
+                              {petExams.length > 0 && <Badge variant="outline" className="text-[9px] bg-amber-50 border-amber-200 text-amber-700">{petExams.length} exames</Badge>}
+                              {petMeds.length > 0 && <Badge variant="outline" className="text-[9px] bg-indigo-50 border-indigo-200 text-indigo-700">{petMeds.length} med</Badge>}
+                            </div>
+                          </button>
+                          {isOpen && (
+                            <div className="bg-muted/30 px-4 py-2 space-y-3 text-[11px]">
+                              {/* Conditions */}
+                              <div>
+                                <div className="font-semibold flex items-center gap-1 mb-1 text-rose-800">
+                                  <Activity className="h-3 w-3" /> Condições diagnosticadas ({petConds.length})
+                                </div>
+                                {petConds.length === 0 ? (
+                                  <p className="italic text-muted-foreground pl-4">nenhuma condição registrada</p>
+                                ) : (
+                                  <ul className="space-y-0.5 pl-4">
+                                    {petConds.map((c, i) => (
+                                      <li key={i} className="flex flex-wrap gap-1.5 items-center">
+                                        <span>• {c.condition_name}</span>
+                                        {c.severity && <Badge variant="outline" className="text-[9px]">{c.severity}</Badge>}
+                                        {c.status && <Badge variant="outline" className="text-[9px] bg-white">{c.status}</Badge>}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </div>
+
+                              {/* Exams */}
+                              <div>
+                                <div className="font-semibold flex items-center gap-1 mb-1 text-amber-800">
+                                  <Microscope className="h-3 w-3" /> Exames laboratoriais ({petExams.length})
+                                </div>
+                                {petExams.length === 0 ? (
+                                  <p className="italic text-muted-foreground pl-4">nenhum exame registrado</p>
+                                ) : (
+                                  <div className="space-y-2 pl-4">
+                                    {petExams.map((e, i) => {
+                                      const resultEntries = e.results && typeof e.results === 'object'
+                                        ? Object.entries(e.results).slice(0, 12) : [];
+                                      return (
+                                        <div key={i} className="border-l-2 border-amber-200 pl-2">
+                                          <div className="flex items-center gap-1.5 flex-wrap">
+                                            <span className="font-medium">{e.exam_type}</span>
+                                            {e.exam_date && <span className="text-muted-foreground text-[10px]">{e.exam_date}</span>}
+                                            {e.lab_name && <Badge variant="outline" className="text-[9px]">{e.lab_name}</Badge>}
+                                          </div>
+                                          {(e.flags_abnormal ?? []).length > 0 && (
+                                            <div className="flex flex-wrap gap-1 mt-1">
+                                              {e.flags_abnormal.map((f: string, k: number) => (
+                                                <Badge key={k} variant="outline" className="text-[9px] bg-rose-50 border-rose-200 text-rose-700">⚠ {f}</Badge>
+                                              ))}
+                                            </div>
+                                          )}
+                                          {resultEntries.length > 0 && (
+                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-3 gap-y-0.5 mt-1 text-[10px]">
+                                              {resultEntries.map(([k, v]) => (
+                                                <div key={k} className="truncate">
+                                                  <span className="text-muted-foreground">{k}:</span>{' '}
+                                                  <span className="font-mono">{typeof v === 'object' ? JSON.stringify(v) : String(v)}</span>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          )}
+                                          {e.clinical_comments && (
+                                            <p className="text-[10px] italic text-muted-foreground mt-1">"{e.clinical_comments}"</p>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Medications */}
+                              <div>
+                                <div className="font-semibold flex items-center gap-1 mb-1 text-indigo-800">
+                                  <Pill className="h-3 w-3" /> Medicações ({petMeds.length})
+                                </div>
+                                {petMeds.length === 0 ? (
+                                  <p className="italic text-muted-foreground pl-4">nenhuma medicação</p>
+                                ) : (
+                                  <ul className="space-y-0.5 pl-4">
+                                    {petMeds.map((m, i) => (
+                                      <li key={i} className="flex flex-wrap gap-1.5 items-center">
+                                        <span>• {m.medication_name}</span>
+                                        {m.dosage && <span className="text-muted-foreground">{m.dosage}</span>}
+                                        {m.frequency && <span className="text-muted-foreground">— {m.frequency}</span>}
+                                        {m.status && <Badge variant="outline" className="text-[9px]">{m.status}</Badge>}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {matchingPets.length > 200 && <p className="text-[10px] text-muted-foreground italic p-2">+ {matchingPets.length - 200} pets…</p>}
                   </div>
+                  <p className="text-[10px] text-muted-foreground italic mt-1">
+                    Todos os dados acima vêm diretamente das tabelas <code>pet_conditions</code>, <code>pet_exams</code> e <code>pet_medications</code> — nada é simulado.
+                  </p>
                 </CardContent>
               </Card>
 
