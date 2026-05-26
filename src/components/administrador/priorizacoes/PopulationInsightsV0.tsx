@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Sparkles, GitBranch, FlaskConical, Database, RefreshCw, Loader2, Bot, BookOpen, Maximize2 } from 'lucide-react';
+import { AlertTriangle, Sparkles, GitBranch, FlaskConical, Database, RefreshCw, Loader2, Bot, BookOpen, Maximize2, RotateCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { KanbanDndProvider, DroppableColumn, DraggableCard } from './dnd/KanbanDnd';
 import InsightDrillDownDialog from './InsightDrillDownDialog';
@@ -43,6 +43,7 @@ const PopulationInsightsV0: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [checkingOriginality, setCheckingOriginality] = useState<string | null>(null);
   const [drillDownInsight, setDrillDownInsight] = useState<DbInsight | null>(null);
+  const [autoQueue, setAutoQueue] = useState<Set<string>>(new Set());
 
   const fetchInsights = async () => {
     setLoading(true);
@@ -57,6 +58,21 @@ const PopulationInsightsV0: React.FC = () => {
 
   useEffect(() => { fetchInsights(); }, []);
 
+  // Auto-check originality for insights that have never been checked.
+  // Processes sequentially (one at a time) to avoid hammering the provider.
+  useEffect(() => {
+    const pending = insights.filter(
+      (i) => (!i.originality_status || i.originality_status === 'unknown') && !autoQueue.has(i.id)
+    );
+    if (pending.length === 0 || checkingOriginality) return;
+    const next = pending[0];
+    setAutoQueue((s) => new Set(s).add(next.id));
+    (async () => {
+      await checkOriginality(next.id, /*silent*/ true);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [insights, checkingOriginality]);
+
   const grouped = useMemo(() => {
     const map: Record<InsightStage, DbInsight[]> = {
       discovery: [], hypothesis: [], proposed_meta_study: [], approved: [],
@@ -70,29 +86,35 @@ const PopulationInsightsV0: React.FC = () => {
     await supabase.from('cohort_insights').update({ stage }).eq('id', id);
   };
 
-  const checkOriginality = async (id: string) => {
+  const checkOriginality = async (id: string, silent = false) => {
     setCheckingOriginality(id);
     try {
       const { data, error } = await supabase.functions.invoke('check-insight-originality', { body: { insight_id: id } });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast({ title: 'Originalidade verificada', description: `Resultado: ${data?.status}. Veja detalhes no drill-down.` });
+      if (!silent) toast({ title: 'Originalidade verificada', description: `Resultado: ${data?.status}.` });
       fetchInsights();
     } catch (e: any) {
-      toast({ title: 'Falha na verificação', description: e?.message ?? 'Erro', variant: 'destructive' });
+      if (!silent) toast({ title: 'Falha na verificação', description: e?.message ?? 'Erro', variant: 'destructive' });
     } finally {
       setCheckingOriginality(null);
     }
   };
 
-  const originalityBadge = (s?: string) => {
-    if (!s || s === 'unknown') return null;
+  const originalityBadge = (c: DbInsight, isChecking: boolean) => {
+    if (isChecking || (!c.originality_status || c.originality_status === 'unknown')) {
+      return (
+        <Badge variant="outline" className="text-[9px] bg-blue-50 border-blue-200 text-blue-700 flex items-center gap-1">
+          <Loader2 className="h-2.5 w-2.5 animate-spin" /> originalidade…
+        </Badge>
+      );
+    }
     const map: Record<string, { color: string; label: string }> = {
       novel:   { color: 'bg-emerald-100 border-emerald-300 text-emerald-800', label: '✦ inédito' },
       partial: { color: 'bg-amber-100 border-amber-300 text-amber-800',       label: '~ parcial' },
       known:   { color: 'bg-gray-100 border-gray-300 text-gray-700',          label: '⌖ já publicado' },
     };
-    const v = map[s]; if (!v) return null;
+    const v = map[c.originality_status]; if (!v) return null;
     return <Badge variant="outline" className={`text-[9px] ${v.color}`}>{v.label}</Badge>;
   };
 
@@ -146,7 +168,7 @@ const PopulationInsightsV0: React.FC = () => {
                       <div className="flex items-start justify-between gap-1.5">
                         <h4 className="text-xs font-semibold leading-tight">{isPt ? c.title : (c.title_en || c.title)}</h4>
                         <div className="flex items-center gap-1 shrink-0">
-                          {originalityBadge(c.originality_status)}
+                          {originalityBadge(c, checkingOriginality === c.id)}
                           <Badge variant="outline" className="text-[10px] font-mono">{Math.round((c.confidence ?? 0) * 100)}</Badge>
                         </div>
                       </div>
@@ -166,21 +188,21 @@ const PopulationInsightsV0: React.FC = () => {
                         ) : <span />}
                         <div className="flex items-center gap-1">
                           <Button
-                            size="sm" variant="ghost" className="h-6 px-1.5 text-[10px]"
-                            disabled={checkingOriginality === c.id}
-                            onClick={(e) => { e.stopPropagation(); checkOriginality(c.id); }}
-                            title="Verificar originalidade na literatura veterinária"
-                          >
-                            {checkingOriginality === c.id
-                              ? <Loader2 className="h-3 w-3 animate-spin" />
-                              : <><BookOpen className="h-3 w-3 mr-0.5" /> originalidade</>}
-                          </Button>
-                          <Button
-                            size="sm" variant="ghost" className="h-6 px-1.5 text-[10px]"
+                            size="sm" variant="default" className="h-6 px-2 text-[10px]"
                             onClick={(e) => { e.stopPropagation(); setDrillDownInsight(c); }}
                             title="Abrir drill-down com gráficos e pets"
                           >
                             <Maximize2 className="h-3 w-3 mr-0.5" /> detalhar
+                          </Button>
+                          <Button
+                            size="sm" variant="ghost" className="h-6 px-1.5 text-[10px]"
+                            disabled={checkingOriginality === c.id}
+                            onClick={(e) => { e.stopPropagation(); checkOriginality(c.id); }}
+                            title="Re-verificar originalidade na literatura veterinária"
+                          >
+                            {checkingOriginality === c.id
+                              ? <Loader2 className="h-3 w-3 animate-spin" />
+                              : <RotateCw className="h-3 w-3" />}
                           </Button>
                         </div>
                       </div>
