@@ -118,19 +118,69 @@ function buildTool(batchSize: number) {
   };
 }
 
+// Pré-sorteia o mix de "completude clínica" do lote para garantir variabilidade visível.
+// Profiles:
+//   "healthy"        → 0 cond, 0 exam, 0 med (apenas consulta de check-up)
+//   "cond_only"      → 1-2 cond, 0 exam, 0 med
+//   "cond_exam"      → 1-3 cond, 2-4 exam, 0 med
+//   "full"           → 1-4 cond, 2-5 exam, 1-3 med
+// Distribuição-alvo por 10 pets: 1 healthy · 2 cond_only · 2 cond_exam · 5 full
+type Profile = "healthy" | "cond_only" | "cond_exam" | "full";
+function sampleProfileMix(n: number): Profile[] {
+  const baseRatios: Array<[Profile, number]> = [
+    ["healthy", 0.10],
+    ["cond_only", 0.20],
+    ["cond_exam", 0.20],
+    ["full", 0.50],
+  ];
+  const out: Profile[] = [];
+  for (const [p, r] of baseRatios) {
+    const count = Math.round(n * r);
+    for (let i = 0; i < count; i++) out.push(p);
+  }
+  // ajuste para bater exatamente n
+  while (out.length < n) out.push("full");
+  while (out.length > n) out.pop();
+  // Fisher-Yates shuffle
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+function describeProfile(p: Profile): string {
+  switch (p) {
+    case "healthy":   return "SAUDÁVEL EM CHECK-UP: 0 condições, 0 exames, 0 medicações (apenas 1 consulta de rotina)";
+    case "cond_only": return "DIAGNÓSTICO CLÍNICO SEM EXAMES: 1-2 condições, 0 exames, 0 medicações";
+    case "cond_exam": return "INVESTIGAÇÃO ATIVA: 1-3 condições, 2-4 exames, 0 medicações (ainda sem tratamento)";
+    case "full":      return "CASO COMPLETO: 1-4 condições, 2-5 exames, 1-3 medicações";
+  }
+}
+
 async function callLLM(criteria: any, batchSize: number, batchIndex: number) {
+  const mix = sampleProfileMix(batchSize);
+  const slotList = mix
+    .map((p, i) => `  Pet ${i + 1}: ${describeProfile(p)}`)
+    .join("\n");
+
   const userPrompt = `Recorte do cohort:
 \`\`\`json
 ${JSON.stringify(criteria, null, 2)}
 \`\`\`
 
 Gere EXATAMENTE ${batchSize} prontuários sintéticos COMPLETOS (lote ${batchIndex + 1}).
-Para cada pet:
-- 1 a 4 condições alinhadas ao recorte (NUNCA vazio)
-- 1 a 3 consultas cronológicas (a última = atual, days_ago = 5..30; as anteriores = 90..540 dias atrás)
-- 2 a 5 exames laboratoriais coerentes com as condições, com flags marcando o que está alterado
-- 0 a 3 medicações se clinicamente indicadas
-- 1 anamnese curta (clinical_note) + 1 notes_summary (1 linha)
+
+PERFIL CLÍNICO DE CADA PET (RESPEITE A ORDEM E O CONTEÚDO):
+${slotList}
+
+REGRAS GERAIS:
+- TODO pet tem pelo menos 1 consulta (a última = atual, days_ago = 5..30; anteriores = 90..540 dias atrás).
+- Se o perfil pede 0 condições/exames/medicações, retorne array VAZIO ([]) para esse campo. NÃO preencha.
+- Pets "SAUDÁVEL EM CHECK-UP" têm consulta de rotina (chief_complaint tipo "Check-up anual", assessment "Animal hígido", plan "Manter rotina"). O notes_summary deve refletir isso ("Cão hígido em acompanhamento preventivo").
+- Para perfis com condições: alinhe ao recorte clínico do cohort.
+- Para perfis com exames: correlacione com as condições e marque flags do que está alterado.
+- 1 anamnese curta (clinical_note) + 1 notes_summary (1 linha) sempre.
 
 IMPORTANTE — diversidade demográfica obrigatória neste lote:
 - Misture sexos de forma equilibrada (não enviese para um lado).
