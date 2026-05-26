@@ -11,6 +11,32 @@ const LLM_TIMEOUT_MS = 90_000;
 const MAX_RETRIES = 2;
 const INTER_BATCH_DELAY_MS = 300;
 
+// Normaliza raça para forma canônica — colapsa variantes do mesmo significante.
+// Crítico para SRD (LLM tende a produzir "SRD", "Sem Raça Definida", "SRD (Vira-lata)", etc.).
+function normalizeBreed(raw: string): string {
+  if (!raw) return "SRD";
+  const s = raw.trim();
+  // remove acentos para matching
+  const stripped = s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  // SRD em qualquer forma → canônico
+  if (
+    /\bsrd\b/.test(stripped) ||
+    /sem raca definida/.test(stripped) ||
+    /\bvira[- ]?lata\b/.test(stripped) ||
+    /\bmongrel\b/.test(stripped) ||
+    /\bmixed[- ]?breed\b/.test(stripped) ||
+    /\bmutt\b/.test(stripped)
+  ) {
+    return "SRD";
+  }
+  // Title Case + colapsa espaços
+  return s
+    .replace(/\s+/g, " ")
+    .split(" ")
+    .map((w) => (w.length > 2 ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w.toLowerCase()))
+    .join(" ");
+}
+
 const SYSTEM_PROMPT = `Você é um gerador de prontuários veterinários sintéticos para cães, calibrado em medicina real.
 Cada pet deve ter um prontuário INTERNAMENTE COERENTE — como se fosse um caso real do "Gerar Pacientes de Exemplo":
 - perfil (raça/idade/peso/sexo/castração) compatíveis com o recorte
@@ -186,6 +212,11 @@ IMPORTANTE — diversidade demográfica obrigatória neste lote:
 - Misture sexos de forma equilibrada (não enviese para um lado).
 - Varie \`neutered\` de forma realista: cerca de 60–80% true e 20–40% false. NÃO retorne todos como true.
 - Varie raças, idades e pesos dentro do recorte; evite repetir o mesmo perfil.
+
+IMPORTANTE — nomenclatura canônica de raça (use EXATAMENTE estes nomes, sem variações):
+- Sem raça definida → use SEMPRE "SRD" (não use "Sem Raça Definida", "SRD (Sem Raça Definida)", "Vira-lata", "SRD - Vira-lata", etc.)
+- Raças com nome composto: use o nome em inglês padrão FCI/AKC (ex.: "Labrador Retriever", "Golden Retriever", "Yorkshire Terrier", "Cavalier King Charles Spaniel", "Shih Tzu", "Poodle", "Pastor Alemão").
+- NUNCA invente variantes ortográficas da mesma raça no mesmo lote.
 
 Exemplo de qualidade esperada (NÃO copie, apenas inspire-se):
 \`\`\`
@@ -408,7 +439,7 @@ Deno.serve(async (req) => {
           const profileRows = pets.map((p: any) => ({
             name: String(p.name).slice(0, 60),
             species: "canine",
-            breed: String(p.breed).slice(0, 60),
+            breed: normalizeBreed(String(p.breed)).slice(0, 60),
             sex: p.sex === "female" ? "female" : "male",
             age_years: Number(p.age_years) || 5,
             weight_kg: Number(p.weight_kg) || 15,
