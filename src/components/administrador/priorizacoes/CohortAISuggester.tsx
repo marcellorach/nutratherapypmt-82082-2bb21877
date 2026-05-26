@@ -414,8 +414,9 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
               Sugestões ativas (IA)
             </h3>
             <p className="text-xs text-gray-600 mt-1">
-              A Senex AI lê sinais da plataforma (gaps do Meta-KG, conflitos, condições sub-representadas)
-              e propõe 5 cohorts que o parceiro clínico poderia compartilhar.
+              A Senex AI propõe 6 cohorts (1 por modelo preditivo, com versões amplas ou estratificadas
+              e populações de cães vivos ou já falecidos) que a PetLove poderia compartilhar para
+              destravar ganho operacional concreto — não para preencher lacunas de KG.
               {showModelTag && (
                 <>
                   {' '}Modelo: <code className="text-[10px] bg-white px-1 rounded">google/gemini-3.5-flash</code>.
@@ -425,7 +426,7 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
           </div>
           <Button size="sm" onClick={fetchSuggestions} disabled={loading || anyGenerating}>
             {loading ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5 mr-1.5" />}
-            {loading ? 'Gerando…' : anyGenerating ? 'Em espera' : (cohorts.length ? 'Gerar novamente' : 'Gerar 5 sugestões')}
+            {loading ? 'Gerando…' : anyGenerating ? 'Em espera' : (cohorts.length ? 'Gerar novamente' : 'Gerar 6 sugestões')}
           </Button>
         </div>
 
@@ -459,9 +460,26 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
                         {score}
                       </Badge>
                     </div>
-                    <Badge variant="outline" className={`text-[10px] ${KIND_COLOR[c.kind]}`}>
-                      {KIND_LABEL[c.kind]}
-                    </Badge>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {c.cohort_population && POPULATION_META[c.cohort_population] && (
+                        <Badge variant="outline" className={`text-[10px] ${POPULATION_META[c.cohort_population].cls}`}>
+                          {POPULATION_META[c.cohort_population].icon} {POPULATION_META[c.cohort_population].label}
+                        </Badge>
+                      )}
+                      {c.breadth && BREADTH_META[c.breadth] && (
+                        <Badge variant="outline" className={`text-[10px] ${BREADTH_META[c.breadth].cls}`}>
+                          {BREADTH_META[c.breadth].label}
+                        </Badge>
+                      )}
+                      <Badge variant="outline" className={`text-[10px] ${KIND_COLOR[c.kind]}`}>
+                        {KIND_LABEL[c.kind]}
+                      </Badge>
+                      {c.target_model_id && MODEL_LABEL[c.target_model_id] && (
+                        <Badge variant="outline" className="text-[10px] bg-indigo-50 text-indigo-800 border-indigo-200">
+                          🎯 Treina: {MODEL_LABEL[c.target_model_id]}
+                        </Badge>
+                      )}
+                    </div>
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <CohortOriginalityBadge
                         suggestionId={suggestionIds[i] ?? null}
@@ -480,9 +498,22 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
                     <div className="text-[11px] text-gray-600 bg-gray-50 rounded p-2 space-y-0.5">
                       <div><b>Critérios:</b> {c.suggested_criteria.breeds || '—'} · {c.suggested_criteria.age_range || '—'} · {c.suggested_criteria.conditions || '—'} · N≈{c.suggested_criteria.target_n}</div>
                     </div>
-                    <p className="text-[11px] italic text-emerald-700">
-                      <b>Descobrível:</b> {c.discoverable}
-                    </p>
+                    <div className="text-[11px] bg-emerald-50/60 border border-emerald-200 rounded p-2 space-y-1">
+                      <div className="font-semibold text-emerald-900 text-[10px] uppercase tracking-wide">Por que sugerimos isto</div>
+                      <p className="italic text-emerald-800"><b>Padrão:</b> {c.discoverable}</p>
+                      {c.value_to_partner && (
+                        <p className="text-emerald-900"><b>Valor para PetLove:</b> {c.value_to_partner}</p>
+                      )}
+                      {c.record_requirements && c.record_requirements.length > 0 && (
+                        <div className="text-emerald-900">
+                          <b>Prontuários precisam ter:</b>{' '}
+                          <span className="text-emerald-800">{c.record_requirements.join(' · ')}</span>
+                        </div>
+                      )}
+                      {c.target_model_expected_gain && (
+                        <p className="text-indigo-800"><b>Ganho esperado no modelo:</b> {c.target_model_expected_gain}</p>
+                      )}
+                    </div>
                     {job && (
                       <div className="space-y-1.5 border-t pt-2">
                         <div className="flex items-center justify-between text-[11px]">
@@ -525,7 +556,7 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
                     )}
                     <div className="flex justify-between items-center pt-1">
                       <div className="text-[10px] text-gray-500">
-                        Impacto {c.impact_score} · Viabilidade {c.viability_score}
+                        Impacto {c.impact_score} (ganho operacional) · Viabilidade {c.viability_score} (dado já existe na PetLove)
                       </div>
                       <div className="flex gap-1.5">
                         <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-gray-400 hover:text-red-600"
