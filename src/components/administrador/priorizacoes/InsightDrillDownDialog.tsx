@@ -326,12 +326,16 @@ const InsightDrillDownDialog: React.FC<Props> = ({ insight, open, onOpenChange }
                                           )}
                                           {resultEntries.length > 0 && (
                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-x-3 gap-y-0.5 mt-1 text-[10px]">
-                                              {resultEntries.map(([k, v]) => (
-                                                <div key={k} className="truncate">
-                                                  <span className="text-muted-foreground">{k}:</span>{' '}
-                                                  <span className="font-mono">{typeof v === 'object' ? JSON.stringify(v) : String(v)}</span>
-                                                </div>
-                                              ))}
+                                              {resultEntries.map(([k, v]) => {
+                                                const f = formatLabValue(v);
+                                                return (
+                                                  <div key={k} className="truncate" title={f.ref ?? ''}>
+                                                    <span className="text-muted-foreground">{k}:</span>{' '}
+                                                    <span className={`font-mono ${f.abnormal ? 'text-rose-700 font-semibold' : ''}`}>{f.text}</span>
+                                                    {f.ref && <span className="text-muted-foreground/70 ml-1">({f.ref})</span>}
+                                                  </div>
+                                                );
+                                              })}
                                             </div>
                                           )}
                                           {e.clinical_comments && (
