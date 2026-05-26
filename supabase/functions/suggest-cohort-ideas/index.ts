@@ -230,65 +230,6 @@ REGRAS DURAS: array com 6 itens; os 6 target_model_id devem ser DISTINTOS e cobr
     const validationWarnings = lastAttempt && !lastAttempt.valid ? lastAttempt.issues : null;
     const MODEL = finalModel || PRIMARY_MODEL;
 
-    // Skip the legacy single-call block by short-circuiting below.
-    if (false) {
-      const resp = await fetch("");
-      return resp;
-    }
-/* LEGACY_BLOCK_START */
-/*
-    const oldUserPrompt = `unused`;
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({}),
-    });
-*/
-
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userPrompt },
-        ],
-        tools: [TOOL],
-        tool_choice: { type: "function", function: { name: "propose_cohorts" } },
-      }),
-    });
-
-    if (!resp.ok) {
-      const txt = await resp.text();
-      console.error("AI gateway error", resp.status, txt);
-      if (resp.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit excedido. Tente novamente em alguns segundos." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (resp.status === 402) {
-        return new Response(JSON.stringify({ error: "Créditos Lovable AI esgotados. Adicione em Settings > Workspace > Usage." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      return new Response(JSON.stringify({ error: "AI gateway error", details: txt }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const data = await resp.json();
-    const toolCall = data?.choices?.[0]?.message?.tool_calls?.[0];
-    const args = toolCall?.function?.arguments;
-    let parsed: any = {};
-    try { parsed = typeof args === "string" ? JSON.parse(args) : (args ?? {}); }
-    catch (e) { console.error("Failed to parse tool args", e, args); }
-
-    const cohorts: any[] = parsed?.cohorts ?? [];
-
     // Persist suggestions (best-effort, admin-only). Requires service role to bypass RLS safely.
     let persisted = 0;
     try {
@@ -365,6 +306,8 @@ REGRAS DURAS: array com 6 itens; os 6 target_model_id devem ser DISTINTOS e cobr
       model: MODEL,
       cohorts,
       persisted,
+      attempts,
+      validation_warnings: validationWarnings,
       generated_at: new Date().toISOString(),
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
