@@ -12,16 +12,14 @@ const MAX_RETRIES = 2;
 const INTER_BATCH_DELAY_MS = 300;
 
 const SYSTEM_PROMPT = `Você é um gerador de prontuários veterinários sintéticos para cães, calibrado em medicina real.
-Cada pet deve ter um prontuário COMPLETO e INTERNAMENTE COERENTE — como se fosse um caso real do "Gerar Pacientes de Exemplo":
+Cada pet deve ter um prontuário INTERNAMENTE COERENTE — como se fosse um caso real do "Gerar Pacientes de Exemplo":
 - perfil (raça/idade/peso/sexo/castração) compatíveis com o recorte
-- 1 a 4 condições clínicas alinhadas ao recorte (NUNCA zero — todo pet do cohort PRECISA estar dentro do recorte clínico solicitado)
-- 1 a 3 consultas em ordem cronológica (a última é a mais recente) com chief_complaint, clinical_exam, assessment e plan em português, redigidos como um veterinário escreveria
-- 2 a 5 exames laboratoriais com valores plausíveis (use unidades vet padrão: mg/dL, U/L, %, ng/mL) e flags marcando o que está fora do range
-- 0 a 3 medicações se clinicamente indicadas (com dosagem e frequência)
-- 1 anamnese curta (clinical_note) com 1–2 frases de contexto livre
-- 1 notes_summary curto (1 linha) descrevendo o perfil do paciente
-Variabilidade obrigatória: NÃO repita perfis. Distribua severidades (mild/moderate/severe). Correlacione achados laboratoriais com as condições (ex.: ALT/AST elevados em hepatopatia, creatinina/ureia em DRC, glicemia em diabetes).
-REGRA CRÍTICA: pet sem condições ou sem exames será DESCARTADO. Sempre preencha ambos.`;
+- SEMPRE pelo menos 1 consulta (a mais recente é a atual) com chief_complaint, clinical_exam, assessment e plan em português
+- condições, exames e medicações conforme o PERFIL atribuído a cada pet no prompt do usuário (alguns pets serão saudáveis em check-up, outros parciais, outros completos)
+- 1 anamnese curta (clinical_note) e 1 notes_summary (1 linha)
+- valores de exame plausíveis (mg/dL, U/L, %, ng/mL) e flags marcando o que está fora do range; correlacione achados às condições (ex.: ALT/AST em hepatopatia, creatinina/ureia em DRC, glicemia em diabetes)
+Variabilidade obrigatória: NÃO repita perfis. Distribua severidades (mild/moderate/severe).
+REGRA CRÍTICA: respeite EXATAMENTE o perfil (profile) atribuído a cada pet — não preencha condições/exames/medicações em pets cujo perfil pede para deixar vazio.`;
 
 function buildTool(batchSize: number) {
   return {
@@ -46,7 +44,7 @@ function buildTool(batchSize: number) {
                 notes_summary: { type: "string", description: "1 linha descrevendo o perfil clínico do paciente (ex.: 'Labrador sênior obeso com OA bilateral')." },
                 conditions: {
                   type: "array",
-                  minItems: 1,
+                  minItems: 0,
                   maxItems: 4,
                   items: {
                     type: "object",
@@ -94,7 +92,7 @@ function buildTool(batchSize: number) {
                 clinical_note: { type: "string", description: "Anamnese livre de 1–2 frases (contexto do tutor, hábitos, histórico relevante)." },
                 exams: {
                   type: "array",
-                  minItems: 2,
+                  minItems: 0,
                   maxItems: 5,
                   items: {
                     type: "object",
@@ -120,19 +118,69 @@ function buildTool(batchSize: number) {
   };
 }
 
+// Pré-sorteia o mix de "completude clínica" do lote para garantir variabilidade visível.
+// Profiles:
+//   "healthy"        → 0 cond, 0 exam, 0 med (apenas consulta de check-up)
+//   "cond_only"      → 1-2 cond, 0 exam, 0 med
+//   "cond_exam"      → 1-3 cond, 2-4 exam, 0 med
+//   "full"           → 1-4 cond, 2-5 exam, 1-3 med
+// Distribuição-alvo por 10 pets: 1 healthy · 2 cond_only · 2 cond_exam · 5 full
+type Profile = "healthy" | "cond_only" | "cond_exam" | "full";
+function sampleProfileMix(n: number): Profile[] {
+  const baseRatios: Array<[Profile, number]> = [
+    ["healthy", 0.10],
+    ["cond_only", 0.20],
+    ["cond_exam", 0.20],
+    ["full", 0.50],
+  ];
+  const out: Profile[] = [];
+  for (const [p, r] of baseRatios) {
+    const count = Math.round(n * r);
+    for (let i = 0; i < count; i++) out.push(p);
+  }
+  // ajuste para bater exatamente n
+  while (out.length < n) out.push("full");
+  while (out.length > n) out.pop();
+  // Fisher-Yates shuffle
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+function describeProfile(p: Profile): string {
+  switch (p) {
+    case "healthy":   return "SAUDÁVEL EM CHECK-UP: 0 condições, 0 exames, 0 medicações (apenas 1 consulta de rotina)";
+    case "cond_only": return "DIAGNÓSTICO CLÍNICO SEM EXAMES: 1-2 condições, 0 exames, 0 medicações";
+    case "cond_exam": return "INVESTIGAÇÃO ATIVA: 1-3 condições, 2-4 exames, 0 medicações (ainda sem tratamento)";
+    case "full":      return "CASO COMPLETO: 1-4 condições, 2-5 exames, 1-3 medicações";
+  }
+}
+
 async function callLLM(criteria: any, batchSize: number, batchIndex: number) {
+  const mix = sampleProfileMix(batchSize);
+  const slotList = mix
+    .map((p, i) => `  Pet ${i + 1}: ${describeProfile(p)}`)
+    .join("\n");
+
   const userPrompt = `Recorte do cohort:
 \`\`\`json
 ${JSON.stringify(criteria, null, 2)}
 \`\`\`
 
 Gere EXATAMENTE ${batchSize} prontuários sintéticos COMPLETOS (lote ${batchIndex + 1}).
-Para cada pet:
-- 1 a 4 condições alinhadas ao recorte (NUNCA vazio)
-- 1 a 3 consultas cronológicas (a última = atual, days_ago = 5..30; as anteriores = 90..540 dias atrás)
-- 2 a 5 exames laboratoriais coerentes com as condições, com flags marcando o que está alterado
-- 0 a 3 medicações se clinicamente indicadas
-- 1 anamnese curta (clinical_note) + 1 notes_summary (1 linha)
+
+PERFIL CLÍNICO DE CADA PET (RESPEITE A ORDEM E O CONTEÚDO):
+${slotList}
+
+REGRAS GERAIS:
+- TODO pet tem pelo menos 1 consulta (a última = atual, days_ago = 5..30; anteriores = 90..540 dias atrás).
+- Se o perfil pede 0 condições/exames/medicações, retorne array VAZIO ([]) para esse campo. NÃO preencha.
+- Pets "SAUDÁVEL EM CHECK-UP" têm consulta de rotina (chief_complaint tipo "Check-up anual", assessment "Animal hígido", plan "Manter rotina"). O notes_summary deve refletir isso ("Cão hígido em acompanhamento preventivo").
+- Para perfis com condições: alinhe ao recorte clínico do cohort.
+- Para perfis com exames: correlacione com as condições e marque flags do que está alterado.
+- 1 anamnese curta (clinical_note) + 1 notes_summary (1 linha) sempre.
 
 IMPORTANTE — diversidade demográfica obrigatória neste lote:
 - Misture sexos de forma equilibrada (não enviese para um lado).
@@ -335,15 +383,24 @@ Deno.serve(async (req) => {
             continue;
           }
 
-          // Validation: discard pets without conditions or exams
+          // Validação mínima: precisa ter ao menos perfil + 1 consulta. Condições/exames/medicações
+          // são opcionais (o perfil pré-sorteado controla a distribuição).
           const validPets = pets.filter((p: any) =>
-            Array.isArray(p?.conditions) && p.conditions.length > 0 &&
-            Array.isArray(p?.exams) && p.exams.length > 0
+            p && typeof p.name === "string" && typeof p.breed === "string" &&
+            Array.isArray(p?.consultations) && p.consultations.length > 0
           );
           const discarded = pets.length - validPets.length;
           if (discarded > 0) {
-            await appendLog(service, cohortId, "warn", `Batch ${b + 1} · ${discarded} pets descartados (sem condições ou exames)`);
+            await appendLog(service, cohortId, "warn", `Batch ${b + 1} · ${discarded} pets descartados (perfil incompleto / sem consulta)`);
           }
+          // Distribuição clínica do lote (para auditoria visual)
+          const dist = validPets.reduce((acc: any, p: any) => {
+            const c = (p.conditions ?? []).length, e = (p.exams ?? []).length, m = (p.medications ?? []).length;
+            const k = c === 0 ? "healthy" : (e === 0 ? "cond_only" : (m === 0 ? "cond_exam" : "full"));
+            acc[k] = (acc[k] ?? 0) + 1; return acc;
+          }, {} as Record<string, number>);
+          await appendLog(service, cohortId, "info",
+            `Batch ${b + 1} · mix retornado: healthy=${dist.healthy ?? 0} · cond_only=${dist.cond_only ?? 0} · cond_exam=${dist.cond_exam ?? 0} · full=${dist.full ?? 0}`);
           if (validPets.length === 0) continue;
           pets = validPets;
 
