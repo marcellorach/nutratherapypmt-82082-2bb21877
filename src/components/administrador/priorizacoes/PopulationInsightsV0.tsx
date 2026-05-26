@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Sparkles, GitBranch, FlaskConical, Database, RefreshCw, Loader2, Bot, BookOpen, Maximize2, RotateCw } from 'lucide-react';
+import { Layers } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { KanbanDndProvider, DroppableColumn, DraggableCard } from './dnd/KanbanDnd';
 import InsightDrillDownDialog from './InsightDrillDownDialog';
@@ -41,6 +42,7 @@ const PopulationInsightsV0: React.FC = () => {
   const { i18n } = useTranslation();
   const isPt = i18n.language?.startsWith('pt');
   const [insights, setInsights] = useState<DbInsight[]>([]);
+  const [cohortNames, setCohortNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [checkingOriginality, setCheckingOriginality] = useState<string | null>(null);
   const [drillDownInsight, setDrillDownInsight] = useState<DbInsight | null>(null);
@@ -55,6 +57,12 @@ const PopulationInsightsV0: React.FC = () => {
       .order('confidence', { ascending: false })
       .limit(200);
     if (!error) setInsights((data ?? []) as DbInsight[]);
+    const { data: cohorts } = await supabase.from('synthetic_cohorts').select('id, name');
+    if (cohorts) {
+      const m: Record<string, string> = {};
+      cohorts.forEach((c: any) => { m[c.id] = c.name; });
+      setCohortNames(m);
+    }
     setLoading(false);
   };
 
@@ -186,6 +194,18 @@ const PopulationInsightsV0: React.FC = () => {
                         </div>
                       </div>
                       <p className="text-[11px] text-gray-700 leading-snug">{isPt ? c.summary : (c.summary_en || c.summary)}</p>
+                      <div className="pt-0.5">
+                        {c.cohort_id && cohortNames[c.cohort_id] ? (
+                          <Badge variant="outline" className="text-[9px] bg-indigo-50 border-indigo-200 text-indigo-800 flex items-center gap-1 w-fit max-w-full">
+                            <Database className="h-2.5 w-2.5 shrink-0" />
+                            <span className="truncate">{cohortNames[c.cohort_id]}</span>
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-[9px] bg-purple-50 border-purple-300 text-purple-800 flex items-center gap-1 w-fit">
+                            <Layers className="h-2.5 w-2.5" /> Pan-cohort (todos)
+                          </Badge>
+                        )}
+                      </div>
                       {(c.signals?.length ?? 0) > 0 && (
                         <div className="flex flex-wrap gap-1 pt-1">
                           {c.signals!.slice(0, 4).map((sig, k) => (
