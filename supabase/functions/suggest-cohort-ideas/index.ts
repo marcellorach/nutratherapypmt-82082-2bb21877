@@ -5,7 +5,17 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const MODEL = "google/gemini-3.5-flash";
+const PRIMARY_MODEL = "google/gemini-3.1-pro-preview";
+const FALLBACK_MODEL = "openai/gpt-5.4";
+
+const REQUIRED_MODEL_IDS = [
+  "efficacy-prediction",
+  "disease-progression",
+  "cost-benefit-analysis",
+  "patient-segmentation",
+  "mortality-risk-window",
+  "treatment-adherence",
+] as const;
 
 const SYSTEM_PROMPT = `Você é um pesquisador sênior em medicina veterinária focado em longevidade canina,
 atuando como ponte entre a Senex AI e a PetLove (maior rede vet do Brasil, com centenas de milhares
