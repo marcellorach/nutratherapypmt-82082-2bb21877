@@ -413,7 +413,7 @@ Deno.serve(async (req) => {
           const profileRows = pets.map((p: any) => ({
             name: String(p.name).slice(0, 60),
             species: "canine",
-            breed: String(p.breed).slice(0, 60),
+            breed: normalizeBreed(String(p.breed)).slice(0, 60),
             sex: p.sex === "female" ? "female" : "male",
             age_years: Number(p.age_years) || 5,
             weight_kg: Number(p.weight_kg) || 15,
