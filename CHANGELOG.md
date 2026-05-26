@@ -24,6 +24,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 6.0.0 -->
 
+### Added - 2026-05-26 — Observabilidade e DnD na análise de cohorts
+<!-- area: admin · status: entregue · i18n: 1.112.0 -->
+- Log de execução estruturado em `analyze-cohort-patterns` persistido em `synthetic_cohorts.analysis_log` e exibido no card do cohort (paralelo ao log de geração).
+- Botão "Analisar padrões" agora vira "Re-analisar (N)" após primeira execução, com tooltip + confirmação. Backend devolve 409 sem `force=true` se análise < 24h, evitando duplicação acidental.
+- Badge do modelo (`google/gemini-3.5-flash`) visível durante e após a análise, e em cada card do Population Insights — atende ao princípio de transparência clínica.
+- Drag-and-drop com `@dnd-kit/core` no Kanban de Priorizações (persistido em nova tabela `prioritization_overrides`, RLS admin-only) e no Population Insights v0 (atualiza `cohort_insights.stage` direto na DB).
+- Files: supabase/functions/analyze-cohort-patterns/index.ts, src/components/administrador/priorizacoes/SyntheticCohortsManager.tsx, src/components/administrador/priorizacoes/PrioritizationBoard.tsx, src/components/administrador/priorizacoes/PopulationInsightsV0.tsx, src/components/administrador/priorizacoes/dnd/KanbanDnd.tsx
+
 ### Added - 2026-05-26 — Check de originalidade nas sugestões de cohort
 <!-- area: admin · status: entregue · i18n: 1.111.0 -->
 - Cada sugestão de cohort gerada pela IA agora passa por um check automático de originalidade em 3 camadas: base interna (embeddings em `study_embeddings` via `search_study_chunks`), PubMed E-utilities (esearch/esummary) e Perplexity em modo `academic` (opt-in via toggle).
