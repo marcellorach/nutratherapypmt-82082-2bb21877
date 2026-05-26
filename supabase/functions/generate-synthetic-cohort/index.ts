@@ -12,16 +12,14 @@ const MAX_RETRIES = 2;
 const INTER_BATCH_DELAY_MS = 300;
 
 const SYSTEM_PROMPT = `Você é um gerador de prontuários veterinários sintéticos para cães, calibrado em medicina real.
-Cada pet deve ter um prontuário COMPLETO e INTERNAMENTE COERENTE — como se fosse um caso real do "Gerar Pacientes de Exemplo":
+Cada pet deve ter um prontuário INTERNAMENTE COERENTE — como se fosse um caso real do "Gerar Pacientes de Exemplo":
 - perfil (raça/idade/peso/sexo/castração) compatíveis com o recorte
-- 1 a 4 condições clínicas alinhadas ao recorte (NUNCA zero — todo pet do cohort PRECISA estar dentro do recorte clínico solicitado)
-- 1 a 3 consultas em ordem cronológica (a última é a mais recente) com chief_complaint, clinical_exam, assessment e plan em português, redigidos como um veterinário escreveria
-- 2 a 5 exames laboratoriais com valores plausíveis (use unidades vet padrão: mg/dL, U/L, %, ng/mL) e flags marcando o que está fora do range
-- 0 a 3 medicações se clinicamente indicadas (com dosagem e frequência)
-- 1 anamnese curta (clinical_note) com 1–2 frases de contexto livre
-- 1 notes_summary curto (1 linha) descrevendo o perfil do paciente
-Variabilidade obrigatória: NÃO repita perfis. Distribua severidades (mild/moderate/severe). Correlacione achados laboratoriais com as condições (ex.: ALT/AST elevados em hepatopatia, creatinina/ureia em DRC, glicemia em diabetes).
-REGRA CRÍTICA: pet sem condições ou sem exames será DESCARTADO. Sempre preencha ambos.`;
+- SEMPRE pelo menos 1 consulta (a mais recente é a atual) com chief_complaint, clinical_exam, assessment e plan em português
+- condições, exames e medicações conforme o PERFIL atribuído a cada pet no prompt do usuário (alguns pets serão saudáveis em check-up, outros parciais, outros completos)
+- 1 anamnese curta (clinical_note) e 1 notes_summary (1 linha)
+- valores de exame plausíveis (mg/dL, U/L, %, ng/mL) e flags marcando o que está fora do range; correlacione achados às condições (ex.: ALT/AST em hepatopatia, creatinina/ureia em DRC, glicemia em diabetes)
+Variabilidade obrigatória: NÃO repita perfis. Distribua severidades (mild/moderate/severe).
+REGRA CRÍTICA: respeite EXATAMENTE o perfil (profile) atribuído a cada pet — não preencha condições/exames/medicações em pets cujo perfil pede para deixar vazio.`;
 
 function buildTool(batchSize: number) {
   return {
@@ -46,7 +44,7 @@ function buildTool(batchSize: number) {
                 notes_summary: { type: "string", description: "1 linha descrevendo o perfil clínico do paciente (ex.: 'Labrador sênior obeso com OA bilateral')." },
                 conditions: {
                   type: "array",
-                  minItems: 1,
+                  minItems: 0,
                   maxItems: 4,
                   items: {
                     type: "object",
@@ -94,7 +92,7 @@ function buildTool(batchSize: number) {
                 clinical_note: { type: "string", description: "Anamnese livre de 1–2 frases (contexto do tutor, hábitos, histórico relevante)." },
                 exams: {
                   type: "array",
-                  minItems: 2,
+                  minItems: 0,
                   maxItems: 5,
                   items: {
                     type: "object",
