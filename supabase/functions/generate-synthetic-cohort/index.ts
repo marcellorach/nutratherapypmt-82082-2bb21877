@@ -134,6 +134,11 @@ Para cada pet:
 - 0 a 3 medicações se clinicamente indicadas
 - 1 anamnese curta (clinical_note) + 1 notes_summary (1 linha)
 
+IMPORTANTE — diversidade demográfica obrigatória neste lote:
+- Misture sexos de forma equilibrada (não enviese para um lado).
+- Varie \`neutered\` de forma realista: cerca de 60–80% true e 20–40% false. NÃO retorne todos como true.
+- Varie raças, idades e pesos dentro do recorte; evite repetir o mesmo perfil.
+
 Exemplo de qualidade esperada (NÃO copie, apenas inspire-se):
 \`\`\`
 { "name":"Rex", "breed":"Labrador Retriever", "sex":"male", "age_years":8, "weight_kg":32, "neutered":true,
