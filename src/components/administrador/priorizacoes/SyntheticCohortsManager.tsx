@@ -49,6 +49,7 @@ const STATUS_COLOR: Record<CohortRow['status'], string> = {
 const SyntheticCohortsManager: React.FC = () => {
   const { t } = useTranslation();
   const [cohorts, setCohorts] = useState<CohortRow[]>([]);
+  const [insightsByCohort, setInsightsByCohort] = useState<Record<string, Array<{ id: string; title: string; stage: string; confidence: number }>>>({});
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState<string | null>(null);
   const [analyzingAll, setAnalyzingAll] = useState(false);
@@ -70,6 +71,20 @@ const SyntheticCohortsManager: React.FC = () => {
       .order('created_at', { ascending: false });
     if (error) toast({ title: 'Erro ao listar cohorts', description: error.message, variant: 'destructive' });
     setCohorts((data ?? []) as unknown as CohortRow[]);
+    // also load insight titles per cohort
+    const { data: ins } = await supabase
+      .from('cohort_insights')
+      .select('id, cohort_id, title, stage, confidence')
+      .not('cohort_id', 'is', null)
+      .order('confidence', { ascending: false });
+    if (ins) {
+      const map: Record<string, Array<{ id: string; title: string; stage: string; confidence: number }>> = {};
+      ins.forEach((i: any) => {
+        if (!map[i.cohort_id]) map[i.cohort_id] = [];
+        map[i.cohort_id].push({ id: i.id, title: i.title, stage: i.stage, confidence: i.confidence });
+      });
+      setInsightsByCohort(map);
+    }
     setLoading(false);
   };
 
