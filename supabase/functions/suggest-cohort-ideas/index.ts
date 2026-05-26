@@ -7,36 +7,62 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const MODEL = "google/gemini-3.5-flash";
 
-const SYSTEM_PROMPT = `Você é um pesquisador sênior em medicina veterinária focado em longevidade canina.
-Recebe sinais quantitativos de uma plataforma de RAG médico (Senex AI) e propõe 5 cohorts
-que a PetLove (maior rede vet do Brasil) poderia compartilhar do seu histórico (centenas
-de milhares de prontuários) para destravar descobertas com alto valor clínico.
+const SYSTEM_PROMPT = `Você é um pesquisador sênior em medicina veterinária focado em longevidade canina,
+atuando como ponte entre a Senex AI e a PetLove (maior rede vet do Brasil, com centenas de milhares
+de prontuários ativos E falecidos).
 
-Critérios para um bom cohort:
-- Foco em doenças metabólicas/degenerativas em cães (escopo da plataforma).
-- Recorte específico o bastante para ser estatisticamente útil (N=200–2000).
-- Combina sinais internos (gaps do Knowledge Graph, conflitos, baixa cobertura)
-  com a força da PetLove (histórico longitudinal real).
-- Diversidade: pelo menos 1 cohort de prevenção, 1 de validação de tratamento,
-  1 de descoberta exploratória.
-- Cada cohort gera uma descoberta acionável (mudança de protocolo, novo guideline,
-  validação de hipótese, prevenção raça-específica).
+OBJETIVO: propor 6 cohorts que a PetLove poderia compartilhar do seu histórico para gerar
+VALOR OPERACIONAL DIRETO para ela mesma — NÃO para preencher lacunas do Knowledge Graph
+(isso resolvemos com mais estudos). Cada cohort deve revelar um padrão que a PetLove ainda
+não enxerga e que destrava uma decisão de negócio/clínica concreta (mudar protocolo, sinalizar
+vet outlier, reduzir custo evitável, identificar churn precoce, prever óbito evitável, etc.).
 
-Score (impacto × viabilidade) é 0–100. Impacto alto = descoberta destrava decisão clínica.
-Viabilidade alta = dado provavelmente já está estruturado no histórico PetLove.`;
+REGRA OBRIGATÓRIA: devolva EXATAMENTE 6 cohorts, 1 ancorado em cada um dos modelos preditivos
+da plataforma. Os 6 modelos (use o id literal em \`target_model_id\`):
+1. \`efficacy-prediction\` — Eficácia real de nutracêuticos (responders × não-responders).
+2. \`disease-progression\` — Velocidade de progressão de doenças degenerativas/metabólicas.
+3. \`cost-benefit-analysis\` — Custo vet evitado por protocolo nutracêutico.
+4. \`patient-segmentation\` — Cães tratáveis × não-tratáveis (polifarmácia, comorbidades).
+5. \`mortality-risk-window\` — Risco de óbito em 6/12/24m E janela de intervenção (gold label = falecidos).
+6. \`treatment-adherence\` — Quem abandona o plano em 3/6/9m (puro operacional PetLove).
+
+DUAS POPULAÇÕES POSSÍVEIS:
+- \`living\`: cães vivos com acompanhamento longitudinal (responde "o que está acontecendo agora?").
+- \`deceased\`: cães JÁ FALECIDOS com prontuário completo pré-óbito (responde "qual a trajetória
+  real até a morte?" — gold label insubstituível). Pelo menos 2 dos 6 cohorts devem ser \`deceased\`
+  ou \`mixed\` — especialmente para os modelos 2 e 5.
+- \`mixed\`: vivos + falecidos no mesmo recorte (ex.: curva de sobrevida).
+
+DUAS LARGURAS (\`breadth\`):
+- \`broad\`: recorte amplo, N=1000–2500, viabilidade alta, padrão diluído mas estatisticamente robusto.
+- \`stratified\`: recorte específico (raça×idade×condição×medicação), N=150–400, padrão nítido,
+  impacto alto.
+Distribua livremente entre os 6 cohorts (mistura broad/stratified à sua escolha).
+
+CRITÉRIOS POR COHORT:
+- Foco em doenças metabólicas/degenerativas caninas (escopo da plataforma).
+- \`value_to_partner\`: 1–2 frases descrevendo o ganho operacional concreto para PetLove
+  (ex.: "identificar 25% de não-responders ANTES de prescrever, economizando ~R$X/ano").
+- \`discoverable\` (pattern): O padrão concreto que emerge dos dados.
+- \`record_requirements\`: critérios não-negociáveis nos prontuários (ex.: "≥18m pré-óbito",
+  "causa de óbito registrada", "≥3 hemogramas seriados", "BCS documentado").
+- \`target_model_expected_gain\`: frase curta tipo "+N pets · esperado +X% accuracy".
+
+Impacto (0–100) = quanto a descoberta destrava decisão operacional/clínica PetLove.
+Viabilidade (0–100) = quão provável que o dado JÁ existe estruturado no histórico PetLove.`;
 
 const TOOL = {
   type: "function",
   function: {
     name: "propose_cohorts",
-    description: "Propõe 5 cohorts que a PetLove poderia compartilhar.",
+    description: "Propõe 6 cohorts (1 por modelo preditivo) que a PetLove poderia compartilhar.",
     parameters: {
       type: "object",
       properties: {
         cohorts: {
           type: "array",
-          minItems: 5,
-          maxItems: 5,
+          minItems: 6,
+          maxItems: 6,
           items: {
             type: "object",
             properties: {
@@ -56,12 +82,27 @@ const TOOL = {
                 required: ["breeds", "age_range", "conditions", "target_n"],
                 additionalProperties: false
               },
-              discoverable: { type: "string", description: "O que poderíamos descobrir (1–2 frases acionáveis)" },
+              discoverable: { type: "string", description: "O padrão concreto que emerge dos dados (1–2 frases acionáveis)" },
               kind: { type: "string", enum: ["prevention", "treatment_validation", "exploratory"] },
+              cohort_population: { type: "string", enum: ["living", "deceased", "mixed"], description: "Cães vivos, falecidos (gold label) ou misto." },
+              breadth: { type: "string", enum: ["broad", "stratified"], description: "Recorte amplo (N alto, padrão diluído) ou estratificado (N menor, padrão nítido)." },
+              pattern_family: { type: "string", description: "Família do padrão (ex.: 'treatment_inefficacy', 'mortality_trajectory', 'churn_signature', 'polypharmacy_risk')." },
+              value_to_partner: { type: "string", description: "Ganho operacional concreto para PetLove em 1–2 frases." },
+              record_requirements: {
+                type: "array",
+                items: { type: "string" },
+                description: "Critérios não-negociáveis nos prontuários (ex.: '≥18m pré-óbito', 'causa de óbito registrada')."
+              },
+              target_model_id: {
+                type: "string",
+                enum: ["efficacy-prediction","disease-progression","cost-benefit-analysis","patient-segmentation","mortality-risk-window","treatment-adherence"],
+                description: "ID do modelo preditivo que este cohort treina."
+              },
+              target_model_expected_gain: { type: "string", description: "Ex.: '+850 pets · esperado +6% accuracy'." },
               impact_score: { type: "number", minimum: 0, maximum: 100 },
               viability_score: { type: "number", minimum: 0, maximum: 100 }
             },
-            required: ["title", "rationale", "suggested_criteria", "discoverable", "kind", "impact_score", "viability_score"],
+            required: ["title", "rationale", "suggested_criteria", "discoverable", "kind", "cohort_population", "breadth", "pattern_family", "value_to_partner", "record_requirements", "target_model_id", "target_model_expected_gain", "impact_score", "viability_score"],
             additionalProperties: false
           }
         }
@@ -86,9 +127,12 @@ Deno.serve(async (req) => {
 ${JSON.stringify(signals, null, 2)}
 \`\`\`
 
-Proponha 5 cohorts que a PetLove poderia compartilhar para destravar descobertas
-com alto valor clínico em longevidade canina. Diversifique entre prevenção,
-validação de tratamento e descoberta exploratória.`;
+Proponha 6 cohorts (exatamente 1 por modelo preditivo, na ordem dos ids:
+efficacy-prediction, disease-progression, cost-benefit-analysis, patient-segmentation,
+mortality-risk-window, treatment-adherence). Pelo menos 2 devem ser de cães FALECIDOS
+(\`deceased\` ou \`mixed\`) — especialmente os ancorados em disease-progression e
+mortality-risk-window. Misture broad e stratified livremente. Sempre preencha
+\`value_to_partner\` com ganho operacional concreto para a PetLove (não para o KG).`;
 
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -150,6 +194,13 @@ validação de tratamento e descoberta exploratória.`;
           suggested_criteria: c.suggested_criteria ?? {},
           discoverable: c.discoverable ?? null,
           kind: c.kind ?? "exploratory",
+          cohort_population: c.cohort_population ?? null,
+          breadth: c.breadth ?? null,
+          pattern_family: c.pattern_family ?? null,
+          value_to_partner: c.value_to_partner ?? null,
+          record_requirements: c.record_requirements ?? null,
+          target_model_id: c.target_model_id ?? null,
+          target_model_expected_gain: c.target_model_expected_gain ?? null,
           impact_score: c.impact_score ?? null,
           viability_score: c.viability_score ?? null,
           source_model: MODEL,
