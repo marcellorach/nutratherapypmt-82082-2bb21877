@@ -123,6 +123,75 @@ const TOOL = {
   }
 };
 
+type ModelResult =
+  | { rateLimited: true; status: number; error: string; cohorts: any[] }
+  | { rateLimited: false; error?: string; cohorts: any[] };
+
+async function callModel(model: string, messages: any[]): Promise<ModelResult> {
+  const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${LOVABLE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      tools: [TOOL],
+      tool_choice: { type: "function", function: { name: "propose_cohorts" } },
+    }),
+  });
+
+  if (!resp.ok) {
+    const txt = await resp.text().catch(() => "");
+    console.error("AI gateway error", model, resp.status, txt);
+    if (resp.status === 429) {
+      return { rateLimited: true, status: 429, error: "Rate limit excedido. Tente novamente em alguns segundos.", cohorts: [] };
+    }
+    if (resp.status === 402) {
+      return { rateLimited: true, status: 402, error: "Créditos Lovable AI esgotados. Adicione em Settings > Workspace > Usage.", cohorts: [] };
+    }
+    return { rateLimited: false, error: `AI gateway ${resp.status}: ${txt.slice(0, 200)}`, cohorts: [] };
+  }
+
+  const data = await resp.json().catch(() => ({}));
+  const toolCall = data?.choices?.[0]?.message?.tool_calls?.[0];
+  const args = toolCall?.function?.arguments;
+  let parsed: any = {};
+  try { parsed = typeof args === "string" ? JSON.parse(args) : (args ?? {}); }
+  catch (e) { console.error("Failed to parse tool args", model, e); }
+  const cohorts: any[] = Array.isArray(parsed?.cohorts) ? parsed.cohorts : [];
+  return { rateLimited: false, cohorts };
+}
+
+function validateCohorts(cohorts: any[]): { ok: boolean; issues: string[] } {
+  const issues: string[] = [];
+  if (!Array.isArray(cohorts) || cohorts.length !== 6) {
+    issues.push(`cohorts.length=${cohorts?.length ?? 0}, esperado 6`);
+  }
+  const ids = cohorts.map((c) => c?.target_model_id).filter(Boolean);
+  const uniq = new Set(ids);
+  const missing = REQUIRED_MODEL_IDS.filter((id) => !uniq.has(id));
+  if (missing.length) issues.push(`target_model_id ausentes: ${missing.join(", ")}`);
+  if (uniq.size !== ids.length) issues.push(`target_model_id duplicados`);
+
+  cohorts.forEach((c, i) => {
+    if (!Array.isArray(c?.record_requirements) || c.record_requirements.length === 0) {
+      issues.push(`cohort[${i}] record_requirements vazio`);
+    }
+    for (const f of ["cohort_population", "breadth", "pattern_family", "value_to_partner", "target_model_expected_gain"]) {
+      if (!c?.[f] || (typeof c[f] === "string" && c[f].trim() === "")) {
+        issues.push(`cohort[${i}].${f} ausente`);
+      }
+    }
+  });
+
+  const deceasedish = cohorts.filter((c) => c?.cohort_population === "deceased" || c?.cohort_population === "mixed").length;
+  if (deceasedish < 2) issues.push(`apenas ${deceasedish} cohort(s) deceased/mixed, esperado ≥2`);
+
+  return { ok: issues.length === 0, issues };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
