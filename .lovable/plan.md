@@ -1,86 +1,93 @@
-## Objetivo
 
-Adicionar **check de originalidade** às sugestões de cohort, com 3 camadas de busca em cascata e **transparência total** sobre o que foi encontrado (para você poder julgar se a busca realmente funcionou, não só confiar no score).
+# Plano: Análise de Padrões de Cohort — Transparência, Reuso e Drill-down
 
-## Arquitetura: 3 camadas, da mais barata para a mais cara
+Vamos atacar tudo em 4 fases pequenas e independentes para não travar nada. Tudo continua usando dados reais do cohort (sem mocks) e Lovable AI (`google/gemini-3.5-flash`).
 
-```text
-1. Base interna (study_embeddings)   → grátis, ~200ms     [sempre roda]
-2. PubMed E-utilities                → grátis, ~2s         [sempre roda]
-3. Perplexity sonar (academic mode)  → ~$0.005, ~5s        [opt-in via toggle]
-```
+## Fase 1 — Visibilidade e controle da análise (resolve a, b, c)
 
-A camada 3 fica **desligada por padrão** (toggle na UI "Usar Perplexity para busca expandida"). Quando você quiser ativar, é 1 clique — a chave já está lá.
+**a) Log de execução da análise de padrões**
+- Adicionar coluna `analysis_log jsonb` em `synthetic_cohorts` (mesmo padrão de `progress_log`).
+- `analyze-cohort-patterns` passa a gravar eventos estruturados: `started → loading_pets (n=X) → loading_conditions → loading_exams → aggregating → calling_llm (model, prompt_tokens) → parsing → inserting (n_insights) → done` (ou `error`).
+- Cada card em "Cohorts sintéticos" ganha um collapsible "Log da análise (N)" igual ao log de geração — ao lado de "Estatísticas".
 
-## O que o usuário vê
+**b) Botão "Analisar padrões" inteligente**
+- Adicionar `last_analyzed_at timestamptz` e `last_analysis_insights_count int` em `synthetic_cohorts`.
+- Depois de analisado: botão fica "Re-analisar (X insights, há 3h)" com tooltip explicando que re-rodar pode gerar novos insights (LLM não é determinístico) e duplicar entradas. Confirmação modal antes de re-rodar.
+- Opção `force=true` no payload; sem ela, o backend devolve 409 se já houver insights recentes (<24h) sem `force`.
 
-Cada sugestão de cohort ganha um bloco **"Originalidade"** com:
+**c) Modelo visível**
+- Mostrar `google/gemini-3.5-flash` (vindo de `source_model` da resposta) no card do cohort durante e após análise — não só no role `platform_architect`. Badge pequeno: `🤖 gemini-3.5-flash`.
+- Mesmo badge nos cards de insights em Population Insights (já existe `source_model` na tabela, só renderizar).
 
-- Score 0–100 + badge (`Alta` / `Média` / `Já bem estudado`)
-- **Breakdown transparente**: quantos hits em cada fonte
-  - Base interna: 3 estudos (similaridade máx 0.78)
-  - PubMed: 47 artigos para `golden retriever AND hepatic AND SAMe`
-  - Perplexity: desligado / X citações
-- **Top 3 títulos mais próximos** clicáveis (link direto PubMed)
-- **Query usada** exibida em mono — você vê exatamente o que foi pesquisado
-- Botão "Re-rodar busca" caso ache que ficou ruim
+## Fase 2 — Drag-and-drop nos kanbans (resolve d)
 
-Se a busca falhar (API down, timeout), mostra `Indisponível` em vez de score falso — isso é o que você pediu ("ver se realmente houve sucesso").
+- Instalar `@dnd-kit/core` + `@dnd-kit/sortable` (mesma stack já familiar ao projeto).
+- Aplicar em:
+  - **PrioritizationBoard** (Kanban de Priorizações) → arrastar entre `backlog/next/in_progress/in_test/done`. Persistir em `prioritizationBoard.ts` não dá (é estático); então criar tabela `prioritization_overrides (card_id, status, order)` para guardar a posição editada por admin. Fallback ao default se não tiver override.
+  - **PopulationInsightsV0** → arrastar entre `discovery/hypothesis/proposed_meta_study/approved`. Já existe `UPDATE cohort_insights SET stage` — só trocar o `<select>` pelo drag.
 
-## Como gero a query de busca
+## Fase 3 — Originalidade documentada para cohorts e insights (resolve e, i)
 
-Uma chamada Gemini 2.5 Flash converte o cohort em query estruturada:
+A reinterpretação do usuário muda o uso: **encontrar estudos confirmatórios é positivo** (reforça o KG); só não devemos gerar pedido de meta-estudo duplicado.
 
-```
-input:  "Golden 8+ com elevação de ALT testando SAMe vs placebo"
-output: {
-  pubmed_query: "(golden retriever[tiab] OR canine[tiab]) AND (ALT[tiab] OR hepatic[tiab]) AND (SAMe[tiab] OR S-adenosylmethionine[tiab])",
-  google_scholar_query: "golden retriever ALT SAMe hepatic dog clinical trial",
-  keywords: ["golden retriever", "hepatic", "SAMe", "ALT"]
-}
-```
+- Reaproveitar a função `check-cohort-originality` já criada (suggestions) e generalizá-la para receber `{kind: 'cohort'|'insight', id, title, signals}`.
+- Disparar automaticamente após:
+  - geração de cohort (`generate-synthetic-cohort` no final) — usa o nome + rationale + critérios.
+  - geração de insights (`analyze-cohort-patterns` no final, para cada insight) — usa title + signals.
+- Persistir em colunas novas em `synthetic_cohorts` e `cohort_insights`:
+  - `originality_score numeric`
+  - `originality_breakdown jsonb` (queries usadas, hits PubMed, top 3 títulos com link, hits internos, perplexity opcional)
+  - `originality_checked_at`, `originality_status`
+- UI: badge clicável "Confirmado por N estudos" (score baixo = bom para validação) ou "Inédito" (score alto = candidato a meta-estudo). Popover mostra: queries exatas, fontes consultadas, top 3 estudos clicáveis, e ressalta "Estudos recentes (<2 anos) podem não estar indexados".
+- Em insights `proposed_meta_study`: se originalidade < 30, sugere converter para `approved` ao invés de novo meta-estudo, com botão "Marcar como confirmado por literatura existente".
 
-A `google_scholar_query` é mostrada na UI como **link clicável** (`https://scholar.google.com/scholar?q=...`) — não chamamos Scholar via API (não tem API pública), mas você pode clicar e validar manualmente em 1 segundo. Isso responde diretamente seu "talvez um query de busca no Google já ajude".
+## Fase 4 — Análise cross-cohort e drill-down (resolve f, g, j)
 
-## Cálculo do score
+**f) Provar que os agentes leem dados reais:**
+- O log da Fase 1 + o objeto `evidence` em cada insight já vêm do cohort. Adicionar no popover do insight uma seção "Cálculo verificável" mostrando: query SQL equivalente + número exato (ex.: `83.3% = 50/60 cães com idade ≥ 8a`) recalculada em tempo real ao abrir.
 
-```
-internal_score  = 100 - (max_cosine_similarity * 100)   // 0–100
-pubmed_score    = clamp(100 - (hits * 2), 0, 100)        // 50 hits ≈ 0
-perplexity_score = (se ativo) baseado em nº citações relevantes
+**g) Análise de TODOS os cohorts juntos:**
+- Nova action no header de "Cohorts sintéticos": **"Meta-análise transversal"** (agrega N cohorts selecionados).
+- Novo edge function `analyze-meta-cohort` que agrega pets de múltiplos `cohort_id`s, dedupe por raça/idade, e roda mesmo prompt do `analyze-cohort-patterns` com escopo expandido. Persiste insights com `cohort_id = null` + `scope = 'cross_cohort'` (nova coluna).
+- Population Insights ganha filtro "Origem: cohort único / cross-cohort / todos".
 
-originalidade = 0.4 * internal + 0.6 * pubmed
-              (se Perplexity ativo: 0.3 internal + 0.4 pubmed + 0.3 perplexity)
-```
-
-Cohort com originalidade **< 30** ganha badge vermelho "⚠️ Já bem estudado — considere refinar o recorte".
-
-## Onde encaixa no fluxo
-
-Roda **logo após** `suggest-cohort-ideas` retornar as 5 sugestões, em paralelo (uma chamada por cohort). Não bloqueia a UI — cada card mostra spinner "Verificando originalidade…" e atualiza quando termina. Persiste o resultado em `cohort_suggestions` (3 colunas novas: `originality_score`, `originality_breakdown jsonb`, `originality_checked_at`).
+**j) Drill-down dos insights:**
+- Cada insight ganha um botão "Investigar →" que abre um Dialog em tela cheia com:
+  - **Header**: título + evidência verificável recalculada.
+  - **Charts** (Recharts, dados reais do cohort):
+    - Distribuição por idade (histograma do `pet_profiles.age_years` do cohort).
+    - Distribuição por raça (barras).
+    - Prevalência das `signals` (ex.: ALT, FA) — flags abnormais por idade.
+    - Scatter age × marcador quando aplicável.
+  - **Lista estratificável**: tabela paginada de pets que satisfazem o padrão, com filtros (raça/idade/sexo/severidade). Click no pet abre `CohortPatientsDialog` já existente.
+  - **Cálculo bruto**: linha por linha (id do pet, idade, raça, valor do marcador, contribui? sim/não).
+  - **Originalidade**: bloco da Fase 3 inline.
+  - **Ações**: mover de estágio, "Confirmado por literatura", "Promover a meta-estudo", "Exportar CSV".
 
 ## Detalhes técnicos
 
-**Arquivos novos**
-- `supabase/functions/check-cohort-originality/index.ts` — orquestra as 3 camadas, retorna `{ score, breakdown, queries, similar_studies, status }`
-- `src/components/administrador/priorizacoes/CohortOriginalityBadge.tsx` — badge + popover com breakdown
-- `supabase/migrations/<ts>_cohort_originality_columns.sql` — adiciona 3 colunas em `cohort_suggestions`
+- **Migrações:**
+  - `synthetic_cohorts`: + `analysis_log jsonb`, `last_analyzed_at`, `last_analysis_insights_count`, `originality_score`, `originality_breakdown`, `originality_checked_at`, `originality_status`.
+  - `cohort_insights`: + `originality_score`, `originality_breakdown`, `originality_checked_at`, `originality_status`, `scope text default 'cohort'`, `source_cohort_ids uuid[]`.
+  - `prioritization_overrides` (nova): `card_id text pk`, `status text`, `order int`, `updated_at`. RLS: admin only.
+- **Edge functions:**
+  - editar `analyze-cohort-patterns` (log + force flag + dispara originality).
+  - editar `generate-synthetic-cohort` (dispara originality no final via `EdgeRuntime.waitUntil`).
+  - editar `check-cohort-originality` (aceitar `kind`/`scope` genéricos).
+  - novo `analyze-meta-cohort`.
+- **Componentes novos/editados:**
+  - `CohortAnalysisLog.tsx` (collapsible reaproveitando estilo do `CohortProgressLog`).
+  - `InsightDrillDownDialog.tsx` (Fase 4).
+  - `OriginalityBadge.tsx` generalizado a partir de `CohortOriginalityBadge.tsx`.
+  - `SyntheticCohortsManager.tsx`, `PopulationInsightsV0.tsx`, `PrioritizationBoard.tsx` (dnd).
+- **i18n:** PT/EN paritário, com bump de `I18N_VERSION` em `src/i18n.ts`.
+- **CHANGELOG.md + organograma + `npm run sync:changelog`** como sempre.
 
-**Arquivos editados**
-- `supabase/functions/suggest-cohort-ideas/index.ts` — dispara `check-cohort-originality` via `EdgeRuntime.waitUntil` para cada sugestão persistida
-- Componente que renderiza os cards de sugestão (provavelmente em `priorizacoes/` — vou localizar quando implementar) — embed do badge
-- `src/i18n.ts` (bump versão) + `pt/en translation.json` (chaves `prioritization.originality.*`)
-- `CHANGELOG.md` + organograma + `npm run sync:changelog`
+## Ordem sugerida de entrega
+1. Fase 1 (visibilidade) — pequena, te dá feedback imediato pra testar.
+2. Fase 2 (drag-and-drop) — isolada.
+3. Fase 4 drill-down (sem cross-cohort) — alto valor visual.
+4. Fase 3 originalidade — depende do toggle Perplexity ser opcional (já está).
+5. Fase 4 cross-cohort — última, pois depende de tudo acima.
 
-**Perplexity**
-- Reutilizo a edge function `query-perplexity` que já existe, mas só chamada quando o toggle estiver ativo. **Não pede nada de você agora.**
-
-**Sem impacto em outras áreas** — mudanças isoladas em Priorizações.
-
-## O que NÃO faço
-
-- Não chamo Google Scholar via scraping (frágil, ToS).
-- Não bloqueio a geração de cohort se originalidade for baixa — só sinalizo. Você decide.
-- Não mexo no `generate-synthetic-cohort` nem em outras partes do fluxo.
-
-Posso seguir?
+Posso entregar **Fase 1 + Fase 2 num único turno** (já desbloqueia a, b, c, d e a maioria da observabilidade), e seguir com as outras nos próximos. Confirma que faço assim?
