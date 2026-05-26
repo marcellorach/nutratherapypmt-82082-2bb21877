@@ -5,7 +5,17 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const MODEL = "google/gemini-3.5-flash";
+const PRIMARY_MODEL = "google/gemini-3.1-pro-preview";
+const FALLBACK_MODEL = "openai/gpt-5.4";
+
+const REQUIRED_MODEL_IDS = [
+  "efficacy-prediction",
+  "disease-progression",
+  "cost-benefit-analysis",
+  "patient-segmentation",
+  "mortality-risk-window",
+  "treatment-adherence",
+] as const;
 
 const SYSTEM_PROMPT = `Você é um pesquisador sênior em medicina veterinária focado em longevidade canina,
 atuando como ponte entre a Senex AI e a PetLove (maior rede vet do Brasil, com centenas de milhares
@@ -113,6 +123,75 @@ const TOOL = {
   }
 };
 
+type ModelResult =
+  | { rateLimited: true; status: number; error: string; cohorts: any[] }
+  | { rateLimited: false; error?: string; cohorts: any[] };
+
+async function callModel(model: string, messages: any[]): Promise<ModelResult> {
+  const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${LOVABLE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      tools: [TOOL],
+      tool_choice: { type: "function", function: { name: "propose_cohorts" } },
+    }),
+  });
+
+  if (!resp.ok) {
+    const txt = await resp.text().catch(() => "");
+    console.error("AI gateway error", model, resp.status, txt);
+    if (resp.status === 429) {
+      return { rateLimited: true, status: 429, error: "Rate limit excedido. Tente novamente em alguns segundos.", cohorts: [] };
+    }
+    if (resp.status === 402) {
+      return { rateLimited: true, status: 402, error: "Créditos Lovable AI esgotados. Adicione em Settings > Workspace > Usage.", cohorts: [] };
+    }
+    return { rateLimited: false, error: `AI gateway ${resp.status}: ${txt.slice(0, 200)}`, cohorts: [] };
+  }
+
+  const data = await resp.json().catch(() => ({}));
+  const toolCall = data?.choices?.[0]?.message?.tool_calls?.[0];
+  const args = toolCall?.function?.arguments;
+  let parsed: any = {};
+  try { parsed = typeof args === "string" ? JSON.parse(args) : (args ?? {}); }
+  catch (e) { console.error("Failed to parse tool args", model, e); }
+  const cohorts: any[] = Array.isArray(parsed?.cohorts) ? parsed.cohorts : [];
+  return { rateLimited: false, cohorts };
+}
+
+function validateCohorts(cohorts: any[]): { ok: boolean; issues: string[] } {
+  const issues: string[] = [];
+  if (!Array.isArray(cohorts) || cohorts.length !== 6) {
+    issues.push(`cohorts.length=${cohorts?.length ?? 0}, esperado 6`);
+  }
+  const ids = cohorts.map((c) => c?.target_model_id).filter(Boolean);
+  const uniq = new Set(ids);
+  const missing = REQUIRED_MODEL_IDS.filter((id) => !uniq.has(id));
+  if (missing.length) issues.push(`target_model_id ausentes: ${missing.join(", ")}`);
+  if (uniq.size !== ids.length) issues.push(`target_model_id duplicados`);
+
+  cohorts.forEach((c, i) => {
+    if (!Array.isArray(c?.record_requirements) || c.record_requirements.length === 0) {
+      issues.push(`cohort[${i}] record_requirements vazio`);
+    }
+    for (const f of ["cohort_population", "breadth", "pattern_family", "value_to_partner", "target_model_expected_gain"]) {
+      if (!c?.[f] || (typeof c[f] === "string" && c[f].trim() === "")) {
+        issues.push(`cohort[${i}].${f} ausente`);
+      }
+    }
+  });
+
+  const deceasedish = cohorts.filter((c) => c?.cohort_population === "deceased" || c?.cohort_population === "mixed").length;
+  if (deceasedish < 2) issues.push(`apenas ${deceasedish} cohort(s) deceased/mixed, esperado ≥2`);
+
+  return { ok: issues.length === 0, issues };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -132,51 +211,93 @@ efficacy-prediction, disease-progression, cost-benefit-analysis, patient-segment
 mortality-risk-window, treatment-adherence). Pelo menos 2 devem ser de cães FALECIDOS
 (\`deceased\` ou \`mixed\`) — especialmente os ancorados em disease-progression e
 mortality-risk-window. Misture broad e stratified livremente. Sempre preencha
-\`value_to_partner\` com ganho operacional concreto para a PetLove (não para o KG).`;
+\`value_to_partner\` com ganho operacional concreto para a PetLove (não para o KG).
 
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userPrompt },
-        ],
-        tools: [TOOL],
-        tool_choice: { type: "function", function: { name: "propose_cohorts" } },
-      }),
-    });
+RESPONDA chamando a função propose_cohorts com EXATAMENTE este shape (6 itens):
+{
+  "cohorts": [
+    {
+      "target_model_id": "<um dos 6 ids literais acima>",
+      "cohort_population": "living|deceased|mixed",
+      "breadth": "broad|stratified",
+      "pattern_family": "ex.: treatment_inefficacy | mortality_trajectory | churn_signature | polypharmacy_risk",
+      "value_to_partner": "ganho operacional concreto p/ PetLove (1-2 frases)",
+      "record_requirements": ["≥18m pré-óbito", "causa de óbito registrada", "≥3 hemogramas seriados"],
+      "target_model_expected_gain": "+N pets · esperado +X% accuracy",
+      "title": "...", "rationale": "...", "discoverable": "...",
+      "kind": "prevention|treatment_validation|exploratory",
+      "suggested_criteria": { "breeds": "...", "age_range": "...", "conditions": "...", "target_n": "..." },
+      "impact_score": 0, "viability_score": 0
+    }
+  ]
+}
+REGRAS DURAS: array com 6 itens; os 6 target_model_id devem ser DISTINTOS e cobrir todos os modelos; record_requirements NÃO pode ser vazio; pelo menos 2 cohorts com cohort_population != "living".`;
 
-    if (!resp.ok) {
-      const txt = await resp.text();
-      console.error("AI gateway error", resp.status, txt);
-      if (resp.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit excedido. Tente novamente em alguns segundos." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const baseMessages = [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: userPrompt },
+    ];
+
+    const attempts: Array<{ model: string; valid: boolean; issues: string[] }> = [];
+    let finalCohorts: any[] = [];
+    let finalModel = "";
+    let lastIssues: string[] = [];
+    let rateLimitResponse: Response | null = null;
+
+    const runAttempt = async (model: string, messages: any[]) => {
+      const r = await callModel(model, messages);
+      if (r.rateLimited) {
+        rateLimitResponse = new Response(JSON.stringify({ error: r.error }), {
+          status: r.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
+        return null;
       }
-      if (resp.status === 402) {
-        return new Response(JSON.stringify({ error: "Créditos Lovable AI esgotados. Adicione em Settings > Workspace > Usage." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      if (r.error) {
+        attempts.push({ model, valid: false, issues: [r.error] });
+        return null;
       }
-      return new Response(JSON.stringify({ error: "AI gateway error", details: txt }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      const v = validateCohorts(r.cohorts);
+      attempts.push({ model, valid: v.ok, issues: v.issues });
+      if (v.ok) {
+        finalCohorts = r.cohorts;
+        finalModel = model;
+      } else {
+        lastIssues = v.issues;
+        // keep last cohorts as best-effort if nothing else works
+        if (r.cohorts.length) finalCohorts = r.cohorts;
+        finalModel = model;
+      }
+      return v.ok;
+    };
+
+    // 1) Primary
+    const ok1 = await runAttempt(PRIMARY_MODEL, baseMessages);
+    if (rateLimitResponse) {
+      // Primary rate-limited: try fallback directly
+      rateLimitResponse = null;
+      await runAttempt(FALLBACK_MODEL, baseMessages);
+    } else if (ok1 === false) {
+      // 2) Retry primary with correction message
+      const correction = {
+        role: "user" as const,
+        content: `Sua resposta anterior falhou validação: ${lastIssues.join("; ")}. Corrija e devolva EXATAMENTE 6 cohorts, 1 por modelo preditivo (target_model_id distintos), record_requirements não-vazio, ≥2 com cohort_population deceased ou mixed.`,
+      };
+      const ok2 = await runAttempt(PRIMARY_MODEL, [...baseMessages, correction]);
+      if (rateLimitResponse) {
+        rateLimitResponse = null;
+        await runAttempt(FALLBACK_MODEL, [...baseMessages, correction]);
+      } else if (ok2 === false) {
+        // 3) Fallback
+        await runAttempt(FALLBACK_MODEL, [...baseMessages, correction]);
+      }
     }
 
-    const data = await resp.json();
-    const toolCall = data?.choices?.[0]?.message?.tool_calls?.[0];
-    const args = toolCall?.function?.arguments;
-    let parsed: any = {};
-    try { parsed = typeof args === "string" ? JSON.parse(args) : (args ?? {}); }
-    catch (e) { console.error("Failed to parse tool args", e, args); }
+    if (rateLimitResponse) return rateLimitResponse;
 
-    const cohorts: any[] = parsed?.cohorts ?? [];
+    const cohorts = finalCohorts;
+    const lastAttempt = attempts[attempts.length - 1];
+    const validationWarnings = lastAttempt && !lastAttempt.valid ? lastAttempt.issues : null;
+    const MODEL = finalModel || PRIMARY_MODEL;
 
     // Persist suggestions (best-effort, admin-only). Requires service role to bypass RLS safely.
     let persisted = 0;
@@ -254,6 +375,8 @@ mortality-risk-window. Misture broad e stratified livremente. Sempre preencha
       model: MODEL,
       cohorts,
       persisted,
+      attempts,
+      validation_warnings: validationWarnings,
       generated_at: new Date().toISOString(),
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
