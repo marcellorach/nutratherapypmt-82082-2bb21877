@@ -24,6 +24,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.0 -->
 
+### Fixed - 2026-05-26 — suggest-cohort-ideas: modelo + validação + retry/fallback
+<!-- area: admin · status: entregue · i18n: 1.114.0 -->
+- Trocado modelo primário de `gemini-3.5-flash` (ignorava o JSON Schema do tool-call: devolvia 5 cohorts sem `target_model_id` nem `record_requirements`) para `google/gemini-3.1-pro-preview`.
+- Adicionada **validação server-side** das 4 regras duras: exatamente 6 cohorts, 6 `target_model_id` distintos cobrindo todos os modelos, `record_requirements` não-vazio em todos, ≥2 cohorts com `cohort_population` deceased/mixed.
+- Pipeline com 3 camadas: tentativa primária → retry no primário com mensagem de correção apontando as `issues` → fallback automático para `openai/gpt-5.4`. 429/402 do primário disparam fallback direto.
+- Reforço inline da estrutura JSON esperada no user prompt (modelos respeitam melhor o schema quando ele aparece também no prompt).
+- Resposta passa a expor `attempts[]` e `validation_warnings` para diagnóstico, sem quebrar a UI atual.
+- Files: supabase/functions/suggest-cohort-ideas/index.ts
+
 ### Added - 2026-05-26 — 6 modelos preditivos + cohorts ancorados (amplo × estratificado, vivos × falecidos)
 <!-- area: admin · status: entregue · i18n: 1.114.0 -->
 - **Catálogo de modelos preditivos expandido de 4 → 6**: adicionados `mortality-risk-window` (Risco de Mortalidade e Janela de Intervenção — 100% treinado em cães já falecidos como gold label) e `treatment-adherence` (Previsão de Adesão ao Tratamento — sinais operacionais PetLove de recompra/agendamentos/check-ins). Ambos entram com status `initial`, `totalPetsMonitored=0` e `nextMilestone` apontando para o primeiro cohort-âncora — sem mock inflado.
