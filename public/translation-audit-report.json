@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-05-26T02:32:30.233Z",
+  "timestamp": "2026-05-26T11:37:07.482Z",
   "summary": {
-    "totalFiles": 932,
-    "totalIssues": 455,
+    "totalFiles": 935,
+    "totalIssues": 458,
     "hardcodedTexts": 54,
-    "missingKeys": 399,
+    "missingKeys": 402,
     "incompleteTranslations": 2
   },
   "issues": [
@@ -1985,22 +1985,43 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/priorizacoes/PopulationInsightsV0.tsx",
-      "line": 42,
+      "line": 56,
       "text": "*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/priorizacoes/PopulationInsightsV0.tsx",
-      "line": 128,
-      "text": " ",
+      "line": 60,
+      "text": "id, name",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/priorizacoes/PrioritizationBoard.tsx",
+      "line": 29,
+      "text": "card_id, from_status, to_status, moved_at, note",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/priorizacoes/PrioritizationBoard.tsx",
+      "line": 43,
+      "text": "card_id, status",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/priorizacoes/SyntheticCohortsManager.tsx",
-      "line": 62,
+      "line": 70,
       "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/priorizacoes/SyntheticCohortsManager.tsx",
+      "line": 77,
+      "text": "id, cohort_id, title, stage, confidence",
       "severity": "high"
     },
     {
@@ -2608,21 +2629,21 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 1007,
+      "line": 1061,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 1218,
+      "line": 1272,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 4013,
+      "line": 4067,
       "text": "@",
       "severity": "high"
     },
@@ -3091,7 +3112,7 @@
     {
       "type": "hardcoded",
       "file": "src/components/administrador/priorizacoes/PopulationInsightsV0.tsx",
-      "line": 84,
+      "line": 162,
       "text": "Gerador de Cohort",
       "severity": "medium"
     },
