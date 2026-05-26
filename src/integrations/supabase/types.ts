@@ -1032,6 +1032,10 @@ export type Database = {
           id: string
           impact_score: number | null
           kind: string
+          originality_breakdown: Json | null
+          originality_checked_at: string | null
+          originality_score: number | null
+          originality_status: string | null
           rationale: string | null
           signals: Json
           source_model: string | null
@@ -1049,6 +1053,10 @@ export type Database = {
           id?: string
           impact_score?: number | null
           kind: string
+          originality_breakdown?: Json | null
+          originality_checked_at?: string | null
+          originality_score?: number | null
+          originality_status?: string | null
           rationale?: string | null
           signals?: Json
           source_model?: string | null
@@ -1066,6 +1074,10 @@ export type Database = {
           id?: string
           impact_score?: number | null
           kind?: string
+          originality_breakdown?: Json | null
+          originality_checked_at?: string | null
+          originality_score?: number | null
+          originality_status?: string | null
           rationale?: string | null
           signals?: Json
           source_model?: string | null
