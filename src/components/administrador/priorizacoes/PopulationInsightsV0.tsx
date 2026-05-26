@@ -3,9 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Sparkles, GitBranch, FlaskConical, Database, RefreshCw, Loader2, Bot } from 'lucide-react';
+import { AlertTriangle, Sparkles, GitBranch, FlaskConical, Database, RefreshCw, Loader2, Bot, BookOpen, Maximize2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { KanbanDndProvider, DroppableColumn, DraggableCard } from './dnd/KanbanDnd';
+import InsightDrillDownDialog from './InsightDrillDownDialog';
+import { toast } from '@/components/ui/use-toast';
 
 type InsightStage = 'discovery' | 'hypothesis' | 'proposed_meta_study' | 'approved';
 interface DbInsight {
@@ -22,6 +24,9 @@ interface DbInsight {
   signals: string[] | null;
   created_at: string;
   source_model?: string | null;
+  originality_status?: 'unknown' | 'novel' | 'partial' | 'known';
+  originality_checked_at?: string | null;
+  originality_evidence?: any;
 }
 
 const STAGES: { id: InsightStage; label: string; color: string; icon: React.ComponentType<any> }[] = [
@@ -36,6 +41,8 @@ const PopulationInsightsV0: React.FC = () => {
   const isPt = i18n.language?.startsWith('pt');
   const [insights, setInsights] = useState<DbInsight[]>([]);
   const [loading, setLoading] = useState(false);
+  const [checkingOriginality, setCheckingOriginality] = useState<string | null>(null);
+  const [drillDownInsight, setDrillDownInsight] = useState<DbInsight | null>(null);
 
   const fetchInsights = async () => {
     setLoading(true);
@@ -61,6 +68,32 @@ const PopulationInsightsV0: React.FC = () => {
   const moveStage = async (id: string, stage: InsightStage) => {
     setInsights((curr) => curr.map((i) => i.id === id ? { ...i, stage } : i));
     await supabase.from('cohort_insights').update({ stage }).eq('id', id);
+  };
+
+  const checkOriginality = async (id: string) => {
+    setCheckingOriginality(id);
+    try {
+      const { data, error } = await supabase.functions.invoke('check-insight-originality', { body: { insight_id: id } });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({ title: 'Originalidade verificada', description: `Resultado: ${data?.status}. Veja detalhes no drill-down.` });
+      fetchInsights();
+    } catch (e: any) {
+      toast({ title: 'Falha na verificação', description: e?.message ?? 'Erro', variant: 'destructive' });
+    } finally {
+      setCheckingOriginality(null);
+    }
+  };
+
+  const originalityBadge = (s?: string) => {
+    if (!s || s === 'unknown') return null;
+    const map: Record<string, { color: string; label: string }> = {
+      novel:   { color: 'bg-emerald-100 border-emerald-300 text-emerald-800', label: '✦ inédito' },
+      partial: { color: 'bg-amber-100 border-amber-300 text-amber-800',       label: '~ parcial' },
+      known:   { color: 'bg-gray-100 border-gray-300 text-gray-700',          label: '⌖ já publicado' },
+    };
+    const v = map[s]; if (!v) return null;
+    return <Badge variant="outline" className={`text-[9px] ${v.color}`}>{v.label}</Badge>;
   };
 
   return (
@@ -108,11 +141,14 @@ const PopulationInsightsV0: React.FC = () => {
                   <div className="text-[11px] text-gray-400 italic text-center py-6">—</div>
                 ) : cards.map((c) => (
                   <DraggableCard key={c.id} id={c.id}>
-                  <Card className="bg-white">
+                  <Card className="bg-white hover:shadow-md transition-shadow">
                     <CardContent className="p-2.5 space-y-1.5">
                       <div className="flex items-start justify-between gap-1.5">
                         <h4 className="text-xs font-semibold leading-tight">{isPt ? c.title : (c.title_en || c.title)}</h4>
-                        <Badge variant="outline" className="text-[10px] font-mono shrink-0">{Math.round((c.confidence ?? 0) * 100)}</Badge>
+                        <div className="flex items-center gap-1 shrink-0">
+                          {originalityBadge(c.originality_status)}
+                          <Badge variant="outline" className="text-[10px] font-mono">{Math.round((c.confidence ?? 0) * 100)}</Badge>
+                        </div>
                       </div>
                       <p className="text-[11px] text-gray-700 leading-snug">{isPt ? c.summary : (c.summary_en || c.summary)}</p>
                       {(c.signals?.length ?? 0) > 0 && (
@@ -128,7 +164,25 @@ const PopulationInsightsV0: React.FC = () => {
                             <Bot className="h-2.5 w-2.5" /> {c.source_model}
                           </Badge>
                         ) : <span />}
-                        <span className="text-[9px] text-gray-400 italic">arraste para mover</span>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            size="sm" variant="ghost" className="h-6 px-1.5 text-[10px]"
+                            disabled={checkingOriginality === c.id}
+                            onClick={(e) => { e.stopPropagation(); checkOriginality(c.id); }}
+                            title="Verificar originalidade na literatura veterinária"
+                          >
+                            {checkingOriginality === c.id
+                              ? <Loader2 className="h-3 w-3 animate-spin" />
+                              : <><BookOpen className="h-3 w-3 mr-0.5" /> originalidade</>}
+                          </Button>
+                          <Button
+                            size="sm" variant="ghost" className="h-6 px-1.5 text-[10px]"
+                            onClick={(e) => { e.stopPropagation(); setDrillDownInsight(c); }}
+                            title="Abrir drill-down com gráficos e pets"
+                          >
+                            <Maximize2 className="h-3 w-3 mr-0.5" /> detalhar
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -140,6 +194,12 @@ const PopulationInsightsV0: React.FC = () => {
         })}
       </div>
       </KanbanDndProvider>
+
+      <InsightDrillDownDialog
+        insight={drillDownInsight as any}
+        open={!!drillDownInsight}
+        onOpenChange={(v) => !v && setDrillDownInsight(null)}
+      />
     </div>
   );
 };

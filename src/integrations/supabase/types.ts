@@ -971,6 +971,9 @@ export type Database = {
           evidence: Json
           id: string
           kind: string
+          originality_checked_at: string | null
+          originality_evidence: Json | null
+          originality_status: string
           signals: Json | null
           source_model: string | null
           stage: string
@@ -988,6 +991,9 @@ export type Database = {
           evidence?: Json
           id?: string
           kind: string
+          originality_checked_at?: string | null
+          originality_evidence?: Json | null
+          originality_status?: string
           signals?: Json | null
           source_model?: string | null
           stage?: string
@@ -1005,6 +1011,9 @@ export type Database = {
           evidence?: Json
           id?: string
           kind?: string
+          originality_checked_at?: string | null
+          originality_evidence?: Json | null
+          originality_status?: string
           signals?: Json | null
           source_model?: string | null
           stage?: string
