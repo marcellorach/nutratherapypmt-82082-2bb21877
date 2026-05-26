@@ -24,6 +24,13 @@ export interface SuggestedCohort {
   };
   discoverable: string;
   kind: 'prevention' | 'treatment_validation' | 'exploratory';
+  cohort_population?: 'living' | 'deceased' | 'mixed' | null;
+  breadth?: 'broad' | 'stratified' | null;
+  pattern_family?: string | null;
+  value_to_partner?: string | null;
+  record_requirements?: string[] | null;
+  target_model_id?: string | null;
+  target_model_expected_gain?: string | null;
   impact_score: number;
   viability_score: number;
 }
@@ -55,6 +62,26 @@ const KIND_COLOR: Record<SuggestedCohort['kind'], string> = {
   exploratory: 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200',
 };
 
+const POPULATION_META: Record<NonNullable<SuggestedCohort['cohort_population']>, { icon: string; label: string; cls: string }> = {
+  living:   { icon: '🟢', label: 'Vivos',     cls: 'bg-emerald-50 text-emerald-800 border-emerald-200' },
+  deceased: { icon: '⚫', label: 'Falecidos', cls: 'bg-gray-100 text-gray-800 border-gray-300' },
+  mixed:    { icon: '⚪', label: 'Misto',     cls: 'bg-amber-50 text-amber-800 border-amber-200' },
+};
+
+const BREADTH_META: Record<NonNullable<SuggestedCohort['breadth']>, { label: string; cls: string }> = {
+  broad:      { label: 'Amplo',        cls: 'bg-sky-50 text-sky-800 border-sky-200' },
+  stratified: { label: 'Estratificado', cls: 'bg-violet-50 text-violet-800 border-violet-200' },
+};
+
+const MODEL_LABEL: Record<string, string> = {
+  'efficacy-prediction': 'Eficácia de Nutracêuticos',
+  'disease-progression': 'Progressão de Doenças',
+  'cost-benefit-analysis': 'Custo-Benefício',
+  'patient-segmentation': 'Segmentação por Tratabilidade',
+  'mortality-risk-window': 'Risco de Mortalidade & Janela',
+  'treatment-adherence': 'Adesão ao Tratamento',
+};
+
 const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
   const [loading, setLoading] = useState(false);
   const [cohorts, setCohorts] = useState<SuggestedCohort[]>([]);
@@ -76,7 +103,7 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
     (async () => {
       const { data, error } = await (supabase as any)
         .from('cohort_suggestions')
-        .select('id, title, rationale, suggested_criteria, discoverable, kind, impact_score, viability_score, status, used_cohort_id, originality_score, originality_status, originality_breakdown')
+        .select('id, title, rationale, suggested_criteria, discoverable, kind, cohort_population, breadth, pattern_family, value_to_partner, record_requirements, target_model_id, target_model_expected_gain, impact_score, viability_score, status, used_cohort_id, originality_score, originality_status, originality_breakdown')
         .in('status', ['active', 'used'])
         .order('created_at', { ascending: false })
         .limit(10);
@@ -91,6 +118,13 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
           suggested_criteria: r.suggested_criteria ?? {},
           discoverable: r.discoverable ?? '',
           kind: r.kind,
+          cohort_population: r.cohort_population ?? null,
+          breadth: r.breadth ?? null,
+          pattern_family: r.pattern_family ?? null,
+          value_to_partner: r.value_to_partner ?? null,
+          record_requirements: r.record_requirements ?? null,
+          target_model_id: r.target_model_id ?? null,
+          target_model_expected_gain: r.target_model_expected_gain ?? null,
           impact_score: Number(r.impact_score ?? 0),
           viability_score: Number(r.viability_score ?? 0),
         })));
