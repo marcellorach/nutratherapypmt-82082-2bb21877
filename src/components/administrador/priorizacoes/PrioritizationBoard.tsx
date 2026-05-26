@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   PRIORITIZATION_BOARD,
@@ -6,6 +6,9 @@ import {
   PrioritizationStatus,
 } from '@/data/prioritizationBoard';
 import PrioritizationCardItem from './PrioritizationCard';
+import { supabase } from '@/integrations/supabase/client';
+import { KanbanDndProvider, DroppableColumn, DraggableCard } from './dnd/KanbanDnd';
+import { toast } from '@/components/ui/use-toast';
 
 const STATUS_STYLES: Record<PrioritizationStatus, { bg: string; label: string }> = {
   backlog: { bg: 'bg-gray-50 border-gray-200', label: 'Backlog' },
@@ -17,6 +20,18 @@ const STATUS_STYLES: Record<PrioritizationStatus, { bg: string; label: string }>
 
 const PrioritizationBoard: React.FC = () => {
   const { t } = useTranslation();
+  const [overrides, setOverrides] = useState<Record<string, PrioritizationStatus>>({});
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from('prioritization_overrides').select('card_id, status');
+      if (data) {
+        const map: Record<string, PrioritizationStatus> = {};
+        data.forEach((o: any) => (map[o.card_id] = o.status));
+        setOverrides(map);
+      }
+    })();
+  }, []);
 
   const grouped = useMemo(() => {
     const map: Record<PrioritizationStatus, typeof PRIORITIZATION_BOARD> = {
@@ -28,17 +43,50 @@ const PrioritizationBoard: React.FC = () => {
     };
     [...PRIORITIZATION_BOARD]
       .sort((a, b) => a.order - b.order)
-      .forEach((card) => map[card.status].push(card));
+      .forEach((card) => {
+        const status = overrides[card.id] ?? card.status;
+        if (map[status]) map[status].push(card);
+      });
     return map;
-  }, []);
+  }, [overrides]);
+
+  const handleDrop = async (cardId: string, columnId: string) => {
+    const newStatus = columnId as PrioritizationStatus;
+    if (!PRIORITIZATION_STATUSES.includes(newStatus)) return;
+    const card = PRIORITIZATION_BOARD.find((c) => c.id === cardId);
+    if (!card) return;
+    const current = overrides[cardId] ?? card.status;
+    if (current === newStatus) return;
+    setOverrides((prev) => ({ ...prev, [cardId]: newStatus }));
+    const { error } = await supabase
+      .from('prioritization_overrides')
+      .upsert(
+        { card_id: cardId, status: newStatus, sort_order: card.order },
+        { onConflict: 'card_id' },
+      );
+    if (error) {
+      toast({ title: 'Falha ao mover card', description: error.message, variant: 'destructive' });
+      setOverrides((prev) => {
+        const next = { ...prev };
+        if (card.status === newStatus) delete next[cardId];
+        else next[cardId] = current;
+        return next;
+      });
+    }
+  };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3 w-full">
-      {PRIORITIZATION_STATUSES.map((status) => {
+    <KanbanDndProvider onDrop={handleDrop}>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3 w-full">
+        {PRIORITIZATION_STATUSES.map((status) => {
         const style = STATUS_STYLES[status];
         const cards = grouped[status];
         return (
-          <div key={status} className={`rounded-lg border ${style.bg} p-2 flex flex-col min-h-[200px] min-w-0`}>
+          <DroppableColumn
+            key={status}
+            id={status}
+            className={`rounded-lg border ${style.bg} p-2 flex flex-col min-h-[200px] min-w-0`}
+          >
             <div className="flex items-center justify-between mb-2 px-1">
               <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-700">
                 {t(`prioritization.status.${status}`, style.label)}
@@ -51,13 +99,18 @@ const PrioritizationBoard: React.FC = () => {
               {cards.length === 0 ? (
                 <div className="text-[11px] text-gray-400 italic text-center py-4">—</div>
               ) : (
-                cards.map((card) => <PrioritizationCardItem key={card.id} card={card} />)
+                cards.map((card) => (
+                  <DraggableCard key={card.id} id={card.id}>
+                    <PrioritizationCardItem card={card} />
+                  </DraggableCard>
+                ))
               )}
             </div>
-          </div>
+          </DroppableColumn>
         );
-      })}
-    </div>
+        })}
+      </div>
+    </KanbanDndProvider>
   );
 };
 
