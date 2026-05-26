@@ -4140,6 +4140,30 @@ export type Database = {
         }
         Relationships: []
       }
+      prioritization_overrides: {
+        Row: {
+          card_id: string
+          sort_order: number
+          status: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          card_id: string
+          sort_order?: number
+          status: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          card_id?: string
+          sort_order?: number
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       processed_studies: {
         Row: {
           analysis_data: Json | null
@@ -4674,6 +4698,7 @@ export type Database = {
       }
       synthetic_cohorts: {
         Row: {
+          analysis_log: Json
           created_at: string
           created_by: string | null
           criteria: Json
@@ -4681,6 +4706,9 @@ export type Database = {
           generation_error: string | null
           id: string
           kind: string
+          last_analysis_insights_count: number
+          last_analysis_model: string | null
+          last_analyzed_at: string | null
           last_heartbeat_at: string | null
           name: string
           progress_log: Json
@@ -4690,6 +4718,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          analysis_log?: Json
           created_at?: string
           created_by?: string | null
           criteria?: Json
@@ -4697,6 +4726,9 @@ export type Database = {
           generation_error?: string | null
           id?: string
           kind: string
+          last_analysis_insights_count?: number
+          last_analysis_model?: string | null
+          last_analyzed_at?: string | null
           last_heartbeat_at?: string | null
           name: string
           progress_log?: Json
@@ -4706,6 +4738,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          analysis_log?: Json
           created_at?: string
           created_by?: string | null
           criteria?: Json
@@ -4713,6 +4746,9 @@ export type Database = {
           generation_error?: string | null
           id?: string
           kind?: string
+          last_analysis_insights_count?: number
+          last_analysis_model?: string | null
+          last_analyzed_at?: string | null
           last_heartbeat_at?: string | null
           name?: string
           progress_log?: Json

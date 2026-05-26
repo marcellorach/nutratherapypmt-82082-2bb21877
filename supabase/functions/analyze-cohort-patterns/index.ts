@@ -85,13 +85,30 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { cohort_id } = await req.json();
+    const body = await req.json();
+    const cohort_id = body?.cohort_id;
+    const force = Boolean(body?.force);
     if (!cohort_id) {
       return new Response(JSON.stringify({ error: "cohort_id required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     const service = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    const log: Array<{ ts: string; level: "info" | "warn" | "error"; message: string }> = [];
+    const pushLog = async (
+      level: "info" | "warn" | "error",
+      message: string,
+      persist = true,
+    ) => {
+      log.push({ ts: new Date().toISOString(), level, message });
+      if (persist) {
+        await service
+          .from("synthetic_cohorts")
+          .update({ analysis_log: log })
+          .eq("id", cohort_id);
+      }
+    };
 
     // load cohort + sample of pets (compacted for prompt size)
     const { data: cohort } = await service.from("synthetic_cohorts").select("*").eq("id", cohort_id).single();
@@ -101,21 +118,44 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Guard against accidental re-runs (<24h) unless force=true
+    if (!force && cohort.last_analyzed_at) {
+      const ageMs = Date.now() - new Date(cohort.last_analyzed_at).getTime();
+      if (ageMs < 24 * 3600 * 1000) {
+        return new Response(
+          JSON.stringify({
+            error: "already_analyzed",
+            message: `Cohort analisado há ${Math.round(ageMs / 60000)} min. Use force=true para re-analisar.`,
+            last_analyzed_at: cohort.last_analyzed_at,
+            last_count: cohort.last_analysis_insights_count,
+          }),
+          { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+    }
+
+    // Reset log for this run
+    await service.from("synthetic_cohorts").update({ analysis_log: [] }).eq("id", cohort_id);
+    await pushLog("info", `Iniciando análise de padrões (modelo: ${MODEL})`);
+
     const { data: pets } = await service
       .from("pet_profiles")
       .select("id, breed, sex, age_years, weight_kg")
       .eq("cohort_id", cohort_id);
     const petIds = (pets ?? []).map((p: any) => p.id);
+    await pushLog("info", `Carregados ${pets?.length ?? 0} pets do cohort`);
 
     const { data: conditions } = await service
       .from("pet_conditions")
       .select("pet_id, condition_name, severity, status")
       .in("pet_id", petIds);
+    await pushLog("info", `Carregadas ${conditions?.length ?? 0} condições clínicas`);
 
     const { data: exams } = await service
       .from("pet_exams")
       .select("pet_id, exam_type, flags_abnormal")
       .in("pet_id", petIds);
+    await pushLog("info", `Carregados ${exams?.length ?? 0} exames laboratoriais`);
 
     // compact aggregates to feed the LLM
     const byBreed: Record<string, number> = {};
@@ -145,6 +185,11 @@ Deno.serve(async (req) => {
       condition_frequency: conditionFreq,
       abnormal_flag_frequency: flagFreq,
     };
+    await pushLog(
+      "info",
+      `Agregados calculados: ${Object.keys(byBreed).length} raças, ${Object.keys(conditionFreq).length} condições distintas, ${Object.keys(flagFreq).length} flags laboratoriais`,
+    );
+    await pushLog("info", `Chamando LLM (${MODEL}) com ${JSON.stringify(summary).length} chars de contexto…`);
 
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -162,14 +207,17 @@ Deno.serve(async (req) => {
 
     if (!resp.ok) {
       const t = await resp.text();
+      await pushLog("error", `AI gateway erro ${resp.status}: ${t.slice(0, 200)}`);
       throw new Error(`AI gateway ${resp.status}: ${t.slice(0, 400)}`);
     }
     const data = await resp.json();
     const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
     const parsed = typeof args === "string" ? JSON.parse(args) : args;
     const insights = parsed?.insights ?? [];
+    await pushLog("info", `LLM retornou ${insights.length} insights estruturados`);
 
     if (!insights.length) {
+      await pushLog("error", "Resposta vazia do LLM");
       return new Response(JSON.stringify({ error: "Empty LLM response" }), {
         status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -185,7 +233,20 @@ Deno.serve(async (req) => {
       created_by: user.id,
     }));
     const { error: insErr } = await service.from("cohort_insights").insert(rows);
-    if (insErr) throw insErr;
+    if (insErr) {
+      await pushLog("error", `Falha ao inserir insights: ${insErr.message}`);
+      throw insErr;
+    }
+    await pushLog("info", `${rows.length} insights persistidos em cohort_insights`);
+    await service
+      .from("synthetic_cohorts")
+      .update({
+        last_analyzed_at: new Date().toISOString(),
+        last_analysis_insights_count: rows.length,
+        last_analysis_model: MODEL,
+      })
+      .eq("id", cohort_id);
+    await pushLog("info", "Análise concluída ✓");
 
     return new Response(JSON.stringify({ ok: true, generated: rows.length, model: MODEL }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
