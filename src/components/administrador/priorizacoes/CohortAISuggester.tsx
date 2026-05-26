@@ -428,6 +428,20 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
                     <Badge variant="outline" className={`text-[10px] ${KIND_COLOR[c.kind]}`}>
                       {KIND_LABEL[c.kind]}
                     </Badge>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <CohortOriginalityBadge
+                        suggestionId={suggestionIds[i] ?? null}
+                        title={c.title}
+                        rationale={c.rationale}
+                        criteria={c.suggested_criteria}
+                        score={originality[i]?.score ?? null}
+                        status={originality[i]?.status ?? null}
+                        breakdown={originality[i]?.breakdown ?? null}
+                        onUpdated={(score, status, breakdown) =>
+                          setOriginality((prev) => ({ ...prev, [i]: { score, status, breakdown } }))
+                        }
+                      />
+                    </div>
                     <p className="text-xs text-gray-700 leading-snug">{c.rationale}</p>
                     <div className="text-[11px] text-gray-600 bg-gray-50 rounded p-2 space-y-0.5">
                       <div><b>Critérios:</b> {c.suggested_criteria.breeds || '—'} · {c.suggested_criteria.age_range || '—'} · {c.suggested_criteria.conditions || '—'} · N≈{c.suggested_criteria.target_n}</div>
