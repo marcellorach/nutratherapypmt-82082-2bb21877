@@ -383,15 +383,24 @@ Deno.serve(async (req) => {
             continue;
           }
 
-          // Validation: discard pets without conditions or exams
+          // Validação mínima: precisa ter ao menos perfil + 1 consulta. Condições/exames/medicações
+          // são opcionais (o perfil pré-sorteado controla a distribuição).
           const validPets = pets.filter((p: any) =>
-            Array.isArray(p?.conditions) && p.conditions.length > 0 &&
-            Array.isArray(p?.exams) && p.exams.length > 0
+            p && typeof p.name === "string" && typeof p.breed === "string" &&
+            Array.isArray(p?.consultations) && p.consultations.length > 0
           );
           const discarded = pets.length - validPets.length;
           if (discarded > 0) {
-            await appendLog(service, cohortId, "warn", `Batch ${b + 1} · ${discarded} pets descartados (sem condições ou exames)`);
+            await appendLog(service, cohortId, "warn", `Batch ${b + 1} · ${discarded} pets descartados (perfil incompleto / sem consulta)`);
           }
+          // Distribuição clínica do lote (para auditoria visual)
+          const dist = validPets.reduce((acc: any, p: any) => {
+            const c = (p.conditions ?? []).length, e = (p.exams ?? []).length, m = (p.medications ?? []).length;
+            const k = c === 0 ? "healthy" : (e === 0 ? "cond_only" : (m === 0 ? "cond_exam" : "full"));
+            acc[k] = (acc[k] ?? 0) + 1; return acc;
+          }, {} as Record<string, number>);
+          await appendLog(service, cohortId, "info",
+            `Batch ${b + 1} · mix retornado: healthy=${dist.healthy ?? 0} · cond_only=${dist.cond_only ?? 0} · cond_exam=${dist.cond_exam ?? 0} · full=${dist.full ?? 0}`);
           if (validPets.length === 0) continue;
           pets = validPets;
 
