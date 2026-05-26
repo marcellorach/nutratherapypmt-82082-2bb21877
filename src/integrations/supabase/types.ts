@@ -1035,6 +1035,8 @@ export type Database = {
       }
       cohort_suggestions: {
         Row: {
+          breadth: string | null
+          cohort_population: string | null
           created_at: string
           created_by: string | null
           discoverable: string | null
@@ -1045,17 +1047,24 @@ export type Database = {
           originality_checked_at: string | null
           originality_score: number | null
           originality_status: string | null
+          pattern_family: string | null
           rationale: string | null
+          record_requirements: Json | null
           signals: Json
           source_model: string | null
           status: string
           suggested_criteria: Json
+          target_model_expected_gain: string | null
+          target_model_id: string | null
           title: string
           updated_at: string
           used_cohort_id: string | null
+          value_to_partner: string | null
           viability_score: number | null
         }
         Insert: {
+          breadth?: string | null
+          cohort_population?: string | null
           created_at?: string
           created_by?: string | null
           discoverable?: string | null
@@ -1066,17 +1075,24 @@ export type Database = {
           originality_checked_at?: string | null
           originality_score?: number | null
           originality_status?: string | null
+          pattern_family?: string | null
           rationale?: string | null
+          record_requirements?: Json | null
           signals?: Json
           source_model?: string | null
           status?: string
           suggested_criteria?: Json
+          target_model_expected_gain?: string | null
+          target_model_id?: string | null
           title: string
           updated_at?: string
           used_cohort_id?: string | null
+          value_to_partner?: string | null
           viability_score?: number | null
         }
         Update: {
+          breadth?: string | null
+          cohort_population?: string | null
           created_at?: string
           created_by?: string | null
           discoverable?: string | null
@@ -1087,14 +1103,19 @@ export type Database = {
           originality_checked_at?: string | null
           originality_score?: number | null
           originality_status?: string | null
+          pattern_family?: string | null
           rationale?: string | null
+          record_requirements?: Json | null
           signals?: Json
           source_model?: string | null
           status?: string
           suggested_criteria?: Json
+          target_model_expected_gain?: string | null
+          target_model_id?: string | null
           title?: string
           updated_at?: string
           used_cohort_id?: string | null
+          value_to_partner?: string | null
           viability_score?: number | null
         }
         Relationships: [
