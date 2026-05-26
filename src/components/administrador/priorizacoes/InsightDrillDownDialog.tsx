@@ -28,6 +28,24 @@ interface Props {
 
 const PIE_COLORS = ['#10b981', '#f59e0b', '#ef4444', '#6366f1', '#8b5cf6', '#ec4899'];
 
+const formatLabValue = (v: any): { text: string; abnormal: boolean; ref?: string } => {
+  if (v === null || v === undefined) return { text: '—', abnormal: false };
+  if (typeof v !== 'object') return { text: String(v), abnormal: false };
+  const value = v.value ?? v.result ?? v.val;
+  const unit = v.unit ?? v.units ?? '';
+  const refMin = v.ref_min ?? v.refMin ?? v.min;
+  const refMax = v.ref_max ?? v.refMax ?? v.max;
+  if (value === undefined) return { text: JSON.stringify(v).slice(0, 40), abnormal: false };
+  const num = Number(value);
+  let abnormal = false;
+  if (!Number.isNaN(num)) {
+    if (refMin != null && num < Number(refMin)) abnormal = true;
+    if (refMax != null && num > Number(refMax)) abnormal = true;
+  }
+  const ref = refMin != null || refMax != null ? `ref ${refMin ?? '−∞'}–${refMax ?? '+∞'}` : undefined;
+  return { text: `${value}${unit ? ' ' + unit : ''}`, abnormal, ref };
+};
+
 const InsightDrillDownDialog: React.FC<Props> = ({ insight, open, onOpenChange }) => {
   const [pets, setPets] = useState<any[]>([]);
   const [conditions, setConditions] = useState<any[]>([]);
