@@ -3,8 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Sparkles, GitBranch, FlaskConical, Database, RefreshCw, Loader2 } from 'lucide-react';
+import { AlertTriangle, Sparkles, GitBranch, FlaskConical, Database, RefreshCw, Loader2, Bot } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { KanbanDndProvider, DroppableColumn, DraggableCard } from './dnd/KanbanDnd';
 
 type InsightStage = 'discovery' | 'hypothesis' | 'proposed_meta_study' | 'approved';
 interface DbInsight {
@@ -20,6 +21,7 @@ interface DbInsight {
   confidence: number;
   signals: string[] | null;
   created_at: string;
+  source_model?: string | null;
 }
 
 const STAGES: { id: InsightStage; label: string; color: string; icon: React.ComponentType<any> }[] = [
@@ -85,12 +87,13 @@ const PopulationInsightsV0: React.FC = () => {
         </CardContent></Card>
       )}
 
+      <KanbanDndProvider onDrop={(id, col) => moveStage(id, col as InsightStage)}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         {STAGES.map((s) => {
           const Icon = s.icon;
           const cards = grouped[s.id];
           return (
-            <div key={s.id} className={`rounded-lg border ${s.color} p-2 flex flex-col min-h-[300px]`}>
+            <DroppableColumn key={s.id} id={s.id} className={`rounded-lg border ${s.color} p-2 flex flex-col min-h-[300px]`}>
               <div className="flex items-center justify-between mb-2 px-1">
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-700 flex items-center gap-1.5">
                   <Icon className="h-3.5 w-3.5" />
@@ -104,7 +107,8 @@ const PopulationInsightsV0: React.FC = () => {
                 {cards.length === 0 ? (
                   <div className="text-[11px] text-gray-400 italic text-center py-6">—</div>
                 ) : cards.map((c) => (
-                  <Card key={c.id} className="bg-white">
+                  <DraggableCard key={c.id} id={c.id}>
+                  <Card className="bg-white">
                     <CardContent className="p-2.5 space-y-1.5">
                       <div className="flex items-start justify-between gap-1.5">
                         <h4 className="text-xs font-semibold leading-tight">{isPt ? c.title : (c.title_en || c.title)}</h4>
@@ -118,25 +122,24 @@ const PopulationInsightsV0: React.FC = () => {
                           ))}
                         </div>
                       )}
-                      <div className="flex gap-1 pt-1 border-t flex-wrap">
-                        {STAGES.filter((st) => st.id !== c.stage).map((st) => (
-                          <Button
-                            key={st.id} size="sm" variant="ghost"
-                            className="h-5 text-[10px] px-1.5"
-                            onClick={() => moveStage(c.id, st.id)}
-                          >
-                            → {st.label.split(' ')[0]}
-                          </Button>
-                        ))}
+                      <div className="flex items-center justify-between pt-1 border-t gap-2">
+                        {c.source_model ? (
+                          <Badge variant="outline" className="text-[9px] font-mono flex items-center gap-1 bg-gray-50">
+                            <Bot className="h-2.5 w-2.5" /> {c.source_model}
+                          </Badge>
+                        ) : <span />}
+                        <span className="text-[9px] text-gray-400 italic">arraste para mover</span>
                       </div>
                     </CardContent>
                   </Card>
+                  </DraggableCard>
                 ))}
               </div>
-            </div>
+            </DroppableColumn>
           );
         })}
       </div>
+      </KanbanDndProvider>
     </div>
   );
 };
