@@ -22,7 +22,20 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ---
 
 ## [Unreleased]
-<!-- senex: 6.0.0 -->
+<!-- senex: 7.0.0 -->
+
+### Added - 2026-05-26 — Senex 7.0: Painel de Priorizações com histórico + Population Insights com proveniência
+<!-- area: admin · status: entregue · i18n: 1.113.0 -->
+- **Kanban de Priorizações com log de movimentações**: nova tabela `prioritization_history` (card_id, from_status, to_status, moved_at, note) — toda movimentação de card no Kanban grava entrada automaticamente. Card mostra "Criado dd/mm/aa · N mov." com expansão completa do histórico (origem → destino + data).
+- **Card #1 (Role visualization layer) marcado como entregue** via override no banco, com histórico semeado.
+- **Seed do histórico** dos 10 cards do roadmap em 25/05/26 para servir de baseline.
+- **Tag de origem nos insights de Population Insights**: cada card de descoberta/hipótese agora mostra de qual cohort sintético veio (badge azul-indigo com nome) ou se é resultado da análise cruzada pan-cohort (badge roxo "Pan-cohort (todos)").
+- **Lista de insights por cohort** em `SyntheticCohortsManager`: bloco verde "Insights gerados (N)" lista os títulos dos insights extraídos com score de confiança lado a lado de cada cohort.
+- **OriginalityDialog separado**: badge "✦ inédito / ~ parcial / ⌖ já publicado" agora abre dialog dedicado com evidências da literatura (Perplexity + Gemini + citações PubMed clicáveis), separado do drill-down de evidência do cohort.
+- **InsightDrillDownDialog enxuto**: foco exclusivo em evidência do cohort — gráficos Recharts + lista expansível de pets sustentando o insight com condições/exames/medicações reais (formatação de exames `valor unidade (ref min–max)` em vez de JSON cru).
+- **Análise pan-cohort** (`analyze-all-cohorts-patterns`): edge function dedicada que cruza padrões entre todos os cohorts prontos e gera insights com `cohort_id=null`.
+- **Log de Análise renomeado e auto-expandido** durante execução em `CohortProgressLog`.
+- Files: src/data/prioritizationBoard.ts, src/components/administrador/priorizacoes/PrioritizationBoard.tsx, src/components/administrador/priorizacoes/PrioritizationCard.tsx, src/components/administrador/priorizacoes/PopulationInsightsV0.tsx, src/components/administrador/priorizacoes/SyntheticCohortsManager.tsx, src/components/administrador/priorizacoes/OriginalityDialog.tsx, src/components/administrador/priorizacoes/InsightDrillDownDialog.tsx, src/components/administrador/priorizacoes/CohortProgressLog.tsx, supabase/functions/analyze-all-cohorts-patterns/index.ts, supabase/functions/check-insight-originality/index.ts, supabase/migrations/*prioritization_history*.sql
 
 ### Added - 2026-05-26 — Observabilidade e DnD na análise de cohorts
 <!-- area: admin · status: entregue · i18n: 1.112.0 -->
