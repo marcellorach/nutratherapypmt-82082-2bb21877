@@ -8,6 +8,7 @@ import { toast } from '@/components/ui/use-toast';
 import { useRoleView } from '@/contexts/RoleViewContext';
 import CohortProgressLog, { ProgressLogEntry } from './CohortProgressLog';
 import { Progress } from '@/components/ui/progress';
+import CohortOriginalityBadge, { OriginalityBreakdown } from './CohortOriginalityBadge';
 
 export interface SuggestedCohort {
   title: string;
@@ -58,6 +59,8 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
   const [loading, setLoading] = useState(false);
   const [cohorts, setCohorts] = useState<SuggestedCohort[]>([]);
   const [suggestionIds, setSuggestionIds] = useState<(string | null)[]>([]);
+  // originalidade por índice de sugestão
+  const [originality, setOriginality] = useState<Record<number, { score: number | null; status: string | null; breakdown: OriginalityBreakdown | null }>>({});
   const [generating, setGenerating] = useState<number | null>(null);
   // idx -> ActiveJob (mantém histórico até o usuário descartar)
   const [jobs, setJobs] = useState<Record<number, ActiveJob>>({});
@@ -73,7 +76,7 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
     (async () => {
       const { data, error } = await (supabase as any)
         .from('cohort_suggestions')
-        .select('id, title, rationale, suggested_criteria, discoverable, kind, impact_score, viability_score, status, used_cohort_id')
+        .select('id, title, rationale, suggested_criteria, discoverable, kind, impact_score, viability_score, status, used_cohort_id, originality_score, originality_status, originality_breakdown')
         .in('status', ['active', 'used'])
         .order('created_at', { ascending: false })
         .limit(10);
@@ -92,6 +95,15 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
           viability_score: Number(r.viability_score ?? 0),
         })));
         setSuggestionIds(data.map((r: any) => r.id));
+        const orig: Record<number, { score: number | null; status: string | null; breakdown: OriginalityBreakdown | null }> = {};
+        data.forEach((r: any, i: number) => {
+          orig[i] = {
+            score: r.originality_score != null ? Number(r.originality_score) : null,
+            status: r.originality_status ?? null,
+            breakdown: r.originality_breakdown ?? null,
+          };
+        });
+        setOriginality(orig);
         // Re-hidrata jobs em andamento (ou recém-concluídos) a partir do banco,
         // para que ao voltar de outra aba o card de progresso reapareça.
         const usedCohortIds = data
@@ -149,17 +161,28 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
       const newCohorts: SuggestedCohort[] = data?.cohorts ?? [];
       setCohorts(newCohorts);
       setSuggestionIds(new Array(newCohorts.length).fill(null));
+      setOriginality({});
       // Re-fetch IDs from DB (suggestions were just persisted by the edge function)
       if (newCohorts.length) {
         const { data: persisted } = await (supabase as any)
           .from('cohort_suggestions')
-          .select('id, title')
+          .select('id, title, originality_score, originality_status, originality_breakdown')
           .eq('status', 'active')
           .order('created_at', { ascending: false })
           .limit(newCohorts.length);
         if (persisted) {
           // map by title (best-effort)
           setSuggestionIds(newCohorts.map((c) => persisted.find((p: any) => p.title === c.title)?.id ?? null));
+          const orig: Record<number, { score: number | null; status: string | null; breakdown: OriginalityBreakdown | null }> = {};
+          newCohorts.forEach((c, i) => {
+            const row = persisted.find((p: any) => p.title === c.title);
+            orig[i] = {
+              score: row?.originality_score != null ? Number(row.originality_score) : null,
+              status: row?.originality_status ?? null,
+              breakdown: row?.originality_breakdown ?? null,
+            };
+          });
+          setOriginality(orig);
         }
       }
       if (!newCohorts.length) {
