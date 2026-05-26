@@ -24,6 +24,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.0 -->
 
+### Added - 2026-05-26 — 6 modelos preditivos + cohorts ancorados (amplo × estratificado, vivos × falecidos)
+<!-- area: admin · status: entregue · i18n: 1.114.0 -->
+- **Catálogo de modelos preditivos expandido de 4 → 6**: adicionados `mortality-risk-window` (Risco de Mortalidade e Janela de Intervenção — 100% treinado em cães já falecidos como gold label) e `treatment-adherence` (Previsão de Adesão ao Tratamento — sinais operacionais PetLove de recompra/agendamentos/check-ins). Ambos entram com status `initial`, `totalPetsMonitored=0` e `nextMilestone` apontando para o primeiro cohort-âncora — sem mock inflado.
+- **Sugestões de cohort reorientadas para VALOR PetLove (não preenchimento de KG)**: novo system prompt em `suggest-cohort-ideas` orienta o LLM a propor exatamente 6 cohorts (1 por modelo), com pelo menos 2 cohorts de cães falecidos (`deceased`/`mixed`) para alimentar Disease Progression e Mortality Risk com trajetórias completas pré-óbito.
+- **Duas larguras por cohort**: `broad` (N=1000–2500, padrão diluído, viabilidade alta) e `stratified` (N=150–400, padrão nítido, impacto alto) — mistura livre entre os 6 cohorts.
+- **Migration**: novas colunas em `cohort_suggestions` — `pattern_family`, `value_to_partner`, `cohort_population` (`living`/`deceased`/`mixed`), `record_requirements` (jsonb), `target_model_id` (enum dos 6 modelos), `target_model_expected_gain`, `breadth` (`broad`/`stratified`).
+- **Card de sugestão enriquecido em `CohortAISuggester`**: tag de população (🟢 Vivos · ⚫ Falecidos · ⚪ Misto), badge de largura (Amplo/Estratificado), chip "🎯 Treina: [Modelo]" fechando o loop com o catálogo de modelos preditivos, bloco "Por que sugerimos isto" com `discoverable_pattern`, `value_to_partner`, `record_requirements` e `target_model_expected_gain`, e rótulos dos scores re-explicados ("Impacto = ganho operacional · Viabilidade = dado já existe na PetLove").
+- **Bilingual all layers**: novas chaves `predictiveModels.models.mortality-risk-window.*` e `predictiveModels.models.treatment-adherence.*` em PT e EN; I18N_VERSION 1.113.0 → 1.114.0.
+- Files: src/components/administrador/modelosPreditivos/data/predictiveModelsData.ts, src/components/administrador/priorizacoes/CohortAISuggester.tsx, supabase/functions/suggest-cohort-ideas/index.ts, supabase/migrations/*cohort_suggestions_expanded*.sql, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts
+
 ### Added - 2026-05-26 — Senex 7.0: Painel de Priorizações com histórico + Population Insights com proveniência
 <!-- area: admin · status: entregue · i18n: 1.113.0 -->
 - **Kanban de Priorizações com log de movimentações**: nova tabela `prioritization_history` (card_id, from_status, to_status, moved_at, note) — toda movimentação de card no Kanban grava entrada automaticamente. Card mostra "Criado dd/mm/aa · N mov." com expansão completa do histórico (origem → destino + data).

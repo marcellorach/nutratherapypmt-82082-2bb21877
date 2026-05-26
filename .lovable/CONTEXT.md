@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-05-26T03:44:55.489Z
+Generated: 2026-05-26T15:43:57.728Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.113.0
+## Latest i18n version: 1.114.0
 
 ## Changes by area (last 14 days)
-- **admin**: 46
+- **admin**: 47
 - **vet-ui**: 13
 - **meta**: 7
 - **kg**: 6
@@ -15,6 +15,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **clinical-pipeline**: 2
 
 ## Top 10 recent entries
+### 2026-05-26 · [admin] ADDED — 6 modelos preditivos + cohorts ancorados (amplo × estratificado, vivos × falecidos)
+- Catálogo de modelos preditivos expandido de 4 → 6: adicionados `mortality-risk-window` (Risco de Mortalidade e Janela de Intervenção — 100% treinado em cães já falecidos como gold label) e `treatment-adherence` (Previsão de Adesão ao Tratamento — sinais operacionais PetLove de recompra/agendamentos/check-ins). Ambos entram com status `initial`, `totalPetsMonitored=0` e `nextMilestone` apontando para o primeiro cohort-âncora — sem mock inflado.
+- Sugestões de cohort reorientadas para VALOR PetLove (não preenchimento de KG): novo system prompt em `suggest-cohort-ideas` orienta o LLM a propor exatamente 6 cohorts (1 por modelo), com pelo menos 2 cohorts de cães falecidos (`deceased`/`mixed`) para alimentar Disease Progression e Mortality Risk com trajetórias completas pré-óbito.
+- Duas larguras por cohort: `broad` (N=1000–2500, padrão diluído, viabilidade alta) e `stratified` (N=150–400, padrão nítido, impacto alto) — mistura livre entre os 6 cohorts.
+_files: src/components/administrador/modelosPreditivos/data/predictiveModelsData.ts, src/components/administrador/priorizacoes/CohortAISuggester.tsx, supabase/functions/suggest-cohort-ideas/index.ts, src/locales/pt/translation.json…_
+
 ### 2026-05-26 · [admin] ADDED — Senex 7.0: Painel de Priorizações com histórico + Population Insights com proveniência
 - Kanban de Priorizações com log de movimentações: nova tabela `prioritization_history` (card_id, from_status, to_status, moved_at, note) — toda movimentação de card no Kanban grava entrada automaticamente. Card mostra "Criado dd/mm/aa · N mov." com expansão completa do histórico (origem → destino + data).
 - Card #1 (Role visualization layer) marcado como entregue via override no banco, com histórico semeado.
@@ -68,12 +74,6 @@ _files: src/config/role-views.ts, src/pages/administrador/PriorizacoesTab.tsx, s
 - Novo hook `useMetaKgPhaseBMetrics`: query React-Query sobre `meta_studies` (apenas `lifecycle_status='approved'`), normaliza statements de `architectural_patterns`/`methodological_recipes`/`anti_patterns_pitfalls` (lowercase, slice 120 chars) e calcula redundância (mesmo statement em ≥2 estudos por bucket) + conflito (mesmo statement como recipe e anti-padrão).
 - i18n: +13 chaves em `fundamentos.roadmap.*` (PT+EN). I18N_VERSION 1.103.0 → 1.104.0.
 _files: src/components/administrador/fundamentos/MetaKgRoadmapCard.tsx, src/hooks/useMetaKgPhaseBMetrics.ts, src/i18n.ts_
-
-### 2026-05-22 · [admin] CHANGED — Observatório Clínico v2.1: filtros globais, métricas NNT/HR/TTR, fluxo mensal e caminhos biológicos
-- Coorte sintética rebalanceada para totais não-redondos: 8.473 tratados / 13.916 espelho / 8.473 gêmeos digitais (1 twin por tratado). Helpers novos em `syntheticCohort.ts`: `meanTrajectoryWithCI` (IC95%), `computeNNT`, `computeHazardRatio`, `computeTimeToResponse` (mediana + IQR), `computeMonthlyFlow` (active/joined/churned).
-- `ClinicalFiltersBar` sticky no topo da tab com 7 filtros (condição, raça, idade, região, adesão, janela de protocolo, resposta) + hook `useFilteredCohort` que propaga a coorte filtrada para todas as sub-abas.
-- `CohortObservatory`: novo bloco "Métricas de impacto clínico" (NNT/HR/TTR) e `AdherenceMonthlyStack` substitui o funil 0-3-6m por barras empilhadas mensais (24 meses) com churn negativo abaixo do eixo.
-_files: src/data/biologicalPathways.ts, src/utils/syntheticCohort.ts, src/hooks/useFilteredCohort.ts, src/i18n.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

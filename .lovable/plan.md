@@ -1,93 +1,71 @@
+## Plano: 6 modelos preditivos + cohorts ancorados (versão ampla vs. estratificada)
 
-# Plano: Análise de Padrões de Cohort — Transparência, Reuso e Drill-down
+### 1. Expandir de 4 para 6 modelos
 
-Vamos atacar tudo em 4 fases pequenas e independentes para não travar nada. Tudo continua usando dados reais do cohort (sem mocks) e Lovable AI (`google/gemini-3.5-flash`).
+Manter os 4 atuais e adicionar 2 novos. Mantemos os ids snake-case dos atuais e adicionamos:
 
-## Fase 1 — Visibilidade e controle da análise (resolve a, b, c)
+| # | modelId | Nome | População-alvo principal |
+|---|---|---|---|
+| 1 | `efficacy-prediction` | Nutraceutical Efficacy Prediction | vivos + falecidos (outcome final) |
+| 2 | `disease-progression` | Disease Progression Prediction | vivos longitudinais + falecidos (gold label) |
+| 3 | `cost-benefit-analysis` | Cost-Benefit Analysis | vivos (custo real PetLove) |
+| 4 | `patient-segmentation` | Treatability Segmentation | vivos + falecidos |
+| 5 | `mortality-risk-window` *(novo)* | Mortality Risk & Intervention Window | falecidos (100%) |
+| 6 | `treatment-adherence` *(novo)* | Treatment Adherence Predictor | vivos (operacional puro) |
 
-**a) Log de execução da análise de padrões**
-- Adicionar coluna `analysis_log jsonb` em `synthetic_cohorts` (mesmo padrão de `progress_log`).
-- `analyze-cohort-patterns` passa a gravar eventos estruturados: `started → loading_pets (n=X) → loading_conditions → loading_exams → aggregating → calling_llm (model, prompt_tokens) → parsing → inserting (n_insights) → done` (ou `error`).
-- Cada card em "Cohorts sintéticos" ganha um collapsible "Log da análise (N)" igual ao log de geração — ao lado de "Estatísticas".
+Descartados desta rodada (anotar em CHANGELOG como "futuros"): `avoidable-death-detector`, `polypharmacy-risk-score`, `breed-specific-aging-curve` — todos podem nascer como derivados dos 6 acima depois.
 
-**b) Botão "Analisar padrões" inteligente**
-- Adicionar `last_analyzed_at timestamptz` e `last_analysis_insights_count int` em `synthetic_cohorts`.
-- Depois de analisado: botão fica "Re-analisar (X insights, há 3h)" com tooltip explicando que re-rodar pode gerar novos insights (LLM não é determinístico) e duplicar entradas. Confirmação modal antes de re-rodar.
-- Opção `force=true` no payload; sem ela, o backend devolve 409 se já houver insights recentes (<24h) sem `force`.
+### 2. Dois cohorts-âncora por modelo (12 exemplos no total)
 
-**c) Modelo visível**
-- Mostrar `google/gemini-3.5-flash` (vindo de `source_model` da resposta) no card do cohort durante e após análise — não só no role `platform_architect`. Badge pequeno: `🤖 gemini-3.5-flash`.
-- Mesmo badge nos cards de insights em Population Insights (já existe `source_model` na tabela, só renderizar).
+Para cada modelo, uma versão **ampla** (N maior, padrão mais diluído, viabilidade alta) e uma **estratificada** (N menor, padrão mais nítido, impacto alto). Isso vira o seed inicial do `suggest-cohort-ideas`.
 
-## Fase 2 — Drag-and-drop nos kanbans (resolve d)
+| Modelo | Cohort AMPLO | Cohort ESTRATIFICADO |
+|---|---|---|
+| **1. Efficacy Prediction** | Cães ≥6a em uso de condroprotetor oral ≥6m (qualquer raça >15kg) com 2+ avaliações clínicas — N alvo 1500 · vivos | Golden Retriever 6–10a, condroprotetor ≥12m, ≥3 escores funcionais (Helsinki/CBPI), sem corticoide concomitante — N 250 · vivos |
+| **2. Disease Progression** | Cães com creatinina >1.6 em algum momento, ≥18m de seguimento (qualquer raça/idade) — N 2000 · vivos+falecidos | Cães falecidos por DRC nos últimos 24m, com ≥18m pré-óbito e ≥3 hemogramas/bioquímicos seriados — N 300 · falecidos |
+| **3. Cost-Benefit** | Cães em qualquer plano nutracêutico contínuo ≥6m com gasto vet documentado 12m antes/depois — N 1200 · vivos | Cães com osteoartrite confirmada que alternaram entre AINE crônico e protocolo nutracêutico, com registro de visitas/exames antes e depois — N 200 · vivos |
+| **4. Treatability Segmentation** | Cães ≥5a com 2+ condições crônicas ativas e ≥4 medicações simultâneas — N 1000 · vivos+falecidos | Cães com polifarmácia hepatotóxica documentada (≥3 fármacos com risco hepático) + ALT/AST seriadas — N 250 · mistos |
+| **5. Mortality Risk & Window** *(novo)* | Cães falecidos nos últimos 36m com causa de óbito registrada e ≥12m de prontuário pré-óbito — N 1500 · falecidos | Cães falecidos por linfoma multicêntrico com protocolo quimioterápico completo e datas de recidiva registradas — N 150 · falecidos |
+| **6. Treatment Adherence** *(novo)* | Tutores que iniciaram qualquer plano nutracêutico nos últimos 18m, com registro de recompra/renovação — N 2000 · vivos | Tutores de cães grandes (>25kg) com osteoartrite que iniciaram plano de ≥3 compostos, acompanhados por 9m com check-ins agendados — N 300 · vivos |
 
-- Instalar `@dnd-kit/core` + `@dnd-kit/sortable` (mesma stack já familiar ao projeto).
-- Aplicar em:
-  - **PrioritizationBoard** (Kanban de Priorizações) → arrastar entre `backlog/next/in_progress/in_test/done`. Persistir em `prioritizationBoard.ts` não dá (é estático); então criar tabela `prioritization_overrides (card_id, status, order)` para guardar a posição editada por admin. Fallback ao default se não tiver override.
-  - **PopulationInsightsV0** → arrastar entre `discovery/hypothesis/proposed_meta_study/approved`. Já existe `UPDATE cohort_insights SET stage` — só trocar o `<select>` pelo drag.
+Cada um desses 12 entra no card com: população (🟢/⚫/⚪), `pattern_family`, `discoverable_pattern`, `value_to_partner`, `record_requirements`, e a frase âncora **"Este cohort treina: [Modelo X] → +N pets, esperado +Y% accuracy"**.
 
-## Fase 3 — Originalidade documentada para cohorts e insights (resolve e, i)
+### 3. Mudanças de código (sem implementar agora — só desenhar)
 
-A reinterpretação do usuário muda o uso: **encontrar estudos confirmatórios é positivo** (reforça o KG); só não devemos gerar pedido de meta-estudo duplicado.
+**a) `src/components/administrador/modelosPreditivos/data/predictiveModelsData.ts`**
+- Adicionar 2 novos modelos (`mortality-risk-window`, `treatment-adherence`) com status `initial`, `totalPetsMonitored: 0`, `dataSources` apontando para `clinical_monitoring`/`anamnesis`, `degenerativeInsights: []`.
+- Marcar claramente como "aguardando primeiro cohort" (sem números mock inflados).
 
-- Reaproveitar a função `check-cohort-originality` já criada (suggestions) e generalizá-la para receber `{kind: 'cohort'|'insight', id, title, signals}`.
-- Disparar automaticamente após:
-  - geração de cohort (`generate-synthetic-cohort` no final) — usa o nome + rationale + critérios.
-  - geração de insights (`analyze-cohort-patterns` no final, para cada insight) — usa title + signals.
-- Persistir em colunas novas em `synthetic_cohorts` e `cohort_insights`:
-  - `originality_score numeric`
-  - `originality_breakdown jsonb` (queries usadas, hits PubMed, top 3 títulos com link, hits internos, perplexity opcional)
-  - `originality_checked_at`, `originality_status`
-- UI: badge clicável "Confirmado por N estudos" (score baixo = bom para validação) ou "Inédito" (score alto = candidato a meta-estudo). Popover mostra: queries exatas, fontes consultadas, top 3 estudos clicáveis, e ressalta "Estudos recentes (<2 anos) podem não estar indexados".
-- Em insights `proposed_meta_study`: se originalidade < 30, sugere converter para `approved` ao invés de novo meta-estudo, com botão "Marcar como confirmado por literatura existente".
+**b) `src/locales/{pt,en}/translation.json`** + bump `I18N_VERSION` em `src/i18n.ts`
+- Novas chaves `predictiveModels.models.mortality-risk-window.{name,description,milestone}` e `predictiveModels.models.treatment-adherence.{name,description,milestone}`.
 
-## Fase 4 — Análise cross-cohort e drill-down (resolve f, g, j)
+**c) `supabase/functions/suggest-cohort-ideas/index.ts`** — reescrita do system prompt e tool schema (continuação do plano anterior, agora consolidado):
+- System prompt orientado a **valor PetLove** (não preenchimento de KG).
+- Tool schema ganha: `cohort_population` (`living`/`deceased`/`mixed`), `pattern_family`, `value_to_partner`, `discoverable_pattern`, `record_requirements`, `target_model_id` (um dos 6 ids acima), `target_model_expected_gain` (string curta), `breadth` (`broad`/`stratified`).
+- Instrução: sempre devolver 6 cohorts (1 por modelo), e o LLM pode escolher se aquele cohort específico é broad ou stratified, mas o conjunto precisa cobrir os 6 modelos.
 
-**f) Provar que os agentes leem dados reais:**
-- O log da Fase 1 + o objeto `evidence` em cada insight já vêm do cohort. Adicionar no popover do insight uma seção "Cálculo verificável" mostrando: query SQL equivalente + número exato (ex.: `83.3% = 50/60 cães com idade ≥ 8a`) recalculada em tempo real ao abrir.
+**d) Migration** `cohort_suggestions` — colunas novas: `pattern_family text`, `value_to_partner text`, `cohort_population text check in ('living','deceased','mixed')`, `record_requirements jsonb`, `target_model_id text`, `target_model_expected_gain text`, `breadth text check in ('broad','stratified')`.
 
-**g) Análise de TODOS os cohorts juntos:**
-- Nova action no header de "Cohorts sintéticos": **"Meta-análise transversal"** (agrega N cohorts selecionados).
-- Novo edge function `analyze-meta-cohort` que agrega pets de múltiplos `cohort_id`s, dedupe por raça/idade, e roda mesmo prompt do `analyze-cohort-patterns` com escopo expandido. Persiste insights com `cohort_id = null` + `scope = 'cross_cohort'` (nova coluna).
-- Population Insights ganha filtro "Origem: cohort único / cross-cohort / todos".
+**e) `CohortAISuggester.tsx`** — card mostra:
+- Header: tag população (🟢/⚫/⚪) + badge breadth (Amplo/Estratificado) + chip "Treina: [Nome do Modelo]".
+- Bloco "Por que sugerimos isto": `discoverable_pattern`, `value_to_partner`, `record_requirements`.
+- Rodapé: "Impacto = ganho operacional · Viabilidade = dado já existe na PetLove".
 
-**j) Drill-down dos insights:**
-- Cada insight ganha um botão "Investigar →" que abre um Dialog em tela cheia com:
-  - **Header**: título + evidência verificável recalculada.
-  - **Charts** (Recharts, dados reais do cohort):
-    - Distribuição por idade (histograma do `pet_profiles.age_years` do cohort).
-    - Distribuição por raça (barras).
-    - Prevalência das `signals` (ex.: ALT, FA) — flags abnormais por idade.
-    - Scatter age × marcador quando aplicável.
-  - **Lista estratificável**: tabela paginada de pets que satisfazem o padrão, com filtros (raça/idade/sexo/severidade). Click no pet abre `CohortPatientsDialog` já existente.
-  - **Cálculo bruto**: linha por linha (id do pet, idade, raça, valor do marcador, contribui? sim/não).
-  - **Originalidade**: bloco da Fase 3 inline.
-  - **Ações**: mover de estágio, "Confirmado por literatura", "Promover a meta-estudo", "Exportar CSV".
+**f) `CHANGELOG.md`** — entrada em `[Unreleased]` com area `predictive-models` + `cohort-suggestions`, status `planned`, i18n `pt+en`. Rodar `npm run sync:changelog`.
 
-## Detalhes técnicos
+**g) Organograma** — `src/data/projectOrganograma.ts`: confirmar que a aba Modelos Preditivos lista 6 modelos (não 4).
 
-- **Migrações:**
-  - `synthetic_cohorts`: + `analysis_log jsonb`, `last_analyzed_at`, `last_analysis_insights_count`, `originality_score`, `originality_breakdown`, `originality_checked_at`, `originality_status`.
-  - `cohort_insights`: + `originality_score`, `originality_breakdown`, `originality_checked_at`, `originality_status`, `scope text default 'cohort'`, `source_cohort_ids uuid[]`.
-  - `prioritization_overrides` (nova): `card_id text pk`, `status text`, `order int`, `updated_at`. RLS: admin only.
-- **Edge functions:**
-  - editar `analyze-cohort-patterns` (log + force flag + dispara originality).
-  - editar `generate-synthetic-cohort` (dispara originality no final via `EdgeRuntime.waitUntil`).
-  - editar `check-cohort-originality` (aceitar `kind`/`scope` genéricos).
-  - novo `analyze-meta-cohort`.
-- **Componentes novos/editados:**
-  - `CohortAnalysisLog.tsx` (collapsible reaproveitando estilo do `CohortProgressLog`).
-  - `InsightDrillDownDialog.tsx` (Fase 4).
-  - `OriginalityBadge.tsx` generalizado a partir de `CohortOriginalityBadge.tsx`.
-  - `SyntheticCohortsManager.tsx`, `PopulationInsightsV0.tsx`, `PrioritizationBoard.tsx` (dnd).
-- **i18n:** PT/EN paritário, com bump de `I18N_VERSION` em `src/i18n.ts`.
-- **CHANGELOG.md + organograma + `npm run sync:changelog`** como sempre.
+### 4. Ordem de execução proposta (já em build mode)
 
-## Ordem sugerida de entrega
-1. Fase 1 (visibilidade) — pequena, te dá feedback imediato pra testar.
-2. Fase 2 (drag-and-drop) — isolada.
-3. Fase 4 drill-down (sem cross-cohort) — alto valor visual.
-4. Fase 3 originalidade — depende do toggle Perplexity ser opcional (já está).
-5. Fase 4 cross-cohort — última, pois depende de tudo acima.
+1. Atualizar `predictiveModelsData.ts` + traduções + bump i18n (modelos visíveis primeiro, mesmo zerados).
+2. Migration `cohort_suggestions` com colunas novas.
+3. Reescrever `suggest-cohort-ideas` (prompt + tool schema + persistência das colunas novas).
+4. Refatorar UI do `CohortAISuggester.tsx`.
+5. Seed inicial: rodar a função uma vez e validar que os 6 cohorts gerados batem com os exemplos da tabela acima (validação manual sua antes de seguir).
+6. Atualizar organograma + CHANGELOG + docs.
 
-Posso entregar **Fase 1 + Fase 2 num único turno** (já desbloqueia a, b, c, d e a maioria da observabilidade), e seguir com as outras nos próximos. Confirma que faço assim?
+### 5. Pontos de validação antes de eu codar
+
+- Os 6 modelos cobrem o que você quer? Algum a tirar/trocar?
+- A regra "1 cohort por modelo, mistura broad/stratified livremente" serve, ou prefere "sempre 2 por modelo = 12 cards"?
+- Os exemplos amplos vs. estratificados da tabela acima fazem sentido clinicamente, ou ajusta algum recorte (idade, raça, N) antes de eu congelar como seed?

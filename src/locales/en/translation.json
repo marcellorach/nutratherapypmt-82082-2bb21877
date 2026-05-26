@@ -3726,6 +3726,16 @@
         "name": "Disease Progression Prediction",
         "description": "Predicts the progression rate of degenerative diseases with and without nutraceutical intervention, enabling personalized prognoses.",
         "milestone": "Reach 200,000 pets with 24+ month follow-up for long-term predictions"
+      },
+      "mortality-risk-window": {
+        "name": "Mortality Risk & Intervention Window",
+        "description": "Estimates the probability of death at 6/12/24 months and surfaces the modifiable therapeutic window, trained on complete trajectories of deceased dogs (gold label).",
+        "milestone": "Collect 1,500 complete pre-mortem records (≥12m) for Kaplan-Meier curves by protocol"
+      },
+      "treatment-adherence": {
+        "name": "Treatment Adherence Predictor",
+        "description": "Predicts the probability that a guardian will drop the nutraceutical plan at 3/6/9 months based on operational signals (repurchase, scheduling, check-ins), enabling proactive PetLove outreach.",
+        "milestone": "Reach 2,000 guardians with ≥9 months of documented journey to surface churn drivers"
       }
     },
     "dataSources": {

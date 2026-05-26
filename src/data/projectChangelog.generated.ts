@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-26T03:44:55.484Z
+// Última geração: 2026-05-26T15:43:57.722Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,31 @@ export const lastChangelogDate = "2026-05-26";
 export const senexVersion = "7.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-26",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "6 modelos preditivos + cohorts ancorados (amplo × estratificado, vivos × falecidos)",
+    "bullets": [
+      "Catálogo de modelos preditivos expandido de 4 → 6: adicionados `mortality-risk-window` (Risco de Mortalidade e Janela de Intervenção — 100% treinado em cães já falecidos como gold label) e `treatment-adherence` (Previsão de Adesão ao Tratamento — sinais operacionais PetLove de recompra/agendamentos/check-ins). Ambos entram com status `initial`, `totalPetsMonitored=0` e `nextMilestone` apontando para o primeiro cohort-âncora — sem mock inflado.",
+      "Sugestões de cohort reorientadas para VALOR PetLove (não preenchimento de KG): novo system prompt em `suggest-cohort-ideas` orienta o LLM a propor exatamente 6 cohorts (1 por modelo), com pelo menos 2 cohorts de cães falecidos (`deceased`/`mixed`) para alimentar Disease Progression e Mortality Risk com trajetórias completas pré-óbito.",
+      "Duas larguras por cohort: `broad` (N=1000–2500, padrão diluído, viabilidade alta) e `stratified` (N=150–400, padrão nítido, impacto alto) — mistura livre entre os 6 cohorts.",
+      "Migration: novas colunas em `cohort_suggestions` — `pattern_family`, `value_to_partner`, `cohort_population` (`living`/`deceased`/`mixed`), `record_requirements` (jsonb), `target_model_id` (enum dos 6 modelos), `target_model_expected_gain`, `breadth` (`broad`/`stratified`).",
+      "Card de sugestão enriquecido em `CohortAISuggester`: tag de população (🟢 Vivos · ⚫ Falecidos · ⚪ Misto), badge de largura (Amplo/Estratificado), chip \"🎯 Treina: [Modelo]\" fechando o loop com o catálogo de modelos preditivos, bloco \"Por que sugerimos isto\" com `discoverable_pattern`, `value_to_partner`, `record_requirements` e `target_model_expected_gain`, e rótulos dos scores re-explicados (\"Impacto = ganho operacional · Viabilidade = dado já existe na PetLove\").",
+      "Bilingual all layers: novas chaves `predictiveModels.models.mortality-risk-window.*` e `predictiveModels.models.treatment-adherence.*` em PT e EN; I18N_VERSION 1.113.0 → 1.114.0.",
+      "Files: src/components/administrador/modelosPreditivos/data/predictiveModelsData.ts, src/components/administrador/priorizacoes/CohortAISuggester.tsx, supabase/functions/suggest-cohort-ideas/index.ts, supabase/migrations/*cohort_suggestions_expanded*.sql, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "src/components/administrador/modelosPreditivos/data/predictiveModelsData.ts",
+      "src/components/administrador/priorizacoes/CohortAISuggester.tsx",
+      "supabase/functions/suggest-cohort-ideas/index.ts",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.114.0"
+  },
   {
     "date": "2026-05-26",
     "kind": "added",

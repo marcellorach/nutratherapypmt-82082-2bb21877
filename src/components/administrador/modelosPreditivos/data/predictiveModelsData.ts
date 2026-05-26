@@ -664,5 +664,93 @@ export const predictiveModelsData: PredictiveModel[] = [
       current: 95600,
       description: 'Alcançar 150.000 pets com dados longitudinais >12 meses para previsões de longo prazo'
     }
+  },
+  {
+    modelId: 'mortality-risk-window',
+    modelName: 'Risco de Mortalidade e Janela de Intervenção',
+    algorithm: 'Survival Forest + Cox Proportional Hazards',
+    algorithmShortName: 'PetLove Mortis',
+    status: 'initial',
+    currentAccuracy: 0,
+    trainedAt: '—',
+    description: 'Estima probabilidade de óbito em 6/12/24 meses e identifica a janela terapêutica modificável, treinado em trajetórias completas de cães já falecidos (gold label).',
+    totalPetsMonitored: 0,
+    treatmentGroup: 0,
+    controlGroup: 0,
+    monthlyGrowthRate: 0,
+    dataSources: [
+      {
+        type: 'clinical_monitoring',
+        percentage: 60,
+        sampleCount: 0,
+        label: 'Prontuário longitudinal pré-óbito',
+        description: 'Trajetória clínica completa do diagnóstico inicial ao óbito (≥12m de seguimento documentado)'
+      },
+      {
+        type: 'lab_exams',
+        percentage: 25,
+        sampleCount: 0,
+        label: 'Séries laboratoriais pré-óbito',
+        description: 'Hemogramas e bioquímicos seriados nos meses anteriores ao óbito, com causa registrada'
+      },
+      {
+        type: 'anamnesis',
+        percentage: 15,
+        sampleCount: 0,
+        label: 'Causa de óbito e contexto clínico',
+        description: 'Causa registrada do óbito, comorbidades ativas e medicações nos últimos 6 meses de vida'
+      }
+    ],
+    performanceHistory: [],
+    degenerativeInsights: [],
+    nextMilestone: {
+      target: 1500,
+      current: 0,
+      description: 'Reunir 1.500 prontuários completos pré-óbito (≥12m) para curvas Kaplan-Meier por protocolo'
+    }
+  },
+  {
+    modelId: 'treatment-adherence',
+    modelName: 'Previsão de Adesão ao Tratamento',
+    algorithm: 'XGBoost + Sequential Behavioral Features',
+    algorithmShortName: 'PetLove Stick',
+    status: 'initial',
+    currentAccuracy: 0,
+    trainedAt: '—',
+    description: 'Prevê probabilidade de abandono do plano nutracêutico em 3/6/9 meses a partir de sinais operacionais (recompra, agendamentos, check-ins), permitindo intervenção proativa do time PetLove.',
+    totalPetsMonitored: 0,
+    treatmentGroup: 0,
+    controlGroup: 0,
+    monthlyGrowthRate: 0,
+    dataSources: [
+      {
+        type: 'nutritherapy_monitoring',
+        percentage: 55,
+        sampleCount: 0,
+        label: 'Histórico de plano nutracêutico',
+        description: 'Datas de início, renovação, recompra e cancelamento de plano contínuo por tutor'
+      },
+      {
+        type: 'clinical_monitoring',
+        percentage: 30,
+        sampleCount: 0,
+        label: 'Cadência de consultas e check-ins',
+        description: 'Frequência de retornos, agendamentos cumpridos vs. faltas e contatos do time clínico'
+      },
+      {
+        type: 'anamnesis',
+        percentage: 15,
+        sampleCount: 0,
+        label: 'Sinais comportamentais do tutor',
+        description: 'Engajamento em comunicações, dúvidas registradas e reportes de evolução do pet'
+      }
+    ],
+    performanceHistory: [],
+    degenerativeInsights: [],
+    nextMilestone: {
+      target: 2000,
+      current: 0,
+      description: 'Alcançar 2.000 tutores com ≥9 meses de jornada documentada para detectar fatores de churn'
+    }
   }
 ];
