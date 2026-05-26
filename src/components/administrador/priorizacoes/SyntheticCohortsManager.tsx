@@ -12,6 +12,8 @@ import { Label } from '@/components/ui/label';
 import { useTranslation } from 'react-i18next';
 import CohortPatientsDialog from './CohortPatientsDialog';
 import CohortStatsPanel from './CohortStatsPanel';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Bot } from 'lucide-react';
 
 interface CohortRow {
   id: string;
@@ -24,6 +26,10 @@ interface CohortRow {
   generation_error: string | null;
   created_at: string;
   progress_log?: ProgressLogEntry[] | null;
+  analysis_log?: ProgressLogEntry[] | null;
+  last_analyzed_at?: string | null;
+  last_analysis_insights_count?: number | null;
+  last_analysis_model?: string | null;
 }
 
 const KIND_LABEL: Record<CohortRow['kind'], string> = {
@@ -79,10 +85,20 @@ const SyntheticCohortsManager: React.FC = () => {
   }, []);
 
   const runAnalysis = async (cohortId: string) => {
+    const cohort = cohorts.find((c) => c.id === cohortId);
+    const force =
+      !!cohort?.last_analyzed_at &&
+      !window.confirm(
+        `Este cohort já foi analisado em ${new Date(cohort.last_analyzed_at!).toLocaleString()} ` +
+          `(${cohort.last_analysis_insights_count ?? 0} insights). Re-analisar pode gerar novos insights duplicados. Continuar?`,
+      )
+        ? null
+        : !!cohort?.last_analyzed_at;
+    if (cohort?.last_analyzed_at && force === null) return;
     setAnalyzing(cohortId);
     try {
       const { data, error } = await supabase.functions.invoke('analyze-cohort-patterns', {
-        body: { cohort_id: cohortId },
+        body: { cohort_id: cohortId, force: force === true },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -90,6 +106,7 @@ const SyntheticCohortsManager: React.FC = () => {
         title: 'Insights gerados',
         description: `${data?.generated ?? 0} insights adicionados ao Population Insights.`,
       });
+      fetchCohorts();
     } catch (e: any) {
       toast({ title: 'Falha na análise', description: e?.message ?? 'Erro', variant: 'destructive' });
     } finally {
@@ -186,6 +203,24 @@ const SyntheticCohortsManager: React.FC = () => {
               {c.progress_log && c.progress_log.length > 0 && (
                 <CohortProgressLog entries={c.progress_log as ProgressLogEntry[]} />
               )}
+              {c.analysis_log && c.analysis_log.length > 0 && (
+                <div className="space-y-1">
+                  <CohortProgressLog entries={c.analysis_log as ProgressLogEntry[]} />
+                  {c.last_analyzed_at && (
+                    <div className="flex items-center justify-between text-[10px] text-gray-500 px-1">
+                      <span>
+                        ✓ Última análise: {new Date(c.last_analyzed_at).toLocaleString()} ·{' '}
+                        {c.last_analysis_insights_count ?? 0} insights
+                      </span>
+                      {c.last_analysis_model && (
+                        <Badge variant="outline" className="text-[10px] font-mono flex items-center gap-1">
+                          <Bot className="h-2.5 w-2.5" /> {c.last_analysis_model}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
               <CohortStatsPanel cohortId={c.id} cohortReady={c.status === 'ready' && c.generated_n > 0} />
               <div className="flex gap-1.5 pt-1 border-t">
                 <Button
@@ -195,16 +230,29 @@ const SyntheticCohortsManager: React.FC = () => {
                 >
                   {t('prioritization.syntheticExplorer.openPatients')}
                 </Button>
-                <Button
-                  size="sm" variant="outline" className="h-7 text-xs"
-                  disabled={c.status !== 'ready' || analyzing === c.id}
-                  onClick={() => runAnalysis(c.id)}
-                >
-                  {analyzing === c.id
-                    ? <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                    : <FlaskConical className="h-3 w-3 mr-1" />}
-                  Analisar padrões
-                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm" variant="outline" className="h-7 text-xs"
+                        disabled={c.status !== 'ready' || analyzing === c.id}
+                        onClick={() => runAnalysis(c.id)}
+                      >
+                        {analyzing === c.id
+                          ? <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                          : <FlaskConical className="h-3 w-3 mr-1" />}
+                        {c.last_analyzed_at
+                          ? `Re-analisar (${c.last_analysis_insights_count ?? 0})`
+                          : 'Analisar padrões'}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs text-xs">
+                      {c.last_analyzed_at
+                        ? `Já analisado. Re-rodar usa ${c.last_analysis_model || 'google/gemini-3.5-flash'} e pode gerar insights novos/duplicados.`
+                        : `Usa ${'google/gemini-3.5-flash'} para extrair padrões clínicos. O log de execução aparecerá no card.`}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 <Button
                   size="sm" variant="ghost" className="h-7 text-xs text-red-600 hover:text-red-700"
                   disabled={deleting === c.id}
