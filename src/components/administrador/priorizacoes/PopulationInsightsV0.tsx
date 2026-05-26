@@ -7,6 +7,7 @@ import { AlertTriangle, Sparkles, GitBranch, FlaskConical, Database, RefreshCw, 
 import { supabase } from '@/integrations/supabase/client';
 import { KanbanDndProvider, DroppableColumn, DraggableCard } from './dnd/KanbanDnd';
 import InsightDrillDownDialog from './InsightDrillDownDialog';
+import OriginalityDialog from './OriginalityDialog';
 import { toast } from '@/components/ui/use-toast';
 
 type InsightStage = 'discovery' | 'hypothesis' | 'proposed_meta_study' | 'approved';
@@ -43,6 +44,7 @@ const PopulationInsightsV0: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [checkingOriginality, setCheckingOriginality] = useState<string | null>(null);
   const [drillDownInsight, setDrillDownInsight] = useState<DbInsight | null>(null);
+  const [originalityInsight, setOriginalityInsight] = useState<DbInsight | null>(null);
   const [autoQueue, setAutoQueue] = useState<Set<string>>(new Set());
 
   const fetchInsights = async () => {
@@ -119,7 +121,7 @@ const PopulationInsightsV0: React.FC = () => {
     return (
       <button
         type="button"
-        onClick={(e) => { e.stopPropagation(); setDrillDownInsight(c); }}
+        onClick={(e) => { e.stopPropagation(); setOriginalityInsight(c); }}
         title="Ver evidências e citações da busca na literatura"
       >
         <Badge variant="outline" className={`text-[9px] cursor-pointer hover:brightness-95 ${v.color}`}>
@@ -232,6 +234,11 @@ const PopulationInsightsV0: React.FC = () => {
         insight={drillDownInsight as any}
         open={!!drillDownInsight}
         onOpenChange={(v) => !v && setDrillDownInsight(null)}
+      />
+      <OriginalityDialog
+        insight={originalityInsight as any}
+        open={!!originalityInsight}
+        onOpenChange={(v) => !v && setOriginalityInsight(null)}
       />
     </div>
   );
