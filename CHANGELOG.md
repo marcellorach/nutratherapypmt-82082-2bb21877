@@ -24,6 +24,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 6.0.0 -->
 
+### Added - 2026-05-26 — Check de originalidade nas sugestões de cohort
+<!-- area: admin · status: entregue · i18n: 1.111.0 -->
+- Cada sugestão de cohort gerada pela IA agora passa por um check automático de originalidade em 3 camadas: base interna (embeddings em `study_embeddings` via `search_study_chunks`), PubMed E-utilities (esearch/esummary) e Perplexity em modo `academic` (opt-in via toggle).
+- Score 0–100 com badge (Alta / Média / Já bem estudado), popover com breakdown transparente por fonte (hits, top 3 títulos similares com link para PubMed, query exibida), link clicável para validar manualmente no Google Scholar e botão "Re-rodar".
+- Fontes que falham aparecem como "indisponível" em vez de gerar score falso — o usuário sempre sabe se a busca realmente teve sucesso.
+- Persistência em `cohort_suggestions` (novas colunas `originality_score`, `originality_status`, `originality_breakdown`, `originality_checked_at`). Disparado em background por `suggest-cohort-ideas` via `EdgeRuntime.waitUntil`; UI faz polling enquanto pendente.
+- Files: supabase/functions/check-cohort-originality/index.ts, supabase/functions/suggest-cohort-ideas/index.ts, src/components/administrador/priorizacoes/CohortOriginalityBadge.tsx, src/components/administrador/priorizacoes/CohortAISuggester.tsx, supabase/migrations/20260526015941_*.sql
+
 ### Fixed - 2026-05-25 — Cohort travado sem heartbeat volta a poder ser destravado
 <!-- area: admin · status: entregue · i18n: 1.111.0 -->
 - `CohortAISuggester` agora considera a última atividade disponível (`last_heartbeat_at`, último log ou `created_at`) para detectar travamentos. Isso corrige os cohorts antigos que ficavam presos em `generating` sem heartbeat e nunca exibiam o botão **Forçar finalização**.
