@@ -187,6 +187,11 @@ IMPORTANTE — diversidade demográfica obrigatória neste lote:
 - Varie \`neutered\` de forma realista: cerca de 60–80% true e 20–40% false. NÃO retorne todos como true.
 - Varie raças, idades e pesos dentro do recorte; evite repetir o mesmo perfil.
 
+IMPORTANTE — nomenclatura canônica de raça (use EXATAMENTE estes nomes, sem variações):
+- Sem raça definida → use SEMPRE "SRD" (não use "Sem Raça Definida", "SRD (Sem Raça Definida)", "Vira-lata", "SRD - Vira-lata", etc.)
+- Raças com nome composto: use o nome em inglês padrão FCI/AKC (ex.: "Labrador Retriever", "Golden Retriever", "Yorkshire Terrier", "Cavalier King Charles Spaniel", "Shih Tzu", "Poodle", "Pastor Alemão").
+- NUNCA invente variantes ortográficas da mesma raça no mesmo lote.
+
 Exemplo de qualidade esperada (NÃO copie, apenas inspire-se):
 \`\`\`
 { "name":"Rex", "breed":"Labrador Retriever", "sex":"male", "age_years":8, "weight_kg":32, "neutered":true,
