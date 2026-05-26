@@ -11,6 +11,32 @@ const LLM_TIMEOUT_MS = 90_000;
 const MAX_RETRIES = 2;
 const INTER_BATCH_DELAY_MS = 300;
 
+// Normaliza raça para forma canônica — colapsa variantes do mesmo significante.
+// Crítico para SRD (LLM tende a produzir "SRD", "Sem Raça Definida", "SRD (Vira-lata)", etc.).
+function normalizeBreed(raw: string): string {
+  if (!raw) return "SRD";
+  const s = raw.trim();
+  // remove acentos para matching
+  const stripped = s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  // SRD em qualquer forma → canônico
+  if (
+    /\bsrd\b/.test(stripped) ||
+    /sem raca definida/.test(stripped) ||
+    /\bvira[- ]?lata\b/.test(stripped) ||
+    /\bmongrel\b/.test(stripped) ||
+    /\bmixed[- ]?breed\b/.test(stripped) ||
+    /\bmutt\b/.test(stripped)
+  ) {
+    return "SRD";
+  }
+  // Title Case + colapsa espaços
+  return s
+    .replace(/\s+/g, " ")
+    .split(" ")
+    .map((w) => (w.length > 2 ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w.toLowerCase()))
+    .join(" ");
+}
+
 const SYSTEM_PROMPT = `Você é um gerador de prontuários veterinários sintéticos para cães, calibrado em medicina real.
 Cada pet deve ter um prontuário INTERNAMENTE COERENTE — como se fosse um caso real do "Gerar Pacientes de Exemplo":
 - perfil (raça/idade/peso/sexo/castração) compatíveis com o recorte
