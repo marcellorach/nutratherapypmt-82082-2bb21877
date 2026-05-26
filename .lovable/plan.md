@@ -1,65 +1,86 @@
-## Problema observado
+## Objetivo
 
-Os pets sintéticos estão sendo criados com `0 condições` e `0 exames` (ver Floquinho na captura). O schema do tool atual exige `conditions` e `exams`, mas o modelo está retornando arrays vazios e o código não rejeita — apenas insere o perfil "vazio". Além disso, faltam **consultas (anamnese)**, **medicações** e **notas clínicas**, que são justamente o que dá riqueza aos pacientes do "Gerar Pacientes de Exemplo".
+Adicionar **check de originalidade** às sugestões de cohort, com 3 camadas de busca em cascata e **transparência total** sobre o que foi encontrado (para você poder julgar se a busca realmente funcionou, não só confiar no score).
 
-E não existe nenhuma visão estatística do cohort dentro do card — só contagem total e status.
+## Arquitetura: 3 camadas, da mais barata para a mais cara
 
-## O que vou fazer
+```text
+1. Base interna (study_embeddings)   → grátis, ~200ms     [sempre roda]
+2. PubMed E-utilities                → grátis, ~2s         [sempre roda]
+3. Perplexity sonar (academic mode)  → ~$0.005, ~5s        [opt-in via toggle]
+```
 
-### 1) Enriquecer geração (edge function `generate-synthetic-cohort`)
+A camada 3 fica **desligada por padrão** (toggle na UI "Usar Perplexity para busca expandida"). Quando você quiser ativar, é 1 clique — a chave já está lá.
 
-**Schema do tool ampliado** — cada pet sintético passa a ter:
-- `conditions` (1–4, obrigatórias e não-vazias) com `severity`, `status` e `origin`
-- `exams` (2–5) com `results_json` plausível e `flags_abnormal`
-- `consultations` (1–3) com `days_ago`, `chief_complaint`, `clinical_exam`, `weight_kg_at_visit`, `body_condition_score`, `assessment`, `plan` — a última marcada `is_latest=true` (espelha SAMPLE_PETS / Luna, Rex etc.)
-- `medications` (0–3) ligadas à consulta correspondente quando fizer sentido clínico
-- `clinical_notes` (1–2 frases de anamnese livre, tipo "observation")
-- `notes` (texto livre no perfil, estilo "Cavalier sênior multissistêmico…")
+## O que o usuário vê
 
-**Prompt reforçado**: pede coerência clínica (raça × idade × condições × labs), pede variabilidade entre pets, e — crucial — instrui o modelo a NUNCA retornar `conditions` vazio. Inclui 1 exemplo few-shot curto baseado em "Rex" (Labrador OA + obesidade).
+Cada sugestão de cohort ganha um bloco **"Originalidade"** com:
 
-**Validação server-side**: pet com `conditions.length === 0` é descartado antes de inserir, e o batch tenta um retry curto até atingir o `size` pedido. Loga `n descartados por estarem vazios`.
+- Score 0–100 + badge (`Alta` / `Média` / `Já bem estudado`)
+- **Breakdown transparente**: quantos hits em cada fonte
+  - Base interna: 3 estudos (similaridade máx 0.78)
+  - PubMed: 47 artigos para `golden retriever AND hepatic AND SAMe`
+  - Perplexity: desligado / X citações
+- **Top 3 títulos mais próximos** clicáveis (link direto PubMed)
+- **Query usada** exibida em mono — você vê exatamente o que foi pesquisado
+- Botão "Re-rodar busca" caso ache que ficou ruim
 
-**Persistência ampliada**: além de `pet_profiles + pet_conditions + pet_exams`, agora também grava em `pet_consultations` (marcando a mais recente como `is_latest`), `pet_medications` (com `consultation_id`) e `pet_clinical_notes`. Conditions e exams passam a referenciar a consulta correspondente via `consultation_id` quando indicado.
+Se a busca falhar (API down, timeout), mostra `Indisponível` em vez de score falso — isso é o que você pediu ("ver se realmente houve sucesso").
 
-**BATCH_SIZE reduzido** de 25 → 12: payload por pet ficou ~3× maior; mantém o timeout de 90s viável e ajuda o último batch a não estourar (que é onde sempre trava).
+## Como gero a query de busca
 
-### 2) Estatísticas do cohort no card
+Uma chamada Gemini 2.5 Flash converte o cohort em query estruturada:
 
-Novo componente `CohortStatsPanel` exibido **dentro** do card de cada cohort `ready` (colapsável, fechado por padrão para não poluir):
+```
+input:  "Golden 8+ com elevação de ALT testando SAMe vs placebo"
+output: {
+  pubmed_query: "(golden retriever[tiab] OR canine[tiab]) AND (ALT[tiab] OR hepatic[tiab]) AND (SAMe[tiab] OR S-adenosylmethionine[tiab])",
+  google_scholar_query: "golden retriever ALT SAMe hepatic dog clinical trial",
+  keywords: ["golden retriever", "hepatic", "SAMe", "ALT"]
+}
+```
 
-- Demografia: idade média/mediana, peso médio, % macho/fêmea, % castrados
-- Top 5 raças (barra horizontal)
-- Top 8 condições com contagem + distribuição de severidade (mild/moderate/severe)
-- Cobertura: % pets com ≥1 condição, % com ≥1 exame, % com ≥1 consulta, média de exames/pet
-- Flags laboratoriais mais comuns (top 5)
+A `google_scholar_query` é mostrada na UI como **link clicável** (`https://scholar.google.com/scholar?q=...`) — não chamamos Scholar via API (não tem API pública), mas você pode clicar e validar manualmente em 1 segundo. Isso responde diretamente seu "talvez um query de busca no Google já ajude".
 
-Dados via 1 RPC nova `get_cohort_stats(cohort_id uuid)` que agrega tudo em SQL (mais barato que puxar 175 pets pro client). Retorna JSON.
+## Cálculo do score
 
-### 3) Atualizar o `CohortPatientsDialog`
+```
+internal_score  = 100 - (max_cosine_similarity * 100)   // 0–100
+pubmed_score    = clamp(100 - (hits * 2), 0, 100)        // 50 hits ≈ 0
+perplexity_score = (se ativo) baseado em nº citações relevantes
 
-Mostrar as **consultas** (timeline) e **medicações** do pet, não só conditions+exams — para refletir o que agora é gerado.
+originalidade = 0.4 * internal + 0.6 * pubmed
+              (se Perplexity ativo: 0.3 internal + 0.4 pubmed + 0.3 perplexity)
+```
 
-### 4) Plumbing
+Cohort com originalidade **< 30** ganha badge vermelho "⚠️ Já bem estudado — considere refinar o recorte".
 
-- Migration: criar função `get_cohort_stats(uuid)` (SECURITY DEFINER, restrita a admin via `is_admin()`)
-- i18n PT/EN: novas chaves em `prioritization.cohortStats.*` e `prioritization.syntheticExplorer.consultations` / `.medications`; bump `I18N_VERSION`
-- CHANGELOG.md + organograma + sync
+## Onde encaixa no fluxo
+
+Roda **logo após** `suggest-cohort-ideas` retornar as 5 sugestões, em paralelo (uma chamada por cohort). Não bloqueia a UI — cada card mostra spinner "Verificando originalidade…" e atualiza quando termina. Persiste o resultado em `cohort_suggestions` (3 colunas novas: `originality_score`, `originality_breakdown jsonb`, `originality_checked_at`).
 
 ## Detalhes técnicos
 
-**Arquivos editados**
-- `supabase/functions/generate-synthetic-cohort/index.ts` — schema, prompt, batch size, validação, persistência ampliada
-- `src/components/administrador/priorizacoes/CohortPatientsDialog.tsx` — mostrar consultas + medicações
-- `src/components/administrador/priorizacoes/SyntheticCohortsManager.tsx` — embed `<CohortStatsPanel />`
-- `src/i18n.ts`, `src/locales/{pt,en}/translation.json`
-- `CHANGELOG.md`, `src/data/projectOrganograma.ts`
-
 **Arquivos novos**
-- `src/components/administrador/priorizacoes/CohortStatsPanel.tsx`
-- `supabase/migrations/<ts>_cohort_stats_rpc.sql`
+- `supabase/functions/check-cohort-originality/index.ts` — orquestra as 3 camadas, retorna `{ score, breakdown, queries, similar_studies, status }`
+- `src/components/administrador/priorizacoes/CohortOriginalityBadge.tsx` — badge + popover com breakdown
+- `supabase/migrations/<ts>_cohort_originality_columns.sql` — adiciona 3 colunas em `cohort_suggestions`
 
-**Não muda**
-- `synthetic_cohorts` schema, geração de sugestões (`suggest-cohort-ideas`), UI de "Gerador de sugestão", finalização de stalled, autenticação/RLS.
+**Arquivos editados**
+- `supabase/functions/suggest-cohort-ideas/index.ts` — dispara `check-cohort-originality` via `EdgeRuntime.waitUntil` para cada sugestão persistida
+- Componente que renderiza os cards de sugestão (provavelmente em `priorizacoes/` — vou localizar quando implementar) — embed do badge
+- `src/i18n.ts` (bump versão) + `pt/en translation.json` (chaves `prioritization.originality.*`)
+- `CHANGELOG.md` + organograma + `npm run sync:changelog`
 
-Posso seguir com a implementação?
+**Perplexity**
+- Reutilizo a edge function `query-perplexity` que já existe, mas só chamada quando o toggle estiver ativo. **Não pede nada de você agora.**
+
+**Sem impacto em outras áreas** — mudanças isoladas em Priorizações.
+
+## O que NÃO faço
+
+- Não chamo Google Scholar via scraping (frágil, ToS).
+- Não bloqueio a geração de cohort se originalidade for baixa — só sinalizo. Você decide.
+- Não mexo no `generate-synthetic-cohort` nem em outras partes do fluxo.
+
+Posso seguir?
