@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-05-25T23:14:23.504Z
+Generated: 2026-05-26T02:02:18.752Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
@@ -7,15 +7,20 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 
 ## Changes by area (last 14 days)
 - **admin**: 44
-- **vet-ui**: 16
+- **vet-ui**: 13
 - **meta**: 7
 - **kg**: 6
 - **curation**: 4
-- **clinical-pipeline**: 4
 - **tutor-ui**: 2
-- **i18n**: 1
+- **clinical-pipeline**: 2
 
 ## Top 10 recent entries
+### 2026-05-26 · [admin] ADDED — Check de originalidade nas sugestões de cohort
+- Cada sugestão de cohort gerada pela IA agora passa por um check automático de originalidade em 3 camadas: base interna (embeddings em `study_embeddings` via `search_study_chunks`), PubMed E-utilities (esearch/esummary) e Perplexity em modo `academic` (opt-in via toggle).
+- Score 0–100 com badge (Alta / Média / Já bem estudado), popover com breakdown transparente por fonte (hits, top 3 títulos similares com link para PubMed, query exibida), link clicável para validar manualmente no Google Scholar e botão "Re-rodar".
+- Fontes que falham aparecem como "indisponível" em vez de gerar score falso — o usuário sempre sabe se a busca realmente teve sucesso.
+_files: supabase/functions/check-cohort-originality/index.ts, supabase/functions/suggest-cohort-ideas/index.ts, src/components/administrador/priorizacoes/CohortOriginalityBadge.tsx, src/components/administrador/priorizacoes/CohortAISuggester.tsx_
+
 ### 2026-05-25 · [admin] FIXED — Cohort travado sem heartbeat volta a poder ser destravado
 - `CohortAISuggester` agora considera a última atividade disponível (`last_heartbeat_at`, último log ou `created_at`) para detectar travamentos. Isso corrige os cohorts antigos que ficavam presos em `generating` sem heartbeat e nunca exibiam o botão Forçar finalização.
 - Após a finalização manual, o card local é atualizado imediatamente para `ready`/`failed`, sem depender do próximo ciclo de polling.
@@ -69,12 +74,6 @@ _files: src/utils/syntheticCohort.ts, src/i18n.ts_
 - Kanban: ilustrações geradas por IA removidas (não representavam o conteúdo dos papers). `CoverThumb` agora sempre renderiza ícone temático por `kind` sobre gradiente. Botões "Gerar capas" (header) e "capa" (por card) eliminados.
 - Edge function `generate-meta-study-cover` e coluna `cover_image_url` permanecem no banco (sem uso na UI), permitindo reativação futura caso queiramos diagramas reais do conteúdo.
 _files: src/components/administrador/fundamentos/MetaStudyDetailedCard.tsx, src/pages/administrador/FundamentosTab.tsx, src/components/administrador/fundamentos/MetaStudyKanban.tsx, src/i18n.ts_
-
-### 2026-05-22 · [admin] ADDED — Meta-Estudos "Stanford-grade": capas IA, badge de Core Rules e chat contextual
-- Coluna `meta_studies.cover_image_url` + bucket público `meta-study-covers`. Style-guide fixo (paleta navy/gold/parchment, isométrico editorial) garante consistência visual entre papers.
-- Edge function `generate-meta-study-cover` (Gemini image): gera 1x por paper, bucket público, com tema derivado do `kind`. Backfill via botão "Gerar capas" no Kanban (5/5 papers atuais já cobertos).
-- Edge function `chat-meta-study`: chat streaming com contexto = summary + key_claims + proposed_rules + core_rule_evidence do próprio registro (sem RAG novo).
-_files: supabase/functions/generate-meta-study-cover/index.ts, supabase/functions/chat-meta-study/index.ts, src/components/administrador/fundamentos/MetaStudyChatDialog.tsx, src/components/administrador/fundamentos/CoreRulesEvidenceBadge.tsx…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
