@@ -142,7 +142,108 @@ efficacy-prediction, disease-progression, cost-benefit-analysis, patient-segment
 mortality-risk-window, treatment-adherence). Pelo menos 2 devem ser de cães FALECIDOS
 (\`deceased\` ou \`mixed\`) — especialmente os ancorados em disease-progression e
 mortality-risk-window. Misture broad e stratified livremente. Sempre preencha
-\`value_to_partner\` com ganho operacional concreto para a PetLove (não para o KG).`;
+\`value_to_partner\` com ganho operacional concreto para a PetLove (não para o KG).
+
+RESPONDA chamando a função propose_cohorts com EXATAMENTE este shape (6 itens):
+{
+  "cohorts": [
+    {
+      "target_model_id": "<um dos 6 ids literais acima>",
+      "cohort_population": "living|deceased|mixed",
+      "breadth": "broad|stratified",
+      "pattern_family": "ex.: treatment_inefficacy | mortality_trajectory | churn_signature | polypharmacy_risk",
+      "value_to_partner": "ganho operacional concreto p/ PetLove (1-2 frases)",
+      "record_requirements": ["≥18m pré-óbito", "causa de óbito registrada", "≥3 hemogramas seriados"],
+      "target_model_expected_gain": "+N pets · esperado +X% accuracy",
+      "title": "...", "rationale": "...", "discoverable": "...",
+      "kind": "prevention|treatment_validation|exploratory",
+      "suggested_criteria": { "breeds": "...", "age_range": "...", "conditions": "...", "target_n": "..." },
+      "impact_score": 0, "viability_score": 0
+    }
+  ]
+}
+REGRAS DURAS: array com 6 itens; os 6 target_model_id devem ser DISTINTOS e cobrir todos os modelos; record_requirements NÃO pode ser vazio; pelo menos 2 cohorts com cohort_population != "living".`;
+
+    const baseMessages = [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: userPrompt },
+    ];
+
+    const attempts: Array<{ model: string; valid: boolean; issues: string[] }> = [];
+    let finalCohorts: any[] = [];
+    let finalModel = "";
+    let lastIssues: string[] = [];
+    let rateLimitResponse: Response | null = null;
+
+    const runAttempt = async (model: string, messages: any[]) => {
+      const r = await callModel(model, messages);
+      if (r.rateLimited) {
+        rateLimitResponse = new Response(JSON.stringify({ error: r.error }), {
+          status: r.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+        return null;
+      }
+      if (r.error) {
+        attempts.push({ model, valid: false, issues: [r.error] });
+        return null;
+      }
+      const v = validateCohorts(r.cohorts);
+      attempts.push({ model, valid: v.ok, issues: v.issues });
+      if (v.ok) {
+        finalCohorts = r.cohorts;
+        finalModel = model;
+      } else {
+        lastIssues = v.issues;
+        // keep last cohorts as best-effort if nothing else works
+        if (r.cohorts.length) finalCohorts = r.cohorts;
+        finalModel = model;
+      }
+      return v.ok;
+    };
+
+    // 1) Primary
+    const ok1 = await runAttempt(PRIMARY_MODEL, baseMessages);
+    if (rateLimitResponse) {
+      // Primary rate-limited: try fallback directly
+      rateLimitResponse = null;
+      await runAttempt(FALLBACK_MODEL, baseMessages);
+    } else if (ok1 === false) {
+      // 2) Retry primary with correction message
+      const correction = {
+        role: "user" as const,
+        content: `Sua resposta anterior falhou validação: ${lastIssues.join("; ")}. Corrija e devolva EXATAMENTE 6 cohorts, 1 por modelo preditivo (target_model_id distintos), record_requirements não-vazio, ≥2 com cohort_population deceased ou mixed.`,
+      };
+      const ok2 = await runAttempt(PRIMARY_MODEL, [...baseMessages, correction]);
+      if (rateLimitResponse) {
+        rateLimitResponse = null;
+        await runAttempt(FALLBACK_MODEL, [...baseMessages, correction]);
+      } else if (ok2 === false) {
+        // 3) Fallback
+        await runAttempt(FALLBACK_MODEL, [...baseMessages, correction]);
+      }
+    }
+
+    if (rateLimitResponse) return rateLimitResponse;
+
+    const cohorts = finalCohorts;
+    const lastAttempt = attempts[attempts.length - 1];
+    const validationWarnings = lastAttempt && !lastAttempt.valid ? lastAttempt.issues : null;
+    const MODEL = finalModel || PRIMARY_MODEL;
+
+    // Skip the legacy single-call block by short-circuiting below.
+    if (false) {
+      const resp = await fetch("");
+      return resp;
+    }
+/* LEGACY_BLOCK_START */
+/*
+    const oldUserPrompt = `unused`;
+    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+*/
 
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
