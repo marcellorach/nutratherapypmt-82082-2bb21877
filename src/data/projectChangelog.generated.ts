@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-26T15:43:57.722Z
+// Última geração: 2026-05-26T23:39:19.719Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,25 @@ export const lastChangelogDate = "2026-05-26";
 export const senexVersion = "7.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-26",
+    "kind": "fixed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "suggest-cohort-ideas: modelo + validação + retry/fallback",
+    "bullets": [
+      "Trocado modelo primário de `gemini-3.5-flash` (ignorava o JSON Schema do tool-call: devolvia 5 cohorts sem `target_model_id` nem `record_requirements`) para `google/gemini-3.1-pro-preview`.",
+      "Adicionada validação server-side das 4 regras duras: exatamente 6 cohorts, 6 `target_model_id` distintos cobrindo todos os modelos, `record_requirements` não-vazio em todos, ≥2 cohorts com `cohort_population` deceased/mixed.",
+      "Pipeline com 3 camadas: tentativa primária → retry no primário com mensagem de correção apontando as `issues` → fallback automático para `openai/gpt-5.4`. 429/402 do primário disparam fallback direto.",
+      "Reforço inline da estrutura JSON esperada no user prompt (modelos respeitam melhor o schema quando ele aparece também no prompt).",
+      "Resposta passa a expor `attempts[]` e `validation_warnings` para diagnóstico, sem quebrar a UI atual.",
+      "Files: supabase/functions/suggest-cohort-ideas/index.ts"
+    ],
+    "files": [
+      "supabase/functions/suggest-cohort-ideas/index.ts"
+    ],
+    "i18nVersion": "1.114.0"
+  },
   {
     "date": "2026-05-26",
     "kind": "added",
