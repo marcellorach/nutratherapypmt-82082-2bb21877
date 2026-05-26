@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-25T23:14:23.498Z
+// Última geração: 2026-05-26T02:02:18.748Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,32 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-05-25";
+export const lastChangelogDate = "2026-05-26";
 
 export const senexVersion = "6.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-26",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Check de originalidade nas sugestões de cohort",
+    "bullets": [
+      "Cada sugestão de cohort gerada pela IA agora passa por um check automático de originalidade em 3 camadas: base interna (embeddings em `study_embeddings` via `search_study_chunks`), PubMed E-utilities (esearch/esummary) e Perplexity em modo `academic` (opt-in via toggle).",
+      "Score 0–100 com badge (Alta / Média / Já bem estudado), popover com breakdown transparente por fonte (hits, top 3 títulos similares com link para PubMed, query exibida), link clicável para validar manualmente no Google Scholar e botão \"Re-rodar\".",
+      "Fontes que falham aparecem como \"indisponível\" em vez de gerar score falso — o usuário sempre sabe se a busca realmente teve sucesso.",
+      "Persistência em `cohort_suggestions` (novas colunas `originality_score`, `originality_status`, `originality_breakdown`, `originality_checked_at`). Disparado em background por `suggest-cohort-ideas` via `EdgeRuntime.waitUntil`; UI faz polling enquanto pendente.",
+      "Files: supabase/functions/check-cohort-originality/index.ts, supabase/functions/suggest-cohort-ideas/index.ts, src/components/administrador/priorizacoes/CohortOriginalityBadge.tsx, src/components/administrador/priorizacoes/CohortAISuggester.tsx, supabase/migrations/20260526015941_*.sql"
+    ],
+    "files": [
+      "supabase/functions/check-cohort-originality/index.ts",
+      "supabase/functions/suggest-cohort-ideas/index.ts",
+      "src/components/administrador/priorizacoes/CohortOriginalityBadge.tsx",
+      "src/components/administrador/priorizacoes/CohortAISuggester.tsx"
+    ],
+    "i18nVersion": "1.111.0"
+  },
   {
     "date": "2026-05-25",
     "kind": "fixed",

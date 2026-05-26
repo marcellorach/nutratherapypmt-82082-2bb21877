@@ -8,6 +8,7 @@ import { toast } from '@/components/ui/use-toast';
 import { useRoleView } from '@/contexts/RoleViewContext';
 import CohortProgressLog, { ProgressLogEntry } from './CohortProgressLog';
 import { Progress } from '@/components/ui/progress';
+import CohortOriginalityBadge, { OriginalityBreakdown } from './CohortOriginalityBadge';
 
 export interface SuggestedCohort {
   title: string;
@@ -58,6 +59,8 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
   const [loading, setLoading] = useState(false);
   const [cohorts, setCohorts] = useState<SuggestedCohort[]>([]);
   const [suggestionIds, setSuggestionIds] = useState<(string | null)[]>([]);
+  // originalidade por índice de sugestão
+  const [originality, setOriginality] = useState<Record<number, { score: number | null; status: string | null; breakdown: OriginalityBreakdown | null }>>({});
   const [generating, setGenerating] = useState<number | null>(null);
   // idx -> ActiveJob (mantém histórico até o usuário descartar)
   const [jobs, setJobs] = useState<Record<number, ActiveJob>>({});
@@ -73,7 +76,7 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
     (async () => {
       const { data, error } = await (supabase as any)
         .from('cohort_suggestions')
-        .select('id, title, rationale, suggested_criteria, discoverable, kind, impact_score, viability_score, status, used_cohort_id')
+        .select('id, title, rationale, suggested_criteria, discoverable, kind, impact_score, viability_score, status, used_cohort_id, originality_score, originality_status, originality_breakdown')
         .in('status', ['active', 'used'])
         .order('created_at', { ascending: false })
         .limit(10);
@@ -92,6 +95,15 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
           viability_score: Number(r.viability_score ?? 0),
         })));
         setSuggestionIds(data.map((r: any) => r.id));
+        const orig: Record<number, { score: number | null; status: string | null; breakdown: OriginalityBreakdown | null }> = {};
+        data.forEach((r: any, i: number) => {
+          orig[i] = {
+            score: r.originality_score != null ? Number(r.originality_score) : null,
+            status: r.originality_status ?? null,
+            breakdown: r.originality_breakdown ?? null,
+          };
+        });
+        setOriginality(orig);
         // Re-hidrata jobs em andamento (ou recém-concluídos) a partir do banco,
         // para que ao voltar de outra aba o card de progresso reapareça.
         const usedCohortIds = data
@@ -149,17 +161,28 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
       const newCohorts: SuggestedCohort[] = data?.cohorts ?? [];
       setCohorts(newCohorts);
       setSuggestionIds(new Array(newCohorts.length).fill(null));
+      setOriginality({});
       // Re-fetch IDs from DB (suggestions were just persisted by the edge function)
       if (newCohorts.length) {
         const { data: persisted } = await (supabase as any)
           .from('cohort_suggestions')
-          .select('id, title')
+          .select('id, title, originality_score, originality_status, originality_breakdown')
           .eq('status', 'active')
           .order('created_at', { ascending: false })
           .limit(newCohorts.length);
         if (persisted) {
           // map by title (best-effort)
           setSuggestionIds(newCohorts.map((c) => persisted.find((p: any) => p.title === c.title)?.id ?? null));
+          const orig: Record<number, { score: number | null; status: string | null; breakdown: OriginalityBreakdown | null }> = {};
+          newCohorts.forEach((c, i) => {
+            const row = persisted.find((p: any) => p.title === c.title);
+            orig[i] = {
+              score: row?.originality_score != null ? Number(row.originality_score) : null,
+              status: row?.originality_status ?? null,
+              breakdown: row?.originality_breakdown ?? null,
+            };
+          });
+          setOriginality(orig);
         }
       }
       if (!newCohorts.length) {
@@ -209,6 +232,37 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
     }, 3000);
     return () => clearInterval(t);
   }, [jobs]);
+
+  // Polling de originalidade: enquanto houver sugestões com score=null e id válido, recarrega a cada 4s.
+  useEffect(() => {
+    const pendingIdx = Object.entries(originality)
+      .filter(([i, o]) => o.score == null && o.status !== 'error' && suggestionIds[Number(i)])
+      .map(([i]) => Number(i));
+    if (!pendingIdx.length) return;
+    const ids = pendingIdx.map((i) => suggestionIds[i]).filter(Boolean) as string[];
+    const t = setInterval(async () => {
+      const { data } = await (supabase as any)
+        .from('cohort_suggestions')
+        .select('id, originality_score, originality_status, originality_breakdown')
+        .in('id', ids);
+      if (!data) return;
+      setOriginality((prev) => {
+        const next = { ...prev };
+        pendingIdx.forEach((i) => {
+          const row = data.find((r: any) => r.id === suggestionIds[i]);
+          if (row && (row.originality_score != null || row.originality_status)) {
+            next[i] = {
+              score: row.originality_score != null ? Number(row.originality_score) : null,
+              status: row.originality_status ?? null,
+              breakdown: row.originality_breakdown ?? null,
+            };
+          }
+        });
+        return next;
+      });
+    }, 4000);
+    return () => clearInterval(t);
+  }, [originality, suggestionIds]);
 
   const forceFinalize = async (cohortId: string) => {
     if (!window.confirm('Marcar este cohort como finalizado manualmente? Os pets já gerados serão mantidos.')) return;
@@ -374,6 +428,20 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
                     <Badge variant="outline" className={`text-[10px] ${KIND_COLOR[c.kind]}`}>
                       {KIND_LABEL[c.kind]}
                     </Badge>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <CohortOriginalityBadge
+                        suggestionId={suggestionIds[i] ?? null}
+                        title={c.title}
+                        rationale={c.rationale}
+                        criteria={c.suggested_criteria}
+                        score={originality[i]?.score ?? null}
+                        status={originality[i]?.status ?? null}
+                        breakdown={originality[i]?.breakdown ?? null}
+                        onUpdated={(score, status, breakdown) =>
+                          setOriginality((prev) => ({ ...prev, [i]: { score, status, breakdown } }))
+                        }
+                      />
+                    </div>
                     <p className="text-xs text-gray-700 leading-snug">{c.rationale}</p>
                     <div className="text-[11px] text-gray-600 bg-gray-50 rounded p-2 space-y-0.5">
                       <div><b>Critérios:</b> {c.suggested_criteria.breeds || '—'} · {c.suggested_criteria.age_range || '—'} · {c.suggested_criteria.conditions || '—'} · N≈{c.suggested_criteria.target_n}</div>

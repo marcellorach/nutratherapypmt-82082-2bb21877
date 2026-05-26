@@ -159,6 +159,40 @@ validação de tratamento e descoberta exploratória.`;
         const { error: insErr } = await service.from("cohort_suggestions").insert(rows);
         if (insErr) console.error("Persist suggestions failed", insErr);
         else persisted = rows.length;
+
+        // Dispara check de originalidade em background (não bloqueia a resposta).
+        if (persisted > 0) {
+          try {
+            const { data: justInserted } = await service
+              .from("cohort_suggestions")
+              .select("id, title, rationale, suggested_criteria")
+              .eq("status", "active")
+              .order("created_at", { ascending: false })
+              .limit(persisted);
+            const usePerplexity = body?.use_perplexity === true;
+            for (const row of justInserted ?? []) {
+              const url = `${SUPABASE_URL}/functions/v1/check-cohort-originality`;
+              const p = fetch(url, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+                },
+                body: JSON.stringify({
+                  suggestion_id: row.id,
+                  title: row.title,
+                  rationale: row.rationale,
+                  suggested_criteria: row.suggested_criteria,
+                  use_perplexity: usePerplexity,
+                }),
+              }).catch((e) => console.error("originality dispatch failed", row.id, e));
+              // @ts-ignore EdgeRuntime is available in Supabase Edge runtime
+              if (typeof EdgeRuntime !== "undefined") EdgeRuntime.waitUntil(p);
+            }
+          } catch (e) {
+            console.error("originality dispatch outer exception", e);
+          }
+        }
       }
     } catch (e) {
       console.error("Persist suggestions exception", e);
