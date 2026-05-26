@@ -86,19 +86,19 @@ const SyntheticCohortsManager: React.FC = () => {
 
   const runAnalysis = async (cohortId: string) => {
     const cohort = cohorts.find((c) => c.id === cohortId);
-    const force =
-      !!cohort?.last_analyzed_at &&
-      !window.confirm(
-        `Este cohort já foi analisado em ${new Date(cohort.last_analyzed_at!).toLocaleString()} ` +
-          `(${cohort.last_analysis_insights_count ?? 0} insights). Re-analisar pode gerar novos insights duplicados. Continuar?`,
-      )
-        ? null
-        : !!cohort?.last_analyzed_at;
-    if (cohort?.last_analyzed_at && force === null) return;
+    let force = false;
+    if (cohort?.last_analyzed_at) {
+      const ok = window.confirm(
+        `Este cohort já foi analisado em ${new Date(cohort.last_analyzed_at).toLocaleString()} ` +
+          `(${cohort.last_analysis_insights_count ?? 0} insights). Re-analisar usa o LLM novamente e pode gerar insights duplicados. Continuar?`,
+      );
+      if (!ok) return;
+      force = true;
+    }
     setAnalyzing(cohortId);
     try {
       const { data, error } = await supabase.functions.invoke('analyze-cohort-patterns', {
-        body: { cohort_id: cohortId, force: force === true },
+        body: { cohort_id: cohortId, force },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
