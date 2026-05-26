@@ -85,7 +85,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { cohort_id } = await req.json();
+    const body = await req.json();
+    const cohort_id = body?.cohort_id;
+    const force = Boolean(body?.force);
     if (!cohort_id) {
       return new Response(JSON.stringify({ error: "cohort_id required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -108,22 +110,28 @@ Deno.serve(async (req) => {
       }
     };
 
-    const { force } = await (async () => {
-      try {
-        // re-read body — already consumed; default false
-        return { force: false };
-      } catch {
-        return { force: false };
-      }
-    })();
-    const forceFlag = Boolean((globalThis as any).__force) || false;
-
     // load cohort + sample of pets (compacted for prompt size)
     const { data: cohort } = await service.from("synthetic_cohorts").select("*").eq("id", cohort_id).single();
     if (!cohort) {
       return new Response(JSON.stringify({ error: "Cohort not found" }), {
         status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Guard against accidental re-runs (<24h) unless force=true
+    if (!force && cohort.last_analyzed_at) {
+      const ageMs = Date.now() - new Date(cohort.last_analyzed_at).getTime();
+      if (ageMs < 24 * 3600 * 1000) {
+        return new Response(
+          JSON.stringify({
+            error: "already_analyzed",
+            message: `Cohort analisado há ${Math.round(ageMs / 60000)} min. Use force=true para re-analisar.`,
+            last_analyzed_at: cohort.last_analyzed_at,
+            last_count: cohort.last_analysis_insights_count,
+          }),
+          { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
     }
 
     // Reset log for this run
