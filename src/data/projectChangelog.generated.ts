@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-27T01:33:10.976Z
+// Última geração: 2026-05-27T01:43:51.563Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,30 @@ export const lastChangelogDate = "2026-05-27";
 export const senexVersion = "7.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-27",
+    "kind": "changed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Rebatizar \"Priorizações\" → \"AI Scientist\" e mover para Research & Development",
+    "bullets": [
+      "Aba `priorizacoes` renomeada para AI Scientist e movida do grupo `governance-ai` para `research` (primeira posição da sidebar de R&D).",
+      "Sidebar: removido item de Governance & AI, adicionado em `ResearchGroup` com ícone `Sparkles`.",
+      "Header da página `PriorizacoesTab` atualizado; nova chave i18n `admin.sidebar.research.aiScientist` (PT/EN = \"AI Scientist\").",
+      "Files: src/config/admin-tabs.ts, src/components/administrador/sidebar/groups/ResearchGroup.tsx, src/components/administrador/sidebar/groups/GovernanceAIGroup.tsx, src/pages/administrador/PriorizacoesTab.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts, src/data/projectOrganograma.ts"
+    ],
+    "files": [
+      "src/config/admin-tabs.ts",
+      "src/components/administrador/sidebar/groups/ResearchGroup.tsx",
+      "src/components/administrador/sidebar/groups/GovernanceAIGroup.tsx",
+      "src/pages/administrador/PriorizacoesTab.tsx",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json",
+      "src/i18n.ts",
+      "src/data/projectOrganograma.ts"
+    ],
+    "i18nVersion": "1.115.0"
+  },
   {
     "date": "2026-05-27",
     "kind": "changed",

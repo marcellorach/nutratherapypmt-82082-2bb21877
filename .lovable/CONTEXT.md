@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-05-27T01:33:10.986Z
+Generated: 2026-05-27T01:43:51.568Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.114.0
+## Latest i18n version: 1.115.0
 
 ## Changes by area (last 14 days)
-- **admin**: 50
+- **admin**: 51
 - **vet-ui**: 9
 - **meta**: 7
 - **curation**: 6
@@ -15,6 +15,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **clinical-pipeline**: 1
 
 ## Top 10 recent entries
+### 2026-05-27 · [admin] CHANGED — Rebatizar "Priorizações" → "AI Scientist" e mover para Research & Development
+- Aba `priorizacoes` renomeada para AI Scientist e movida do grupo `governance-ai` para `research` (primeira posição da sidebar de R&D).
+- Sidebar: removido item de Governance & AI, adicionado em `ResearchGroup` com ícone `Sparkles`.
+- Header da página `PriorizacoesTab` atualizado; nova chave i18n `admin.sidebar.research.aiScientist` (PT/EN = "AI Scientist").
+_files: src/config/admin-tabs.ts, src/components/administrador/sidebar/groups/ResearchGroup.tsx, src/components/administrador/sidebar/groups/GovernanceAIGroup.tsx, src/pages/administrador/PriorizacoesTab.tsx…_
+
 ### 2026-05-27 · [curation] CHANGED — Painel de evidência no dialog de validação vet-curador
 - Problema identificado: o dialog de validação mostrava só título/resumo/confiança/sinais, sem expor os dados que sustentariam a decisão. O campo `evidence` dos insights gerados por `analyze-cohort-patterns` veio vazio (`{}`) — a confiança 80% era auto-declarada pelo LLM, sem nada auditável.
 - Painel "Evidência disponível" embutido no `VetCuratorReviewDialog`, computado em tempo real a partir de `pet_profiles` + `pet_conditions` + `pet_exams` da cohort de origem (sem chamada de LLM):
@@ -68,12 +74,6 @@ _files: supabase/functions/analyze-cohort-patterns/index.ts, src/components/admi
 - Score 0–100 com badge (Alta / Média / Já bem estudado), popover com breakdown transparente por fonte (hits, top 3 títulos similares com link para PubMed, query exibida), link clicável para validar manualmente no Google Scholar e botão "Re-rodar".
 - Fontes que falham aparecem como "indisponível" em vez de gerar score falso — o usuário sempre sabe se a busca realmente teve sucesso.
 _files: supabase/functions/check-cohort-originality/index.ts, supabase/functions/suggest-cohort-ideas/index.ts, src/components/administrador/priorizacoes/CohortOriginalityBadge.tsx, src/components/administrador/priorizacoes/CohortAISuggester.tsx_
-
-### 2026-05-25 · [admin] FIXED — Cohort travado sem heartbeat volta a poder ser destravado
-- `CohortAISuggester` agora considera a última atividade disponível (`last_heartbeat_at`, último log ou `created_at`) para detectar travamentos. Isso corrige os cohorts antigos que ficavam presos em `generating` sem heartbeat e nunca exibiam o botão Forçar finalização.
-- Após a finalização manual, o card local é atualizado imediatamente para `ready`/`failed`, sem depender do próximo ciclo de polling.
-- O cohort travado `SRD sênior (8+) com OA em uso crônico de AINEs vs. Bedinvetmab` foi destravado no backend e marcado como `ready` com 175/200 pets preservados.
-_files: src/components/administrador/priorizacoes/CohortAISuggester.tsx_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
