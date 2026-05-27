@@ -144,6 +144,28 @@ const PopulationInsightsV0: React.FC = () => {
     );
   };
 
+  const vetReviewBadge = (c: DbInsight) => {
+    const st = (c.vet_review_status ?? 'pending') as VetReviewStatus;
+    const map: Record<VetReviewStatus, { color: string; label: string; Icon: React.ComponentType<any> }> = {
+      pending:       { color: 'bg-gray-100 border-gray-300 text-gray-700',           label: 'vet: pendente',  Icon: Stethoscope },
+      approved:      { color: 'bg-emerald-100 border-emerald-300 text-emerald-800',  label: 'vet: aprovado',  Icon: CheckCircle2 },
+      rejected:      { color: 'bg-red-100 border-red-300 text-red-800',              label: 'vet: rejeitado', Icon: XCircle },
+      needs_changes: { color: 'bg-amber-100 border-amber-300 text-amber-800',        label: 'vet: ajustes',   Icon: AlertCircle },
+    };
+    const v = map[st];
+    return (
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); setReviewInsight(c); }}
+        title="Abrir revisão do vet-curador"
+      >
+        <Badge variant="outline" className={`text-[9px] cursor-pointer hover:brightness-95 flex items-center gap-0.5 ${v.color}`}>
+          <v.Icon className="h-2.5 w-2.5" /> {v.label}
+        </Badge>
+      </button>
+    );
+  };
+
   return (
     <div className="space-y-4">
       <Card className="border-dashed border-emerald-300 bg-emerald-50/60">
