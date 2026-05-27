@@ -175,6 +175,24 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
     rationale_en: 'Without clinical validation, the document sent to the partner loses credibility.',
   },
   {
+    id: 'vet-curator-insight-validation',
+    order: 14,
+    title_pt: 'Validação vet-curador de insights de cohort',
+    title_en: 'Vet-curator validation of cohort insights',
+    description_pt:
+      'Cada cohort_insight ganha status de revisão clínica (Pendente / Aprovado / Rejeitado / Requer ajustes), notas e timestamp do revisor. Botão "validar" em cada card abre dialog dedicado; aprovação move automaticamente para a coluna Aprovados. Insight só vira regra clínica / meta-estudo após aprovação.',
+    description_en:
+      'Each cohort_insight gets a clinical review status (Pending / Approved / Rejected / Needs changes), reviewer notes and timestamp. "Validate" button on each card opens a dedicated dialog; approval auto-moves the insight to the Approved column. Insight only becomes a clinical rule / meta-study after approval.',
+    area: 'curation',
+    effort: 'S',
+    value: ['ClinicalPartner', 'Internal'],
+    status: 'done',
+    deliveredVersion: 'Unreleased',
+    requiresVetCuratorValidation: true,
+    rationale_pt: 'Fecha o ciclo de governança clínica: nada vira regra sem assinatura do vet-curador.',
+    rationale_en: 'Closes the clinical governance loop: nothing becomes a rule without vet-curator sign-off.',
+  },
+  {
     id: 'internal-skills-3',
     order: 8,
     title_pt: '3 SKILL.md internas iniciais',
