@@ -130,7 +130,7 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
               <UserCog className={`h-4 w-4 mr-2 ${currentStep === "access-requests" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.configuration.accessRequests')}</span>
+              <span>{t('admin.sidebar.configuration.usersAndRoles', 'Usuários & Perfis')}</span>
               <ConfiguredCheck />
             </div>
             <div className="flex items-center ml-auto">
