@@ -9,7 +9,6 @@ interface Props {
 }
 
 const items = [
-  { id: 'priorizacoes', icon: LayoutGrid, key: 'admin.sidebar.governanceAI.priorizacoes', fallback: 'Priorizações' },
   { id: 'config-ia', icon: Cpu, key: 'admin.sidebar.configuration.aiConfig' },
   { id: 'prompts', icon: Bot, key: 'admin.sidebar.configuration.aiPrompts' },
   { id: 'organograma', icon: ListTree, key: 'admin.sidebar.configuration.organograma' },
