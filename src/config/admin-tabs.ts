@@ -51,6 +51,7 @@ const DatabaseMigrationsTab = lazy(() => import('@/components/administrador/migr
 const TranslationsHub = lazy(() => import('@/components/administrador/TranslationsHub'));
 const OntologyHub = lazy(() => import('@/components/administrador/OntologyHub'));
 const AccessRequestsPanel = lazy(() => import('@/components/administrador/access/AccessRequestsPanel'));
+const UsersAndRolesPanel = lazy(() => import('@/components/administrador/access/UsersAndRolesPanel'));
 const AdminPetManagementTab = lazy(() => import('@/components/administrador/patients/AdminPetManagementTab'));
 
 // Knowledge Graph & Curation
@@ -336,10 +337,10 @@ export const adminTabsConfig: AdminTabConfig[] = [
   },
   {
     id: 'access-requests',
-    label: 'Solicitações de Acesso',
+    label: 'Usuários & Perfis',
     group: 'configuration',
-    component: AccessRequestsPanel,
-    description: 'Gerenciamento de solicitações de acesso à plataforma'
+    component: UsersAndRolesPanel,
+    description: 'Aprovação de acesso à plataforma + configuração de perfis de visualização (sidebar declarativa)'
   },
   {
     id: 'organograma',
