@@ -59,7 +59,7 @@ const PriorizacoesTab: React.FC = () => {
               <span className="font-semibold">{t('prioritization.sections.analysis', 'Análises & Perfis')}</span>
             </div>
             <span className="text-[10px] text-gray-500 font-normal">
-              {t('prioritization.sections.analysisHint', 'Insights · Playground · Roles')}
+              {t('prioritization.sections.analysisHint', 'Insights · Playground multi-fonte')}
             </span>
           </TabsTrigger>
         </TabsList>
