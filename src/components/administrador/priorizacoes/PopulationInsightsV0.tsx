@@ -217,6 +217,7 @@ const PopulationInsightsV0: React.FC = () => {
                         <h4 className="text-xs font-semibold leading-tight">{isPt ? c.title : (c.title_en || c.title)}</h4>
                         <div className="flex items-center gap-1 shrink-0">
                           {originalityBadge(c, checkingOriginality === c.id)}
+                          {vetReviewBadge(c)}
                           <Badge variant="outline" className="text-[10px] font-mono">{Math.round((c.confidence ?? 0) * 100)}</Badge>
                         </div>
                       </div>
@@ -255,6 +256,14 @@ const PopulationInsightsV0: React.FC = () => {
                             <Maximize2 className="h-3 w-3 mr-0.5" /> detalhar
                           </Button>
                           <Button
+                            size="sm" variant="outline"
+                            className="h-6 px-2 text-[10px] border-indigo-300 text-indigo-700 hover:bg-indigo-50"
+                            onClick={(e) => { e.stopPropagation(); setReviewInsight(c); }}
+                            title="Validar como vet-curador (aprovar / rejeitar / requerer ajustes)"
+                          >
+                            <Stethoscope className="h-3 w-3 mr-0.5" /> validar
+                          </Button>
+                          <Button
                             size="sm" variant="ghost" className="h-6 px-1.5 text-[10px]"
                             disabled={checkingOriginality === c.id}
                             onClick={(e) => { e.stopPropagation(); checkOriginality(c.id); }}
@@ -286,6 +295,12 @@ const PopulationInsightsV0: React.FC = () => {
         insight={originalityInsight as any}
         open={!!originalityInsight}
         onOpenChange={(v) => !v && setOriginalityInsight(null)}
+      />
+      <VetCuratorReviewDialog
+        insight={reviewInsight as any}
+        open={!!reviewInsight}
+        onOpenChange={(v) => !v && setReviewInsight(null)}
+        onReviewed={fetchInsights}
       />
     </div>
   );
