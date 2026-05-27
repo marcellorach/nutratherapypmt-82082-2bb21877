@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Sparkles, GitBranch, FlaskConical, Database, RefreshCw, Loader2, Bot, BookOpen, Maximize2, RotateCw, Stethoscope, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { AlertTriangle, Sparkles, GitBranch, FlaskConical, Database, RefreshCw, Loader2, Bot, BookOpen, Maximize2, RotateCw, Stethoscope, CheckCircle2, XCircle, AlertCircle, FlaskRound } from 'lucide-react';
 import { Layers } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -50,6 +50,7 @@ const PopulationInsightsV0: React.FC = () => {
   const [cohortNames, setCohortNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [checkingOriginality, setCheckingOriginality] = useState<string | null>(null);
+  const [regenerating, setRegenerating] = useState<string | null>(null);
   const [drillDownInsight, setDrillDownInsight] = useState<DbInsight | null>(null);
   const [originalityInsight, setOriginalityInsight] = useState<DbInsight | null>(null);
   const [reviewInsight, setReviewInsight] = useState<DbInsight | null>(null);
@@ -114,6 +115,23 @@ const PopulationInsightsV0: React.FC = () => {
       if (!silent) toast({ title: 'Falha na verificação', description: e?.message ?? 'Erro', variant: 'destructive' });
     } finally {
       setCheckingOriginality(null);
+    }
+  };
+
+  const regenerateEvidence = async (id: string) => {
+    setRegenerating(id);
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-cohort-patterns', {
+        body: { insight_id: id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({ title: 'Insight re-analisado', description: 'Evidência quantitativa atualizada.' });
+      fetchInsights();
+    } catch (e: any) {
+      toast({ title: 'Falha na re-análise', description: e?.message ?? 'Erro', variant: 'destructive' });
+    } finally {
+      setRegenerating(null);
     }
   };
 
@@ -294,6 +312,17 @@ const PopulationInsightsV0: React.FC = () => {
                             {checkingOriginality === c.id
                               ? <Loader2 className="h-3 w-3 animate-spin" />
                               : <RotateCw className="h-3 w-3" />}
+                          </Button>
+                          <Button
+                            size="sm" variant="ghost"
+                            className="h-7 px-2 text-[11px] text-amber-700 hover:bg-amber-50"
+                            disabled={regenerating === c.id}
+                            onClick={(e) => { e.stopPropagation(); regenerateEvidence(c.id); }}
+                            title="Re-analisar forçando evidência quantitativa estruturada (n, prevalência, baseline, effect size)"
+                          >
+                            {regenerating === c.id
+                              ? <Loader2 className="h-3 w-3 animate-spin" />
+                              : <FlaskRound className="h-3 w-3" />}
                           </Button>
                         </div>
                       </CardContent>
