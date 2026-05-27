@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-05-27T20:19:44.080Z",
+  "timestamp": "2026-05-27T20:20:51.565Z",
   "summary": {
     "totalFiles": 939,
-    "totalIssues": 459,
+    "totalIssues": 458,
     "hardcodedTexts": 54,
     "missingKeys": 402,
-    "incompleteTranslations": 3
+    "incompleteTranslations": 2
   },
   "issues": [
     {
@@ -2834,13 +2834,6 @@
       "file": "src/locales/en/translation.json",
       "line": 0,
       "text": "Missing EN translation for: landing.partnership.inDevelopment",
-      "severity": "high"
-    },
-    {
-      "type": "incomplete-translation",
-      "file": "src/locales/en/translation.json",
-      "line": 0,
-      "text": "Missing EN translation for: prioritization.status.rita",
       "severity": "high"
     },
     {
