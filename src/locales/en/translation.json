@@ -8438,6 +8438,7 @@
       "playground": "Multi-source playground"
     },
     "status": {
+      "rita": "Rita",
       "backlog": "Backlog",
       "next": "Next",
       "in_progress": "In progress",
