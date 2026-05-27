@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-05-27T01:24:07.355Z
+Generated: 2026-05-27T01:33:10.986Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
@@ -9,12 +9,18 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **admin**: 50
 - **vet-ui**: 9
 - **meta**: 7
+- **curation**: 6
 - **kg**: 6
-- **curation**: 5
 - **tutor-ui**: 2
 - **clinical-pipeline**: 1
 
 ## Top 10 recent entries
+### 2026-05-27 · [curation] CHANGED — Painel de evidência no dialog de validação vet-curador
+- Problema identificado: o dialog de validação mostrava só título/resumo/confiança/sinais, sem expor os dados que sustentariam a decisão. O campo `evidence` dos insights gerados por `analyze-cohort-patterns` veio vazio (`{}`) — a confiança 80% era auto-declarada pelo LLM, sem nada auditável.
+- Painel "Evidência disponível" embutido no `VetCuratorReviewDialog`, computado em tempo real a partir de `pet_profiles` + `pet_conditions` + `pet_exams` da cohort de origem (sem chamada de LLM):
+- Suporte populacional: N/total pets que casam com os sinais + barra de progresso; aviso âmbar automático se N<10 ou suporte<20%; aviso vermelho se zero matches.
+_files: src/hooks/useInsightEvidence.ts, src/components/administrador/priorizacoes/VetCuratorReviewDialog.tsx, src/components/administrador/priorizacoes/PopulationInsightsV0.tsx, src/data/prioritizationBoard.ts_
+
 ### 2026-05-27 · [curation] ADDED — Validação vet-curador de insights de cohort
 - Governança clínica fechada: cada `cohort_insights` ganhou `vet_review_status` (`pending`/`approved`/`rejected`/`needs_changes`), `vet_review_notes`, `vet_reviewed_by` e `vet_reviewed_at`. Default `pending`, com check constraint e índice no status.
 - Badge no card do kanban Population Insights v0 mostra o status com cor (cinza/verde/vermelho/âmbar) e abre o dialog de revisão ao clicar.
@@ -68,12 +74,6 @@ _files: supabase/functions/check-cohort-originality/index.ts, supabase/functions
 - Após a finalização manual, o card local é atualizado imediatamente para `ready`/`failed`, sem depender do próximo ciclo de polling.
 - O cohort travado `SRD sênior (8+) com OA em uso crônico de AINEs vs. Bedinvetmab` foi destravado no backend e marcado como `ready` com 175/200 pets preservados.
 _files: src/components/administrador/priorizacoes/CohortAISuggester.tsx_
-
-### 2026-05-25 · [admin] CHANGED — Cohorts sintéticos: geração clínica rica + painel estatístico
-- `generate-synthetic-cohort` agora emite pets clinicamente completos: 1-4 condições (com severidade/status/origem), 2-5 exames (com `results_json` e `flags_abnormal`), 1-3 consultas cronológicas (`chief_complaint`, `assessment`, `plan`, peso, BCS, última marcada `is_latest=true`), 0-3 medicações vinculadas à consulta e 1-2 notas clínicas (anamnese livre) — inspirado na geração de pacientes de exemplo.
-- Validação descarta e regenera pets sem condições ou sem exames antes do insert; `BATCH_SIZE` reduzido de 25 → 10 para evitar timeout no último batch.
-- Novo painel estatístico colapsável dentro de cada card de cohort `ready` (`CohortStatsPanel`): demografia (idade/peso médios, % macho/fêmea, % castrado), top 5 raças, top 8 condições com distribuição de severidade, cobertura clínica (condições/exames/consultas por pet) e flags laboratoriais — alimentado pela nova RPC `get_cohort_stats(p_cohort_id)` (SECURITY DEFINER, admin-only).
-_files: supabase/functions/generate-synthetic-cohort/index.ts, supabase/migrations/20260525222733_get_cohort_stats.sql, src/i18n.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

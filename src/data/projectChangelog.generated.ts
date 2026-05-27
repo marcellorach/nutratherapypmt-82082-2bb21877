@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-27T01:24:07.350Z
+// Última geração: 2026-05-27T01:33:10.976Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,30 @@ export const lastChangelogDate = "2026-05-27";
 export const senexVersion = "7.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-27",
+    "kind": "changed",
+    "area": "curation",
+    "status": "entregue",
+    "title": "Painel de evidência no dialog de validação vet-curador",
+    "bullets": [
+      "Problema identificado: o dialog de validação mostrava só título/resumo/confiança/sinais, sem expor os dados que sustentariam a decisão. O campo `evidence` dos insights gerados por `analyze-cohort-patterns` veio vazio (`{}`) — a confiança 80% era auto-declarada pelo LLM, sem nada auditável.",
+      "Painel \"Evidência disponível\" embutido no `VetCuratorReviewDialog`, computado em tempo real a partir de `pet_profiles` + `pet_conditions` + `pet_exams` da cohort de origem (sem chamada de LLM):",
+      "Suporte populacional: N/total pets que casam com os sinais + barra de progresso; aviso âmbar automático se N<10 ou suporte<20%; aviso vermelho se zero matches.",
+      "Estratificação dos pets que sustentam: top 5 raças, idade média ± dp, split de severidade.",
+      "Top alterações laboratoriais nos pets matched, frequência absoluta + percentual, flags normalizadas via `canonicalLabFlag`.",
+      "Provenance: nome da cohort + modelo gerador + bloco JSON do `evidence` do LLM (ou aviso âmbar explícito quando vazio).",
+      "Atalho \"Drill-down completo\" no canto do painel fecha o dialog de revisão e abre o `InsightDrillDownDialog` para inspeção profunda (gráficos individuais por pet, lab values).",
+      "Novo hook `src/hooks/useInsightEvidence.ts` centraliza a query + agregações, base para futura unificação com o drill-down.",
+      "Files: src/hooks/useInsightEvidence.ts, src/components/administrador/priorizacoes/VetCuratorReviewDialog.tsx, src/components/administrador/priorizacoes/PopulationInsightsV0.tsx, src/data/prioritizationBoard.ts"
+    ],
+    "files": [
+      "src/hooks/useInsightEvidence.ts",
+      "src/components/administrador/priorizacoes/VetCuratorReviewDialog.tsx",
+      "src/components/administrador/priorizacoes/PopulationInsightsV0.tsx",
+      "src/data/prioritizationBoard.ts"
+    ]
+  },
   {
     "date": "2026-05-27",
     "kind": "added",
