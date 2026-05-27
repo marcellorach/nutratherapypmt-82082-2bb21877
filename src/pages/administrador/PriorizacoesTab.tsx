@@ -4,7 +4,6 @@ import { LayoutGrid, Info, KanbanSquare, FlaskConical, BarChart3 } from 'lucide-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PrioritizationBoard from '@/components/administrador/priorizacoes/PrioritizationBoard';
 import CohortRequestGenerator from '@/components/administrador/priorizacoes/CohortRequestGenerator';
-import RoleViewEditor from '@/components/administrador/priorizacoes/RoleViewEditor';
 import PopulationInsightsV0 from '@/components/administrador/priorizacoes/PopulationInsightsV0';
 import SyntheticCohortsManager from '@/components/administrador/priorizacoes/SyntheticCohortsManager';
 import MultiSourcePlayground from '@/components/administrador/priorizacoes/MultiSourcePlayground';
@@ -89,16 +88,12 @@ const PriorizacoesTab: React.FC = () => {
             <TabsList>
               <TabsTrigger value="population">{t('prioritization.tabs.population', 'Population Insights v0')}</TabsTrigger>
               <TabsTrigger value="playground">{t('prioritization.tabs.playground', 'Playground multi-fonte')}</TabsTrigger>
-              <TabsTrigger value="roles">{t('prioritization.tabs.roles', 'Perfis de Visualização')}</TabsTrigger>
             </TabsList>
             <TabsContent value="population" className="mt-4">
               <PopulationInsightsV0 />
             </TabsContent>
             <TabsContent value="playground" className="mt-4">
               <MultiSourcePlayground />
-            </TabsContent>
-            <TabsContent value="roles" className="mt-4">
-              <RoleViewEditor />
             </TabsContent>
           </Tabs>
         </TabsContent>
