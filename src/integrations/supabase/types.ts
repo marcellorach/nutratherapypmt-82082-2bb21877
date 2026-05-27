@@ -982,6 +982,10 @@ export type Database = {
           title: string
           title_en: string | null
           updated_at: string
+          vet_review_notes: string | null
+          vet_review_status: string
+          vet_reviewed_at: string | null
+          vet_reviewed_by: string | null
         }
         Insert: {
           cohort_id?: string | null
@@ -1002,6 +1006,10 @@ export type Database = {
           title: string
           title_en?: string | null
           updated_at?: string
+          vet_review_notes?: string | null
+          vet_review_status?: string
+          vet_reviewed_at?: string | null
+          vet_reviewed_by?: string | null
         }
         Update: {
           cohort_id?: string | null
@@ -1022,6 +1030,10 @@ export type Database = {
           title?: string
           title_en?: string | null
           updated_at?: string
+          vet_review_notes?: string | null
+          vet_review_status?: string
+          vet_reviewed_at?: string | null
+          vet_reviewed_by?: string | null
         }
         Relationships: [
           {

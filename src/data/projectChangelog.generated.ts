@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-27T00:36:49.068Z
+// Última geração: 2026-05-27T01:24:07.350Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,27 @@ export const lastChangelogDate = "2026-05-27";
 export const senexVersion = "7.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-27",
+    "kind": "added",
+    "area": "curation",
+    "status": "entregue",
+    "title": "Validação vet-curador de insights de cohort",
+    "bullets": [
+      "Governança clínica fechada: cada `cohort_insights` ganhou `vet_review_status` (`pending`/`approved`/`rejected`/`needs_changes`), `vet_review_notes`, `vet_reviewed_by` e `vet_reviewed_at`. Default `pending`, com check constraint e índice no status.",
+      "Badge no card do kanban Population Insights v0 mostra o status com cor (cinza/verde/vermelho/âmbar) e abre o dialog de revisão ao clicar.",
+      "Botão \"validar\" em cada card abre `VetCuratorReviewDialog`: exibe título, resumo, confiança, sinais, model e o status atual; campo de notas clínicas; três ações — Aprovar (verde), Rejeitar (vermelho), Requer ajustes (âmbar).",
+      "Aprovação move automaticamente o insight para a coluna `approved` do kanban — só após esta assinatura o insight pode virar regra clínica ou meta-estudo proposto.",
+      "Card adicionado ao Painel de Priorizações (`vet-curator-insight-validation`, order 14, status `done`, com flag `requiresVetCuratorValidation`).",
+      "Files: supabase/migrations/* (alter cohort_insights), src/components/administrador/priorizacoes/VetCuratorReviewDialog.tsx, src/components/administrador/priorizacoes/PopulationInsightsV0.tsx, src/data/prioritizationBoard.ts"
+    ],
+    "files": [
+      "src/components/administrador/priorizacoes/VetCuratorReviewDialog.tsx",
+      "src/components/administrador/priorizacoes/PopulationInsightsV0.tsx",
+      "src/data/prioritizationBoard.ts"
+    ],
+    "i18nVersion": "1.114.0"
+  },
   {
     "date": "2026-05-27",
     "kind": "fixed",

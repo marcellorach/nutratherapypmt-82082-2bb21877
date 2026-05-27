@@ -3,12 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Sparkles, GitBranch, FlaskConical, Database, RefreshCw, Loader2, Bot, BookOpen, Maximize2, RotateCw } from 'lucide-react';
+import { AlertTriangle, Sparkles, GitBranch, FlaskConical, Database, RefreshCw, Loader2, Bot, BookOpen, Maximize2, RotateCw, Stethoscope, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import { Layers } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { KanbanDndProvider, DroppableColumn, DraggableCard } from './dnd/KanbanDnd';
 import InsightDrillDownDialog from './InsightDrillDownDialog';
 import OriginalityDialog from './OriginalityDialog';
+import VetCuratorReviewDialog, { VetReviewStatus } from './VetCuratorReviewDialog';
 import { toast } from '@/components/ui/use-toast';
 
 type InsightStage = 'discovery' | 'hypothesis' | 'proposed_meta_study' | 'approved';
@@ -29,6 +30,9 @@ interface DbInsight {
   originality_status?: 'unknown' | 'novel' | 'partial' | 'known';
   originality_checked_at?: string | null;
   originality_evidence?: any;
+  vet_review_status?: VetReviewStatus | null;
+  vet_review_notes?: string | null;
+  vet_reviewed_at?: string | null;
 }
 
 const STAGES: { id: InsightStage; label: string; color: string; icon: React.ComponentType<any> }[] = [
@@ -47,6 +51,7 @@ const PopulationInsightsV0: React.FC = () => {
   const [checkingOriginality, setCheckingOriginality] = useState<string | null>(null);
   const [drillDownInsight, setDrillDownInsight] = useState<DbInsight | null>(null);
   const [originalityInsight, setOriginalityInsight] = useState<DbInsight | null>(null);
+  const [reviewInsight, setReviewInsight] = useState<DbInsight | null>(null);
   const [autoQueue, setAutoQueue] = useState<Set<string>>(new Set());
 
   const fetchInsights = async () => {
@@ -139,6 +144,28 @@ const PopulationInsightsV0: React.FC = () => {
     );
   };
 
+  const vetReviewBadge = (c: DbInsight) => {
+    const st = (c.vet_review_status ?? 'pending') as VetReviewStatus;
+    const map: Record<VetReviewStatus, { color: string; label: string; Icon: React.ComponentType<any> }> = {
+      pending:       { color: 'bg-gray-100 border-gray-300 text-gray-700',           label: 'vet: pendente',  Icon: Stethoscope },
+      approved:      { color: 'bg-emerald-100 border-emerald-300 text-emerald-800',  label: 'vet: aprovado',  Icon: CheckCircle2 },
+      rejected:      { color: 'bg-red-100 border-red-300 text-red-800',              label: 'vet: rejeitado', Icon: XCircle },
+      needs_changes: { color: 'bg-amber-100 border-amber-300 text-amber-800',        label: 'vet: ajustes',   Icon: AlertCircle },
+    };
+    const v = map[st];
+    return (
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); setReviewInsight(c); }}
+        title="Abrir revisão do vet-curador"
+      >
+        <Badge variant="outline" className={`text-[9px] cursor-pointer hover:brightness-95 flex items-center gap-0.5 ${v.color}`}>
+          <v.Icon className="h-2.5 w-2.5" /> {v.label}
+        </Badge>
+      </button>
+    );
+  };
+
   return (
     <div className="space-y-4">
       <Card className="border-dashed border-emerald-300 bg-emerald-50/60">
@@ -190,6 +217,7 @@ const PopulationInsightsV0: React.FC = () => {
                         <h4 className="text-xs font-semibold leading-tight">{isPt ? c.title : (c.title_en || c.title)}</h4>
                         <div className="flex items-center gap-1 shrink-0">
                           {originalityBadge(c, checkingOriginality === c.id)}
+                          {vetReviewBadge(c)}
                           <Badge variant="outline" className="text-[10px] font-mono">{Math.round((c.confidence ?? 0) * 100)}</Badge>
                         </div>
                       </div>
@@ -228,6 +256,14 @@ const PopulationInsightsV0: React.FC = () => {
                             <Maximize2 className="h-3 w-3 mr-0.5" /> detalhar
                           </Button>
                           <Button
+                            size="sm" variant="outline"
+                            className="h-6 px-2 text-[10px] border-indigo-300 text-indigo-700 hover:bg-indigo-50"
+                            onClick={(e) => { e.stopPropagation(); setReviewInsight(c); }}
+                            title="Validar como vet-curador (aprovar / rejeitar / requerer ajustes)"
+                          >
+                            <Stethoscope className="h-3 w-3 mr-0.5" /> validar
+                          </Button>
+                          <Button
                             size="sm" variant="ghost" className="h-6 px-1.5 text-[10px]"
                             disabled={checkingOriginality === c.id}
                             onClick={(e) => { e.stopPropagation(); checkOriginality(c.id); }}
@@ -259,6 +295,12 @@ const PopulationInsightsV0: React.FC = () => {
         insight={originalityInsight as any}
         open={!!originalityInsight}
         onOpenChange={(v) => !v && setOriginalityInsight(null)}
+      />
+      <VetCuratorReviewDialog
+        insight={reviewInsight as any}
+        open={!!reviewInsight}
+        onOpenChange={(v) => !v && setReviewInsight(null)}
+        onReviewed={fetchInsights}
       />
     </div>
   );
