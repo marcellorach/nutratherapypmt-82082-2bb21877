@@ -35,10 +35,20 @@ const PriorizacoesTab: React.FC = () => {
       </header>
 
       <Tabs defaultValue="board" className="w-full">
-        <TabsList>
+        <TabsList className="flex flex-wrap h-auto gap-1 p-1">
           <TabsTrigger value="board">{t('prioritization.tabs.board', 'Kanban')}</TabsTrigger>
+
+          <span className="mx-1 h-5 w-px bg-gray-300" aria-hidden="true" />
+          <span className="text-[10px] uppercase tracking-wide text-gray-500 px-1 self-center">
+            {t('prioritization.groups.cohorts', 'Cohorts')}
+          </span>
           <TabsTrigger value="cohort">{t('prioritization.tabs.cohort', 'Gerador de Sugestão de Cohort')}</TabsTrigger>
           <TabsTrigger value="synthetic">{t('prioritization.tabs.synthetic', 'Cohorts sintéticos')}</TabsTrigger>
+
+          <span className="mx-1 h-5 w-px bg-gray-300" aria-hidden="true" />
+          <span className="text-[10px] uppercase tracking-wide text-gray-500 px-1 self-center">
+            {t('prioritization.groups.analysis', 'Análises & Perfis')}
+          </span>
           <TabsTrigger value="population">{t('prioritization.tabs.population', 'Population Insights v0')}</TabsTrigger>
           <TabsTrigger value="playground">{t('prioritization.tabs.playground', 'Playground multi-fonte')}</TabsTrigger>
           <TabsTrigger value="roles">{t('prioritization.tabs.roles', 'Perfis de Visualização')}</TabsTrigger>
@@ -47,23 +57,18 @@ const PriorizacoesTab: React.FC = () => {
         <TabsContent value="board" className="mt-4">
           <PrioritizationBoard />
         </TabsContent>
-
         <TabsContent value="cohort" className="mt-4">
           <CohortRequestGenerator />
         </TabsContent>
-
         <TabsContent value="synthetic" className="mt-4">
           <SyntheticCohortsManager />
         </TabsContent>
-
         <TabsContent value="population" className="mt-4">
           <PopulationInsightsV0 />
         </TabsContent>
-
         <TabsContent value="playground" className="mt-4">
           <MultiSourcePlayground />
         </TabsContent>
-
         <TabsContent value="roles" className="mt-4">
           <RoleViewEditor />
         </TabsContent>
