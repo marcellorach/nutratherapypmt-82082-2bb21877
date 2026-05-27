@@ -7,14 +7,15 @@ import {
 } from '@/data/prioritizationBoard';
 import PrioritizationCardItem from './PrioritizationCard';
 import { supabase } from '@/integrations/supabase/client';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { KanbanDndProvider, DroppableColumn, DraggableCard } from './dnd/KanbanDnd';
+import { toast } from '@/components/ui/use-toast';
 
-const STATUS_STYLES: Record<PrioritizationStatus, { dot: string; label: string }> = {
-  backlog: { dot: 'bg-gray-400', label: 'Backlog' },
-  next: { dot: 'bg-blue-500', label: 'Próximo' },
-  in_progress: { dot: 'bg-amber-500', label: 'Em curso' },
-  in_test: { dot: 'bg-purple-500', label: 'Em teste' },
-  done: { dot: 'bg-emerald-500', label: 'Entregue' },
+const STATUS_STYLES: Record<PrioritizationStatus, { bg: string; label: string }> = {
+  backlog: { bg: 'bg-gray-50 border-gray-200', label: 'Backlog' },
+  next: { bg: 'bg-blue-50 border-blue-200', label: 'Próximo' },
+  in_progress: { bg: 'bg-amber-50 border-amber-200', label: 'Em curso' },
+  in_test: { bg: 'bg-purple-50 border-purple-200', label: 'Em teste' },
+  done: { bg: 'bg-emerald-50 border-emerald-200', label: 'Entregue' },
 };
 
 const PrioritizationBoard: React.FC = () => {
@@ -66,55 +67,75 @@ const PrioritizationBoard: React.FC = () => {
     return map;
   }, [overrides]);
 
-  const defaultTab = PRIORITIZATION_STATUSES.find((s) => grouped[s].length > 0) ?? 'backlog';
+  const handleDrop = async (cardId: string, columnId: string) => {
+    const newStatus = columnId as PrioritizationStatus;
+    if (!PRIORITIZATION_STATUSES.includes(newStatus)) return;
+    const card = PRIORITIZATION_BOARD.find((c) => c.id === cardId);
+    if (!card) return;
+    const current = overrides[cardId] ?? card.status;
+    if (current === newStatus) return;
+    setOverrides((prev) => ({ ...prev, [cardId]: newStatus }));
+    const { error } = await supabase
+      .from('prioritization_overrides')
+      .upsert(
+        { card_id: cardId, status: newStatus, sort_order: card.order },
+        { onConflict: 'card_id' },
+      );
+    if (error) {
+      toast({ title: 'Falha ao mover card', description: error.message, variant: 'destructive' });
+      setOverrides((prev) => {
+        const next = { ...prev };
+        if (card.status === newStatus) delete next[cardId];
+        else next[cardId] = current;
+        return next;
+      });
+      return;
+    }
+    await supabase.from('prioritization_history').insert({
+      card_id: cardId,
+      from_status: current,
+      to_status: newStatus,
+      note: null,
+    });
+    loadHistory();
+  };
 
   return (
-    <Tabs defaultValue={defaultTab} className="w-full">
-      <TabsList className="flex flex-wrap h-auto bg-gray-100 p-1 gap-1">
+    <KanbanDndProvider onDrop={handleDrop}>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3 w-full">
         {PRIORITIZATION_STATUSES.map((status) => {
-          const style = STATUS_STYLES[status];
-          const count = grouped[status].length;
-          return (
-            <TabsTrigger
-              key={status}
-              value={status}
-              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
-            >
-              <span className={`w-2 h-2 rounded-full ${style.dot}`} />
-              <span className="text-xs font-medium uppercase tracking-wide">
-                {t(`prioritization.status.${status}`, style.label)}
-              </span>
-              <span className="text-[10px] font-mono text-gray-500 bg-white rounded-full px-1.5 py-0.5 border">
-                {count}
-              </span>
-            </TabsTrigger>
-          );
-        })}
-      </TabsList>
-
-      {PRIORITIZATION_STATUSES.map((status) => {
+        const style = STATUS_STYLES[status];
         const cards = grouped[status];
         return (
-          <TabsContent key={status} value={status} className="mt-4">
-            {cards.length === 0 ? (
-              <div className="text-sm text-gray-400 italic text-center py-12 border border-dashed rounded-lg">
-                Nenhum card neste estágio.
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {cards.map((card) => (
-                  <PrioritizationCardItem
-                    key={card.id}
-                    card={card}
-                    history={history[card.id] ?? []}
-                  />
-                ))}
-              </div>
-            )}
-          </TabsContent>
+          <DroppableColumn
+            key={status}
+            id={status}
+            className={`rounded-lg border ${style.bg} p-2 flex flex-col min-h-[200px] min-w-0`}
+          >
+            <div className="flex items-center justify-between mb-2 px-1">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-700">
+                {t(`prioritization.status.${status}`, style.label)}
+              </h3>
+              <span className="text-[10px] font-mono text-gray-500 bg-white rounded-full px-1.5 py-0.5">
+                {cards.length}
+              </span>
+            </div>
+            <div className="space-y-2 flex-1">
+              {cards.length === 0 ? (
+                <div className="text-[11px] text-gray-400 italic text-center py-4">—</div>
+              ) : (
+                cards.map((card) => (
+                  <DraggableCard key={card.id} id={card.id}>
+                    <PrioritizationCardItem card={card} history={history[card.id] ?? []} />
+                  </DraggableCard>
+                ))
+              )}
+            </div>
+          </DroppableColumn>
         );
-      })}
-    </Tabs>
+        })}
+      </div>
+    </KanbanDndProvider>
   );
 };
 
