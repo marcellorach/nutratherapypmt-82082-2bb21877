@@ -59,3 +59,25 @@ export function localizeConditionName(name: string, locale: string): string {
   const key = name.toLowerCase().trim();
   return EN_TO_PT[key] || name;
 }
+
+// Reverse lookup: any PT label -> EN canonical key
+const PT_TO_EN: Record<string, string> = Object.entries(EN_TO_PT).reduce(
+  (acc, [en, pt]) => {
+    acc[pt.toLowerCase().trim()] = en;
+    return acc;
+  },
+  {} as Record<string, string>,
+);
+
+/**
+ * Returns the canonical English key for a condition name (lowercased).
+ * Useful for de-duplicating PT/EN variants before aggregating counts.
+ * Falls back to the lowercased input when no mapping is found.
+ */
+export function canonicalConditionKey(name: string): string {
+  if (!name) return '';
+  const key = name.toLowerCase().trim();
+  if (EN_TO_PT[key]) return key; // already EN canonical
+  if (PT_TO_EN[key]) return PT_TO_EN[key]; // PT -> EN
+  return key;
+}
