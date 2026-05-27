@@ -2106,6 +2106,7 @@
       },
       "research": {
         "title": "Research and Development",
+        "aiScientist": "AI Scientist",
         "proposedStudies": "Study Proposals",
         "proposedStudiesStatus": "70% Functional",
         "proposedStudiesStatusTooltip": "AI-powered proposal system functional. Missing automated approval pipeline integration.",

@@ -24,6 +24,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.0 -->
 
+### Changed - 2026-05-27 — Rebatizar "Priorizações" → "AI Scientist" e mover para Research & Development
+<!-- area: admin · status: entregue · i18n: 1.115.0 -->
+- Aba `priorizacoes` renomeada para **AI Scientist** e movida do grupo `governance-ai` para `research` (primeira posição da sidebar de R&D).
+- Sidebar: removido item de Governance & AI, adicionado em `ResearchGroup` com ícone `Sparkles`.
+- Header da página `PriorizacoesTab` atualizado; nova chave i18n `admin.sidebar.research.aiScientist` (PT/EN = "AI Scientist").
+- Files: src/config/admin-tabs.ts, src/components/administrador/sidebar/groups/ResearchGroup.tsx, src/components/administrador/sidebar/groups/GovernanceAIGroup.tsx, src/pages/administrador/PriorizacoesTab.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts, src/data/projectOrganograma.ts
+
 ### Changed - 2026-05-27 — Painel de evidência no dialog de validação vet-curador
 <!-- area: curation · status: entregue -->
 - **Problema identificado**: o dialog de validação mostrava só título/resumo/confiança/sinais, sem expor os dados que sustentariam a decisão. O campo `evidence` dos insights gerados por `analyze-cohort-patterns` veio vazio (`{}`) — a confiança 80% era auto-declarada pelo LLM, sem nada auditável.

@@ -392,10 +392,10 @@ export const adminTabsConfig: AdminTabConfig[] = [
   },
   {
     id: 'priorizacoes',
-    label: 'Priorizações',
-    group: 'governance-ai',
+    label: 'AI Scientist',
+    group: 'research',
     component: PriorizacoesTab,
-    description: 'Painel Kanban: roadmap operacional do Senex AI + Gerador de Sugestões de Cohort para a PetLove'
+    description: 'AI Scientist: roadmap operacional do Senex AI, gerador de cohorts, Population Insights v0 e validação vet-curador'
   }
 ];
 
