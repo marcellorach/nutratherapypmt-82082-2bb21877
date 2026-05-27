@@ -11,6 +11,7 @@ import { KanbanDndProvider, DroppableColumn, DraggableCard } from './dnd/KanbanD
 import { toast } from '@/components/ui/use-toast';
 
 const STATUS_STYLES: Record<PrioritizationStatus, { bg: string; label: string }> = {
+  rita: { bg: 'bg-pink-50 border-pink-300', label: 'Rita' },
   backlog: { bg: 'bg-gray-50 border-gray-200', label: 'Backlog' },
   next: { bg: 'bg-blue-50 border-blue-200', label: 'Próximo' },
   in_progress: { bg: 'bg-amber-50 border-amber-200', label: 'Em curso' },
@@ -52,6 +53,7 @@ const PrioritizationBoard: React.FC = () => {
 
   const grouped = useMemo(() => {
     const map: Record<PrioritizationStatus, typeof PRIORITIZATION_BOARD> = {
+      rita: [],
       backlog: [],
       next: [],
       in_progress: [],
