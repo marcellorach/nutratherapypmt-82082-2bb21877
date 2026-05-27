@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-05-27T00:09:03.799Z
+Generated: 2026-05-27T00:36:49.072Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
 ## Latest i18n version: 1.114.0
 
 ## Changes by area (last 14 days)
-- **admin**: 49
+- **admin**: 50
 - **vet-ui**: 9
 - **meta**: 7
 - **kg**: 6
@@ -15,6 +15,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **clinical-pipeline**: 1
 
 ## Top 10 recent entries
+### 2026-05-27 · [admin] FIXED — Cohort stats: canonicalização PT/EN + ref não-numérico
+- Duplicação de taxonomia resolvida no agregador de cohort stats: "Osteoarthritis" + "Osteoartrite" agora somam como uma só condição (e idem para os demais mapas EN↔PT já existentes em `condition-name-localizer`). Novo helper `canonicalConditionKey` faz o lookup reverso PT→EN antes da contagem; nome exibido respeita o idioma ativo via `localizeConditionName`.
+- Top flags laboratoriais normalizadas: novo `lab-flag-canonicalizer.ts` unifica abreviaturas/PT (HCT↔Hematócrito, PLT↔Plt, ALT↔TGP, AST↔TGO, FA↔ALP, Ureia↔BUN, Creatinina↔Creatinine, etc.). Counts somados, top-12 mantido.
+- `ref ?–?` ocultado: `formatLabValue` em `InsightDrillDownDialog` agora só emite a faixa de referência quando ao menos um dos limites é numérico — exames qualitativos (citologia de linfoma linfoblástico) ficam sem o bloco feio.
+_files: src/services/condition-name-localizer.ts, src/services/lab-flag-canonicalizer.ts, src/components/administrador/priorizacoes/CohortStatsPanel.tsx, src/components/administrador/priorizacoes/InsightDrillDownDialog.tsx…_
+
 ### 2026-05-27 · [admin] ADDED — Painel de Priorizações: 2 cards novos + tag "Valida vet-curador"
 - Novo card `cohort-suggester-hardening` (in_test) representando o trabalho do dia: edge function `suggest-cohort-ideas` com gemini-3.1-pro-preview, validação server-side e fallback gpt-5.4.
 - Novo card `cohort-suggestions-clinical-review` (next) para a revisão clínica das 6 sugestões geradas pela vet-curadora — bloqueia o envio do documento ao parceiro clínico sem validação.
@@ -68,12 +74,6 @@ _files: supabase/functions/generate-synthetic-cohort/index.ts, supabase/migratio
 - O fluxo resolve a lacuna de inspeção operacional: após a geração parcial (ex.: 175/200), já é possível auditar os registros efetivamente persistidos sem sair da aba de priorizações.
 - I18N_VERSION 1.109.0 → 1.110.0 com novas chaves `prioritization.syntheticExplorer.*` em PT/EN.
 _files: src/i18n.ts_
-
-### 2026-05-25 · [admin] ADDED — Playground Multi-Fonte + SourcePanel (fundação #8)
-- Serviço `MultiSourceResolver` (`src/services/multi-source-resolver.ts`) com 5 providers independentes: KG curado (peso 1.0, via RPC `get_relations_graph_data`), histórico do cão (0.95), cohort sintético (0.7), cães tratados (0.6, stub) e internet via Perplexity (0.3). Detecção automática de conflito quando ≥ 2 fontes de peso ≥ 0.6 retornam claims com polaridade divergente.
-- Edge function `query-perplexity` (modelo `sonar`, escopo canino restrito, extração de confidence high/medium/low, citações).
-- Componente `<SourcePanel />` em `src/components/clinical/SourcePanel.tsx`: visibilidade híbrida por `useRoleView()` — tutor vê só síntese + nota neutra; vet vê painel colapsável com badge de peso, confiança e conflito; arquiteto vê também tags de modelo.
-_files: src/services/multi-source-resolver.ts, src/components/clinical/SourcePanel.tsx, src/data/populationInsightsSeed.ts, src/components/administrador/priorizacoes/MultiSourcePlayground.tsx…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-27T00:09:03.789Z
+// Última geração: 2026-05-27T00:36:49.068Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,27 @@ export const lastChangelogDate = "2026-05-27";
 export const senexVersion = "7.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-27",
+    "kind": "fixed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Cohort stats: canonicalização PT/EN + ref não-numérico",
+    "bullets": [
+      "Duplicação de taxonomia resolvida no agregador de cohort stats: \"Osteoarthritis\" + \"Osteoartrite\" agora somam como uma só condição (e idem para os demais mapas EN↔PT já existentes em `condition-name-localizer`). Novo helper `canonicalConditionKey` faz o lookup reverso PT→EN antes da contagem; nome exibido respeita o idioma ativo via `localizeConditionName`.",
+      "Top flags laboratoriais normalizadas: novo `lab-flag-canonicalizer.ts` unifica abreviaturas/PT (HCT↔Hematócrito, PLT↔Plt, ALT↔TGP, AST↔TGO, FA↔ALP, Ureia↔BUN, Creatinina↔Creatinine, etc.). Counts somados, top-12 mantido.",
+      "`ref ?–?` ocultado: `formatLabValue` em `InsightDrillDownDialog` agora só emite a faixa de referência quando ao menos um dos limites é numérico — exames qualitativos (citologia de linfoma linfoblástico) ficam sem o bloco feio.",
+      "Files: src/services/condition-name-localizer.ts, src/services/lab-flag-canonicalizer.ts, src/components/administrador/priorizacoes/CohortStatsPanel.tsx, src/components/administrador/priorizacoes/InsightDrillDownDialog.tsx, src/data/prioritizationBoard.ts"
+    ],
+    "files": [
+      "src/services/condition-name-localizer.ts",
+      "src/services/lab-flag-canonicalizer.ts",
+      "src/components/administrador/priorizacoes/CohortStatsPanel.tsx",
+      "src/components/administrador/priorizacoes/InsightDrillDownDialog.tsx",
+      "src/data/prioritizationBoard.ts"
+    ],
+    "i18nVersion": "1.114.0"
+  },
   {
     "date": "2026-05-27",
     "kind": "added",

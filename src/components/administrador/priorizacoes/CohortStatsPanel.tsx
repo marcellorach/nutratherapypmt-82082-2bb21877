@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, BarChart3, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useTranslation } from 'react-i18next';
+import { canonicalConditionKey, localizeConditionName } from '@/services/condition-name-localizer';
+import { canonicalLabFlag } from '@/services/lab-flag-canonicalizer';
 
 interface Stats {
   total: number;
@@ -30,7 +32,7 @@ const Bar: React.FC<{ value: number; total: number; color?: string }> = ({ value
 };
 
 const CohortStatsPanel: React.FC<{ cohortId: string; cohortReady: boolean }> = ({ cohortId, cohortReady }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
@@ -44,6 +46,38 @@ const CohortStatsPanel: React.FC<{ cohortId: string; cohortReady: boolean }> = (
       setLoading(false);
     })();
   }, [open, stats, cohortId, cohortReady]);
+
+  // De-duplicate PT/EN condition variants and lab-flag aliases on the client
+  const normalized = useMemo(() => {
+    if (!stats) return stats;
+    const locale = i18n.language || 'pt';
+    const condMap = new Map<string, { name: string; n: number; mild: number; moderate: number; severe: number }>();
+    (stats.top_conditions || []).forEach((c) => {
+      const key = canonicalConditionKey(c.name);
+      const display = localizeConditionName(key, locale);
+      const prev = condMap.get(key);
+      if (prev) {
+        prev.n += c.n;
+        prev.mild += c.mild;
+        prev.moderate += c.moderate;
+        prev.severe += c.severe;
+      } else {
+        condMap.set(key, { ...c, name: display });
+      }
+    });
+    const flagMap = new Map<string, { flag: string; n: number }>();
+    (stats.top_flags || []).forEach((f) => {
+      const key = canonicalLabFlag(f.flag);
+      const prev = flagMap.get(key);
+      if (prev) prev.n += f.n;
+      else flagMap.set(key, { flag: key, n: f.n });
+    });
+    return {
+      ...stats,
+      top_conditions: Array.from(condMap.values()).sort((a, b) => b.n - a.n).slice(0, 10),
+      top_flags: Array.from(flagMap.values()).sort((a, b) => b.n - a.n).slice(0, 12),
+    };
+  }, [stats, i18n.language]);
 
   if (!cohortReady) return null;
 
@@ -68,72 +102,72 @@ const CohortStatsPanel: React.FC<{ cohortId: string; cohortReady: boolean }> = (
               <Loader2 className="h-3 w-3 animate-spin" /> {t('prioritization.cohortStats.loading')}
             </div>
           )}
-          {stats && stats.total === 0 && (
+          {normalized && normalized.total === 0 && (
             <div className="text-gray-500">{t('prioritization.cohortStats.empty')}</div>
           )}
-          {stats && stats.total > 0 && (
+          {normalized && normalized.total > 0 && (
             <>
               {/* Demografia */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 <div className="bg-white rounded p-1.5">
                   <div className="text-gray-500">{t('prioritization.cohortStats.avgAge')}</div>
-                  <div className="text-sm font-semibold text-gray-900">{stats.demographics?.avg_age ?? '—'}a</div>
+                  <div className="text-sm font-semibold text-gray-900">{normalized.demographics?.avg_age ?? '—'}a</div>
                 </div>
                 <div className="bg-white rounded p-1.5">
                   <div className="text-gray-500">{t('prioritization.cohortStats.avgWeight')}</div>
-                  <div className="text-sm font-semibold text-gray-900">{stats.demographics?.avg_weight ?? '—'}kg</div>
+                  <div className="text-sm font-semibold text-gray-900">{normalized.demographics?.avg_weight ?? '—'}kg</div>
                 </div>
                 <div className="bg-white rounded p-1.5">
                   <div className="text-gray-500">{t('prioritization.cohortStats.sexSplit')}</div>
                   <div className="text-sm font-semibold text-gray-900">
-                    ♂ {stats.demographics?.male_n ?? 0} · ♀ {stats.demographics?.female_n ?? 0}
+                    ♂ {normalized.demographics?.male_n ?? 0} · ♀ {normalized.demographics?.female_n ?? 0}
                   </div>
                 </div>
                 <div className="bg-white rounded p-1.5">
                   <div className="text-gray-500">{t('prioritization.cohortStats.neutered')}</div>
                   <div className="text-sm font-semibold text-gray-900">
-                    {stats.demographics?.neutered_n ?? 0}/{stats.total}
+                    {normalized.demographics?.neutered_n ?? 0}/{normalized.total}
                   </div>
                 </div>
               </div>
 
               {/* Cobertura */}
-              {stats.coverage && (
+              {normalized.coverage && (
                 <div>
                   <div className="text-gray-600 mb-1 font-medium">{t('prioritization.cohortStats.coverage')}</div>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-1.5">
                     <div>
-                      <div className="text-gray-500">{t('prioritization.cohortStats.withCondition')}: {stats.coverage.pets_with_condition}/{stats.total}</div>
-                      <Bar value={stats.coverage.pets_with_condition} total={stats.total} color="bg-emerald-500" />
+                      <div className="text-gray-500">{t('prioritization.cohortStats.withCondition')}: {normalized.coverage.pets_with_condition}/{normalized.total}</div>
+                      <Bar value={normalized.coverage.pets_with_condition} total={normalized.total} color="bg-emerald-500" />
                     </div>
                     <div>
-                      <div className="text-gray-500">{t('prioritization.cohortStats.withExam')}: {stats.coverage.pets_with_exam}/{stats.total}</div>
-                      <Bar value={stats.coverage.pets_with_exam} total={stats.total} color="bg-blue-500" />
+                      <div className="text-gray-500">{t('prioritization.cohortStats.withExam')}: {normalized.coverage.pets_with_exam}/{normalized.total}</div>
+                      <Bar value={normalized.coverage.pets_with_exam} total={normalized.total} color="bg-blue-500" />
                     </div>
                     <div>
-                      <div className="text-gray-500">{t('prioritization.cohortStats.withConsultation')}: {stats.coverage.pets_with_consultation}/{stats.total}</div>
-                      <Bar value={stats.coverage.pets_with_consultation} total={stats.total} color="bg-purple-500" />
+                      <div className="text-gray-500">{t('prioritization.cohortStats.withConsultation')}: {normalized.coverage.pets_with_consultation}/{normalized.total}</div>
+                      <Bar value={normalized.coverage.pets_with_consultation} total={normalized.total} color="bg-purple-500" />
                     </div>
                   </div>
                   <div className="text-gray-500 mt-1">
                     {t('prioritization.cohortStats.avgPerPet', {
-                      exams: stats.coverage.avg_exams_per_pet,
-                      cons: stats.coverage.avg_consultations_per_pet,
-                      meds: stats.coverage.medications_total,
+                      exams: normalized.coverage.avg_exams_per_pet,
+                      cons: normalized.coverage.avg_consultations_per_pet,
+                      meds: normalized.coverage.medications_total,
                     })}
                   </div>
                 </div>
               )}
 
               {/* Top raças */}
-              {stats.top_breeds && stats.top_breeds.length > 0 && (
+              {normalized.top_breeds && normalized.top_breeds.length > 0 && (
                 <div>
                   <div className="text-gray-600 mb-1 font-medium">{t('prioritization.cohortStats.topBreeds')}</div>
                   <div className="space-y-1">
-                    {stats.top_breeds.map((b) => (
+                    {normalized.top_breeds.map((b) => (
                       <div key={b.breed}>
                         <div className="flex justify-between text-gray-700"><span className="truncate">{b.breed}</span><span className="font-mono">{b.n}</span></div>
-                        <Bar value={b.n} total={stats.total} />
+                        <Bar value={b.n} total={normalized.total} />
                       </div>
                     ))}
                   </div>
@@ -141,11 +175,11 @@ const CohortStatsPanel: React.FC<{ cohortId: string; cohortReady: boolean }> = (
               )}
 
               {/* Top condições */}
-              {stats.top_conditions && stats.top_conditions.length > 0 && (
+              {normalized.top_conditions && normalized.top_conditions.length > 0 && (
                 <div>
                   <div className="text-gray-600 mb-1 font-medium">{t('prioritization.cohortStats.topConditions')}</div>
                   <div className="space-y-1">
-                    {stats.top_conditions.map((c) => (
+                    {normalized.top_conditions.map((c) => (
                       <div key={c.name} className="bg-white rounded p-1.5">
                         <div className="flex justify-between text-gray-800"><span className="truncate font-medium">{c.name}</span><span className="font-mono">{c.n}</span></div>
                         <div className="flex gap-1 mt-1 text-[10px] text-gray-500">
@@ -160,11 +194,11 @@ const CohortStatsPanel: React.FC<{ cohortId: string; cohortReady: boolean }> = (
               )}
 
               {/* Flags laboratoriais */}
-              {stats.top_flags && stats.top_flags.length > 0 && (
+              {normalized.top_flags && normalized.top_flags.length > 0 && (
                 <div>
                   <div className="text-gray-600 mb-1 font-medium">{t('prioritization.cohortStats.topFlags')}</div>
                   <div className="flex flex-wrap gap-1">
-                    {stats.top_flags.map((f) => (
+                    {normalized.top_flags.map((f) => (
                       <span key={f.flag} className="px-1.5 py-0.5 rounded bg-red-50 text-red-700 border border-red-200">
                         {f.flag} <span className="font-mono">({f.n})</span>
                       </span>
