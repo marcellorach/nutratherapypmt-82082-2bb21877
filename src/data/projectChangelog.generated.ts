@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-26T23:39:19.719Z
+// Última geração: 2026-05-27T00:09:03.789Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,30 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-05-26";
+export const lastChangelogDate = "2026-05-27";
 
 export const senexVersion = "7.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-27",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Painel de Priorizações: 2 cards novos + tag \"Valida vet-curador\"",
+    "bullets": [
+      "Novo card `cohort-suggester-hardening` (in_test) representando o trabalho do dia: edge function `suggest-cohort-ideas` com gemini-3.1-pro-preview, validação server-side e fallback gpt-5.4.",
+      "Novo card `cohort-suggestions-clinical-review` (next) para a revisão clínica das 6 sugestões geradas pela vet-curadora — bloqueia o envio do documento ao parceiro clínico sem validação.",
+      "Novo campo `requiresVetCuratorValidation` no tipo `PrioritizationCard` + badge rosa \"Valida vet-curador\" (ícone estetoscópio) no `PrioritizationCardItem`. Aplicado inicialmente ao card de revisão clínica.",
+      "Reordenação de `order` para acomodar os novos cards (1–12).",
+      "Files: src/data/prioritizationBoard.ts, src/components/administrador/priorizacoes/PrioritizationCard.tsx"
+    ],
+    "files": [
+      "src/data/prioritizationBoard.ts",
+      "src/components/administrador/priorizacoes/PrioritizationCard.tsx"
+    ],
+    "i18nVersion": "1.114.0"
+  },
   {
     "date": "2026-05-26",
     "kind": "fixed",
