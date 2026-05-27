@@ -104,7 +104,7 @@ const PrioritizationBoard: React.FC = () => {
 
   return (
     <KanbanDndProvider onDrop={handleDrop}>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3 w-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-3 w-full">
         {PRIORITIZATION_STATUSES.map((status) => {
         const style = STATUS_STYLES[status];
         const cards = grouped[status];
