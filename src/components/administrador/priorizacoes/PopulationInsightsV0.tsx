@@ -3,12 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Sparkles, GitBranch, FlaskConical, Database, RefreshCw, Loader2, Bot, BookOpen, Maximize2, RotateCw } from 'lucide-react';
+import { AlertTriangle, Sparkles, GitBranch, FlaskConical, Database, RefreshCw, Loader2, Bot, BookOpen, Maximize2, RotateCw, Stethoscope, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import { Layers } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { KanbanDndProvider, DroppableColumn, DraggableCard } from './dnd/KanbanDnd';
 import InsightDrillDownDialog from './InsightDrillDownDialog';
 import OriginalityDialog from './OriginalityDialog';
+import VetCuratorReviewDialog, { VetReviewStatus } from './VetCuratorReviewDialog';
 import { toast } from '@/components/ui/use-toast';
 
 type InsightStage = 'discovery' | 'hypothesis' | 'proposed_meta_study' | 'approved';
@@ -29,6 +30,9 @@ interface DbInsight {
   originality_status?: 'unknown' | 'novel' | 'partial' | 'known';
   originality_checked_at?: string | null;
   originality_evidence?: any;
+  vet_review_status?: VetReviewStatus | null;
+  vet_review_notes?: string | null;
+  vet_reviewed_at?: string | null;
 }
 
 const STAGES: { id: InsightStage; label: string; color: string; icon: React.ComponentType<any> }[] = [
@@ -47,6 +51,7 @@ const PopulationInsightsV0: React.FC = () => {
   const [checkingOriginality, setCheckingOriginality] = useState<string | null>(null);
   const [drillDownInsight, setDrillDownInsight] = useState<DbInsight | null>(null);
   const [originalityInsight, setOriginalityInsight] = useState<DbInsight | null>(null);
+  const [reviewInsight, setReviewInsight] = useState<DbInsight | null>(null);
   const [autoQueue, setAutoQueue] = useState<Set<string>>(new Set());
 
   const fetchInsights = async () => {
