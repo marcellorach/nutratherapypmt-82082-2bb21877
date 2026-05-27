@@ -52,7 +52,7 @@ const CohortStatsPanel: React.FC<{ cohortId: string; cohortReady: boolean }> = (
     if (!stats) return stats;
     const locale = i18n.language || 'pt';
     const condMap = new Map<string, { name: string; n: number; mild: number; moderate: number; severe: number }>();
-    (normalized.top_conditions || []).forEach((c) => {
+    (stats.top_conditions || []).forEach((c) => {
       const key = canonicalConditionKey(c.name);
       const display = localizeConditionName(key, locale);
       const prev = condMap.get(key);
@@ -66,7 +66,7 @@ const CohortStatsPanel: React.FC<{ cohortId: string; cohortReady: boolean }> = (
       }
     });
     const flagMap = new Map<string, { flag: string; n: number }>();
-    (normalized.top_flags || []).forEach((f) => {
+    (stats.top_flags || []).forEach((f) => {
       const key = canonicalLabFlag(f.flag);
       const prev = flagMap.get(key);
       if (prev) prev.n += f.n;
