@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, BarChart3, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useTranslation } from 'react-i18next';
+import { canonicalConditionKey, localizeConditionName } from '@/services/condition-name-localizer';
+import { canonicalLabFlag } from '@/services/lab-flag-canonicalizer';
 
 interface Stats {
   total: number;
@@ -30,7 +32,7 @@ const Bar: React.FC<{ value: number; total: number; color?: string }> = ({ value
 };
 
 const CohortStatsPanel: React.FC<{ cohortId: string; cohortReady: boolean }> = ({ cohortId, cohortReady }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
@@ -44,6 +46,38 @@ const CohortStatsPanel: React.FC<{ cohortId: string; cohortReady: boolean }> = (
       setLoading(false);
     })();
   }, [open, stats, cohortId, cohortReady]);
+
+  // De-duplicate PT/EN condition variants and lab-flag aliases on the client
+  const normalized = useMemo(() => {
+    if (!stats) return stats;
+    const locale = i18n.language || 'pt';
+    const condMap = new Map<string, { name: string; n: number; mild: number; moderate: number; severe: number }>();
+    (stats.top_conditions || []).forEach((c) => {
+      const key = canonicalConditionKey(c.name);
+      const display = localizeConditionName(key, locale);
+      const prev = condMap.get(key);
+      if (prev) {
+        prev.n += c.n;
+        prev.mild += c.mild;
+        prev.moderate += c.moderate;
+        prev.severe += c.severe;
+      } else {
+        condMap.set(key, { ...c, name: display });
+      }
+    });
+    const flagMap = new Map<string, { flag: string; n: number }>();
+    (stats.top_flags || []).forEach((f) => {
+      const key = canonicalLabFlag(f.flag);
+      const prev = flagMap.get(key);
+      if (prev) prev.n += f.n;
+      else flagMap.set(key, { flag: key, n: f.n });
+    });
+    return {
+      ...stats,
+      top_conditions: Array.from(condMap.values()).sort((a, b) => b.n - a.n).slice(0, 10),
+      top_flags: Array.from(flagMap.values()).sort((a, b) => b.n - a.n).slice(0, 12),
+    };
+  }, [stats, i18n.language]);
 
   if (!cohortReady) return null;
 
@@ -68,10 +102,10 @@ const CohortStatsPanel: React.FC<{ cohortId: string; cohortReady: boolean }> = (
               <Loader2 className="h-3 w-3 animate-spin" /> {t('prioritization.cohortStats.loading')}
             </div>
           )}
-          {stats && stats.total === 0 && (
+          {normalized && normalized.total === 0 && (
             <div className="text-gray-500">{t('prioritization.cohortStats.empty')}</div>
           )}
-          {stats && stats.total > 0 && (
+          {normalized && normalized.total > 0 && (
             <>
               {/* Demografia */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
