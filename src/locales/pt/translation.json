@@ -8442,6 +8442,7 @@
       "playground": "Playground multi-fonte"
     },
     "status": {
+      "rita": "Rita",
       "backlog": "Backlog",
       "next": "Próximo",
       "in_progress": "Em curso",
