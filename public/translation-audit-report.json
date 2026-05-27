@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-27T20:17:30.858Z",
+  "timestamp": "2026-05-27T20:18:42.248Z",
   "summary": {
     "totalFiles": 939,
     "totalIssues": 458,
@@ -1999,14 +1999,14 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/priorizacoes/PrioritizationBoard.tsx",
-      "line": 29,
+      "line": 30,
       "text": "card_id, from_status, to_status, moved_at, note",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/priorizacoes/PrioritizationBoard.tsx",
-      "line": 43,
+      "line": 44,
       "text": "card_id, status",
       "severity": "high"
     },
