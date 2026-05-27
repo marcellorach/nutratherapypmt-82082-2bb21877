@@ -105,14 +105,28 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const cohort_id = body?.cohort_id;
+    let cohort_id = body?.cohort_id;
     const force = Boolean(body?.force);
+    const insight_id: string | undefined = body?.insight_id;
+    const service = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // If insight_id provided, resolve cohort_id from it (single-insight regeneration mode)
+    let existingInsight: any = null;
+    if (insight_id && !cohort_id) {
+      const { data: ins } = await service.from("cohort_insights").select("*").eq("id", insight_id).single();
+      if (!ins) {
+        return new Response(JSON.stringify({ error: "insight not found" }), {
+          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      existingInsight = ins;
+      cohort_id = ins.cohort_id;
+    }
     if (!cohort_id) {
-      return new Response(JSON.stringify({ error: "cohort_id required" }), {
+      return new Response(JSON.stringify({ error: "cohort_id or insight_id required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const service = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     const log: Array<{ ts: string; level: "info" | "warn" | "error"; message: string }> = [];
     const pushLog = async (
@@ -138,7 +152,7 @@ Deno.serve(async (req) => {
     }
 
     // Guard against accidental re-runs (<24h) unless force=true
-    if (!force && cohort.last_analyzed_at) {
+    if (!force && !insight_id && cohort.last_analyzed_at) {
       const ageMs = Date.now() - new Date(cohort.last_analyzed_at).getTime();
       if (ageMs < 24 * 3600 * 1000) {
         return new Response(
@@ -251,6 +265,30 @@ Deno.serve(async (req) => {
       signals: i.signals ?? [], source_model: MODEL,
       created_by: user.id,
     }));
+    if (insight_id && existingInsight) {
+      // Single-insight regeneration: pick best matching new insight (highest confidence)
+      // and UPDATE the existing row with stronger quantitative evidence.
+      const best = rows.reduce((a: any, b: any) => ((b.confidence ?? 0) > (a.confidence ?? 0) ? b : a), rows[0]);
+      const { error: updErr } = await service.from("cohort_insights").update({
+        title: best.title,
+        title_en: best.title_en,
+        summary: best.summary,
+        summary_en: best.summary_en,
+        evidence: best.evidence,
+        confidence: best.confidence,
+        signals: best.signals,
+        source_model: MODEL,
+      }).eq("id", insight_id);
+      if (updErr) {
+        await pushLog("error", `Falha ao atualizar insight: ${updErr.message}`);
+        throw updErr;
+      }
+      await pushLog("info", `Insight ${insight_id} re-analisado com evidência quantitativa`);
+      return new Response(JSON.stringify({ ok: true, regenerated: 1, model: MODEL }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { error: insErr } = await service.from("cohort_insights").insert(rows);
     if (insErr) {
       await pushLog("error", `Falha ao inserir insights: ${insErr.message}`);
