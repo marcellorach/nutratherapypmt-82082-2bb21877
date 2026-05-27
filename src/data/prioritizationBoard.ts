@@ -41,9 +41,15 @@ export interface PrioritizationCard {
   /** Justificativa de ordem — visível no card. */
   rationale_pt?: string;
   rationale_en?: string;
+  /**
+   * Sinaliza que o card precisa de validação clínica de um veterinário-curador
+   * antes de avançar (ex.: revisar `record_requirements`, dosagens, contraindicações).
+   * Renderiza badge "Requer validação do vet-curador" no card.
+   */
+  requiresVetCuratorValidation?: boolean;
 }
 
-export const PRIORITIZATION_BOARD_LAST_UPDATED = '2026-05-25';
+export const PRIORITIZATION_BOARD_LAST_UPDATED = '2026-05-27';
 
 /** Labels neutras — nunca exibir nomes de parceiros não-oficiais (PetLove, Stanford, etc.) na UI pública. */
 export const STRATEGIC_VALUE_LABEL: Record<StrategicValue, { pt: string; en: string }> = {
@@ -70,8 +76,24 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
     rationale_en: 'Unlocks real use by internal vet and guests without rewriting auth.',
   },
   {
-    id: 'prioritization-panel',
+    id: 'cohort-suggester-hardening',
     order: 2,
+    title_pt: 'Hardening do gerador de sugestões de cohort',
+    title_en: 'Cohort suggester hardening',
+    description_pt:
+      'Edge function suggest-cohort-ideas com modelo primário gemini-3.1-pro-preview, validação server-side (6 cohorts, 6 modelos distintos, ≥2 deceased/mixed, record_requirements obrigatório), retry com mensagem de correção e fallback automático para gpt-5.4.',
+    description_en:
+      'Edge function suggest-cohort-ideas with gemini-3.1-pro-preview as primary, server-side validation (6 cohorts, 6 distinct models, ≥2 deceased/mixed, mandatory record_requirements), retry with correction message and automatic fallback to gpt-5.4.',
+    area: 'population',
+    effort: 'M',
+    value: ['Internal', 'ClinicalPartner'],
+    status: 'in_test',
+    rationale_pt: 'Validado via curl; falta smoke test visual no kanban Priorizações.',
+    rationale_en: 'Validated via curl; visual smoke test in Prioritizations kanban still pending.',
+  },
+  {
+    id: 'prioritization-panel',
+    order: 3,
     title_pt: 'Painel de Priorizações (esta aba)',
     title_en: 'Prioritization Panel (this tab)',
     description_pt: 'Kanban com 5 colunas como fonte única do roadmap. Substitui na prática docs/STANFORD_DEMO.md.',
@@ -85,7 +107,7 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
   },
   {
     id: 'cohort-request-generator',
-    order: 3,
+    order: 4,
     title_pt: 'Gerador de Sugestões de Cohort',
     title_en: 'Cohort Request Generator',
     description_pt:
@@ -102,7 +124,7 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
   },
   {
     id: 'population-insights-skeleton',
-    order: 4,
+    order: 5,
     title_pt: 'Population Insights — esqueleto (sem cohort real)',
     title_en: 'Population Insights — skeleton (no real cohort yet)',
     description_pt:
@@ -119,7 +141,7 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
   },
   {
     id: 'real-vet-pilot',
-    order: 5,
+    order: 6,
     title_pt: 'Piloto com 1–2 vets reais',
     title_en: 'Pilot with 1–2 real vets',
     description_pt:
@@ -135,8 +157,26 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
     rationale_en: 'Validates the "vet view" before scaling.',
   },
   {
+    id: 'cohort-suggestions-clinical-review',
+    order: 7,
+    title_pt: 'Revisão clínica das 6 sugestões de cohort',
+    title_en: 'Clinical review of the 6 cohort suggestions',
+    description_pt:
+      'Vet-curadora revisa cada uma das 6 sugestões geradas: cobertura dos modelos preditivos, viabilidade dos record_requirements (≥18m pré-morte, causa de morte, hemogramas), e se o split living/deceased/mixed faz sentido clínico.',
+    description_en:
+      'Vet-curator reviews each of the 6 generated suggestions: predictive model coverage, feasibility of record_requirements (≥18m pre-death, cause of death, CBCs), and whether the living/deceased/mixed split is clinically sound.',
+    area: 'curation',
+    effort: 'S',
+    value: ['ClinicalPartner', 'Internal'],
+    status: 'next',
+    dependsOn: ['cohort-suggester-hardening'],
+    requiresVetCuratorValidation: true,
+    rationale_pt: 'Sem validação clínica, o documento gerado para o parceiro perde credibilidade.',
+    rationale_en: 'Without clinical validation, the document sent to the partner loses credibility.',
+  },
+  {
     id: 'internal-skills-3',
-    order: 6,
+    order: 8,
     title_pt: '3 SKILL.md internas iniciais',
     title_en: '3 initial internal SKILL.md',
     description_pt:
@@ -152,7 +192,7 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
   },
   {
     id: 'population-insights-real',
-    order: 7,
+    order: 9,
     title_pt: 'Population Insights — integração com cohort clínico real',
     title_en: 'Population Insights — real clinical-partner cohort integration',
     description_pt:
@@ -169,7 +209,7 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
   },
   {
     id: 'investigate-clinical-question-skill',
-    order: 8,
+    order: 10,
     title_pt: 'Skill investigate-clinical-question (Dr. Claw-style)',
     title_en: 'Skill investigate-clinical-question (Dr. Claw-style)',
     description_pt:
@@ -184,7 +224,7 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
   },
   {
     id: 'real-rls-roles',
-    order: 9,
+    order: 11,
     title_pt: 'RLS real + papéis no banco',
     title_en: 'Real RLS + DB roles',
     description_pt:
@@ -200,7 +240,7 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
   },
   {
     id: 'meta-kg-phase-b',
-    order: 10,
+    order: 12,
     title_pt: 'Fase B do Meta-KG',
     title_en: 'Meta-KG Phase B',
     description_pt:
