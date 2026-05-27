@@ -16,8 +16,18 @@ Para cada padrão relevante, retorne 1 insight categorizado:
 - 'hypothesis': hipótese causal/mecanística derivada da observação
 - 'proposed_meta_study': meta-estudo que validaria a hipótese
 
+REGRA OBRIGATÓRIA DE EVIDÊNCIA QUANTITATIVA: cada insight DEVE preencher o objeto 'evidence'
+com números DERIVADOS DOS AGREGADOS FORNECIDOS — nada de prosa solta. Campos obrigatórios:
+  - n_supporting: quantos pets sustentam o padrão
+  - n_total: tamanho da cohort considerada
+  - prevalence: n_supporting / n_total (0–1)
+  - comparison_baseline: prevalência ou taxa de referência (string curta, ex: "vs 12% literatura canina geral")
+  - effect_size: magnitude/odds/diferença observada (string curta, ex: "3.2x vs baseline")
+  - notes: 1 linha explicando o cálculo
+Se você NÃO consegue derivar números do agregado, NÃO produza o insight.
+
 Gere pelo menos 6 insights bem distribuídos. Cada insight deve incluir título PT e EN,
-resumo PT e EN (até 280 chars), evidência quantitativa, confiança 0–1, e sinais (marcadores envolvidos).`;
+resumo PT e EN (até 280 chars), evidência quantitativa estruturada, confiança 0–1, e sinais.`;
 
 const TOOL = {
   type: "function",
@@ -41,7 +51,16 @@ const TOOL = {
               summary_en: { type: "string" },
               evidence: {
                 type: "object",
-                description: "ex.: { n: 200, prevalence: 0.72, comparison: '...' }",
+                description: "Evidência quantitativa OBRIGATÓRIA derivada da cohort.",
+                properties: {
+                  n_supporting: { type: "number" },
+                  n_total: { type: "number" },
+                  prevalence: { type: "number", minimum: 0, maximum: 1 },
+                  comparison_baseline: { type: "string" },
+                  effect_size: { type: "string" },
+                  notes: { type: "string" },
+                },
+                required: ["n_supporting", "n_total", "prevalence", "comparison_baseline", "effect_size", "notes"],
                 additionalProperties: true,
               },
               confidence: { type: "number", minimum: 0, maximum: 1 },
