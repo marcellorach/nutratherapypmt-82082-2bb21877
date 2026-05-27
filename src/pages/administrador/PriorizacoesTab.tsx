@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { LayoutGrid, Info } from 'lucide-react';
+import { LayoutGrid, Info, KanbanSquare, FlaskConical, BarChart3 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PrioritizationBoard from '@/components/administrador/priorizacoes/PrioritizationBoard';
 import CohortRequestGenerator from '@/components/administrador/priorizacoes/CohortRequestGenerator';
@@ -34,43 +34,73 @@ const PriorizacoesTab: React.FC = () => {
         </div>
       </header>
 
-      <Tabs defaultValue="board" className="w-full">
-        <TabsList className="flex flex-wrap h-auto gap-1 p-1">
-          <TabsTrigger value="board">{t('prioritization.tabs.board', 'Kanban')}</TabsTrigger>
-
-          <span className="mx-1 h-5 w-px bg-gray-300" aria-hidden="true" />
-          <span className="text-[10px] uppercase tracking-wide text-gray-500 px-1 self-center">
-            {t('prioritization.groups.cohorts', 'Cohorts')}
-          </span>
-          <TabsTrigger value="cohort">{t('prioritization.tabs.cohort', 'Gerador de Sugestão de Cohort')}</TabsTrigger>
-          <TabsTrigger value="synthetic">{t('prioritization.tabs.synthetic', 'Cohorts sintéticos')}</TabsTrigger>
-
-          <span className="mx-1 h-5 w-px bg-gray-300" aria-hidden="true" />
-          <span className="text-[10px] uppercase tracking-wide text-gray-500 px-1 self-center">
-            {t('prioritization.groups.analysis', 'Análises & Perfis')}
-          </span>
-          <TabsTrigger value="population">{t('prioritization.tabs.population', 'Population Insights v0')}</TabsTrigger>
-          <TabsTrigger value="playground">{t('prioritization.tabs.playground', 'Playground multi-fonte')}</TabsTrigger>
-          <TabsTrigger value="roles">{t('prioritization.tabs.roles', 'Perfis de Visualização')}</TabsTrigger>
+      <Tabs defaultValue="roadmap" className="w-full">
+        <TabsList className="grid grid-cols-3 w-full max-w-3xl h-auto p-1 bg-gray-100">
+          <TabsTrigger value="roadmap" className="flex-col gap-1 py-2 data-[state=active]:bg-white">
+            <div className="flex items-center gap-2">
+              <KanbanSquare className="h-4 w-4" />
+              <span className="font-semibold">{t('prioritization.sections.roadmap', 'Roadmap')}</span>
+            </div>
+            <span className="text-[10px] text-gray-500 font-normal">
+              {t('prioritization.sections.roadmapHint', 'Kanban de execução')}
+            </span>
+          </TabsTrigger>
+          <TabsTrigger value="cohorts" className="flex-col gap-1 py-2 data-[state=active]:bg-white">
+            <div className="flex items-center gap-2">
+              <FlaskConical className="h-4 w-4" />
+              <span className="font-semibold">{t('prioritization.sections.cohorts', 'Geração de Cohorts')}</span>
+            </div>
+            <span className="text-[10px] text-gray-500 font-normal">
+              {t('prioritization.sections.cohortsHint', 'Sugestão + sintéticos')}
+            </span>
+          </TabsTrigger>
+          <TabsTrigger value="analysis" className="flex-col gap-1 py-2 data-[state=active]:bg-white">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              <span className="font-semibold">{t('prioritization.sections.analysis', 'Análises & Perfis')}</span>
+            </div>
+            <span className="text-[10px] text-gray-500 font-normal">
+              {t('prioritization.sections.analysisHint', 'Insights · Playground · Roles')}
+            </span>
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="board" className="mt-4">
+        <TabsContent value="roadmap" className="mt-6">
           <PrioritizationBoard />
         </TabsContent>
-        <TabsContent value="cohort" className="mt-4">
-          <CohortRequestGenerator />
+
+        <TabsContent value="cohorts" className="mt-6">
+          <Tabs defaultValue="cohort" className="w-full">
+            <TabsList>
+              <TabsTrigger value="cohort">{t('prioritization.tabs.cohort', 'Gerador de Sugestão de Cohort')}</TabsTrigger>
+              <TabsTrigger value="synthetic">{t('prioritization.tabs.synthetic', 'Cohorts sintéticos')}</TabsTrigger>
+            </TabsList>
+            <TabsContent value="cohort" className="mt-4">
+              <CohortRequestGenerator />
+            </TabsContent>
+            <TabsContent value="synthetic" className="mt-4">
+              <SyntheticCohortsManager />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
-        <TabsContent value="synthetic" className="mt-4">
-          <SyntheticCohortsManager />
-        </TabsContent>
-        <TabsContent value="population" className="mt-4">
-          <PopulationInsightsV0 />
-        </TabsContent>
-        <TabsContent value="playground" className="mt-4">
-          <MultiSourcePlayground />
-        </TabsContent>
-        <TabsContent value="roles" className="mt-4">
-          <RoleViewEditor />
+
+        <TabsContent value="analysis" className="mt-6">
+          <Tabs defaultValue="population" className="w-full">
+            <TabsList>
+              <TabsTrigger value="population">{t('prioritization.tabs.population', 'Population Insights v0')}</TabsTrigger>
+              <TabsTrigger value="playground">{t('prioritization.tabs.playground', 'Playground multi-fonte')}</TabsTrigger>
+              <TabsTrigger value="roles">{t('prioritization.tabs.roles', 'Perfis de Visualização')}</TabsTrigger>
+            </TabsList>
+            <TabsContent value="population" className="mt-4">
+              <PopulationInsightsV0 />
+            </TabsContent>
+            <TabsContent value="playground" className="mt-4">
+              <MultiSourcePlayground />
+            </TabsContent>
+            <TabsContent value="roles" className="mt-4">
+              <RoleViewEditor />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
       </Tabs>
     </div>
