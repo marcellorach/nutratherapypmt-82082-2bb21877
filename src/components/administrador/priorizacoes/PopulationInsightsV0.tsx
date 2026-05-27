@@ -301,6 +301,10 @@ const PopulationInsightsV0: React.FC = () => {
         open={!!reviewInsight}
         onOpenChange={(v) => !v && setReviewInsight(null)}
         onReviewed={fetchInsights}
+        onOpenDrillDown={(ins) => {
+          setReviewInsight(null);
+          setDrillDownInsight(ins as any);
+        }}
       />
     </div>
   );
