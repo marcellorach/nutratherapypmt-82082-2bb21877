@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { AlertTriangle, Sparkles, GitBranch, FlaskConical, Database, RefreshCw, Loader2, Bot, BookOpen, Maximize2, RotateCw, Stethoscope, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import { Layers } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { KanbanDndProvider, DroppableColumn, DraggableCard } from './dnd/KanbanDnd';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import InsightDrillDownDialog from './InsightDrillDownDialog';
 import OriginalityDialog from './OriginalityDialog';
 import VetCuratorReviewDialog, { VetReviewStatus } from './VetCuratorReviewDialog';
@@ -190,81 +191,102 @@ const PopulationInsightsV0: React.FC = () => {
         </CardContent></Card>
       )}
 
-      <KanbanDndProvider onDrop={(id, col) => moveStage(id, col as InsightStage)}>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+      <Tabs defaultValue={STAGES[0].id} className="w-full">
+        <TabsList className="flex flex-wrap h-auto bg-gray-100 p-1 gap-1">
+          {STAGES.map((s) => {
+            const Icon = s.icon;
+            return (
+              <TabsTrigger
+                key={s.id}
+                value={s.id}
+                className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+              >
+                <Icon className="h-3.5 w-3.5" />
+                <span className="text-xs font-medium uppercase tracking-wide">{s.label}</span>
+                <span className="text-[10px] font-mono text-gray-500 bg-white rounded-full px-1.5 py-0.5 border">
+                  {grouped[s.id].length}
+                </span>
+              </TabsTrigger>
+            );
+          })}
+        </TabsList>
+
         {STAGES.map((s) => {
-          const Icon = s.icon;
           const cards = grouped[s.id];
           return (
-            <DroppableColumn key={s.id} id={s.id} className={`rounded-lg border ${s.color} p-2 flex flex-col min-h-[300px]`}>
-              <div className="flex items-center justify-between mb-2 px-1">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-700 flex items-center gap-1.5">
-                  <Icon className="h-3.5 w-3.5" />
-                  {s.label}
-                </h3>
-                <span className="text-[10px] font-mono text-gray-500 bg-white rounded-full px-1.5 py-0.5">
-                  {cards.length}
-                </span>
-              </div>
-              <div className="space-y-2 flex-1">
-                {cards.length === 0 ? (
-                  <div className="text-[11px] text-gray-400 italic text-center py-6">—</div>
-                ) : cards.map((c) => (
-                  <DraggableCard key={c.id} id={c.id}>
-                  <Card className="bg-white hover:shadow-md transition-shadow">
-                    <CardContent className="p-2.5 space-y-1.5">
-                      <div className="flex items-start justify-between gap-1.5">
-                        <h4 className="text-xs font-semibold leading-tight">{isPt ? c.title : (c.title_en || c.title)}</h4>
-                        <div className="flex items-center gap-1 shrink-0">
-                          {originalityBadge(c, checkingOriginality === c.id)}
-                          {vetReviewBadge(c)}
-                          <Badge variant="outline" className="text-[10px] font-mono">{Math.round((c.confidence ?? 0) * 100)}</Badge>
+            <TabsContent key={s.id} value={s.id} className="mt-4">
+              {cards.length === 0 ? (
+                <div className="text-sm text-gray-400 italic text-center py-12 border border-dashed rounded-lg">
+                  Nenhum card neste estágio.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {cards.map((c) => (
+                    <Card key={c.id} className="bg-white hover:shadow-md transition-shadow">
+                      <CardContent className="p-4 space-y-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="text-sm font-semibold leading-snug">{isPt ? c.title : (c.title_en || c.title)}</h4>
+                          <div className="flex items-center gap-1 shrink-0">
+                            {originalityBadge(c, checkingOriginality === c.id)}
+                            {vetReviewBadge(c)}
+                            <Badge variant="outline" className="text-[10px] font-mono">{Math.round((c.confidence ?? 0) * 100)}</Badge>
+                          </div>
                         </div>
-                      </div>
-                      <p className="text-[11px] text-gray-700 leading-snug">{isPt ? c.summary : (c.summary_en || c.summary)}</p>
-                      <div className="pt-0.5">
-                        {c.cohort_id && cohortNames[c.cohort_id] ? (
-                          <Badge variant="outline" className="text-[9px] bg-indigo-50 border-indigo-200 text-indigo-800 flex items-center gap-1 w-fit max-w-full">
-                            <Database className="h-2.5 w-2.5 shrink-0" />
-                            <span className="truncate">{cohortNames[c.cohort_id]}</span>
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-[9px] bg-purple-50 border-purple-300 text-purple-800 flex items-center gap-1 w-fit">
-                            <Layers className="h-2.5 w-2.5" /> Pan-cohort (todos)
-                          </Badge>
+                        <p className="text-xs text-gray-700 leading-relaxed">{isPt ? c.summary : (c.summary_en || c.summary)}</p>
+                        <div>
+                          {c.cohort_id && cohortNames[c.cohort_id] ? (
+                            <Badge variant="outline" className="text-[10px] bg-indigo-50 border-indigo-200 text-indigo-800 flex items-center gap-1 w-fit max-w-full">
+                              <Database className="h-2.5 w-2.5 shrink-0" />
+                              <span className="truncate">{cohortNames[c.cohort_id]}</span>
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-[10px] bg-purple-50 border-purple-300 text-purple-800 flex items-center gap-1 w-fit">
+                              <Layers className="h-2.5 w-2.5" /> Pan-cohort (todos)
+                            </Badge>
+                          )}
+                        </div>
+                        {(c.signals?.length ?? 0) > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {c.signals!.slice(0, 6).map((sig, k) => (
+                              <Badge key={k} variant="outline" className="text-[10px] bg-gray-50">{sig}</Badge>
+                            ))}
+                          </div>
                         )}
-                      </div>
-                      {(c.signals?.length ?? 0) > 0 && (
-                        <div className="flex flex-wrap gap-1 pt-1">
-                          {c.signals!.slice(0, 4).map((sig, k) => (
-                            <Badge key={k} variant="outline" className="text-[10px] bg-gray-50">{sig}</Badge>
-                          ))}
+                        <div className="flex items-center justify-between pt-2 border-t gap-2">
+                          {c.source_model ? (
+                            <Badge variant="outline" className="text-[10px] font-mono flex items-center gap-1 bg-gray-50">
+                              <Bot className="h-2.5 w-2.5" /> {c.source_model}
+                            </Badge>
+                          ) : <span />}
+                          <Select value={c.stage} onValueChange={(v) => moveStage(c.id, v as InsightStage)}>
+                            <SelectTrigger className="h-7 text-[10px] w-auto gap-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {STAGES.map((st) => (
+                                <SelectItem key={st.id} value={st.id} className="text-xs">{st.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
-                      )}
-                      <div className="flex items-center justify-between pt-1 border-t gap-2">
-                        {c.source_model ? (
-                          <Badge variant="outline" className="text-[9px] font-mono flex items-center gap-1 bg-gray-50">
-                            <Bot className="h-2.5 w-2.5" /> {c.source_model}
-                          </Badge>
-                        ) : <span />}
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 justify-end">
                           <Button
-                            size="sm" variant="default" className="h-6 px-2 text-[10px]"
+                            size="sm" variant="default" className="h-7 px-2 text-[11px]"
                             onClick={(e) => { e.stopPropagation(); setDrillDownInsight(c); }}
                             title="Abrir drill-down com gráficos e pets"
                           >
-                            <Maximize2 className="h-3 w-3 mr-0.5" /> detalhar
+                            <Maximize2 className="h-3 w-3 mr-1" /> detalhar
                           </Button>
                           <Button
                             size="sm" variant="outline"
-                            className="h-6 px-2 text-[10px] border-indigo-300 text-indigo-700 hover:bg-indigo-50"
+                            className="h-7 px-2 text-[11px] border-indigo-300 text-indigo-700 hover:bg-indigo-50"
                             onClick={(e) => { e.stopPropagation(); setReviewInsight(c); }}
                             title="Validar como vet-curador (aprovar / rejeitar / requerer ajustes)"
                           >
-                            <Stethoscope className="h-3 w-3 mr-0.5" /> validar
+                            <Stethoscope className="h-3 w-3 mr-1" /> validar
                           </Button>
                           <Button
-                            size="sm" variant="ghost" className="h-6 px-1.5 text-[10px]"
+                            size="sm" variant="ghost" className="h-7 px-2 text-[11px]"
                             disabled={checkingOriginality === c.id}
                             onClick={(e) => { e.stopPropagation(); checkOriginality(c.id); }}
                             title="Re-verificar originalidade na literatura veterinária"
@@ -274,17 +296,15 @@ const PopulationInsightsV0: React.FC = () => {
                               : <RotateCw className="h-3 w-3" />}
                           </Button>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  </DraggableCard>
-                ))}
-              </div>
-            </DroppableColumn>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
           );
         })}
-      </div>
-      </KanbanDndProvider>
+      </Tabs>
 
       <InsightDrillDownDialog
         insight={drillDownInsight as any}
