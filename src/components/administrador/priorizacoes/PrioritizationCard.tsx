@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Lock, History, ChevronDown, ChevronRight } from 'lucide-react';
+import { Lock, History, ChevronDown, ChevronRight, Stethoscope } from 'lucide-react';
 import { PrioritizationCard as Card_, STRATEGIC_VALUE_LABEL } from '@/data/prioritizationBoard';
 
 export interface HistoryEntry {
@@ -85,6 +85,18 @@ const PrioritizationCardItem: React.FC<Props> = ({ card, history = [] }) => {
               {isPt ? STRATEGIC_VALUE_LABEL[v].pt : STRATEGIC_VALUE_LABEL[v].en}
             </Badge>
           ))}
+          {card.requiresVetCuratorValidation && (
+            <Badge
+              variant="outline"
+              className="text-[10px] px-1.5 py-0 h-4 bg-rose-50 text-rose-700 border-rose-300 inline-flex items-center gap-1"
+              title={isPt
+                ? 'Requer validação de um veterinário-curador antes de avançar.'
+                : 'Requires vet-curator validation before moving forward.'}
+            >
+              <Stethoscope className="h-2.5 w-2.5" />
+              {isPt ? 'Valida vet-curador' : 'Vet-curator review'}
+            </Badge>
+          )}
           {card.dependsOn?.length ? (
             <span className="inline-flex items-center gap-0.5 text-[10px] text-gray-500" title={card.dependsOn.join(', ')}>
               <Lock className="h-2.5 w-2.5" />
