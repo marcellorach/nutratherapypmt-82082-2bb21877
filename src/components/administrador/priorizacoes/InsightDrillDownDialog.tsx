@@ -33,15 +33,18 @@ const formatLabValue = (v: any): { text: string; abnormal: boolean; ref?: string
   if (typeof v !== 'object') return { text: String(v), abnormal: false };
   const value = v.value ?? v.result ?? v.val;
   const unit = v.unit ?? v.units ?? '';
-  const refMin = v.ref_min ?? v.refMin ?? v.min;
-  const refMax = v.ref_max ?? v.refMax ?? v.max;
+  const rawMin = v.ref_min ?? v.refMin ?? v.min;
+  const rawMax = v.ref_max ?? v.refMax ?? v.max;
+  const refMin = rawMin != null && !Number.isNaN(Number(rawMin)) ? Number(rawMin) : null;
+  const refMax = rawMax != null && !Number.isNaN(Number(rawMax)) ? Number(rawMax) : null;
   if (value === undefined) return { text: JSON.stringify(v).slice(0, 40), abnormal: false };
   const num = Number(value);
   let abnormal = false;
   if (!Number.isNaN(num)) {
-    if (refMin != null && num < Number(refMin)) abnormal = true;
-    if (refMax != null && num > Number(refMax)) abnormal = true;
+    if (refMin != null && num < refMin) abnormal = true;
+    if (refMax != null && num > refMax) abnormal = true;
   }
+  // Only emit the reference range when at least one bound is numeric (qualitative tests like cytology have no range)
   const ref = refMin != null || refMax != null ? `ref ${refMin ?? '−∞'}–${refMax ?? '+∞'}` : undefined;
   return { text: `${value}${unit ? ' ' + unit : ''}`, abnormal, ref };
 };
