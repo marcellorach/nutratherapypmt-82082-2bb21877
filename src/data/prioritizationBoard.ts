@@ -180,9 +180,9 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
     title_pt: 'Validação vet-curador de insights de cohort',
     title_en: 'Vet-curator validation of cohort insights',
     description_pt:
-      'Cada cohort_insight ganha status de revisão clínica (Pendente / Aprovado / Rejeitado / Requer ajustes), notas e timestamp do revisor. Botão "validar" em cada card abre dialog dedicado; aprovação move automaticamente para a coluna Aprovados. Insight só vira regra clínica / meta-estudo após aprovação.',
+      'Cada cohort_insight ganha status de revisão clínica (Pendente / Aprovado / Rejeitado / Requer ajustes), notas e timestamp do revisor. Botão "validar" em cada card abre dialog dedicado com painel de Evidência embutido (suporte populacional N/total, estratificação por raça/idade/severidade, top alterações laboratoriais canonicalizadas, provenance + aviso explícito quando o LLM não forneceu evidência quantitativa estruturada) e atalho para drill-down completo. Aprovação move automaticamente para a coluna Aprovados. Insight só vira regra clínica / meta-estudo após aprovação.',
     description_en:
-      'Each cohort_insight gets a clinical review status (Pending / Approved / Rejected / Needs changes), reviewer notes and timestamp. "Validate" button on each card opens a dedicated dialog; approval auto-moves the insight to the Approved column. Insight only becomes a clinical rule / meta-study after approval.',
+      'Each cohort_insight gets a clinical review status (Pending / Approved / Rejected / Needs changes), reviewer notes and timestamp. "Validate" button on each card opens a dedicated dialog with embedded Evidence panel (population support N/total, breed/age/severity stratification, top canonicalized lab flags, provenance + explicit warning when the LLM did not provide structured quantitative evidence) and shortcut to full drill-down. Approval auto-moves the insight to the Approved column. Insight only becomes a clinical rule / meta-study after approval.',
     area: 'curation',
     effort: 'S',
     value: ['ClinicalPartner', 'Internal'],
