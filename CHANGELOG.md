@@ -24,6 +24,18 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.0 -->
 
+### Changed - 2026-05-27 — Painel de evidência no dialog de validação vet-curador
+<!-- area: curation · status: entregue -->
+- **Problema identificado**: o dialog de validação mostrava só título/resumo/confiança/sinais, sem expor os dados que sustentariam a decisão. O campo `evidence` dos insights gerados por `analyze-cohort-patterns` veio vazio (`{}`) — a confiança 80% era auto-declarada pelo LLM, sem nada auditável.
+- **Painel "Evidência disponível"** embutido no `VetCuratorReviewDialog`, computado em tempo real a partir de `pet_profiles` + `pet_conditions` + `pet_exams` da cohort de origem (sem chamada de LLM):
+  - Suporte populacional: N/total pets que casam com os sinais + barra de progresso; aviso âmbar automático se N<10 ou suporte<20%; aviso vermelho se zero matches.
+  - Estratificação dos pets que sustentam: top 5 raças, idade média ± dp, split de severidade.
+  - Top alterações laboratoriais nos pets matched, frequência absoluta + percentual, flags normalizadas via `canonicalLabFlag`.
+  - Provenance: nome da cohort + modelo gerador + bloco JSON do `evidence` do LLM (ou aviso âmbar explícito quando vazio).
+- **Atalho "Drill-down completo"** no canto do painel fecha o dialog de revisão e abre o `InsightDrillDownDialog` para inspeção profunda (gráficos individuais por pet, lab values).
+- **Novo hook** `src/hooks/useInsightEvidence.ts` centraliza a query + agregações, base para futura unificação com o drill-down.
+- Files: src/hooks/useInsightEvidence.ts, src/components/administrador/priorizacoes/VetCuratorReviewDialog.tsx, src/components/administrador/priorizacoes/PopulationInsightsV0.tsx, src/data/prioritizationBoard.ts
+
 ### Added - 2026-05-27 — Validação vet-curador de insights de cohort
 <!-- area: curation · status: entregue · i18n: 1.114.0 -->
 - **Governança clínica fechada**: cada `cohort_insights` ganhou `vet_review_status` (`pending`/`approved`/`rejected`/`needs_changes`), `vet_review_notes`, `vet_reviewed_by` e `vet_reviewed_at`. Default `pending`, com check constraint e índice no status.

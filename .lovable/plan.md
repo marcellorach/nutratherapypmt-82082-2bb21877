@@ -1,114 +1,65 @@
-## Objetivo
+## Problema
 
-Corrigir a falha da aba **Priorizações → Gerar 6 sugestões**, em que o `gemini-3.5-flash` ignora o JSON Schema do tool-call e devolve apenas 5 cohorts sem `target_model_id`, `record_requirements`, `cohort_population`, `breadth`, etc.
+O dialog de validação do vet-curador mostra resumo, confiança e sinais — mas **não mostra evidência**. Pior: o campo `evidence` do insight no banco está literalmente `{}` (o LLM não populou). A confiança 80% é auto-declarada pelo modelo, sem dados que a sustentem visíveis para o curador.
 
-## Estratégia: 3 camadas de defesa
+Sem evidência exposta, "Aprovar / Rejeitar" vira chute. Isso quebra a premissa da governança clínica.
 
-```text
-[1] Modelo primário forte
-      google/gemini-3.1-pro-preview
-              │ falhou validação?
-              ▼
-[2] Retry no mesmo modelo
-      + mensagem de correção apontando o que faltou
-              │ ainda falhou?
-              ▼
-[3] Fallback automático
-      openai/gpt-5.4 (tool-calling mais estrito)
-              │ ainda falhou?
-              ▼
-      Retorna 200 com cohorts crus + warning para o front exibir aviso
-```
+## Solução: Painel "Evidência" no `VetCuratorReviewDialog`
 
-## Mudanças em `supabase/functions/suggest-cohort-ideas/index.ts`
+Adicionar uma seção colapsável **"Evidência disponível"** entre o cabeçalho do insight e o campo de notas. Toda a evidência é computada *em tempo real* a partir da cohort — não depende do LLM ter populado nada.
 
-### 1. Constantes de modelo
-```ts
-const PRIMARY_MODEL  = "google/gemini-3.1-pro-preview";
-const FALLBACK_MODEL = "openai/gpt-5.4";
-```
-Remove a const `MODEL` fixa. O campo `source_model` persistido passa a refletir qual modelo de fato gerou cada cohort.
+### Conteúdo do painel (4 blocos)
 
-### 2. Reforço inline da estrutura no user prompt
-Acrescenta no final do `userPrompt` um bloco com a forma JSON literal esperada (alguns modelos respeitam melhor schema quando ele aparece também no prompt):
+**1. Suporte populacional**
+- "N / total pets da cohort sustentam este insight" — query: pets do `cohort_id` que casam com ≥1 signal nas condições/flags.
+- Barra visual mostrando proporção (ex.: 9/60 = 15%).
+- Alerta âmbar automático se N < 10 ou proporção < 20%: *"amostra insuficiente para regra clínica"*.
 
-```text
-RESPONDA chamando a função propose_cohorts com EXATAMENTE este shape:
-{
-  "cohorts": [
-    {
-      "target_model_id": "<um dos 6 ids literais>",
-      "cohort_population": "living|deceased|mixed",
-      "breadth": "broad|stratified",
-      "pattern_family": "...",
-      "value_to_partner": "...",
-      "record_requirements": ["...", "..."],
-      "target_model_expected_gain": "...",
-      "title": "...", "rationale": "...", "discoverable": "...",
-      "kind": "prevention|treatment_validation|exploratory",
-      "suggested_criteria": { "breeds": "...", "age_range": "...", "conditions": "...", "target_n": "..." },
-      "impact_score": 0-100, "viability_score": 0-100
-    }
-  ]
-}
-Array DEVE ter 6 itens, 1 por modelo, pelo menos 2 com cohort_population != "living".
-```
+**2. Estratificação dos pets que sustentam**
+- Tabela compacta com top 5 raças (n + %), distribuição etária (média ± dp), split de severidade (mild/mod/sev).
+- Reaproveita exatamente a lógica que `InsightDrillDownDialog` já roda.
 
-### 3. Função `validateCohorts(cohorts)` — server-side
-Regras (todas devem passar):
-- `cohorts.length === 6`
-- Conjunto de `target_model_id` cobre **exatamente** os 6 ids literais (sem duplicatas, sem faltantes).
-- Para todo cohort: `record_requirements` é array não-vazio; `cohort_population`, `breadth`, `pattern_family`, `value_to_partner`, `target_model_expected_gain` presentes e não-vazios.
-- Pelo menos 2 cohorts com `cohort_population ∈ {deceased, mixed}`.
+**3. Top flags laboratoriais nos pets matched**
+- Lista com `HCT`, `PLT`, etc. + frequência (n/total matched), normalizadas via `canonicalLabFlag` (já existe).
+- Para cada flag, valor médio observado vs faixa de referência canina (quando numérico).
 
-Retorna `{ ok: true }` ou `{ ok: false, issues: string[] }` (lista legível dos problemas para alimentar o retry).
+**4. Provenance & meta-evidência**
+- Cohort de origem (nome + link "ver cohort").
+- Modelo gerador + timestamp.
+- Resultado da checagem de originalidade (`novel/partial/known`) + nº de citações da literatura, se já checada. Link "ver citações" abre `OriginalityDialog`.
+- Bloco `evidence` JSON bruto do LLM em `<pre>`: se vazio (caso atual), mostra aviso âmbar *"O modelo não forneceu evidência quantitativa estruturada — apenas os dados derivados da cohort abaixo são auditáveis."*
 
-### 4. Função `callModel(model, messages)` extraída
-Encapsula a chamada ao gateway + parse do `tool_calls[0].function.arguments`. Trata 429/402 como hoje, mas devolve para o caller (sem `return` direto) para permitir o orquestrador decidir.
+### Botão secundário "Drill-down completo"
+Botão pequeno no rodapé do painel que abre o `InsightDrillDownDialog` existente (gráficos por pet, lab values individuais) sem fechar o dialog de validação — útil se o curador quiser inspeção profunda antes de decidir.
 
-### 5. Orquestrador (substitui o bloco atual de fetch)
-```text
-1. messages = [system, user]
-2. tentativa 1: callModel(PRIMARY_MODEL, messages)
-3. validate → se ok, segue
-4. senão: append assistant tool_call result + user "Sua resposta falhou validação: <issues>. Corrija e devolva 6 cohorts completos." → callModel(PRIMARY_MODEL, messages)
-5. validate → se ok, segue
-6. senão: callModel(FALLBACK_MODEL, messages_originais_com_correcao)
-7. validate → registra resultado final + `validation_warnings` se ainda inválido
-```
+### (Opcional, fora do escopo deste plano) Botão "Re-gerar com evidência obrigatória"
+Apenas registrar como TODO no card de priorização: adicionar flag `require_quantitative_evidence: true` ao prompt do `analyze-cohort-patterns` e re-rodar para esse insight específico. Não implementar agora — deixa o ciclo focado em **expor o que já temos**.
 
-429 e 402 do **primário** disparam fallback imediato (sem retry). 429/402 do fallback retornam o status original para o cliente.
+## Implementação técnica
 
-### 6. Persistência + resposta
-- Persiste somente cohorts da tentativa que passou (ou da última tentativa se nenhuma passou, marcando `validation_warnings`).
-- Resposta JSON ganha:
-  ```json
-  { "ok": true, "model": "<modelo_vencedor>", "attempts": [{"model":"...","valid":false,"issues":[...]}, ...], "validation_warnings": [...] | null, "cohorts": [...], "persisted": N, "generated_at": "..." }
-  ```
-- O front (`CohortAISuggester.tsx`) **não muda** — continua lendo `cohorts`. `attempts`/`validation_warnings` ficam disponíveis para diagnóstico futuro.
+**Arquivo único: `src/components/administrador/priorizacoes/VetCuratorReviewDialog.tsx`**
 
-## Fora de escopo
+Adicionar:
+- `useEffect` que, quando `open && insight.cohort_id`, consulta:
+  - `cohort_pets` filtrado por `cohort_id` (mesma query do drill-down — extrair para hook compartilhado `useInsightEvidence(insight)` para evitar duplicação).
+- Componente interno `EvidencePanel` com os 4 blocos acima.
+- Botão "Drill-down completo" que dispara um callback `onOpenDrillDown` (novo prop opcional) — o pai (`PopulationInsightsV0`) já tem `setDrillDownInsight`, basta encadear.
 
-- Mudanças de UI no `CohortAISuggester`.
-- Alterações no schema da tabela `cohort_suggestions` (campos já existem).
-- Mudar prompt do system (mantém o atual; só reforço inline no user).
-- Tornar o fallback configurável via body — fica hardcoded por ora.
+**Refatoração leve:**
+Extrair de `InsightDrillDownDialog.tsx` a lógica `useMemo` de estratificação para um hook `src/hooks/useInsightEvidence.ts` reutilizado pelos dois dialogs. Isso garante que drill-down e painel de validação mostrem números **idênticos** — sem divergir.
 
-## Validação após implementar
+**Sem mudança de DB.** Sem chamada de LLM. Só consulta + agregação no cliente.
 
-1. `supabase--deploy_edge_functions` em `suggest-cohort-ideas`.
-2. `supabase--curl_edge_functions` POST `/suggest-cohort-ideas` com `{ "signals": {} }`.
-3. Verificar na resposta:
-   - `cohorts.length === 6`
-   - 6 `target_model_id` distintos cobrindo os ids esperados
-   - `record_requirements` não-vazio em todos
-   - ≥ 2 com `cohort_population ∈ {deceased, mixed}`
-   - `model` retornado (idealmente `google/gemini-3.1-pro-preview` direto, sem cair no fallback)
-4. Se cair no fallback de cara, inspecionar `attempts` para entender o que o Gemini 3.1 Pro errou e ajustar o reforço inline.
+**Tradução:** strings ficam em PT direto no componente (todo o resto do dialog já é PT) — sem mexer em i18n nesta entrega. Se quiser bilíngue, próxima iteração.
 
-## CHANGELOG
+## Atualizações de governança
 
-Entrada em `[Unreleased] → Fixed`:
-- 🛠️ `suggest-cohort-ideas`: trocado modelo para `gemini-3.1-pro-preview`, adicionada validação server-side (6 cohorts, 6 modelos distintos, ≥2 deceased/mixed, `record_requirements` obrigatório) com retry e fallback para `gpt-5.4`.
+- `CHANGELOG.md` (`[Unreleased]` → `Changed`): painel de evidência no dialog de validação, hook compartilhado.
+- `prioritizationBoard.ts`: atualizar descrição do card `vet-curator-insight-validation` mencionando o painel de evidência embutido.
+- `npm run sync:changelog`.
 
-Depois rodar `npm run sync:changelog`.
+## Fora do escopo (próximos cards, não agora)
+
+- Re-gerar insights forçando `evidence` quantitativa no schema (precisaria mudar prompt + edge function + criar botão "re-analisar este insight").
+- Backfill em massa dos insights existentes que vieram com `evidence={}`.
+- Calcular p-valor / odds ratio para o sinal vs resto da cohort (estatística inferencial real — só faz sentido com cohort real, não sintético).
