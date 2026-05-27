@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-27T01:43:51.563Z
+// Última geração: 2026-05-27T02:12:42.616Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,25 @@ export const lastChangelogDate = "2026-05-27";
 export const senexVersion = "7.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-27",
+    "kind": "changed",
+    "area": "curation",
+    "status": "entregue",
+    "title": "Evidência quantitativa obrigatória + re-análise por insight",
+    "bullets": [
+      "`analyze-cohort-patterns`: schema de `evidence` agora exige campos estruturados (`n_supporting`, `n_total`, `prevalence`, `comparison_baseline`, `effect_size`, `notes`). Prompt reforçado para derivar números dos agregados ou não emitir o insight.",
+      "Edge function aceita `insight_id` para re-analisar 1 insight existente (UPDATE in-place com a melhor evidência quantitativa).",
+      "Novo botão \"🧪\" em cada card de Population Insights chama a re-análise individual.",
+      "Files: supabase/functions/analyze-cohort-patterns/index.ts, src/components/administrador/priorizacoes/PopulationInsightsV0.tsx, src/i18n.ts"
+    ],
+    "files": [
+      "supabase/functions/analyze-cohort-patterns/index.ts",
+      "src/components/administrador/priorizacoes/PopulationInsightsV0.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.115.6"
+  },
   {
     "date": "2026-05-27",
     "kind": "changed",

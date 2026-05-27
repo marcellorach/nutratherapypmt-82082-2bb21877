@@ -1,20 +1,26 @@
 # Project context briefing (auto)
-Generated: 2026-05-27T01:43:51.568Z
+Generated: 2026-05-27T02:12:42.622Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.115.0
+## Latest i18n version: 1.115.6
 
 ## Changes by area (last 14 days)
 - **admin**: 51
 - **vet-ui**: 9
+- **curation**: 7
 - **meta**: 7
-- **curation**: 6
 - **kg**: 6
 - **tutor-ui**: 2
 - **clinical-pipeline**: 1
 
 ## Top 10 recent entries
+### 2026-05-27 · [curation] CHANGED — Evidência quantitativa obrigatória + re-análise por insight
+- `analyze-cohort-patterns`: schema de `evidence` agora exige campos estruturados (`n_supporting`, `n_total`, `prevalence`, `comparison_baseline`, `effect_size`, `notes`). Prompt reforçado para derivar números dos agregados ou não emitir o insight.
+- Edge function aceita `insight_id` para re-analisar 1 insight existente (UPDATE in-place com a melhor evidência quantitativa).
+- Novo botão "🧪" em cada card de Population Insights chama a re-análise individual.
+_files: supabase/functions/analyze-cohort-patterns/index.ts, src/components/administrador/priorizacoes/PopulationInsightsV0.tsx, src/i18n.ts_
+
 ### 2026-05-27 · [admin] CHANGED — Rebatizar "Priorizações" → "AI Scientist" e mover para Research & Development
 - Aba `priorizacoes` renomeada para AI Scientist e movida do grupo `governance-ai` para `research` (primeira posição da sidebar de R&D).
 - Sidebar: removido item de Governance & AI, adicionado em `ResearchGroup` com ícone `Sparkles`.
@@ -68,12 +74,6 @@ _files: src/data/prioritizationBoard.ts, src/components/administrador/priorizaco
 - Botão "Analisar padrões" agora vira "Re-analisar (N)" após primeira execução, com tooltip + confirmação. Backend devolve 409 sem `force=true` se análise < 24h, evitando duplicação acidental.
 - Badge do modelo (`google/gemini-3.5-flash`) visível durante e após a análise, e em cada card do Population Insights — atende ao princípio de transparência clínica.
 _files: supabase/functions/analyze-cohort-patterns/index.ts, src/components/administrador/priorizacoes/SyntheticCohortsManager.tsx, src/components/administrador/priorizacoes/PrioritizationBoard.tsx, src/components/administrador/priorizacoes/PopulationInsightsV0.tsx…_
-
-### 2026-05-26 · [admin] ADDED — Check de originalidade nas sugestões de cohort
-- Cada sugestão de cohort gerada pela IA agora passa por um check automático de originalidade em 3 camadas: base interna (embeddings em `study_embeddings` via `search_study_chunks`), PubMed E-utilities (esearch/esummary) e Perplexity em modo `academic` (opt-in via toggle).
-- Score 0–100 com badge (Alta / Média / Já bem estudado), popover com breakdown transparente por fonte (hits, top 3 títulos similares com link para PubMed, query exibida), link clicável para validar manualmente no Google Scholar e botão "Re-rodar".
-- Fontes que falham aparecem como "indisponível" em vez de gerar score falso — o usuário sempre sabe se a busca realmente teve sucesso.
-_files: supabase/functions/check-cohort-originality/index.ts, supabase/functions/suggest-cohort-ideas/index.ts, src/components/administrador/priorizacoes/CohortOriginalityBadge.tsx, src/components/administrador/priorizacoes/CohortAISuggester.tsx_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
