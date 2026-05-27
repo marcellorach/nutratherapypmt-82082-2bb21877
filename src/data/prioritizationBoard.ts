@@ -255,6 +255,23 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
     rationale_pt: 'Depois que houver descobertas reais no cohort do parceiro clínico.',
     rationale_en: 'After real discoveries from the clinical-partner cohort exist.',
   },
+  {
+    id: 'cohort-stats-canonicalization',
+    order: 13,
+    title_pt: 'Canonicalização PT/EN nas cohort stats',
+    title_en: 'PT/EN canonicalization in cohort stats',
+    description_pt:
+      'Top condições e top flags laboratoriais agora deduplicam variantes PT/EN/abreviaturas (Osteoartrite↔Osteoarthritis, HCT↔Hematócrito, PLT↔Plt) antes de contar. Range de referência não-numérico (citologia) é omitido no drill-down.',
+    description_en:
+      'Top conditions and lab flags now deduplicate PT/EN/abbrev variants (Osteoartrite↔Osteoarthritis, HCT↔Hematócrito, PLT↔Plt) before counting. Non-numeric reference range (cytology) is omitted in drill-down.',
+    area: 'population',
+    effort: 'S',
+    value: ['Internal', 'AcademicPartner'],
+    status: 'done',
+    deliveredVersion: 'Unreleased',
+    rationale_pt: 'Higiene básica antes de mostrar cohort para parceiro acadêmico — evitar artefato de dupla contagem.',
+    rationale_en: 'Basic hygiene before showing cohort to academic partner — avoids double-count artifacts.',
+  },
 ];
 
 export const PRIORITIZATION_STATUSES: PrioritizationStatus[] = [
