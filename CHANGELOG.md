@@ -24,6 +24,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.0 -->
 
+### Changed - 2026-05-27 — Evidência quantitativa obrigatória + re-análise por insight
+<!-- area: curation · status: entregue · i18n: 1.115.6 -->
+- `analyze-cohort-patterns`: schema de `evidence` agora exige campos estruturados (`n_supporting`, `n_total`, `prevalence`, `comparison_baseline`, `effect_size`, `notes`). Prompt reforçado para derivar números dos agregados ou não emitir o insight.
+- Edge function aceita `insight_id` para re-analisar 1 insight existente (UPDATE in-place com a melhor evidência quantitativa).
+- Novo botão "🧪" em cada card de Population Insights chama a re-análise individual.
+- Files: supabase/functions/analyze-cohort-patterns/index.ts, src/components/administrador/priorizacoes/PopulationInsightsV0.tsx, src/i18n.ts
+
 ### Changed - 2026-05-27 — Rebatizar "Priorizações" → "AI Scientist" e mover para Research & Development
 <!-- area: admin · status: entregue · i18n: 1.115.0 -->
 - Aba `priorizacoes` renomeada para **AI Scientist** e movida do grupo `governance-ai` para `research` (primeira posição da sidebar de R&D).
