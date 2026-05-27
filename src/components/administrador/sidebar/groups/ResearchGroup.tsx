@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
-import { Beaker, FlaskConical, CheckCheck, Database, Lightbulb, ChevronRight, CircleCheck } from "lucide-react";
+import { Beaker, FlaskConical, CheckCheck, Database, Lightbulb, ChevronRight, CircleCheck, Sparkles } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from 'react-i18next';
 
@@ -32,6 +32,23 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({ currentStep, handleStepCl
   
   return (
     <>
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          isActive={currentStep === "priorizacoes"}
+          onClick={() => handleStepClick("priorizacoes")}
+          className={currentStep === "priorizacoes" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <Sparkles className={`h-4 w-4 mr-2 ${currentStep === "priorizacoes" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.research.aiScientist', 'AI Scientist')}</span>
+            </div>
+            {currentStep === "priorizacoes" && (
+              <ChevronRight className="h-4 w-4 ml-auto text-primary" />
+            )}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton
           isActive={currentStep === "sugestoes-ai"}
