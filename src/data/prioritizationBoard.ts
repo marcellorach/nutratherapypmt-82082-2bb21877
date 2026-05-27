@@ -10,7 +10,8 @@ export type PrioritizationStatus =
   | 'next'
   | 'in_progress'
   | 'in_test'
-  | 'done';
+  | 'done'
+  | 'rita';
 
 export type PrioritizationArea =
   | 'patient'
@@ -293,6 +294,7 @@ export const PRIORITIZATION_BOARD: PrioritizationCard[] = [
 ];
 
 export const PRIORITIZATION_STATUSES: PrioritizationStatus[] = [
+  'rita',
   'backlog',
   'next',
   'in_progress',
