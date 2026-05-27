@@ -19,7 +19,7 @@ const PriorizacoesTab: React.FC = () => {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <LayoutGrid className="h-6 w-6 text-primary" />
-            {t('prioritization.title', 'Priorizações')}
+            {t('prioritization.title', 'AI Scientist')}
           </h1>
           <p className="text-sm text-gray-600 max-w-3xl mt-1">
             {t(
