@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-05-27T00:34:12.047Z",
+  "timestamp": "2026-05-27T20:16:12.674Z",
   "summary": {
-    "totalFiles": 935,
+    "totalFiles": 939,
     "totalIssues": 458,
     "hardcodedTexts": 54,
     "missingKeys": 402,
@@ -1985,14 +1985,14 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/priorizacoes/PopulationInsightsV0.tsx",
-      "line": 56,
+      "line": 63,
       "text": "*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/priorizacoes/PopulationInsightsV0.tsx",
-      "line": 60,
+      "line": 67,
       "text": "id, name",
       "severity": "high"
     },
@@ -2629,21 +2629,21 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 1124,
+      "line": 1233,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 1335,
+      "line": 1444,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 4130,
+      "line": 4239,
       "text": "@",
       "severity": "high"
     },
@@ -3112,7 +3112,7 @@
     {
       "type": "hardcoded",
       "file": "src/components/administrador/priorizacoes/PopulationInsightsV0.tsx",
-      "line": 162,
+      "line": 208,
       "text": "Gerador de Cohort",
       "severity": "medium"
     },
