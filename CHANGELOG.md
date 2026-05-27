@@ -24,6 +24,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.0 -->
 
+### Added - 2026-05-27 — Validação vet-curador de insights de cohort
+<!-- area: curation · status: entregue · i18n: 1.114.0 -->
+- **Governança clínica fechada**: cada `cohort_insights` ganhou `vet_review_status` (`pending`/`approved`/`rejected`/`needs_changes`), `vet_review_notes`, `vet_reviewed_by` e `vet_reviewed_at`. Default `pending`, com check constraint e índice no status.
+- **Badge no card** do kanban Population Insights v0 mostra o status com cor (cinza/verde/vermelho/âmbar) e abre o dialog de revisão ao clicar.
+- **Botão "validar"** em cada card abre `VetCuratorReviewDialog`: exibe título, resumo, confiança, sinais, model e o status atual; campo de notas clínicas; três ações — Aprovar (verde), Rejeitar (vermelho), Requer ajustes (âmbar).
+- **Aprovação move automaticamente** o insight para a coluna `approved` do kanban — só após esta assinatura o insight pode virar regra clínica ou meta-estudo proposto.
+- Card adicionado ao Painel de Priorizações (`vet-curator-insight-validation`, order 14, status `done`, com flag `requiresVetCuratorValidation`).
+- Files: supabase/migrations/* (alter cohort_insights), src/components/administrador/priorizacoes/VetCuratorReviewDialog.tsx, src/components/administrador/priorizacoes/PopulationInsightsV0.tsx, src/data/prioritizationBoard.ts
+
 ### Fixed - 2026-05-27 — Cohort stats: canonicalização PT/EN + ref não-numérico
 <!-- area: admin · status: entregue · i18n: 1.114.0 -->
 - **Duplicação de taxonomia resolvida** no agregador de cohort stats: "Osteoarthritis" + "Osteoartrite" agora somam como uma só condição (e idem para os demais mapas EN↔PT já existentes em `condition-name-localizer`). Novo helper `canonicalConditionKey` faz o lookup reverso PT→EN antes da contagem; nome exibido respeita o idioma ativo via `localizeConditionName`.
