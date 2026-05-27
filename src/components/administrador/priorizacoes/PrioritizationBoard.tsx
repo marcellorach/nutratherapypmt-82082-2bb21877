@@ -7,7 +7,6 @@ import {
 } from '@/data/prioritizationBoard';
 import PrioritizationCardItem from './PrioritizationCard';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 const STATUS_STYLES: Record<PrioritizationStatus, { dot: string; label: string }> = {
