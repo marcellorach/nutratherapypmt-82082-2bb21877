@@ -526,20 +526,41 @@ const CohortAISuggester: React.FC<Props> = ({ onUseSuggestion }) => {
                           <span className="font-mono text-gray-600">{job.generated_n}/{job.target_n} pets</span>
                         </div>
                         <Progress value={progressPct} className="h-1.5" />
-                        {isStalled && (
-                          <div className="flex items-center justify-between gap-2 bg-amber-50 border border-amber-200 rounded p-1.5">
-                            <span className="text-[10px] text-amber-800">
-                              ⚠ Sem progresso há &gt;3min — pode estar travado.
+                        {isThisGenerating && (
+                          <div
+                            className={`flex items-center justify-between gap-2 rounded p-1.5 border ${
+                              isStalled
+                                ? 'bg-amber-50 border-amber-200'
+                                : 'bg-gray-50 border-gray-200'
+                            }`}
+                          >
+                            <span
+                              className={`text-[10px] ${
+                                isStalled ? 'text-amber-800' : 'text-gray-600'
+                              }`}
+                            >
+                              {isStalled
+                                ? `⚠ Sem progresso há >${Math.floor(stalledMs / 60000)}min — pode estar travado.`
+                                : `Pode parar a qualquer momento e manter os ${job.generated_n} pets já gerados.`}
                             </span>
                             <Button
-                              size="sm" variant="outline" className="h-6 text-[10px]"
-                              disabled={finalizing === job.cohort_id}
+                              size="sm"
+                              variant="outline"
+                              className={`h-6 text-[10px] shrink-0 ${
+                                isStalled ? 'border-amber-400 text-amber-900' : ''
+                              }`}
+                              disabled={finalizing === job.cohort_id || job.generated_n === 0}
                               onClick={() => forceFinalize(job.cohort_id)}
+                              title={
+                                job.generated_n === 0
+                                  ? 'Aguarde o primeiro batch terminar'
+                                  : 'Encerra a geração agora e mantém os pets já criados'
+                              }
                             >
                               {finalizing === job.cohort_id
                                 ? <Loader2 className="h-2.5 w-2.5 mr-1 animate-spin" />
                                 : null}
-                              Forçar finalização
+                              Parar e manter {job.generated_n}/{job.target_n}
                             </Button>
                           </div>
                         )}
