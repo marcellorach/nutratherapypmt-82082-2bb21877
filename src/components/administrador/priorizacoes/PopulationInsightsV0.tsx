@@ -55,6 +55,7 @@ const PopulationInsightsV0: React.FC = () => {
   const [originalityInsight, setOriginalityInsight] = useState<DbInsight | null>(null);
   const [reviewInsight, setReviewInsight] = useState<DbInsight | null>(null);
   const [autoQueue, setAutoQueue] = useState<Set<string>>(new Set());
+  const [cohortFilter, setCohortFilter] = useState<string>('all');
 
   const fetchInsights = async () => {
     setLoading(true);
@@ -90,13 +91,32 @@ const PopulationInsightsV0: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [insights, checkingOriginality]);
 
+  const filteredInsights = useMemo(() => {
+    if (cohortFilter === 'all') return insights;
+    if (cohortFilter === 'pan') return insights.filter((i) => !i.cohort_id);
+    return insights.filter((i) => i.cohort_id === cohortFilter);
+  }, [insights, cohortFilter]);
+
+  const cohortChips = useMemo(() => {
+    const counts: Record<string, number> = {};
+    let pan = 0;
+    insights.forEach((i) => {
+      if (!i.cohort_id) pan++;
+      else counts[i.cohort_id] = (counts[i.cohort_id] ?? 0) + 1;
+    });
+    const chips = Object.entries(counts)
+      .map(([id, count]) => ({ id, label: cohortNames[id] ?? id.slice(0, 8), count }))
+      .sort((a, b) => b.count - a.count);
+    return { pan, chips };
+  }, [insights, cohortNames]);
+
   const grouped = useMemo(() => {
     const map: Record<InsightStage, DbInsight[]> = {
       discovery: [], hypothesis: [], proposed_meta_study: [], approved: [],
     };
-    insights.forEach((i) => { if (map[i.stage]) map[i.stage].push(i); });
+    filteredInsights.forEach((i) => { if (map[i.stage]) map[i.stage].push(i); });
     return map;
-  }, [insights]);
+  }, [filteredInsights]);
 
   const moveStage = async (id: string, stage: InsightStage) => {
     setInsights((curr) => curr.map((i) => i.id === id ? { ...i, stage } : i));
@@ -207,6 +227,34 @@ const PopulationInsightsV0: React.FC = () => {
         <Card><CardContent className="p-6 text-center text-sm text-gray-500">
           Nenhum insight ainda. Gere um cohort sintético na aba <b>Gerador de Cohort</b> → "Gerar cohort" → depois clique em <b>Analisar padrões</b> em <b>Cohorts sintéticos</b>.
         </CardContent></Card>
+      )}
+
+      {insights.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 px-1">
+          <span className="text-[10px] uppercase tracking-wide text-gray-500 mr-1">Filtrar por cohort:</span>
+          {[
+            { id: 'all', label: 'Todos', count: insights.length },
+            ...(cohortChips.pan > 0 ? [{ id: 'pan', label: 'Pan-cohort', count: cohortChips.pan }] : []),
+            ...cohortChips.chips,
+          ].map((chip) => {
+            const active = cohortFilter === chip.id;
+            return (
+              <button
+                key={chip.id}
+                type="button"
+                onClick={() => setCohortFilter(active && chip.id !== 'all' ? 'all' : chip.id)}
+                className={`text-[11px] px-2 py-0.5 rounded-full border flex items-center gap-1 transition ${
+                  active
+                    ? 'bg-indigo-600 border-indigo-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <span className="truncate max-w-[220px]">{chip.label}</span>
+                <span className={`text-[9px] font-mono rounded-full px-1 ${active ? 'bg-white/20' : 'bg-gray-100'}`}>{chip.count}</span>
+              </button>
+            );
+          })}
+        </div>
       )}
 
       <Tabs defaultValue={STAGES[0].id} className="w-full">
