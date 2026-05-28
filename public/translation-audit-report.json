@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-28T19:40:30.779Z",
+  "timestamp": "2026-05-28T20:47:49.191Z",
   "summary": {
     "totalFiles": 939,
     "totalIssues": 458,
@@ -1985,14 +1985,14 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/priorizacoes/PopulationInsightsV0.tsx",
-      "line": 63,
+      "line": 64,
       "text": "*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/priorizacoes/PopulationInsightsV0.tsx",
-      "line": 67,
+      "line": 68,
       "text": "id, name",
       "severity": "high"
     },
@@ -3112,7 +3112,7 @@
     {
       "type": "hardcoded",
       "file": "src/components/administrador/priorizacoes/PopulationInsightsV0.tsx",
-      "line": 208,
+      "line": 228,
       "text": "Gerador de Cohort",
       "severity": "medium"
     },
