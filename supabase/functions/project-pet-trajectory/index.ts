@@ -523,7 +523,7 @@ OUTPUT REQUIREMENTS:
       },
     ];
 
-    const model = "google/gemini-2.5-flash";
+    const model = "google/gemini-2.5-pro";
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 120_000);
     let aiResp: Response;
@@ -572,11 +572,36 @@ OUTPUT REQUIREMENTS:
       return jsonResponse({ error: "ai_gateway_error", status: aiResp.status }, 500);
     }
 
-    const aiJson = await aiResp.json();
-    const toolCall = aiJson?.choices?.[0]?.message?.tool_calls?.[0];
+    let aiJson = await aiResp.json();
+    let toolCall = aiJson?.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall?.function?.arguments) {
-      console.error("No tool call in response", JSON.stringify(aiJson).slice(0, 500));
-      return jsonResponse({ error: "ai_no_tool_call" }, 500);
+      // Retry once with stricter instruction — some models occasionally
+      // return prose despite tool_choice. A single retry resolves this.
+      console.warn("No tool call on first attempt, retrying once...");
+      const retryResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: systemPrompt + "\n\nCRITICAL: You MUST invoke the function tool `submit_trajectory_projection`. Do NOT reply with text. Output ONLY a tool call." },
+            { role: "user", content: JSON.stringify(userPayload) },
+          ],
+          tools,
+          tool_choice: { type: "function", function: { name: "submit_trajectory_projection" } },
+        }),
+      });
+      if (retryResp.ok) {
+        aiJson = await retryResp.json();
+        toolCall = aiJson?.choices?.[0]?.message?.tool_calls?.[0];
+      }
+      if (!toolCall?.function?.arguments) {
+        console.error("No tool call after retry", JSON.stringify(aiJson).slice(0, 500));
+        return jsonResponse({ error: "ai_no_tool_call" }, 500);
+      }
     }
     let parsed: any;
     try {
