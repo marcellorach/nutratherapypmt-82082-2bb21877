@@ -86,23 +86,6 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
       </SidebarGroup>
       )}
       
-      {/* Configuração */}
-      {show('configuration') && (
-      <SidebarGroup>
-        <SidebarGroupLabel className="text-orange-500">
-          {t('admin.sidebar.configuration.title')}
-        </SidebarGroupLabel>
-        <SidebarGroupContent>
-          <SidebarMenu>
-            <ConfigurationGroup 
-              currentStep={currentStep} 
-              handleStepClick={handleStepClick} 
-            />
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
-      )}
-
       {/* Governança & IA */}
       {show('governance-ai') && (
       <SidebarGroup>
@@ -114,6 +97,23 @@ const AdminSidebarGroups: React.FC<AdminSidebarGroupsProps> = ({ currentStep, se
             <GovernanceAIGroup
               currentStep={currentStep}
               handleStepClick={handleStepClick}
+            />
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+      )}
+
+      {/* Configuração */}
+      {show('configuration') && (
+      <SidebarGroup>
+        <SidebarGroupLabel className="text-orange-500">
+          {t('admin.sidebar.configuration.title')}
+        </SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            <ConfigurationGroup 
+              currentStep={currentStep} 
+              handleStepClick={handleStepClick} 
             />
           </SidebarMenu>
         </SidebarGroupContent>
