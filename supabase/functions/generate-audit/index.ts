@@ -14,8 +14,11 @@ const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const PRIMARY_MODEL = "google/gemini-3.1-pro-preview";
 const FALLBACK_MODEL = "openai/gpt-5-mini";
 
-const PRIMARY_CALL_TIMEOUT_MS = 85_000;
-const FALLBACK_CALL_TIMEOUT_MS = 45_000;
+// Timeouts ampliados: blocos densos com SVG/tabelas no Gemini 3.1 Pro Preview
+// regularmente levam 60–120s. Antes ficava em 85s/45s e disparava AbortError
+// no meio da geração, travando a auditoria. Agora damos folga real.
+const PRIMARY_CALL_TIMEOUT_MS = 180_000;
+const FALLBACK_CALL_TIMEOUT_MS = 120_000;
 const FALLBACK_BACKOFF_MS = 5_000;
 const HEARTBEAT_INTERVAL_MS = 5_000;
 const MAX_LOG_ENTRIES = 200;
