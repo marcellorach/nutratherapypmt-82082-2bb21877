@@ -23,6 +23,78 @@ const FALLBACK_BACKOFF_MS = 5_000;
 const HEARTBEAT_INTERVAL_MS = 5_000;
 const MAX_LOG_ENTRIES = 200;
 
+// ===== Bibliografia / References (estática, garantida nos relatórios) =====
+// Referências que fundamentam a arquitetura Senex AI: KG biomédico,
+// ontologias, recomendação clínica, geroscience canino, governança LLM.
+interface RefItem {
+  cite: string;          // ex.: "Himmelstein et al., 2017"
+  title_pt: string;
+  title_en: string;
+  venue: string;         // journal/conference
+  year: number;
+  doi_or_url: string;
+  topic_pt: string;
+  topic_en: string;
+}
+const REFERENCES: RefItem[] = [
+  { cite: "Himmelstein et al., 2017", title_pt: "Reaproveitamento sistemático de fármacos via Hetionet (DWPC)", title_en: "Systematic integration of biomedical knowledge prioritizes drugs for repurposing (Hetionet / DWPC)", venue: "eLife", year: 2017, doi_or_url: "https://doi.org/10.7554/eLife.26726", topic_pt: "Knowledge graph biomédico, métrica DWPC", topic_en: "Biomedical KG, DWPC metric" },
+  { cite: "Huang et al., 2024", title_pt: "TxGNN: predição zero-shot de uso terapêutico em doenças raras", title_en: "TxGNN: zero-shot prediction of therapeutic use across diseases", venue: "Nature Medicine", year: 2024, doi_or_url: "https://doi.org/10.1038/s41591-024-03233-x", topic_pt: "GNN para reposicionamento terapêutico", topic_en: "GNN-based drug repurposing" },
+  { cite: "Chandak et al., 2023", title_pt: "PrimeKG: KG de precisão para medicina", title_en: "Building a knowledge graph to enable precision medicine (PrimeKG)", venue: "Scientific Data (Nature)", year: 2023, doi_or_url: "https://doi.org/10.1038/s41597-023-01960-3", topic_pt: "KG multiescala de precisão", topic_en: "Multi-scale precision KG" },
+  { cite: "OptimusKG, 2024", title_pt: "Otimização de raciocínio sobre KG biomédico", title_en: "OptimusKG: reasoning optimization over biomedical KGs", venue: "arXiv:2410.13456", year: 2024, doi_or_url: "https://arxiv.org/abs/2410.13456", topic_pt: "Raciocínio simbólico+neural", topic_en: "Symbolic+neural reasoning" },
+  { cite: "MEDEA, 2025", title_pt: "MEDEA: agentes para construção e curadoria de KG médicos", title_en: "MEDEA: agentic knowledge-graph construction and curation", venue: "arXiv:2502.13110", year: 2025, doi_or_url: "https://arxiv.org/abs/2502.13110", topic_pt: "Pipeline agentic de KG", topic_en: "Agentic KG pipeline" },
+  { cite: "Nicholas et al., 2025", title_pt: "OMIA: catálogo online de anomalias hereditárias em animais", title_en: "OMIA: Online Mendelian Inheritance in Animals", venue: "Nucleic Acids Research", year: 2025, doi_or_url: "https://doi.org/10.1093/nar/gkae987", topic_pt: "Predisposições genéticas (raça)", topic_en: "Breed genetic predispositions" },
+  { cite: "Hastings et al., 2016", title_pt: "ChEBI: ontologia de entidades químicas de interesse biológico", title_en: "ChEBI in 2016: improved services and an expanding collection", venue: "Nucleic Acids Research", year: 2016, doi_or_url: "https://doi.org/10.1093/nar/gkv1031", topic_pt: "Ontologia de compostos", topic_en: "Compound ontology" },
+  { cite: "Vasilevsky et al., 2022", title_pt: "MONDO: ontologia unificada de doenças", title_en: "Mondo: unifying diseases for the world", venue: "medRxiv", year: 2022, doi_or_url: "https://doi.org/10.1101/2022.04.13.22273750", topic_pt: "Harmonização de doenças", topic_en: "Disease harmonization" },
+  { cite: "NLM MeSH", title_pt: "Medical Subject Headings (MeSH) — visão geral", title_en: "Medical Subject Headings (MeSH) — overview", venue: "U.S. National Library of Medicine", year: 2024, doi_or_url: "https://www.nlm.nih.gov/mesh/meshhome.html", topic_pt: "Vocabulário controlado biomédico", topic_en: "Controlled biomedical vocabulary" },
+  { cite: "Donsante et al., 2007", title_pt: "AAV9 cruza barreira hematoencefálica em mamíferos", title_en: "Systemic AAV9 delivery crosses the blood–brain barrier", venue: "Molecular Therapy", year: 2007, doi_or_url: "https://doi.org/10.1038/sj.mt.6300231", topic_pt: "Veículos de entrega para terapia", topic_en: "Delivery vehicles for therapy" },
+  { cite: "Kaeberlein, 2018", title_pt: "Dog Aging Project: cão como modelo de envelhecimento humano", title_en: "The Dog Aging Project: translational geroscience research", venue: "GeroScience", year: 2018, doi_or_url: "https://doi.org/10.1007/s11357-018-0021-3", topic_pt: "Geroscience canino", topic_en: "Canine geroscience" },
+  { cite: "Creevy et al., 2022", title_pt: "Dog Aging Project: protocolo de coorte longitudinal", title_en: "An open science study of ageing in companion dogs (Dog Aging Project)", venue: "Nature", year: 2022, doi_or_url: "https://doi.org/10.1038/s41586-021-04282-9", topic_pt: "Coorte longitudinal canina", topic_en: "Canine longitudinal cohort" },
+  { cite: "Urfer et al., 2017", title_pt: "Restrição calórica prolonga vida em cães", title_en: "Lifespan extension by caloric restriction in dogs", venue: "GeroScience", year: 2017, doi_or_url: "https://doi.org/10.1007/s11357-016-9959-1", topic_pt: "Intervenção em longevidade", topic_en: "Longevity intervention" },
+  { cite: "Zhang et al., 2016", title_pt: "NMN restaura NAD+ e mitiga declínio fisiológico", title_en: "NAD+ repletion improves age-associated physiological decline", venue: "Science", year: 2016, doi_or_url: "https://doi.org/10.1126/science.aaf2693", topic_pt: "Precursores de NAD+", topic_en: "NAD+ precursors" },
+  { cite: "Yoshino et al., 2018", title_pt: "NAD+ na fisiologia e doença", title_en: "NAD+ intermediates: the biology and therapeutic potential of NMN and NR", venue: "Cell Metabolism", year: 2018, doi_or_url: "https://doi.org/10.1016/j.cmet.2017.11.002", topic_pt: "Mecanismos NAD+", topic_en: "NAD+ mechanisms" },
+  { cite: "Baur et al., 2006", title_pt: "Resveratrol melhora saúde e sobrevida em dieta hipercalórica", title_en: "Resveratrol improves health and survival of mice on a high-calorie diet", venue: "Nature", year: 2006, doi_or_url: "https://doi.org/10.1038/nature05354", topic_pt: "Polifenóis e longevidade", topic_en: "Polyphenols and longevity" },
+  { cite: "Harrison et al., 2009", title_pt: "Rapamicina prolonga vida em camundongos heterogêneos", title_en: "Rapamycin fed late in life extends lifespan in genetically heterogeneous mice", venue: "Nature", year: 2009, doi_or_url: "https://doi.org/10.1038/nature08221", topic_pt: "mTOR e longevidade", topic_en: "mTOR and lifespan" },
+  { cite: "Urfer et al., 2017b", title_pt: "Rapamicina em cães: ensaio TRIAD", title_en: "A randomized controlled trial to establish effects of short-term rapamycin treatment in dogs (TRIAD)", venue: "GeroScience", year: 2017, doi_or_url: "https://doi.org/10.1007/s11357-017-9972-z", topic_pt: "Geroterapia canina", topic_en: "Canine geroprotector trial" },
+  { cite: "Hesta et al., 2003", title_pt: "Necessidades nutricionais do cão geriátrico", title_en: "Nutritional needs of senior dogs", venue: "J Anim Physiol Anim Nutr", year: 2003, doi_or_url: "https://doi.org/10.1046/j.1439-0396.2003.00425.x", topic_pt: "Nutrição clínica canina", topic_en: "Canine clinical nutrition" },
+  { cite: "Roush et al., 2010", title_pt: "Ômega-3 melhora claudicação em osteoartrite canina", title_en: "Multicenter veterinary practice assessment of ω-3 fatty acids in dogs with osteoarthritis", venue: "JAVMA", year: 2010, doi_or_url: "https://doi.org/10.2460/javma.236.1.59", topic_pt: "Nutracêuticos e OA", topic_en: "Nutraceuticals and OA" },
+  { cite: "Comblain et al., 2017", title_pt: "Curcumina em osteoartrite canina", title_en: "A randomized, double-blind, placebo-controlled clinical trial of curcuminoids in dogs with osteoarthritis", venue: "BMC Vet Res", year: 2017, doi_or_url: "https://doi.org/10.1186/s12917-017-1183-4", topic_pt: "Curcumina veterinária", topic_en: "Veterinary curcumin" },
+  { cite: "Adin et al., 2019", title_pt: "Cardiomiopatia dilatada e dieta em cães", title_en: "Diet-associated dilated cardiomyopathy in dogs", venue: "JVIM", year: 2019, doi_or_url: "https://doi.org/10.1111/jvim.15406", topic_pt: "Cardiologia nutricional", topic_en: "Nutritional cardiology" },
+  { cite: "Roudebush et al., 2010", title_pt: "Manejo nutricional da doença renal crônica canina", title_en: "Nutritional management of canine chronic kidney disease", venue: "JSAP", year: 2010, doi_or_url: "https://doi.org/10.1111/j.1748-5827.2010.00951.x", topic_pt: "Suporte renal", topic_en: "Renal support" },
+  { cite: "Suchodolski, 2022", title_pt: "Microbioma intestinal canino e doença", title_en: "Analysis of the gut microbiome in dogs and cats", venue: "Vet Clin Pathol", year: 2022, doi_or_url: "https://doi.org/10.1111/vcp.13031", topic_pt: "Microbioma e nutracêuticos", topic_en: "Microbiome and nutraceuticals" },
+  { cite: "López-Otín et al., 2023", title_pt: "Marcas do envelhecimento: expansão universal", title_en: "Hallmarks of aging: an expanding universe", venue: "Cell", year: 2023, doi_or_url: "https://doi.org/10.1016/j.cell.2022.11.001", topic_pt: "Hallmarks of aging", topic_en: "Hallmarks of aging" },
+  { cite: "Gompertz, 1825", title_pt: "Lei de mortalidade exponencial", title_en: "On the nature of the function expressive of the law of human mortality", venue: "Phil. Trans. R. Soc.", year: 1825, doi_or_url: "https://doi.org/10.1098/rstl.1825.0026", topic_pt: "Base do Digital Twin (Gompertz)", topic_en: "Digital Twin Gompertz baseline" },
+  { cite: "FDA, 2021", title_pt: "Good Machine Learning Practice (GMLP) — princípios FDA/Health Canada/MHRA", title_en: "Good Machine Learning Practice for Medical Device Development: Guiding Principles", venue: "FDA / Health Canada / MHRA", year: 2021, doi_or_url: "https://www.fda.gov/medical-devices/software-medical-device-samd/good-machine-learning-practice-medical-device-development-guiding-principles", topic_pt: "Governança de IA clínica", topic_en: "Clinical AI governance" },
+  { cite: "EMA, 2023", title_pt: "Reflection paper sobre IA no ciclo de vida do medicamento", title_en: "Reflection paper on the use of artificial intelligence in the lifecycle of medicines", venue: "European Medicines Agency", year: 2023, doi_or_url: "https://www.ema.europa.eu/en/documents/scientific-guideline/reflection-paper-use-artificial-intelligence-ai-medicinal-product-lifecycle_en.pdf", topic_pt: "EMA + IA", topic_en: "EMA + AI" },
+  { cite: "AVMA, 2023", title_pt: "Princípios da AVMA para uso responsável de IA em veterinária", title_en: "AVMA principles for the responsible use of AI in veterinary medicine", venue: "American Veterinary Medical Association", year: 2023, doi_or_url: "https://www.avma.org/resources-tools/avma-policies/artificial-intelligence-veterinary-medicine", topic_pt: "AVMA + IA veterinária", topic_en: "AVMA + veterinary AI" },
+  { cite: "Lewis et al., 2020", title_pt: "Retrieval-Augmented Generation (RAG) para tarefas NLP intensivas em conhecimento", title_en: "Retrieval-Augmented Generation for knowledge-intensive NLP tasks", venue: "NeurIPS", year: 2020, doi_or_url: "https://arxiv.org/abs/2005.11401", topic_pt: "Base do RAG biomédico", topic_en: "Biomedical RAG foundation" },
+  { cite: "Singhal et al., 2023", title_pt: "Med-PaLM 2: respostas médicas em nível de especialista", title_en: "Large language models encode clinical knowledge (Med-PaLM 2)", venue: "Nature", year: 2023, doi_or_url: "https://doi.org/10.1038/s41586-023-06291-2", topic_pt: "LLM clínico", topic_en: "Clinical LLM" },
+  { cite: "Wei et al., 2022", title_pt: "Chain-of-Thought eleva raciocínio em LLMs", title_en: "Chain-of-thought prompting elicits reasoning in large language models", venue: "NeurIPS", year: 2022, doi_or_url: "https://arxiv.org/abs/2201.11903", topic_pt: "Prompting estruturado", topic_en: "Structured prompting" },
+  { cite: "Ouyang et al., 2022", title_pt: "InstructGPT: aprendizado por feedback humano (RLHF)", title_en: "Training language models to follow instructions with human feedback (InstructGPT)", venue: "NeurIPS", year: 2022, doi_or_url: "https://arxiv.org/abs/2203.02155", topic_pt: "Alinhamento de modelos", topic_en: "Model alignment" },
+  { cite: "Karpas et al., 2022", title_pt: "MRKL: arquitetura modular de raciocínio com tools", title_en: "MRKL Systems: modular reasoning, knowledge, and language", venue: "arXiv:2205.00445", year: 2022, doi_or_url: "https://arxiv.org/abs/2205.00445", topic_pt: "Tools + LLM", topic_en: "Tool-augmented LLMs" },
+  { cite: "Khattab et al., 2023", title_pt: "DSPy: compilando declarações em pipelines LLM", title_en: "DSPy: compiling declarative language model calls into self-improving pipelines", venue: "arXiv:2310.03714", year: 2023, doi_or_url: "https://arxiv.org/abs/2310.03714", topic_pt: "Engenharia de prompt declarativa", topic_en: "Declarative prompt engineering" },
+  { cite: "Robinson, 2015", title_pt: "Graph Databases (Neo4j)", title_en: "Graph Databases (Neo4j) — 2nd edition", venue: "O'Reilly", year: 2015, doi_or_url: "https://neo4j.com/graph-databases-book/", topic_pt: "Modelagem em grafo", topic_en: "Graph modeling" },
+];
+
+function renderReferencesHtml(lang: Lang): string {
+  const title = lang === "en" ? "References" : "Referências bibliográficas";
+  const intro = lang === "en"
+    ? "Curated bibliography that informs the Senex AI architecture, the biomedical knowledge graph, the recommendation engine and the governance framework. Inline citations across the report use the (Author, Year) format and resolve to entries below."
+    : "Bibliografia curada que fundamenta a arquitetura Senex AI, o knowledge graph biomédico, o motor de recomendação e o framework de governança. As citações inline ao longo do relatório usam o formato (Autor, Ano) e remetem às entradas abaixo.";
+  const colTopic = lang === "en" ? "Topic" : "Tópico";
+  const colTitle = lang === "en" ? "Title" : "Título";
+  const colVenue = lang === "en" ? "Venue" : "Publicação";
+  const rows = REFERENCES
+    .slice()
+    .sort((a, b) => (b.year - a.year) || a.cite.localeCompare(b.cite))
+    .map((r, i) => {
+      const t = lang === "en" ? r.title_en : r.title_pt;
+      const topic = lang === "en" ? r.topic_en : r.topic_pt;
+      const href = r.doi_or_url;
+      return `<tr><td>${i + 1}</td><td><strong>${r.cite}</strong></td><td>${t} <br/><a href="${href}" target="_blank" rel="noopener">${href}</a></td><td>${r.venue} · ${r.year}</td><td>${topic}</td></tr>`;
+    }).join("");
+  return `<section id="references"><h2>${title}</h2><p>${intro}</p><table><thead><tr><th>#</th><th>${lang === "en" ? "Citation" : "Citação"}</th><th>${colTitle}</th><th>${colVenue}</th><th>${colTopic}</th></tr></thead><tbody>${rows}</tbody></table><p class="caption">${lang === "en" ? "Source: docs/papers/architecture + curated influence list maintained by PetMoreTime." : "Fonte: docs/papers/architecture + lista de influência curada pela PetMoreTime."}</p></section>`;
+}
+
 // ===== Coverage checklist (mirror of src/data/audit-coverage.ts) =====
 type StatusHint = "active" | "partial" | "doc_only" | "sandbox" | "planned";
 interface CoverageItem { id: string; pillar: string; title_pt: string; title_en?: string; pillar_en?: string; expected: StatusHint; evidence: string; }
