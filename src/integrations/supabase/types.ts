@@ -446,6 +446,7 @@ export type Database = {
       }
       audit_requests: {
         Row: {
+          auto_triggered: boolean
           fulfilled_audit_id: string | null
           id: string
           requested_at: string
@@ -457,6 +458,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          auto_triggered?: boolean
           fulfilled_audit_id?: string | null
           id?: string
           requested_at?: string
@@ -468,6 +470,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          auto_triggered?: boolean
           fulfilled_audit_id?: string | null
           id?: string
           requested_at?: string
@@ -487,6 +490,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      audit_settings: {
+        Row: {
+          change_threshold: number
+          id: boolean
+          updated_at: string
+          watched_areas: string[]
+        }
+        Insert: {
+          change_threshold?: number
+          id?: boolean
+          updated_at?: string
+          watched_areas?: string[]
+        }
+        Update: {
+          change_threshold?: number
+          id?: boolean
+          updated_at?: string
+          watched_areas?: string[]
+        }
+        Relationships: []
       }
       auto_discoveries: {
         Row: {
@@ -4917,6 +4941,7 @@ export type Database = {
           scope: string
           scope_history: Json
           summary: Json
+          superseded_by: string | null
           system_changelog_date: string | null
           system_version: string
           updated_at: string
@@ -4932,6 +4957,7 @@ export type Database = {
           scope: string
           scope_history?: Json
           summary?: Json
+          superseded_by?: string | null
           system_changelog_date?: string | null
           system_version: string
           updated_at?: string
@@ -4947,12 +4973,21 @@ export type Database = {
           scope?: string
           scope_history?: Json
           summary?: Json
+          superseded_by?: string | null
           system_changelog_date?: string | null
           system_version?: string
           updated_at?: string
           version?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "technical_audits_superseded_by_fkey"
+            columns: ["superseded_by"]
+            isOneToOne: false
+            referencedRelation: "technical_audits"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       translations: {
         Row: {
