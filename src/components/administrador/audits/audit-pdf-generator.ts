@@ -1,96 +1,65 @@
-// Client-side HTML → PDF generator for audit reports.
-// Uses html2pdf.js to render the audit HTML in an offscreen iframe and
-// uploads the resulting PDF to the `audit-reports` storage bucket, then
-// updates the technical_audits row with the public PDF URL.
-
-import html2pdf from "html2pdf.js";
-import { supabase } from "@/integrations/supabase/client";
+// Audit report helpers — content-type agnostic.
+// We never trust the storage object's MIME (it has flipped to text/plain in
+// the past). Instead we always fetch the HTML as text and either render it
+// inline via <iframe srcDoc> or open it in a popup that auto-triggers the
+// native browser "Save as PDF" dialog.
 
 interface AuditLike {
   id: string;
   version: string;
   html_path: string | null;
-  pdf_path: string | null;
 }
 
-const BUCKET = "audit-reports";
-
-async function fetchHtml(url: string): Promise<string> {
+export async function fetchAuditHtml(url: string): Promise<string> {
   const r = await fetch(url, { cache: "no-store" });
-  if (!r.ok) throw new Error(`Failed to fetch HTML (${r.status})`);
-  return await r.text();
-}
+  if (!r.ok) throw new Error(`Falha ao baixar HTML (${r.status})`);
+  let html = await r.text();
 
-function renderInIframe(html: string): Promise<HTMLIFrameElement> {
-  return new Promise((resolve, reject) => {
-    const iframe = document.createElement("iframe");
-    iframe.style.position = "fixed";
-    iframe.style.left = "-10000px";
-    iframe.style.top = "0";
-    iframe.style.width = "800px";
-    iframe.style.height = "1200px";
-    iframe.style.border = "0";
-    iframe.setAttribute("aria-hidden", "true");
-    document.body.appendChild(iframe);
-    iframe.onload = () => setTimeout(() => resolve(iframe), 400);
-    iframe.onerror = () => reject(new Error("iframe load failed"));
-    const doc = iframe.contentDocument!;
-    doc.open();
-    doc.write(html);
-    doc.close();
-  });
-}
-
-export async function generateAuditPdf(audit: AuditLike): Promise<string | null> {
-  if (!audit.html_path) return null;
-  if (audit.pdf_path) return audit.pdf_path;
-
-  let iframe: HTMLIFrameElement | null = null;
+  // Some legacy audits in /public/audits/<v>/index.html use relative
+  // references (style.css, media/...). Inject a <base> so they still resolve
+  // correctly when the HTML is served via srcDoc or via a blob popup.
   try {
-    const html = await fetchHtml(audit.html_path);
-    iframe = await renderInIframe(html);
-    const root = iframe.contentDocument?.body;
-    if (!root) throw new Error("iframe body missing");
-
-    const blob: Blob = await html2pdf()
-      .from(root)
-      .set({
-        margin: [10, 10, 10, 10],
-        filename: `auditoria-${audit.version}.pdf`,
-        image: { type: "jpeg", quality: 0.95 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      } as any)
-      .outputPdf("blob");
-
-    const path = `${audit.id.replace(/^v/, "")}/auditoria.pdf`;
-    const { error: upErr } = await supabase.storage
-      .from(BUCKET)
-      .upload(path, blob, { upsert: true, contentType: "application/pdf" });
-    if (upErr) throw upErr;
-
-    const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
-    const pdfUrl = pub.publicUrl;
-
-    const { error: updErr } = await supabase
-      .from("technical_audits")
-      .update({ pdf_path: pdfUrl })
-      .eq("id", audit.id);
-    if (updErr) throw updErr;
-
-    return pdfUrl;
-  } finally {
-    if (iframe?.parentNode) iframe.parentNode.removeChild(iframe);
+    const base = new URL(url, window.location.href);
+    const baseHref = base.href.replace(/[^/]*$/, "");
+    if (!/<base\s/i.test(html)) {
+      if (/<head[^>]*>/i.test(html)) {
+        html = html.replace(/<head([^>]*)>/i, `<head$1><base href="${baseHref}">`);
+      } else {
+        html = `<head><base href="${baseHref}"></head>` + html;
+      }
+    }
+  } catch {
+    /* noop */
   }
+  return html;
 }
 
-export async function backfillMissingAuditPdfs(audits: AuditLike[]): Promise<void> {
-  for (const a of audits) {
-    if (!a.html_path || a.pdf_path) continue;
-    try {
-      await generateAuditPdf(a);
-    } catch (e) {
-      console.warn("[audit-pdf] backfill failed for", a.id, e);
-    }
+/**
+ * Open the audit HTML in a new tab/window and trigger the native print
+ * dialog. Users save as PDF from the browser — works in every browser,
+ * preserves Unicode and styling, and avoids the broken html2pdf path.
+ */
+export async function openAuditForPrint(audit: AuditLike): Promise<void> {
+  if (!audit.html_path) throw new Error("Auditoria sem HTML");
+  const html = await fetchAuditHtml(audit.html_path);
+  const printScript = `
+<script>
+  window.addEventListener('load', function () {
+    setTimeout(function () { window.focus(); window.print(); }, 350);
+  });
+</script>`;
+  const finalHtml = /<\/body>/i.test(html)
+    ? html.replace(/<\/body>/i, `${printScript}</body>`)
+    : html + printScript;
+
+  const blob = new Blob([finalHtml], { type: "text/html;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const win = window.open(url, "_blank");
+  if (!win) {
+    // Popup blocked — fall back to same-tab navigation.
+    window.location.href = url;
+    return;
   }
+  // Release the blob URL once the popup has had time to parse it.
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
