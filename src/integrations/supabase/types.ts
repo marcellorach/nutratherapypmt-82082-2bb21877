@@ -4978,6 +4978,7 @@ export type Database = {
           created_at: string
           docx_path: string | null
           html_path: string | null
+          html_path_en: string | null
           id: string
           language: string
           language_group_id: string | null
@@ -5000,6 +5001,7 @@ export type Database = {
           created_at?: string
           docx_path?: string | null
           html_path?: string | null
+          html_path_en?: string | null
           id: string
           language?: string
           language_group_id?: string | null
@@ -5022,6 +5024,7 @@ export type Database = {
           created_at?: string
           docx_path?: string | null
           html_path?: string | null
+          html_path_en?: string | null
           id?: string
           language?: string
           language_group_id?: string | null
