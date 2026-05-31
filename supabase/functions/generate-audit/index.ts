@@ -279,53 +279,14 @@ Gere o relatório HTML completo agora. Lembre: o padrão de referência é a aud
       return JSON.parse(args);
     }
 
-    let parsed: any;
-    try {
-      parsed = await callModel(PRIMARY_MODEL);
-    } catch (e) {
-      console.warn("Primary model failed, falling back:", e);
-      parsed = await callModel(FALLBACK_MODEL);
-    }
-
-    let html: string = parsed.html;
-    let validation = assessAuditHtml(html);
-    if (!validation.ok) {
-      console.warn("Audit HTML below baseline, retrying with repair instructions", validation);
-      try {
-        parsed = await callModel(
-          PRIMARY_MODEL,
-          `Mantenha o padrão standalone cumulativo da v5.2.0. Problemas detectados: ${validation.issues.join("; ")}. Inclua as seções ausentes e reescreva tudo em formato completo.`,
-        );
-      } catch (_e) {
-        parsed = await callModel(
-          FALLBACK_MODEL,
-          `Mantenha o padrão standalone cumulativo da v5.2.0. Problemas detectados: ${validation.issues.join("; ")}. Inclua as seções ausentes e reescreva tudo em formato completo.`,
-        );
-      }
-      html = parsed.html;
-      validation = assessAuditHtml(html);
-      if (!validation.ok) {
-        throw new Error(`Auditoria recusada por regressão de formato: ${validation.issues.join(" | ")}`);
-      }
-    }
-
-    const summary: any = { ...(parsed.summary ?? {}), generator: "senex-ai", model: PRIMARY_MODEL };
-
-    // Upload HTML to storage
-    const path = `${version}/auditoria.html`;
-    const { error: upErr } = await service.storage
-      .from("audit-reports")
-      .upload(path, new TextEncoder().encode(html), {
-        upsert: true,
-        contentType: "text/html; charset=utf-8",
-      });
-    if (upErr) throw upErr;
-    const { data: pub } = service.storage.from("audit-reports").getPublicUrl(path);
-    const htmlUrl = pub.publicUrl;
-
-    // Insert audit row
+    // Geração é assíncrona — passa de 150s de timeout do edge runtime.
+    // Inserimos um placeholder e disparamos a geração via EdgeRuntime.waitUntil.
     const auditId = version.toLowerCase().startsWith("v") ? version.toLowerCase() : `v${version.toLowerCase()}`;
     const numericVersion = auditId.replace(/^v/, "");
+    const pendingHtml = `<!doctype html><meta charset="utf-8"><title>Gerando ${auditId}…</title><style>body{font-family:system-ui;padding:48px;color:#444;text-align:center}</style><h1>Auditoria ${auditId} em geração…</h1><p>Este relatório está sendo produzido em segundo plano. Atualize a lista em alguns minutos.</p>`;
+    const placeholderPath = `${version}/pending.html`;
+    await service.storage.from("audit-reports").upload(placeholderPath, new TextEncoder().encode(pendingHtml), { upsert: true, contentType: "text/html; charset=utf-8" });
+    const { data: pendPub } = service.storage.from("audit-reports").getPublicUrl(placeholderPath);
 
     const { data: inserted, error: insErr } = await service
       .from("technical_audits")
@@ -337,17 +298,61 @@ Gere o relatório HTML completo agora. Lembre: o padrão de referência é a aud
         system_changelog_date: system_changelog_date ?? null,
         scope,
         scope_history: [],
-        html_path: htmlUrl,
+        html_path: pendPub.publicUrl,
         pdf_path: null,
         docx_path: null,
-        summary,
+        summary: { status: "processing", generator: "senex-ai", model: PRIMARY_MODEL },
         superseded_by: null,
       })
       .select("*")
       .single();
     if (insErr) throw insErr;
 
-    return new Response(JSON.stringify({ ok: true, audit: inserted }), {
+    const backgroundJob = (async () => {
+      try {
+        let parsed: any;
+        try {
+          parsed = await callModel(PRIMARY_MODEL);
+        } catch (e) {
+          console.warn("Primary model failed, falling back:", e);
+          parsed = await callModel(FALLBACK_MODEL);
+        }
+        let html: string = parsed.html;
+        let validation = assessAuditHtml(html);
+        if (!validation.ok) {
+          console.warn("Audit HTML below baseline, retrying with repair instructions", validation);
+          try {
+            parsed = await callModel(PRIMARY_MODEL, `Mantenha o padrão standalone cumulativo da v5.2.0. Problemas detectados: ${validation.issues.join("; ")}. Inclua as seções ausentes e reescreva tudo em formato completo.`);
+          } catch (_e) {
+            parsed = await callModel(FALLBACK_MODEL, `Mantenha o padrão standalone cumulativo da v5.2.0. Problemas detectados: ${validation.issues.join("; ")}. Inclua as seções ausentes e reescreva tudo em formato completo.`);
+          }
+          html = parsed.html;
+          validation = assessAuditHtml(html);
+          if (!validation.ok) {
+            throw new Error(`Auditoria recusada por regressão de formato: ${validation.issues.join(" | ")}`);
+          }
+        }
+        const summary: any = { ...(parsed.summary ?? {}), generator: "senex-ai", model: PRIMARY_MODEL, status: "ready" };
+        const path = `${version}/auditoria.html`;
+        const { error: upErr } = await service.storage.from("audit-reports").upload(path, new TextEncoder().encode(html), { upsert: true, contentType: "text/html; charset=utf-8" });
+        if (upErr) throw upErr;
+        const { data: pub } = service.storage.from("audit-reports").getPublicUrl(path);
+        await service.from("technical_audits").update({ html_path: pub.publicUrl, summary }).eq("id", auditId);
+      } catch (err: any) {
+        console.error("background audit generation failed:", err);
+        await service.from("technical_audits").update({
+          summary: { status: "failed", error: err?.message ?? String(err), generator: "senex-ai" },
+        }).eq("id", auditId);
+      }
+    })();
+
+    // @ts-ignore EdgeRuntime is available in Supabase Edge Functions
+    if (typeof EdgeRuntime !== "undefined" && (EdgeRuntime as any).waitUntil) {
+      // @ts-ignore
+      EdgeRuntime.waitUntil(backgroundJob);
+    }
+
+    return new Response(JSON.stringify({ ok: true, audit: inserted, status: "processing" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {
