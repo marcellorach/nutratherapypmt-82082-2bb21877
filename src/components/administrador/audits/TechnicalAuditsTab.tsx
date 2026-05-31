@@ -291,9 +291,15 @@ export default function TechnicalAuditsTab() {
 
       {pendingRequests.length > 0 && (
         <Card className="border-amber-300 bg-amber-50/50 dark:bg-amber-950/20">
-          <CardContent className="py-3 flex items-center gap-3 text-sm">
+          <CardContent className="py-3 flex items-center gap-3 text-sm flex-wrap">
             <AlertTriangle className="h-4 w-4 text-amber-600" />
             <span className="text-muted-foreground">{t("audits.pendingBanner", { count: pendingRequests.length })}</span>
+            {pendingRequests.some((r) => r.auto_triggered) && (
+              <Badge variant="outline" className="gap-1 text-[10px]">
+                <Bot className="h-3 w-3" />
+                auto-disparada
+              </Badge>
+            )}
           </CardContent>
         </Card>
       )}
