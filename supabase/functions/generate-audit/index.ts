@@ -104,6 +104,9 @@ interface OutlineState {
     summary: Record<string, any>;
   };
   finalized?: boolean;
+  en_done?: boolean;
+  en_blocks?: Record<string, string>;
+  en_exec_summary_html?: string;
 }
 
 function groupCoverage(lang: Lang = "pt") {
@@ -997,9 +1000,9 @@ ${(outline.rendered_blocks ?? []).map((item) => item.html).join("\n").slice(0, 1
           ...(outline.close.summary ?? {}),
           generator: "senex-ai",
           model: PRIMARY_MODEL,
-          status,
-          stage: status,
-          stage_label: status === "ready" ? "Pronto" : "Pronto com lacunas",
+          status: "processing",
+          stage: "translating_en",
+          stage_label: "Gerando versão em inglês (native)",
           progress: 100,
           blocks_done: outline.rendered_blocks?.length ?? outline.blocks.length,
           blocks_total: totalBlocks,
@@ -1012,7 +1015,7 @@ ${(outline.rendered_blocks ?? []).map((item) => item.html).join("\n").slice(0, 1
           audit_context: refreshedSummary.audit_context ?? auditContext,
         };
 
-        outline = { ...outline, finalized: true };
+        // Persist PT result first, mantém finalized=false até o EN concluir
         await service.from("technical_audits").update({
           html_path: publicUrl.publicUrl,
           summary: finalSummary,
@@ -1020,9 +1023,157 @@ ${(outline.rendered_blocks ?? []).map((item) => item.html).join("\n").slice(0, 1
           last_heartbeat: new Date().toISOString(),
         }).eq("id", auditId);
         await pushLog({
-          level: status === "ready" ? "info" : "warn",
+          level: "info",
           phase: "save",
-          message: `Geração concluída — status ${status}${(outline.skipped_blocks?.length ?? 0) ? ` · ${outline.skipped_blocks?.length} bloco(s) pulado(s)` : ""}`,
+          message: `PT salvo (${(fullHtml.length / 1024).toFixed(1)} KB) — iniciando EN nativo em paralelo`,
+        });
+
+        // ===== EN native generation (parallel per-block translate/rewrite) =====
+        if (!outline.en_done) {
+          await setStage("translating_en", "Gerando versão em inglês (native, paralelo)", 96, {
+            blocks_done: outline.rendered_blocks?.length ?? 0,
+            blocks_total: totalBlocks,
+          });
+          const prompts = await loadActivePrompts(service);
+          const baseSystemEn = buildBaseSystem(
+            { snapshot: snapshot!, prevAuditsCtx: prevAuditsCtx! },
+            "en",
+            prompts.en?.system,
+          );
+          const blocksToTranslate = outline.rendered_blocks ?? [];
+          const enHtmlByBlock: Record<string, string> = { ...(outline.en_blocks ?? {}) };
+          const translateTool = {
+            type: "function",
+            function: {
+              name: "emit_block_en",
+              description: "Native English rewrite of one audit block.",
+              parameters: {
+                type: "object",
+                properties: { html: { type: "string" } },
+                required: ["html"],
+                additionalProperties: false,
+              },
+            },
+          };
+          // Batch parallel calls (limit 3 concurrent to avoid gateway pressure)
+          const concurrency = 3;
+          for (let i = 0; i < blocksToTranslate.length; i += concurrency) {
+            const slice = blocksToTranslate.slice(i, i + concurrency);
+            const settled = await Promise.allSettled(slice.map(async (b) => {
+              if (enHtmlByBlock[b.block_id]) return { block_id: b.block_id, html: enHtmlByBlock[b.block_id] };
+              const out = await resilientCall([
+                { role: "system", content: baseSystemEn },
+                {
+                  role: "user",
+                  content: `Produce a NATIVE ENGLISH rewrite of the audit block below (do not literally translate — write as if originally authored in English by a senior auditor). REQUIREMENTS:
+- Keep ALL inline SVG, ids, table structure, numeric values and section tags exactly as in the source.
+- Use canonical EN titles from the checklist for any h2/h3 that map to a known id.
+- Keep <p class="caption">/<figcaption> captions, just translate their text.
+- Output a single <section id="${b.block_id}"> fragment, no <html>/<head>/<body>.
+
+PT SOURCE:
+${b.html}`,
+                },
+              ], translateTool, {
+                phase: "block",
+                block_id: `en-${b.block_id}`,
+                label: `EN rewrite ${b.block_id}`,
+              });
+              return { block_id: b.block_id, html: String(out.html ?? b.html) };
+            }));
+            for (let k = 0; k < settled.length; k++) {
+              const r = settled[k];
+              const src = slice[k];
+              if (r.status === "fulfilled") {
+                enHtmlByBlock[r.value.block_id] = r.value.html;
+              } else {
+                enHtmlByBlock[src.block_id] = src.html; // fallback: PT
+                await pushLog({
+                  level: "warn",
+                  phase: "block",
+                  block_id: `en-${src.block_id}`,
+                  message: `EN rewrite failed → fallback to PT (${(r.reason as any)?.message ?? r.reason})`,
+                });
+              }
+            }
+            outline = { ...outline, en_blocks: enHtmlByBlock };
+            await saveOutline(outline);
+          }
+
+          // EN exec summary (one-shot rewrite)
+          let execEn = outline.close?.exec_summary_html ?? "";
+          try {
+            const closeEnTool = {
+              type: "function",
+              function: {
+                name: "emit_close_en",
+                description: "Native English rewrite of executive summary.",
+                parameters: {
+                  type: "object",
+                  properties: { exec_summary_html: { type: "string" } },
+                  required: ["exec_summary_html"],
+                  additionalProperties: false,
+                },
+              },
+            };
+            const outClose = await resilientCall([
+              { role: "system", content: baseSystemEn },
+              {
+                role: "user",
+                content: `Rewrite this executive summary as NATIVE ENGLISH. Preserve all SVG, table structure, ids, numbers. Return a single <section id="executive-summary"> fragment.\n\nPT SOURCE:\n${outline.close?.exec_summary_html ?? ""}`,
+              },
+            ], closeEnTool, { phase: "cierre", label: "EN executive summary" });
+            execEn = String(outClose.exec_summary_html ?? execEn);
+          } catch (err: any) {
+            await pushLog({ level: "warn", phase: "cierre", message: `EN exec summary fallback → PT (${err?.message ?? err})` });
+          }
+
+          // Build EN full html
+          const headerEn = `<header><h1>Technical audit ${auditId.toUpperCase()}</h1><p class="meta">Generated on ${new Date().toISOString().slice(0, 10)} · i18n ${effectiveSystemVersion || "n/a"} · last changelog entry: ${effectiveChangelogDate ?? "n/a"}</p><p class="meta">Platform: <strong>Senex AI</strong> · Engine: <strong>PetMoreTime</strong></p></header>`;
+          let bodyHtmlEn = `${headerEn}\n${execEn}\n${blocksToTranslate.map((b) => enHtmlByBlock[b.block_id] ?? b.html).join("\n")}`;
+          if (coverage.missing.length > 0) {
+            const listEn = coverage.missing.map((item) => `<li><strong>${item.title_en || item.title_pt}</strong> (id <code>${item.id}</code>) — pillar ${item.pillar_en || item.pillar}</li>`).join("");
+            bodyHtmlEn += `\n<section id="generation-warnings" class="warnings"><h2>Generation gaps</h2><p>The checklist items below were not emitted. Re-run the audit to fill them.</p><ul>${listEn}</ul></section>`;
+          }
+          const fullHtmlEn = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Audit ${auditId}</title>${style}</head><body>${bodyHtmlEn}</body></html>`;
+          const pathEn = `${numericVersion}/auditoria-en.html`;
+          const { error: upErrEn } = await service.storage
+            .from("audit-reports")
+            .upload(pathEn, new TextEncoder().encode(fullHtmlEn), { upsert: true, contentType: "text/html; charset=utf-8" });
+          let publicUrlEn: string | null = null;
+          if (upErrEn) {
+            await pushLog({ level: "error", phase: "save", message: `EN upload failed: ${upErrEn.message}` });
+            warnings.push(`EN upload failed: ${upErrEn.message}`);
+          } else {
+            const { data: pubEn } = service.storage.from("audit-reports").getPublicUrl(pathEn);
+            publicUrlEn = pubEn.publicUrl;
+            outline = { ...outline, en_done: true, en_exec_summary_html: execEn };
+            await saveOutline(outline);
+            await pushLog({ level: "info", phase: "save", message: `EN salvo (${(fullHtmlEn.length / 1024).toFixed(1)} KB)` });
+          }
+          if (publicUrlEn) {
+            await service.from("technical_audits").update({ html_path_en: publicUrlEn }).eq("id", auditId);
+          }
+        }
+
+        // Finalize (PT + EN done)
+        const finalStatus = warnings.length > 0 ? "ready_with_warnings" : "ready";
+        outline = { ...outline, finalized: true };
+        await service.from("technical_audits").update({
+          summary: {
+            ...finalSummary,
+            status: finalStatus,
+            stage: finalStatus,
+            stage_label: finalStatus === "ready" ? "Pronto (PT + EN)" : "Pronto com lacunas",
+            warnings,
+          },
+          outline,
+          last_heartbeat: new Date().toISOString(),
+        }).eq("id", auditId);
+        await pushLog({
+          level: finalStatus === "ready" ? "info" : "warn",
+          phase: "save",
+          message: `Geração concluída (PT + EN) — status ${finalStatus}${(outline.skipped_blocks?.length ?? 0) ? ` · ${outline.skipped_blocks?.length} bloco(s) pulado(s)` : ""}`,
         });
       } catch (error: any) {
         console.error("background audit generation failed:", error);

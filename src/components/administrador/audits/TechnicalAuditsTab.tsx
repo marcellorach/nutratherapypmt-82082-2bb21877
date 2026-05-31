@@ -53,6 +53,7 @@ interface TechnicalAudit {
   scope: string;
   scope_history: Array<{ scope: string; edited_at: string; edited_by?: string }>;
   html_path: string | null;
+  html_path_en?: string | null;
   pdf_path: string | null;
   docx_path: string | null;
   summary: Record<string, unknown> & {
@@ -106,6 +107,7 @@ export default function TechnicalAuditsTab() {
   const [viewerHtml, setViewerHtml] = useState<string | null>(null);
   const [viewerLoading, setViewerLoading] = useState(false);
   const [viewerError, setViewerError] = useState<string | null>(null);
+  const [viewerLang, setViewerLang] = useState<"pt" | "en">("pt");
 
   // dialog state
   const [newScope, setNewScope] = useState(DEFAULT_NEW_SCOPE);
@@ -197,14 +199,15 @@ export default function TechnicalAuditsTab() {
     let cancelled = false;
     setViewerHtml(null);
     setViewerError(null);
-    if (!selected?.html_path) return;
+    const path = viewerLang === "en" && selected?.html_path_en ? selected.html_path_en : selected?.html_path;
+    if (!path) return;
     setViewerLoading(true);
-    fetchAuditHtml(selected.html_path)
+    fetchAuditHtml(path)
       .then((html) => { if (!cancelled) setViewerHtml(html); })
       .catch((e) => { if (!cancelled) setViewerError(e instanceof Error ? e.message : String(e)); })
       .finally(() => { if (!cancelled) setViewerLoading(false); });
     return () => { cancelled = true; };
-  }, [selected?.id, selected?.html_path]);
+  }, [selected?.id, selected?.html_path, selected?.html_path_en, viewerLang]);
 
   const nextVersion = useMemo(() => {
     return `v${SENEX_VERSION}`;
@@ -620,11 +623,29 @@ export default function TechnicalAuditsTab() {
               </CardTitle>
               {selected?.html_path && (
                 <div className="flex flex-wrap items-center gap-2">
+                  {selected?.html_path_en && (
+                    <div className="inline-flex rounded-md border bg-background p-0.5 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setViewerLang("pt")}
+                        className={`px-2 py-1 rounded ${viewerLang === "pt" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                      >
+                        PT
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setViewerLang("en")}
+                        className={`px-2 py-1 rounded ${viewerLang === "en" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                      >
+                        EN
+                      </button>
+                    </div>
+                  )}
                   <Button
                     size="sm"
                     variant="outline"
                     className="gap-1"
-                    onClick={() => window.open(selected.html_path!, "_blank")}
+                    onClick={() => window.open((viewerLang === "en" && selected.html_path_en) ? selected.html_path_en : selected.html_path!, "_blank")}
                   >
                     <ExternalLink className="h-3 w-3" /> {t("audits.viewer.openNewTab")}
                   </Button>
