@@ -210,7 +210,18 @@ export default function TechnicalAuditsTab() {
   }, [selected?.id, selected?.html_path, selected?.html_path_en, viewerLang]);
 
   const nextVersion = useMemo(() => {
-    return `v${SENEX_VERSION}`;
+    // Auto-bump: se já existe uma auditoria com a versão atual do Senex,
+    // incrementa o PATCH até encontrar uma versão livre (7.0.0 → 7.0.1 → 7.0.2...).
+    const base = SENEX_VERSION;
+    const existing = new Set(audits.map((a) => a.version));
+    if (!existing.has(base)) return `v${base}`;
+    const parts = base.split(".").map((n) => parseInt(n, 10));
+    if (parts.length !== 3 || parts.some((n) => Number.isNaN(n))) return `v${base}`;
+    let [maj, min, patch] = parts;
+    do {
+      patch += 1;
+    } while (existing.has(`${maj}.${min}.${patch}`) && patch < 999);
+    return `v${maj}.${min}.${patch}`;
   }, [audits]);
 
   const handleRequestNew = async () => {
