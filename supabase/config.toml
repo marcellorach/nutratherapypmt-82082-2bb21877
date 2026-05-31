@@ -137,3 +137,6 @@ verify_jwt = true
 
 [functions.finalize-stalled-cohort]
 verify_jwt = true
+
+[functions.audit-watchdog]
+verify_jwt = false

@@ -4937,8 +4937,11 @@ export type Database = {
           docx_path: string | null
           html_path: string | null
           id: string
+          last_heartbeat: string | null
           outline: Json | null
           pdf_path: string | null
+          progress_log: Json
+          resume_count: number
           scope: string
           scope_history: Json
           summary: Json
@@ -4954,8 +4957,11 @@ export type Database = {
           docx_path?: string | null
           html_path?: string | null
           id: string
+          last_heartbeat?: string | null
           outline?: Json | null
           pdf_path?: string | null
+          progress_log?: Json
+          resume_count?: number
           scope: string
           scope_history?: Json
           summary?: Json
@@ -4971,8 +4977,11 @@ export type Database = {
           docx_path?: string | null
           html_path?: string | null
           id?: string
+          last_heartbeat?: string | null
           outline?: Json | null
           pdf_path?: string | null
+          progress_log?: Json
+          resume_count?: number
           scope?: string
           scope_history?: Json
           summary?: Json
