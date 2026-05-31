@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-05-31T12:25:03.735Z
+Generated: 2026-05-31T23:34:21.781Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
 ## Latest i18n version: 1.115.8
 
 ## Changes by area (last 14 days)
-- **admin**: 53
+- **admin**: 54
 - **curation**: 7
 - **kg**: 6
 - **meta**: 5
@@ -15,6 +15,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **clinical-pipeline**: 1
 
 ## Top 10 recent entries
+### 2026-05-31 · [admin] ADDED — Auditoria técnica: auto-bump de versão + bibliografia obrigatória
+- Botão "Run new audit" no `TechnicalAuditsTab` agora calcula a próxima versão automaticamente: se `v{SENEX_VERSION}` já existe na tabela `technical_audits`, incrementa o PATCH (7.0.0 → 7.0.1 → 7.0.2...) até achar uma versão livre. Isso permite re-rodar auditorias sem sobrescrever a anterior nem editar manualmente o senex version.
+- `generate-audit` passou a anexar uma seção `<section id="references">` ao final dos relatórios PT e EN com bibliografia curada (37 entradas: Hetionet, TxGNN, PrimeKG, ChEBI, MONDO, MeSH, OMIA, Dog Aging Project, Hallmarks of Aging, GMLP/FDA, EMA, AVMA, RAG/Med-PaLM, etc.) ordenada por ano. Os prompts PT/EN exigem agora citações inline no formato (Autor, Ano) em todos os blocos, sem invenção de fontes.
+- Files: src/components/administrador/audits/TechnicalAuditsTab.tsx, supabase/functions/generate-audit/index.ts
+_files: src/components/administrador/audits/TechnicalAuditsTab.tsx, supabase/functions/generate-audit/index.ts_
+
 ### 2026-05-31 · [admin] FIXED — Auditoria técnica agora retoma por checkpoints curtos
 - `generate-audit` deixou de depender de uma execução longa única e passou a persistir checkpoints no campo `outline`: outline salvo, blocos renderizados salvos um a um, sumário executivo salvo separadamente e montagem final só no último passo.
 - Cada continuação agora é reinvocada internamente com credencial de serviço aceita pela própria função, corrigindo o caso em que o watchdog detectava travamento mas não conseguia retomar a auditoria automaticamente.
@@ -68,12 +74,6 @@ _files: src/data/prioritizationBoard.ts, src/components/administrador/priorizaco
 - Adicionada validação server-side das 4 regras duras: exatamente 6 cohorts, 6 `target_model_id` distintos cobrindo todos os modelos, `record_requirements` não-vazio em todos, ≥2 cohorts com `cohort_population` deceased/mixed.
 - Pipeline com 3 camadas: tentativa primária → retry no primário com mensagem de correção apontando as `issues` → fallback automático para `openai/gpt-5.4`. 429/402 do primário disparam fallback direto.
 _files: supabase/functions/suggest-cohort-ideas/index.ts_
-
-### 2026-05-26 · [admin] ADDED — 6 modelos preditivos + cohorts ancorados (amplo × estratificado, vivos × falecidos)
-- Catálogo de modelos preditivos expandido de 4 → 6: adicionados `mortality-risk-window` (Risco de Mortalidade e Janela de Intervenção — 100% treinado em cães já falecidos como gold label) e `treatment-adherence` (Previsão de Adesão ao Tratamento — sinais operacionais PetLove de recompra/agendamentos/check-ins). Ambos entram com status `initial`, `totalPetsMonitored=0` e `nextMilestone` apontando para o primeiro cohort-âncora — sem mock inflado.
-- Sugestões de cohort reorientadas para VALOR PetLove (não preenchimento de KG): novo system prompt em `suggest-cohort-ideas` orienta o LLM a propor exatamente 6 cohorts (1 por modelo), com pelo menos 2 cohorts de cães falecidos (`deceased`/`mixed`) para alimentar Disease Progression e Mortality Risk com trajetórias completas pré-óbito.
-- Duas larguras por cohort: `broad` (N=1000–2500, padrão diluído, viabilidade alta) e `stratified` (N=150–400, padrão nítido, impacto alto) — mistura livre entre os 6 cohorts.
-_files: src/components/administrador/modelosPreditivos/data/predictiveModelsData.ts, src/components/administrador/priorizacoes/CohortAISuggester.tsx, supabase/functions/suggest-cohort-ideas/index.ts, src/locales/pt/translation.json…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

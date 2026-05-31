@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-31T12:25:03.724Z
+// Última geração: 2026-05-31T23:34:21.776Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,23 @@ export const lastChangelogDate = "2026-05-31";
 export const senexVersion = "7.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-31",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Auditoria técnica: auto-bump de versão + bibliografia obrigatória",
+    "bullets": [
+      "Botão \"Run new audit\" no `TechnicalAuditsTab` agora calcula a próxima versão automaticamente: se `v{SENEX_VERSION}` já existe na tabela `technical_audits`, incrementa o PATCH (7.0.0 → 7.0.1 → 7.0.2...) até achar uma versão livre. Isso permite re-rodar auditorias sem sobrescrever a anterior nem editar manualmente o senex version.",
+      "`generate-audit` passou a anexar uma seção `<section id=\"references\">` ao final dos relatórios PT e EN com bibliografia curada (37 entradas: Hetionet, TxGNN, PrimeKG, ChEBI, MONDO, MeSH, OMIA, Dog Aging Project, Hallmarks of Aging, GMLP/FDA, EMA, AVMA, RAG/Med-PaLM, etc.) ordenada por ano. Os prompts PT/EN exigem agora citações inline no formato (Autor, Ano) em todos os blocos, sem invenção de fontes.",
+      "Files: src/components/administrador/audits/TechnicalAuditsTab.tsx, supabase/functions/generate-audit/index.ts"
+    ],
+    "files": [
+      "src/components/administrador/audits/TechnicalAuditsTab.tsx",
+      "supabase/functions/generate-audit/index.ts"
+    ],
+    "i18nVersion": "1.115.8"
+  },
   {
     "date": "2026-05-31",
     "kind": "fixed",
