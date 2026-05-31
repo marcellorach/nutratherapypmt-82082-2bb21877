@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Network } from 'vis-network';
 import { DataSet } from 'vis-data';
-import 'vis-network/styles/vis-network.css';
 import { BiologicalNetworkData, BiologicalNode, BiologicalLink } from './types';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
