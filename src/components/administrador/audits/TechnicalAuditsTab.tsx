@@ -185,6 +185,40 @@ export default function TechnicalAuditsTab() {
 
   const pendingRequests = requests.filter((r) => r.status === "pending");
 
+  const activeAudits = useMemo(() => audits.filter((a) => !a.superseded_by), [audits]);
+  const supersededAudits = useMemo(() => audits.filter((a) => a.superseded_by), [audits]);
+  const visibleAudits = showSuperseded ? audits : activeAudits;
+
+  const runWatchdog = async () => {
+    setWatching(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("audit-change-watchdog");
+      if (error) throw error;
+      const d = data as { count?: number; shouldTrigger?: boolean; created?: boolean };
+      toast({
+        title: d?.created
+          ? "Nova solicitação de auditoria criada"
+          : d?.shouldTrigger
+            ? `${d.count} mudanças detectadas — já existe solicitação pendente`
+            : `Somente ${d?.count ?? 0} mudanças desde a última auditoria (limite ${threshold})`,
+      });
+      load();
+    } catch (e) {
+      toast({
+        title: "Falha ao verificar mudanças",
+        description: e instanceof Error ? e.message : String(e),
+        variant: "destructive",
+      });
+    } finally {
+      setWatching(false);
+    }
+  };
+
+  const saveThreshold = async (value: number) => {
+    setThreshold(value);
+    await supabase.from("audit_settings").update({ change_threshold: value }).eq("id", true);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -267,18 +301,61 @@ export default function TechnicalAuditsTab() {
       <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6">
         {/* Lista */}
         <div className="space-y-3">
-          {!loading && audits.length >= 2 && (
-            <AuditVersionComparison audits={audits} />
+          {!loading && activeAudits.length >= 2 && (
+            <AuditVersionComparison audits={activeAudits} />
           )}
+
+          {/* Painel de configuração do watchdog */}
+          {!loading && (
+            <Card className="border-muted">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs flex items-center gap-2 text-muted-foreground">
+                  <SettingsIcon className="h-3.5 w-3.5" />
+                  Auditoria automática
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <label className="text-muted-foreground">Limite:</label>
+                  <Input
+                    type="number"
+                    min={2}
+                    max={20}
+                    value={threshold}
+                    onChange={(e) => saveThreshold(Math.max(2, Math.min(20, Number(e.target.value) || 6)))}
+                    className="h-7 w-16 text-xs"
+                  />
+                  <span className="text-muted-foreground">mudanças críticas</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground leading-snug">
+                  Conta entradas Added/Changed/Fixed em <code>curation · kg · clinical-pipeline · infra · base-knowledge</code> desde a última auditoria ativa.
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full h-7 gap-1 text-xs"
+                  onClick={runWatchdog}
+                  disabled={watching}
+                >
+                  <RefreshCw className={`h-3 w-3 ${watching ? "animate-spin" : ""}`} />
+                  {watching ? "Verificando…" : "Verificar agora"}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
           {loading && (
             <p className="text-sm text-muted-foreground">{t("audits.loading")}</p>
           )}
-          {audits.map((a) => {
+          {visibleAudits.map((a) => {
             const isSelected = a.id === selectedId;
+            const isSuperseded = !!a.superseded_by;
             return (
               <Card
                 key={a.id}
-                className={`cursor-pointer transition-all ${isSelected ? "border-primary shadow-md" : "hover:border-muted-foreground/30"}`}
+                className={`cursor-pointer transition-all ${
+                  isSelected ? "border-primary shadow-md" : "hover:border-muted-foreground/30"
+                } ${isSuperseded ? "opacity-60" : ""}`}
                 onClick={() => setSelectedId(a.id)}
               >
                 <CardHeader className="pb-2">
@@ -293,6 +370,11 @@ export default function TechnicalAuditsTab() {
                     {t("audits.system")}: <span className="font-mono">{a.system_version}</span>
                     {a.system_changelog_date && ` · ${a.system_changelog_date}`}
                   </p>
+                  {isSuperseded && (
+                    <Badge variant="secondary" className="text-[10px] mt-1 w-fit">
+                      Substituída por {a.superseded_by?.toUpperCase()}
+                    </Badge>
+                  )}
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex flex-wrap gap-1.5 text-xs">
