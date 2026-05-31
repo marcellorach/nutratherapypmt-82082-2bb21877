@@ -104,6 +104,9 @@ interface OutlineState {
     summary: Record<string, any>;
   };
   finalized?: boolean;
+  en_done?: boolean;
+  en_blocks?: Record<string, string>;
+  en_exec_summary_html?: string;
 }
 
 function groupCoverage(lang: Lang = "pt") {
