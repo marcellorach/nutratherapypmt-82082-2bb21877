@@ -1,6 +1,5 @@
 
 import React, { useRef, useEffect } from 'react';
-import 'vis-network/styles/vis-network.css';
 import { useNetworkGraph } from '@/hooks/network/useNetworkGraph';
 import NetworkControls from './graph/NetworkControls';
 import BiologicalLegend from './graph/BiologicalLegend';

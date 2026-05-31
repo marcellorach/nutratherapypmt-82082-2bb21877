@@ -6,7 +6,6 @@ import { Progress } from "@/components/ui/progress";
 import { Play, Pause, Zap, Network } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
-import "./agentAnimation.css";
 
 import { agents, agentPositions } from './agentData';
 import { useAnalysisSimulation } from './useAnalysisSimulation';

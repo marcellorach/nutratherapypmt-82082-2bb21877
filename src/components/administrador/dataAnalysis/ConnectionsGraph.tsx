@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { AgentConnection, DataPacket } from './types';
-import "./agentAnimation.css";
 
 interface ConnectionsGraphProps {
   connections: AgentConnection[];

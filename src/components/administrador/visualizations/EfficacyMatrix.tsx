@@ -11,7 +11,6 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { ArrowDown, ArrowUp, Search, Filter, Download, Star, StarOff, TrendingUp, TrendingDown, PieChart, BarChart2, ChevronDown } from 'lucide-react';
 import { getEvidenceLevel } from '@/rules/general/evidence-levels';
 import { ChartContainer } from '@/components/ui/chart';
-import '@/components/administrador/visualizations/ai-processing.css';
 
 interface MatrixCell {
   nutraceuticoId: number;
