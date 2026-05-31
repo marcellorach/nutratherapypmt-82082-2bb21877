@@ -454,6 +454,54 @@ export default function TechnicalAuditsTab() {
                 Lacunas no checklist: <span className="font-mono">{progress.coverage_missing.slice(0, 6).join(", ")}{progress.coverage_missing.length > 6 ? "…" : ""}</span>
               </p>
             )}
+            {/* Heartbeat + watchdog status */}
+            {progress.status === "processing" && (() => {
+              const hb = progress.last_heartbeat ? new Date(progress.last_heartbeat).getTime() : 0;
+              const ageMs = hb ? nowTick - hb : 0;
+              const ageSec = Math.max(0, Math.round(ageMs / 1000));
+              const tone = !hb ? "text-muted-foreground" : ageSec > 90 ? "text-destructive" : ageSec > 30 ? "text-amber-700" : "text-muted-foreground";
+              return (
+                <div className="flex items-center gap-2 text-[11px]">
+                  <span className={tone}>
+                    Última atividade: {hb ? `há ${ageSec}s` : "—"}
+                    {(progress.resume_count ?? 0) > 0 ? ` · retomadas: ${progress.resume_count}` : ""}
+                  </span>
+                  {ageSec > 90 && (
+                    <Badge variant="destructive" className="text-[9px]">watchdog acionará em breve</Badge>
+                  )}
+                </div>
+              );
+            })()}
+            {/* Live log panel */}
+            {progress.log && progress.log.length > 0 && (
+              <div className="mt-1">
+                <button
+                  type="button"
+                  onClick={() => setLogOpen((v) => !v)}
+                  className="text-[11px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+                >
+                  {logOpen ? "▾" : "▸"} Log da geração ({progress.log.length} entradas)
+                </button>
+                {logOpen && (
+                  <ScrollArea className="mt-1 h-48 rounded border bg-background/60 p-2">
+                    <ul className="space-y-1 font-mono text-[10.5px] leading-snug">
+                      {[...progress.log].reverse().map((e, i) => {
+                        const ts = new Date(e.ts);
+                        const ago = Math.max(0, Math.round((nowTick - ts.getTime()) / 1000));
+                        const color = e.level === "error" ? "text-destructive" : e.level === "warn" ? "text-amber-700" : "text-foreground";
+                        return (
+                          <li key={`${e.ts}-${i}`} className="flex gap-2">
+                            <span className="text-muted-foreground shrink-0 w-16">há {ago}s</span>
+                            <span className="shrink-0 w-16 uppercase text-muted-foreground">{e.phase}</span>
+                            <span className={`${color} break-words`}>{e.message}</span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </ScrollArea>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
