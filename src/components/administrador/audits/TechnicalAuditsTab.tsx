@@ -100,10 +100,10 @@ export default function TechnicalAuditsTab() {
       supabase.from("audit_requests").select("*").order("requested_at", { ascending: false }),
     ]);
     if (a.data) {
-      setAudits(a.data as TechnicalAudit[]);
+      setAudits(a.data as unknown as TechnicalAudit[]);
       if (!selectedId && a.data.length) setSelectedId(a.data[0].id);
     }
-    if (r.data) setRequests(r.data as AuditRequest[]);
+    if (r.data) setRequests(r.data as unknown as AuditRequest[]);
     setLoading(false);
   };
 
