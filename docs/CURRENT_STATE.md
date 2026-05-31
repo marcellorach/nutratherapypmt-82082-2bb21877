@@ -1,8 +1,8 @@
 # 📍 NutraTherapy - Estado Atual do Projeto
 
 ---
-**Versão:** 1.10.0  
-**Última Atualização:** 2026-03-12  
+**Versão:** 1.10.1  
+**Última Atualização:** 2026-05-31  
 **Responsável:** AI Assistant  
 **Status:** 🟢 Atualizado  
 ---
@@ -218,6 +218,13 @@ Todas as tabs estão criadas com lazy loading e funcionando:
 - ✅ **UI adaptativa** por role
 
 ### 6. 🛠️ Serviços Modularizados (100% Funcional)
+
+### 7. 🧾 Auditorias Técnicas Versionadas (Funcional com retomada automática)
+
+- ✅ Geração de auditorias técnicas em HTML versionado dentro da aba administrativa
+- ✅ Log persistido de progresso por etapa (`outline`, blocos, cierre e salvamento)
+- ✅ Checkpoints salvos no backend para continuar do último bloco em vez de reiniciar a auditoria inteira
+- ✅ Retomada automática por watchdog quando uma execução fica sem heartbeat
 
 #### **NutraceuticalsService**
 ```

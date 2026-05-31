@@ -1,8 +1,8 @@
 # 🏗️ NutraTherapy - Arquitetura Técnica Completa
 
 ---
-**Versão:** 1.12.1  
-**Última Atualização:** 2026-05-13  
+**Versão:** 1.12.2  
+**Última Atualização:** 2026-05-31  
 **Responsável:** AI Assistant  
 **Status:** 🟢 Atualizado  
 **Motor:** **Senex AI** · © **PetMoreTime** · 2025–presente · desenvolvimento e operação exclusivos · sucessor da arquitetura interna VetGraphRAG/VetMedGraph  
@@ -87,6 +87,7 @@ O sistema combina:
 - **Supabase** 2.49.4 - BaaS (Auth, DB, Storage, Edge Functions)
 - **PostgreSQL** - Database (via Supabase)
 - **Edge Functions** - Serverless compute (Deno runtime)
+- **Pipeline de auditoria técnica** - Geração versionada com checkpoints persistidos por etapa (outline → blocos → cierre → upload) e retomada autônoma sem reiniciar do zero
 
 #### **Internacionalização**
 - **i18next** 25.2.0 - i18n framework
