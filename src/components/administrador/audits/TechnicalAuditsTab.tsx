@@ -31,7 +31,6 @@ import {
   ShieldCheck,
   AlertTriangle,
   CheckCircle2,
-  Bot,
   Eye,
   EyeOff,
   RefreshCw,
