@@ -469,6 +469,18 @@ export default function TechnicalAuditsTab() {
               </CardContent>
             </Card>
           )}
+
+          {!loading && supersededAudits.length > 0 && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="w-full h-7 text-xs gap-1 text-muted-foreground"
+              onClick={() => setShowSuperseded((v) => !v)}
+            >
+              {showSuperseded ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+              {showSuperseded ? "Ocultar" : "Mostrar"} {supersededAudits.length} versão(ões) substituída(s)
+            </Button>
+          )}
         </div>
 
         {/* Visualizador */}
