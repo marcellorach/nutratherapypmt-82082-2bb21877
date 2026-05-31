@@ -215,6 +215,23 @@ POLÍTICA OBRIGATÓRIA:
 - Cada item do checklist canônico precisa aparecer como subseção com id estável.
 - Áreas existentes mas incompletas → classifique como "parcial", "doc-only", "sandbox" ou "planejado" e descreva o gap. NUNCA omita.
 
+VISUALIZAÇÕES OBRIGATÓRIAS (gráficos, diagramas, infográficos):
+- O relatório DEVE conter elementos visuais ricos além de tabelas. NÃO use bibliotecas externas — emita SVG inline puro (sem <script>, sem <foreignObject>) e divs com classes utilitárias já existentes no CSS do relatório.
+- Mínimo por relatório completo: 6 gráficos SVG + 3 diagramas SVG + 4 infográficos (cards/KPIs/heatmaps em HTML+SVG).
+- Distribua: cada bloco principal deve ter pelo menos 1 visual (gráfico OU diagrama OU infográfico) coerente com o tema da seção.
+- Tipos aceitos (escolha o mais adequado ao dado):
+  * Gráfico de barras horizontais/verticais (SVG <rect>) — para coberturas, contagens, comparações.
+  * Gráfico de rosca/donut (SVG <circle stroke-dasharray>) — para proporções (ex.: parity PT/EN, FDA covered/partial/missing).
+  * Heatmap / matriz (grid de <rect>) — para maturidade por pilar, risco × impacto.
+  * Diagrama de fluxo / pipeline (SVG com <rect>, <path>, <text>) — para arquitetura, fluxo de curadoria, ciclo de vida.
+  * Diagrama de camadas (ontologia 5-layer, stack de runtime) — caixas empilhadas com legendas.
+  * Infográfico de KPIs — grid <div class="kpi-grid"> com cards <div class="kpi"><span class="kpi-value">N</span><span class="kpi-label">…</span></div>.
+  * Timeline horizontal — SVG com linha + marcos para versões/auditorias.
+- Cores SEMPRE via paleta do relatório: #1d4ed8 (accent), #16a34a (ok), #b45309 (warn), #dc2626 (gap), #4b5563 (muted), #e5e7eb (soft). Não inventar cores.
+- TODO visual precisa de <figcaption> ou <p class="caption"> explicando o que representa e a fonte (snapshot, checklist, auditorias anteriores).
+- Os números nos visuais devem refletir o SNAPSHOT FACTUAL (não invente). Se o dado não estiver disponível, marque "n/d" no eixo/label e descreva no caption.
+- NUNCA use emoji em vez de visual. NUNCA use ASCII art. NUNCA referencie imagens externas (sem <img src=...>).
+
 CHECKLIST CANÔNICO (todos os ids devem aparecer no relatório):
 ${checklistForPrompt()}
 
