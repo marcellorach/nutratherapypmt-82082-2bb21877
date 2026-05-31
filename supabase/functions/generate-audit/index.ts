@@ -93,6 +93,30 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const service = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // Progress endpoint: return current stage/progress for a given audit id.
+    if ((body as any)?.action === "progress") {
+      const id = String((body as any).audit_id ?? "").toLowerCase();
+      if (!id) {
+        return new Response(JSON.stringify({ error: "audit_id required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      const { data: row } = await service
+        .from("technical_audits")
+        .select("id, html_path, summary, updated_at")
+        .eq("id", id)
+        .maybeSingle();
+      const summary: any = row?.summary ?? {};
+      return new Response(JSON.stringify({
+        audit_id: id,
+        status: summary.status ?? (row ? "unknown" : "missing"),
+        stage: summary.stage ?? null,
+        stage_label: summary.stage_label ?? null,
+        progress: typeof summary.progress === "number" ? summary.progress : null,
+        error: summary.error ?? null,
+        html_path: row?.html_path ?? null,
+        updated_at: row?.updated_at ?? null,
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     // Maintenance action: re-upload existing HTMLs with proper text/html content-type.
     if ((body as any)?.action === "fix_mime") {
       const { data: rows } = await service
@@ -288,6 +312,14 @@ Gere o relatório HTML completo agora. Lembre: o padrão de referência é a aud
     await service.storage.from("audit-reports").upload(placeholderPath, new TextEncoder().encode(pendingHtml), { upsert: true, contentType: "text/html; charset=utf-8" });
     const { data: pendPub } = service.storage.from("audit-reports").getPublicUrl(placeholderPath);
 
+    const initialSummary = {
+      status: "processing",
+      generator: "senex-ai",
+      model: PRIMARY_MODEL,
+      stage: "queued",
+      stage_label: "Na fila",
+      progress: 2,
+    };
     const { data: inserted, error: insErr } = await service
       .from("technical_audits")
       .upsert({
@@ -301,26 +333,40 @@ Gere o relatório HTML completo agora. Lembre: o padrão de referência é a aud
         html_path: pendPub.publicUrl,
         pdf_path: null,
         docx_path: null,
-        summary: { status: "processing", generator: "senex-ai", model: PRIMARY_MODEL },
+        summary: initialSummary,
         superseded_by: null,
       })
       .select("*")
       .single();
     if (insErr) throw insErr;
 
+    async function setStage(stage: string, label: string, progress: number, extra: Record<string, any> = {}) {
+      try {
+        await service.from("technical_audits").update({
+          summary: { ...initialSummary, ...extra, status: "processing", stage, stage_label: label, progress },
+        }).eq("id", auditId);
+      } catch (e) {
+        console.warn("setStage failed", e);
+      }
+    }
+
     const backgroundJob = (async () => {
       try {
+        await setStage("calling_model", "Gerando relatório com modelo principal", 15);
         let parsed: any;
         try {
           parsed = await callModel(PRIMARY_MODEL);
         } catch (e) {
           console.warn("Primary model failed, falling back:", e);
+          await setStage("calling_fallback", "Modelo principal falhou, usando fallback", 35);
           parsed = await callModel(FALLBACK_MODEL);
         }
+        await setStage("validating", "Validando estrutura e cobertura do relatório", 55);
         let html: string = parsed.html;
         let validation = assessAuditHtml(html);
         if (!validation.ok) {
           console.warn("Audit HTML below baseline, retrying with repair instructions", validation);
+          await setStage("repairing", "Reescrevendo para atingir o padrão v5.2.0", 65);
           try {
             parsed = await callModel(PRIMARY_MODEL, `Mantenha o padrão standalone cumulativo da v5.2.0. Problemas detectados: ${validation.issues.join("; ")}. Inclua as seções ausentes e reescreva tudo em formato completo.`);
           } catch (_e) {
@@ -332,16 +378,32 @@ Gere o relatório HTML completo agora. Lembre: o padrão de referência é a aud
             throw new Error(`Auditoria recusada por regressão de formato: ${validation.issues.join(" | ")}`);
           }
         }
-        const summary: any = { ...(parsed.summary ?? {}), generator: "senex-ai", model: PRIMARY_MODEL, status: "ready" };
+        await setStage("uploading", "Salvando relatório no storage", 85);
         const path = `${version}/auditoria.html`;
         const { error: upErr } = await service.storage.from("audit-reports").upload(path, new TextEncoder().encode(html), { upsert: true, contentType: "text/html; charset=utf-8" });
         if (upErr) throw upErr;
         const { data: pub } = service.storage.from("audit-reports").getPublicUrl(path);
+        const summary: any = {
+          ...(parsed.summary ?? {}),
+          generator: "senex-ai",
+          model: PRIMARY_MODEL,
+          status: "ready",
+          stage: "ready",
+          stage_label: "Pronto",
+          progress: 100,
+        };
         await service.from("technical_audits").update({ html_path: pub.publicUrl, summary }).eq("id", auditId);
       } catch (err: any) {
         console.error("background audit generation failed:", err);
         await service.from("technical_audits").update({
-          summary: { status: "failed", error: err?.message ?? String(err), generator: "senex-ai" },
+          summary: {
+            status: "failed",
+            stage: "failed",
+            stage_label: "Falhou",
+            progress: 100,
+            error: err?.message ?? String(err),
+            generator: "senex-ai",
+          },
         }).eq("id", auditId);
       }
     })();

@@ -38,6 +38,7 @@ import {
   RefreshCw,
   Settings as SettingsIcon,
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 // I18N_VERSION precisa bater com src/i18n.ts no momento da geração de uma auditoria.
 const CURRENT_I18N_VERSION = I18N_VERSION;
@@ -114,6 +115,16 @@ export default function TechnicalAuditsTab() {
   const [editTarget, setEditTarget] = useState<TechnicalAudit | null>(null);
   const [editScope, setEditScope] = useState("");
 
+  // Background generation progress (polled from edge function `progress` action)
+  const [progress, setProgress] = useState<null | {
+    audit_id: string;
+    status: string;
+    stage: string | null;
+    stage_label: string | null;
+    progress: number | null;
+    error: string | null;
+  }>(null);
+
   const load = async () => {
     setLoading(true);
     const [a, r, s] = await Promise.all([
@@ -187,15 +198,14 @@ export default function TechnicalAuditsTab() {
       toast({
         title: t("audits.toast.requestSuccessTitle", { version: nextVersion }),
         description: isProcessing
-          ? "A auditoria está sendo gerada em segundo plano (pode levar 2–4 min). Atualize a lista para acompanhar."
+          ? "Geração iniciada em segundo plano. O progresso aparece logo abaixo."
           : t("audits.toast.requestSuccessDesc"),
       });
       setNewOpen(false);
       await load();
       if (newId) setSelectedId(newId);
-      // Re-load a few times to catch the background completion
-      if (isProcessing) {
-        [60, 120, 210].forEach((s) => setTimeout(() => { load().catch(() => {}); }, s * 1000));
+      if (isProcessing && newId) {
+        setProgress({ audit_id: newId, status: "processing", stage: "queued", stage_label: "Na fila", progress: 2, error: null });
       }
     } catch (e) {
       toast({
@@ -207,6 +217,42 @@ export default function TechnicalAuditsTab() {
       setSubmitting(false);
     }
   };
+
+  // Poll the progress endpoint while a background job is running.
+  useEffect(() => {
+    if (!progress || progress.status !== "processing") return;
+    let cancelled = false;
+    const id = progress.audit_id;
+    const tick = async () => {
+      try {
+        const { data } = await supabase.functions.invoke("generate-audit", {
+          body: { action: "progress", audit_id: id },
+        });
+        if (cancelled || !data) return;
+        const next = data as any;
+        setProgress((prev) => prev && prev.audit_id === id ? { ...prev, ...next } : prev);
+        if (next.status === "ready" || next.status === "failed") {
+          await load();
+          if (next.status === "failed") {
+            toast({
+              title: "Falha na geração da auditoria",
+              description: next.error ?? "Erro desconhecido",
+              variant: "destructive",
+            });
+          } else {
+            toast({ title: `Auditoria ${id.toUpperCase()} pronta` });
+          }
+          // Keep ready banner visible briefly, then clear.
+          setTimeout(() => { if (!cancelled) setProgress(null); }, 4000);
+        }
+      } catch {
+        /* swallow — next tick will retry */
+      }
+    };
+    const interval = setInterval(tick, 5000);
+    tick();
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [progress?.audit_id, progress?.status]);
 
   const handleSaveScope = async () => {
     if (!editTarget) return;
@@ -334,6 +380,33 @@ export default function TechnicalAuditsTab() {
       </div>
 
       {/* Banner de fila removido: a geração agora é instantânea. */}
+
+      {progress && (
+        <Card className="border-primary/40 bg-primary/5">
+          <CardContent className="py-3 space-y-2">
+            <div className="flex items-center justify-between gap-3 text-sm">
+              <div className="flex items-center gap-2 min-w-0">
+                <RefreshCw className={`h-4 w-4 ${progress.status === "processing" ? "animate-spin text-primary" : progress.status === "failed" ? "text-destructive" : "text-success"}`} />
+                <span className="font-medium truncate">
+                  {progress.audit_id.toUpperCase()} —{" "}
+                  {progress.status === "ready"
+                    ? "Pronto"
+                    : progress.status === "failed"
+                      ? "Falhou"
+                      : (progress.stage_label ?? "Processando")}
+                </span>
+              </div>
+              <span className="text-xs text-muted-foreground tabular-nums">
+                {Math.round(progress.progress ?? 0)}%
+              </span>
+            </div>
+            <Progress value={progress.progress ?? 0} className="h-2" />
+            {progress.error && (
+              <p className="text-xs text-destructive">{progress.error}</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* 1. Gráfico de evolução — largura total */}
       {!loading && audits.length >= 1 && (
