@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-05-31T14:14:56.368Z",
+  "timestamp": "2026-05-31T14:37:10.692Z",
   "summary": {
-    "totalFiles": 944,
+    "totalFiles": 945,
     "totalIssues": 459,
     "hardcodedTexts": 54,
     "missingKeys": 403,
@@ -2244,6 +2244,13 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/visualizations/EfficacyMatrix.tsx",
+      "line": 113,
+      "text": "-",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/visualizations/EfficacyMatrix.tsx",
       "line": 114,
       "text": "-",
       "severity": "high"
@@ -2251,7 +2258,7 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/visualizations/EfficacyMatrix.tsx",
-      "line": 115,
+      "line": 122,
       "text": "-",
       "severity": "high"
     },
@@ -2265,7 +2272,7 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/visualizations/EfficacyMatrix.tsx",
-      "line": 124,
+      "line": 132,
       "text": "-",
       "severity": "high"
     },
@@ -2279,14 +2286,7 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/visualizations/EfficacyMatrix.tsx",
-      "line": 134,
-      "text": "-",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/components/administrador/visualizations/EfficacyMatrix.tsx",
-      "line": 248,
+      "line": 247,
       "text": "a",
       "severity": "high"
     },

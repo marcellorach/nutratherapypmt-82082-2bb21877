@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SENEX_VERSION } from '@/config/senex-version';
 
 type FailureDetail = {
@@ -83,6 +84,28 @@ export function installAssetFailureTelemetry() {
 /** Banner shown when one or more asset preload failures are captured. */
 export default function AssetFailureBanner() {
   const [detail, setDetail] = useState<FailureDetail | null>(null);
+  const { i18n } = useTranslation();
+  const lang = (i18n.language || 'pt').toLowerCase().startsWith('en') ? 'en' : 'pt';
+  const tr = {
+    pt: {
+      title: 'Falha ao carregar parte da aplicação',
+      body: 'Detectamos um recurso indisponível (provavelmente uma versão antiga em cache). Recarregue a página para obter a versão mais recente.',
+      build: 'Build',
+      resource: 'Recurso',
+      time: 'Horário',
+      reload: 'Recarregar',
+      dismiss: 'Dispensar',
+    },
+    en: {
+      title: 'Failed to load part of the application',
+      body: 'A resource is unavailable (likely a stale cached version). Reload the page to get the latest version.',
+      build: 'Build',
+      resource: 'Resource',
+      time: 'Time',
+      reload: 'Reload',
+      dismiss: 'Dismiss',
+    },
+  }[lang];
 
   useEffect(() => {
     const onFailure = (e: Event) => {
@@ -116,20 +139,19 @@ export default function AssetFailureBanner() {
         <div className="flex items-start gap-3">
           <div className="flex-1">
             <p className="text-sm font-semibold text-foreground">
-              Falha ao carregar parte da aplicação
+              {tr.title}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Detectamos um recurso indisponível (provavelmente uma versão antiga em cache).
-              Recarregue a página para obter a versão mais recente.
+              {tr.body}
             </p>
             <div className="mt-2 space-y-0.5 text-[10px] text-muted-foreground/80">
-              <div>Build: <span className="font-mono">{detail.buildVersion}</span></div>
+              <div>{tr.build}: <span className="font-mono">{detail.buildVersion}</span></div>
               {detail.url && (
                 <div className="truncate">
-                  Recurso: <span className="font-mono">{detail.url}</span>
+                  {tr.resource}: <span className="font-mono">{detail.url}</span>
                 </div>
               )}
-              <div>Horário: <span className="font-mono">{detail.timestamp}</span></div>
+              <div>{tr.time}: <span className="font-mono">{detail.timestamp}</span></div>
             </div>
           </div>
           <div className="flex flex-col gap-2">
@@ -138,14 +160,14 @@ export default function AssetFailureBanner() {
               onClick={handleReload}
               className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90"
             >
-              Recarregar
+              {tr.reload}
             </button>
             <button
               type="button"
               onClick={handleDismiss}
               className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted"
             >
-              Dispensar
+              {tr.dismiss}
             </button>
           </div>
         </div>
