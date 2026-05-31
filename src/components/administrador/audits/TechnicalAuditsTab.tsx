@@ -144,25 +144,33 @@ export default function TechnicalAuditsTab() {
 
   const handleRequestNew = async () => {
     setSubmitting(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    const { error } = await supabase.from("audit_requests").insert({
-      scope: newScope,
-      system_version: `i18n ${CURRENT_I18N_VERSION}`,
-      system_date: lastChangelogDate || new Date().toISOString().slice(0, 10),
-      status: "pending",
-      requested_by: user?.id ?? null,
-    });
-    setSubmitting(false);
-    if (error) {
-      toast({ title: t("audits.toast.requestError"), description: error.message, variant: "destructive" });
-      return;
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-audit", {
+        body: {
+          version: nextVersion,
+          scope: newScope,
+          system_version: `i18n ${CURRENT_I18N_VERSION}`,
+          system_changelog_date: lastChangelogDate || new Date().toISOString().slice(0, 10),
+        },
+      });
+      if (error) throw error;
+      const newId = (data as any)?.audit?.id ?? null;
+      toast({
+        title: t("audits.toast.requestSuccessTitle", { version: nextVersion }),
+        description: t("audits.toast.requestSuccessDesc"),
+      });
+      setNewOpen(false);
+      await load();
+      if (newId) setSelectedId(newId);
+    } catch (e) {
+      toast({
+        title: t("audits.toast.requestError"),
+        description: e instanceof Error ? e.message : String(e),
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
     }
-    toast({
-      title: t("audits.toast.requestSuccessTitle", { version: nextVersion }),
-      description: t("audits.toast.requestSuccessDesc"),
-    });
-    setNewOpen(false);
-    load();
   };
 
   const handleSaveScope = async () => {
