@@ -284,7 +284,7 @@ export default function TechnicalAuditsTab() {
         /* swallow — next tick will retry */
       }
     };
-    const interval = setInterval(tick, 5000);
+    const interval = setInterval(tick, 2000);
     tick();
     return () => { cancelled = true; clearInterval(interval); };
   }, [progress?.audit_id, progress?.status]);
