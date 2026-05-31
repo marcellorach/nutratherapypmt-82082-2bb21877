@@ -422,6 +422,30 @@ Deno.serve(async (req) => {
     const scope = String((body as any)?.scope ?? "").trim();
     const systemVersion = String((body as any)?.system_version ?? "").trim();
     const systemChangelogDate = (body as any)?.system_changelog_date ?? null;
+
+    // Auto-discovery: front-end may pass dynamic scope items derived from admin-tabs/organograma.
+    const incomingScopeItems = (body as any)?.scope_items;
+    if (Array.isArray(incomingScopeItems) && incomingScopeItems.length > 0) {
+      const sanitized: CoverageItem[] = incomingScopeItems
+        .filter((it: any) => it && typeof it.id === "string" && typeof it.title_pt === "string" && typeof it.pillar === "string")
+        .map((it: any) => ({
+          id: String(it.id),
+          pillar: String(it.pillar),
+          pillar_en: typeof it.pillar_en === "string" ? it.pillar_en : undefined,
+          title_pt: String(it.title_pt),
+          title_en: typeof it.title_en === "string" ? it.title_en : undefined,
+          expected: (["active","partial","doc_only","sandbox","planned"].includes(it.expected) ? it.expected : "active") as StatusHint,
+          evidence: typeof it.evidence === "string" ? it.evidence : "",
+        }));
+      // Merge: dynamic items + any fallback item not already covered (id-wise)
+      const dynIds = new Set(sanitized.map((s) => s.id));
+      const extras = FALLBACK_COVERAGE.filter((f) => !dynIds.has(f.id));
+      COVERAGE = [...sanitized, ...extras];
+      console.log(`[audit] dynamic scope_items received: ${sanitized.length} (+ ${extras.length} fallback)`);
+    } else {
+      COVERAGE = FALLBACK_COVERAGE;
+    }
+
     if (!version) {
       return new Response(JSON.stringify({ error: "version required" }), {
         status: 400,
