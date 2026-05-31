@@ -23,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import AuditVersionComparison from "./AuditVersionComparison";
 import ComplianceHistoryChart from "./ComplianceHistoryChart";
 import { openAuditForPrint, fetchAuditHtml } from "./audit-pdf-generator";
+import { renderCoverageScopePt, COVERAGE_VERSION } from "@/data/audit-coverage";
 import {
   FileText,
   Download,
@@ -60,6 +61,15 @@ interface TechnicalAudit {
     risks?: number | { count?: number };
     pages?: number;
     infographics?: number;
+    status?: string;
+    stage?: string;
+    stage_label?: string;
+    progress?: number;
+    blocks_done?: number;
+    blocks_total?: number;
+    warnings?: string[];
+    coverage_missing?: string[];
+    error?: string;
   };
   superseded_by: string | null;
   created_at: string;
@@ -77,21 +87,11 @@ interface AuditRequest {
   auto_triggered?: boolean;
 }
 
-const DEFAULT_NEW_SCOPE = `Cobertura desejada da próxima auditoria:
-
-• Pipeline de curadoria de 7 estágios (PDF → triplets → KG → recomendação)
-• Modelo de 5 camadas do Knowledge Graph (Compostos · Mecanismos · Pathways · Condições · Outcomes)
-• Políticas RLS de todas as tabelas críticas e função has_role
-• Conformidade regulatória FDA / EMA / AVMA (requisitos vs evidências vs gaps)
-• Sistema bilingue PT/EN — paridade de chaves, dados estáticos e DB
-• Motor de recomendação híbrida (limite de 8 compostos sinérgicos)
-• Digital Twin & projeções de longevidade (Gompertz por raça)
-• Pipeline de gap-fill PubMed + Gemini
-• Integração SNOMED-CT VetSCT e UMLS
-• Auditoria de tradução e cache-busting i18n
-• Infográficos de fluxo do sistema
-
-Adicione ou remova itens conforme o foco desta auditoria.`;
+// Default scope agora vem do checklist canônico (src/data/audit-coverage.ts) —
+// garante que toda nova auditoria parte cobrindo TODAS as áreas do sistema
+// (AI Scientist, Fundamentos Arquiteturais, Meta-KG, etc.) e o usuário pode
+// adicionar ênfases sem remover itens obrigatórios.
+const DEFAULT_NEW_SCOPE = renderCoverageScopePt();
 
 export default function TechnicalAuditsTab() {
   const { toast } = useToast();
@@ -123,6 +123,10 @@ export default function TechnicalAuditsTab() {
     stage_label: string | null;
     progress: number | null;
     error: string | null;
+    blocks_done?: number | null;
+    blocks_total?: number | null;
+    warnings?: string[] | null;
+    coverage_missing?: string[] | null;
   }>(null);
 
   const load = async () => {
@@ -137,6 +141,22 @@ export default function TechnicalAuditsTab() {
       const firstActive = (a.data as Array<{ id: string; superseded_by: string | null }>)
         .find((x) => !x.superseded_by);
       if (!selectedId && firstActive) setSelectedId(firstActive.id);
+      // Reatar polling em auditorias ainda processando (ex.: usuário recarregou a aba).
+      const inflight = (a.data as unknown as TechnicalAudit[]).find(
+        (x) => x.summary?.status === "processing",
+      );
+      if (inflight && !progress) {
+        setProgress({
+          audit_id: inflight.id,
+          status: "processing",
+          stage: inflight.summary?.stage ?? null,
+          stage_label: inflight.summary?.stage_label ?? null,
+          progress: inflight.summary?.progress ?? 0,
+          error: null,
+          blocks_done: inflight.summary?.blocks_done ?? null,
+          blocks_total: inflight.summary?.blocks_total ?? null,
+        });
+      }
     }
     if (r.data) setRequests(r.data as unknown as AuditRequest[]);
     if (s.data?.change_threshold) setThreshold(s.data.change_threshold as number);
@@ -231,13 +251,18 @@ export default function TechnicalAuditsTab() {
         if (cancelled || !data) return;
         const next = data as any;
         setProgress((prev) => prev && prev.audit_id === id ? { ...prev, ...next } : prev);
-        if (next.status === "ready" || next.status === "failed") {
+        if (next.status === "ready" || next.status === "ready_with_warnings" || next.status === "failed") {
           await load();
           if (next.status === "failed") {
             toast({
               title: "Falha na geração da auditoria",
               description: next.error ?? "Erro desconhecido",
               variant: "destructive",
+            });
+          } else if (next.status === "ready_with_warnings") {
+            toast({
+              title: `Auditoria ${id.toUpperCase()} pronta com lacunas`,
+              description: `${(next.coverage_missing?.length ?? 0)} item(ns) do checklist não foram emitidos. Re-execute para preencher.`,
             });
           } else {
             toast({ title: `Auditoria ${id.toUpperCase()} pronta` });
@@ -361,10 +386,13 @@ export default function TechnicalAuditsTab() {
 
             <div>
               <label className="text-xs text-muted-foreground">{t("audits.newDialog.scope")}</label>
+              <p className="text-[10px] text-muted-foreground mb-1">
+                Checklist canônico v{COVERAGE_VERSION} — todos os itens abaixo serão exigidos no relatório. Você pode acrescentar ênfases no final, mas não reduza o checklist.
+              </p>
               <Textarea
                 value={newScope}
                 onChange={(e) => setNewScope(e.target.value)}
-                rows={14}
+                rows={18}
                 className="font-mono text-xs mt-1"
               />
             </div>
@@ -386,15 +414,22 @@ export default function TechnicalAuditsTab() {
           <CardContent className="py-3 space-y-2">
             <div className="flex items-center justify-between gap-3 text-sm">
               <div className="flex items-center gap-2 min-w-0">
-                <RefreshCw className={`h-4 w-4 ${progress.status === "processing" ? "animate-spin text-primary" : progress.status === "failed" ? "text-destructive" : "text-success"}`} />
+                <RefreshCw className={`h-4 w-4 ${progress.status === "processing" ? "animate-spin text-primary" : progress.status === "failed" ? "text-destructive" : progress.status === "ready_with_warnings" ? "text-amber-600" : "text-success"}`} />
                 <span className="font-medium truncate">
                   {progress.audit_id.toUpperCase()} —{" "}
                   {progress.status === "ready"
                     ? "Pronto"
+                    : progress.status === "ready_with_warnings"
+                      ? "Pronto com lacunas"
                     : progress.status === "failed"
                       ? "Falhou"
                       : (progress.stage_label ?? "Processando")}
                 </span>
+                {progress.status === "processing" && progress.blocks_total ? (
+                  <Badge variant="outline" className="text-[10px] ml-1">
+                    {progress.blocks_done ?? 0}/{progress.blocks_total} blocos
+                  </Badge>
+                ) : null}
               </div>
               <span className="text-xs text-muted-foreground tabular-nums">
                 {Math.round(progress.progress ?? 0)}%
@@ -403,6 +438,11 @@ export default function TechnicalAuditsTab() {
             <Progress value={progress.progress ?? 0} className="h-2" />
             {progress.error && (
               <p className="text-xs text-destructive">{progress.error}</p>
+            )}
+            {progress.status === "ready_with_warnings" && progress.coverage_missing && progress.coverage_missing.length > 0 && (
+              <p className="text-xs text-amber-700">
+                Lacunas no checklist: <span className="font-mono">{progress.coverage_missing.slice(0, 6).join(", ")}{progress.coverage_missing.length > 6 ? "…" : ""}</span>
+              </p>
             )}
           </CardContent>
         </Card>
