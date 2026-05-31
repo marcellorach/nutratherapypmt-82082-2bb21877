@@ -127,7 +127,17 @@ export default function TechnicalAuditsTab() {
     blocks_total?: number | null;
     warnings?: string[] | null;
     coverage_missing?: string[] | null;
+    log?: Array<{ ts: string; level: "info" | "warn" | "error"; phase: string; message: string; block_id?: string; duration_ms?: number; attempt?: number }> | null;
+    last_heartbeat?: string | null;
+    resume_count?: number | null;
   }>(null);
+  const [logOpen, setLogOpen] = useState(true);
+  const [nowTick, setNowTick] = useState(Date.now());
+  useEffect(() => {
+    if (!progress || progress.status !== "processing") return;
+    const i = setInterval(() => setNowTick(Date.now()), 1000);
+    return () => clearInterval(i);
+  }, [progress?.status]);
 
   const load = async () => {
     setLoading(true);
