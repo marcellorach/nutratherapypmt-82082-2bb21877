@@ -232,3 +232,102 @@
   30% { box-shadow: 0 0 0 6px rgba(124, 58, 237, 0.4); }
   100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
 }
+
+/* ============================================================
+ * Merged from agentAnimation.css (was loaded as a separate CSS
+ * chunk by lazy components). Inlined here to avoid stale CSS
+ * preload failures after redeploys.
+ * ============================================================ */
+@keyframes movePacket {
+  0% { transform: translate(var(--from-x), var(--from-y)); }
+  100% { transform: translate(var(--to-x), var(--to-y)); }
+}
+.connection-path {
+  stroke-dasharray: 5;
+  animation: dash 1s linear infinite;
+}
+@keyframes dash { to { stroke-dashoffset: -10; } }
+.connection-arrow { animation: pulse 1.5s infinite; }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.animate-blink { animation: blink 1s step-start infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.data-packet { filter: drop-shadow(0 0 3px rgba(16, 185, 129, 0.7)); }
+.agent-active { animation: agentPulse 1.5s infinite; }
+@keyframes agentPulse {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* ============================================================
+ * Merged from ai-processing.css (was loaded as a separate CSS
+ * chunk by lazy visualization components).
+ * ============================================================ */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow { animation: spin-slow 3s linear infinite; }
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 2px rgba(99, 102, 241, 0.5)); }
+  50% { opacity: 0.8; filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.8)); }
+}
+.animate-pulse-glow { animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+@keyframes pulse-subtle {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+  50% { box-shadow: 0 0 20px 2px rgba(59, 130, 246, 0.15); }
+}
+.animate-pulse-subtle { animation: pulse-subtle 2s ease-in-out infinite; }
+@keyframes progress-shine {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.animate-progress-shine {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background-size: 200% 100%;
+  animation: progress-shine 1.5s linear infinite;
+}
+@keyframes heatmap-pulse {
+  0% { opacity: 0.85; }
+  50% { opacity: 1; }
+  100% { opacity: 0.85; }
+}
+.animate-heatmap-pulse { animation: heatmap-pulse 2s ease-in-out infinite; }
+@keyframes highlight-row {
+  0% { background-color: rgba(243, 244, 246, 0.2); }
+  50% { background-color: rgba(243, 244, 246, 0.7); }
+  100% { background-color: rgba(243, 244, 246, 0.2); }
+}
+.animate-highlight-row { animation: highlight-row 1.5s ease-in-out; }
+.cell-transition { transition: all 0.2s ease-in-out; }
+.cell-hover-effect:hover {
+  transform: scale(1.05);
+  z-index: 10;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.gradient-bg {
+  background: linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(247,247,250,1) 100%);
+}
+.matrix-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: white;
+}
+.highlight-compare { position: relative; }
+.highlight-compare::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(59, 130, 246, 0.08);
+  z-index: -1;
+}
+.favorite-star { transition: transform 0.3s ease; }
+.favorite-star:hover { transform: scale(1.3); }
+.tooltip-enhanced { max-width: 320px !important; }
