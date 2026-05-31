@@ -1,0 +1,1 @@
+DELETE FROM public.technical_audits WHERE id IN ('v7.0.0', 'v5.3.0');
