@@ -142,7 +142,8 @@ function assessCoverage(html: string) {
   for (const item of COVERAGE) {
     const idHit = lower.includes(`id="${item.id}"`) || lower.includes(`id='${item.id}'`);
     const titleHit = lower.includes(item.title_pt.toLowerCase().slice(0, 22));
-    if (!idHit && !titleHit) missing.push(item);
+    const titleEnHit = item.title_en ? lower.includes(item.title_en.toLowerCase().slice(0, 22)) : false;
+    if (!idHit && !titleHit && !titleEnHit) missing.push(item);
   }
   return {
     missing,
