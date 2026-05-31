@@ -67,6 +67,13 @@ const FALLBACK_COVERAGE: CoverageItem[] = [
   { id: "invoxia-integration", pillar: "Sandbox & Planejado", title_pt: "Integração Invoxia", expected: "sandbox", evidence: "invoxia-api edge function" },
 ];
 
+// Active coverage (default = fallback; overridden per-request by body.scope_items)
+let COVERAGE: CoverageItem[] = FALLBACK_COVERAGE;
+
+// ===== Languages =====
+type Lang = "pt" | "en";
+const LANGS: Lang[] = ["pt", "en"];
+
 type LogLevel = "info" | "warn" | "error";
 type LogPhase = "outline" | "block" | "cierre" | "validate" | "save" | "watchdog" | "system";
 interface LogEntry {
