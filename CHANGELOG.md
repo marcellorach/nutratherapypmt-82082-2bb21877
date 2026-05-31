@@ -24,6 +24,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.0 -->
 
+### Fixed - 2026-05-31 — Auditorias futuras travadas no padrão standalone da v5.2.0
+<!-- area: admin · status: entregue · i18n: 1.115.8 -->
+- A edge function `generate-audit` agora rejeita relatórios simplificados e força regeneração quando o HTML vier abaixo do baseline estrutural da v5.2.0 (densidade mínima, seções-chave, tabelas e ausência de rótulos como "teste rápido" ou "paridade parcial").
+- O prompt passou a tratar qualquer escopo curto como ênfase adicional, nunca como permissão para gerar auditoria reduzida; o padrão obrigatório agora é standalone + cumulativo.
+- `TechnicalAuditsTab` deixou de usar uma versão i18n hardcoded antiga e passou a ler `I18N_VERSION` diretamente de `src/i18n.ts`, evitando novos relatórios com metadado retrocedido.
+- Files: supabase/functions/generate-audit/index.ts, src/components/administrador/audits/TechnicalAuditsTab.tsx, src/i18n.ts
+
 ### Changed - 2026-05-27 — Evidência quantitativa obrigatória + re-análise por insight
 <!-- area: curation · status: entregue · i18n: 1.115.6 -->
 - `analyze-cohort-patterns`: schema de `evidence` agora exige campos estruturados (`n_supporting`, `n_total`, `prevalence`, `comparison_baseline`, `effect_size`, `notes`). Prompt reforçado para derivar números dos agregados ou não emitir o insight.

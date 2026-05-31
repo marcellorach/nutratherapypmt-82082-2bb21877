@@ -18,6 +18,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { lastChangelogDate } from "@/data/projectChangelog.generated";
 import { SENEX_VERSION } from "@/config/senex-version";
+import { I18N_VERSION } from "@/i18n";
 import { useTranslation } from "react-i18next";
 import AuditVersionComparison from "./AuditVersionComparison";
 import ComplianceHistoryChart from "./ComplianceHistoryChart";
@@ -39,7 +40,7 @@ import {
 } from "lucide-react";
 
 // I18N_VERSION precisa bater com src/i18n.ts no momento da geração de uma auditoria.
-const CURRENT_I18N_VERSION = "1.63.0";
+const CURRENT_I18N_VERSION = I18N_VERSION;
 
 interface TechnicalAudit {
   id: string;

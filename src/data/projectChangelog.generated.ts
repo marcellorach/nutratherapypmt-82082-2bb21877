@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-27T02:12:42.616Z
+// Última geração: 2026-05-31T04:26:52.585Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,30 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-05-27";
+export const lastChangelogDate = "2026-05-31";
 
 export const senexVersion = "7.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-31",
+    "kind": "fixed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Auditorias futuras travadas no padrão standalone da v5.2.0",
+    "bullets": [
+      "A edge function `generate-audit` agora rejeita relatórios simplificados e força regeneração quando o HTML vier abaixo do baseline estrutural da v5.2.0 (densidade mínima, seções-chave, tabelas e ausência de rótulos como \"teste rápido\" ou \"paridade parcial\").",
+      "O prompt passou a tratar qualquer escopo curto como ênfase adicional, nunca como permissão para gerar auditoria reduzida; o padrão obrigatório agora é standalone + cumulativo.",
+      "`TechnicalAuditsTab` deixou de usar uma versão i18n hardcoded antiga e passou a ler `I18N_VERSION` diretamente de `src/i18n.ts`, evitando novos relatórios com metadado retrocedido.",
+      "Files: supabase/functions/generate-audit/index.ts, src/components/administrador/audits/TechnicalAuditsTab.tsx, src/i18n.ts"
+    ],
+    "files": [
+      "src/i18n.ts",
+      "supabase/functions/generate-audit/index.ts",
+      "src/components/administrador/audits/TechnicalAuditsTab.tsx"
+    ],
+    "i18nVersion": "1.115.8"
+  },
   {
     "date": "2026-05-27",
     "kind": "changed",
