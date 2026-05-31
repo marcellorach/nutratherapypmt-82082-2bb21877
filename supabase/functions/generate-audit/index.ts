@@ -1209,6 +1209,8 @@ ${b.html}`,
             const listEn = coverage.missing.map((item) => `<li><strong>${item.title_en || item.title_pt}</strong> (id <code>${item.id}</code>) — pillar ${item.pillar_en || item.pillar}</li>`).join("");
             bodyHtmlEn += `\n<section id="generation-warnings" class="warnings"><h2>Generation gaps</h2><p>The checklist items below were not emitted. Re-run the audit to fill them.</p><ul>${listEn}</ul></section>`;
           }
+          // Mandatory references at the end of the EN report
+          bodyHtmlEn += `\n${renderReferencesHtml("en")}`;
           const fullHtmlEn = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Audit ${auditId}</title>${style}</head><body>${bodyHtmlEn}</body></html>`;
           const pathEn = `${numericVersion}/auditoria-en.html`;
           const { error: upErrEn } = await service.storage
