@@ -105,18 +105,23 @@ interface OutlineState {
   finalized?: boolean;
 }
 
-function groupCoverage() {
+function groupCoverage(lang: Lang = "pt") {
   const map = new Map<string, CoverageItem[]>();
   for (const i of COVERAGE) {
-    if (!map.has(i.pillar)) map.set(i.pillar, []);
-    map.get(i.pillar)!.push(i);
+    const key = lang === "en" ? (i.pillar_en || i.pillar) : i.pillar;
+    if (!map.has(key)) map.set(key, []);
+    map.get(key)!.push(i);
   }
   return Array.from(map.entries()).map(([pillar, items]) => ({ pillar, items }));
 }
 
-function checklistForPrompt() {
-  return groupCoverage()
-    .map((g) => `## ${g.pillar}\n${g.items.map((i) => `- [${i.id}] ${i.title_pt} — evidência: ${i.evidence} (hint: ${i.expected})`).join("\n")}`)
+function checklistForPrompt(lang: Lang = "pt") {
+  const evidenceLabel = lang === "en" ? "evidence" : "evidência";
+  return groupCoverage(lang)
+    .map((g) => `## ${g.pillar}\n${g.items.map((i) => {
+      const title = lang === "en" ? (i.title_en || i.title_pt) : i.title_pt;
+      return `- [${i.id}] ${title} — ${evidenceLabel}: ${i.evidence} (hint: ${i.expected})`;
+    }).join("\n")}`)
     .join("\n\n");
 }
 
