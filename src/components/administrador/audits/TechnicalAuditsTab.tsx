@@ -21,7 +21,7 @@ import { SENEX_VERSION } from "@/config/senex-version";
 import { useTranslation } from "react-i18next";
 import AuditVersionComparison from "./AuditVersionComparison";
 import ComplianceHistoryChart from "./ComplianceHistoryChart";
-import { generateAuditPdf, backfillMissingAuditPdfs } from "./audit-pdf-generator";
+import { openAuditForPrint, fetchAuditHtml } from "./audit-pdf-generator";
 import {
   FileText,
   Download,
@@ -101,6 +101,9 @@ export default function TechnicalAuditsTab() {
   const [showSuperseded, setShowSuperseded] = useState(false);
   const [threshold, setThreshold] = useState<number>(6);
   const [watching, setWatching] = useState<boolean>(false);
+  const [viewerHtml, setViewerHtml] = useState<string | null>(null);
+  const [viewerLoading, setViewerLoading] = useState(false);
+  const [viewerError, setViewerError] = useState<string | null>(null);
 
   // dialog state
   const [newScope, setNewScope] = useState(DEFAULT_NEW_SCOPE);
@@ -122,19 +125,6 @@ export default function TechnicalAuditsTab() {
       const firstActive = (a.data as Array<{ id: string; superseded_by: string | null }>)
         .find((x) => !x.superseded_by);
       if (!selectedId && firstActive) setSelectedId(firstActive.id);
-      // Retroactive: ensure every audit has a PDF. Runs in background.
-      const missing = (a.data as unknown as TechnicalAudit[]).filter((x) => x.html_path && !x.pdf_path);
-      if (missing.length > 0) {
-        backfillMissingAuditPdfs(missing).then(() => {
-          supabase
-            .from("technical_audits")
-            .select("*")
-            .order("audit_date", { ascending: false })
-            .then(({ data }) => {
-              if (data) setAudits(data as unknown as TechnicalAudit[]);
-            });
-        });
-      }
     }
     if (r.data) setRequests(r.data as unknown as AuditRequest[]);
     if (s.data?.change_threshold) setThreshold(s.data.change_threshold as number);
@@ -143,15 +133,12 @@ export default function TechnicalAuditsTab() {
 
   useEffect(() => {
     load();
-    // One-time MIME fix for previously uploaded HTMLs served as text/plain.
-    const KEY = "audit-mime-fixed-v1";
-    if (typeof window !== "undefined" && !localStorage.getItem(KEY)) {
+    // Re-run MIME fix every load so that newly created audits also get their
+    // content-type corrected in storage (previous one-shot localStorage flag
+    // skipped audits created after the first run).
+    if (typeof window !== "undefined") {
       supabase.functions
         .invoke("generate-audit", { body: { action: "fix_mime" } })
-        .then(() => {
-          localStorage.setItem(KEY, "1");
-          load();
-        })
         .catch(() => { /* silent */ });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -161,6 +148,21 @@ export default function TechnicalAuditsTab() {
     () => audits.find((a) => a.id === selectedId) ?? null,
     [audits, selectedId],
   );
+
+  // Always render the audit HTML via srcDoc — independent of the storage
+  // object's Content-Type header. Fixes the "raw HTML displayed as text" bug.
+  useEffect(() => {
+    let cancelled = false;
+    setViewerHtml(null);
+    setViewerError(null);
+    if (!selected?.html_path) return;
+    setViewerLoading(true);
+    fetchAuditHtml(selected.html_path)
+      .then((html) => { if (!cancelled) setViewerHtml(html); })
+      .catch((e) => { if (!cancelled) setViewerError(e instanceof Error ? e.message : String(e)); })
+      .finally(() => { if (!cancelled) setViewerLoading(false); });
+    return () => { cancelled = true; };
+  }, [selected?.id, selected?.html_path]);
 
   const nextVersion = useMemo(() => {
     return `v${SENEX_VERSION}`;
@@ -187,12 +189,6 @@ export default function TechnicalAuditsTab() {
       setNewOpen(false);
       await load();
       if (newId) setSelectedId(newId);
-      // Always generate PDF alongside HTML, in background.
-      if (newAudit?.html_path && !newAudit?.pdf_path) {
-        generateAuditPdf(newAudit)
-          .then(() => load())
-          .catch((err) => console.warn("[audit-pdf] generation failed", err));
-      }
     } catch (e) {
       toast({
         title: t("audits.toast.requestError"),
@@ -400,9 +396,24 @@ export default function TechnicalAuditsTab() {
                           <ExternalLink className="h-2.5 w-2.5" /> HTML
                         </Button>
                       )}
-                      {a.pdf_path && (
-                        <Button size="sm" variant="outline" className="h-6 px-2 text-[10px] gap-1" asChild onClick={(e) => e.stopPropagation()}>
-                          <a href={a.pdf_path} download><Download className="h-2.5 w-2.5" /> PDF</a>
+                      {a.html_path && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-6 px-2 text-[10px] gap-1"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openAuditForPrint(a).catch((err) =>
+                              toast({
+                                title: "Não foi possível abrir o PDF",
+                                description: err instanceof Error ? err.message : String(err),
+                                variant: "destructive",
+                              }),
+                            );
+                          }}
+                          title="Abre o relatório e dispara o diálogo Salvar como PDF do navegador"
+                        >
+                          <Download className="h-2.5 w-2.5" /> PDF
                         </Button>
                       )}
                       <Button
@@ -446,26 +457,23 @@ export default function TechnicalAuditsTab() {
                       <Download className="h-3 w-3" /> HTML
                     </a>
                   </Button>
-                  {selected.pdf_path ? (
-                    <Button size="sm" variant="default" className="gap-1" asChild>
-                      <a
-                        href={selected.pdf_path}
-                        download={`auditoria-${selected.id}.pdf`}
-                      >
-                        <Download className="h-3 w-3" /> PDF
-                      </a>
-                    </Button>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="gap-1"
-                      disabled
-                      title="PDF sendo gerado em segundo plano"
-                    >
-                      <RefreshCw className="h-3 w-3 animate-spin" /> PDF
-                    </Button>
-                  )}
+                  <Button
+                    size="sm"
+                    variant="default"
+                    className="gap-1"
+                    onClick={() =>
+                      openAuditForPrint(selected).catch((err) =>
+                        toast({
+                          title: "Não foi possível abrir o PDF",
+                          description: err instanceof Error ? err.message : String(err),
+                          variant: "destructive",
+                        }),
+                      )
+                    }
+                    title="Abre o relatório e dispara o diálogo Salvar como PDF do navegador"
+                  >
+                    <Download className="h-3 w-3" /> PDF
+                  </Button>
                 </div>
               )}
             </div>
@@ -477,11 +485,23 @@ export default function TechnicalAuditsTab() {
           </CardHeader>
           <CardContent>
             {selected?.html_path ? (
-              <iframe
-                src={selected.html_path}
-                title={`Auditoria ${selected.id}`}
-                className="w-full h-[75vh] border rounded-md bg-white"
-              />
+              viewerLoading ? (
+                <div className="flex items-center justify-center h-[75vh] text-sm text-muted-foreground gap-2">
+                  <RefreshCw className="h-4 w-4 animate-spin" /> Carregando relatório…
+                </div>
+              ) : viewerError ? (
+                <div className="flex flex-col items-center justify-center h-[75vh] text-sm text-destructive gap-2">
+                  <AlertTriangle className="h-5 w-5" />
+                  <span>Falha ao carregar: {viewerError}</span>
+                </div>
+              ) : viewerHtml ? (
+                <iframe
+                  srcDoc={viewerHtml}
+                  title={`Auditoria ${selected.id}`}
+                  className="w-full h-[75vh] border rounded-md bg-white"
+                  sandbox="allow-same-origin allow-popups"
+                />
+              ) : null
             ) : (
               <p className="text-sm text-muted-foreground text-center py-12">
                 {t("audits.viewer.noHtml")}
