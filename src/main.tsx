@@ -6,6 +6,11 @@ import './App.css'
 import './index.css'
 import 'vis-network/styles/vis-network.css'
 import './i18n.ts' // Explicit file extension
+import { installAssetFailureTelemetry } from './components/system/AssetFailureBanner'
+
+// Install asset-failure telemetry before anything else mounts so we capture
+// CSS/JS preload errors that happen during initial bootstrap.
+installAssetFailureTelemetry();
 
 // Auto-recover from stale dynamic chunk errors after a new deploy.
 // When the browser holds an old index.html that references hashed chunks

@@ -17,6 +17,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { SiteVariantProvider } from './contexts/SiteVariantContext';
 import { RoleViewProvider } from './contexts/RoleViewContext';
+import AssetFailureBanner from './components/system/AssetFailureBanner';
 
 // Criar instância do QueryClient
 const queryClient = new QueryClient({
@@ -37,6 +38,7 @@ function App() {
             <AuthProvider>
               <SiteVariantProvider>
               <RoleViewProvider>
+              <AssetFailureBanner />
               <Routes>
                 {/* Public auth routes */}
                 <Route path="/auth" element={<AuthPage />} />
