@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Operada por PetMoreTime" />
+  <meta name="dcterms.date" content="2026-05-18" />
+  <title>Auditoria T��cnica Senex AI v5.1.0</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Auditoria T��cnica Senex AI v5.1.0</h1>
+<p class="author">Operada por PetMoreTime</p>
+<p class="date">2026-05-18</p>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#resumo-executivo" id="toc-resumo-executivo">Resumo
+Executivo</a>
+<ul>
+<li><a href="#indicadores" id="toc-indicadores">Indicadores</a></li>
+</ul></li>
+<li><a href="#escopo" id="toc-escopo">Escopo</a></li>
+<li><a href="#pontos-fortes" id="toc-pontos-fortes">Pontos
+Fortes</a></li>
+<li><a href="#lacunas-gaps" id="toc-lacunas-gaps">Lacunas
+(Gaps)</a></li>
+<li><a href="#riscos" id="toc-riscos">Riscos</a></li>
+<li><a href="#conformidade" id="toc-conformidade">Conformidade</a></li>
+<li><a href="#recomendações-para-v5.2"
+id="toc-recomendações-para-v5.2">Recomendações para v5.2</a></li>
+<li><a href="#apêndice-convenções" id="toc-apêndice-convenções">Apêndice
+— Convenções</a></li>
+</ul>
+</nav>
+<h1 id="resumo-executivo">Resumo Executivo</h1>
+<p>Auditoria técnica da plataforma <strong>Senex AI</strong> (operada
+por PetMoreTime, sucessora de VetGraphRAG/VetMedGraph) com base no
+estado do sistema em <strong>i18n 1.86.7</strong> e changelog de
+<strong>2026-05-18</strong>. Esta versão <strong>v5.1.0</strong>
+consolida o pipeline de curadoria de 7 estágios, o Knowledge Graph de 5
+camadas (Compostos → Mecanismos → Vias → Condições → Outcomes), o motor
+de recomendação híbrida com cap de 8 compostos sinérgicos, o Digital
+Twin Gompertz, e o pipeline de Gap-fill PubMed + Gemini para
+preenchimento de lacunas (composto × condição).</p>
+<h2 id="indicadores">Indicadores</h2>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pontos fortes</td>
+<td>7</td>
+</tr>
+<tr>
+<td>Lacunas (gaps)</td>
+<td>12</td>
+</tr>
+<tr>
+<td>Riscos abertos</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Severidade CRITICAL</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Severidade HIGH</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Severidade MEDIUM</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Severidade LOW</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+<h1 id="escopo">Escopo</h1>
+<p>Pipeline de curadoria 7 estágios · Knowledge Graph 5 camadas ·
+RLS/<code>has_role</code> · Conformidade FDA/EMA/AVMA · Bilíngue PT/EN
+com cache-bust via <code>I18N_VERSION</code> · Recomendação híbrida (cap
+8 compostos sinérgicos) · Digital Twin Gompertz · Gap-fill PubMed +
+Gemini · Taxonomia SNOMED-CT VetSCT + UMLS · Infográficos clínicos.</p>
+<h1 id="pontos-fortes">Pontos Fortes</h1>
+<ol type="1">
+<li><strong>Pipeline de curadoria de 7 estágios</strong> robusto, com
+deduplicação por SHA-256 do PDF e Levenshtein de título, embeddings de
+pré-curadoria e auto-aprovação ≥ 50% de confiança.</li>
+<li><strong>Knowledge Graph de 5 camadas</strong> com IDs canônicos
+(UUID Supabase) e notação biomédica padronizada (SNOMED-CT VetSCT /
+UMLS).</li>
+<li><strong>Bilingue PT/EN em todas as camadas</strong> (UI
+<code>t()</code>, DB <code>name_en</code>, dados estáticos
+<code>_en</code>) com versionamento <code>I18N_VERSION</code> para
+cache-busting.</li>
+<li><strong>Governança de RLS</strong> baseada em
+<code>has_role()</code> SECURITY DEFINER, tabela <code>user_roles</code>
+isolada e GRANTs explícitos por papel.</li>
+<li><strong>Recomendação híbrida</strong> consciente do contexto clínico
+do pet, cap de 8 compostos sinérgicos, nomenclatura legível e
+deduplicação alfanumérica.</li>
+<li><strong>Digital Twin Gompertz</strong> com projeção de
+<code>years_gained</code> e disparo automático de Gap-fill quando a
+evidência é insuficiente.</li>
+<li><strong>Política No-Mock</strong>: todo dado clínico vem de tabelas
+reais; saídas LLM-only são rotuladas explicitamente.</li>
+</ol>
+<h1 id="lacunas-gaps">Lacunas (Gaps)</h1>
+<ol type="1">
+<li>Cobertura incompleta de pares (composto × condição) no KG para
+condições raras — mitigado parcialmente pelo Gap-fill.</li>
+<li>Ausência de export bibliográfico padronizado (BibTeX/RIS) das
+evidências recomendadas.</li>
+<li>Falta de teste de regressão automatizado para o cap de 8 compostos
+em cenários de polifarmácia extrema.</li>
+<li>Sidebar do administrador ainda em refatoração — chave
+<code>admin.sidebar.configuration.usersAndRoles</code> apareceu como
+missingKey em PT/EN no log de 31/05.</li>
+<li>Página <code>PriorizacoesTab</code> teve falha transitória de import
+dinâmico (chunk Vite) sem fallback amigável.</li>
+<li>Edge function <code>project-pet-trajectory</code> retornou
+<code>ai_no_tool_call</code> antes do fix para
+<code>gemini-2.5-pro</code> + retry com <code>tool_choice</code>
+forçado.</li>
+<li>Falta cobertura de testes E2E para o fluxo Tutor (aprovação →
+pagamento → entrega).</li>
+<li>Auditoria de relações depende de RPC
+<code>get_relations_graph_data</code> com limite fixo (2000) — sem
+paginação.</li>
+<li>Não há painel consolidado de health-check de provedores de IA além
+do <code>provider-health</code>.</li>
+<li>Ausência de feature-flag para desabilitar Gap-fill em ambientes de
+demonstração.</li>
+<li>Storage <code>pet_exams_pdfs</code> não possui política de
+retenção/limpeza automática.</li>
+<li>Documentação de ontologia (<code>docs/ONTOLOGY_SOURCES.md</code>)
+defasada em relação ao último import canônico.</li>
+</ol>
+<h1 id="riscos">Riscos</h1>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 46%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Severidade</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R1</td>
+<td><strong>CRITICAL</strong></td>
+<td>Dependência de chave única <code>LOVABLE_API_KEY</code> no gateway
+sem rotação programada — risco de indisponibilidade em quota burst.</td>
+</tr>
+<tr>
+<td>R2</td>
+<td>HIGH</td>
+<td>Gap-fill que escreve <code>pending triplets</code> sem revisão
+humana pode introduzir ruído se o threshold (50%) for relaxado.</td>
+</tr>
+<tr>
+<td>R3</td>
+<td>HIGH</td>
+<td><code>is_admin()</code> é usada em RPCs SECURITY DEFINER — qualquer
+regressão na tabela <code>user_roles</code> escala privilégios.</td>
+</tr>
+<tr>
+<td>R4</td>
+<td>HIGH</td>
+<td>Bilingue exige incremento manual de <code>I18N_VERSION</code>;
+esquecimento causa cache stale em produção.</td>
+</tr>
+<tr>
+<td>R5</td>
+<td>MEDIUM</td>
+<td>Soft-delete de estudos sem job de purge periódico pode inflar
+<code>study_embeddings</code> e custo de vetorização.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="conformidade">Conformidade</h1>
+<ul>
+<li><strong>FDA/EMA/AVMA</strong>: escopo restrito a
+metabólicos/degenerativos caninos; exclusão explícita de imagem complexa
+(MRI).</li>
+<li><strong>Bilingue PT/EN</strong>: enforcement automatizado via
+auditoria de tradução (<code>scripts/audit-translations.ts</code>).</li>
+<li><strong>RLS</strong>: todas as tabelas <code>public.*</code>
+clínicas com policies <code>auth.uid()</code>-scoped +
+<code>has_role('admin')</code> para CRUD administrativo.</li>
+<li><strong>Audit log</strong>: <code>core_rule_audit_log</code> e
+<code>study_audit_logs</code> ativos; deleções em massa exigem digitar
+<code>DELETE</code>.</li>
+</ul>
+<h1 id="recomendações-para-v5.2">Recomendações para v5.2</h1>
+<ol type="1">
+<li>Implementar rotação automática de <code>LOVABLE_API_KEY</code> com
+fallback secundário.</li>
+<li>Adicionar feature-flag <code>DISABLE_GAPFILL</code> por
+ambiente.</li>
+<li>Paginação cursor-based em
+<code>get_relations_graph_data</code>.</li>
+<li>Lint/CI que falha PR se mexer em <code>src/locales/**</code> sem
+bumpar <code>I18N_VERSION</code>.</li>
+<li>Job semanal de purge de <code>study_embeddings</code> órfãos.</li>
+<li>Suíte E2E (Playwright) cobrindo fluxos Tutor e Veterinário
+ponta-a-ponta.</li>
+</ol>
+<h1 id="apêndice-convenções">Apêndice — Convenções</h1>
+<ul>
+<li>IDs canônicos: UUID Supabase (nunca <code>elementId</code> do
+Neo4j).</li>
+<li>Taxonomia: SNOMED-CT VetSCT + UMLS, governada por
+<code>src/data/biomedical-taxonomy.ts</code>.</li>
+<li>Curadoria: triplets <code>&lt; 50%</code> ficam
+<strong>pending</strong>; ≥ 50% auto-aprovam.</li>
+<li>Recomendações: cap de <strong>8</strong> compostos sinérgicos, nomes
+humanos, dedup alfanumérica.</li>
+</ul>
+</body>
+</html>
