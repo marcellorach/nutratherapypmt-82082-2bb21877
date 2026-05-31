@@ -411,15 +411,22 @@ export default function TechnicalAuditsTab() {
           <CardContent className="py-3 space-y-2">
             <div className="flex items-center justify-between gap-3 text-sm">
               <div className="flex items-center gap-2 min-w-0">
-                <RefreshCw className={`h-4 w-4 ${progress.status === "processing" ? "animate-spin text-primary" : progress.status === "failed" ? "text-destructive" : "text-success"}`} />
+                <RefreshCw className={`h-4 w-4 ${progress.status === "processing" ? "animate-spin text-primary" : progress.status === "failed" ? "text-destructive" : progress.status === "ready_with_warnings" ? "text-amber-600" : "text-success"}`} />
                 <span className="font-medium truncate">
                   {progress.audit_id.toUpperCase()} —{" "}
                   {progress.status === "ready"
                     ? "Pronto"
+                    : progress.status === "ready_with_warnings"
+                      ? "Pronto com lacunas"
                     : progress.status === "failed"
                       ? "Falhou"
                       : (progress.stage_label ?? "Processando")}
                 </span>
+                {progress.status === "processing" && progress.blocks_total ? (
+                  <Badge variant="outline" className="text-[10px] ml-1">
+                    {progress.blocks_done ?? 0}/{progress.blocks_total} blocos
+                  </Badge>
+                ) : null}
               </div>
               <span className="text-xs text-muted-foreground tabular-nums">
                 {Math.round(progress.progress ?? 0)}%
@@ -428,6 +435,11 @@ export default function TechnicalAuditsTab() {
             <Progress value={progress.progress ?? 0} className="h-2" />
             {progress.error && (
               <p className="text-xs text-destructive">{progress.error}</p>
+            )}
+            {progress.status === "ready_with_warnings" && progress.coverage_missing && progress.coverage_missing.length > 0 && (
+              <p className="text-xs text-amber-700">
+                Lacunas no checklist: <span className="font-mono">{progress.coverage_missing.slice(0, 6).join(", ")}{progress.coverage_missing.length > 6 ? "…" : ""}</span>
+              </p>
             )}
           </CardContent>
         </Card>
