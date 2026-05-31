@@ -24,6 +24,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.0 -->
 
+### Fixed - 2026-05-31 — Auditoria técnica agora retoma por checkpoints curtos
+<!-- area: admin · status: entregue · i18n: 1.115.8 -->
+- `generate-audit` deixou de depender de uma execução longa única e passou a persistir checkpoints no campo `outline`: outline salvo, blocos renderizados salvos um a um, sumário executivo salvo separadamente e montagem final só no último passo.
+- Cada continuação agora é reinvocada internamente com credencial de serviço aceita pela própria função, corrigindo o caso em que o watchdog detectava travamento mas não conseguia retomar a auditoria automaticamente.
+- O timeout por chamada de LLM foi reduzido e simplificado para 2 tentativas (primária + fallback), evitando ficar preso vários minutos no mesmo bloco antes de avançar.
+- Files: supabase/functions/generate-audit/index.ts, supabase/functions/audit-watchdog/index.ts, ARCHITECTURE.md, docs/CURRENT_STATE.md
+
 ### Fixed - 2026-05-31 — Auditorias futuras travadas no padrão standalone da v5.2.0
 <!-- area: admin · status: entregue · i18n: 1.115.8 -->
 - A edge function `generate-audit` agora rejeita relatórios simplificados e força regeneração quando o HTML vier abaixo do baseline estrutural da v5.2.0 (densidade mínima, seções-chave, tabelas e ausência de rótulos como "teste rápido" ou "paridade parcial").
