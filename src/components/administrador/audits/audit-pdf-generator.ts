@@ -60,8 +60,7 @@ export async function generateAuditPdf(audit: AuditLike): Promise<string | null>
         image: { type: "jpeg", quality: 0.95 },
         html2canvas: { scale: 2, useCORS: true, logging: false },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-        pagebreak: { mode: ["css", "legacy"] },
-      })
+      } as any)
       .outputPdf("blob");
 
     const path = `${audit.id.replace(/^v/, "")}/auditoria.pdf`;
