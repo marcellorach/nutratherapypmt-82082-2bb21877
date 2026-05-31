@@ -30,6 +30,11 @@ import {
   ShieldCheck,
   AlertTriangle,
   CheckCircle2,
+  Bot,
+  Eye,
+  EyeOff,
+  RefreshCw,
+  Settings as SettingsIcon,
 } from "lucide-react";
 
 // I18N_VERSION precisa bater com src/i18n.ts no momento da geração de uma auditoria.
@@ -46,7 +51,14 @@ interface TechnicalAudit {
   html_path: string | null;
   pdf_path: string | null;
   docx_path: string | null;
-  summary: { strengths?: number; gaps?: number; risks?: number; pages?: number; infographics?: number };
+  summary: Record<string, unknown> & {
+    strengths?: number | { count?: number };
+    gaps?: number | { count?: number };
+    risks?: number | { count?: number };
+    pages?: number;
+    infographics?: number;
+  };
+  superseded_by: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -59,6 +71,7 @@ interface AuditRequest {
   status: string;
   fulfilled_audit_id: string | null;
   requested_at: string;
+  auto_triggered?: boolean;
 }
 
 const DEFAULT_NEW_SCOPE = `Cobertura desejada da próxima auditoria:
@@ -84,6 +97,9 @@ export default function TechnicalAuditsTab() {
   const [requests, setRequests] = useState<AuditRequest[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showSuperseded, setShowSuperseded] = useState(false);
+  const [threshold, setThreshold] = useState<number>(6);
+  const [watching, setWatching] = useState<boolean>(false);
 
   // dialog state
   const [newScope, setNewScope] = useState(DEFAULT_NEW_SCOPE);
@@ -95,15 +111,19 @@ export default function TechnicalAuditsTab() {
 
   const load = async () => {
     setLoading(true);
-    const [a, r] = await Promise.all([
+    const [a, r, s] = await Promise.all([
       supabase.from("technical_audits").select("*").order("audit_date", { ascending: false }),
       supabase.from("audit_requests").select("*").order("requested_at", { ascending: false }),
+      supabase.from("audit_settings").select("change_threshold").eq("id", true).maybeSingle(),
     ]);
     if (a.data) {
       setAudits(a.data as unknown as TechnicalAudit[]);
-      if (!selectedId && a.data.length) setSelectedId(a.data[0].id);
+      const firstActive = (a.data as Array<{ id: string; superseded_by: string | null }>)
+        .find((x) => !x.superseded_by);
+      if (!selectedId && firstActive) setSelectedId(firstActive.id);
     }
     if (r.data) setRequests(r.data as unknown as AuditRequest[]);
+    if (s.data?.change_threshold) setThreshold(s.data.change_threshold as number);
     setLoading(false);
   };
 
