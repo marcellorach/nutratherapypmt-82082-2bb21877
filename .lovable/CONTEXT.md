@@ -1,20 +1,26 @@
 # Project context briefing (auto)
-Generated: 2026-05-27T02:12:42.622Z
+Generated: 2026-05-31T04:26:52.593Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.115.6
+## Latest i18n version: 1.115.8
 
 ## Changes by area (last 14 days)
-- **admin**: 51
-- **vet-ui**: 9
+- **admin**: 52
 - **curation**: 7
-- **meta**: 7
 - **kg**: 6
+- **meta**: 5
+- **vet-ui**: 4
 - **tutor-ui**: 2
 - **clinical-pipeline**: 1
 
 ## Top 10 recent entries
+### 2026-05-31 · [admin] FIXED — Auditorias futuras travadas no padrão standalone da v5.2.0
+- A edge function `generate-audit` agora rejeita relatórios simplificados e força regeneração quando o HTML vier abaixo do baseline estrutural da v5.2.0 (densidade mínima, seções-chave, tabelas e ausência de rótulos como "teste rápido" ou "paridade parcial").
+- O prompt passou a tratar qualquer escopo curto como ênfase adicional, nunca como permissão para gerar auditoria reduzida; o padrão obrigatório agora é standalone + cumulativo.
+- `TechnicalAuditsTab` deixou de usar uma versão i18n hardcoded antiga e passou a ler `I18N_VERSION` diretamente de `src/i18n.ts`, evitando novos relatórios com metadado retrocedido.
+_files: src/i18n.ts, supabase/functions/generate-audit/index.ts, src/components/administrador/audits/TechnicalAuditsTab.tsx_
+
 ### 2026-05-27 · [curation] CHANGED — Evidência quantitativa obrigatória + re-análise por insight
 - `analyze-cohort-patterns`: schema de `evidence` agora exige campos estruturados (`n_supporting`, `n_total`, `prevalence`, `comparison_baseline`, `effect_size`, `notes`). Prompt reforçado para derivar números dos agregados ou não emitir o insight.
 - Edge function aceita `insight_id` para re-analisar 1 insight existente (UPDATE in-place com a melhor evidência quantitativa).
@@ -68,12 +74,6 @@ _files: src/components/administrador/modelosPreditivos/data/predictiveModelsData
 - Card #1 (Role visualization layer) marcado como entregue via override no banco, com histórico semeado.
 - Seed do histórico dos 10 cards do roadmap em 25/05/26 para servir de baseline.
 _files: src/data/prioritizationBoard.ts, src/components/administrador/priorizacoes/PrioritizationBoard.tsx, src/components/administrador/priorizacoes/PrioritizationCard.tsx, src/components/administrador/priorizacoes/PopulationInsightsV0.tsx…_
-
-### 2026-05-26 · [admin] ADDED — Observabilidade e DnD na análise de cohorts
-- Log de execução estruturado em `analyze-cohort-patterns` persistido em `synthetic_cohorts.analysis_log` e exibido no card do cohort (paralelo ao log de geração).
-- Botão "Analisar padrões" agora vira "Re-analisar (N)" após primeira execução, com tooltip + confirmação. Backend devolve 409 sem `force=true` se análise < 24h, evitando duplicação acidental.
-- Badge do modelo (`google/gemini-3.5-flash`) visível durante e após a análise, e em cada card do Population Insights — atende ao princípio de transparência clínica.
-_files: supabase/functions/analyze-cohort-patterns/index.ts, src/components/administrador/priorizacoes/SyntheticCohortsManager.tsx, src/components/administrador/priorizacoes/PrioritizationBoard.tsx, src/components/administrador/priorizacoes/PopulationInsightsV0.tsx…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
