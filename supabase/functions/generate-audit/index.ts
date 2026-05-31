@@ -712,6 +712,9 @@ REGRAS:
 - Para cada seção: <section id="SECTION_ID"><h3>...</h3>...</section>.
 - Texto denso (≥ 180 palavras por seção), analítico, em PT.
 - Inclua ao menos 1 <table> elegante por bloco.
+- Inclua ao menos 1 visual (gráfico SVG, diagrama SVG ou infográfico em <div class="kpi-grid">) por bloco, posicionado logo após a primeira tabela, com <p class="caption">… (fonte: snapshot|checklist|auditoria anterior)</p>.
+- Use SVG inline puro (viewBox, <rect>, <circle>, <path>, <text>) — sem <script>, sem <img>, sem <foreignObject>, sem bibliotecas externas. Paleta restrita: #1d4ed8 #16a34a #b45309 #dc2626 #4b5563 #e5e7eb.
+- Os números no visual devem espelhar o snapshot factual ou o checklist canônico. Se faltar dado, marque "n/d" e explique no caption.
 - Se algo não estiver implementado, marque "Status: parcial/doc-only/sandbox/planejado" e descreva o gap.
 - NÃO emita <html>, <head>, <body> ou <style>. Apenas fragment HTML.`,
             },
