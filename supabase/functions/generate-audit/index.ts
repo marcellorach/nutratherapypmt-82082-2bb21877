@@ -25,8 +25,8 @@ const MAX_LOG_ENTRIES = 200;
 
 // ===== Coverage checklist (mirror of src/data/audit-coverage.ts) =====
 type StatusHint = "active" | "partial" | "doc_only" | "sandbox" | "planned";
-interface CoverageItem { id: string; pillar: string; title_pt: string; expected: StatusHint; evidence: string; }
-const COVERAGE: CoverageItem[] = [
+interface CoverageItem { id: string; pillar: string; title_pt: string; title_en?: string; pillar_en?: string; expected: StatusHint; evidence: string; }
+const FALLBACK_COVERAGE: CoverageItem[] = [
   { id: "auth-rls", pillar: "Plataforma & Infraestrutura", title_pt: "Autenticação, papéis e RLS", expected: "active", evidence: "user_roles, profiles, is_admin/has_role" },
   { id: "edge-functions", pillar: "Plataforma & Infraestrutura", title_pt: "Edge Functions (catálogo, papéis, JWT)", expected: "active", evidence: "67+ funções em supabase/functions/*" },
   { id: "storage-buckets", pillar: "Plataforma & Infraestrutura", title_pt: "Buckets de Storage", expected: "active", evidence: "study_pdfs, pet_exams_pdfs, audit-reports" },
@@ -67,6 +67,13 @@ const COVERAGE: CoverageItem[] = [
   { id: "invoxia-integration", pillar: "Sandbox & Planejado", title_pt: "Integração Invoxia", expected: "sandbox", evidence: "invoxia-api edge function" },
 ];
 
+// Active coverage (default = fallback; overridden per-request by body.scope_items)
+let COVERAGE: CoverageItem[] = FALLBACK_COVERAGE;
+
+// ===== Languages =====
+type Lang = "pt" | "en";
+const LANGS: Lang[] = ["pt", "en"];
+
 type LogLevel = "info" | "warn" | "error";
 type LogPhase = "outline" | "block" | "cierre" | "validate" | "save" | "watchdog" | "system";
 interface LogEntry {
@@ -82,7 +89,8 @@ interface LogEntry {
 interface StoredBlock {
   block_id: string;
   pillar_title: string;
-  html: string;
+  html: string;          // PT (legacy field name retained for back-compat)
+  html_en?: string;      // EN (added for bilingual generation)
 }
 
 interface OutlineState {
@@ -98,18 +106,23 @@ interface OutlineState {
   finalized?: boolean;
 }
 
-function groupCoverage() {
+function groupCoverage(lang: Lang = "pt") {
   const map = new Map<string, CoverageItem[]>();
   for (const i of COVERAGE) {
-    if (!map.has(i.pillar)) map.set(i.pillar, []);
-    map.get(i.pillar)!.push(i);
+    const key = lang === "en" ? (i.pillar_en || i.pillar) : i.pillar;
+    if (!map.has(key)) map.set(key, []);
+    map.get(key)!.push(i);
   }
   return Array.from(map.entries()).map(([pillar, items]) => ({ pillar, items }));
 }
 
-function checklistForPrompt() {
-  return groupCoverage()
-    .map((g) => `## ${g.pillar}\n${g.items.map((i) => `- [${i.id}] ${i.title_pt} — evidência: ${i.evidence} (hint: ${i.expected})`).join("\n")}`)
+function checklistForPrompt(lang: Lang = "pt") {
+  const evidenceLabel = lang === "en" ? "evidence" : "evidência";
+  return groupCoverage(lang)
+    .map((g) => `## ${g.pillar}\n${g.items.map((i) => {
+      const title = lang === "en" ? (i.title_en || i.title_pt) : i.title_pt;
+      return `- [${i.id}] ${title} — ${evidenceLabel}: ${i.evidence} (hint: ${i.expected})`;
+    }).join("\n")}`)
     .join("\n\n");
 }
 
@@ -130,7 +143,8 @@ function assessCoverage(html: string) {
   for (const item of COVERAGE) {
     const idHit = lower.includes(`id="${item.id}"`) || lower.includes(`id='${item.id}'`);
     const titleHit = lower.includes(item.title_pt.toLowerCase().slice(0, 22));
-    if (!idHit && !titleHit) missing.push(item);
+    const titleEnHit = item.title_en ? lower.includes(item.title_en.toLowerCase().slice(0, 22)) : false;
+    if (!idHit && !titleHit && !titleEnHit) missing.push(item);
   }
   return {
     missing,
@@ -207,7 +221,47 @@ async function readAuditContext(service: ReturnType<typeof createClient>) {
   return { snapshot, prevAuditsCtx };
 }
 
-function buildBaseSystem(auditContext: { snapshot: Record<string, any>; prevAuditsCtx: string }) {
+function buildBaseSystem(
+  auditContext: { snapshot: Record<string, any>; prevAuditsCtx: string },
+  lang: Lang = "pt",
+  promptOverride?: string,
+) {
+  if (lang === "en") {
+    if (promptOverride && promptOverride.trim() && promptOverride.trim() !== "__SEED_FALLBACK__") {
+      return `${promptOverride}\n\nCANONICAL CHECKLIST (all ids must appear in the report):\n${checklistForPrompt("en")}\n\nFACTUAL DB SNAPSHOT (use real numbers):\n${JSON.stringify(auditContext.snapshot, null, 2)}\n\nPRIOR AUDITS (context):\n${auditContext.prevAuditsCtx}`;
+    }
+    return `You are the internal technical auditor of the Senex AI platform (PetMoreTime).
+NEVER mention "Lovable", "Lovable AI" or development tools. Use "Senex AI" as the brand and "PetMoreTime" as the engine.
+Write in ENGLISH, dense, analytical, in semantic HTML.
+
+MANDATORY POLICY:
+- Every audit is standalone and cumulative. Never produce "quick test", "smoke" or "delta-only".
+- Target depth equal to or greater than V3 (30+ pages, 25+ h2 sections, 8+ tables).
+- Each item of the canonical checklist must appear as a subsection with a stable id.
+- Existing but incomplete areas → classify as "partial", "doc-only", "sandbox" or "planned" and describe the gap. NEVER omit.
+
+MANDATORY VISUALS (charts, diagrams, infographics):
+- The report MUST contain rich visual elements beyond tables. Do NOT use external libraries — emit pure inline SVG (no <script>, no <foreignObject>) and divs with utility classes already present in the report CSS.
+- Minimum per full report: 6 SVG charts + 3 SVG diagrams + 4 infographics (cards/KPIs/heatmaps in HTML+SVG).
+- Each main block must have at least 1 visual (chart OR diagram OR infographic) coherent with the section theme.
+- Accepted types: horizontal/vertical bar charts (SVG <rect>); donut chart (SVG <circle stroke-dasharray>); heatmap/matrix; flow/pipeline diagram; layer diagram; KPI infographic (<div class="kpi-grid">); horizontal timeline.
+- Colors STRICTLY from the report palette: #1d4ed8 (accent), #16a34a (ok), #b45309 (warn), #dc2626 (gap), #4b5563 (muted), #e5e7eb (soft).
+- Every visual needs a <figcaption> or <p class="caption"> explaining what it represents and the source (snapshot, checklist, previous audits).
+- Numbers must reflect the FACTUAL SNAPSHOT (do not invent). If data is unavailable, mark "n/a" and describe in the caption.
+- NEVER use emoji instead of a visual. NEVER ASCII art. NEVER external images (no <img src=...>).
+
+CANONICAL CHECKLIST (all ids must appear in the report):
+${checklistForPrompt("en")}
+
+FACTUAL DB SNAPSHOT (use real numbers):
+${JSON.stringify(auditContext.snapshot, null, 2)}
+
+PRIOR AUDITS (context):
+${auditContext.prevAuditsCtx}`;
+  }
+  if (promptOverride && promptOverride.trim() && promptOverride.trim() !== "__SEED_FALLBACK__") {
+    return `${promptOverride}\n\nCHECKLIST CANÔNICO (todos os ids devem aparecer no relatório):\n${checklistForPrompt("pt")}\n\nSNAPSHOT FACTUAL DO BANCO (use números reais):\n${JSON.stringify(auditContext.snapshot, null, 2)}\n\nAUDITORIAS ANTERIORES (contexto):\n${auditContext.prevAuditsCtx}`;
+  }
   return `Você é o auditor técnico interno da plataforma Senex AI (PetMoreTime).
 NUNCA mencione "Lovable", "Lovable AI" ou ferramentas de desenvolvimento. Use "Senex AI" como marca e "PetMoreTime" como motor.
 Escreva em PORTUGUÊS, denso, analítico, em HTML semântico.
@@ -236,13 +290,34 @@ VISUALIZAÇÕES OBRIGATÓRIAS (gráficos, diagramas, infográficos):
 - NUNCA use emoji em vez de visual. NUNCA use ASCII art. NUNCA referencie imagens externas (sem <img src=...>).
 
 CHECKLIST CANÔNICO (todos os ids devem aparecer no relatório):
-${checklistForPrompt()}
+${checklistForPrompt("pt")}
 
 SNAPSHOT FACTUAL DO BANCO (use números reais):
 ${JSON.stringify(auditContext.snapshot, null, 2)}
 
 AUDITORIAS ANTERIORES (contexto):
 ${auditContext.prevAuditsCtx}`;
+}
+
+async function loadActivePrompts(
+  service: ReturnType<typeof createClient>,
+): Promise<Record<Lang, { system?: string; per_block?: string; close?: string; version?: string }>> {
+  const result: any = { pt: {}, en: {} };
+  try {
+    const { data } = await service
+      .from("audit_prompt_versions")
+      .select("kind, language, prompt, version")
+      .eq("is_active", true);
+    for (const row of (data ?? []) as any[]) {
+      const lang = row.language as Lang;
+      if (!result[lang]) result[lang] = {};
+      result[lang][row.kind as "system" | "per_block" | "close"] = row.prompt;
+      result[lang].version = row.version;
+    }
+  } catch (err) {
+    console.warn("loadActivePrompts failed", err);
+  }
+  return result;
 }
 
 Deno.serve(async (req) => {
@@ -347,6 +422,30 @@ Deno.serve(async (req) => {
     const scope = String((body as any)?.scope ?? "").trim();
     const systemVersion = String((body as any)?.system_version ?? "").trim();
     const systemChangelogDate = (body as any)?.system_changelog_date ?? null;
+
+    // Auto-discovery: front-end may pass dynamic scope items derived from admin-tabs/organograma.
+    const incomingScopeItems = (body as any)?.scope_items;
+    if (Array.isArray(incomingScopeItems) && incomingScopeItems.length > 0) {
+      const sanitized: CoverageItem[] = incomingScopeItems
+        .filter((it: any) => it && typeof it.id === "string" && typeof it.title_pt === "string" && typeof it.pillar === "string")
+        .map((it: any) => ({
+          id: String(it.id),
+          pillar: String(it.pillar),
+          pillar_en: typeof it.pillar_en === "string" ? it.pillar_en : undefined,
+          title_pt: String(it.title_pt),
+          title_en: typeof it.title_en === "string" ? it.title_en : undefined,
+          expected: (["active","partial","doc_only","sandbox","planned"].includes(it.expected) ? it.expected : "active") as StatusHint,
+          evidence: typeof it.evidence === "string" ? it.evidence : "",
+        }));
+      // Merge: dynamic items + any fallback item not already covered (id-wise)
+      const dynIds = new Set(sanitized.map((s) => s.id));
+      const extras = FALLBACK_COVERAGE.filter((f) => !dynIds.has(f.id));
+      COVERAGE = [...sanitized, ...extras];
+      console.log(`[audit] dynamic scope_items received: ${sanitized.length} (+ ${extras.length} fallback)`);
+    } else {
+      COVERAGE = FALLBACK_COVERAGE;
+    }
+
     if (!version) {
       return new Response(JSON.stringify({ error: "version required" }), {
         status: 400,
