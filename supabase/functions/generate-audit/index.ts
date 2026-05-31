@@ -15,6 +15,63 @@ const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const PRIMARY_MODEL = "google/gemini-3.1-pro-preview";
 const FALLBACK_MODEL = "openai/gpt-5-mini";
 
+const REFERENCE_SECTION_HINTS = [
+  "sumário executivo",
+  "glossário",
+  "metodologia",
+  "visão arquitetural",
+  "pipeline de digestão",
+  "vetorização e embeddings",
+  "banco relacional e rls",
+  "uso de llm por edge function",
+  "knowledge graph",
+  "análise do paciente",
+  "recomendação híbrida",
+  "digital twin",
+  "conformidade fda",
+  "conformidade ema",
+  "conformidade avma",
+  "gmlp",
+  "forças",
+  "gaps e riscos",
+  "roadmap",
+  "apêndice a",
+  "apêndice b",
+  "apêndice c",
+  "apêndice d",
+  "bibliografia",
+];
+
+function stripHtml(html: string) {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&[a-z0-9#]+;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function assessAuditHtml(html: string) {
+  const normalized = html.toLowerCase();
+  const words = stripHtml(html).split(" ").filter(Boolean).length;
+  const h2 = (html.match(/<h2\b/gi) ?? []).length;
+  const tables = (html.match(/<table\b/gi) ?? []).length;
+  const missingSections = REFERENCE_SECTION_HINTS.filter((section) => !normalized.includes(section));
+  const issues: string[] = [];
+
+  if (words < 2400) issues.push(`texto curto demais (${words} palavras; mínimo 2400)`);
+  if (h2 < 24) issues.push(`estrutura curta demais (${h2} seções h2; mínimo 24)`);
+  if (tables < 6) issues.push(`poucas tabelas (${tables}; mínimo 6)`);
+  if (missingSections.length > 5) issues.push(`faltam seções-chave: ${missingSections.slice(0, 8).join(", ")}`);
+  if (/teste rápido|smoke|paridade parcial|auditoria curta|delta-only/i.test(html)) {
+    issues.push("o HTML descreve a auditoria como teste rápido/parcial/delta-only");
+  }
+
+  return { ok: issues.length === 0, words, h2, tables, missingSections, issues };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -100,7 +157,44 @@ Deno.serve(async (req) => {
 
     const systemPrompt = `Você é o auditor técnico interno da plataforma Senex AI (PetMoreTime). Gere uma auditoria técnica COMPLETA, em português, sobre a versão informada. NÃO mencione "Lovable", "Lovable AI" ou qualquer ferramenta de desenvolvimento. Use o nome "Senex AI" e o motor "PetMoreTime". A saída deve ser HTML semântico, autocontido (com <style> embutido elegante e minimalista), pronto para iframe.
 
-Inclua: capa, sumário executivo, escopo, snapshot de métricas, conformidade regulatória (FDA, EMA, AVMA, GMLP) com matriz (covered/partial/missing), forças, lacunas (gaps), riscos, recomendações priorizadas, conclusão. Use seções h2/h3, tabelas, listas. Sem emojis em excesso. Tipografia: serif para títulos (ex: Georgia), sans para corpo. Cores sóbrias.`;
+POLÍTICA OBRIGATÓRIA A PARTIR DA V5.2.0:
+- Toda auditoria é standalone e cumulativa.
+- Nunca gere versão "teste rápido", "smoke", "resumo curto", "paridade parcial" ou somente delta.
+- Mesmo se o escopo vier curto ou experimental, expanda para um relatório completo no padrão da v5.2.0 e trate o escopo recebido apenas como ênfase adicional.
+- O documento precisa parecer adequado para revisão externa/regulatória.
+
+ESTRUTURA MÍNIMA ESPERADA:
+1. Sumário executivo
+2. Mudanças desde a versão anterior
+3. Glossário
+4. Metodologia
+5. Visão arquitetural
+6. Pipeline de digestão
+7. Vetorização e embeddings
+8. Banco relacional e RLS
+9. Uso de LLM por Edge Function
+10. Knowledge Graph
+11. Análise do paciente
+12. Recomendação híbrida
+13. Digital Twin
+14. Jornadas/fluxos reais e roadmap
+15. Comparação histórica
+16. FDA
+17. EMA
+18. AVMA
+19. GMLP
+20. Forças
+21. Gaps e riscos
+22. Roadmap priorizado
+23. Apêndices A-D
+24. Bibliografia
+
+REQUISITOS DE QUALIDADE:
+- pelo menos 24 seções h2
+- pelo menos 6 tabelas
+- texto denso, analítico e auto-suficiente
+- snapshot real do banco citado quando disponível
+- resumo estruturado coerente com o HTML final`;
 
     const userPrompt = `Versão da auditoria: ${version}
 Sistema (i18n): ${system_version ?? "n/a"}
@@ -115,7 +209,7 @@ ${JSON.stringify(snapshot, null, 2)}
 AUDITORIAS ANTERIORES (contexto):
 ${changelogContext.slice(0, 6000)}
 
-Gere o relatório HTML completo agora.`;
+Gere o relatório HTML completo agora. Lembre: o padrão de referência é a auditoria standalone cumulativa v5.2.0, nunca um relatório simplificado.`;
 
     const tools = [
       {
