@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { lastChangelogDate } from "@/data/projectChangelog.generated";
 import { SENEX_VERSION } from "@/config/senex-version";
 import { useTranslation } from "react-i18next";
+import AuditVersionComparison from "./AuditVersionComparison";
 import {
   FileText,
   Download,
@@ -246,6 +247,9 @@ export default function TechnicalAuditsTab() {
       <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6">
         {/* Lista */}
         <div className="space-y-3">
+          {!loading && audits.length >= 2 && (
+            <AuditVersionComparison audits={audits} />
+          )}
           {loading && (
             <p className="text-sm text-muted-foreground">{t("audits.loading")}</p>
           )}
