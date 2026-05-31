@@ -174,7 +174,10 @@ Gere o relatório HTML completo agora.`;
     const path = `${version}/auditoria.html`;
     const { error: upErr } = await service.storage
       .from("audit-reports")
-      .upload(path, new Blob([html], { type: "text/html; charset=utf-8" }), { upsert: true, contentType: "text/html; charset=utf-8" });
+      .upload(path, new TextEncoder().encode(html), {
+        upsert: true,
+        contentType: "text/html; charset=utf-8",
+      });
     if (upErr) throw upErr;
     const { data: pub } = service.storage.from("audit-reports").getPublicUrl(path);
     const htmlUrl = pub.publicUrl;
