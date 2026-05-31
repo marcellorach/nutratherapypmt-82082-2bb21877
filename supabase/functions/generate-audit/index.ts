@@ -34,14 +34,39 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json().catch(() => ({}));
+    const service = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Maintenance action: re-upload existing HTMLs with proper text/html content-type.
+    if ((body as any)?.action === "fix_mime") {
+      const { data: rows } = await service
+        .from("technical_audits")
+        .select("id, html_path")
+        .not("html_path", "is", null);
+      const results: any[] = [];
+      for (const r of (rows ?? []) as Array<{ id: string; html_path: string }>) {
+        const m = r.html_path.match(/audit-reports\/(.+)$/);
+        if (!m) { results.push({ id: r.id, skipped: true }); continue; }
+        const objectPath = m[1];
+        const dl = await fetch(r.html_path);
+        if (!dl.ok) { results.push({ id: r.id, error: `download ${dl.status}` }); continue; }
+        const html = await dl.text();
+        const { error: upErr } = await service.storage
+          .from("audit-reports")
+          .upload(objectPath, new TextEncoder().encode(html), {
+            upsert: true,
+            contentType: "text/html; charset=utf-8",
+          });
+        results.push({ id: r.id, ok: !upErr, error: upErr?.message });
+      }
+      return new Response(JSON.stringify({ fixed: results }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const { version, scope, system_version, system_changelog_date } = body as {
       version: string; scope: string; system_version?: string; system_changelog_date?: string;
     };
     if (!version || !scope) {
       return new Response(JSON.stringify({ error: "version and scope required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
-
-    const service = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // Gather DB snapshot (best-effort; ignore failures)
     const snapshot: Record<string, any> = {};
@@ -174,7 +199,10 @@ Gere o relatório HTML completo agora.`;
     const path = `${version}/auditoria.html`;
     const { error: upErr } = await service.storage
       .from("audit-reports")
-      .upload(path, new Blob([html], { type: "text/html; charset=utf-8" }), { upsert: true, contentType: "text/html; charset=utf-8" });
+      .upload(path, new TextEncoder().encode(html), {
+        upsert: true,
+        contentType: "text/html; charset=utf-8",
+      });
     if (upErr) throw upErr;
     const { data: pub } = service.storage.from("audit-reports").getPublicUrl(path);
     const htmlUrl = pub.publicUrl;

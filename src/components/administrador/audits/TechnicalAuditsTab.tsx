@@ -143,6 +143,17 @@ export default function TechnicalAuditsTab() {
 
   useEffect(() => {
     load();
+    // One-time MIME fix for previously uploaded HTMLs served as text/plain.
+    const KEY = "audit-mime-fixed-v1";
+    if (typeof window !== "undefined" && !localStorage.getItem(KEY)) {
+      supabase.functions
+        .invoke("generate-audit", { body: { action: "fix_mime" } })
+        .then(() => {
+          localStorage.setItem(KEY, "1");
+          load();
+        })
+        .catch(() => { /* silent */ });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
