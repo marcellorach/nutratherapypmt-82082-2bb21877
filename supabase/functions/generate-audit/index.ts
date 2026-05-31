@@ -116,8 +116,9 @@ Deno.serve(async (req) => {
     if ((body as any)?.action === "progress") {
       const id = String((body as any).audit_id ?? "").toLowerCase();
       if (!id) return new Response(JSON.stringify({ error: "audit_id required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      const { data: row } = await service.from("technical_audits").select("id, html_path, summary, updated_at").eq("id", id).maybeSingle();
+      const { data: row } = await service.from("technical_audits").select("id, html_path, summary, updated_at, progress_log, last_heartbeat, resume_count").eq("id", id).maybeSingle();
       const summary: any = row?.summary ?? {};
+      const log = Array.isArray((row as any)?.progress_log) ? (row as any).progress_log : [];
       return new Response(JSON.stringify({
         audit_id: id, status: summary.status ?? (row ? "unknown" : "missing"),
         stage: summary.stage ?? null, stage_label: summary.stage_label ?? null,
@@ -126,6 +127,9 @@ Deno.serve(async (req) => {
         blocks_total: typeof summary.blocks_total === "number" ? summary.blocks_total : null,
         warnings: Array.isArray(summary.warnings) ? summary.warnings : null,
         coverage_missing: Array.isArray(summary.coverage_missing) ? summary.coverage_missing : null,
+        log: log.slice(-30),
+        last_heartbeat: (row as any)?.last_heartbeat ?? null,
+        resume_count: (row as any)?.resume_count ?? 0,
         error: summary.error ?? null, html_path: row?.html_path ?? null, updated_at: row?.updated_at ?? null,
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
