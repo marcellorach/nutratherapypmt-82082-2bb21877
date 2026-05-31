@@ -1052,6 +1052,8 @@ ${(outline.rendered_blocks ?? []).map((item) => item.html).join("\n").slice(0, 1
           bodyHtml += `\n<section id="generation-warnings" class="warnings"><h2>Lacunas de geração</h2><p>Os itens abaixo do checklist canônico não foram emitidos. O relatório foi salvo mesmo assim — re-execute para preencher.</p><ul>${list}</ul></section>`;
           warnings.push(`Cobertura incompleta: ${coverage.missing.length} itens ausentes`);
         }
+        // Bibliografia obrigatória ao final do relatório PT
+        bodyHtml += `\n${renderReferencesHtml("pt")}`;
 
         const fullHtml = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Auditoria ${auditId}</title>${style}</head><body>${bodyHtml}</body></html>`;
         await setStage("uploading", "Salvando relatório", 95, {
