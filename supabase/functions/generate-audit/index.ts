@@ -14,6 +14,12 @@ const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const PRIMARY_MODEL = "google/gemini-3.1-pro-preview";
 const FALLBACK_MODEL = "openai/gpt-5-mini";
 
+// Watchdog / anti-stall tuning
+const LLM_CALL_TIMEOUT_MS = 90_000;   // single LLM call hard timeout
+const LLM_RETRY_BACKOFFS_MS = [5_000, 15_000]; // 2 retries after the first attempt
+const HEARTBEAT_INTERVAL_MS = 5_000;  // touch last_heartbeat while a block is running
+const MAX_LOG_ENTRIES = 200;          // ring buffer cap, trimmed in DB
+
 // ===== Coverage checklist (mirror of src/data/audit-coverage.ts) =====
 type StatusHint = "active" | "partial" | "doc_only" | "sandbox" | "planned";
 interface CoverageItem { id: string; pillar: string; title_pt: string; expected: StatusHint; evidence: string; }
@@ -78,6 +84,19 @@ function assessCoverage(html: string) {
     if (!idHit && !titleHit) missing.push(item);
   }
   return { missing, words: stripHtml(html).split(" ").filter(Boolean).length, h2: (html.match(/<h2\b/gi) ?? []).length, tables: (html.match(/<table\b/gi) ?? []).length };
+}
+
+// ===== Logging / heartbeat helpers (used as closures by the background job) =====
+type LogLevel = "info" | "warn" | "error";
+type LogPhase = "outline" | "block" | "cierre" | "validate" | "save" | "watchdog" | "system";
+interface LogEntry {
+  ts: string;
+  level: LogLevel;
+  phase: LogPhase;
+  message: string;
+  block_id?: string;
+  duration_ms?: number;
+  attempt?: number;
 }
 
 Deno.serve(async (req) => {
@@ -177,37 +196,113 @@ ${prevAuditsCtx}`;
 
     const auditId = version.toLowerCase().startsWith("v") ? version.toLowerCase() : `v${version.toLowerCase()}`;
     const numericVersion = auditId.replace(/^v/, "");
-    const initialSummary = { status: "processing", generator: "senex-ai", model: PRIMARY_MODEL, stage: "queued", stage_label: "Na fila", progress: 2, blocks_done: 0, blocks_total: 0, warnings: [] as string[] };
-    const { data: inserted, error: insErr } = await service.from("technical_audits").upsert({
-      id: auditId, version: numericVersion, audit_date: new Date().toISOString().slice(0, 10),
-      system_version: system_version ?? "", system_changelog_date: system_changelog_date ?? null,
-      scope, scope_history: [], html_path: null, pdf_path: null, docx_path: null,
-      summary: initialSummary, superseded_by: null, outline: null,
-    }).select("*").single();
-    if (insErr) throw insErr;
+    const isResume = (body as any)?.action === "resume";
+    let inserted: any;
+    if (isResume) {
+      const { data: existing } = await service.from("technical_audits").select("*").eq("id", auditId).maybeSingle();
+      if (!existing) return new Response(JSON.stringify({ error: "audit not found for resume" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      inserted = existing;
+      await service.from("technical_audits")
+        .update({ summary: { ...((existing.summary as any) ?? {}), status: "processing", stage: "resuming", stage_label: "Retomando…", error: null }, resume_count: (existing.resume_count ?? 0) + 1, last_heartbeat: new Date().toISOString() })
+        .eq("id", auditId);
+    } else {
+      const initialSummary = { status: "processing", generator: "senex-ai", model: PRIMARY_MODEL, stage: "queued", stage_label: "Na fila", progress: 2, blocks_done: 0, blocks_total: 0, warnings: [] as string[] };
+      const { data, error: insErr } = await service.from("technical_audits").upsert({
+        id: auditId, version: numericVersion, audit_date: new Date().toISOString().slice(0, 10),
+        system_version: system_version ?? "", system_changelog_date: system_changelog_date ?? null,
+        scope, scope_history: [], html_path: null, pdf_path: null, docx_path: null,
+        summary: initialSummary, superseded_by: null, outline: null,
+        progress_log: [], last_heartbeat: new Date().toISOString(), resume_count: 0,
+      }).select("*").single();
+      if (insErr) throw insErr;
+      inserted = data;
+    }
+
+    // === Logging + heartbeat closures ===
+    async function pushLog(entry: Omit<LogEntry, "ts">) {
+      const full: LogEntry = { ts: new Date().toISOString(), ...entry };
+      try {
+        // Read current log, append, trim to last MAX_LOG_ENTRIES, write back.
+        const { data: row } = await service.from("technical_audits").select("progress_log").eq("id", auditId).maybeSingle();
+        const prev = Array.isArray(row?.progress_log) ? (row!.progress_log as LogEntry[]) : [];
+        const next = [...prev, full].slice(-MAX_LOG_ENTRIES);
+        await service.from("technical_audits").update({ progress_log: next, last_heartbeat: full.ts }).eq("id", auditId);
+      } catch (e) { console.warn("pushLog failed", e); }
+      // Always console.log too for edge function logs.
+      console.log(`[audit ${auditId}] ${full.level.toUpperCase()} ${full.phase}: ${full.message}`);
+    }
+    async function heartbeat() {
+      try { await service.from("technical_audits").update({ last_heartbeat: new Date().toISOString() }).eq("id", auditId); } catch { /* noop */ }
+    }
 
     async function setStage(stage: string, label: string, progress: number, extra: Record<string, any> = {}) {
       try {
         const { data: curr } = await service.from("technical_audits").select("summary").eq("id", auditId).maybeSingle();
         const merged = { ...((curr?.summary as any) ?? {}), ...extra, status: "processing", stage, stage_label: label, progress };
-        await service.from("technical_audits").update({ summary: merged }).eq("id", auditId);
+        await service.from("technical_audits").update({ summary: merged, last_heartbeat: new Date().toISOString() }).eq("id", auditId);
       } catch (e) { console.warn("setStage failed", e); }
     }
 
     const backgroundJob = (async () => {
       try {
-        // 1) OUTLINE
-        await setStage("outlining", "Montando estrutura do relatório", 8);
+        await pushLog({ level: "info", phase: "system", message: isResume ? `Retomando geração (tentativa #${(inserted.resume_count ?? 0) + 1})` : "Iniciando geração" });
+
+        // ===== Resilient LLM call: per-attempt timeout + retries + model fallback =====
+        async function callToolWithTimeout(messages: any[], tool: any, model: string, timeoutMs: number) {
+          const ctrl = new AbortController();
+          const t = setTimeout(() => ctrl.abort(), timeoutMs);
+          try {
+            const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+              method: "POST", headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+              body: JSON.stringify({ model, messages, tools: [tool], tool_choice: { type: "function", function: { name: tool.function.name } } }),
+              signal: ctrl.signal,
+            });
+            if (!r.ok) { const txt = await r.text(); throw new Error(`${model} → ${r.status}: ${txt.slice(0, 300)}`); }
+            const d = await r.json();
+            const args = d?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+            if (!args) throw new Error(`${model} returned no tool_call`);
+            return JSON.parse(args);
+          } finally { clearTimeout(t); }
+        }
+        async function resilientCall(messages: any[], tool: any, opts: { phase: LogPhase; label: string; block_id?: string }) {
+          const attempts = [{ model: PRIMARY_MODEL, backoff: 0 }, { model: FALLBACK_MODEL, backoff: LLM_RETRY_BACKOFFS_MS[0] }, { model: FALLBACK_MODEL, backoff: LLM_RETRY_BACKOFFS_MS[1] }];
+          let lastErr: any;
+          for (let i = 0; i < attempts.length; i++) {
+            const { model, backoff } = attempts[i];
+            if (backoff > 0) await new Promise((r) => setTimeout(r, backoff));
+            const hb = setInterval(() => { heartbeat().catch(() => {}); }, HEARTBEAT_INTERVAL_MS);
+            const t0 = Date.now();
+            try {
+              await pushLog({ level: "info", phase: opts.phase, block_id: opts.block_id, attempt: i + 1, message: `${opts.label} — tentativa ${i + 1}/${attempts.length} (${model})` });
+              const out = await callToolWithTimeout(messages, tool, model, LLM_CALL_TIMEOUT_MS);
+              await pushLog({ level: "info", phase: opts.phase, block_id: opts.block_id, attempt: i + 1, duration_ms: Date.now() - t0, message: `${opts.label} — ok (${((Date.now()-t0)/1000).toFixed(1)}s)` });
+              return out;
+            } catch (e: any) {
+              lastErr = e;
+              const reason = e?.name === "AbortError" ? `timeout >${LLM_CALL_TIMEOUT_MS/1000}s` : (e?.message ?? String(e));
+              await pushLog({ level: "warn", phase: opts.phase, block_id: opts.block_id, attempt: i + 1, duration_ms: Date.now() - t0, message: `${opts.label} — falha (${reason})` });
+            } finally { clearInterval(hb); }
+          }
+          throw lastErr ?? new Error("all LLM attempts failed");
+        }
+
+        // ===== Outline (skip if resuming and outline already present) =====
+        let outline: any = (inserted as any)?.outline ?? null;
+        if (!outline) {
+          await setStage("outlining", "Montando estrutura do relatório", 8);
         const outlineTool = { type: "function", function: { name: "emit_outline", description: "Índice completo do relatório por pilar.", parameters: { type: "object", properties: { title: { type: "string" }, blocks: { type: "array", items: { type: "object", properties: { block_id: { type: "string" }, pillar_title: { type: "string" }, sections: { type: "array", items: { type: "object", properties: { section_id: { type: "string" }, title: { type: "string" }, bullets: { type: "array", items: { type: "string" } } }, required: ["section_id", "title", "bullets"], additionalProperties: false } } }, required: ["block_id", "pillar_title", "sections"], additionalProperties: false } } }, required: ["title", "blocks"], additionalProperties: false } } };
-        const outline = await tryWithFallback([
+          outline = await resilientCall([
           { role: "system", content: baseSystem },
           { role: "user", content: `Auditoria ${auditId} (i18n ${system_version ?? "n/a"}).
 ESCOPO DO USUÁRIO (ênfases adicionais — não substitui o checklist):
 ${scope}
 
 Monte o ÍNDICE: um bloco por pilar do checklist + blocos extras (sumário executivo já será gerado separado, então NÃO o inclua; inclua: mudanças desde versão anterior, comparação histórica, forças, gaps e riscos consolidados, roadmap, apêndices, bibliografia). Cada seção tem 3-6 bullets. TODOS os section_id do checklist canônico devem aparecer pelo menos uma vez.` },
-        ], outlineTool);
+          ], outlineTool, { phase: "outline", label: "Outline" });
         await service.from("technical_audits").update({ outline }).eq("id", auditId);
+        } else {
+          await pushLog({ level: "info", phase: "outline", message: "Outline já presente — reaproveitando" });
+        }
 
         const blocks = (outline.blocks ?? []) as Array<any>;
         const totalBlocks = blocks.length + 1;
@@ -217,6 +312,7 @@ Monte o ÍNDICE: um bloco por pilar do checklist + blocos extras (sumário execu
         const blockTool = { type: "function", function: { name: "emit_block", description: "HTML denso de um bloco.", parameters: { type: "object", properties: { html: { type: "string" }, warnings: { type: "array", items: { type: "string" } } }, required: ["html"], additionalProperties: false } } };
         const renderedHtml: string[] = [];
         const blockWarnings: string[] = [];
+        const skippedBlocks: string[] = [];
         for (let i = 0; i < blocks.length; i++) {
           const blk = blocks[i];
           const pct = 15 + Math.round(((i + 0.5) / totalBlocks) * 70);
@@ -236,25 +332,25 @@ REGRAS:
 - Se algo não estiver implementado, marque "Status: parcial/doc-only/sandbox/planejado" e descreva o gap.
 - NÃO emita <html>, <head>, <body> ou <style>. Apenas fragment HTML.` },
           ];
-          let attempt: any;
-          try { attempt = await tryWithFallback(messages, blockTool); }
-          catch (e: any) {
-            blockWarnings.push(`bloco ${blk.block_id}: 1ª tentativa falhou (${e?.message ?? "erro"})`);
-            try { attempt = await tryWithFallback(messages, blockTool); }
-            catch (e2: any) {
-              blockWarnings.push(`bloco ${blk.block_id}: NÃO renderizado (${e2?.message ?? "erro"})`);
-              renderedHtml.push(`<section id="${blk.block_id}" class="block-gap"><h2>${blk.pillar_title} — Lacuna de geração</h2><p>Bloco não pôde ser gerado. Motivo: ${e2?.message ?? "erro desconhecido"}. Re-execute para preencher.</p></section>`);
-              continue;
-            }
+          try {
+            const attempt = await resilientCall(messages, blockTool, { phase: "block", block_id: blk.block_id, label: `Bloco ${i + 1}/${totalBlocks} (${blk.pillar_title})` });
+            renderedHtml.push(String(attempt.html ?? ""));
+            if (Array.isArray(attempt.warnings)) blockWarnings.push(...attempt.warnings);
+          } catch (e: any) {
+            const reason = e?.message ?? String(e);
+            skippedBlocks.push(blk.block_id);
+            blockWarnings.push(`bloco ${blk.block_id}: PULADO após 3 tentativas (${reason})`);
+            await pushLog({ level: "error", phase: "block", block_id: blk.block_id, message: `Bloco PULADO após 3 tentativas — ${reason}. Continuando para o próximo.` });
+            renderedHtml.push(`<section id="${blk.block_id}" class="block-gap"><h2>${blk.pillar_title} — Lacuna de geração</h2><p>Bloco não pôde ser gerado após 3 tentativas. Motivo: ${reason}. Re-execute para preencher.</p></section>`);
           }
-          renderedHtml.push(String(attempt.html ?? ""));
-          if (Array.isArray(attempt.warnings)) blockWarnings.push(...attempt.warnings);
         }
 
         // 3) CIERRE
         await setStage("closing", "Gerando sumário executivo", 88, { blocks_done: blocks.length });
         const closeTool = { type: "function", function: { name: "emit_close", description: "Sumário executivo + summary estruturado.", parameters: { type: "object", properties: { exec_summary_html: { type: "string" }, summary: { type: "object", properties: { strengths: { type: "number" }, gaps: { type: "number" }, risks: { type: "number" }, pages: { type: "number" }, generator: { type: "string" }, parity: { type: "string" }, highlights: { type: "array", items: { type: "string" } }, compliance: { type: "object", properties: { fda: { type: "object", properties: { covered: { type: "number" }, partial: { type: "number" }, missing: { type: "number" }, points: { type: "number" } }, required: ["covered","partial","missing","points"], additionalProperties: false }, ema: { type: "object", properties: { covered: { type: "number" }, partial: { type: "number" }, missing: { type: "number" }, points: { type: "number" } }, required: ["covered","partial","missing","points"], additionalProperties: false }, avma: { type: "object", properties: { covered: { type: "number" }, partial: { type: "number" }, missing: { type: "number" }, points: { type: "number" } }, required: ["covered","partial","missing","points"], additionalProperties: false }, gmlp: { type: "object", properties: { covered: { type: "number" }, partial: { type: "number" }, missing: { type: "number" }, principles: { type: "number" } }, required: ["covered","partial","missing","principles"], additionalProperties: false } }, required: ["fda","ema","avma","gmlp"], additionalProperties: false } }, required: ["strengths","gaps","risks","pages","generator","parity","highlights","compliance"], additionalProperties: false } }, required: ["exec_summary_html", "summary"], additionalProperties: false } } };
-        const close = await tryWithFallback([
+        let close: any;
+        try {
+          close = await resilientCall([
           { role: "system", content: baseSystem },
           { role: "user", content: `Gere o SUMÁRIO EXECUTIVO da auditoria ${auditId} com base nas seções já renderizadas, e o resumo estruturado JSON.
 
@@ -265,7 +361,12 @@ Inclua no exec_summary_html (<section id="executive-summary">):
 
 SEÇÕES JÁ RENDERIZADAS (resumo):
 ${renderedHtml.join("\n").slice(0, 14000)}` },
-        ], closeTool);
+          ], closeTool, { phase: "cierre", label: "Sumário executivo" });
+        } catch (e: any) {
+          await pushLog({ level: "warn", phase: "cierre", message: `Sumário executivo falhou — usando placeholder (${e?.message ?? e})` });
+          close = { exec_summary_html: `<section id="executive-summary"><h2>Sumário executivo</h2><p>Não foi possível gerar o sumário executivo após 3 tentativas. O relatório foi preservado com os blocos renderizados.</p></section>`, summary: { strengths: 0, gaps: 0, risks: 0, pages: 0, generator: "senex-ai", parity: "n/a", highlights: [], compliance: { fda: { covered:0, partial:0, missing:0, points:0 }, ema: { covered:0, partial:0, missing:0, points:0 }, avma: { covered:0, partial:0, missing:0, points:0 }, gmlp: { covered:0, partial:0, missing:0, principles:0 } } } };
+          blockWarnings.push(`cierre: placeholder (${e?.message ?? e})`);
+        }
 
         // 4) MONTAGEM
         const style = `<style>:root{--ink:#111827;--muted:#4b5563;--soft:#e5e7eb;--bg:#f9fafb;--accent:#1d4ed8;--warn:#b45309}*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--ink);line-height:1.6;max-width:980px;margin:0 auto;padding:48px 32px;background:#fff}h1{font-size:2rem;font-weight:700;margin:0 0 8px}h2{font-size:1.4rem;font-weight:700;margin:48px 0 16px;padding-bottom:8px;border-bottom:2px solid var(--soft)}h3{font-size:1.1rem;font-weight:600;margin:24px 0 8px}p{margin:0 0 12px}table{width:100%;border-collapse:collapse;margin:16px 0;font-size:0.92rem}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--soft);vertical-align:top}th{background:var(--bg);font-weight:600}.meta{color:var(--muted);font-size:0.85rem}section.block-gap,section.warnings{background:#fff7ed;border-left:4px solid var(--warn);padding:16px;border-radius:6px;margin:24px 0}ul{margin:0 0 12px 18px}code{background:var(--bg);padding:2px 6px;border-radius:4px;font-size:0.9em}</style>`;
@@ -273,6 +374,7 @@ ${renderedHtml.join("\n").slice(0, 14000)}` },
         let bodyHtml = `${header}\n${close.exec_summary_html ?? ""}\n${renderedHtml.join("\n")}`;
 
         // 5) VALIDAÇÃO POR COBERTURA
+        await pushLog({ level: "info", phase: "validate", message: "Validando cobertura do checklist canônico" });
         const cov = assessCoverage(bodyHtml);
         const warnings = [...blockWarnings];
         if (cov.missing.length > 0) {
@@ -285,15 +387,18 @@ ${renderedHtml.join("\n").slice(0, 14000)}` },
 
         // 6) UPLOAD
         await setStage("uploading", "Salvando relatório", 95);
+        await pushLog({ level: "info", phase: "save", message: `Salvando HTML (${(fullHtml.length/1024).toFixed(1)} KB)` });
         const path = `${version}/auditoria.html`;
         const { error: upErr } = await service.storage.from("audit-reports").upload(path, new TextEncoder().encode(fullHtml), { upsert: true, contentType: "text/html; charset=utf-8" });
         if (upErr) throw upErr;
         const { data: pub } = service.storage.from("audit-reports").getPublicUrl(path);
         const status = warnings.length > 0 ? "ready_with_warnings" : "ready";
-        const finalSummary: any = { ...(close.summary ?? {}), generator: "senex-ai", model: PRIMARY_MODEL, status, stage: status, stage_label: status === "ready" ? "Pronto" : "Pronto com lacunas", progress: 100, blocks_done: blocks.length, blocks_total: totalBlocks, words: cov.words, h2: cov.h2, tables: cov.tables, coverage_missing: cov.missing.map((m) => m.id), warnings };
+        const finalSummary: any = { ...(close.summary ?? {}), generator: "senex-ai", model: PRIMARY_MODEL, status, stage: status, stage_label: status === "ready" ? "Pronto" : "Pronto com lacunas", progress: 100, blocks_done: blocks.length, blocks_total: totalBlocks, words: cov.words, h2: cov.h2, tables: cov.tables, coverage_missing: cov.missing.map((m) => m.id), skipped_blocks: skippedBlocks, warnings };
         await service.from("technical_audits").update({ html_path: pub.publicUrl, summary: finalSummary }).eq("id", auditId);
+        await pushLog({ level: status === "ready" ? "info" : "warn", phase: "save", message: `Geração concluída — status ${status}${skippedBlocks.length ? ` · ${skippedBlocks.length} bloco(s) pulado(s)` : ""}` });
       } catch (err: any) {
         console.error("background audit generation failed:", err);
+        try { await pushLog({ level: "error", phase: "system", message: `Erro fatal: ${err?.message ?? String(err)}` }); } catch { /* noop */ }
         await service.from("technical_audits").update({
           summary: { status: "failed", stage: "failed", stage_label: "Falhou", progress: 100, error: err?.message ?? String(err), generator: "senex-ai" },
         }).eq("id", auditId);
