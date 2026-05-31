@@ -31,7 +31,6 @@ import {
   ShieldCheck,
   AlertTriangle,
   CheckCircle2,
-  Bot,
   Eye,
   EyeOff,
   RefreshCw,
@@ -144,25 +143,33 @@ export default function TechnicalAuditsTab() {
 
   const handleRequestNew = async () => {
     setSubmitting(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    const { error } = await supabase.from("audit_requests").insert({
-      scope: newScope,
-      system_version: `i18n ${CURRENT_I18N_VERSION}`,
-      system_date: lastChangelogDate || new Date().toISOString().slice(0, 10),
-      status: "pending",
-      requested_by: user?.id ?? null,
-    });
-    setSubmitting(false);
-    if (error) {
-      toast({ title: t("audits.toast.requestError"), description: error.message, variant: "destructive" });
-      return;
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-audit", {
+        body: {
+          version: nextVersion,
+          scope: newScope,
+          system_version: `i18n ${CURRENT_I18N_VERSION}`,
+          system_changelog_date: lastChangelogDate || new Date().toISOString().slice(0, 10),
+        },
+      });
+      if (error) throw error;
+      const newId = (data as any)?.audit?.id ?? null;
+      toast({
+        title: t("audits.toast.requestSuccessTitle", { version: nextVersion }),
+        description: t("audits.toast.requestSuccessDesc"),
+      });
+      setNewOpen(false);
+      await load();
+      if (newId) setSelectedId(newId);
+    } catch (e) {
+      toast({
+        title: t("audits.toast.requestError"),
+        description: e instanceof Error ? e.message : String(e),
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
     }
-    toast({
-      title: t("audits.toast.requestSuccessTitle", { version: nextVersion }),
-      description: t("audits.toast.requestSuccessDesc"),
-    });
-    setNewOpen(false);
-    load();
   };
 
   const handleSaveScope = async () => {
@@ -290,204 +297,99 @@ export default function TechnicalAuditsTab() {
         </Dialog>
       </div>
 
-      {pendingRequests.length > 0 && (
-        <Card className="border-amber-300 bg-amber-50/50 dark:bg-amber-950/20">
-          <CardContent className="py-3 flex items-center gap-3 text-sm flex-wrap">
-            <AlertTriangle className="h-4 w-4 text-amber-600" />
-            <span className="text-muted-foreground">{t("audits.pendingBanner", { count: pendingRequests.length })}</span>
-            {pendingRequests.some((r) => r.auto_triggered) && (
-              <Badge variant="outline" className="gap-1 text-[10px]">
-                <Bot className="h-3 w-3" />
-                auto-disparada
-              </Badge>
-            )}
-          </CardContent>
-        </Card>
+      {/* Banner de fila removido: a geração agora é instantânea. */}
+
+      {/* 1. Gráfico de evolução — largura total */}
+      {!loading && audits.length >= 1 && (
+        <ComplianceHistoryChart audits={audits} />
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6">
-        {/* Lista */}
-        <div className="space-y-3">
-          {!loading && audits.length >= 1 && (
-            <ComplianceHistoryChart audits={audits} />
-          )}
-          {!loading && activeAudits.length >= 2 && (
-            <AuditVersionComparison audits={activeAudits} />
-          )}
+      {/* 2. Comparação entre versões — largura total */}
+      {!loading && activeAudits.length >= 2 && (
+        <AuditVersionComparison audits={activeAudits} />
+      )}
 
-          {/* Painel de configuração do watchdog */}
-          {!loading && (
-            <Card className="border-muted">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs flex items-center gap-2 text-muted-foreground">
-                  <SettingsIcon className="h-3.5 w-3.5" />
-                  Auditoria automática
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-xs">
-                <div className="flex items-center gap-2">
-                  <label className="text-muted-foreground">Limite:</label>
-                  <Input
-                    type="number"
-                    min={2}
-                    max={20}
-                    value={threshold}
-                    onChange={(e) => saveThreshold(Math.max(2, Math.min(20, Number(e.target.value) || 6)))}
-                    className="h-7 w-16 text-xs"
-                  />
-                  <span className="text-muted-foreground">mudanças críticas</span>
-                </div>
-                <p className="text-[10px] text-muted-foreground leading-snug">
-                  Conta entradas Added/Changed/Fixed em <code>curation · kg · clinical-pipeline · infra · base-knowledge</code> desde a última auditoria ativa.
-                </p>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full h-7 gap-1 text-xs"
-                  onClick={runWatchdog}
-                  disabled={watching}
+      {/* 3. Última auditoria — largura total, com lista horizontal acima */}
+      <div className="space-y-3">
+        {!loading && visibleAudits.length > 0 && (
+          <div className="flex gap-3 overflow-x-auto pb-2">
+            {visibleAudits.map((a) => {
+              const isSelected = a.id === selectedId;
+              const isSuperseded = !!a.superseded_by;
+              return (
+                <Card
+                  key={a.id}
+                  className={`cursor-pointer transition-all shrink-0 w-[280px] ${
+                    isSelected ? "border-primary shadow-md" : "hover:border-muted-foreground/30"
+                  } ${isSuperseded ? "opacity-60" : ""}`}
+                  onClick={() => setSelectedId(a.id)}
                 >
-                  <RefreshCw className={`h-3 w-3 ${watching ? "animate-spin" : ""}`} />
-                  {watching ? "Verificando…" : "Verificar agora"}
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {loading && (
-            <p className="text-sm text-muted-foreground">{t("audits.loading")}</p>
-          )}
-          {visibleAudits.map((a) => {
-            const isSelected = a.id === selectedId;
-            const isSuperseded = !!a.superseded_by;
-            return (
-              <Card
-                key={a.id}
-                className={`cursor-pointer transition-all ${
-                  isSelected ? "border-primary shadow-md" : "hover:border-muted-foreground/30"
-                } ${isSuperseded ? "opacity-60" : ""}`}
-                onClick={() => setSelectedId(a.id)}
-              >
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-primary" />
-                      {t("audits.auditCard.title", { id: a.id.toUpperCase() })}
-                    </CardTitle>
-                    <Badge variant="outline">{a.audit_date}</Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {t("audits.system")}: <span className="font-mono">{a.system_version}</span>
-                    {a.system_changelog_date && ` · ${a.system_changelog_date}`}
-                  </p>
-                  {isSuperseded && (
-                    <Badge variant="secondary" className="text-[10px] mt-1 w-fit">
-                      Substituída por {a.superseded_by?.toUpperCase()}
-                    </Badge>
-                  )}
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex flex-wrap gap-1.5 text-xs">
-                    {typeof a.summary?.strengths === "number" && (
-                      <Badge variant="secondary" className="gap-1">
-                        <CheckCircle2 className="h-3 w-3" />{t("audits.auditCard.strengths", { count: a.summary.strengths })}
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-primary" />
+                        {a.id.toUpperCase()}
+                      </CardTitle>
+                      <Badge variant="outline" className="text-[10px]">{a.audit_date}</Badge>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground truncate">
+                      <span className="font-mono">{a.system_version}</span>
+                    </p>
+                    {isSuperseded && (
+                      <Badge variant="secondary" className="text-[9px] mt-1 w-fit">
+                        Substituída por {a.superseded_by?.toUpperCase()}
                       </Badge>
                     )}
-                    {typeof a.summary?.gaps === "number" && (
-                      <Badge variant="secondary" className="gap-1">
-                        <AlertTriangle className="h-3 w-3" />{t("audits.auditCard.gaps", { count: a.summary.gaps })}
-                      </Badge>
-                    )}
-                    {typeof a.summary?.risks === "number" && (
-                      <Badge variant="destructive" className="gap-1">
-                        {t("audits.auditCard.risks", { count: a.summary.risks })}
-                      </Badge>
-                    )}
-                    {typeof a.summary?.pages === "number" && (
-                      <Badge variant="outline">{t("audits.auditCard.pages", { count: a.summary.pages })}</Badge>
-                    )}
-                  </div>
-
-                  <div className="flex flex-wrap gap-1.5">
-                    {a.html_path && (
+                  </CardHeader>
+                  <CardContent className="space-y-2 pb-3">
+                    <div className="flex flex-wrap gap-1 text-[10px]">
+                      {typeof a.summary?.strengths === "number" && (
+                        <Badge variant="secondary" className="gap-1 text-[10px] py-0">
+                          <CheckCircle2 className="h-2.5 w-2.5" />{a.summary.strengths as number}
+                        </Badge>
+                      )}
+                      {typeof a.summary?.gaps === "number" && (
+                        <Badge variant="secondary" className="gap-1 text-[10px] py-0">
+                          <AlertTriangle className="h-2.5 w-2.5" />{a.summary.gaps as number}
+                        </Badge>
+                      )}
+                      {typeof a.summary?.risks === "number" && (
+                        <Badge variant="destructive" className="gap-1 text-[10px] py-0">{a.summary.risks as number}</Badge>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {a.html_path && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-6 px-2 text-[10px] gap-1"
+                          onClick={(e) => { e.stopPropagation(); window.open(a.html_path!, "_blank"); }}
+                        >
+                          <ExternalLink className="h-2.5 w-2.5" /> HTML
+                        </Button>
+                      )}
+                      {a.pdf_path && (
+                        <Button size="sm" variant="outline" className="h-6 px-2 text-[10px] gap-1" asChild onClick={(e) => e.stopPropagation()}>
+                          <a href={a.pdf_path} download><Download className="h-2.5 w-2.5" /> PDF</a>
+                        </Button>
+                      )}
                       <Button
                         size="sm"
-                        variant="outline"
-                        className="h-7 px-2 text-xs gap-1"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          window.open(a.html_path!, "_blank");
-                        }}
+                        variant="ghost"
+                        className="h-6 px-2 text-[10px] gap-1 ml-auto"
+                        onClick={(e) => { e.stopPropagation(); setEditTarget(a); setEditScope(a.scope); }}
                       >
-                        <ExternalLink className="h-3 w-3" /> HTML
+                        <Pencil className="h-2.5 w-2.5" />
                       </Button>
-                    )}
-                    {a.pdf_path && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-7 px-2 text-xs gap-1"
-                        asChild
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <a href={a.pdf_path} download>
-                          <Download className="h-3 w-3" /> PDF
-                        </a>
-                      </Button>
-                    )}
-                    {a.docx_path && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-7 px-2 text-xs gap-1"
-                        asChild
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <a href={a.docx_path} download>
-                          <Download className="h-3 w-3" /> DOCX
-                        </a>
-                      </Button>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-7 px-2 text-xs gap-1 ml-auto"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditTarget(a);
-                        setEditScope(a.scope);
-                      }}
-                    >
-                      <Pencil className="h-3 w-3" /> {t("audits.scopeButton")}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
 
-          {!loading && audits.length === 0 && (
-            <Card>
-              <CardContent className="py-6 text-sm text-muted-foreground text-center">
-                {t("audits.empty")}
-              </CardContent>
-            </Card>
-          )}
-
-          {!loading && supersededAudits.length > 0 && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="w-full h-7 text-xs gap-1 text-muted-foreground"
-              onClick={() => setShowSuperseded((v) => !v)}
-            >
-              {showSuperseded ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-              {showSuperseded ? "Ocultar" : "Mostrar"} {supersededAudits.length} versão(ões) substituída(s)
-            </Button>
-          )}
-        </div>
-
-        {/* Visualizador */}
+        {/* Viewer largura total */}
         <Card className="min-h-[600px]">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between flex-wrap gap-2">
@@ -516,7 +418,7 @@ export default function TechnicalAuditsTab() {
               <iframe
                 src={selected.html_path}
                 title={`Auditoria ${selected.id}`}
-                className="w-full h-[70vh] border rounded-md bg-white"
+                className="w-full h-[75vh] border rounded-md bg-white"
               />
             ) : (
               <p className="text-sm text-muted-foreground text-center py-12">
@@ -525,6 +427,68 @@ export default function TechnicalAuditsTab() {
             )}
           </CardContent>
         </Card>
+
+        {/* Painel auditoria automática + supersedidas */}
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 items-start">
+          {!loading && (
+            <Card className="border-muted">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xs flex items-center gap-2 text-muted-foreground">
+                  <SettingsIcon className="h-3.5 w-3.5" />
+                  Auditoria automática
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-xs">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <label className="text-muted-foreground">Limite:</label>
+                  <Input
+                    type="number"
+                    min={2}
+                    max={20}
+                    value={threshold}
+                    onChange={(e) => saveThreshold(Math.max(2, Math.min(20, Number(e.target.value) || 6)))}
+                    className="h-7 w-16 text-xs"
+                  />
+                  <span className="text-muted-foreground">mudanças críticas</span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 gap-1 text-xs ml-auto"
+                    onClick={runWatchdog}
+                    disabled={watching}
+                  >
+                    <RefreshCw className={`h-3 w-3 ${watching ? "animate-spin" : ""}`} />
+                    {watching ? "Verificando…" : "Verificar agora"}
+                  </Button>
+                </div>
+                <p className="text-[10px] text-muted-foreground leading-snug">
+                  Conta entradas Added/Changed/Fixed em <code>curation · kg · clinical-pipeline · infra · base-knowledge</code> desde a última auditoria ativa.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {!loading && supersededAudits.length > 0 && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-9 text-xs gap-1 text-muted-foreground"
+              onClick={() => setShowSuperseded((v) => !v)}
+            >
+              {showSuperseded ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+              {showSuperseded ? "Ocultar" : "Mostrar"} {supersededAudits.length} substituída(s)
+            </Button>
+          )}
+        </div>
+
+        {loading && <p className="text-sm text-muted-foreground">{t("audits.loading")}</p>}
+        {!loading && audits.length === 0 && (
+          <Card>
+            <CardContent className="py-6 text-sm text-muted-foreground text-center">
+              {t("audits.empty")}
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Edit scope dialog */}

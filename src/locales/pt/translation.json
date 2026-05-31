@@ -8365,16 +8365,16 @@
     "newButton": "Fazer nova auditoria ({{version}})",
     "newDialog": {
       "title": "Solicitar nova auditoria técnica",
-      "description": "Edite o escopo abaixo. A auditoria será gerada pelo agente Lovable na próxima sessão dedicada (geração de relatórios completos com infográficos não roda em runtime).",
+      "description": "Edite o escopo abaixo. A auditoria será gerada agora pelo motor Senex AI com o melhor modelo de raciocínio disponível.",
       "auditVersion": "Versão da auditoria",
       "systemVersion": "Versão do sistema (i18n)",
       "lastChangelog": "Última atualização do changelog",
       "scope": "Escopo da auditoria",
       "cancel": "Cancelar",
-      "submit": "Solicitar auditoria",
-      "submitting": "Enviando…"
+      "submit": "Gerar auditoria agora",
+      "submitting": "Gerando…"
     },
-    "pendingBanner": "{{count}} auditoria(s) aguardando geração pelo agente Lovable.",
+    "pendingBanner": "{{count}} auditoria(s) na fila legada (limpe ou ignore — agora a geração é imediata).",
     "loading": "Carregando…",
     "empty": "Nenhuma auditoria ainda. Clique em \"Fazer nova auditoria\".",
     "system": "Sistema",
@@ -8400,9 +8400,9 @@
       "cancel": "Cancelar"
     },
     "toast": {
-      "requestError": "Erro ao solicitar auditoria",
-      "requestSuccessTitle": "Auditoria {{version}} solicitada",
-      "requestSuccessDesc": "O escopo foi registrado. O agente Lovable irá gerar a auditoria na próxima sessão dedicada.",
+      "requestError": "Erro ao gerar auditoria",
+      "requestSuccessTitle": "Auditoria {{version}} gerada",
+      "requestSuccessDesc": "Relatório criado e disponível abaixo.",
       "saveError": "Erro ao salvar",
       "scopeUpdated": "Escopo atualizado"
     }
