@@ -25,8 +25,8 @@ const MAX_LOG_ENTRIES = 200;
 
 // ===== Coverage checklist (mirror of src/data/audit-coverage.ts) =====
 type StatusHint = "active" | "partial" | "doc_only" | "sandbox" | "planned";
-interface CoverageItem { id: string; pillar: string; title_pt: string; expected: StatusHint; evidence: string; }
-const COVERAGE: CoverageItem[] = [
+interface CoverageItem { id: string; pillar: string; title_pt: string; title_en?: string; pillar_en?: string; expected: StatusHint; evidence: string; }
+const FALLBACK_COVERAGE: CoverageItem[] = [
   { id: "auth-rls", pillar: "Plataforma & Infraestrutura", title_pt: "Autenticação, papéis e RLS", expected: "active", evidence: "user_roles, profiles, is_admin/has_role" },
   { id: "edge-functions", pillar: "Plataforma & Infraestrutura", title_pt: "Edge Functions (catálogo, papéis, JWT)", expected: "active", evidence: "67+ funções em supabase/functions/*" },
   { id: "storage-buckets", pillar: "Plataforma & Infraestrutura", title_pt: "Buckets de Storage", expected: "active", evidence: "study_pdfs, pet_exams_pdfs, audit-reports" },
