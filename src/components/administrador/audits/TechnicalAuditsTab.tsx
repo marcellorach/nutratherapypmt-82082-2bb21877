@@ -21,6 +21,7 @@ import { SENEX_VERSION } from "@/config/senex-version";
 import { useTranslation } from "react-i18next";
 import AuditVersionComparison from "./AuditVersionComparison";
 import ComplianceHistoryChart from "./ComplianceHistoryChart";
+import { generateAuditPdf, backfillMissingAuditPdfs } from "./audit-pdf-generator";
 import {
   FileText,
   Download,
@@ -121,6 +122,19 @@ export default function TechnicalAuditsTab() {
       const firstActive = (a.data as Array<{ id: string; superseded_by: string | null }>)
         .find((x) => !x.superseded_by);
       if (!selectedId && firstActive) setSelectedId(firstActive.id);
+      // Retroactive: ensure every audit has a PDF. Runs in background.
+      const missing = (a.data as unknown as TechnicalAudit[]).filter((x) => x.html_path && !x.pdf_path);
+      if (missing.length > 0) {
+        backfillMissingAuditPdfs(missing).then(() => {
+          supabase
+            .from("technical_audits")
+            .select("*")
+            .order("audit_date", { ascending: false })
+            .then(({ data }) => {
+              if (data) setAudits(data as unknown as TechnicalAudit[]);
+            });
+        });
+      }
     }
     if (r.data) setRequests(r.data as unknown as AuditRequest[]);
     if (s.data?.change_threshold) setThreshold(s.data.change_threshold as number);
@@ -154,6 +168,7 @@ export default function TechnicalAuditsTab() {
       });
       if (error) throw error;
       const newId = (data as any)?.audit?.id ?? null;
+      const newAudit = (data as any)?.audit ?? null;
       toast({
         title: t("audits.toast.requestSuccessTitle", { version: nextVersion }),
         description: t("audits.toast.requestSuccessDesc"),
@@ -161,6 +176,12 @@ export default function TechnicalAuditsTab() {
       setNewOpen(false);
       await load();
       if (newId) setSelectedId(newId);
+      // Always generate PDF alongside HTML, in background.
+      if (newAudit?.html_path && !newAudit?.pdf_path) {
+        generateAuditPdf(newAudit)
+          .then(() => load())
+          .catch((err) => console.warn("[audit-pdf] generation failed", err));
+      }
     } catch (e) {
       toast({
         title: t("audits.toast.requestError"),
