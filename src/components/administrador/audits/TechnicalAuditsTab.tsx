@@ -183,13 +183,20 @@ export default function TechnicalAuditsTab() {
       if (error) throw error;
       const newId = (data as any)?.audit?.id ?? null;
       const newAudit = (data as any)?.audit ?? null;
+      const isProcessing = (data as any)?.status === "processing";
       toast({
         title: t("audits.toast.requestSuccessTitle", { version: nextVersion }),
-        description: t("audits.toast.requestSuccessDesc"),
+        description: isProcessing
+          ? "A auditoria está sendo gerada em segundo plano (pode levar 2–4 min). Atualize a lista para acompanhar."
+          : t("audits.toast.requestSuccessDesc"),
       });
       setNewOpen(false);
       await load();
       if (newId) setSelectedId(newId);
+      // Re-load a few times to catch the background completion
+      if (isProcessing) {
+        [60, 120, 210].forEach((s) => setTimeout(() => { load().catch(() => {}); }, s * 1000));
+      }
     } catch (e) {
       toast({
         title: t("audits.toast.requestError"),
