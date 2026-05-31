@@ -325,6 +325,10 @@ MANDATORY VISUALS (charts, diagrams, infographics):
 - Numbers must reflect the FACTUAL SNAPSHOT (do not invent). If data is unavailable, mark "n/a" and describe in the caption.
 - NEVER use emoji instead of a visual. NEVER ASCII art. NEVER external images (no <img src=...>).
 
+INLINE CITATIONS (MANDATORY):
+- Whenever you state evidence, mechanism, regulatory principle or geroscience claim, append an inline citation in the format (Author, Year) — e.g. (Himmelstein et al., 2017), (López-Otín et al., 2023), (FDA, 2021). A full bibliography is appended automatically at the end of the report.
+- Prefer at least 2 inline citations per main block. Never invent references — only use authors/years from the canonical influence list (Himmelstein, Huang/TxGNN, Chandak/PrimeKG, Hastings/ChEBI, Vasilevsky/MONDO, NLM MeSH, Nicholas/OMIA, Kaeberlein, Creevy/Dog Aging Project, Urfer, Zhang/NMN, Yoshino, Baur/Resveratrol, Harrison/Rapamycin, Roush/Omega-3, Comblain/Curcumin, Adin/DCM, Roudebush/CKD, Suchodolski, López-Otín, Gompertz, FDA-GMLP, EMA, AVMA, Lewis/RAG, Singhal/Med-PaLM, Wei/CoT, Ouyang/InstructGPT, Karpas/MRKL, Khattab/DSPy, Robinson/Neo4j).
+
 CANONICAL CHECKLIST (all ids must appear in the report):
 ${checklistForPrompt("en")}
 
@@ -363,6 +367,10 @@ VISUALIZAÇÕES OBRIGATÓRIAS (gráficos, diagramas, infográficos):
 - TODO visual precisa de <figcaption> ou <p class="caption"> explicando o que representa e a fonte (snapshot, checklist, auditorias anteriores).
 - Os números nos visuais devem refletir o SNAPSHOT FACTUAL (não invente). Se o dado não estiver disponível, marque "n/d" no eixo/label e descreva no caption.
 - NUNCA use emoji em vez de visual. NUNCA use ASCII art. NUNCA referencie imagens externas (sem <img src=...>).
+
+CITAÇÕES INLINE (OBRIGATÓRIO):
+- Sempre que afirmar evidência, mecanismo, princípio regulatório ou afirmação de geroscience, acrescente citação inline no formato (Autor, Ano) — ex.: (Himmelstein et al., 2017), (López-Otín et al., 2023), (FDA, 2021). A bibliografia completa é anexada automaticamente ao final do relatório.
+- Mínimo recomendado: 2 citações inline por bloco principal. NUNCA invente referências — use apenas autores/anos da lista canônica de influência (Himmelstein, Huang/TxGNN, Chandak/PrimeKG, Hastings/ChEBI, Vasilevsky/MONDO, NLM MeSH, Nicholas/OMIA, Kaeberlein, Creevy/Dog Aging Project, Urfer, Zhang/NMN, Yoshino, Baur/Resveratrol, Harrison/Rapamycin, Roush/Omega-3, Comblain/Curcumin, Adin/DCM, Roudebush/CKD, Suchodolski, López-Otín, Gompertz, FDA-GMLP, EMA, AVMA, Lewis/RAG, Singhal/Med-PaLM, Wei/CoT, Ouyang/InstructGPT, Karpas/MRKL, Khattab/DSPy, Robinson/Neo4j).
 
 CHECKLIST CANÔNICO (todos os ids devem aparecer no relatório):
 ${checklistForPrompt("pt")}
