@@ -215,6 +215,23 @@ POLÍTICA OBRIGATÓRIA:
 - Cada item do checklist canônico precisa aparecer como subseção com id estável.
 - Áreas existentes mas incompletas → classifique como "parcial", "doc-only", "sandbox" ou "planejado" e descreva o gap. NUNCA omita.
 
+VISUALIZAÇÕES OBRIGATÓRIAS (gráficos, diagramas, infográficos):
+- O relatório DEVE conter elementos visuais ricos além de tabelas. NÃO use bibliotecas externas — emita SVG inline puro (sem <script>, sem <foreignObject>) e divs com classes utilitárias já existentes no CSS do relatório.
+- Mínimo por relatório completo: 6 gráficos SVG + 3 diagramas SVG + 4 infográficos (cards/KPIs/heatmaps em HTML+SVG).
+- Distribua: cada bloco principal deve ter pelo menos 1 visual (gráfico OU diagrama OU infográfico) coerente com o tema da seção.
+- Tipos aceitos (escolha o mais adequado ao dado):
+  * Gráfico de barras horizontais/verticais (SVG <rect>) — para coberturas, contagens, comparações.
+  * Gráfico de rosca/donut (SVG <circle stroke-dasharray>) — para proporções (ex.: parity PT/EN, FDA covered/partial/missing).
+  * Heatmap / matriz (grid de <rect>) — para maturidade por pilar, risco × impacto.
+  * Diagrama de fluxo / pipeline (SVG com <rect>, <path>, <text>) — para arquitetura, fluxo de curadoria, ciclo de vida.
+  * Diagrama de camadas (ontologia 5-layer, stack de runtime) — caixas empilhadas com legendas.
+  * Infográfico de KPIs — grid <div class="kpi-grid"> com cards <div class="kpi"><span class="kpi-value">N</span><span class="kpi-label">…</span></div>.
+  * Timeline horizontal — SVG com linha + marcos para versões/auditorias.
+- Cores SEMPRE via paleta do relatório: #1d4ed8 (accent), #16a34a (ok), #b45309 (warn), #dc2626 (gap), #4b5563 (muted), #e5e7eb (soft). Não inventar cores.
+- TODO visual precisa de <figcaption> ou <p class="caption"> explicando o que representa e a fonte (snapshot, checklist, auditorias anteriores).
+- Os números nos visuais devem refletir o SNAPSHOT FACTUAL (não invente). Se o dado não estiver disponível, marque "n/d" no eixo/label e descreva no caption.
+- NUNCA use emoji em vez de visual. NUNCA use ASCII art. NUNCA referencie imagens externas (sem <img src=...>).
+
 CHECKLIST CANÔNICO (todos os ids devem aparecer no relatório):
 ${checklistForPrompt()}
 
@@ -695,6 +712,9 @@ REGRAS:
 - Para cada seção: <section id="SECTION_ID"><h3>...</h3>...</section>.
 - Texto denso (≥ 180 palavras por seção), analítico, em PT.
 - Inclua ao menos 1 <table> elegante por bloco.
+- Inclua ao menos 1 visual (gráfico SVG, diagrama SVG ou infográfico em <div class="kpi-grid">) por bloco, posicionado logo após a primeira tabela, com <p class="caption">… (fonte: snapshot|checklist|auditoria anterior)</p>.
+- Use SVG inline puro (viewBox, <rect>, <circle>, <path>, <text>) — sem <script>, sem <img>, sem <foreignObject>, sem bibliotecas externas. Paleta restrita: #1d4ed8 #16a34a #b45309 #dc2626 #4b5563 #e5e7eb.
+- Os números no visual devem espelhar o snapshot factual ou o checklist canônico. Se faltar dado, marque "n/d" e explique no caption.
 - Se algo não estiver implementado, marque "Status: parcial/doc-only/sandbox/planejado" e descreva o gap.
 - NÃO emita <html>, <head>, <body> ou <style>. Apenas fragment HTML.`,
             },
@@ -845,7 +865,7 @@ ${(outline.rendered_blocks ?? []).map((item) => item.html).join("\n").slice(0, 1
 
         await pushLog({ level: "info", phase: "validate", message: "Validando cobertura do checklist canônico" });
         const renderedHtml = (outline.rendered_blocks ?? []).map((item) => item.html);
-        const style = `<style>:root{--ink:#111827;--muted:#4b5563;--soft:#e5e7eb;--bg:#f9fafb;--accent:#1d4ed8;--warn:#b45309}*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--ink);line-height:1.6;max-width:980px;margin:0 auto;padding:48px 32px;background:#fff}h1{font-size:2rem;font-weight:700;margin:0 0 8px}h2{font-size:1.4rem;font-weight:700;margin:48px 0 16px;padding-bottom:8px;border-bottom:2px solid var(--soft)}h3{font-size:1.1rem;font-weight:600;margin:24px 0 8px}p{margin:0 0 12px}table{width:100%;border-collapse:collapse;margin:16px 0;font-size:0.92rem}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--soft);vertical-align:top}th{background:var(--bg);font-weight:600}.meta{color:var(--muted);font-size:0.85rem}section.block-gap,section.warnings{background:#fff7ed;border-left:4px solid var(--warn);padding:16px;border-radius:6px;margin:24px 0}ul{margin:0 0 12px 18px}code{background:var(--bg);padding:2px 6px;border-radius:4px;font-size:0.9em}</style>`;
+        const style = `<style>:root{--ink:#111827;--muted:#4b5563;--soft:#e5e7eb;--bg:#f9fafb;--accent:#1d4ed8;--ok:#16a34a;--warn:#b45309;--gap:#dc2626}*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--ink);line-height:1.6;max-width:980px;margin:0 auto;padding:48px 32px;background:#fff}h1{font-size:2rem;font-weight:700;margin:0 0 8px}h2{font-size:1.4rem;font-weight:700;margin:48px 0 16px;padding-bottom:8px;border-bottom:2px solid var(--soft)}h3{font-size:1.1rem;font-weight:600;margin:24px 0 8px}p{margin:0 0 12px}table{width:100%;border-collapse:collapse;margin:16px 0;font-size:0.92rem}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--soft);vertical-align:top}th{background:var(--bg);font-weight:600}.meta,p.caption,figcaption{color:var(--muted);font-size:0.82rem;margin:4px 0 16px}section.block-gap,section.warnings{background:#fff7ed;border-left:4px solid var(--warn);padding:16px;border-radius:6px;margin:24px 0}ul{margin:0 0 12px 18px}code{background:var(--bg);padding:2px 6px;border-radius:4px;font-size:0.9em}svg{max-width:100%;height:auto;display:block;margin:12px 0}figure{margin:16px 0}.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:16px 0}.kpi{border:1px solid var(--soft);border-radius:8px;padding:14px;background:var(--bg)}.kpi-value{display:block;font-size:1.6rem;font-weight:700;color:var(--accent);line-height:1.1}.kpi-label{display:block;font-size:0.8rem;color:var(--muted);margin-top:4px}.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:0.8rem;color:var(--muted);margin:6px 0 14px}.legend span{display:inline-flex;align-items:center;gap:6px}.legend i{width:10px;height:10px;border-radius:2px;display:inline-block}</style>`;
         const header = `<header><h1>Auditoria técnica ${auditId.toUpperCase()}</h1><p class="meta">Gerada em ${new Date().toISOString().slice(0, 10)} · sistema i18n ${effectiveSystemVersion || "n/a"} · última entrada de changelog: ${effectiveChangelogDate ?? "n/a"}</p><p class="meta">Plataforma: <strong>Senex AI</strong> · Motor: <strong>PetMoreTime</strong></p></header>`;
         let bodyHtml = `${header}\n${outline.close.exec_summary_html ?? ""}\n${renderedHtml.join("\n")}`;
         const warnings = [...(outline.block_warnings ?? [])];
