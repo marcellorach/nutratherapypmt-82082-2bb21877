@@ -89,7 +89,8 @@ interface LogEntry {
 interface StoredBlock {
   block_id: string;
   pillar_title: string;
-  html: string;
+  html: string;          // PT (legacy field name retained for back-compat)
+  html_en?: string;      // EN (added for bilingual generation)
 }
 
 interface OutlineState {
@@ -220,7 +221,47 @@ async function readAuditContext(service: ReturnType<typeof createClient>) {
   return { snapshot, prevAuditsCtx };
 }
 
-function buildBaseSystem(auditContext: { snapshot: Record<string, any>; prevAuditsCtx: string }) {
+function buildBaseSystem(
+  auditContext: { snapshot: Record<string, any>; prevAuditsCtx: string },
+  lang: Lang = "pt",
+  promptOverride?: string,
+) {
+  if (lang === "en") {
+    if (promptOverride && promptOverride.trim() && promptOverride.trim() !== "__SEED_FALLBACK__") {
+      return `${promptOverride}\n\nCANONICAL CHECKLIST (all ids must appear in the report):\n${checklistForPrompt("en")}\n\nFACTUAL DB SNAPSHOT (use real numbers):\n${JSON.stringify(auditContext.snapshot, null, 2)}\n\nPRIOR AUDITS (context):\n${auditContext.prevAuditsCtx}`;
+    }
+    return `You are the internal technical auditor of the Senex AI platform (PetMoreTime).
+NEVER mention "Lovable", "Lovable AI" or development tools. Use "Senex AI" as the brand and "PetMoreTime" as the engine.
+Write in ENGLISH, dense, analytical, in semantic HTML.
+
+MANDATORY POLICY:
+- Every audit is standalone and cumulative. Never produce "quick test", "smoke" or "delta-only".
+- Target depth equal to or greater than V3 (30+ pages, 25+ h2 sections, 8+ tables).
+- Each item of the canonical checklist must appear as a subsection with a stable id.
+- Existing but incomplete areas → classify as "partial", "doc-only", "sandbox" or "planned" and describe the gap. NEVER omit.
+
+MANDATORY VISUALS (charts, diagrams, infographics):
+- The report MUST contain rich visual elements beyond tables. Do NOT use external libraries — emit pure inline SVG (no <script>, no <foreignObject>) and divs with utility classes already present in the report CSS.
+- Minimum per full report: 6 SVG charts + 3 SVG diagrams + 4 infographics (cards/KPIs/heatmaps in HTML+SVG).
+- Each main block must have at least 1 visual (chart OR diagram OR infographic) coherent with the section theme.
+- Accepted types: horizontal/vertical bar charts (SVG <rect>); donut chart (SVG <circle stroke-dasharray>); heatmap/matrix; flow/pipeline diagram; layer diagram; KPI infographic (<div class="kpi-grid">); horizontal timeline.
+- Colors STRICTLY from the report palette: #1d4ed8 (accent), #16a34a (ok), #b45309 (warn), #dc2626 (gap), #4b5563 (muted), #e5e7eb (soft).
+- Every visual needs a <figcaption> or <p class="caption"> explaining what it represents and the source (snapshot, checklist, previous audits).
+- Numbers must reflect the FACTUAL SNAPSHOT (do not invent). If data is unavailable, mark "n/a" and describe in the caption.
+- NEVER use emoji instead of a visual. NEVER ASCII art. NEVER external images (no <img src=...>).
+
+CANONICAL CHECKLIST (all ids must appear in the report):
+${checklistForPrompt("en")}
+
+FACTUAL DB SNAPSHOT (use real numbers):
+${JSON.stringify(auditContext.snapshot, null, 2)}
+
+PRIOR AUDITS (context):
+${auditContext.prevAuditsCtx}`;
+  }
+  if (promptOverride && promptOverride.trim() && promptOverride.trim() !== "__SEED_FALLBACK__") {
+    return `${promptOverride}\n\nCHECKLIST CANÔNICO (todos os ids devem aparecer no relatório):\n${checklistForPrompt("pt")}\n\nSNAPSHOT FACTUAL DO BANCO (use números reais):\n${JSON.stringify(auditContext.snapshot, null, 2)}\n\nAUDITORIAS ANTERIORES (contexto):\n${auditContext.prevAuditsCtx}`;
+  }
   return `Você é o auditor técnico interno da plataforma Senex AI (PetMoreTime).
 NUNCA mencione "Lovable", "Lovable AI" ou ferramentas de desenvolvimento. Use "Senex AI" como marca e "PetMoreTime" como motor.
 Escreva em PORTUGUÊS, denso, analítico, em HTML semântico.
@@ -249,13 +290,34 @@ VISUALIZAÇÕES OBRIGATÓRIAS (gráficos, diagramas, infográficos):
 - NUNCA use emoji em vez de visual. NUNCA use ASCII art. NUNCA referencie imagens externas (sem <img src=...>).
 
 CHECKLIST CANÔNICO (todos os ids devem aparecer no relatório):
-${checklistForPrompt()}
+${checklistForPrompt("pt")}
 
 SNAPSHOT FACTUAL DO BANCO (use números reais):
 ${JSON.stringify(auditContext.snapshot, null, 2)}
 
 AUDITORIAS ANTERIORES (contexto):
 ${auditContext.prevAuditsCtx}`;
+}
+
+async function loadActivePrompts(
+  service: ReturnType<typeof createClient>,
+): Promise<Record<Lang, { system?: string; per_block?: string; close?: string; version?: string }>> {
+  const result: any = { pt: {}, en: {} };
+  try {
+    const { data } = await service
+      .from("audit_prompt_versions")
+      .select("kind, language, prompt, version")
+      .eq("is_active", true);
+    for (const row of (data ?? []) as any[]) {
+      const lang = row.language as Lang;
+      if (!result[lang]) result[lang] = {};
+      result[lang][row.kind as "system" | "per_block" | "close"] = row.prompt;
+      result[lang].version = row.version;
+    }
+  } catch (err) {
+    console.warn("loadActivePrompts failed", err);
+  }
+  return result;
 }
 
 Deno.serve(async (req) => {
