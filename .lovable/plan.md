@@ -1,78 +1,99 @@
-## Objetivo
 
-Hoje a barra mostra só "Bloco 5/15 — AI Scientist · 36%" e fica parada se um bloco travar (timeout do LLM, rate limit, erro silencioso). Vamos adicionar:
+# Auto-aprimoramento do gerador de auditorias + bilíngue PT/EN
 
-1. **Log ao vivo** do que a edge function está fazendo, visível na UI em tempo real.
-2. **Watchdog autônomo** que detecta travamento e age sozinho (retry → pular bloco → finalizar com warnings) sem precisar do usuário clicar em nada.
+Objetivo: tornar o `generate-audit` (1) capaz de capturar automaticamente novas funcionalidades sem editar o edge function, e (2) gerar o relatório em PT e EN nativos lado a lado, com a mesma estrutura visual do V7.
 
-## 1. Log estruturado persistido
+---
 
-### Nova coluna em `technical_audits`
-```sql
-ALTER TABLE technical_audits
-  ADD COLUMN progress_log jsonb NOT NULL DEFAULT '[]'::jsonb,
-  ADD COLUMN last_heartbeat timestamptz;
-```
+## Parte 1 — Auto-discovery de cobertura
 
-Cada entrada do log:
-```ts
-{ ts: ISO, level: 'info'|'warn'|'error', phase: 'outline'|'block'|'cierre'|'validate'|'save'|'watchdog',
-  block_id?: string, message: string, duration_ms?: number, attempt?: number }
-```
+Hoje a checklist `COVERAGE` está hardcoded em `supabase/functions/generate-audit/index.ts` (linhas 27–68). Cada nova tab, sidebar group ou área obriga edição manual.
 
-### Edge function `generate-audit`
-- Helper `pushLog(entry)` → `UPDATE technical_audits SET progress_log = progress_log || $1, last_heartbeat = now() WHERE id=$2`.
-- Chamado em cada transição relevante: início/fim de outline, início/fim de cada bloco (com `duration_ms`), retries, validação, salvamento, erros capturados.
-- `last_heartbeat` atualizado também a cada ~5s dentro de blocos longos (via `setInterval` antes da chamada ao LLM, limpo no fim).
+Vamos substituir por um **derivador automático** rodado no início de cada `start`:
 
-## 2. Painel de log ao vivo na UI
+1. **Nova edge function `audit-scope-builder`** que, a cada chamada, lê:
+   - `src/config/admin-tabs.ts` (estrutura completa de tabs)
+   - `src/data/projectOrganograma.ts` (pillars, áreas, status)
+   - Últimas N entradas de `CHANGELOG.md` (via `src/data/projectChangelog.generated.ts`)
+   - Tabelas-chave do banco (catálogo de edge functions inferido de `supabase/functions/*` + lista de tabelas via `information_schema`)
+   - Resultado: produz um array `CoverageItem[]` dinâmico + um `delta_since_last_audit` (o que mudou desde a última `technical_audits`).
 
-Em `TechnicalAuditsTab.tsx`, dentro do card de progresso já existente:
-- Nova seção colapsável **"Log da geração"** (aberta por padrão durante `processing`).
-- Lista invertida das últimas ~30 entradas com ícone por `level`, timestamp relativo ("há 4s"), e badge da fase.
-- Polling existente (2s) já traz `progress_log` — só renderizar.
-- Indicador "Última atividade: há Xs" baseado em `last_heartbeat`; fica âmbar > 30s, vermelho > 90s.
+2. **`generate-audit` consome esse builder** em vez do `COVERAGE` hardcoded. O `COVERAGE` antigo vira *seed/fallback* caso o builder falhe.
 
-## 3. Watchdog anti-travamento (autônomo)
+3. **Detecção forçada de tabs novas**: se uma tab existe em `admin-tabs.ts` mas não aparece em nenhum item do scope, o builder gera um item `[pillar: "Não classificado"]` para forçar o modelo a cobri-la. Isso garante que nenhuma nova funcionalidade fique invisível.
 
-### 3a. Dentro da própria edge function (watchdog local)
-- Cada chamada ao LLM envolvida em `Promise.race([call, timeout(90s)])`.
-- Em timeout/erro: log `warn` + retry automático (até 2x, backoff 5s/15s).
-- Se 3 tentativas falharem no mesmo bloco:
-  - Log `error` + marca o bloco como `skipped` no `outline`.
-  - Continua para o próximo bloco em vez de quebrar tudo.
-- No fim, se houver blocos `skipped`, status final = `ready_with_warnings` com lista dos blocos pulados.
+## Parte 2 — Meta-prompt versionado (DB-driven)
 
-### 3b. Watchdog externo (cron) para travas duras
-Nova edge function `audit-watchdog` agendada via `pg_cron` a cada 1 min:
-```sql
-select cron.schedule('audit-watchdog', '* * * * *',
-  $$ select net.http_post('<project>/functions/v1/audit-watchdog', ...) $$);
-```
-Lógica:
-- Busca auditorias com `status='processing'` e `last_heartbeat < now() - interval '3 minutes'`.
-- Para cada uma:
-  - Log `watchdog: heartbeat perdido há Xs, tentando retomar`.
-  - Reinvoca `generate-audit` em modo `resume` (usa `outline` salvo, retoma do próximo bloco pendente).
-  - Se já foi retomada 2x sem progresso, marca como `failed` com erro claro e libera a UI.
+1. **Nova tabela `audit_prompt_versions`** (migration):
+   ```
+   id (uuid pk), version (text, ex: "v7.1"), kind (text: "system"|"per_block"|"close"),
+   language (text: "pt"|"en"), prompt (text), notes (text),
+   gaps_detected (jsonb), created_at, created_by, is_active (bool)
+   ```
+   - Grants: `authenticated SELECT`, `service_role ALL`. RLS: admins escrevem, todos autenticados leem.
+   - Unique constraint: `(kind, language, is_active=true)` parcial.
 
-### 3c. Botão manual (fallback)
-Mantém o botão "Retomar do último bloco" já planejado, mas agora ele é o último recurso — o watchdog deve resolver sozinho na maioria dos casos.
+2. **`generate-audit` puxa os prompts ativos do DB** em vez de hardcoded. Fallback hardcoded permanece como `v7.0` baseline para resiliência.
 
-## 4. Arquivos afetados
+3. **Auto-registro de gaps**: ao final de cada geração, um passo "meta" pede ao modelo para listar (a) áreas que pediu mas não recebeu dados suficientes, (b) sugestões de melhoria no próximo prompt. Salva em `audit_prompt_versions.gaps_detected` da versão usada.
+
+4. **UI mínima na tab `technical-audits`**: card "Versão de prompt em uso" + botão "Promover melhorias detectadas para nova versão" (admin clona a versão ativa e edita os gaps). Sem complexidade de editor avançado nesta fase.
+
+## Parte 3 — Geração bilíngue PT + EN nativos em paralelo
+
+1. **Schema**: adicionar coluna `language` (text, default `'pt'`) em `technical_audits` + `html_path_en text` + `pdf_path_en text` opcional. Alternativa mais limpa: criar **duas linhas** em `technical_audits` (uma `language='pt'`, outra `language='en'`) ligadas por nova coluna `language_group_id uuid`. **Vamos usar essa abordagem** — mantém o modelo de "1 row = 1 relatório" e permite navegar nos dois separadamente.
+
+2. **`generate-audit` action `start`**:
+   - Cria as **duas rows** (PT e EN) com o mesmo `language_group_id`.
+   - Dispara processamento dos dois em paralelo (`Promise.allSettled`) — cada idioma faz suas próprias chamadas LLM com o prompt do `audit_prompt_versions` correspondente.
+   - Cada idioma escreve seu HTML em `audit-reports/<version>/<id>-<lang>.html`.
+
+3. **Custo/tempo**: dobra (2x chamadas LLM por bloco). Para mitigar: blocos rodam em paralelo por idioma, e o timeout de 180s já está adequado.
+
+4. **UI da listagem em `technical-audits`**: cada relatório aparece com **dois botões** (PT/EN). Selector de idioma no topo do HTML renderizado também (link cruzado entre os dois HTMLs do mesmo `language_group_id`).
+
+5. **Glossário consistente**: ambos prompts incluem um mini-glossário PT↔EN dos termos do projeto (Knowledge Graph, Curadoria, Digital Twin, etc.) extraído de `src/utils/translationDictionary.ts` para garantir terminologia uniforme.
+
+---
+
+## Detalhes técnicos
+
+**Arquivos a criar:**
+- `supabase/migrations/<ts>_audit_prompt_versions_and_bilingual.sql` — tabela `audit_prompt_versions` + colunas `language`, `language_group_id` em `technical_audits` + GRANTs + RLS + seed da v7.0 PT existente.
+- `supabase/functions/audit-scope-builder/index.ts` — nova edge function (verify_jwt = false, chamada internamente).
+
+**Arquivos a editar:**
+- `supabase/functions/generate-audit/index.ts`:
+  - Remover `COVERAGE` hardcoded → consumir do `audit-scope-builder` (com fallback).
+  - Carregar prompts ativos por `(kind, language)` de `audit_prompt_versions`.
+  - Loop principal duplicado: `for (const lang of ['pt','en']) Promise.all(...)`.
+  - Após `cierre`, gravar `gaps_detected` no DB.
+- `src/data/audit-coverage.ts` — manter como seed/snapshot fallback, mas marcar deprecated em comentário.
+- `src/components/administrador/technical-audits/` — adicionar selector PT/EN nos cards de relatório e link cruzado.
+- `CHANGELOG.md` + `src/i18n.ts` (incrementar `I18N_VERSION`) + `src/locales/{pt,en}/translation.json` (novas chaves `technicalAudits.languageBadge.*`, `technicalAudits.promptVersion.*`).
+
+**Sequência de implementação:**
 
 ```text
-supabase/migrations/<ts>_audit_progress_log_and_heartbeat.sql      (novo)
-supabase/functions/generate-audit/index.ts                          (pushLog + race+retry+skip+resume)
-supabase/functions/audit-watchdog/index.ts                          (novo)
-supabase/config.toml                                                (registrar audit-watchdog se necessário)
-src/components/administrador/audits/TechnicalAuditsTab.tsx          (painel de log + indicador de heartbeat)
-src/integrations/supabase/types.ts                                  (regenerado pela migração)
+1. Migration: audit_prompt_versions + language_group_id + GRANTs/RLS
+2. Edge function: audit-scope-builder (auto-discovery)
+3. Refactor generate-audit:
+   3a. Consumir scope-builder
+   3b. Consumir prompts do DB (fallback hardcoded)
+   3c. Loop bilíngue paralelo
+   3d. Gravar gaps_detected
+4. UI: selector PT/EN + card "Versão de prompt em uso"
+5. Seed inicial: v7.0 PT (atual) + v7.0 EN (tradução do prompt)
+6. CHANGELOG + I18N_VERSION + sync:changelog
 ```
 
-## 5. Fora de escopo
-- Reescrever o pipeline de geração (mantém outline → blocks → cierre).
-- Mudar o checklist canônico ou o snapshot.
-- UI fora do card de progresso.
+**Riscos / mitigações:**
+- **Custo 2x**: aceito, pois usuário escolheu PT+EN nativos. Pode-se desativar EN via flag se necessário.
+- **Prompt em EN pode divergir do PT**: glossário compartilhado + mesma estrutura de outline (gerada uma vez e reutilizada).
+- **Auto-discovery pode pegar tabs irrelevantes**: builder filtra por `admin-tabs.ts` apenas (não inclui rotas públicas).
+- **Backward compat**: relatórios V7 existentes (`language` NULL) continuam acessíveis; migration aplica `default 'pt'` apenas em novos rows.
 
-Sigo?
+**Fora de escopo nesta rodada:**
+- Editor visual avançado de prompts (apenas botão "promover" + edição via DB).
+- Adicionar Claude ou outros providers (opção C anterior — fica para próxima).
+- Traduzir relatórios V7 antigos retroativamente.

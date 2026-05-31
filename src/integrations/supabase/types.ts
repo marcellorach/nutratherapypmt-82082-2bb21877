@@ -423,6 +423,48 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_prompt_versions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          gaps_detected: Json
+          id: string
+          is_active: boolean
+          kind: string
+          language: string
+          notes: string | null
+          prompt: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          gaps_detected?: Json
+          id?: string
+          is_active?: boolean
+          kind: string
+          language: string
+          notes?: string | null
+          prompt: string
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          gaps_detected?: Json
+          id?: string
+          is_active?: boolean
+          kind?: string
+          language?: string
+          notes?: string | null
+          prompt?: string
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
       audit_reports: {
         Row: {
           created_at: string | null
@@ -4937,6 +4979,8 @@ export type Database = {
           docx_path: string | null
           html_path: string | null
           id: string
+          language: string
+          language_group_id: string | null
           last_heartbeat: string | null
           outline: Json | null
           pdf_path: string | null
@@ -4957,6 +5001,8 @@ export type Database = {
           docx_path?: string | null
           html_path?: string | null
           id: string
+          language?: string
+          language_group_id?: string | null
           last_heartbeat?: string | null
           outline?: Json | null
           pdf_path?: string | null
@@ -4977,6 +5023,8 @@ export type Database = {
           docx_path?: string | null
           html_path?: string | null
           id?: string
+          language?: string
+          language_group_id?: string | null
           last_heartbeat?: string | null
           outline?: Json | null
           pdf_path?: string | null
