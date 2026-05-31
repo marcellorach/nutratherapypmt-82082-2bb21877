@@ -254,7 +254,7 @@ Gere o relatório HTML completo agora. Lembre: o padrão de referência é a aud
       },
     ];
 
-    async function callModel(model: string) {
+    async function callModel(model: string, repairInstruction?: string) {
       const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -263,6 +263,7 @@ Gere o relatório HTML completo agora. Lembre: o padrão de referência é a aud
           messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt },
+            ...(repairInstruction ? [{ role: "user", content: `REFAÇA COMPLETAMENTE a auditoria corrigindo estes problemas obrigatórios: ${repairInstruction}` }] : []),
           ],
           tools,
           tool_choice: { type: "function", function: { name: "emit_audit" } },
@@ -286,7 +287,28 @@ Gere o relatório HTML completo agora. Lembre: o padrão de referência é a aud
       parsed = await callModel(FALLBACK_MODEL);
     }
 
-    const html: string = parsed.html;
+    let html: string = parsed.html;
+    let validation = assessAuditHtml(html);
+    if (!validation.ok) {
+      console.warn("Audit HTML below baseline, retrying with repair instructions", validation);
+      try {
+        parsed = await callModel(
+          PRIMARY_MODEL,
+          `Mantenha o padrão standalone cumulativo da v5.2.0. Problemas detectados: ${validation.issues.join("; ")}. Inclua as seções ausentes e reescreva tudo em formato completo.`,
+        );
+      } catch (_e) {
+        parsed = await callModel(
+          FALLBACK_MODEL,
+          `Mantenha o padrão standalone cumulativo da v5.2.0. Problemas detectados: ${validation.issues.join("; ")}. Inclua as seções ausentes e reescreva tudo em formato completo.`,
+        );
+      }
+      html = parsed.html;
+      validation = assessAuditHtml(html);
+      if (!validation.ok) {
+        throw new Error(`Auditoria recusada por regressão de formato: ${validation.issues.join(" | ")}`);
+      }
+    }
+
     const summary: any = { ...(parsed.summary ?? {}), generator: "senex-ai", model: PRIMARY_MODEL };
 
     // Upload HTML to storage
