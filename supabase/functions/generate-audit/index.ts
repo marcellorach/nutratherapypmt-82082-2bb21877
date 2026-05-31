@@ -429,7 +429,15 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const { data: isAdmin } = await userClient.rpc("is_admin");
+      const adminCheckClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+      const { data: roleRows, error: roleErr } = await adminCheckClient
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userData.user.id)
+        .eq("role", "admin")
+        .limit(1);
+      if (roleErr) console.error("[generate-audit] role check error", roleErr);
+      const isAdmin = Array.isArray(roleRows) && roleRows.length > 0;
       if (!isAdmin) {
         return new Response(JSON.stringify({ error: "Admin only" }), {
           status: 403,
