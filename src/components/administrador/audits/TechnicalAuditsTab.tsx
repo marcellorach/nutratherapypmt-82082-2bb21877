@@ -418,14 +418,44 @@ export default function TechnicalAuditsTab() {
                 {selected ? `${selected.id.toUpperCase()} — ${selected.audit_date}` : t("audits.viewer.select")}
               </CardTitle>
               {selected?.html_path && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="gap-1"
-                  onClick={() => window.open(selected.html_path!, "_blank")}
-                >
-                  <ExternalLink className="h-3 w-3" /> {t("audits.viewer.openNewTab")}
-                </Button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-1"
+                    onClick={() => window.open(selected.html_path!, "_blank")}
+                  >
+                    <ExternalLink className="h-3 w-3" /> {t("audits.viewer.openNewTab")}
+                  </Button>
+                  <Button size="sm" variant="outline" className="gap-1" asChild>
+                    <a
+                      href={selected.html_path}
+                      download={`auditoria-${selected.id}.html`}
+                    >
+                      <Download className="h-3 w-3" /> HTML
+                    </a>
+                  </Button>
+                  {selected.pdf_path ? (
+                    <Button size="sm" variant="default" className="gap-1" asChild>
+                      <a
+                        href={selected.pdf_path}
+                        download={`auditoria-${selected.id}.pdf`}
+                      >
+                        <Download className="h-3 w-3" /> PDF
+                      </a>
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1"
+                      disabled
+                      title="PDF sendo gerado em segundo plano"
+                    >
+                      <RefreshCw className="h-3 w-3 animate-spin" /> PDF
+                    </Button>
+                  )}
+                </div>
               )}
             </div>
             {selected && (
