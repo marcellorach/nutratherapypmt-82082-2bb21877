@@ -53,6 +53,7 @@ interface TechnicalAudit {
   scope: string;
   scope_history: Array<{ scope: string; edited_at: string; edited_by?: string }>;
   html_path: string | null;
+  html_path_en?: string | null;
   pdf_path: string | null;
   docx_path: string | null;
   summary: Record<string, unknown> & {
@@ -106,6 +107,7 @@ export default function TechnicalAuditsTab() {
   const [viewerHtml, setViewerHtml] = useState<string | null>(null);
   const [viewerLoading, setViewerLoading] = useState(false);
   const [viewerError, setViewerError] = useState<string | null>(null);
+  const [viewerLang, setViewerLang] = useState<"pt" | "en">("pt");
 
   // dialog state
   const [newScope, setNewScope] = useState(DEFAULT_NEW_SCOPE);
@@ -197,14 +199,15 @@ export default function TechnicalAuditsTab() {
     let cancelled = false;
     setViewerHtml(null);
     setViewerError(null);
-    if (!selected?.html_path) return;
+    const path = viewerLang === "en" && selected?.html_path_en ? selected.html_path_en : selected?.html_path;
+    if (!path) return;
     setViewerLoading(true);
-    fetchAuditHtml(selected.html_path)
+    fetchAuditHtml(path)
       .then((html) => { if (!cancelled) setViewerHtml(html); })
       .catch((e) => { if (!cancelled) setViewerError(e instanceof Error ? e.message : String(e)); })
       .finally(() => { if (!cancelled) setViewerLoading(false); });
     return () => { cancelled = true; };
-  }, [selected?.id, selected?.html_path]);
+  }, [selected?.id, selected?.html_path, selected?.html_path_en, viewerLang]);
 
   const nextVersion = useMemo(() => {
     return `v${SENEX_VERSION}`;
