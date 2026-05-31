@@ -381,6 +381,33 @@ export default function TechnicalAuditsTab() {
 
       {/* Banner de fila removido: a geração agora é instantânea. */}
 
+      {progress && (
+        <Card className="border-primary/40 bg-primary/5">
+          <CardContent className="py-3 space-y-2">
+            <div className="flex items-center justify-between gap-3 text-sm">
+              <div className="flex items-center gap-2 min-w-0">
+                <RefreshCw className={`h-4 w-4 ${progress.status === "processing" ? "animate-spin text-primary" : progress.status === "failed" ? "text-destructive" : "text-success"}`} />
+                <span className="font-medium truncate">
+                  {progress.audit_id.toUpperCase()} —{" "}
+                  {progress.status === "ready"
+                    ? "Pronto"
+                    : progress.status === "failed"
+                      ? "Falhou"
+                      : (progress.stage_label ?? "Processando")}
+                </span>
+              </div>
+              <span className="text-xs text-muted-foreground tabular-nums">
+                {Math.round(progress.progress ?? 0)}%
+              </span>
+            </div>
+            <Progress value={progress.progress ?? 0} className="h-2" />
+            {progress.error && (
+              <p className="text-xs text-destructive">{progress.error}</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* 1. Gráfico de evolução — largura total */}
       {!loading && audits.length >= 1 && (
         <ComplianceHistoryChart audits={audits} />
