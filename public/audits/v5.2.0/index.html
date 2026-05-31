@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="lovable-agent · paridade V3" />
+  <meta name="dcterms.date" content="2026-05-31" />
+  <title>Auditoria Senex AI v5.2.0</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Auditoria Senex AI v5.2.0</h1>
+<p class="author">lovable-agent · paridade V3</p>
+<p class="date">2026-05-31</p>
+</header>
+<h1 id="auditoria-técnica-senex-ai-v5.2.0">Auditoria Técnica Senex AI —
+v5.2.0</h1>
+<p><strong>Tipo:</strong> Delta sobre v5.1.0 (18/05/2026 → 27/05/2026)
+<strong>Foco:</strong> mudanças clinicamente e arquiteturalmente
+relevantes desde a auditoria anterior. Para a base completa (29 seções,
+glossário, jornadas, matriz regulatória, apêndices, bibliografia),
+consulte <strong>v5.1.0</strong> — esta v5.2.0 herda integralmente
+aquele documento e atualiza apenas o que mudou.</p>
+<hr />
+<h2 id="sumário-executivo-do-delta">1. Sumário executivo do delta</h2>
+<p>Entre 18/05 e 27/05/2026 o sistema passou por <strong>5 mudanças
+estruturais</strong> que afetam diretamente governança clínica,
+qualidade do raciocínio populacional e conformidade regulatória. Nenhuma
+destas alterações estava capturada na v5.1.0; todas elas reduzem riscos
+previamente listados como P0/P1 e fortalecem a postura GMLP/EMA.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Mudança</th>
+<th>Área</th>
+<th>Impacto sobre gaps/riscos da v5.1.0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>AI Scientist</strong> (rename de “Priorizações”) movido para
+Research &amp; Development</td>
+<td>admin/IA</td>
+<td>Reposiciona a função como produto científico, não tarefa
+operacional. Suporta GMLP §1 (escopo claro).</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Validação vet-curador</strong> obrigatória em
+<code>cohort_insights</code> (status
+pending/approved/rejected/needs_changes)</td>
+<td>curation</td>
+<td>Fecha o loop HITL antes que um insight populacional vire regra
+clínica. Mitiga risco “triplet errado auto-aprovado” (high) e gap “PCCP
+formal”.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Evidência quantitativa obrigatória</strong> no schema dos
+insights (<code>n_supporting</code>, <code>n_total</code>,
+<code>prevalence</code>, <code>effect_size</code>,
+<code>comparison_baseline</code>)</td>
+<td>curation/IA</td>
+<td>Elimina confiança auto-declarada pelo LLM. Endereça FDA Draft
+Jan/2025 §III.B (transparência) e EMA §4.2 (rastreabilidade).</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Canonicalização PT/EN</strong> em cohort stats +
+<code>lab-flag-canonicalizer.ts</code></td>
+<td>i18n/clinical</td>
+<td>Fim da duplicação Osteoarthritis/Osteoartrite e HCT/Hematócrito.
+Reforça regra “Bilingual System”.</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Hardening de <code>suggest-cohort-ideas</code></strong>:
+gemini-3.1-pro-preview + validação server-side de 4 regras + fallback
+gpt-5.4</td>
+<td>infra/IA</td>
+<td>Cobertura forçada dos 6 modelos-alvo, fallback de provedor. Mitiga
+risco “drift LLM” (medium).</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="diferenças-ponto-a-ponto-contra-a-v5.1.0">2. Diferenças
+ponto-a-ponto contra a v5.1.0</h2>
+<h3 id="governança-hitl">2.1 Governança HITL</h3>
+<ul>
+<li><strong>v5.1.0:</strong> curadoria gatekeeper para triplets de
+estudos.</li>
+<li><strong>v5.2.0:</strong> <strong>mais</strong> uma camada de
+gatekeeper, agora para <em>insights populacionais</em>
+(cohort_insights). Sem aprovação
+<code>vet_reviewed_by + vet_reviewed_at</code>, o insight não promove
+para regra/meta-estudo.</li>
+<li><strong>Implementação:</strong> <code>VetCuratorReviewDialog</code>,
+<code>vet_review_status</code> com check constraint + índice.</li>
+</ul>
+<h3 id="schema-de-evidência">2.2 Schema de evidência</h3>
+<ul>
+<li><strong>v5.1.0:</strong> <code>evidence jsonb</code> aceitava objeto
+vazio; confiança vinha do LLM sem validação.</li>
+<li><strong>v5.2.0:</strong> schema obriga 6 campos quantitativos. Edge
+function <code>analyze-cohort-patterns</code> derruba o insight se os
+agregados não sustentarem números reais. Novo botão “🧪” permite
+re-análise por insight (UPDATE in-place).</li>
+</ul>
+<h3 id="painel-de-evidência-no-dialog-de-revisão">2.3 Painel de
+evidência no dialog de revisão</h3>
+<ul>
+<li>Computado em tempo real a partir de
+<code>pet_profiles + pet_conditions + pet_exams</code> (sem chamada de
+LLM): suporte populacional N/total, estratificação (raça, idade ± dp,
+severidade), top alterações lab com flags canônicas, provenance (cohort,
+modelo gerador, JSON do evidence). Avisos automáticos quando N&lt;10 ou
+suporte&lt;20%.</li>
+</ul>
+<h3 id="canonicalização-clínica">2.4 Canonicalização clínica</h3>
+<ul>
+<li>Novo helper <code>canonicalConditionKey</code> faz lookup reverso
+PT→EN antes da contagem (resolve a dupla contagem).</li>
+<li>Novo <code>lab-flag-canonicalizer.ts</code> unifica HCT↔︎Hematócrito,
+PLT↔︎Plt, ALT↔︎TGP, AST↔︎TGO, FA↔︎ALP, Ureia↔︎BUN, Creatinina↔︎Creatinine.
+Top-12 estável.</li>
+<li><code>formatLabValue</code> deixou de imprimir <code>ref ?–?</code>
+para exames qualitativos.</li>
+</ul>
+<h3 id="ia-gateway-robustez">2.5 IA gateway / robustez</h3>
+<ul>
+<li><code>suggest-cohort-ideas</code> migrado de gemini-3.5-flash
+(ignorava JSON Schema, perdia <code>target_model_id</code> e
+<code>record_requirements</code>) para gemini-3.1-pro-preview.</li>
+<li>Validação server-side das 4 regras duras: 6 cohorts, 6 modelos
+distintos, <code>record_requirements</code> não-vazio, ≥2 cohorts
+deceased/mixed.</li>
+<li>Fallback automático para gpt-5.4 em falha de provedor.</li>
+</ul>
+<hr />
+<h2 id="cobertura-regulatória-delta">3. Cobertura regulatória —
+delta</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Framework</th>
+<th>Pontos cobertos na v5.1.0</th>
+<th>Pontos adicionais na v5.2.0</th>
+<th>Total v5.2.0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FDA Draft Jan/2025</td>
+<td>5/7</td>
+<td>+1 (transparência quantitativa)</td>
+<td><strong>6/7</strong></td>
+</tr>
+<tr>
+<td>EMA Set/2024 + EU AI Act</td>
+<td>3/4</td>
+<td>+1 (rastreabilidade de evidência)</td>
+<td><strong>4/4</strong></td>
+</tr>
+<tr>
+<td>AVMA Nov/2025</td>
+<td>2/4 (com 2 gaps)</td>
+<td>sem mudança</td>
+<td>2/4</td>
+</tr>
+<tr>
+<td>GMLP (10 princípios)</td>
+<td>7/10 + 3 parciais</td>
+<td>+1 (princípio §1 escopo)</td>
+<td><strong>8/10 + 2 parciais</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="mitigações-de-gapsriscos-previamente-listados">4. Mitigações de
+gaps/riscos previamente listados</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Gap/Risco (v5.1.0)</th>
+<th>Severidade</th>
+<th>Status em v5.2.0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PCCP formal</td>
+<td>P0</td>
+<td><strong>Em mitigação</strong> — HITL populacional implementado</td>
+</tr>
+<tr>
+<td>Triplet errado auto-aprovado</td>
+<td>high</td>
+<td><strong>Reduzido</strong> — validação vet-curador agora cobre
+insights populacionais</td>
+</tr>
+<tr>
+<td>Drift LLM</td>
+<td>medium</td>
+<td><strong>Reduzido</strong> — validação server-side + fallback de
+provedor</td>
+</tr>
+<tr>
+<td>Bias audit</td>
+<td>P1</td>
+<td>sem mudança</td>
+</tr>
+<tr>
+<td>RWPM longitudinal</td>
+<td>P0</td>
+<td>sem mudança</td>
+</tr>
+<tr>
+<td>Embeddings legados</td>
+<td>P1</td>
+<td>sem mudança</td>
+</tr>
+<tr>
+<td>Gompertz 81 raças</td>
+<td>P1</td>
+<td>sem mudança</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Gaps remanescentes:</strong> 9 (12 → 9). <strong>Riscos
+remanescentes:</strong> 4 (5 → 4).</p>
+<hr />
+<h2 id="métricas-operacionais-snapshot-31052026">5. Métricas
+operacionais (snapshot 31/05/2026)</h2>
+<p>Reaproveita os dados da v5.1.0 + adições do período:</p>
+<ul>
+<li><strong>Edge Functions:</strong> 67 (sem alteração estrutural; 1
+endurecida).</li>
+<li><strong>Prompts ativos (<code>ai_prompt_versions</code>):</strong> 8
+(mesma contagem; 1 prompt do <code>analyze-cohort-patterns</code> versão
+maior).</li>
+<li><strong>i18n_version:</strong> 1.115.6 (de 1.86.7).</li>
+<li><strong>Triplets aprovados:</strong> 3924; sincronizados Neo4j:
+4411; totais: 4785 (sem mudança material no período).</li>
+<li><strong>Cohort insights com <code>vet_review_status</code>:</strong>
+novo campo; backfill default <code>pending</code>.</li>
+</ul>
+<hr />
+<h2 id="pendências-carregadas-para-a-próxima-auditoria-v5.3.0">6.
+Pendências carregadas para a próxima auditoria (v5.3.0)</h2>
+<ol type="1">
+<li>RWPM longitudinal (P0) — sem progresso.</li>
+<li>Bias audit (P1) — sem progresso.</li>
+<li>Gompertz 81 raças (P1) — sem progresso.</li>
+<li>Europe PMC/bioRxiv (P2) — sem progresso.</li>
+<li>VLM figuras (P3) — sem progresso.</li>
+<li>AVMA Nov/2025 — 2 gaps em aberto.</li>
+<li>GMLP §3 e §7 — parciais.</li>
+</ol>
+<hr />
+<h2 id="anexos-herdados-da-v5.1.0">7. Anexos herdados da v5.1.0</h2>
+<p>Inalterados; consultar diretamente em
+<code>public/audits/v5.1.0/</code>:</p>
+<ul>
+<li><strong>Apêndice A</strong> — Schema SQL principal</li>
+<li><strong>Apêndice B</strong> — Inventário de 67 Edge Functions</li>
+<li><strong>Apêndice C</strong> — Prompts e modelos LLM</li>
+<li><strong>Apêndice D</strong> — Métricas operacionais
+consolidadas</li>
+<li><strong>Bibliografia</strong> — 14 referências verificáveis</li>
+</ul>
+<hr />
+<p><em>Gerado em 31/05/2026 pelo lovable-agent · paridade V3. Esta
+v5.2.0 é incremental sobre v5.1.0 (mesma autoria, mesma metodologia).
+Para auditoria completa standalone, ver v5.1.0.</em></p>
+</body>
+</html>
