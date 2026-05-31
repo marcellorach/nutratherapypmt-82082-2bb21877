@@ -11,9 +11,9 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 
-// Best available reasoning model on the gateway
-const PRIMARY_MODEL = "openai/gpt-5.5";
-const FALLBACK_MODEL = "google/gemini-3.1-pro-preview";
+// Best available reasoning model on the gateway that still responds in <60s
+const PRIMARY_MODEL = "google/gemini-3.1-pro-preview";
+const FALLBACK_MODEL = "openai/gpt-5-mini";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
