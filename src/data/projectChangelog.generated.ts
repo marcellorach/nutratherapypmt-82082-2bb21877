@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-31T04:26:52.585Z
+// Última geração: 2026-05-31T12:25:03.724Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,23 @@ export const lastChangelogDate = "2026-05-31";
 export const senexVersion = "7.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-05-31",
+    "kind": "fixed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Auditoria técnica agora retoma por checkpoints curtos",
+    "bullets": [
+      "`generate-audit` deixou de depender de uma execução longa única e passou a persistir checkpoints no campo `outline`: outline salvo, blocos renderizados salvos um a um, sumário executivo salvo separadamente e montagem final só no último passo.",
+      "Cada continuação agora é reinvocada internamente com credencial de serviço aceita pela própria função, corrigindo o caso em que o watchdog detectava travamento mas não conseguia retomar a auditoria automaticamente.",
+      "O timeout por chamada de LLM foi reduzido e simplificado para 2 tentativas (primária + fallback), evitando ficar preso vários minutos no mesmo bloco antes de avançar.",
+      "Files: supabase/functions/generate-audit/index.ts, ARCHITECTURE.md, docs/CURRENT_STATE.md"
+    ],
+    "files": [
+      "supabase/functions/generate-audit/index.ts"
+    ],
+    "i18nVersion": "1.115.8"
+  },
   {
     "date": "2026-05-31",
     "kind": "fixed",
