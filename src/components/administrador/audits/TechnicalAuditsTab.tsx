@@ -386,10 +386,13 @@ export default function TechnicalAuditsTab() {
 
             <div>
               <label className="text-xs text-muted-foreground">{t("audits.newDialog.scope")}</label>
+              <p className="text-[10px] text-muted-foreground mb-1">
+                Checklist canônico v{COVERAGE_VERSION} — todos os itens abaixo serão exigidos no relatório. Você pode acrescentar ênfases no final, mas não reduza o checklist.
+              </p>
               <Textarea
                 value={newScope}
                 onChange={(e) => setNewScope(e.target.value)}
-                rows={14}
+                rows={18}
                 className="font-mono text-xs mt-1"
               />
             </div>
