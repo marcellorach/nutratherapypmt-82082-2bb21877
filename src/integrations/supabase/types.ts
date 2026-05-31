@@ -4937,6 +4937,7 @@ export type Database = {
           docx_path: string | null
           html_path: string | null
           id: string
+          outline: Json | null
           pdf_path: string | null
           scope: string
           scope_history: Json
@@ -4953,6 +4954,7 @@ export type Database = {
           docx_path?: string | null
           html_path?: string | null
           id: string
+          outline?: Json | null
           pdf_path?: string | null
           scope: string
           scope_history?: Json
@@ -4969,6 +4971,7 @@ export type Database = {
           docx_path?: string | null
           html_path?: string | null
           id?: string
+          outline?: Json | null
           pdf_path?: string | null
           scope?: string
           scope_history?: Json
