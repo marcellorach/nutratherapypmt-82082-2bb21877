@@ -4,6 +4,7 @@ import { StrictMode } from 'react'
 import App from './App.tsx'
 import './App.css'
 import './index.css'
+import 'vis-network/styles/vis-network.css'
 import './i18n.ts' // Explicit file extension
 
 // Auto-recover from stale dynamic chunk errors after a new deploy.
@@ -16,7 +17,9 @@ if (typeof window !== 'undefined') {
     !!msg && (
       msg.includes('Failed to fetch dynamically imported module') ||
       msg.includes('Importing a module script failed') ||
-      msg.includes('error loading dynamically imported module')
+      msg.includes('error loading dynamically imported module') ||
+      msg.includes('Unable to preload CSS') ||
+      msg.includes('Failed to load stylesheet')
     );
   const tryReload = () => {
     if (sessionStorage.getItem(RELOAD_KEY)) return;
