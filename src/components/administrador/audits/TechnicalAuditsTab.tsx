@@ -21,7 +21,7 @@ import { SENEX_VERSION } from "@/config/senex-version";
 import { useTranslation } from "react-i18next";
 import AuditVersionComparison from "./AuditVersionComparison";
 import ComplianceHistoryChart from "./ComplianceHistoryChart";
-import { generateAuditPdf, backfillMissingAuditPdfs } from "./audit-pdf-generator";
+import { openAuditForPrint, fetchAuditHtml } from "./audit-pdf-generator";
 import {
   FileText,
   Download,
@@ -122,19 +122,6 @@ export default function TechnicalAuditsTab() {
       const firstActive = (a.data as Array<{ id: string; superseded_by: string | null }>)
         .find((x) => !x.superseded_by);
       if (!selectedId && firstActive) setSelectedId(firstActive.id);
-      // Retroactive: ensure every audit has a PDF. Runs in background.
-      const missing = (a.data as unknown as TechnicalAudit[]).filter((x) => x.html_path && !x.pdf_path);
-      if (missing.length > 0) {
-        backfillMissingAuditPdfs(missing).then(() => {
-          supabase
-            .from("technical_audits")
-            .select("*")
-            .order("audit_date", { ascending: false })
-            .then(({ data }) => {
-              if (data) setAudits(data as unknown as TechnicalAudit[]);
-            });
-        });
-      }
     }
     if (r.data) setRequests(r.data as unknown as AuditRequest[]);
     if (s.data?.change_threshold) setThreshold(s.data.change_threshold as number);
@@ -143,15 +130,12 @@ export default function TechnicalAuditsTab() {
 
   useEffect(() => {
     load();
-    // One-time MIME fix for previously uploaded HTMLs served as text/plain.
-    const KEY = "audit-mime-fixed-v1";
-    if (typeof window !== "undefined" && !localStorage.getItem(KEY)) {
+    // Re-run MIME fix every load so that newly created audits also get their
+    // content-type corrected in storage (previous one-shot localStorage flag
+    // skipped audits created after the first run).
+    if (typeof window !== "undefined") {
       supabase.functions
         .invoke("generate-audit", { body: { action: "fix_mime" } })
-        .then(() => {
-          localStorage.setItem(KEY, "1");
-          load();
-        })
         .catch(() => { /* silent */ });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -187,12 +171,6 @@ export default function TechnicalAuditsTab() {
       setNewOpen(false);
       await load();
       if (newId) setSelectedId(newId);
-      // Always generate PDF alongside HTML, in background.
-      if (newAudit?.html_path && !newAudit?.pdf_path) {
-        generateAuditPdf(newAudit)
-          .then(() => load())
-          .catch((err) => console.warn("[audit-pdf] generation failed", err));
-      }
     } catch (e) {
       toast({
         title: t("audits.toast.requestError"),
