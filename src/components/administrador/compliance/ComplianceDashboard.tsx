@@ -14,6 +14,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { SENEX_VERSION } from '@/config/senex-version';
 import { COMPLIANCE_ITEMS, type ComplianceItem, type Status } from './complianceData';
+import { I18N_VERSION } from '@/i18n';
+import { lastChangelogDate } from '@/data/projectChangelog.generated';
+import VersionBadge from '@/components/system/VersionBadge';
 
 type Authority = 'FDA' | 'EMA' | 'AVMA';
 type Delta = 'improved' | 'regressed' | 'unchanged' | 'new';
