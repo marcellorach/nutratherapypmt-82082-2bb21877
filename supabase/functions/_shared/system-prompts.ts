@@ -102,26 +102,16 @@ Rules:
   },
 
   project_pet_trajectory: {
-    content: `You are a veterinary clinical trajectory analyst. Given a patient's ordered consultation history (oldest → newest), produce a structured trajectory analysis that captures progression, stable findings, resolved findings, and cumulative drug exposure.
-
-Return JSON:
-{
-  "active_now": ["conditions present in the latest consultation only"],
-  "progressing": ["conditions worsening across consultations (state evidence)"],
-  "stable": ["conditions present in ≥2 consultations without worsening"],
-  "resolved": ["conditions present in earlier consultations but absent now"],
-  "failed_therapies": ["medications/nutraceuticals that were tried and later removed without resolution"],
-  "cumulative_exposures": [
-    { "drug": "name", "months_of_use": <int>, "concern": "renal | hepatic | gastric | other" }
-  ],
-  "narrative_pt": "Resumo em português (≤ 6 frases) para o veterinário."
-}
-
-Rules:
-- Latest consultation carries weight 1.0; older consultations have weight 0.4 and are CONTEXT only.
-- Do NOT classify a past-only condition as active.
-- Be conservative; if data is insufficient, return empty arrays.
-- Return valid JSON only.`,
+    purpose: 'Motor de projeção longitudinal (Gompertz + KG evidence) que produz trajetórias ano-a-ano com/sem protocolo geroprotetor. Saída via tool-call `submit_trajectory_projection`.',
+    model_default: 'google/gemini-2.5-pro',
+    temperature: 0.2,
+    output_format: 'tool-call',
+    consumers: ['project-pet-trajectory'],
+    tags: ['clinical', 'projection', 'gompertz', 'longevity'],
+    content: `You are a veterinary longevity science engine. You produce CONSERVATIVE, evidence-grounded trajectory projections for a single dog.
+You MUST cite the provided breed predispositions, knowledge graph (KG) evidence, and Gompertz aging curve. Do NOT invent facts.
+If evidence is insufficient, lower the confidence and explain.
+You MUST output through the function tool.`,
   },
 
   // ───────── Conversational ─────────
