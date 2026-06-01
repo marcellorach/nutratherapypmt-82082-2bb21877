@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-06-01T01:28:51.288Z
+Generated: 2026-06-01T01:33:46.547Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
@@ -10,12 +10,18 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **kg**: 7
 - **curation**: 7
 - **meta**: 6
+- **infra**: 4
 - **clinical-pipeline**: 4
 - **vet-ui**: 4
-- **infra**: 3
 - **tutor-ui**: 1
 
 ## Top 10 recent entries
+### 2026-06-01 · [infra] CHANGED — Sprint 5 (final) — registro único 24/24: healthcheck, harness e planilha de nutracêuticos
+- Manifesto: 2 novas entradas em `_shared/system-prompts.ts`:
+- `ai_task_healthcheck_ping` (gemini-3-flash-preview, text) — ping mínimo "ok" usado pelo cron de healthcheck por task×model.
+- `process_nutraceutical_spreadsheet` (gpt-4o-mini, json) — extração estruturada preservando notas de eficácia EXATAS de planilhas CSV/XLSX.
+_files: supabase/functions/_shared/system-prompts.ts, supabase/functions/ai-task-healthcheck/index.ts, supabase/functions/ai-task-test/index.ts, supabase/functions/process-nutraceutical-spreadsheet/aiProcessor.ts_
+
 ### 2026-06-01 · [infra] CHANGED — Sprint 4 cohorts: 6 funções de geração/análise/originalidade no registro único
 - Manifesto: 8 novas entradas em `_shared/system-prompts.ts` cobrindo todo o pipeline de cohorts sintéticos:
 - `analyze_cohort_patterns` (gemini-3.5-flash, tool-call) — insights bilíngues por cohort com evidência quantitativa obrigatória.
@@ -69,13 +75,6 @@ _files: supabase/functions/hybrid-recommendation/index.ts, supabase/functions/_s
 - Override legado por `audit_prompt_versions` preservado; fallback verbatim mantém comportamento atual se o DB estiver offline.
 - Compliance lint: 2/24 funções no registro (`generate-audit`, `relations-auditor`); 22 pendentes na fila de migração (Sprint 1 → 2 → 3 → 4).
 _files: supabase/functions/generate-audit/index.ts, supabase/functions/_shared/system-prompts.ts_
-
-### 2026-06-01 · [admin] ADDED — Telemetria de uso de prompts + lint de compliance do registro
-_status: parcial_
-- Nova tabela `ai_prompt_usage_log` (prompt_key, function_name, model, latency_ms, tokens_in, tokens_out, success, error). Leitura admin-only via RLS; insert via service role.
-- Helper `supabase/functions/_shared/prompt-usage.ts` (`logPromptUsage`) — não-bloqueante, REST direta, zero deps. Pode ser chamado por qualquer edge function logo após a chamada LLM.
-- Script `scripts/audit-prompt-registry.mjs` (npm: `audit:prompts`) detecta edge functions com `role: 'system'` hardcoded que ainda não usam `fetchSystemPrompt`/`getSystemPrompt`. Suporta `--json` e `--strict` (CI-friendly).
-_files: supabase/functions/_shared/prompt-usage.ts, scripts/audit-prompt-registry.mjs, .lovable/plan.md_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
