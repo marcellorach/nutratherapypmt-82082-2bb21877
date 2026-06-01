@@ -187,7 +187,8 @@ function buildClinicalContextBlock(ctx?: ClinicalContext): string {
   return sections.length > 0 ? `\n\nPATIENT CLINICAL CONTEXT:\n${sections.join('\n\n')}` : '';
 }
 
-const SYSTEM_PROMPT_ENRICH = `You are a veterinary nutraceutical expert specializing in individualized geroprotective treatment.
+// Fallbacks verbatim — usados apenas se o registro de prompts (DB + manifesto) estiver inacessível.
+const SYSTEM_PROMPT_ENRICH_FALLBACK = `You are a veterinary nutraceutical expert specializing in individualized geroprotective treatment.
 
 You are enriching an existing Knowledge Graph recommendation with clinical context.
 
@@ -239,7 +240,7 @@ IMPORTANT: Return your response as valid JSON with this structure:
 
 Respond in Portuguese (Brazilian).`;
 
-const SYSTEM_PROMPT_FALLBACK = `You are a veterinary nutraceutical expert providing INDIVIDUALIZED recommendations.
+const SYSTEM_PROMPT_FALLBACK_VERBATIM = `You are a veterinary nutraceutical expert providing INDIVIDUALIZED recommendations.
 
 CRITICAL: Our Knowledge Graph has LIMITED data for this case. You MUST be conservative.
 However, you MUST use the patient's clinical context to differentiate your recommendation.
