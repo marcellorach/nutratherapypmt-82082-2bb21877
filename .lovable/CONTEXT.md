@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-06-01T01:10:29.703Z
+Generated: 2026-06-01T01:13:51.208Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
@@ -9,12 +9,18 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **admin**: 48
 - **kg**: 7
 - **curation**: 7
-- **meta**: 5
+- **meta**: 6
 - **clinical-pipeline**: 4
 - **vet-ui**: 4
 - **tutor-ui**: 1
 
 ## Top 10 recent entries
+### 2026-06-01 · [meta] CHANGED — Meta-studies: `chat-meta-study` e `evaluate-meta-study-reliability` no registro único
+- Adicionados `chat_meta_study_persona` e `evaluate_meta_study_reliability` ao manifesto `_shared/system-prompts.ts`.
+- `chat-meta-study`: persona estática agora vem do registro (com fallback verbatim); contexto dinâmico do paper (claims/regras/evidências) preservado. Telemetria via `logPromptUsage` em sucesso e erro HTTP.
+- `evaluate-meta-study-reliability`: prompt do sistema (curador sênior, tool-call `rate_study_reliability`) movido para o registro; carregado uma vez por chamada e reutilizado no loop sequencial. `logPromptUsage` em sucesso, erro HTTP e tool-call ausente.
+_files: supabase/functions/_shared/system-prompts.ts, supabase/functions/chat-meta-study/index.ts, supabase/functions/evaluate-meta-study-reliability/index.ts_
+
 ### 2026-06-01 · [kg] CHANGED — `kg-evidence-gap-fill` migrado para o registro único de prompts
 - Adicionados `kg_gap_fill_gemini` e `kg_gap_fill_perplexity` ao manifesto `_shared/system-prompts.ts` (com metadata, consumers e tags).
 - `assessWithGemini` e `assessWithPerplexity` agora carregam o system prompt via `fetchSystemPrompt(...)` com fallback verbatim para garantir continuidade quando o DB está indisponível.
@@ -69,12 +75,6 @@ _files: src/components/administrador/audits/TechnicalAuditsTab.tsx, supabase/fun
 - Cada continuação agora é reinvocada internamente com credencial de serviço aceita pela própria função, corrigindo o caso em que o watchdog detectava travamento mas não conseguia retomar a auditoria automaticamente.
 - O timeout por chamada de LLM foi reduzido e simplificado para 2 tentativas (primária + fallback), evitando ficar preso vários minutos no mesmo bloco antes de avançar.
 _files: supabase/functions/generate-audit/index.ts_
-
-### 2026-05-31 · [admin] FIXED — Auditorias futuras travadas no padrão standalone da v5.2.0
-- A edge function `generate-audit` agora rejeita relatórios simplificados e força regeneração quando o HTML vier abaixo do baseline estrutural da v5.2.0 (densidade mínima, seções-chave, tabelas e ausência de rótulos como "teste rápido" ou "paridade parcial").
-- O prompt passou a tratar qualquer escopo curto como ênfase adicional, nunca como permissão para gerar auditoria reduzida; o padrão obrigatório agora é standalone + cumulativo.
-- `TechnicalAuditsTab` deixou de usar uma versão i18n hardcoded antiga e passou a ler `I18N_VERSION` diretamente de `src/i18n.ts`, evitando novos relatórios com metadado retrocedido.
-_files: src/i18n.ts, supabase/functions/generate-audit/index.ts, src/components/administrador/audits/TechnicalAuditsTab.tsx_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
