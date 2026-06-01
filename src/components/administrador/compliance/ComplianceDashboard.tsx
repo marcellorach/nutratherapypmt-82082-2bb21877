@@ -14,6 +14,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { SENEX_VERSION } from '@/config/senex-version';
 import { COMPLIANCE_ITEMS, type ComplianceItem, type Status } from './complianceData';
+import { I18N_VERSION } from '@/i18n';
+import { lastChangelogDate } from '@/data/projectChangelog.generated';
+import VersionBadge from '@/components/system/VersionBadge';
 
 type Authority = 'FDA' | 'EMA' | 'AVMA';
 type Delta = 'improved' | 'regressed' | 'unchanged' | 'new';
@@ -171,7 +174,7 @@ const ComplianceDashboard: React.FC = () => {
         .from('compliance_audit_runs')
         .insert({
           system_version: SENEX_VERSION,
-          i18n_version: '1.86.3',
+          i18n_version: I18N_VERSION,
           totals,
           per_authority: perAuthority,
           diff,
@@ -315,11 +318,26 @@ const ComplianceDashboard: React.FC = () => {
             </a>
           </p>
           <p className="text-[11px] text-muted-foreground mt-2 italic max-w-2xl">{t('compliance.systemNote')}</p>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <VersionBadge />
+            <span className="text-[11px] text-muted-foreground">
+              {t('compliance.snapshotHint', {
+                defaultValue: 'Snapshot of the curated checklist ({{count}} requirements) tied to this exact version.',
+                count: COMPLIANCE_ITEMS.length,
+              })}
+            </span>
+          </div>
         </div>
         <div className="flex gap-2 flex-wrap">
           <Button variant="default" onClick={runCheck} disabled={running} className="gap-2">
             <RefreshCcw className={`h-4 w-4 ${running ? 'animate-spin' : ''}`} />
-            {running ? t('compliance.running') : t('compliance.runCheck')}
+            {running
+              ? t('compliance.running')
+              : t('compliance.snapshotButton', {
+                  defaultValue: 'Snapshot compliance (v{{v}} · i18n {{i}})',
+                  v: SENEX_VERSION,
+                  i: I18N_VERSION,
+                })}
           </Button>
           <Button variant="outline" onClick={exportCSV} className="gap-2">
             <Download className="h-4 w-4" /> {t('compliance.exportCsv')}

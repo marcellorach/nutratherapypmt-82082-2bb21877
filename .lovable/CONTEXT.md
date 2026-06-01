@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-06-01T01:33:46.547Z
+Generated: 2026-06-01T16:07:27.777Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: n/a
+## Latest i18n version: 1.116.0
 
 ## Changes by area (last 14 days)
-- **admin**: 48
+- **admin**: 49
 - **kg**: 7
 - **curation**: 7
 - **meta**: 6
@@ -16,6 +16,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **tutor-ui**: 1
 
 ## Top 10 recent entries
+### 2026-06-01 · [admin] CHANGED — Versionamento unificado: SENEX_VERSION como fonte única
+- Novo `<VersionBadge />` (`src/components/system/VersionBadge.tsx`) — lê de `SENEX_VERSION`, `I18N_VERSION` e `lastChangelogDate` e é usado em header de Auditorias, Compliance e Organograma. Divergência entre superfícies fica visualmente impossível.
+- `ComplianceDashboard`: removido `i18n_version: '1.86.3'` hardcoded — agora persiste `I18N_VERSION` real. Botão renomeado para "Snapshot compliance (v… · i18n …)" com badge da versão acima, deixando explícito que é snapshot da checklist curada amarrado à versão atual.
+- `TechnicalAuditsTab`: removido auto-bump de PATCH. A auditoria SEMPRE herda exatamente `v{SENEX_VERSION}` — não inventa versão. Se já existe auditoria para a versão atual, o botão "Run new audit" fica desabilitado com tooltip instruindo a bumpar o marker `<!-- senex: x.y.z -->` em CHANGELOG.md + `npm run sync:changelog`.
+_files: src/components/system/VersionBadge.tsx, src/components/administrador/compliance/ComplianceDashboard.tsx, src/components/administrador/audits/TechnicalAuditsTab.tsx, src/pages/administrador/OrganogramaTab.tsx…_
+
 ### 2026-06-01 · [infra] CHANGED — Sprint 5 (final) — registro único 24/24: healthcheck, harness e planilha de nutracêuticos
 - Manifesto: 2 novas entradas em `_shared/system-prompts.ts`:
 - `ai_task_healthcheck_ping` (gemini-3-flash-preview, text) — ping mínimo "ok" usado pelo cron de healthcheck por task×model.
@@ -69,12 +75,6 @@ _files: supabase/functions/parse-pet-exam-pdf/index.ts, supabase/functions/_shar
 - Adicionada telemetria via `logPromptUsage` (latência, tokens, sucesso/erro) em `ai_prompt_usage_log`.
 - Strings antigas preservadas como fallback verbatim caso o registro DB esteja inacessível.
 _files: supabase/functions/hybrid-recommendation/index.ts, supabase/functions/_shared/system-prompts.ts_
-
-### 2026-06-01 · [admin] CHANGED — Migração `generate-audit` para registro único de prompts
-- `generate-audit` agora carrega o prompt-base PT/EN via `fetchSystemPrompt('audit_base_system_{pt,en}')` (manifest em `_shared/system-prompts.ts`).
-- Override legado por `audit_prompt_versions` preservado; fallback verbatim mantém comportamento atual se o DB estiver offline.
-- Compliance lint: 2/24 funções no registro (`generate-audit`, `relations-auditor`); 22 pendentes na fila de migração (Sprint 1 → 2 → 3 → 4).
-_files: supabase/functions/generate-audit/index.ts, supabase/functions/_shared/system-prompts.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

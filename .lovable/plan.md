@@ -1,74 +1,58 @@
-## Parte A — Relatórios de auditoria bilíngues
+## Diagnóstico do desencontro
 
-Os arquivos em `public/audits/v3/`, `v5.1.0/` e `v5.2.0/` são HTMLs estáticos (~200 KB no total) gerados manualmente em PT, sem nenhuma chave i18n. Vamos gerar uma versão paralela em EN e fazer o leitor escolher o arquivo conforme o idioma ativo.
+Hoje cada superfície lê a "versão" de um lugar diferente, e nada valida que elas batem:
 
-### 1. DB — registrar o caminho EN
-Migration adicionando coluna opcional em `public.technical_audits`:
-```sql
-ALTER TABLE public.technical_audits ADD COLUMN IF NOT EXISTS html_path_en text;
-```
-(seguimos com PDF/DOCX só em PT — a versão EN é HTML-only, suficiente para leitura no app; documento "oficial" continua sendo o PT.)
+| Tela | Mostra | Fonte real |
+|---|---|---|
+| Header/Footer | `v7.0.0 · 2026-06-01` | `SENEX_VERSION` ← `senexVersion` (gerado do marker `<!-- senex: 7.0.0 -->` em CHANGELOG.md) |
+| Aba **Auditorias técnicas** | "Auditoria técnica **V7.0.1** · sistema i18n **1.115.8**" | `nextVersion` no `TechnicalAuditsTab.tsx` faz **auto-bump de PATCH** quando já existe auditoria com a versão Senex atual (7.0.0 → 7.0.1). O número da auditoria **não corresponde a nenhuma versão real do sistema**. O i18n vem certo (de `I18N_VERSION`) mas ficou defasado 1 minor (1.115.8 vs 1.115.9 atual). |
+| **Organograma** | "Updated on 2026-06-01 · 209 changelog entries" | `organogramaLastUpdated` (gerado por `sync:changelog`). Não exibe a versão Senex em lugar nenhum — parece desconectado. |
+| **Regulatory Compliance Dashboard** | botão "Run compliance check" | `ComplianceDashboard.tsx:174` grava `i18n_version: '1.86.3'` **hardcoded** (real: 1.115.9). O `system_version` vem de `SENEX_VERSION` (ok), mas o "check" só faz snapshot do array estático `COMPLIANCE_ITEMS` — não inspeciona código nem corre nada dinâmico. A UI também não diz qual versão está sendo auditada antes de clicar. |
 
-### 2. Geração dos HTMLs EN
-Criar `scripts/translate-audit-html.mjs` que:
-- recebe `--version v5.2.0` (ou roda em loop para as três versões);
-- lê `public/audits/<v>/index.html`;
-- envia o conteúdo em **chunks** (separando por `<h1|h2|h3>` para manter contexto) para o Lovable AI Gateway (`google/gemini-2.5-pro`) com instrução: "Traduza PT→EN preservando 100% das tags HTML, IDs, classes, atributos, code blocks, fórmulas e nomes próprios (Senex AI, PetMoreTime, service_role, RLS, etc.)";
-- monta `public/audits/<v>/index.en.html` reaproveitando `style.css` e `media/` (mesmo `<base href>`);
-- substitui o atributo `<html lang="pt-BR">` por `<html lang="en">`.
+Resultado: três números de versão diferentes na mesma sessão e um check que parece "rodar" mas só persiste a checklist curada.
 
-Reaproveita `LOVABLE_API_KEY` (já disponível para edge functions; o script roda local com `dotenv`). Rodar uma vez por versão, commitar os HTMLs gerados, e revisar visualmente.
+## Política de versionamento proposta (fonte única + bump explícito)
 
-Após geração, gravar os caminhos na base via SQL `UPDATE technical_audits SET html_path_en = '/audits/<v>/index.en.html' WHERE version = '<v>';`
+**Regra de ouro: SENEX_VERSION é a única versão do sistema.** Auditorias e compliance runs herdam essa versão — não inventam a própria.
 
-### 3. Leitor (TechnicalAuditsTab + audit-pdf-generator)
-- Tipar `TechnicalAudit.html_path_en?: string | null`.
-- Selecionar dinamicamente: `const path = i18n.language.startsWith('en') && audit.html_path_en ? audit.html_path_en : audit.html_path;`
-- Se EN selecionado mas `html_path_en` ausente → banner discreto "English translation not available for this audit — showing original Portuguese" + botão para abrir tradução automática do navegador.
-- Botão "Download PDF/DOCX" continua apontando para os arquivos PT (com tooltip "Original document in Portuguese").
-- `openAuditForPrint` recebe o path resolvido (mesma função, novo argumento).
+1. **Remover auto-bump de PATCH no `TechnicalAuditsTab`**.
+   - Se já existe auditoria com `v{SENEX_VERSION}`, o botão "Run new audit" fica desabilitado com tooltip explicativo: *"v7.0.0 já foi auditada. Para rodar nova auditoria, bumpe o marker `<!-- senex: 7.0.x -->` em `CHANGELOG.md` e rode `npm run sync:changelog`."*
+   - Exibe link/botão "Como bumpar versão?" abrindo um dialog com o passo-a-passo.
+   - Alternativa opcional: botão "Re-rodar (substitui anterior)" que marca a antiga como `superseded_by` (campo já existe na tabela) sem criar versão fantasma.
 
-### 4. i18n
-- Novas chaves: `audits.englishUnavailable`, `audits.viewingEnglishTranslation`, `audits.originalInPortuguese`.
-- Incrementar `I18N_VERSION` em `src/i18n.ts`.
+2. **Validação server-side em `generate-audit`**: rejeita request cujo `version` não é exatamente `v{senexVersion}` lido do CHANGELOG no servidor. Mensagem clara: "Audit version must match SENEX_VERSION. Bump the changelog marker first."
 
----
+3. **`ComplianceDashboard` — corrigir e amarrar à fonte única**:
+   - Importar `I18N_VERSION` de `@/i18n` e `SENEX_VERSION`, `SENEX_LAST_UPDATE` de `@/config/senex-version`. Remover o `'1.86.3'` hardcoded.
+   - Antes do botão "Run compliance check", mostrar um banner: *"Will snapshot: Senex AI v7.0.0 · i18n 1.115.9 · changelog 2026-05-31 · 17 requirements."* — usuário sabe o que está rodando antes de clicar.
+   - Após o run, toast com a mesma string + link "View history" para o accordion já existente.
+   - Indicar explicitamente que o "check" é um snapshot da checklist curada (`complianceData.ts`, last reviewed YYYY-MM-DD) — não scan dinâmico de código. Ou renomear o botão para "Snapshot compliance status" para ser honesto.
 
-## Parte B — Organograma 3x com scroll horizontal e vertical
+4. **Novo componente compartilhado `<VersionBadge />`** (em `src/components/system/`):
+   - Renderiza inline: `Senex AI v{SENEX_VERSION} · i18n {I18N_VERSION} · changelog {SENEX_LAST_UPDATE}`.
+   - Usado no cabeçalho de: `TechnicalAuditsTab`, `ComplianceDashboard`, `OrganogramaTab`, `AboutSenexTab`.
+   - Divergência fica visualmente impossível — todos leem da mesma fonte no mesmo render.
 
-Hoje `OrganogramaDiagram` e `OrganogramaForceGraph` usam pan/zoom dentro de um container de altura `calc(100vh - 230px)`. Substituir por **frame fixo com scroll nativo** e canvas interno 3000×2000.
+5. **Organograma**: exibir o `<VersionBadge />` ao lado de "Updated on …" para amarrar o `organogramaLastUpdated` à versão Senex correspondente.
 
-### Aba "Diagrama" (Mermaid — principal afetada)
-Em `src/components/administrador/organograma/OrganogramaDiagram.tsx`:
-- Remover/desabilitar `useScrollPanZoom` ou mantê-lo apenas como zoom opcional.
-- Trocar wrapper de `overflow-hidden` por `overflow-auto` com altura fixa (`h-[80vh]` ou `calc(100vh - 230px)`).
-- Definir o div interno do SVG como `min-width: 3000px; min-height: 2000px` (ou 3x das dimensões intrínsecas calculadas a partir do `viewBox`, com `Math.max`).
-- Manter botões "Centralizar" (faz scroll para o meio) e adicionar botão "Ajustar à tela" que volta para o modo zoom-to-fit.
-- Aplicar `[&_svg]:!w-full [&_svg]:!h-full` dentro do canvas grande para o SVG preencher 3000×2000.
+6. **Documentar a política** em uma nova memória `mem://workflow/versioning-policy` + nota curta em `docs/CORE_RULES.md`:
+   - "Para rodar uma nova auditoria/compliance check: (1) bumpe `<!-- senex: x.y.z -->` em CHANGELOG.md, (2) rode `npm run sync:changelog`, (3) confirme que header/footer mostram a nova versão, (4) só então clique 'Run new audit' / 'Run compliance check'."
 
-### Aba "Grafo" (ForceGraph)
-ForceGraph desenha em canvas físico — scroll nativo não funciona. Aplicar a mesma ideia "canvas grande + scroll do wrapper":
-- Wrapper externo `overflow-auto h-[calc(100vh-280px)]`.
-- Canvas interno dimensionado em `3000×2000` (passados como `width`/`height` para `<ForceGraph2D>` em vez do `ResizeObserver`).
-- Forças d3 já ajustadas; basta aumentar `linkDistance` proporcionalmente (+50%) para distribuir nós no novo espaço.
-- Botão "Centralizar" agora também faz `scrollTo` para o centro do wrapper.
+## Arquivos afetados
 
-### CSS/UX
-- Scrollbars finas via classes utilitárias existentes (`scrollbar-thin` se houver, ou inline `style={{scrollbarWidth:'thin'}}`).
-- Indicador discreto "← arraste / use scroll →" abaixo do frame.
+- `src/components/administrador/audits/TechnicalAuditsTab.tsx` (remover auto-bump, adicionar guard + dialog explicativo)
+- `src/components/administrador/compliance/ComplianceDashboard.tsx` (importar I18N_VERSION, remover hardcode, banner pré-run, renomear botão)
+- `src/components/system/VersionBadge.tsx` (novo)
+- `src/pages/administrador/OrganogramaTab.tsx` (adicionar badge)
+- `src/components/administrador/AboutSenexTab.tsx` (adicionar badge)
+- `supabase/functions/generate-audit/index.ts` (validação `version === v{senexVersion}`)
+- `.lovable/memory/workflow/versioning-policy.md` + index update
+- `CHANGELOG.md` + `npm run sync:changelog`
+- `src/i18n.ts` → bump `I18N_VERSION`
+- `src/locales/{pt,en}/translation.json` → chaves do banner/dialog
 
-### Sem impacto fora do escopo
-Nenhuma mudança em `projectOrganograma.ts`, área meta, ChangelogTimeline ou OrganogramaCards.
+## Não incluído (confirmar se quer)
 
----
+- Tornar o "compliance check" um scan dinâmico real (analisar código/RLS/edge functions automaticamente) — é trabalho substancial; hoje proponho apenas tornar o snapshot honesto e bem-versionado. Posso fazer numa segunda rodada se quiser.
 
-## Documentação
-- `CHANGELOG.md` → entrada `[Unreleased]` com `<!-- area: admin · status: entregue · i18n: <nova versão> -->` cobrindo (a) auditorias EN e (b) organograma 3x.
-- Rodar `npm run sync:changelog`.
-
-## Ordem de execução
-1. Migration `html_path_en`.
-2. Script `translate-audit-html.mjs` + geração dos 3 arquivos EN.
-3. Atualizar `TechnicalAuditsTab` + `audit-pdf-generator` + i18n.
-4. Refatorar `OrganogramaDiagram` e `OrganogramaForceGraph` para canvas 3x com scroll.
-5. CHANGELOG + sync.
+Confirma que avanço com isso? Se sim, na implementação eu já faço o bump para `<!-- senex: 7.0.1 -->` (refletindo essa própria mudança) para você ver a nova política funcionando end-to-end.

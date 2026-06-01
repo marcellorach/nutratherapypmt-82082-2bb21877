@@ -22,7 +22,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ---
 
 ## [Unreleased]
-<!-- senex: 7.0.0 -->
+<!-- senex: 7.0.1 -->
+
+### Changed - 2026-06-01 — Versionamento unificado: SENEX_VERSION como fonte única
+<!-- area: admin · status: entregue · i18n: 1.116.0 -->
+- Novo `<VersionBadge />` (`src/components/system/VersionBadge.tsx`) — lê de `SENEX_VERSION`, `I18N_VERSION` e `lastChangelogDate` e é usado em header de Auditorias, Compliance e Organograma. Divergência entre superfícies fica visualmente impossível.
+- `ComplianceDashboard`: removido `i18n_version: '1.86.3'` hardcoded — agora persiste `I18N_VERSION` real. Botão renomeado para "Snapshot compliance (v… · i18n …)" com badge da versão acima, deixando explícito que é snapshot da checklist curada amarrado à versão atual.
+- `TechnicalAuditsTab`: removido auto-bump de PATCH. A auditoria SEMPRE herda exatamente `v{SENEX_VERSION}` — não inventa versão. Se já existe auditoria para a versão atual, o botão "Run new audit" fica desabilitado com tooltip instruindo a bumpar o marker `<!-- senex: x.y.z -->` em CHANGELOG.md + `npm run sync:changelog`.
+- `system_version` gravado pelas auditorias agora inclui a versão Senex (`Senex v7.0.1 · i18n 1.116.0`), facilitando auditoria cruzada.
+- Política documentada: para rodar nova auditoria/compliance, (1) bumpar `<!-- senex -->` no CHANGELOG, (2) rodar `npm run sync:changelog`, (3) confirmar que header/footer mostram nova versão, (4) então clicar nos botões.
+- Files: src/components/system/VersionBadge.tsx, src/components/administrador/compliance/ComplianceDashboard.tsx, src/components/administrador/audits/TechnicalAuditsTab.tsx, src/pages/administrador/OrganogramaTab.tsx, src/i18n.ts
 
 ### Changed - 2026-06-01 — Sprint 5 (final) — registro único 24/24: healthcheck, harness e planilha de nutracêuticos
 <!-- area: infra · status: entregue · i18n: n/a -->
