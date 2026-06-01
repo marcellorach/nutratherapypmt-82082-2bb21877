@@ -1,6 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { fetchSystemPrompt } from "../_shared/system-prompts.ts";
+import { logPromptUsage } from "../_shared/prompt-usage.ts";
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -9,6 +11,10 @@ const PERPLEXITY_API_KEY = Deno.env.get("PERPLEXITY_API_KEY");
 
 const QUERY_MODEL = "google/gemini-2.5-flash";
 const EMBED_MODEL = "google/gemini-embedding-001";
+const QUERY_PROMPT_KEY = "check_cohort_originality_query_builder";
+const QUERY_FALLBACK = "You are a veterinary literature search expert. Always respond with valid JSON only.";
+const PERPLEXITY_PROMPT_KEY = "check_cohort_originality_perplexity";
+const PERPLEXITY_FALLBACK = "List existing scientific evidence on the user's veterinary research question. Be terse. Cite sources.";
 
 interface Body {
   suggestion_id?: string;
@@ -31,20 +37,34 @@ Criteria: ${JSON.stringify(s.suggested_criteria ?? {})}
 Build search queries to check if there is existing scientific literature on this exact cohort question (canine focus).
 Return a JSON object with: pubmed_query (PubMed boolean syntax with [tiab] tags), google_scholar_query (plain keyword string), keywords (4-6 short terms), semantic_query (one short English sentence summarizing the research question for embedding search).`;
 
+  const systemPrompt = await fetchSystemPrompt(QUERY_PROMPT_KEY, QUERY_FALLBACK);
+  const t0 = Date.now();
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       model: QUERY_MODEL,
       messages: [
-        { role: "system", content: "You are a veterinary literature search expert. Always respond with valid JSON only." },
+        { role: "system", content: systemPrompt },
         { role: "user", content: prompt },
       ],
       response_format: { type: "json_object" },
     }),
   });
-  if (!resp.ok) throw new Error(`Query builder failed ${resp.status}`);
+  if (!resp.ok) {
+    await logPromptUsage({ prompt_key: QUERY_PROMPT_KEY, function_name: "check-cohort-originality", model: QUERY_MODEL, latency_ms: Date.now() - t0, success: false, error: `gateway_${resp.status}` });
+    throw new Error(`Query builder failed ${resp.status}`);
+  }
   const data = await resp.json();
+  await logPromptUsage({
+    prompt_key: QUERY_PROMPT_KEY,
+    function_name: "check-cohort-originality",
+    model: QUERY_MODEL,
+    latency_ms: Date.now() - t0,
+    tokens_in: data?.usage?.prompt_tokens ?? null,
+    tokens_out: data?.usage?.completion_tokens ?? null,
+    success: true,
+  });
   const content = data?.choices?.[0]?.message?.content ?? "{}";
   const parsed = JSON.parse(content);
   return {
@@ -151,6 +171,8 @@ async function searchPerplexity(question: string): Promise<{
 }> {
   if (!PERPLEXITY_API_KEY) return { citations: [], status: "disabled" };
   try {
+    const systemPrompt = await fetchSystemPrompt(PERPLEXITY_PROMPT_KEY, PERPLEXITY_FALLBACK);
+    const t0 = Date.now();
     const resp = await fetch("https://api.perplexity.ai/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${PERPLEXITY_API_KEY}`, "Content-Type": "application/json" },
@@ -158,15 +180,27 @@ async function searchPerplexity(question: string): Promise<{
         model: "sonar",
         search_mode: "academic",
         messages: [
-          { role: "system", content: "List existing scientific evidence on the user's veterinary research question. Be terse. Cite sources." },
+          { role: "system", content: systemPrompt },
           { role: "user", content: question },
         ],
         max_tokens: 400,
         temperature: 0.1,
       }),
     });
-    if (!resp.ok) throw new Error(`perplexity ${resp.status}`);
+    if (!resp.ok) {
+      await logPromptUsage({ prompt_key: PERPLEXITY_PROMPT_KEY, function_name: "check-cohort-originality", model: "sonar", latency_ms: Date.now() - t0, success: false, error: `perplexity_${resp.status}` });
+      throw new Error(`perplexity ${resp.status}`);
+    }
     const data = await resp.json();
+    await logPromptUsage({
+      prompt_key: PERPLEXITY_PROMPT_KEY,
+      function_name: "check-cohort-originality",
+      model: "sonar",
+      latency_ms: Date.now() - t0,
+      tokens_in: data?.usage?.prompt_tokens ?? null,
+      tokens_out: data?.usage?.completion_tokens ?? null,
+      success: true,
+    });
     const citations: string[] = data?.citations ?? [];
     return { citations, status: "ok" };
   } catch (e: any) {
