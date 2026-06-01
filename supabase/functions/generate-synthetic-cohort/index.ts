@@ -1,11 +1,14 @@
 // deno-lint-ignore-file no-explicit-any
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { fetchSystemPrompt } from "../_shared/system-prompts.ts";
+import { logPromptUsage } from "../_shared/prompt-usage.ts";
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const MODEL = "google/gemini-3.5-flash";
+const PROMPT_KEY = "generate_synthetic_cohort";
 const BATCH_SIZE = 10;
 const LLM_TIMEOUT_MS = 90_000;
 const MAX_RETRIES = 2;
@@ -37,7 +40,7 @@ function normalizeBreed(raw: string): string {
     .join(" ");
 }
 
-const SYSTEM_PROMPT = `Você é um gerador de prontuários veterinários sintéticos para cães, calibrado em medicina real.
+const SYSTEM_FALLBACK = `Você é um gerador de prontuários veterinários sintéticos para cães, calibrado em medicina real.
 Cada pet deve ter um prontuário INTERNAMENTE COERENTE — como se fosse um caso real do "Gerar Pacientes de Exemplo":
 - perfil (raça/idade/peso/sexo/castração) compatíveis com o recorte
 - SEMPRE pelo menos 1 consulta (a mais recente é a atual) com chief_complaint, clinical_exam, assessment e plan em português
@@ -242,13 +245,15 @@ Exemplo de qualidade esperada (NÃO copie, apenas inspire-se):
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), LLM_TIMEOUT_MS);
   try {
+    const systemPrompt = await fetchSystemPrompt(PROMPT_KEY, SYSTEM_FALLBACK);
+    const t0 = Date.now();
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: MODEL,
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
         tools: [buildTool(batchSize)],
@@ -259,11 +264,21 @@ Exemplo de qualidade esperada (NÃO copie, apenas inspire-se):
 
     if (!resp.ok) {
       const t = await resp.text();
+      await logPromptUsage({ prompt_key: PROMPT_KEY, function_name: "generate-synthetic-cohort", model: MODEL, latency_ms: Date.now() - t0, success: false, error: `gateway_${resp.status}` });
       const err: any = new Error(`AI gateway ${resp.status}: ${t.slice(0, 500)}`);
       err.status = resp.status;
       throw err;
     }
     const data = await resp.json();
+    await logPromptUsage({
+      prompt_key: PROMPT_KEY,
+      function_name: "generate-synthetic-cohort",
+      model: MODEL,
+      latency_ms: Date.now() - t0,
+      tokens_in: data?.usage?.prompt_tokens ?? null,
+      tokens_out: data?.usage?.completion_tokens ?? null,
+      success: true,
+    });
     const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
     const parsed = typeof args === "string" ? JSON.parse(args) : args;
     return parsed?.pets ?? [];
