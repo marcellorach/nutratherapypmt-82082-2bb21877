@@ -252,27 +252,27 @@ const SystemPromptsCatalog: React.FC = () => {
                 <code>supabase/functions/_shared/system-prompts.ts</code>.
               </CardDescription>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => runSync(false)}
-              disabled={syncing}
-              className="shrink-0"
-            >
-              <RefreshCw className={`h-3.5 w-3.5 mr-1 ${syncing ? 'animate-spin' : ''}`} />
-              {t('admin.systemPrompts.syncButton')}
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={() => exportPdf(filteredFlat, `catalogo-prompts-${new Date().toISOString().slice(0,10)}.pdf`)}
-              disabled={filteredFlat.length === 0}
-              className="shrink-0"
-              title="Exportar catálogo completo em PDF (inclui contexto, modelo, formato e conteúdo)"
-            >
-              <FileDown className="h-3.5 w-3.5 mr-1" />
-              Exportar PDF ({filteredFlat.length})
-            </Button>
+            <div className="flex gap-2 shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => runSync(false)}
+                disabled={syncing}
+              >
+                <RefreshCw className={`h-3.5 w-3.5 mr-1 ${syncing ? 'animate-spin' : ''}`} />
+                {t('admin.systemPrompts.syncButton')}
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => exportPdf(filteredFlat, `catalogo-prompts-${new Date().toISOString().slice(0,10)}.pdf`)}
+                disabled={filteredFlat.length === 0}
+                title="Exportar catálogo completo em PDF (inclui contexto, modelo, formato e conteúdo)"
+              >
+                <FileDown className="h-3.5 w-3.5 mr-1" />
+                Exportar PDF ({filteredFlat.length})
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
