@@ -24,6 +24,23 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.0 -->
 
+### Changed - 2026-06-01 — Sprint 4 cohorts: 6 funções de geração/análise/originalidade no registro único
+<!-- area: infra · status: entregue · i18n: n/a -->
+- Manifesto: 8 novas entradas em `_shared/system-prompts.ts` cobrindo todo o pipeline de cohorts sintéticos:
+  - `analyze_cohort_patterns` (gemini-3.5-flash, tool-call) — insights bilíngues por cohort com evidência quantitativa obrigatória.
+  - `analyze_all_cohorts_patterns` (gemini-3.5-flash, tool-call) — insights pan-populacionais cruzando múltiplos cohorts.
+  - `check_cohort_originality_query_builder` (gemini-2.5-flash, json) — montagem de queries PubMed/Scholar/keywords/semantic.
+  - `check_cohort_originality_perplexity` (sonar academic, text) — busca de evidência existente para a pergunta do cohort.
+  - `suggest_cohort_ideas` (gemini-3.1-pro-preview → gpt-5.4 fallback, tool-call) — 6 cohorts PetLove (1 por modelo preditivo) com valor operacional.
+  - `generate_synthetic_cohort` (gemini-3.5-flash, tool-call) — prontuários veterinários sintéticos coerentes (perfil + consultas + condições + exames + medicações).
+  - `check_insight_originality_perplexity` (sonar, text) — verificação de literatura peer-reviewed canina para insights.
+  - `check_insight_originality_gemini_fallback` (gemini-3.5-flash, text) — fallback quando Perplexity indisponível.
+- Funções migradas via `fetchSystemPrompt(KEY, SYSTEM_FALLBACK)` + telemetria `logPromptUsage` (sucesso/erro/tokens/latência): `analyze-cohort-patterns`, `analyze-all-cohorts-patterns`, `check-cohort-originality` (2 prompts), `suggest-cohort-ideas`, `generate-synthetic-cohort`, `check-insight-originality` (2 prompts).
+- Fallback verbatim preservado em cada função → comportamento idêntico ao prévio se DB indisponível. Conteúdo dos prompts inalterado.
+- Smoke test: boot saudável nas 6 (400 esperado em payloads vazios; análises reais entram em fluxo normal).
+- Compliance: **21/24** funções no registro único (87.5%). Pendentes: `ai-task-healthcheck`, `ai-task-test`, `process-nutraceutical-spreadsheet/aiProcessor.ts`.
+- Files: supabase/functions/_shared/system-prompts.ts, supabase/functions/analyze-cohort-patterns/index.ts, supabase/functions/analyze-all-cohorts-patterns/index.ts, supabase/functions/check-cohort-originality/index.ts, supabase/functions/suggest-cohort-ideas/index.ts, supabase/functions/generate-synthetic-cohort/index.ts, supabase/functions/check-insight-originality/index.ts
+
 ### Changed - 2026-06-01 — Sprint 3 utilitários: `enrich-pet-food-product`, `document-chat`, `suggest-taxonomy-terms` no registro único
 <!-- area: infra · status: entregue · i18n: n/a -->
 - `enrich_pet_food_product`: entrada do manifesto reescrita com o prompt PT-BR real (schema AAFCO/FEDIAF verbatim) + metadata completa (model/temp/output/consumers/tags).
