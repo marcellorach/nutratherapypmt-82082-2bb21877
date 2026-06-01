@@ -15,6 +15,23 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 import { callAITask } from '../_shared/ai-task-router.ts';
+import { fetchSystemPrompt } from '../_shared/system-prompts.ts';
+import { logPromptUsage } from '../_shared/prompt-usage.ts';
+
+const GEMINI_SYSTEM_FALLBACK =
+  'You are a veterinary evidence reviewer for canine geroprotector therapies. ' +
+  'Score the strength of evidence that the COMPOUND meaningfully treats or attenuates the CONDITION in dogs. ' +
+  'Use ONLY the abstracts provided. Be conservative.';
+
+const PERPLEXITY_SYSTEM_FALLBACK =
+  'You are a veterinary evidence reviewer for canine geroprotector therapies. ' +
+  'Search the academic literature for evidence that the COMPOUND meaningfully treats, ' +
+  'attenuates, or modifies the CONDITION in dogs. Prefer canine evidence; if absent, ' +
+  'consider mechanistic / rodent / human evidence and downgrade efficacy accordingly. ' +
+  'Also consider geroscience-based therapeutic strategies (e.g. senolytics, NAD+ precursors, ' +
+  'rapamycin analogs, metformin) and any pharmaceutical or nutraceutical interventions with ' +
+  'emerging evidence for this condition in aging dogs. ' +
+  'Be conservative. Return ONLY structured JSON matching the schema.';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -180,15 +197,13 @@ async function assessWithGemini(
     .join('\n\n---\n\n')
     .slice(0, 18000);
 
+  const systemPrompt = await fetchSystemPrompt('kg_gap_fill_gemini', GEMINI_SYSTEM_FALLBACK);
   const body = {
     model: 'google/gemini-3-flash-preview',
     messages: [
       {
         role: 'system',
-        content:
-          'You are a veterinary evidence reviewer for canine geroprotector therapies. ' +
-          'Score the strength of evidence that the COMPOUND meaningfully treats or attenuates the CONDITION in dogs. ' +
-          'Use ONLY the abstracts provided. Be conservative.',
+        content: systemPrompt,
       },
       {
         role: 'user',
@@ -224,6 +239,7 @@ async function assessWithGemini(
   }];
 
   try {
+    const t0 = Date.now();
     const result = await callAITask('kg_gap_fill', {
       caller: 'kg-evidence-gap-fill',
       messages: body.messages as Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
@@ -232,10 +248,27 @@ async function assessWithGemini(
       fallback: { model_id: body.model },
     });
     const call = result.tool_calls?.[0];
+    logPromptUsage({
+      prompt_key: 'kg_gap_fill_gemini',
+      function_name: 'kg-evidence-gap-fill',
+      model: result.model_used ?? body.model,
+      latency_ms: Date.now() - t0,
+      tokens_in: result.tokens_in ?? null,
+      tokens_out: result.tokens_out ?? null,
+      success: !!call,
+      error: call ? null : 'no_tool_call',
+    });
     if (!call) return null;
     return JSON.parse(call.function.arguments) as GeminiAssessment;
   } catch (err) {
     console.error('Gemini error via router', err);
+    logPromptUsage({
+      prompt_key: 'kg_gap_fill_gemini',
+      function_name: 'kg-evidence-gap-fill',
+      model: body.model,
+      success: false,
+      error: err instanceof Error ? err.message : String(err),
+    });
     return null;
   }
 }
