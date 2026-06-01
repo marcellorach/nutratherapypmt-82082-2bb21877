@@ -371,12 +371,28 @@ async function assessWithPerplexity(
     });
   } catch (e) {
     console.error('[gap-fill] Perplexity fetch threw', e);
+    logPromptUsage({
+      prompt_key: 'kg_gap_fill_perplexity',
+      function_name: 'kg-evidence-gap-fill',
+      model,
+      latency_ms: Date.now() - t0,
+      success: false,
+      error: e instanceof Error ? e.message : String(e),
+    });
     return { assessment: null, raw_citations: [] };
   }
 
   if (!res.ok) {
     const txt = await res.text().catch(() => '');
     console.error('[gap-fill] Perplexity HTTP', res.status, txt.slice(0, 500));
+    logPromptUsage({
+      prompt_key: 'kg_gap_fill_perplexity',
+      function_name: 'kg-evidence-gap-fill',
+      model,
+      latency_ms: Date.now() - t0,
+      success: false,
+      error: `http_${res.status}`,
+    });
     return { assessment: null, raw_citations: [] };
   }
 
@@ -407,6 +423,16 @@ async function assessWithPerplexity(
   parsed.cited_urls = (parsed.cited_urls || []).filter((u) => typeof u === 'string' && u.startsWith('http'));
   parsed.efficacy_0_5 = Math.max(0, Math.min(5, Number(parsed.efficacy_0_5) || 0));
   parsed.llm_confidence = Math.max(0, Math.min(1, Number(parsed.llm_confidence) || 0));
+
+  logPromptUsage({
+    prompt_key: 'kg_gap_fill_perplexity',
+    function_name: 'kg-evidence-gap-fill',
+    model,
+    latency_ms: Date.now() - t0,
+    tokens_in: json?.usage?.prompt_tokens ?? null,
+    tokens_out: json?.usage?.completion_tokens ?? null,
+    success: true,
+  });
 
   return { assessment: parsed, raw_citations: rawCitations };
 }
