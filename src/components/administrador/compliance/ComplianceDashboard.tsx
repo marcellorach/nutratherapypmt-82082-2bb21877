@@ -174,7 +174,7 @@ const ComplianceDashboard: React.FC = () => {
         .from('compliance_audit_runs')
         .insert({
           system_version: SENEX_VERSION,
-          i18n_version: '1.86.3',
+          i18n_version: I18N_VERSION,
           totals,
           per_authority: perAuthority,
           diff,
