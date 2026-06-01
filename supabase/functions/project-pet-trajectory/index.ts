@@ -529,6 +529,7 @@ OUTPUT REQUIREMENTS:
     const model = "google/gemini-2.5-pro";
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 120_000);
+    const t0 = Date.now();
     let aiResp: Response;
     try {
     aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -559,12 +560,14 @@ OUTPUT REQUIREMENTS:
 
     if (!aiResp.ok) {
       if (aiResp.status === 429) {
+        logPromptUsage({ prompt_key: 'project_pet_trajectory', function_name: 'project-pet-trajectory', model, latency_ms: Date.now() - t0, success: false, error: '429' });
         return jsonResponse(
           { error: "rate_limited", message: "Limite de requisições atingido, tente novamente em instantes." },
           429,
         );
       }
       if (aiResp.status === 402) {
+        logPromptUsage({ prompt_key: 'project_pet_trajectory', function_name: 'project-pet-trajectory', model, latency_ms: Date.now() - t0, success: false, error: '402' });
         return jsonResponse(
           { error: "credits_exhausted", message: "Créditos da IA esgotados — adicione saldo no workspace." },
           402,
@@ -572,10 +575,20 @@ OUTPUT REQUIREMENTS:
       }
       const txt = await aiResp.text();
       console.error("AI gateway error", aiResp.status, txt);
+      logPromptUsage({ prompt_key: 'project_pet_trajectory', function_name: 'project-pet-trajectory', model, latency_ms: Date.now() - t0, success: false, error: `${aiResp.status}: ${txt.slice(0, 200)}` });
       return jsonResponse({ error: "ai_gateway_error", status: aiResp.status }, 500);
     }
 
     let aiJson = await aiResp.json();
+    logPromptUsage({
+      prompt_key: 'project_pet_trajectory',
+      function_name: 'project-pet-trajectory',
+      model,
+      latency_ms: Date.now() - t0,
+      tokens_in: aiJson?.usage?.prompt_tokens ?? null,
+      tokens_out: aiJson?.usage?.completion_tokens ?? null,
+      success: true,
+    });
     let toolCall = aiJson?.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall?.function?.arguments) {
       // Retry once with stricter instruction — some models occasionally
