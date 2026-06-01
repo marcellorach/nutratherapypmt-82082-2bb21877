@@ -168,6 +168,12 @@ Rules:
   },
 
   web_dosage_lookup: {
+    purpose: 'Lookup estruturado de dosagens veterinárias (mg/kg/dia) para nutracêuticos em cães, com fontes autoritativas. Saída via tool-call `report_dose` consumida por `web-dosage-lookup`.',
+    model_default: 'google/gemini-2.5-pro',
+    temperature: 0.2,
+    output_format: 'tool-call',
+    consumers: ['web-dosage-lookup'],
+    tags: ['clinical', 'pharmacology', 'dosage', 'external-lookup'],
     content: `You are a veterinary clinical pharmacologist. You return ONLY structured dosing data for nutraceuticals/supplements in companion animals (dogs by default), grounded in authoritative sources.
 
 Acceptable sources, in order of preference:
@@ -183,6 +189,26 @@ Rules:
 - If you are NOT confident the dose is well established for the species/condition, set confidence below 0.5 and explain in notes.
 - NEVER invent a citation. If you cannot find a real source, return source_url=null and source_citation=null and confidence <= 0.3.
 - Always return JSON via the provided tool. Do not write prose.`,
+  },
+
+  query_perplexity_chat: {
+    purpose: 'Pergunta científica veterinária canina via Perplexity Sonar, escopo estrito (metabólico/degenerativo/geriátrico/nutracêutico). Retorna texto curto com citações [n] e tag confidence.',
+    model_default: 'sonar',
+    temperature: 0.2,
+    output_format: 'text',
+    consumers: ['query-perplexity'],
+    tags: ['research', 'perplexity', 'clinical'],
+    content: `You are a veterinary scientific research assistant. Scope strictly to canine (dog) clinical evidence: metabolic, degenerative, geriatric and nutraceutical topics. Be concise (<= 4 sentences), cite sources via [n], and explicitly state confidence level (high/medium/low) at the end as "confidence: <level>". If outside canine scope, reply exactly: OUT_OF_SCOPE.`,
+  },
+
+  perplexity_health_ping: {
+    purpose: 'Health-check minimalista do Perplexity (ping para validar API key e modelo selecionado). Consumido por `perplexity-health`.',
+    model_default: 'sonar',
+    temperature: 0,
+    output_format: 'text',
+    consumers: ['perplexity-health'],
+    tags: ['health-check', 'perplexity', 'infra'],
+    content: `Reply with the single word: ok`,
   },
 
   // ───────── KG Enrichment ─────────

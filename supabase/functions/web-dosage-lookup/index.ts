@@ -1,4 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { fetchSystemPrompt } from "../_shared/system-prompts.ts";
+import { logPromptUsage } from "../_shared/prompt-usage.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,7 +26,7 @@ interface LookupResult {
   notes?: string | null;
 }
 
-const SYSTEM_PROMPT = `You are a veterinary clinical pharmacologist. You return ONLY structured dosing data for nutraceuticals/supplements in companion animals (dogs by default), grounded in authoritative sources.
+const SYSTEM_FALLBACK = `You are a veterinary clinical pharmacologist. You return ONLY structured dosing data for nutraceuticals/supplements in companion animals (dogs by default), grounded in authoritative sources.
 
 Acceptable sources, in order of preference:
 1. Plumb's Veterinary Drug Handbook
@@ -52,10 +54,12 @@ async function callLovableAi(
     ? `Look up the standard ${species} oral dose of "${compound}" used for "${condition}". Provide mg/kg/day range and best citation.`
     : `Look up the standard ${species} oral dose of "${compound}" (general supplementation). Provide mg/kg/day range and best citation.`;
 
+  const systemPrompt = await fetchSystemPrompt("web_dosage_lookup", SYSTEM_FALLBACK);
+  const model = "google/gemini-2.5-pro";
   const body = {
-    model: "google/gemini-2.5-pro",
+    model,
     messages: [
-      { role: "system", content: SYSTEM_PROMPT },
+      { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
     ],
     tools: [
@@ -92,6 +96,7 @@ async function callLovableAi(
     tool_choice: { type: "function", function: { name: "report_dose" } },
   };
 
+  const t0 = Date.now();
   const resp = await fetch(
     "https://ai.gateway.lovable.dev/v1/chat/completions",
     {
@@ -107,6 +112,14 @@ async function callLovableAi(
   if (!resp.ok) {
     const text = await resp.text();
     console.error("Lovable AI error", resp.status, text);
+    await logPromptUsage({
+      prompt_key: "web_dosage_lookup",
+      function_name: "web-dosage-lookup",
+      model,
+      latency_ms: Date.now() - t0,
+      success: false,
+      error: `HTTP ${resp.status}`,
+    });
     if (resp.status === 429 || resp.status === 402) {
       throw new Error(`AI gateway ${resp.status}`);
     }
@@ -115,10 +128,29 @@ async function callLovableAi(
 
   const data = await resp.json();
   const toolCall = data?.choices?.[0]?.message?.tool_calls?.[0];
-  if (!toolCall) return null;
+  if (!toolCall) {
+    await logPromptUsage({
+      prompt_key: "web_dosage_lookup",
+      function_name: "web-dosage-lookup",
+      model,
+      latency_ms: Date.now() - t0,
+      success: false,
+      error: "no_tool_call",
+    });
+    return null;
+  }
 
   try {
     const parsed = JSON.parse(toolCall.function.arguments);
+    await logPromptUsage({
+      prompt_key: "web_dosage_lookup",
+      function_name: "web-dosage-lookup",
+      model,
+      latency_ms: Date.now() - t0,
+      tokens_in: data?.usage?.prompt_tokens,
+      tokens_out: data?.usage?.completion_tokens,
+      success: true,
+    });
     return parsed as LookupResult;
   } catch (e) {
     console.error("Failed to parse tool args", e);
