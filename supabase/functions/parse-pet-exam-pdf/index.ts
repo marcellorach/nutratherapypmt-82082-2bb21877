@@ -2,6 +2,8 @@
 // Input: { exam_id: string, file_url: string }
 // Updates pet_exams row with structured JSON results.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.0";
+import { fetchSystemPrompt } from "../_shared/system-prompts.ts";
+import { logPromptUsage } from "../_shared/prompt-usage.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,7 +15,8 @@ const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-const SYSTEM = `Você extrai dados de PDFs de exames veterinários (cães).
+// Fallback verbatim — usado apenas se o registro de prompts (DB + manifesto) estiver inacessível.
+const SYSTEM_FALLBACK = `Você extrai dados de PDFs de exames veterinários (cães).
 Retorne SOMENTE JSON válido seguindo este schema:
 {
   "exam_type": string,             // ex.: "Hemograma", "Bioquímico", "Urinálise"
@@ -133,11 +136,14 @@ Deno.serve(async (req) => {
     for (let i = 0; i < buf.length; i++) binary += String.fromCharCode(buf[i]);
     const b64 = btoa(binary);
 
+    const SYSTEM = await fetchSystemPrompt('parse_pet_exam_pdf', SYSTEM_FALLBACK);
+    const t0 = Date.now();
+    const model = "google/gemini-2.5-flash";
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model,
         messages: [
           { role: "system", content: SYSTEM },
           { role: "user", content: [
@@ -151,9 +157,26 @@ Deno.serve(async (req) => {
 
     if (!aiRes.ok) {
       const txt = await aiRes.text();
+      logPromptUsage({
+        prompt_key: 'parse_pet_exam_pdf',
+        function_name: 'parse-pet-exam-pdf',
+        model,
+        latency_ms: Date.now() - t0,
+        success: false,
+        error: `${aiRes.status}: ${txt.slice(0, 200)}`,
+      });
       throw new Error(`AI ${aiRes.status}: ${txt.slice(0, 300)}`);
     }
     const aiJson = await aiRes.json();
+    logPromptUsage({
+      prompt_key: 'parse_pet_exam_pdf',
+      function_name: 'parse-pet-exam-pdf',
+      model,
+      latency_ms: Date.now() - t0,
+      tokens_in: aiJson?.usage?.prompt_tokens ?? null,
+      tokens_out: aiJson?.usage?.completion_tokens ?? null,
+      success: true,
+    });
     const content = aiJson.choices?.[0]?.message?.content ?? "{}";
     let parsed: any;
     try { parsed = typeof content === "string" ? JSON.parse(content) : content; }
