@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-01T00:44:22.235Z
+// Última geração: 2026-06-01T00:59:57.196Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,24 @@ export const lastChangelogDate = "2026-06-01";
 export const senexVersion = "7.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-01",
+    "kind": "changed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Migração `generate-audit` para registro único de prompts",
+    "bullets": [
+      "`generate-audit` agora carrega o prompt-base PT/EN via `fetchSystemPrompt('audit_base_system_{pt,en}')` (manifest em `_shared/system-prompts.ts`).",
+      "Override legado por `audit_prompt_versions` preservado; fallback verbatim mantém comportamento atual se o DB estiver offline.",
+      "Compliance lint: 2/24 funções no registro (`generate-audit`, `relations-auditor`); 22 pendentes na fila de migração (Sprint 1 → 2 → 3 → 4).",
+      "Files: supabase/functions/generate-audit/index.ts, supabase/functions/_shared/system-prompts.ts"
+    ],
+    "files": [
+      "supabase/functions/generate-audit/index.ts",
+      "supabase/functions/_shared/system-prompts.ts"
+    ],
+    "i18nVersion": "-"
+  },
   {
     "date": "2026-06-01",
     "kind": "added",

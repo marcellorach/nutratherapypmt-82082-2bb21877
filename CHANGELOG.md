@@ -24,6 +24,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.0 -->
 
+### Changed - 2026-06-01 — Migração `generate-audit` para registro único de prompts
+<!-- area: admin · status: entregue · i18n: - -->
+- `generate-audit` agora carrega o prompt-base PT/EN via `fetchSystemPrompt('audit_base_system_{pt,en}')` (manifest em `_shared/system-prompts.ts`).
+- Override legado por `audit_prompt_versions` preservado; fallback verbatim mantém comportamento atual se o DB estiver offline.
+- Compliance lint: 2/24 funções no registro (`generate-audit`, `relations-auditor`); 22 pendentes na fila de migração (Sprint 1 → 2 → 3 → 4).
+- Files: supabase/functions/generate-audit/index.ts, supabase/functions/_shared/system-prompts.ts
+
 ### Added - 2026-06-01 — Telemetria de uso de prompts + lint de compliance do registro
 <!-- area: admin · status: parcial · i18n: 1.115.8 -->
 - Nova tabela `ai_prompt_usage_log` (prompt_key, function_name, model, latency_ms, tokens_in, tokens_out, success, error). Leitura admin-only via RLS; insert via service role.
