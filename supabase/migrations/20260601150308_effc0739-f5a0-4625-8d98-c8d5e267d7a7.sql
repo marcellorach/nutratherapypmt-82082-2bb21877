@@ -1,0 +1,1 @@
+ALTER TABLE public.technical_audits ADD COLUMN IF NOT EXISTS html_path_en text;

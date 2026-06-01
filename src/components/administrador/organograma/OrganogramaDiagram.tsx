@@ -7,7 +7,11 @@ import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { organograma } from "@/data/projectOrganograma";
 import { getAreaMeta } from "@/data/organogramaAreaMeta";
-import { useScrollPanZoom } from "@/hooks/useScrollPanZoom";
+
+// Canvas alvo do organograma (3x o tamanho útil anterior) — força barras
+// de rolagem horizontal e vertical mesmo em telas grandes.
+const CANVAS_W = 3000;
+const CANVAS_H = 2000;
 
 function safeId(s: string) {
   return s.replace(/[^a-zA-Z0-9_]/g, "_").slice(0, 32);
@@ -46,11 +50,18 @@ export const OrganogramaDiagram: React.FC<Props> = ({ onJumpToCards }) => {
   const source = useMemo(() => buildMermaid(orientation), [orientation]);
   const { t } = useTranslation();
 
-  const { containerRef, innerRef, fit, scale, tx, ty } = useScrollPanZoom<HTMLDivElement>({
-    min: 0.05,
-    max: 6,
-    fitMin: 0.2,
-  });
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Re-centraliza o scroll do quadro no meio do canvas.
+  const centerScroll = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    el.scrollTo({
+      left: Math.max(0, (el.scrollWidth - el.clientWidth) / 2),
+      top: Math.max(0, (el.scrollHeight - el.clientHeight) / 2),
+      behavior: "smooth",
+    });
+  };
 
   useEffect(() => {
     mermaid.initialize({ startOnLoad: false, theme: "neutral", securityLevel: "loose" });
@@ -69,30 +80,19 @@ export const OrganogramaDiagram: React.FC<Props> = ({ onJumpToCards }) => {
           setSvg("");
           return;
         }
-        // Forçar dimensões intrínsecas reais a partir do viewBox para que getBBox / measureNatural funcionem
-        let normalized = rendered;
-        const vbMatch = rendered.match(/viewBox="([\d.\s-]+)"/);
-        if (vbMatch) {
-          const [, , w, h] = vbMatch[1].split(/\s+/).map(Number);
-          if (w > 0 && h > 0) {
-            // remove style max-width que o Mermaid injeta
-            normalized = normalized
-              .replace(/style="[^"]*max-width:[^"]*"/, '')
-              .replace(/<svg([^>]*?)>/, (m, attrs) => {
-                const cleaned = attrs
-                  .replace(/\swidth="[^"]*"/, '')
-                  .replace(/\sheight="[^"]*"/, '');
-                return `<svg${cleaned} width="${w}" height="${h}">`;
-              });
-          }
-        }
+        // Força o SVG a preencher o canvas grande (3000x2000) removendo
+        // width/height/max-width que o Mermaid injeta.
+        const normalized = rendered
+          .replace(/style="[^"]*max-width:[^"]*"/, '')
+          .replace(/<svg([^>]*?)>/, (_m, attrs) => {
+            const cleaned = attrs
+              .replace(/\swidth="[^"]*"/, '')
+              .replace(/\sheight="[^"]*"/, '');
+            return `<svg${cleaned} width="${CANVAS_W}" height="${CANVAS_H}" preserveAspectRatio="xMidYMid meet">`;
+          });
         setSvg(normalized);
         requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            fit();
-            setTimeout(() => fit(), 120);
-            setTimeout(() => fit(), 350);
-          });
+          requestAnimationFrame(centerScroll);
         });
       } catch (err: any) {
         setError(err?.message ?? String(err));
@@ -101,7 +101,7 @@ export const OrganogramaDiagram: React.FC<Props> = ({ onJumpToCards }) => {
     return () => {
       cancelled = true;
     };
-  }, [source, fit]);
+  }, [source]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(source);
@@ -129,7 +129,7 @@ export const OrganogramaDiagram: React.FC<Props> = ({ onJumpToCards }) => {
             </Button>
           </div>
           <div className="flex gap-1">
-            <Button size="sm" variant="outline" onClick={fit}>
+            <Button size="sm" variant="outline" onClick={centerScroll}>
               <Crosshair className="h-3.5 w-3.5 mr-1" />
               {t('organograma.center')}
             </Button>
@@ -151,19 +151,19 @@ export const OrganogramaDiagram: React.FC<Props> = ({ onJumpToCards }) => {
         ) : (
           <div
             ref={containerRef}
-            className="relative rounded-md border bg-muted/20 overflow-hidden"
-            style={{ height: "calc(100vh - 230px)", minHeight: 520 }}
+            className="relative rounded-md border bg-muted/20 overflow-auto"
+            style={{
+              height: "calc(100vh - 230px)",
+              minHeight: 520,
+              scrollbarWidth: "thin",
+            }}
           >
             <div
-              ref={innerRef}
-              className="absolute top-0 left-0 [&_svg]:!block [&_svg]:!max-w-none [&_svg]:overflow-visible origin-top-left will-change-transform"
+              className="[&_svg]:!block [&_svg]:!max-w-none [&_svg]:overflow-visible"
               style={{
-                transform: `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`,
-                transformOrigin: "0 0",
+                width: CANVAS_W,
+                height: CANVAS_H,
               }}
-            >
-              <div
-                style={{ width: "max-content", height: "max-content" }}
                 dangerouslySetInnerHTML={{ __html: svg }}
                 onClick={(e) => {
                   // detecta clique em nó "A_<key>"
@@ -178,8 +178,7 @@ export const OrganogramaDiagram: React.FC<Props> = ({ onJumpToCards }) => {
                     onJumpToCards(possibleKey.replace(/_/g, "-"));
                   }
                 }}
-              />
-            </div>
+            />
           </div>
         )}
 

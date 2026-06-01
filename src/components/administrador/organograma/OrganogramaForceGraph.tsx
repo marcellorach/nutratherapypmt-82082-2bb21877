@@ -64,28 +64,19 @@ interface Props {
 export const OrganogramaForceGraph: React.FC<Props> = ({ onJumpToCards }) => {
   const fgRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [size, setSize] = useState({ w: 800, h: 600 });
+  // Canvas interno fixo bem grande para forçar barras de rolagem H/V.
+  const CANVAS_W = 3000;
+  const CANVAS_H = 2000;
   const data = useMemo(buildGraph, []);
   const { t } = useTranslation();
-
-  useEffect(() => {
-    const node = containerRef.current;
-    if (!node) return;
-    const ro = new ResizeObserver(() => {
-      setSize({ w: node.clientWidth, h: node.clientHeight });
-    });
-    ro.observe(node);
-    return () => ro.disconnect();
-  }, []);
 
   // Configure d3 forces for a more spread-out layout
   useEffect(() => {
     const fg = fgRef.current;
     if (!fg) return;
-    // Repulsão forte para espalhar nós
-    fg.d3Force?.('charge')?.strength((n: any) => (n.kind === 'area' ? -800 : -180));
-    // Distâncias maiores entre nós conectados
-    fg.d3Force?.('link')?.distance((l: any) => (l.kind === 'cross' ? 220 : 90)).strength(0.4);
+    // Repulsão forte + distâncias maiores para distribuir nós no canvas 3000x2000.
+    fg.d3Force?.('charge')?.strength((n: any) => (n.kind === 'area' ? -1400 : -260));
+    fg.d3Force?.('link')?.distance((l: any) => (l.kind === 'cross' ? 340 : 140)).strength(0.4);
     // Evita sobreposição
     fg.d3Force?.('center')?.strength(0.05);
     // Reaquece a simulação
@@ -93,7 +84,16 @@ export const OrganogramaForceGraph: React.FC<Props> = ({ onJumpToCards }) => {
   }, [data]);
 
   const handleCenter = () => {
-    fgRef.current?.zoomToFit?.(600, 80);
+    fgRef.current?.zoomToFit?.(600, 120);
+    // Centra o scroll do wrapper no meio do canvas.
+    const el = containerRef.current;
+    if (el) {
+      el.scrollTo({
+        left: Math.max(0, (el.scrollWidth - el.clientWidth) / 2),
+        top: Math.max(0, (el.scrollHeight - el.clientHeight) / 2),
+        behavior: "smooth",
+      });
+    }
   };
 
   const handleNodeClick = (n: any) => {
@@ -131,14 +131,19 @@ export const OrganogramaForceGraph: React.FC<Props> = ({ onJumpToCards }) => {
         </div>
         <div
           ref={containerRef}
-          className="rounded-md border bg-muted/20 overflow-hidden"
-          style={{ height: "calc(100vh - 280px)", minHeight: 400 }}
+          className="rounded-md border bg-muted/20 overflow-auto"
+          style={{
+            height: "calc(100vh - 280px)",
+            minHeight: 400,
+            scrollbarWidth: "thin",
+          }}
         >
-          <ForceGraph2D
-            ref={fgRef}
-            graphData={data}
-            width={size.w}
-            height={size.h}
+          <div style={{ width: CANVAS_W, height: CANVAS_H }}>
+            <ForceGraph2D
+              ref={fgRef}
+              graphData={data}
+              width={CANVAS_W}
+              height={CANVAS_H}
             backgroundColor="rgba(0,0,0,0)"
             nodeRelSize={6}
             linkColor={(l: any) =>
@@ -151,7 +156,7 @@ export const OrganogramaForceGraph: React.FC<Props> = ({ onJumpToCards }) => {
             cooldownTicks={400}
             d3VelocityDecay={0.25}
             d3AlphaDecay={0.015}
-            onEngineStop={() => fgRef.current?.zoomToFit?.(600, 80)}
+            onEngineStop={() => fgRef.current?.zoomToFit?.(600, 120)}
             nodeCanvasObject={(node: any, ctx, globalScale) => {
               const isArea = node.kind === "area";
               const r = isArea ? 12 : 5;
@@ -183,7 +188,8 @@ export const OrganogramaForceGraph: React.FC<Props> = ({ onJumpToCards }) => {
               ctx.arc(node.x, node.y, node.kind === "area" ? 16 : 8, 0, 2 * Math.PI);
               ctx.fill();
             }}
-          />
+            />
+          </div>
         </div>
         <p className="text-[11px] text-muted-foreground text-center">
           {t('organograma.graphHint')}
