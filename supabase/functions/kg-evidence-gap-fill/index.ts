@@ -15,6 +15,23 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 import { callAITask } from '../_shared/ai-task-router.ts';
+import { fetchSystemPrompt } from '../_shared/system-prompts.ts';
+import { logPromptUsage } from '../_shared/prompt-usage.ts';
+
+const GEMINI_SYSTEM_FALLBACK =
+  'You are a veterinary evidence reviewer for canine geroprotector therapies. ' +
+  'Score the strength of evidence that the COMPOUND meaningfully treats or attenuates the CONDITION in dogs. ' +
+  'Use ONLY the abstracts provided. Be conservative.';
+
+const PERPLEXITY_SYSTEM_FALLBACK =
+  'You are a veterinary evidence reviewer for canine geroprotector therapies. ' +
+  'Search the academic literature for evidence that the COMPOUND meaningfully treats, ' +
+  'attenuates, or modifies the CONDITION in dogs. Prefer canine evidence; if absent, ' +
+  'consider mechanistic / rodent / human evidence and downgrade efficacy accordingly. ' +
+  'Also consider geroscience-based therapeutic strategies (e.g. senolytics, NAD+ precursors, ' +
+  'rapamycin analogs, metformin) and any pharmaceutical or nutraceutical interventions with ' +
+  'emerging evidence for this condition in aging dogs. ' +
+  'Be conservative. Return ONLY structured JSON matching the schema.';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -180,15 +197,13 @@ async function assessWithGemini(
     .join('\n\n---\n\n')
     .slice(0, 18000);
 
+  const systemPrompt = await fetchSystemPrompt('kg_gap_fill_gemini', GEMINI_SYSTEM_FALLBACK);
   const body = {
     model: 'google/gemini-3-flash-preview',
     messages: [
       {
         role: 'system',
-        content:
-          'You are a veterinary evidence reviewer for canine geroprotector therapies. ' +
-          'Score the strength of evidence that the COMPOUND meaningfully treats or attenuates the CONDITION in dogs. ' +
-          'Use ONLY the abstracts provided. Be conservative.',
+        content: systemPrompt,
       },
       {
         role: 'user',
@@ -224,6 +239,7 @@ async function assessWithGemini(
   }];
 
   try {
+    const t0 = Date.now();
     const result = await callAITask('kg_gap_fill', {
       caller: 'kg-evidence-gap-fill',
       messages: body.messages as Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
@@ -232,10 +248,27 @@ async function assessWithGemini(
       fallback: { model_id: body.model },
     });
     const call = result.tool_calls?.[0];
+    logPromptUsage({
+      prompt_key: 'kg_gap_fill_gemini',
+      function_name: 'kg-evidence-gap-fill',
+      model: result.model_used ?? body.model,
+      latency_ms: Date.now() - t0,
+      tokens_in: result.tokens_in ?? null,
+      tokens_out: result.tokens_out ?? null,
+      success: !!call,
+      error: call ? null : 'no_tool_call',
+    });
     if (!call) return null;
     return JSON.parse(call.function.arguments) as GeminiAssessment;
   } catch (err) {
     console.error('Gemini error via router', err);
+    logPromptUsage({
+      prompt_key: 'kg_gap_fill_gemini',
+      function_name: 'kg-evidence-gap-fill',
+      model: body.model,
+      success: false,
+      error: err instanceof Error ? err.message : String(err),
+    });
     return null;
   }
 }
@@ -289,21 +322,14 @@ async function assessWithPerplexity(
     ],
   };
 
+  const systemPrompt = await fetchSystemPrompt('kg_gap_fill_perplexity', PERPLEXITY_SYSTEM_FALLBACK);
   const body = {
     model,
     search_mode: 'academic',
     messages: [
       {
         role: 'system',
-        content:
-          'You are a veterinary evidence reviewer for canine geroprotector therapies. ' +
-          'Search the academic literature for evidence that the COMPOUND meaningfully treats, ' +
-          'attenuates, or modifies the CONDITION in dogs. Prefer canine evidence; if absent, ' +
-          'consider mechanistic / rodent / human evidence and downgrade efficacy accordingly. ' +
-          'Also consider geroscience-based therapeutic strategies (e.g. senolytics, NAD+ precursors, ' +
-          'rapamycin analogs, metformin) and any pharmaceutical or nutraceutical interventions with ' +
-          'emerging evidence for this condition in aging dogs. ' +
-          'Be conservative. Return ONLY structured JSON matching the schema.',
+        content: systemPrompt,
       },
       {
         role: 'user',
@@ -333,6 +359,7 @@ async function assessWithPerplexity(
   };
 
   let res: Response;
+  const t0 = Date.now();
   try {
     res = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
@@ -344,12 +371,28 @@ async function assessWithPerplexity(
     });
   } catch (e) {
     console.error('[gap-fill] Perplexity fetch threw', e);
+    logPromptUsage({
+      prompt_key: 'kg_gap_fill_perplexity',
+      function_name: 'kg-evidence-gap-fill',
+      model,
+      latency_ms: Date.now() - t0,
+      success: false,
+      error: e instanceof Error ? e.message : String(e),
+    });
     return { assessment: null, raw_citations: [] };
   }
 
   if (!res.ok) {
     const txt = await res.text().catch(() => '');
     console.error('[gap-fill] Perplexity HTTP', res.status, txt.slice(0, 500));
+    logPromptUsage({
+      prompt_key: 'kg_gap_fill_perplexity',
+      function_name: 'kg-evidence-gap-fill',
+      model,
+      latency_ms: Date.now() - t0,
+      success: false,
+      error: `http_${res.status}`,
+    });
     return { assessment: null, raw_citations: [] };
   }
 
@@ -380,6 +423,16 @@ async function assessWithPerplexity(
   parsed.cited_urls = (parsed.cited_urls || []).filter((u) => typeof u === 'string' && u.startsWith('http'));
   parsed.efficacy_0_5 = Math.max(0, Math.min(5, Number(parsed.efficacy_0_5) || 0));
   parsed.llm_confidence = Math.max(0, Math.min(1, Number(parsed.llm_confidence) || 0));
+
+  logPromptUsage({
+    prompt_key: 'kg_gap_fill_perplexity',
+    function_name: 'kg-evidence-gap-fill',
+    model,
+    latency_ms: Date.now() - t0,
+    tokens_in: json?.usage?.prompt_tokens ?? null,
+    tokens_out: json?.usage?.completion_tokens ?? null,
+    success: true,
+  });
 
   return { assessment: parsed, raw_citations: rawCitations };
 }

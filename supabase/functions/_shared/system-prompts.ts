@@ -677,6 +677,40 @@ FACTUAL DB SNAPSHOT (use real numbers):
 PRIOR AUDITS (context):
 {{PRIOR_AUDITS}}`,
   },
+
+  // ───────── KG Evidence Gap-Fill ─────────
+  kg_gap_fill_gemini: {
+    purpose:
+      'Avalia força de evidência (compound × condição) a partir de abstracts PubMed para preencher lacunas do Knowledge Graph canino. Consumido por `kg-evidence-gap-fill` no caminho Gemini (tool-call).',
+    model_default: 'google/gemini-3-flash-preview',
+    temperature: 0.2,
+    output_format: 'tool-call',
+    consumers: ['kg-evidence-gap-fill'],
+    tags: ['kg', 'evidence', 'pubmed'],
+    content:
+      'You are a veterinary evidence reviewer for canine geroprotector therapies. ' +
+      'Score the strength of evidence that the COMPOUND meaningfully treats or attenuates the CONDITION in dogs. ' +
+      'Use ONLY the abstracts provided. Be conservative.',
+  },
+
+  kg_gap_fill_perplexity: {
+    purpose:
+      'Busca literatura acadêmica via Perplexity para avaliar evidência (compound × condição) em cães e produzir JSON estruturado para curadoria. Consumido por `kg-evidence-gap-fill` no caminho Perplexity.',
+    model_default: 'sonar-reasoning-pro',
+    temperature: 0.1,
+    output_format: 'json',
+    consumers: ['kg-evidence-gap-fill'],
+    tags: ['kg', 'evidence', 'perplexity', 'search'],
+    content:
+      'You are a veterinary evidence reviewer for canine geroprotector therapies. ' +
+      'Search the academic literature for evidence that the COMPOUND meaningfully treats, ' +
+      'attenuates, or modifies the CONDITION in dogs. Prefer canine evidence; if absent, ' +
+      'consider mechanistic / rodent / human evidence and downgrade efficacy accordingly. ' +
+      'Also consider geroscience-based therapeutic strategies (e.g. senolytics, NAD+ precursors, ' +
+      'rapamycin analogs, metformin) and any pharmaceutical or nutraceutical interventions with ' +
+      'emerging evidence for this condition in aging dogs. ' +
+      'Be conservative. Return ONLY structured JSON matching the schema.',
+  },
 };
 
 /**
