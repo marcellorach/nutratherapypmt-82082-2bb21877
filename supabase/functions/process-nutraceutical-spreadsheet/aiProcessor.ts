@@ -1,4 +1,9 @@
 
+import { fetchSystemPrompt } from "../_shared/system-prompts.ts";
+import { logPromptUsage } from "../_shared/prompt-usage.ts";
+
+const SYSTEM_FALLBACK = `Você é um assistente especializado em extrair e estruturar dados sobre nutracêuticos para pets. Você deve extrair TODOS os nutracêuticos mencionados na planilha, suas categorias (você pode inferir baseado no nome ou aplicação), relações com condições de saúde (prevenção, tratamento e suporte) e suas respectivas notas de eficácia. Não omita nenhum nutracêutico da lista original, mesmo que pareçam similares ou repetidos. Inclua todas as notas de eficácia EXATAMENTE como aparecem na planilha e mantenha os tipos de aplicação originais (Prevenção, Tratamento, Suporte). É crucial que você preserve os valores exatos de pontuação de eficácia da planilha original e não os altere em nenhuma hipótese.`;
+
 /**
  * Processa a planilha utilizando IA
  * @param fileUrl URL do arquivo a ser processado
@@ -62,7 +67,10 @@ Resveratrol,Anti-envelhecimento,Suporte,3.2`;
     // Chamar a OpenAI para processar o conteúdo
     if (openAIApiKey) {
       console.log("Chamando API da OpenAI para processar o conteúdo");
-      
+
+      const systemPrompt = await fetchSystemPrompt("process_nutraceutical_spreadsheet", SYSTEM_FALLBACK);
+      const model = "gpt-4o-mini";
+      const started = Date.now();
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -70,11 +78,11 @@ Resveratrol,Anti-envelhecimento,Suporte,3.2`;
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
+          model,
           messages: [
             {
               role: 'system',
-              content: 'Você é um assistente especializado em extrair e estruturar dados sobre nutracêuticos para pets. Você deve extrair TODOS os nutracêuticos mencionados na planilha, suas categorias (você pode inferir baseado no nome ou aplicação), relações com condições de saúde (prevenção, tratamento e suporte) e suas respectivas notas de eficácia. Não omita nenhum nutracêutico da lista original, mesmo que pareçam similares ou repetidos. Inclua todas as notas de eficácia EXATAMENTE como aparecem na planilha e mantenha os tipos de aplicação originais (Prevenção, Tratamento, Suporte). É crucial que você preserve os valores exatos de pontuação de eficácia da planilha original e não os altere em nenhuma hipótese.'
+              content: systemPrompt
             },
             {
               role: 'user',
@@ -86,16 +94,35 @@ Resveratrol,Anti-envelhecimento,Suporte,3.2`;
       });
 
       const data = await response.json();
-      
+      const latency = Date.now() - started;
+
       if (data.error) {
         console.error(`Erro na API da OpenAI:`, data.error);
+        await logPromptUsage({
+          prompt_key: "process_nutraceutical_spreadsheet",
+          function_name: "process-nutraceutical-spreadsheet",
+          model,
+          latency_ms: latency,
+          success: false,
+          error: String(data.error?.message ?? data.error).slice(0, 240),
+        });
         throw new Error(`Erro na API da OpenAI: ${data.error.message}`);
       }
-      
+
       // Interpretar a resposta da IA e formatar os dados
       const aiOutput = JSON.parse(data.choices[0].message.content);
       console.log("Resposta da OpenAI processada com sucesso");
-      
+
+      await logPromptUsage({
+        prompt_key: "process_nutraceutical_spreadsheet",
+        function_name: "process-nutraceutical-spreadsheet",
+        model,
+        latency_ms: latency,
+        tokens_in: data?.usage?.prompt_tokens ?? null,
+        tokens_out: data?.usage?.completion_tokens ?? null,
+        success: true,
+      });
+
       // Processar e estruturar os dados
       const processedData = processAiOutput(aiOutput, fileName);
       

@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-01T01:28:51.281Z
+// Última geração: 2026-06-01T01:33:46.542Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,33 @@ export const lastChangelogDate = "2026-06-01";
 export const senexVersion = "7.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-01",
+    "kind": "changed",
+    "area": "infra",
+    "status": "entregue",
+    "title": "Sprint 5 (final) — registro único 24/24: healthcheck, harness e planilha de nutracêuticos",
+    "bullets": [
+      "Manifesto: 2 novas entradas em `_shared/system-prompts.ts`:",
+      "`ai_task_healthcheck_ping` (gemini-3-flash-preview, text) — ping mínimo \"ok\" usado pelo cron de healthcheck por task×model.",
+      "`process_nutraceutical_spreadsheet` (gpt-4o-mini, json) — extração estruturada preservando notas de eficácia EXATAS de planilhas CSV/XLSX.",
+      "Funções migradas:",
+      "`ai-task-healthcheck`: ping user-message agora vem do registro (`fetchSystemPrompt` + fallback verbatim) e cada execução por task grava `logPromptUsage` (latência/sucesso/erro).",
+      "`ai-task-test`: harness genérico de admin — adicionada telemetria `logPromptUsage` keyed pelo `task_id` testado, complementando o log já existente em `ai_prompt_test_runs`.",
+      "`process-nutraceutical-spreadsheet/aiProcessor.ts`: system prompt agora resolvido via registro, com telemetria de sucesso/erro (tokens/latência) na chamada à OpenAI.",
+      "Fallback verbatim preservado em todas as funções → comportamento idêntico se o DB de prompts estiver indisponível.",
+      "Smoke test: `ai-task-healthcheck` retornou `{\"checked\":8, ...ok:true}` nas 8 tasks ativas; `ai-task-test` mantém 401 sem JWT (esperado).",
+      "Marco: 24/24 (100%) das edge functions com prompts agora consomem o registro único + telemetria centralizada (`ai_prompt_usage_log`). Encerramento da iniciativa de governança de prompts iniciada na Sprint 1.",
+      "Files: supabase/functions/_shared/system-prompts.ts, supabase/functions/ai-task-healthcheck/index.ts, supabase/functions/ai-task-test/index.ts, supabase/functions/process-nutraceutical-spreadsheet/aiProcessor.ts"
+    ],
+    "files": [
+      "supabase/functions/_shared/system-prompts.ts",
+      "supabase/functions/ai-task-healthcheck/index.ts",
+      "supabase/functions/ai-task-test/index.ts",
+      "supabase/functions/process-nutraceutical-spreadsheet/aiProcessor.ts"
+    ],
+    "i18nVersion": "n/a"
+  },
   {
     "date": "2026-06-01",
     "kind": "changed",

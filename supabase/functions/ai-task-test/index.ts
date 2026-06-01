@@ -1,6 +1,7 @@
 // Phase 2 governance: test a prompt × model against the Lovable AI Gateway.
 // Admin-only. Logs every run to ai_prompt_test_runs.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { logPromptUsage } from "../_shared/prompt-usage.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -146,6 +147,14 @@ Deno.serve(async (req) => {
         run_by: userId,
         error: `${aiResp.status}: ${errText.slice(0, 500)}`,
       });
+      await logPromptUsage({
+        prompt_key: body.task_id,
+        function_name: "ai-task-test",
+        model: body.model_id,
+        latency_ms: latency,
+        success: false,
+        error: `${aiResp.status}: ${errText.slice(0, 240)}`,
+      });
       const status = aiResp.status === 429 || aiResp.status === 402 ? aiResp.status : 502;
       return new Response(
         JSON.stringify({ error: `AI gateway error ${aiResp.status}`, detail: errText.slice(0, 1000) }),
@@ -175,6 +184,16 @@ Deno.serve(async (req) => {
       })
       .select("id")
       .maybeSingle();
+
+    await logPromptUsage({
+      prompt_key: body.task_id,
+      function_name: "ai-task-test",
+      model: body.model_id,
+      latency_ms: latency,
+      tokens_in: tokensIn,
+      tokens_out: tokensOut,
+      success: true,
+    });
 
     return new Response(
       JSON.stringify({

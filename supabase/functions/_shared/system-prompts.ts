@@ -1005,6 +1005,29 @@ REGRA CRÍTICA: respeite EXATAMENTE o perfil (profile) atribuído a cada pet —
     tags: ['cohorts', 'insights', 'originality', 'fallback'],
     content: 'You are an expert in canine veterinary literature. Reason from training knowledge only — flag uncertainty.',
   },
+
+  // ───────── Infra / Governance ─────────
+  ai_task_healthcheck_ping: {
+    purpose:
+      'Ping mínimo enviado pelo cron `ai-task-healthcheck` para validar latência e disponibilidade de cada (task_id × model_id) ativa. Resposta esperada: literalmente "ok".',
+    model_default: 'google/gemini-3-flash-preview',
+    temperature: 0,
+    output_format: 'text',
+    consumers: ['ai-task-healthcheck'],
+    tags: ['infra', 'health-check', 'governance'],
+    content: `Responda apenas com a palavra 'ok'.`,
+  },
+
+  process_nutraceutical_spreadsheet: {
+    purpose:
+      'Extração estruturada de planilhas de nutracêuticos (CSV/XLSX) para pets, preservando notas de eficácia EXATAS da planilha original. Consumido por `process-nutraceutical-spreadsheet/aiProcessor.ts`.',
+    model_default: 'gpt-4o-mini',
+    temperature: 0.2,
+    output_format: 'json',
+    consumers: ['process-nutraceutical-spreadsheet'],
+    tags: ['nutrition', 'extraction', 'spreadsheet'],
+    content: `Você é um assistente especializado em extrair e estruturar dados sobre nutracêuticos para pets. Você deve extrair TODOS os nutracêuticos mencionados na planilha, suas categorias (você pode inferir baseado no nome ou aplicação), relações com condições de saúde (prevenção, tratamento e suporte) e suas respectivas notas de eficácia. Não omita nenhum nutracêutico da lista original, mesmo que pareçam similares ou repetidos. Inclua todas as notas de eficácia EXATAMENTE como aparecem na planilha e mantenha os tipos de aplicação originais (Prevenção, Tratamento, Suporte). É crucial que você preserve os valores exatos de pontuação de eficácia da planilha original e não os altere em nenhuma hipótese.`,
+  },
 };
 
 /**

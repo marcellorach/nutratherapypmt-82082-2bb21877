@@ -8,6 +8,10 @@
 // — se a env CRON_SECRET estiver setada, exige match para rejeitar chamadas
 // não autorizadas.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { fetchSystemPrompt } from "../_shared/system-prompts.ts";
+import { logPromptUsage } from "../_shared/prompt-usage.ts";
+
+const PING_FALLBACK = `Responda apenas com a palavra 'ok'.`;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -25,7 +29,11 @@ interface Body {
   task_ids?: string[];
 }
 
-async function pingModel(modelId: string, systemPrompt: string | null): Promise<{ ok: boolean; latency: number; error?: string }> {
+async function pingModel(
+  modelId: string,
+  systemPrompt: string | null,
+  pingPrompt: string,
+): Promise<{ ok: boolean; latency: number; error?: string }> {
   const started = Date.now();
   try {
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -38,7 +46,7 @@ async function pingModel(modelId: string, systemPrompt: string | null): Promise<
         model: modelId,
         messages: [
           ...(systemPrompt ? [{ role: "system", content: systemPrompt.slice(0, 400) }] : []),
-          { role: "user", content: "Responda apenas com a palavra 'ok'." },
+          { role: "user", content: pingPrompt },
         ],
         stream: false,
         max_tokens: 8,
@@ -84,6 +92,8 @@ Deno.serve(async (req: Request) => {
       ? requestedIds
       : Array.from(byTask.keys());
 
+    const pingPrompt = await fetchSystemPrompt("ai_task_healthcheck_ping", PING_FALLBACK);
+
     const results: Array<{ task_id: string; ok: boolean; latency_ms: number; model_id: string; error?: string }> = [];
 
     for (const task_id of taskIds) {
@@ -103,8 +113,17 @@ Deno.serve(async (req: Request) => {
         }
       } catch { /* ignore */ }
 
-      const ping = await pingModel(modelId, cfg.system_prompt ?? null);
+      const ping = await pingModel(modelId, cfg.system_prompt ?? null, pingPrompt);
       results.push({ task_id, ok: ping.ok, latency_ms: ping.latency, model_id: modelId, error: ping.error });
+
+      await logPromptUsage({
+        prompt_key: "ai_task_healthcheck_ping",
+        function_name: "ai-task-healthcheck",
+        model: modelId,
+        latency_ms: ping.latency,
+        success: ping.ok,
+        error: ping.ok ? null : (ping.error?.slice(0, 240) ?? "unknown"),
+      });
 
       await admin.from("ai_task_status").upsert({
         task_id,
