@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-05-31T23:34:21.776Z
+// Última geração: 2026-06-01T00:33:04.262Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,33 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-05-31";
+export const lastChangelogDate = "2026-06-01";
 
 export const senexVersion = "7.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-01",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Catálogo de prompts com metadados + export PDF + log de auditoria completo",
+    "bullets": [
+      "`ai_system_prompts` ganhou colunas de contexto: `purpose`, `model_default`, `temperature`, `output_format`, `consumers[]`, `tags[]`, `example_input`, `last_used_at`. Os 24 prompts existentes foram seedados com propósito, modelo padrão e tags.",
+      "`SystemPromptsCatalog` agora exibe badges (modelo, temperatura, formato, tags) e propósito de cada prompt, e oferece dois botões de export PDF: catálogo completo (com filtro aplicado) e prompt individual. PDFs são gerados via popup HTML estilizada + `window.print()`, preservando Unicode e dispensando libs externas.",
+      "`sync-system-prompts` atualizado para sincronizar também os novos campos de metadados do manifest (`SystemPromptDef.purpose`, `model_default`, `temperature`, `output_format`, `consumers`, `tags`, `example_input`).",
+      "Fix log da auditoria: `generate-audit` (action=`progress`) deixou de truncar em 30 entradas. Agora devolve o log completo (com suporte opcional a `since_ts` para fetch incremental). `TechnicalAuditsTab` acumula entradas localmente e adiciona botão \"Baixar log completo (.txt)\".",
+      "Files: supabase/functions/generate-audit/index.ts, supabase/functions/sync-system-prompts/index.ts, supabase/functions/_shared/system-prompts.ts, src/components/administrador/audits/TechnicalAuditsTab.tsx, src/components/administrador/configuracoes/SystemPromptsCatalog.tsx"
+    ],
+    "files": [
+      "supabase/functions/generate-audit/index.ts",
+      "supabase/functions/sync-system-prompts/index.ts",
+      "supabase/functions/_shared/system-prompts.ts",
+      "src/components/administrador/audits/TechnicalAuditsTab.tsx",
+      "src/components/administrador/configuracoes/SystemPromptsCatalog.tsx"
+    ],
+    "i18nVersion": "1.115.8"
+  },
   {
     "date": "2026-05-31",
     "kind": "added",
