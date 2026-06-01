@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BookOpen, Beaker, Target, Sparkles, Network, ChevronRight, Share2, ClipboardCheck, CircleCheck, PawPrint, FlaskConical, Database, Pill, GitBranch, AlertTriangle, Scale, UtensilsCrossed } from "lucide-react";
+import { BookOpen, Beaker, Target, Sparkles, Network, ChevronRight, Share2, ClipboardCheck, CircleCheck, PawPrint, FlaskConical, Database, Pill, GitBranch, AlertTriangle, Scale, UtensilsCrossed, Globe } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from 'react-i18next';
@@ -225,17 +225,17 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
 
       <SidebarMenuItem>
         <SidebarMenuButton 
-          isActive={currentStep === "ontology-audit"} 
-          onClick={() => handleStepClick("ontology-audit")}
-          className={currentStep === "ontology-audit" ? "bg-primary/10 text-primary" : ""}
+          isActive={currentStep === "external-sources" || currentStep === "ontology-audit"} 
+          onClick={() => handleStepClick("external-sources")}
+          className={(currentStep === "external-sources" || currentStep === "ontology-audit") ? "bg-primary/10 text-primary" : ""}
         >
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
-              <ClipboardCheck className={`h-4 w-4 mr-2 ${currentStep === "ontology-audit" ? "text-primary" : ""}`} />
-              <span>{t('admin.sidebar.knowledgeBase.ontologyHub')}</span>
-              <StatusBadge statusKey="admin.sidebar.knowledgeBase.ontologyAuditStatus" tooltipKey="admin.sidebar.knowledgeBase.ontologyAuditStatusTooltip" color="text-emerald-500" />
+              <Globe className={`h-4 w-4 mr-2 ${(currentStep === "external-sources" || currentStep === "ontology-audit") ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.externalSources')}</span>
+              <StatusBadge statusKey="admin.sidebar.knowledgeBase.externalSourcesStatus" tooltipKey="admin.sidebar.knowledgeBase.externalSourcesStatusTooltip" color="text-emerald-500" />
             </div>
-            {currentStep === "ontology-audit" && (
+            {(currentStep === "external-sources" || currentStep === "ontology-audit") && (
               <ChevronRight className="h-4 w-4 ml-auto text-primary" />
             )}
           </div>

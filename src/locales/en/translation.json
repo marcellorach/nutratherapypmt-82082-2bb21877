@@ -2042,6 +2042,9 @@
         "tripletCuration": "Triplet Curation",
         "triplets": "Triplets (Curation + Quality)",
         "ontologyHub": "Ontology & SNOMED/UMLS",
+        "externalSources": "External Sources",
+        "externalSourcesStatus": "Unified hub",
+        "externalSourcesStatusTooltip": "Single dashboard for UMLS, SNOMED, MeSH, OMIA, ChEBI, PubMed and Perplexity with status, keys and usage map.",
         "knowledgeGraph": "Knowledge Graph",
         "knowledgeGraphStatus": "100% functional",
         "knowledgeGraphStatusTooltip": "Interactive graph with real database data, entity type and confidence filters.",
@@ -5459,6 +5462,47 @@
       "thinking": "Analyzing...",
       "noResponse": "No response from AI.",
       "error": "Error querying AI. Please try again."
+    }
+  },
+  "externalSources": {
+    "hub": {
+      "title": "External Knowledge Sources",
+      "description": "Single hub for all external ontologies and APIs: status, keys, mapping, import and search."
+    },
+    "tabs": {
+      "overview": "Overview",
+      "mapping": "Mapping",
+      "bulkImport": "Import IDs",
+      "search": "External Search",
+      "audit": "Audit"
+    },
+    "overview": {
+      "title": "External sources status",
+      "description": "Live check of every source used by Senex AI.",
+      "refresh": "Refresh",
+      "lastUpdate": "Last check",
+      "conditions": "conditions",
+      "nutraceuticals": "nutraceuticals"
+    },
+    "card": {
+      "configured": "Configured",
+      "reachable": "Reachable",
+      "entries": "Mapped entries",
+      "open": "Open tab"
+    },
+    "secrets": {
+      "title": "Keys & Configuration",
+      "description": "API keys required for sources that need authentication. Manage them under Lovable Cloud → Secrets.",
+      "optional": "optional",
+      "howToGet": "How to get",
+      "addHint": "To add or update keys, open Lovable Cloud → Secrets. Once added, edge functions receive the value automatically."
+    },
+    "usage": {
+      "title": "Impact Map",
+      "description": "Where each source is consumed by the system.",
+      "source": "Source",
+      "pipelines": "Pipelines",
+      "tables": "Affected tables"
     }
   },
   "ontologyAudit": {

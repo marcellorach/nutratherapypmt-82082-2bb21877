@@ -49,7 +49,7 @@ const AnalyticsTab = lazy(() => import('@/components/administrador/AnalyticsTab'
 const DesignConventionsTab = lazy(() => import('@/components/administrador/DesignConventionsTab'));
 const DatabaseMigrationsTab = lazy(() => import('@/components/administrador/migrations/DatabaseMigrationsTab'));
 const TranslationsHub = lazy(() => import('@/components/administrador/TranslationsHub'));
-const OntologyHub = lazy(() => import('@/components/administrador/OntologyHub'));
+const ExternalSourcesHub = lazy(() => import('@/components/administrador/external-sources/ExternalSourcesHub'));
 const AccessRequestsPanel = lazy(() => import('@/components/administrador/access/AccessRequestsPanel'));
 const UsersAndRolesPanel = lazy(() => import('@/components/administrador/access/UsersAndRolesPanel'));
 const AdminPetManagementTab = lazy(() => import('@/components/administrador/patients/AdminPetManagementTab'));
@@ -329,11 +329,19 @@ export const adminTabsConfig: AdminTabConfig[] = [
     description: 'Alias legado → Translations Hub (sub-tab Manage)'
   },
   {
-    id: 'ontology-audit',
-    label: 'Ontologia & SNOMED/UMLS',
+    id: 'external-sources',
+    label: 'Fontes Externas',
     group: 'knowledge-base',
-    component: OntologyHub,
-    description: 'Auditoria de classificações + mapeamento SNOMED-CT / UMLS em uma só aba'
+    component: ExternalSourcesHub,
+    description: 'Hub único de ontologias externas: UMLS, SNOMED, MeSH, OMIA, ChEBI, PubMed, Perplexity'
+  },
+  {
+    // Legacy alias — preserves old deep-links (?tab=ontology-audit)
+    id: 'ontology-audit',
+    label: 'Ontologia (legado)',
+    group: 'knowledge-base',
+    component: ExternalSourcesHub,
+    description: 'Alias legado → Fontes Externas'
   },
   {
     id: 'access-requests',
