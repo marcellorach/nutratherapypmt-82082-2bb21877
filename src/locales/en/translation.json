@@ -438,7 +438,7 @@
     "library": {
       "title": "Studies Library",
       "studies": "studies",
-      "searchPlaceholder": "Search by title or author...",
+      "searchPlaceholder": "Theme, condition, compound, author, title...",
       "year": "Year",
       "journal": "Journal",
       "allYears": "All Years",
