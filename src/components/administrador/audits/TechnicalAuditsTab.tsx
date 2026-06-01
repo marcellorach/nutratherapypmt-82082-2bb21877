@@ -337,7 +337,22 @@ export default function TechnicalAuditsTab() {
 
   const activeAudits = useMemo(() => audits.filter((a) => !a.superseded_by), [audits]);
   const supersededAudits = useMemo(() => audits.filter((a) => a.superseded_by), [audits]);
-  const visibleAudits = showSuperseded ? audits : activeAudits;
+  // Ordena por versão semântica desc (mais recente à esquerda), com fallback
+  // por audit_date desc quando a versão não é parseável.
+  const compareVersionDesc = (a: TechnicalAudit, b: TechnicalAudit) => {
+    const pa = (a.version || "0.0.0").split(".").map((n) => parseInt(n, 10) || 0);
+    const pb = (b.version || "0.0.0").split(".").map((n) => parseInt(n, 10) || 0);
+    for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+      const da = pa[i] ?? 0;
+      const db = pb[i] ?? 0;
+      if (da !== db) return db - da;
+    }
+    return (b.audit_date || "").localeCompare(a.audit_date || "");
+  };
+  const visibleAudits = useMemo(
+    () => [...(showSuperseded ? audits : activeAudits)].sort(compareVersionDesc),
+    [audits, activeAudits, showSuperseded],
+  );
 
   const runWatchdog = async () => {
     setWatching(true);
