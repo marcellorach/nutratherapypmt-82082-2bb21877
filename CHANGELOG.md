@@ -24,6 +24,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.0 -->
 
+### Changed - 2026-06-01 — Migração `hybrid-recommendation` para registro único de prompts
+<!-- area: clinical-pipeline · status: entregue · i18n: - -->
+- `hybrid-recommendation` agora consome `hybrid_recommendation` (modo enrich) e `hybrid_recommendation_fallback` (modo fallback) via `fetchSystemPrompt`.
+- Adicionada telemetria via `logPromptUsage` (latência, tokens, sucesso/erro) em `ai_prompt_usage_log`.
+- Strings antigas preservadas como fallback verbatim caso o registro DB esteja inacessível.
+- Compliance: 3/24 funções com LLM no registro (próximo alvo: `parse-pet-exam-pdf`).
+- Files: supabase/functions/hybrid-recommendation/index.ts, supabase/functions/_shared/system-prompts.ts
+
 ### Changed - 2026-06-01 — Migração `generate-audit` para registro único de prompts
 <!-- area: admin · status: entregue · i18n: - -->
 - `generate-audit` agora carrega o prompt-base PT/EN via `fetchSystemPrompt('audit_base_system_{pt,en}')` (manifest em `_shared/system-prompts.ts`).

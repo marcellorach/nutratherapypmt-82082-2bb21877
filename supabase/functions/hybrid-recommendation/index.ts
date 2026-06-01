@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { fetchSystemPrompt } from "../_shared/system-prompts.ts";
+import { logPromptUsage } from "../_shared/prompt-usage.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -185,7 +187,8 @@ function buildClinicalContextBlock(ctx?: ClinicalContext): string {
   return sections.length > 0 ? `\n\nPATIENT CLINICAL CONTEXT:\n${sections.join('\n\n')}` : '';
 }
 
-const SYSTEM_PROMPT_ENRICH = `You are a veterinary nutraceutical expert specializing in individualized geroprotective treatment.
+// Fallbacks verbatim — usados apenas se o registro de prompts (DB + manifesto) estiver inacessível.
+const SYSTEM_PROMPT_ENRICH_FALLBACK = `You are a veterinary nutraceutical expert specializing in individualized geroprotective treatment.
 
 You are enriching an existing Knowledge Graph recommendation with clinical context.
 
@@ -237,7 +240,7 @@ IMPORTANT: Return your response as valid JSON with this structure:
 
 Respond in Portuguese (Brazilian).`;
 
-const SYSTEM_PROMPT_FALLBACK = `You are a veterinary nutraceutical expert providing INDIVIDUALIZED recommendations.
+const SYSTEM_PROMPT_FALLBACK_VERBATIM = `You are a veterinary nutraceutical expert providing INDIVIDUALIZED recommendations.
 
 CRITICAL: Our Knowledge Graph has LIMITED data for this case. You MUST be conservative.
 However, you MUST use the patient's clinical context to differentiate your recommendation.
@@ -322,9 +325,11 @@ serve(async (req) => {
     };
     let systemPrompt: string;
     let userPrompt: string;
+    let promptKey: string;
 
     if (mode === 'enrich') {
-      systemPrompt = SYSTEM_PROMPT_ENRICH;
+      promptKey = 'hybrid_recommendation';
+      systemPrompt = await fetchSystemPrompt(promptKey, SYSTEM_PROMPT_ENRICH_FALLBACK);
       userPrompt = `
 Pet Profile:
 - Species: ${petProfile.species || 'Unknown'}
@@ -350,7 +355,8 @@ For each recommended compound, specify which condition/finding it targets.
 Keep response to 3-5 focused paragraphs.`;
 
     } else {
-      systemPrompt = SYSTEM_PROMPT_FALLBACK;
+      promptKey = 'hybrid_recommendation_fallback';
+      systemPrompt = await fetchSystemPrompt(promptKey, SYSTEM_PROMPT_FALLBACK_VERBATIM);
       userPrompt = `
 Pet Profile:
 - Species: ${petProfile.species || 'Unknown'}
@@ -373,6 +379,8 @@ CRITICAL REQUIREMENTS:
 Return your response as valid JSON following the structure specified.`;
     }
 
+    const t0 = Date.now();
+    const model = 'google/gemini-2.5-flash';
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -380,7 +388,7 @@ Return your response as valid JSON following the structure specified.`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
@@ -392,7 +400,14 @@ Return your response as valid JSON following the structure specified.`;
     if (!response.ok) {
       const errorText = await response.text();
       console.error('AI Gateway error:', response.status, errorText);
-      
+      logPromptUsage({
+        prompt_key: promptKey,
+        function_name: 'hybrid-recommendation',
+        model,
+        latency_ms: Date.now() - t0,
+        success: false,
+        error: `${response.status}: ${errorText.slice(0, 200)}`,
+      });
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }), {
           status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -409,6 +424,15 @@ Return your response as valid JSON following the structure specified.`;
     const aiResponse = await response.json();
     const content = aiResponse.choices?.[0]?.message?.content || '';
     console.log('AI response received:', content.substring(0, 300));
+    logPromptUsage({
+      prompt_key: promptKey,
+      function_name: 'hybrid-recommendation',
+      model,
+      latency_ms: Date.now() - t0,
+      tokens_in: aiResponse?.usage?.prompt_tokens ?? null,
+      tokens_out: aiResponse?.usage?.completion_tokens ?? null,
+      success: true,
+    });
 
     const debugPayload = debug ? {
       longitudinal: longitudinalDebug,
