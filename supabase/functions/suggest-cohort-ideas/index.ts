@@ -1,12 +1,15 @@
 // deno-lint-ignore-file no-explicit-any
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { fetchSystemPrompt } from "../_shared/system-prompts.ts";
+import { logPromptUsage } from "../_shared/prompt-usage.ts";
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const PRIMARY_MODEL = "google/gemini-3.1-pro-preview";
 const FALLBACK_MODEL = "openai/gpt-5.4";
+const PROMPT_KEY = "suggest_cohort_ideas";
 
 const REQUIRED_MODEL_IDS = [
   "efficacy-prediction",
@@ -17,7 +20,7 @@ const REQUIRED_MODEL_IDS = [
   "treatment-adherence",
 ] as const;
 
-const SYSTEM_PROMPT = `Você é um pesquisador sênior em medicina veterinária focado em longevidade canina,
+const SYSTEM_FALLBACK = `Você é um pesquisador sênior em medicina veterinária focado em longevidade canina,
 atuando como ponte entre a Senex AI e a PetLove (maior rede vet do Brasil, com centenas de milhares
 de prontuários ativos E falecidos).
 
@@ -128,6 +131,7 @@ type ModelResult =
   | { rateLimited: false; error?: string; cohorts: any[] };
 
 async function callModel(model: string, messages: any[]): Promise<ModelResult> {
+  const t0 = Date.now();
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -145,6 +149,7 @@ async function callModel(model: string, messages: any[]): Promise<ModelResult> {
   if (!resp.ok) {
     const txt = await resp.text().catch(() => "");
     console.error("AI gateway error", model, resp.status, txt);
+    await logPromptUsage({ prompt_key: PROMPT_KEY, function_name: "suggest-cohort-ideas", model, latency_ms: Date.now() - t0, success: false, error: `gateway_${resp.status}` });
     if (resp.status === 429) {
       return { rateLimited: true, status: 429, error: "Rate limit excedido. Tente novamente em alguns segundos.", cohorts: [] };
     }
@@ -155,6 +160,15 @@ async function callModel(model: string, messages: any[]): Promise<ModelResult> {
   }
 
   const data = await resp.json().catch(() => ({}));
+  await logPromptUsage({
+    prompt_key: PROMPT_KEY,
+    function_name: "suggest-cohort-ideas",
+    model,
+    latency_ms: Date.now() - t0,
+    tokens_in: data?.usage?.prompt_tokens ?? null,
+    tokens_out: data?.usage?.completion_tokens ?? null,
+    success: true,
+  });
   const toolCall = data?.choices?.[0]?.message?.tool_calls?.[0];
   const args = toolCall?.function?.arguments;
   let parsed: any = {};
@@ -233,8 +247,9 @@ RESPONDA chamando a função propose_cohorts com EXATAMENTE este shape (6 itens)
 }
 REGRAS DURAS: array com 6 itens; os 6 target_model_id devem ser DISTINTOS e cobrir todos os modelos; record_requirements NÃO pode ser vazio; pelo menos 2 cohorts com cohort_population != "living".`;
 
+    const systemPrompt = await fetchSystemPrompt(PROMPT_KEY, SYSTEM_FALLBACK);
     const baseMessages = [
-      { role: "system", content: SYSTEM_PROMPT },
+      { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
     ];
 
