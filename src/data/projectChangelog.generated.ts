@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-01T01:22:42.965Z
+// Última geração: 2026-06-01T01:28:51.281Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,39 @@ export const lastChangelogDate = "2026-06-01";
 export const senexVersion = "7.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-01",
+    "kind": "changed",
+    "area": "infra",
+    "status": "entregue",
+    "title": "Sprint 4 cohorts: 6 funções de geração/análise/originalidade no registro único",
+    "bullets": [
+      "Manifesto: 8 novas entradas em `_shared/system-prompts.ts` cobrindo todo o pipeline de cohorts sintéticos:",
+      "`analyze_cohort_patterns` (gemini-3.5-flash, tool-call) — insights bilíngues por cohort com evidência quantitativa obrigatória.",
+      "`analyze_all_cohorts_patterns` (gemini-3.5-flash, tool-call) — insights pan-populacionais cruzando múltiplos cohorts.",
+      "`check_cohort_originality_query_builder` (gemini-2.5-flash, json) — montagem de queries PubMed/Scholar/keywords/semantic.",
+      "`check_cohort_originality_perplexity` (sonar academic, text) — busca de evidência existente para a pergunta do cohort.",
+      "`suggest_cohort_ideas` (gemini-3.1-pro-preview → gpt-5.4 fallback, tool-call) — 6 cohorts PetLove (1 por modelo preditivo) com valor operacional.",
+      "`generate_synthetic_cohort` (gemini-3.5-flash, tool-call) — prontuários veterinários sintéticos coerentes (perfil + consultas + condições + exames + medicações).",
+      "`check_insight_originality_perplexity` (sonar, text) — verificação de literatura peer-reviewed canina para insights.",
+      "`check_insight_originality_gemini_fallback` (gemini-3.5-flash, text) — fallback quando Perplexity indisponível.",
+      "Funções migradas via `fetchSystemPrompt(KEY, SYSTEM_FALLBACK)` + telemetria `logPromptUsage` (sucesso/erro/tokens/latência): `analyze-cohort-patterns`, `analyze-all-cohorts-patterns`, `check-cohort-originality` (2 prompts), `suggest-cohort-ideas`, `generate-synthetic-cohort`, `check-insight-originality` (2 prompts).",
+      "Fallback verbatim preservado em cada função → comportamento idêntico ao prévio se DB indisponível. Conteúdo dos prompts inalterado.",
+      "Smoke test: boot saudável nas 6 (400 esperado em payloads vazios; análises reais entram em fluxo normal).",
+      "Compliance: 21/24 funções no registro único (87.5%). Pendentes: `ai-task-healthcheck`, `ai-task-test`, `process-nutraceutical-spreadsheet/aiProcessor.ts`.",
+      "Files: supabase/functions/_shared/system-prompts.ts, supabase/functions/analyze-cohort-patterns/index.ts, supabase/functions/analyze-all-cohorts-patterns/index.ts, supabase/functions/check-cohort-originality/index.ts, supabase/functions/suggest-cohort-ideas/index.ts, supabase/functions/generate-synthetic-cohort/index.ts, supabase/functions/check-insight-originality/index.ts"
+    ],
+    "files": [
+      "supabase/functions/_shared/system-prompts.ts",
+      "supabase/functions/analyze-cohort-patterns/index.ts",
+      "supabase/functions/analyze-all-cohorts-patterns/index.ts",
+      "supabase/functions/check-cohort-originality/index.ts",
+      "supabase/functions/suggest-cohort-ideas/index.ts",
+      "supabase/functions/generate-synthetic-cohort/index.ts",
+      "supabase/functions/check-insight-originality/index.ts"
+    ],
+    "i18nVersion": "n/a"
+  },
   {
     "date": "2026-06-01",
     "kind": "changed",

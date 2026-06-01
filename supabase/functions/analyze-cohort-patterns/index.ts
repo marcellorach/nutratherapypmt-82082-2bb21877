@@ -1,13 +1,16 @@
 // deno-lint-ignore-file no-explicit-any
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { fetchSystemPrompt } from "../_shared/system-prompts.ts";
+import { logPromptUsage } from "../_shared/prompt-usage.ts";
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const MODEL = "google/gemini-3.5-flash";
+const PROMPT_KEY = "analyze_cohort_patterns";
 
-const SYSTEM_PROMPT = `Você é um epidemiologista veterinário lendo um cohort canino para descobrir
+const SYSTEM_FALLBACK = `Você é um epidemiologista veterinário lendo um cohort canino para descobrir
 padrões longitudinais que destravem decisões clínicas. Foque em comorbidades cruzadas, padrões
 laboratoriais (combinações de marcadores), prevalência por raça/idade, e oportunidades de prevenção.
 
@@ -224,13 +227,15 @@ Deno.serve(async (req) => {
     );
     await pushLog("info", `Chamando LLM (${MODEL}) com ${JSON.stringify(summary).length} chars de contexto…`);
 
+    const systemPrompt = await fetchSystemPrompt(PROMPT_KEY, SYSTEM_FALLBACK);
+    const t0 = Date.now();
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: MODEL,
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: systemPrompt },
           { role: "user", content: `Agregados do cohort:\n\n\`\`\`json\n${JSON.stringify(summary, null, 2)}\n\`\`\`\n\nProduza insights bilíngues acionáveis.` },
         ],
         tools: [TOOL],
@@ -241,9 +246,19 @@ Deno.serve(async (req) => {
     if (!resp.ok) {
       const t = await resp.text();
       await pushLog("error", `AI gateway erro ${resp.status}: ${t.slice(0, 200)}`);
+      await logPromptUsage({ prompt_key: PROMPT_KEY, function_name: "analyze-cohort-patterns", model: MODEL, latency_ms: Date.now() - t0, success: false, error: `gateway_${resp.status}` });
       throw new Error(`AI gateway ${resp.status}: ${t.slice(0, 400)}`);
     }
     const data = await resp.json();
+    await logPromptUsage({
+      prompt_key: PROMPT_KEY,
+      function_name: "analyze-cohort-patterns",
+      model: MODEL,
+      latency_ms: Date.now() - t0,
+      tokens_in: data?.usage?.prompt_tokens ?? null,
+      tokens_out: data?.usage?.completion_tokens ?? null,
+      success: true,
+    });
     const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
     const parsed = typeof args === "string" ? JSON.parse(args) : args;
     const insights = parsed?.insights ?? [];
