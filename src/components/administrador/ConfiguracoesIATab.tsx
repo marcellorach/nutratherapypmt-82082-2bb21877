@@ -93,6 +93,11 @@ const ConfiguracoesIATab: React.FC = () => {
 
   const saveConfigToSupabase = async (key: string, value: string) => {
     try {
+      // SECURITY: GET de ai-config devolve apenas máscara "••••XXXX" para segredos.
+      // Se o admin não editou o campo, não sobrescrever a chave real com o placeholder.
+      if (typeof value === 'string' && value.startsWith('••••')) {
+        return { skipped: true };
+      }
       // SECURITY: Validar formato da chave API antes de salvar
       if (key === 'openai_api_key' && !value.startsWith('sk-')) {
         throw new Error('Formato de chave API da OpenAI inválido. Deve começar com "sk-"');
