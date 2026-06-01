@@ -386,9 +386,33 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
         </CardContent>
       </Card>
 
-      {/* Results count */}
-      <div className="text-sm text-muted-foreground">
-        {t('studies.library.showing', 'Showing')} {filteredStudies.length} {t('studies.library.of', 'of')} {studies.length} {t('studies.library.studies', 'studies')}
+      {/* Results count + page size */}
+      <div className="flex items-center justify-between flex-wrap gap-2 text-sm text-muted-foreground">
+        <div>
+          {t('studies.library.showing', 'Showing')}{' '}
+          {filteredStudies.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}
+          {'–'}
+          {Math.min(currentPage * pageSize, filteredStudies.length)}{' '}
+          {t('studies.library.of', 'of')} {filteredStudies.length}{' '}
+          {t('studies.library.studies', 'studies')}
+          {filteredStudies.length !== studies.length && (
+            <span className="ml-1 opacity-70">({studies.length} {t('studies.library.total', 'total')})</span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <span>{t('studies.library.perPage', 'Per page')}:</span>
+          <Select value={pageSize.toString()} onValueChange={(v) => setPageSize(parseInt(v, 10))}>
+            <SelectTrigger className="w-[80px] h-8">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="40">40</SelectItem>
+              <SelectItem value="80">80</SelectItem>
+              <SelectItem value="160">160</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Studies List */}
@@ -413,7 +437,7 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
         </Card>
       ) : (
         <div className="space-y-3">
-          {filteredStudies.map(study => (
+          {pagedStudies.map(study => (
             <Card key={study.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
