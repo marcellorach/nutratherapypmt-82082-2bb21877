@@ -89,3 +89,26 @@ Resultado: log mostra desde "Bloco 1/15" até o final, sem perda.
 - **Fase 3:** telemetria `ai_prompt_usage_log` + lint de compliance.
 
 Confirma se posso seguir com **Fase 1 inteira** já agora, e abrir Fase 2/3 como tarefas separadas?
+
+---
+
+## Status (2026-06-01)
+
+- ✅ **Fase 1** entregue.
+- ✅ **Fase 3** entregue: tabela `ai_prompt_usage_log`, helper `logPromptUsage`, script `npm run audit:prompts`.
+- 🟡 **Fase 2** em backlog: **23 edge functions** ainda com prompt hardcoded (rodar `npm run audit:prompts` para a lista viva). Migração função-a-função, ordem sugerida por impacto clínico:
+  1. `parse-pet-exam-pdf` — chave manifest `parse_pet_exam_pdf` já existe (atenção: prompt atual é PT, manifest é EN — revisar antes de substituir).
+  2. `hybrid-recommendation` — dois prompts (ENRICH, FALLBACK) → criar `hybrid_recommendation_enrich` e `hybrid_recommendation_fallback`.
+  3. `kg-evidence-gap-fill` — dois system prompts no `index.ts` (linhas 187 e 297). Chave `kg_evidence_gap_fill` já existe no manifest.
+  4. `project-pet-trajectory`, `enrich-pet-food-product`, `condition-insights` (parcial), `web-dosage-lookup`.
+  5. `suggest-cohort-ideas`, `suggest-taxonomy-terms`, `translate-and-categorize-conditions`.
+  6. Coortes (`analyze-*-cohorts-*`, `check-cohort-originality`, `check-insight-originality`, `generate-synthetic-cohort`, `evaluate-meta-study-reliability`, `chat-meta-study`).
+  7. Chats (`document-chat`, `query-perplexity`, `perplexity-health`).
+  8. Infra/testes (`ai-task-test`, `ai-task-healthcheck`, `generate-audit`, `process-nutraceutical-spreadsheet`).
+
+Padrão de migração por função (checklist):
+1. Adicionar/atualizar entrada em `SYSTEM_PROMPTS` em `_shared/system-prompts.ts` com `purpose`, `model_default`, `consumers`, `tags`.
+2. Substituir a string literal por `await fetchSystemPrompt("<key>", FALLBACK)`.
+3. Chamar `logPromptUsage({ prompt_key, function_name, model, latency_ms, ... })` após a resposta.
+4. Rodar `npm run audit:prompts` — a função deve sair da lista de pendentes.
+5. Rodar `sync-system-prompts` da UI Admin para popular os campos novos no banco.
