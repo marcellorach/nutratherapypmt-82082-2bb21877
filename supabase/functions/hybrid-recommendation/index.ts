@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { fetchSystemPrompt } from "../_shared/system-prompts.ts";
+import { logPromptUsage } from "../_shared/prompt-usage.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
