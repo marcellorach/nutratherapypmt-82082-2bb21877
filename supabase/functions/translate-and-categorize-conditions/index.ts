@@ -175,7 +175,10 @@ serve(async (req) => {
           // Translate if needed
           if (!condition.name_en && condition.name) {
             console.log(`🔤 Translating: ${condition.name}`);
-            
+            const SYSTEM_FALLBACK = 'You are a professional veterinary medical translator. Translate condition names from Portuguese to English. Return ONLY the translated text, no explanations.';
+            const systemPrompt = await fetchSystemPrompt('translate_text', SYSTEM_FALLBACK);
+            const t0 = Date.now();
+            const model = 'google/gemini-3-pro-preview';
             const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
               method: 'POST',
               headers: {
@@ -183,12 +186,9 @@ serve(async (req) => {
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify({
-                model: 'google/gemini-3-pro-preview',
+                model,
                 messages: [
-                  {
-                    role: 'system',
-                    content: 'You are a professional veterinary medical translator. Translate condition names from Portuguese to English. Return ONLY the translated text, no explanations.'
-                  },
+                  { role: 'system', content: systemPrompt },
                   {
                     role: 'user',
                     content: `Translate this veterinary condition to English: "${condition.name}"`
@@ -201,7 +201,15 @@ serve(async (req) => {
             if (response.ok) {
               const result = await response.json();
               const translation = result.choices?.[0]?.message?.content?.trim();
-              
+              logPromptUsage({
+                prompt_key: 'translate_text',
+                function_name: 'translate-and-categorize-conditions',
+                model,
+                latency_ms: Date.now() - t0,
+                tokens_in: result?.usage?.prompt_tokens ?? null,
+                tokens_out: result?.usage?.completion_tokens ?? null,
+                success: true,
+              });
               if (translation) {
                 updates.name_en = translation;
                 translatedCount++;
@@ -210,6 +218,14 @@ serve(async (req) => {
               }
             } else {
               console.error(`❌ Translation failed for ${condition.name}: ${response.status}`);
+              logPromptUsage({
+                prompt_key: 'translate_text',
+                function_name: 'translate-and-categorize-conditions',
+                model,
+                latency_ms: Date.now() - t0,
+                success: false,
+                error: String(response.status),
+              });
               errorCount++;
             }
           }
