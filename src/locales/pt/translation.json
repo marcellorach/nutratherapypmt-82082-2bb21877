@@ -5465,6 +5465,47 @@
       "error": "Erro ao consultar a IA. Tente novamente."
     }
   },
+  "externalSources": {
+    "hub": {
+      "title": "Fontes Externas de Conhecimento",
+      "description": "Hub único para todas as ontologias e APIs externas: status, chaves, mapeamento, importação e busca."
+    },
+    "tabs": {
+      "overview": "Visão Geral",
+      "mapping": "Mapeamento",
+      "bulkImport": "Importar IDs",
+      "search": "Busca Externa",
+      "audit": "Auditoria"
+    },
+    "overview": {
+      "title": "Status das fontes externas",
+      "description": "Verificação ao vivo de cada fonte usada pelo Senex AI.",
+      "refresh": "Atualizar",
+      "lastUpdate": "Última verificação",
+      "conditions": "condições",
+      "nutraceuticals": "nutracêuticos"
+    },
+    "card": {
+      "configured": "Configurada",
+      "reachable": "Acessível",
+      "entries": "Entradas mapeadas",
+      "open": "Abrir aba"
+    },
+    "secrets": {
+      "title": "Chaves & Configuração",
+      "description": "Chaves de API necessárias para as fontes que exigem autenticação. Gerencie em Lovable Cloud → Secrets.",
+      "optional": "opcional",
+      "howToGet": "Como obter",
+      "addHint": "Para adicionar ou atualizar chaves, abra Lovable Cloud → Secrets. Após adicionar, as funções de borda recebem o valor automaticamente."
+    },
+    "usage": {
+      "title": "Mapa de Impacto",
+      "description": "Onde cada fonte é consumida pelo sistema.",
+      "source": "Fonte",
+      "pipelines": "Pipelines",
+      "tables": "Tabelas afetadas"
+    }
+  },
   "ontologyAudit": {
     "title": "Auditoria de Ontologia",
     "description": "Verifique e corrija classificações de entidades no Knowledge Graph",
