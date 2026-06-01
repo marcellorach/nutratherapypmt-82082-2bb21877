@@ -24,6 +24,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.0 -->
 
+### Changed - 2026-06-01 — Meta-studies: `chat-meta-study` e `evaluate-meta-study-reliability` no registro único
+<!-- area: meta · status: entregue · i18n: n/a -->
+- Adicionados `chat_meta_study_persona` e `evaluate_meta_study_reliability` ao manifesto `_shared/system-prompts.ts`.
+- `chat-meta-study`: persona estática agora vem do registro (com fallback verbatim); contexto dinâmico do paper (claims/regras/evidências) preservado. Telemetria via `logPromptUsage` em sucesso e erro HTTP.
+- `evaluate-meta-study-reliability`: prompt do sistema (curador sênior, tool-call `rate_study_reliability`) movido para o registro; carregado uma vez por chamada e reutilizado no loop sequencial. `logPromptUsage` em sucesso, erro HTTP e tool-call ausente.
+- Smoke test: ambas as funções respondem 400 ao body vazio (boot OK).
+- Compliance `npm run audit:prompts`: 9/24 funções com LLM no registro.
+- Files: supabase/functions/_shared/system-prompts.ts, supabase/functions/chat-meta-study/index.ts, supabase/functions/evaluate-meta-study-reliability/index.ts
+
 ### Changed - 2026-06-01 — `kg-evidence-gap-fill` migrado para o registro único de prompts
 <!-- area: kg · status: entregue · i18n: n/a -->
 - Adicionados `kg_gap_fill_gemini` e `kg_gap_fill_perplexity` ao manifesto `_shared/system-prompts.ts` (com metadata, consumers e tags).

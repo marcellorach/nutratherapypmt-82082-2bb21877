@@ -6,6 +6,11 @@
 // Sugestão completa (com rationales) vai em reliability_suggested JSONB para auditoria.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { fetchSystemPrompt } from "../_shared/system-prompts.ts";
+import { logPromptUsage } from "../_shared/prompt-usage.ts";
+
+const SYSTEM_FALLBACK =
+  'Você é um curador científico sênior. Avalia rigorosamente meta-estudos arquiteturais para um produto de nutracêuticos veterinários (longevidade canina). Sempre responde via tool call.';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -80,7 +85,7 @@ function clamp(n: unknown): number | null {
   return Math.max(0, Math.min(5, Math.round(v * 2) / 2));
 }
 
-async function evaluateOne(study: any) {
+async function evaluateOne(study: any, systemPrompt: string) {
   const prompt = `Avalie a confiabilidade deste meta-estudo arquitetural usando a ferramenta rate_study_reliability.
 
 Título: ${study.title || "(sem título)"}
@@ -96,6 +101,8 @@ Regras propostas: ${(study.proposed_rules || []).length} regras
 
 Contexto: nutracêuticos veterinários para longevidade/geroproteção canina. Avalie em 0-5.`;
 
+  const model = 'google/gemini-3-flash-preview';
+  const t0 = Date.now();
   const resp = await fetch(
     "https://ai.gateway.lovable.dev/v1/chat/completions",
     {
@@ -105,12 +112,11 @@ Contexto: nutracêuticos veterinários para longevidade/geroproteção canina. A
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model,
         messages: [
           {
             role: "system",
-            content:
-              "Você é um curador científico sênior. Avalia rigorosamente meta-estudos arquiteturais para um produto de nutracêuticos veterinários (longevidade canina). Sempre responde via tool call.",
+            content: systemPrompt,
           },
           { role: "user", content: prompt },
         ],
@@ -125,13 +131,40 @@ Contexto: nutracêuticos veterinários para longevidade/geroproteção canina. A
 
   if (!resp.ok) {
     const text = await resp.text();
+    logPromptUsage({
+      prompt_key: 'evaluate_meta_study_reliability',
+      function_name: 'evaluate-meta-study-reliability',
+      model,
+      latency_ms: Date.now() - t0,
+      success: false,
+      error: `http_${resp.status}`,
+    });
     throw new Error(`AI gateway ${resp.status}: ${text.slice(0, 300)}`);
   }
 
   const data = await resp.json();
   const toolCall = data?.choices?.[0]?.message?.tool_calls?.[0];
-  if (!toolCall) throw new Error("Sem tool call na resposta");
+  if (!toolCall) {
+    logPromptUsage({
+      prompt_key: 'evaluate_meta_study_reliability',
+      function_name: 'evaluate-meta-study-reliability',
+      model,
+      latency_ms: Date.now() - t0,
+      success: false,
+      error: 'no_tool_call',
+    });
+    throw new Error("Sem tool call na resposta");
+  }
   const args = JSON.parse(toolCall.function.arguments || "{}");
+  logPromptUsage({
+    prompt_key: 'evaluate_meta_study_reliability',
+    function_name: 'evaluate-meta-study-reliability',
+    model,
+    latency_ms: Date.now() - t0,
+    tokens_in: data?.usage?.prompt_tokens ?? null,
+    tokens_out: data?.usage?.completion_tokens ?? null,
+    success: true,
+  });
 
   return {
     methodology: clamp(args.methodology),
@@ -205,6 +238,11 @@ Deno.serve(async (req) => {
       );
     }
 
+    const systemPrompt = await fetchSystemPrompt(
+      'evaluate_meta_study_reliability',
+      SYSTEM_FALLBACK,
+    );
+
     const results: Array<{
       id: string;
       ok: boolean;
@@ -219,7 +257,7 @@ Deno.serve(async (req) => {
         continue;
       }
       try {
-        const r = await evaluateOne(s);
+        const r = await evaluateOne(s, systemPrompt);
         const update = {
           reliability_methodology: r.methodology,
           reliability_evidence_base: r.evidence_base,

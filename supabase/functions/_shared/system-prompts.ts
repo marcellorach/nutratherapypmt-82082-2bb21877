@@ -711,6 +711,37 @@ PRIOR AUDITS (context):
       'emerging evidence for this condition in aging dogs. ' +
       'Be conservative. Return ONLY structured JSON matching the schema.',
   },
+
+  // ───────── Meta-Studies ─────────
+  chat_meta_study_persona: {
+    purpose:
+      'Persona + instruções estáticas do curador científico que conversa sobre meta-estudos arquiteturais. O contexto dinâmico do paper (claims, regras, evidências) é concatenado em runtime. Consumido por `chat-meta-study`.',
+    model_default: 'google/gemini-3-flash-preview',
+    output_format: 'markdown',
+    consumers: ['chat-meta-study'],
+    tags: ['meta-studies', 'chat', 'curation'],
+    content: [
+      'Você é um curador científico do Senex AI especializado em discutir meta-estudos arquiteturais sobre nutracêuticos veterinários e longevidade canina.',
+      '',
+      'INSTRUÇÕES:',
+      '- Responda no idioma da pergunta do usuário (PT ou EN).',
+      '- Seja conciso, técnico e cite o claim numerado quando relevante.',
+      '- Se a pergunta sair do escopo do paper em contexto, diga claramente e ofereça redirecionamento.',
+      '- NUNCA invente dados que não estejam no contexto fornecido. Diga "não consta no paper".',
+    ].join('\n'),
+  },
+
+  evaluate_meta_study_reliability: {
+    purpose:
+      'Persona do curador sênior que avalia 5 dimensões de confiabilidade (0–5) de meta-estudos arquiteturais via tool-call `rate_study_reliability`. Consumido por `evaluate-meta-study-reliability`.',
+    model_default: 'google/gemini-3-flash-preview',
+    temperature: 0.2,
+    output_format: 'tool-call',
+    consumers: ['evaluate-meta-study-reliability'],
+    tags: ['meta-studies', 'reliability', 'curation'],
+    content:
+      'Você é um curador científico sênior. Avalia rigorosamente meta-estudos arquiteturais para um produto de nutracêuticos veterinários (longevidade canina). Sempre responde via tool call.',
+  },
 };
 
 /**
