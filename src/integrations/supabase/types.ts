@@ -196,6 +196,45 @@ export type Database = {
           },
         ]
       }
+      ai_prompt_usage_log: {
+        Row: {
+          created_at: string
+          error: string | null
+          function_name: string
+          id: string
+          latency_ms: number | null
+          model: string | null
+          prompt_key: string
+          success: boolean
+          tokens_in: number | null
+          tokens_out: number | null
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          function_name: string
+          id?: string
+          latency_ms?: number | null
+          model?: string | null
+          prompt_key: string
+          success?: boolean
+          tokens_in?: number | null
+          tokens_out?: number | null
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          function_name?: string
+          id?: string
+          latency_ms?: number | null
+          model?: string | null
+          prompt_key?: string
+          success?: boolean
+          tokens_in?: number | null
+          tokens_out?: number | null
+        }
+        Relationships: []
+      }
       ai_prompt_versions: {
         Row: {
           created_at: string
