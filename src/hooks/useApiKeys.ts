@@ -19,12 +19,12 @@ export function useApiKeys() {
   const list = useQuery({
     queryKey: ['api-keys-public'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('api_keys_public' as any)
+      const { data, error } = await (supabase as any)
+        .from('api_keys_public')
         .select('*')
         .order('key_name');
       if (error) throw error;
-      return (data ?? []) as ApiKeyRow[];
+      return ((data ?? []) as unknown) as ApiKeyRow[];
     },
     staleTime: 30_000,
   });
