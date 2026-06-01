@@ -5584,11 +5584,15 @@ export type Database = {
         Returns: undefined
       }
       count_pending_access_requests: { Args: never; Returns: number }
-      decrypt_api_key: { Args: { p_key_name: string }; Returns: string }
+      decrypt_api_key: {
+        Args: { p_key_name: string; p_master_key: string }
+        Returns: string
+      }
       encrypt_api_key: {
         Args: {
           p_description?: string
           p_key_name: string
+          p_master_key: string
           p_source_id: string
           p_user?: string
           p_value: string
