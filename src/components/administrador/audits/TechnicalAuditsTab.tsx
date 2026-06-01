@@ -243,7 +243,7 @@ export default function TechnicalAuditsTab() {
         body: {
           version: nextVersion,
           scope: newScope,
-          system_version: `i18n ${CURRENT_I18N_VERSION}`,
+          system_version: `Senex v${SENEX_VERSION} · i18n ${CURRENT_I18N_VERSION}`,
           system_changelog_date: lastChangelogDate || new Date().toISOString().slice(0, 10),
         },
       });
