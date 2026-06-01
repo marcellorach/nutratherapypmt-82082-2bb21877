@@ -6,7 +6,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, RefreshCw } from 'lucide-react';
 import SourceStatusCard, { SourceStatus } from './SourceStatusCard';
-import SecretsPanel from './SecretsPanel';
+import ApiKeysPanel from './ApiKeysPanel';
+import OverviewIntro from './OverviewIntro';
 import UsageMap from './UsageMap';
 
 interface Props { onNavigateSub: (sub: string) => void }
@@ -37,6 +38,8 @@ const OverviewTab: React.FC<Props> = ({ onNavigateSub }) => {
 
   return (
     <div className="space-y-6">
+      <OverviewIntro />
+
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold">{t('externalSources.overview.title')}</h3>
@@ -67,7 +70,7 @@ const OverviewTab: React.FC<Props> = ({ onNavigateSub }) => {
         </Card>
       )}
 
-      <SecretsPanel sources={sources} />
+      <ApiKeysPanel sources={sources} />
       <UsageMap />
     </div>
   );
