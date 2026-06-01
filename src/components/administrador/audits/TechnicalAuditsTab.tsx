@@ -24,6 +24,7 @@ import AuditVersionComparison from "./AuditVersionComparison";
 import ComplianceHistoryChart from "./ComplianceHistoryChart";
 import { openAuditForPrint, fetchAuditHtml } from "./audit-pdf-generator";
 import { renderCoverageScopePt, COVERAGE_VERSION } from "@/data/audit-coverage";
+import VersionBadge from "@/components/system/VersionBadge";
 import {
   FileText,
   Download,
@@ -220,19 +221,20 @@ export default function TechnicalAuditsTab() {
   }, [selected?.id, selected?.html_path, selected?.html_path_en, viewerLang]);
 
   const nextVersion = useMemo(() => {
-    // Auto-bump: se já existe uma auditoria com a versão atual do Senex,
-    // incrementa o PATCH até encontrar uma versão livre (7.0.0 → 7.0.1 → 7.0.2...).
-    const base = SENEX_VERSION;
-    const existing = new Set(audits.map((a) => a.version));
-    if (!existing.has(base)) return `v${base}`;
-    const parts = base.split(".").map((n) => parseInt(n, 10));
-    if (parts.length !== 3 || parts.some((n) => Number.isNaN(n))) return `v${base}`;
-    let [maj, min, patch] = parts;
-    do {
-      patch += 1;
-    } while (existing.has(`${maj}.${min}.${patch}`) && patch < 999);
-    return `v${maj}.${min}.${patch}`;
+    // Política: a auditoria SEMPRE herda exatamente a versão Senex atual
+    // (fonte única = marker `<!-- senex: x.y.z -->` em CHANGELOG.md).
+    // Sem auto-bump. Para rodar nova auditoria, dev precisa bumpar o marker
+    // e rodar `npm run sync:changelog` — isso mantém header/footer/auditoria/
+    // compliance/organograma sempre alinhados.
+    return `v${SENEX_VERSION}`;
   }, [audits]);
+
+  // Auditoria desta versão já existe? Se sim, bloqueamos o botão e instruímos
+  // o usuário a bumpar a versão Senex antes de gerar uma nova.
+  const alreadyAuditedThisVersion = useMemo(
+    () => audits.some((a) => a.version === SENEX_VERSION || a.version === `v${SENEX_VERSION}`),
+    [audits],
+  );
 
   const handleRequestNew = async () => {
     setSubmitting(true);
