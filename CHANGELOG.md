@@ -24,6 +24,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.1 -->
 
+### Security - 2026-06-01 — Endurece ai-config: admin-only + segredos mascarados
+<!-- area: admin · status: entregue · i18n: 1.118.1 -->
+- `supabase/functions/ai-config/index.ts` agora valida `Authorization: Bearer <jwt>` via `getClaims` e checa `user_roles.role = 'admin'` em TODAS as chamadas (GET, POST `get`/`set`/`test-neo4j`). Sem token → 401; sem admin → 403.
+- GET deixa de devolver valores crus de segredos (`*_api_key`, `*_password`, `*_secret`, `*_token`): retorna apenas máscara `"••••XXXX"` (últimos 4) e um objeto `_meta` por chave com `{ is_set, last4, updated_at }`. Chaves não-sensíveis (URI, username, prompts) seguem retornando cruas para admins.
+- POST `action='get'` bloqueia (403) leitura individual de chave sensível.
+- POST `action='set'` rejeita (400) qualquer `value` que comece com `"••••"` (impede sobrescrever a chave real com o placeholder visual).
+- `ConfiguracoesIATab.saveConfigToSupabase` faz early-return quando o input ainda contém a máscara, evitando falsos erros de validação ao "salvar sem editar".
+- **Backlog / Kanban — próximo ciclo de segurança (Abordagem B):** migrar segredos de `ai_configurations` para Supabase Secrets (Lovable Cloud), refatorar edge functions consumidoras (`openai`, `claude`, `gemini`, `perplexity`, `neo4j`) para ler via `Deno.env.get` / helper `getApiKey` (já padrão para `NLM_UMLS_API_KEY`, `NCBI_API_KEY`, `PERPLEXITY_API_KEY`), transformar `ConfiguracoesIATab` em painel de status sem inputs de chave, e limpar linhas de segredo da tabela após migração. Objetivo: eliminar a superfície residual em que a service role consegue ler segredos da `ai_configurations`.
+- **Pendência manual**: `.gitignore` é read-only no sandbox Lovable — adicionar manualmente as linhas `.env`, `.env.*`, `!.env.example`. Hoje o `.env` só contém `VITE_SUPABASE_*` (chaves publicáveis), então o risco é higiene/futuro, não exfiltração ativa.
+- Files: `supabase/functions/ai-config/index.ts`, `src/components/administrador/ConfiguracoesIATab.tsx`
+
 ### Added - 2026-06-01 — Gerenciamento in-app de chaves de API (sem Lovable Cloud)
 <!-- area: admin · status: entregue · i18n: 1.118.0 -->
 - Nova tabela criptografada `public.api_keys` (pgcrypto) + view `api_keys_public` (somente metadados) + funções `encrypt_api_key`/`decrypt_api_key` (SECURITY DEFINER, restritas a `service_role`).
