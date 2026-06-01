@@ -13,6 +13,20 @@
 
 export interface SystemPromptDef {
   content: string;
+  /** O que este prompt faz — usado no painel admin e PDF de catálogo. */
+  purpose?: string;
+  /** Modelo padrão usado quando não há override. */
+  model_default?: string;
+  /** Temperatura padrão (0-2). */
+  temperature?: number;
+  /** Formato esperado da resposta (json | text | tool-call). */
+  output_format?: 'json' | 'text' | 'tool-call' | 'markdown';
+  /** Edge functions que consomem este prompt. */
+  consumers?: string[];
+  /** Tags para filtros (ex: clinical, extraction, translation). */
+  tags?: string[];
+  /** Exemplo curto de input para documentação. */
+  example_input?: string;
 }
 
 export const SYSTEM_PROMPTS: Record<string, SystemPromptDef> = {
