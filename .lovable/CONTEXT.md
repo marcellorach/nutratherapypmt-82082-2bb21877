@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-06-01T01:13:51.208Z
+Generated: 2026-06-01T01:18:43.099Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
@@ -12,9 +12,16 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **meta**: 6
 - **clinical-pipeline**: 4
 - **vet-ui**: 4
+- **infra**: 1
 - **tutor-ui**: 1
 
 ## Top 10 recent entries
+### 2026-06-01 · [infra] CHANGED — Perplexity trio (`query-perplexity`, `perplexity-health`, `web-dosage-lookup`) no registro único
+- Adicionados `query_perplexity_chat` e `perplexity_health_ping` ao manifesto `_shared/system-prompts.ts`; `web_dosage_lookup` recebeu metadata completa (model/temperature/output_format/consumers/tags).
+- `query-perplexity`: prompt agora via `fetchSystemPrompt('query_perplexity_chat', SYSTEM_FALLBACK)`. Telemetria com `logPromptUsage` em sucesso (tokens_in/out do payload Perplexity) e em erro HTTP.
+- `perplexity-health`: ping "ok" agora via `fetchSystemPrompt('perplexity_health_ping', …)`. Telemetria registra latência do ping e status.
+_files: supabase/functions/_shared/system-prompts.ts, supabase/functions/query-perplexity/index.ts, supabase/functions/perplexity-health/index.ts, supabase/functions/web-dosage-lookup/index.ts_
+
 ### 2026-06-01 · [meta] CHANGED — Meta-studies: `chat-meta-study` e `evaluate-meta-study-reliability` no registro único
 - Adicionados `chat_meta_study_persona` e `evaluate_meta_study_reliability` ao manifesto `_shared/system-prompts.ts`.
 - `chat-meta-study`: persona estática agora vem do registro (com fallback verbatim); contexto dinâmico do paper (claims/regras/evidências) preservado. Telemetria via `logPromptUsage` em sucesso e erro HTTP.
@@ -69,12 +76,6 @@ _files: supabase/functions/generate-audit/index.ts, supabase/functions/sync-syst
 - `generate-audit` passou a anexar uma seção `<section id="references">` ao final dos relatórios PT e EN com bibliografia curada (37 entradas: Hetionet, TxGNN, PrimeKG, ChEBI, MONDO, MeSH, OMIA, Dog Aging Project, Hallmarks of Aging, GMLP/FDA, EMA, AVMA, RAG/Med-PaLM, etc.) ordenada por ano. Os prompts PT/EN exigem agora citações inline no formato (Autor, Ano) em todos os blocos, sem invenção de fontes.
 - Files: src/components/administrador/audits/TechnicalAuditsTab.tsx, supabase/functions/generate-audit/index.ts
 _files: src/components/administrador/audits/TechnicalAuditsTab.tsx, supabase/functions/generate-audit/index.ts_
-
-### 2026-05-31 · [admin] FIXED — Auditoria técnica agora retoma por checkpoints curtos
-- `generate-audit` deixou de depender de uma execução longa única e passou a persistir checkpoints no campo `outline`: outline salvo, blocos renderizados salvos um a um, sumário executivo salvo separadamente e montagem final só no último passo.
-- Cada continuação agora é reinvocada internamente com credencial de serviço aceita pela própria função, corrigindo o caso em que o watchdog detectava travamento mas não conseguia retomar a auditoria automaticamente.
-- O timeout por chamada de LLM foi reduzido e simplificado para 2 tentativas (primária + fallback), evitando ficar preso vários minutos no mesmo bloco antes de avançar.
-_files: supabase/functions/generate-audit/index.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
