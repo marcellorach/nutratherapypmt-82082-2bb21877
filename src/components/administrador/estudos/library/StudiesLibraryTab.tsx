@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,6 +31,15 @@ import {
 } from "@/components/ui/select";
 import SearchExternalStudies from './SearchExternalStudies';
 import StudyPdfUpload from './StudyPdfUpload';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
 
 interface ScientificStudy {
   id: string;
@@ -72,6 +81,8 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
   const [populationFilter, setPopulationFilter] = useState<string>('all');
   const [tierFilter, setTierFilter] = useState<string>('all');
   const [autoTagging, setAutoTagging] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(40);
 
   const isEnglish = i18n.language === 'en';
 
@@ -179,21 +190,63 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
   const years = [...new Set(studies.map(s => s.year).filter(Boolean))].sort((a, b) => (b || 0) - (a || 0));
   const journals = [...new Set(studies.map(s => s.journal).filter(Boolean))].sort();
 
-  // Filter studies
-  const filteredStudies = studies.filter(study => {
-    const title = isEnglish ? (study.title_en || study.title) : study.title;
-    const matchesSearch = !searchQuery || 
-      title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      study.authors?.some(a => a.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesYear = yearFilter === 'all' || study.year?.toString() === yearFilter;
-    const matchesJournal = journalFilter === 'all' || study.journal === journalFilter;
-    const matchesDesign = designFilter === 'all' || (study.tags?.study_design || []).includes(designFilter);
-    const matchesPop = populationFilter === 'all' || (study.tags?.population || []).includes(populationFilter);
-    const matchesTier = tierFilter === 'all' || study.prestige_tier?.toString() === tierFilter;
+  // Filter studies — theme-based search across title, abstract, authors, journal and all tag buckets
+  const filteredStudies = useMemo(() => {
+    const tokens = searchQuery
+      .toLowerCase()
+      .split(/\s+/)
+      .map(s => s.trim())
+      .filter(Boolean);
 
-    return matchesSearch && matchesYear && matchesJournal && matchesDesign && matchesPop && matchesTier;
-  });
+    return studies.filter(study => {
+      const title = isEnglish ? (study.title_en || study.title) : study.title;
+      const abstract = isEnglish ? (study.abstract_en || study.abstract) : study.abstract;
+      const tags = study.tags || {};
+      const tagBuckets = [
+        tags.study_design,
+        tags.population,
+        tags.methodology,
+        tags.topics,
+        tags.themes,
+        tags.conditions,
+        tags.compounds,
+        tags.keywords,
+      ];
+      const tagsFlat = tagBuckets
+        .flatMap((b: any) => (Array.isArray(b) ? b : []))
+        .map((s: string) => String(s).toLowerCase().replace(/_/g, ' '));
+
+      const haystack = [
+        title,
+        abstract,
+        study.journal,
+        (study.authors || []).join(' '),
+        tagsFlat.join(' '),
+      ]
+        .filter(Boolean)
+        .join(' \n ')
+        .toLowerCase();
+
+      const matchesSearch = tokens.length === 0 || tokens.every(tok => haystack.includes(tok));
+
+      const matchesYear = yearFilter === 'all' || study.year?.toString() === yearFilter;
+      const matchesJournal = journalFilter === 'all' || study.journal === journalFilter;
+      const matchesDesign = designFilter === 'all' || (study.tags?.study_design || []).includes(designFilter);
+      const matchesPop = populationFilter === 'all' || (study.tags?.population || []).includes(populationFilter);
+      const matchesTier = tierFilter === 'all' || study.prestige_tier?.toString() === tierFilter;
+
+      return matchesSearch && matchesYear && matchesJournal && matchesDesign && matchesPop && matchesTier;
+    });
+  }, [studies, searchQuery, isEnglish, yearFilter, journalFilter, designFilter, populationFilter, tierFilter]);
+
+  // Reset to first page whenever filters or page size change
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, yearFilter, journalFilter, designFilter, populationFilter, tierFilter, pageSize]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredStudies.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const pagedStudies = filteredStudies.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const getTitle = (study: ScientificStudy) => isEnglish ? (study.title_en || study.title) : study.title;
   const getAbstract = (study: ScientificStudy) => isEnglish ? (study.abstract_en || study.abstract) : study.abstract;
@@ -242,7 +295,7 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder={t('studies.library.searchPlaceholder', 'Search by title or author...')}
+                  placeholder={t('studies.library.searchPlaceholder', 'Search by theme, condition, compound, author...')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -333,9 +386,33 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
         </CardContent>
       </Card>
 
-      {/* Results count */}
-      <div className="text-sm text-muted-foreground">
-        {t('studies.library.showing', 'Showing')} {filteredStudies.length} {t('studies.library.of', 'of')} {studies.length} {t('studies.library.studies', 'studies')}
+      {/* Results count + page size */}
+      <div className="flex items-center justify-between flex-wrap gap-2 text-sm text-muted-foreground">
+        <div>
+          {t('studies.library.showing', 'Showing')}{' '}
+          {filteredStudies.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}
+          {'–'}
+          {Math.min(currentPage * pageSize, filteredStudies.length)}{' '}
+          {t('studies.library.of', 'of')} {filteredStudies.length}{' '}
+          {t('studies.library.studies', 'studies')}
+          {filteredStudies.length !== studies.length && (
+            <span className="ml-1 opacity-70">({studies.length} {t('studies.library.total', 'total')})</span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <span>{t('studies.library.perPage', 'Per page')}:</span>
+          <Select value={pageSize.toString()} onValueChange={(v) => setPageSize(parseInt(v, 10))}>
+            <SelectTrigger className="w-[80px] h-8">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="40">40</SelectItem>
+              <SelectItem value="80">80</SelectItem>
+              <SelectItem value="160">160</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Studies List */}
@@ -360,7 +437,7 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
         </Card>
       ) : (
         <div className="space-y-3">
-          {filteredStudies.map(study => (
+          {pagedStudies.map(study => (
             <Card key={study.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
@@ -498,8 +575,61 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
           ))}
         </div>
       )}
+
+      {/* Pagination */}
+      {!loading && filteredStudies.length > pageSize && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={(e) => {
+                  e.preventDefault();
+                  setPage(p => Math.max(1, p - 1));
+                }}
+                className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+              />
+            </PaginationItem>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(p => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+              .reduce<(number | 'ellipsis')[]>((acc, p, idx, arr) => {
+                if (idx > 0 && p - (arr[idx - 1] as number) > 1) acc.push('ellipsis');
+                acc.push(p);
+                return acc;
+              }, [])
+              .map((p, i) =>
+                p === 'ellipsis' ? (
+                  <PaginationItem key={`e-${i}`}>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                ) : (
+                  <PaginationItem key={p}>
+                    <PaginationLink
+                      isActive={p === currentPage}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPage(p);
+                      }}
+                      className="cursor-pointer"
+                    >
+                      {p}
+                    </PaginationLink>
+                  </PaginationItem>
+                )
+              )}
+            <PaginationItem>
+              <PaginationNext
+                onClick={(e) => {
+                  e.preventDefault();
+                  setPage(p => Math.min(totalPages, p + 1));
+                }}
+                className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </div>
   );
-};
+ };
 
 export default StudiesLibraryTab;
