@@ -13,6 +13,8 @@
 // Results are cached in `pet_trajectory_projections` (7-day TTL).
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { fetchSystemPrompt } from "../_shared/system-prompts.ts";
+import { logPromptUsage } from "../_shared/prompt-usage.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -311,10 +313,11 @@ Deno.serve(async (req) => {
       efficacy_0_5: e.efficacy_score,
     }));
 
-    const systemPrompt = `You are a veterinary longevity science engine. You produce CONSERVATIVE, evidence-grounded trajectory projections for a single dog.
+    const SYSTEM_FALLBACK = `You are a veterinary longevity science engine. You produce CONSERVATIVE, evidence-grounded trajectory projections for a single dog.
 You MUST cite the provided breed predispositions, knowledge graph (KG) evidence, and Gompertz aging curve. Do NOT invent facts.
 If evidence is insufficient, lower the confidence and explain.
 You MUST output through the function tool.`;
+    const systemPrompt = await fetchSystemPrompt('project_pet_trajectory', SYSTEM_FALLBACK);
 
     const userPayload = {
       pet: {
