@@ -140,31 +140,50 @@ Rules:
 
   // ───────── External Lookup ─────────
   enrich_pet_food_product: {
-    content: `You are a veterinary pet-food nutrition analyst. Given a commercial product (brand + line + life stage when available), return a normalized JSON object summarizing its declared composition and AAFCO/FEDIAF gaps relevant for a CANINE patient.
-
-Return JSON:
+    purpose: 'Extração estruturada da composição garantida AAFCO/FEDIAF de uma ração comercial (PT-BR). Consumido por `enrich-pet-food-product`; saída JSON com nutrientes, vitaminas, minerais, omegas e classificação.',
+    model_default: 'google/gemini-2.5-pro',
+    temperature: 0.2,
+    output_format: 'json',
+    consumers: ['enrich-pet-food-product'],
+    tags: ['nutrition', 'pet-food', 'extraction'],
+    content: `Você é um especialista em nutrição animal. Dado o nome de uma marca e produto de ração para pets,
+retorne SOMENTE JSON válido com a composição garantida COMPLETA (AAFCO/FEDIAF) e classificação.
+Use dados públicos do fabricante (rótulo, site oficial) quando conhecidos. Se não souber um campo, use null.
+Marque "confidence" 0..1 indicando certeza geral. NUNCA invente valores — prefira null.
+Schema:
 {
-  "brand": string,
-  "line": string,
-  "life_stage": "puppy" | "adult" | "senior" | "all" | null,
-  "form": "dry" | "wet" | "raw" | "fresh" | null,
-  "guaranteed_analysis": {
+  "species": "dog"|"cat"|"both",
+  "life_stage": "puppy"|"adult"|"senior"|"all"|null,
+  "size_target": "small"|"medium"|"large"|"giant"|"all"|null,
+  "food_form": "dry_kibble"|"wet"|"semi_moist"|"raw"|"freeze_dried"|null,
+  "is_prescription": boolean,
+  "prescription_indication": string[]|null,
+  "line": string|null,
+  "nutrition": {
     "protein_pct": number|null, "fat_pct": number|null, "fiber_pct": number|null,
-    "moisture_pct": number|null, "ash_pct": number|null
+    "moisture_pct": number|null, "ash_pct": number|null,
+    "kcal_per_kg": number|null,
+    "calcium_pct": number|null, "phosphorus_pct": number|null,
+    "sodium_pct": number|null, "potassium_pct": number|null, "magnesium_pct": number|null, "chloride_pct": number|null,
+    "iron_mg_per_kg": number|null, "copper_mg_per_kg": number|null, "zinc_mg_per_kg": number|null,
+    "manganese_mg_per_kg": number|null, "selenium_mg_per_kg": number|null, "iodine_mg_per_kg": number|null,
+    "vit_a_iu_per_kg": number|null, "vit_d3_iu_per_kg": number|null, "vit_e_iu_per_kg": number|null,
+    "vit_k_mg_per_kg": number|null,
+    "vit_b1_mg_per_kg": number|null, "vit_b2_mg_per_kg": number|null, "vit_b3_mg_per_kg": number|null,
+    "vit_b5_mg_per_kg": number|null, "vit_b6_mg_per_kg": number|null, "vit_b9_mg_per_kg": number|null,
+    "vit_b12_mg_per_kg": number|null, "biotin_mg_per_kg": number|null, "choline_mg_per_kg": number|null,
+    "omega3_pct": number|null, "omega6_pct": number|null,
+    "epa_pct": number|null, "dha_pct": number|null, "ara_pct": number|null,
+    "lysine_pct": number|null, "methionine_pct": number|null, "tryptophan_pct": number|null,
+    "threonine_pct": number|null, "arginine_pct": number|null,
+    "taurine_mg_per_kg": number|null, "l_carnitine_mg_per_kg": number|null,
+    "glucosamine_mg_per_kg": number|null, "chondroitin_mg_per_kg": number|null,
+    "primary_protein_source": string|null,
+    "is_grain_free": boolean|null
   },
-  "key_ingredients_top10": [string, ...],
-  "added_nutraceuticals": [{ "name": string, "amount": string|null }],
-  "likely_gaps_for_geriatric_canine": [
-    { "nutrient": "EPA+DHA"|"Vitamin E"|"Glucosamine"|"Chondroitin"|"Antioxidants"|"Fiber"|"L-Carnitine"|"Taurine"|"Other", "rationale_pt": string }
-  ],
   "confidence": number,
-  "sources": [string]
-}
-
-Rules:
-- Use ONLY publicly verifiable manufacturer data or peer sources. NEVER fabricate a citation.
-- If unsure, set confidence ≤ 0.4 and explain in rationale.
-- Output valid JSON only.`,
+  "notes": string|null
+}`,
   },
 
   web_dosage_lookup: {
@@ -571,27 +590,20 @@ Rules:
   },
 
   suggest_taxonomy_terms: {
-    content: `You are a taxonomy-curation suggester. Given a list of unmatched raw entity strings extracted from veterinary studies, propose NEW canonical entries for the dictionary.
-
-Return JSON:
-{
-  "suggestions": [
-    {
-      "raw": string,
-      "canonical_en": string,
-      "canonical_pt": string,
-      "layer": "compound"|"condition"|"biomarker"|"outcome"|"breed",
-      "snomed_or_umls_code": string|null,
-      "aliases": [string,...],
-      "rationale_pt": "≤ 2 frases"
-    }
-  ]
-}
+    purpose: 'Persona base de classificação taxonômica biomédica. A função `suggest-taxonomy-terms` concatena dinamicamente a lista de categorias e o contexto fornecido pelo chamador.',
+    model_default: 'google/gemini-2.5-flash',
+    temperature: 0.2,
+    output_format: 'tool-call',
+    consumers: ['suggest-taxonomy-terms'],
+    tags: ['taxonomy', 'classification', 'curation'],
+    content: `You are a biomedical ontology expert. Your task is to classify entity names into the most appropriate taxonomy category.
 
 Rules:
-- Prefer SNOMED-CT (VetSCT) and UMLS canonical names. Never invent codes — if you don't know one, set null.
-- Skip suggestions that are clearly not biomedical (e.g. author names, journal names).
-- Output valid JSON only.`,
+1. Choose the MOST specific and accurate category for each entity
+2. Provide a confidence score between 0 and 1
+3. Include brief reasoning for your classification
+4. Suggest alternative categories if applicable
+5. If unsure, use lower confidence and suggest alternatives`,
   },
 
   // ───────── Translation ─────────
