@@ -17,6 +17,66 @@ interface ConfigRequest {
   value?: string;
 }
 
+// SECURITY: chaves cujo valor cru NUNCA deve voltar para o cliente.
+// GET retorna apenas máscara "••••XXXX" + metadados (is_set / last4 / updated_at).
+const SENSITIVE_KEY_PATTERN = /(_api_key|_password|_secret|_token)$/i;
+const isSensitiveKey = (key: string) => SENSITIVE_KEY_PATTERN.test(key);
+const maskSensitive = (raw: unknown): string => {
+  if (raw === null || raw === undefined) return '';
+  const str = typeof raw === 'string' ? raw : JSON.stringify(raw);
+  if (!str) return '';
+  const last4 = str.length >= 4 ? str.slice(-4) : '';
+  return `••••••••${last4}`;
+};
+
+// SECURITY: exige admin autenticado. Retorna Response de erro ou null.
+async function requireAdmin(req: Request): Promise<Response | null> {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return new Response(JSON.stringify({ error: 'Unauthorized: missing bearer token' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+  const token = authHeader.replace('Bearer ', '');
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+  const anonKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+
+  const authClient = createClient(supabaseUrl, anonKey);
+  const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
+  if (claimsError || !claimsData?.claims?.sub) {
+    return new Response(JSON.stringify({ error: 'Unauthorized: invalid token' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+  const userId = claimsData.claims.sub as string;
+
+  const adminClient = createClient(supabaseUrl, serviceKey);
+  const { data: roleRow, error: roleError } = await adminClient
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', userId)
+    .eq('role', 'admin')
+    .maybeSingle();
+
+  if (roleError) {
+    console.error('Role check error:', roleError);
+    return new Response(JSON.stringify({ error: 'Authorization check failed' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+  if (!roleRow) {
+    return new Response(JSON.stringify({ error: 'Forbidden: admin role required' }), {
+      status: 403,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+  return null;
+}
+
 serve(async (req) => {
   // Tratar solicitação de preflight CORS
   if (req.method === 'OPTIONS') {
@@ -24,6 +84,10 @@ serve(async (req) => {
   }
 
   try {
+    // SECURITY: toda chamada exige admin autenticado.
+    const denied = await requireAdmin(req);
+    if (denied) return denied;
+
     // Criar cliente Supabase usando as credenciais de ambiente
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
@@ -35,18 +99,33 @@ serve(async (req) => {
       // Buscar todas as configurações
       const { data, error } = await supabase
         .from('ai_configurations')
-        .select('config_key, config_value');
+        .select('config_key, config_value, updated_at');
 
       if (error) {
         console.error('GET error:', JSON.stringify(error, null, 2));
         throw new Error(`Database error: ${error.message || error.code || JSON.stringify(error)}`);
       }
 
-      // Converter array para objeto para facilitar o uso no frontend
+      // SECURITY: chaves sensíveis só voltam mascaradas; metadados em _meta.
       const configs: Record<string, any> = {};
+      const meta: Record<string, { is_set: boolean; last4: string; updated_at: string | null }> = {};
       data.forEach((item) => {
-        configs[item.config_key] = item.config_value;
+        const k = item.config_key;
+        const raw = item.config_value;
+        if (isSensitiveKey(k)) {
+          const str = raw == null ? '' : (typeof raw === 'string' ? raw : JSON.stringify(raw));
+          const isSet = !!str;
+          configs[k] = isSet ? maskSensitive(str) : '';
+          meta[k] = {
+            is_set: isSet,
+            last4: isSet && str.length >= 4 ? str.slice(-4) : '',
+            updated_at: item.updated_at ?? null,
+          };
+        } else {
+          configs[k] = raw;
+        }
       });
+      configs._meta = meta;
 
       return new Response(JSON.stringify(configs), { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -160,6 +239,15 @@ serve(async (req) => {
 
       if (action === 'get' && key) {
         console.log('POST get action - fetching key:', key);
+        // SECURITY: bloquear leitura individual de chave sensível.
+        if (isSensitiveKey(key)) {
+          return new Response(JSON.stringify({
+            error: 'Forbidden: sensitive values cannot be read back. Use GET for masked metadata.',
+          }), {
+            status: 403,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
         // Buscar configuração específica
         const { data, error } = await supabase
           .from('ai_configurations')
@@ -177,7 +265,21 @@ serve(async (req) => {
         });
 
       } else if (action === 'set' && key && value !== undefined) {
-        console.log('POST set action - key:', key, 'value:', typeof value);
+        // SECURITY: nunca logar value (pode ser segredo).
+        console.log('POST set action - key:', key, 'value type:', typeof value);
+        // SECURITY: rejeitar tentativa de salvar o próprio placeholder mascarado.
+        if (
+          isSensitiveKey(key) &&
+          typeof value === 'string' &&
+          value.startsWith('••••')
+        ) {
+          return new Response(JSON.stringify({
+            error: 'Refusing to save masked placeholder. Submit the real value or leave unchanged.',
+          }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
         // Atualizar ou inserir configuração usando upsert
         const { data, error } = await supabase
           .from('ai_configurations')
