@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-06-01T17:17:55.062Z
+Generated: 2026-06-01T18:30:21.445Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.117.0
+## Latest i18n version: 1.118.0
 
 ## Changes by area (last 14 days)
-- **admin**: 50
+- **admin**: 51
 - **kg**: 7
 - **curation**: 7
 - **meta**: 6
@@ -16,6 +16,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **tutor-ui**: 1
 
 ## Top 10 recent entries
+### 2026-06-01 · [admin] ADDED — Gerenciamento in-app de chaves de API (sem Lovable Cloud)
+- Nova tabela criptografada `public.api_keys` (pgcrypto) + view `api_keys_public` (somente metadados) + funções `encrypt_api_key`/`decrypt_api_key` (SECURITY DEFINER, restritas a `service_role`).
+- Nova edge function `api-keys-manage` (admin-only, valida JWT + role) com ações `set` / `delete` / `test` — encripta o valor antes de gravar e faz ping real ao provedor para registrar `last_test_status` / `last_test_message`.
+- Novo helper `supabase/functions/_shared/get-api-key.ts` — resolve chave do DB primeiro, fallback para `Deno.env`. `external-sources-status` já consome via helper, então UMLS/NCBI/Perplexity passam a refletir chaves cadastradas pelo UI.
+_files: supabase/functions/_shared/get-api-key.ts, src/hooks/useApiKeys.ts, supabase/functions/api-keys-manage/index.ts, supabase/functions/external-sources-status/index.ts…_
+
 ### 2026-06-01 · [admin] ADDED — Hub unificado de Fontes Externas
 - Nova aba `Knowledge Base → Fontes Externas` (`src/components/administrador/external-sources/ExternalSourcesHub.tsx`) consolida tudo que estava espalhado: status, chaves, mapeamento SNOMED/UMLS, importação de IDs (OMIA/MeSH/ChEBI), busca externa ao vivo e auditoria de ontologia em sub-abas (`?tab=external-sources&sub=...`).
 - Sub-aba "Visão Geral" nova: cards por fonte (UMLS, SNOMED, MeSH, OMIA, ChEBI, PubMed, Perplexity) com configured/reachable/latência/entries, painel de chaves (`NLM_UMLS_API_KEY`, `NCBI_API_KEY`, `PERPLEXITY_API_KEY`) com links "Como obter", e mapa de impacto mostrando para cada fonte os pipelines e tabelas consumidores.
@@ -69,12 +75,6 @@ _files: supabase/functions/_shared/system-prompts.ts, supabase/functions/kg-evid
 - `translate-and-categorize-conditions` → `translate_text`. Teste end-to-end retornou 200 (60 categorizadas).
 - Telemetria `logPromptUsage` ativada em ambas (latência, tokens, erros).
 _files: supabase/functions/project-pet-trajectory/index.ts, supabase/functions/translate-and-categorize-conditions/index.ts, supabase/functions/_shared/system-prompts.ts_
-
-### 2026-06-01 · [clinical-pipeline] CHANGED — Migração `parse-pet-exam-pdf` para registro único de prompts
-- `parse-pet-exam-pdf` agora consome `parse_pet_exam_pdf` via `fetchSystemPrompt` (manifesto atualizado para refletir o schema analyte-keyed real consumido por `pet_exams.analysis_data`).
-- Telemetria via `logPromptUsage` (latência, tokens, sucesso/erro).
-- Smoke test 400 (payload inválido) passou — boot sem erros.
-_files: supabase/functions/parse-pet-exam-pdf/index.ts, supabase/functions/_shared/system-prompts.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

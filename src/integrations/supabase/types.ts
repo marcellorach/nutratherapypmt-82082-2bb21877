@@ -444,6 +444,48 @@ export type Database = {
         }
         Relationships: []
       }
+      api_keys: {
+        Row: {
+          created_at: string
+          description: string | null
+          encrypted_value: string
+          id: string
+          key_name: string
+          last_test_message: string | null
+          last_test_status: string | null
+          last_tested_at: string | null
+          source_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          encrypted_value: string
+          id?: string
+          key_name: string
+          last_test_message?: string | null
+          last_test_status?: string | null
+          last_tested_at?: string | null
+          source_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          encrypted_value?: string
+          id?: string
+          key_name?: string
+          last_test_message?: string | null
+          last_test_status?: string | null
+          last_tested_at?: string | null
+          source_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       api_usage_logs: {
         Row: {
           api_provider: string
@@ -5432,6 +5474,45 @@ export type Database = {
       }
     }
     Views: {
+      api_keys_public: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string | null
+          is_set: boolean | null
+          key_name: string | null
+          last_test_message: string | null
+          last_test_status: string | null
+          last_tested_at: string | null
+          source_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          is_set?: never
+          key_name?: string | null
+          last_test_message?: string | null
+          last_test_status?: string | null
+          last_tested_at?: string | null
+          source_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          is_set?: never
+          key_name?: string | null
+          last_test_message?: string | null
+          last_test_status?: string | null
+          last_tested_at?: string | null
+          source_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       clean_seed_data: {
         Row: {
           chemical_compound: string | null
@@ -5503,6 +5584,21 @@ export type Database = {
         Returns: undefined
       }
       count_pending_access_requests: { Args: never; Returns: number }
+      decrypt_api_key: {
+        Args: { p_key_name: string; p_master_key: string }
+        Returns: string
+      }
+      encrypt_api_key: {
+        Args: {
+          p_description?: string
+          p_key_name: string
+          p_master_key: string
+          p_source_id: string
+          p_user?: string
+          p_value: string
+        }
+        Returns: undefined
+      }
       get_cohort_stats: { Args: { p_cohort_id: string }; Returns: Json }
       get_conditions_with_treatability: {
         Args: never

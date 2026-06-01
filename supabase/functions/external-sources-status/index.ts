@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { getApiKey } from '../_shared/get-api-key.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -40,9 +41,12 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    const UMLS = Deno.env.get('NLM_UMLS_API_KEY') || '';
-    const NCBI = Deno.env.get('NCBI_API_KEY') || '';
-    const PPLX = Deno.env.get('PERPLEXITY_API_KEY') || '';
+    // Resolve keys from encrypted api_keys table first, env as fallback.
+    const [UMLS, NCBI, PPLX] = await Promise.all([
+      getApiKey('NLM_UMLS_API_KEY').then(v => v ?? ''),
+      getApiKey('NCBI_API_KEY').then(v => v ?? ''),
+      getApiKey('PERPLEXITY_API_KEY').then(v => v ?? ''),
+    ]);
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,

@@ -24,6 +24,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.1 -->
 
+### Added - 2026-06-01 — Gerenciamento in-app de chaves de API (sem Lovable Cloud)
+<!-- area: admin · status: entregue · i18n: 1.118.0 -->
+- Nova tabela criptografada `public.api_keys` (pgcrypto) + view `api_keys_public` (somente metadados) + funções `encrypt_api_key`/`decrypt_api_key` (SECURITY DEFINER, restritas a `service_role`).
+- Nova edge function `api-keys-manage` (admin-only, valida JWT + role) com ações `set` / `delete` / `test` — encripta o valor antes de gravar e faz ping real ao provedor para registrar `last_test_status` / `last_test_message`.
+- Novo helper `supabase/functions/_shared/get-api-key.ts` — resolve chave do DB primeiro, fallback para `Deno.env`. `external-sources-status` já consome via helper, então UMLS/NCBI/Perplexity passam a refletir chaves cadastradas pelo UI.
+- UI: novo `OverviewIntro` (Collapsible, aberto por padrão, persiste em `localStorage`) no topo da Visão Geral explicando o que é a página, como operar em 4 passos, leitura dos 4 estados de status (🟢🟡🔴⚪) e checklist de depuração.
+- UI: `SecretsPanel` substituído por `ApiKeysPanel` com 1 card expansível por chave: status colorido, lista do que a chave alimenta, botão "Gerar chave" (abre site do provedor), input `type=password` + salvar, testar conexão e remover.
+- Novo hook `src/hooks/useApiKeys.ts` (React Query) lista `api_keys_public` + mutations set/delete/test.
+- Novo secret `API_KEYS_ENCRYPTION_KEY` (chave-mestra de 32 bytes) — única dependência de Cloud; todas as outras chaves passam a ser geridas dentro do app.
+- Files: `supabase/functions/api-keys-manage/index.ts`, `supabase/functions/_shared/get-api-key.ts`, `supabase/functions/external-sources-status/index.ts`, `src/components/administrador/external-sources/OverviewIntro.tsx`, `src/components/administrador/external-sources/ApiKeysPanel.tsx`, `src/components/administrador/external-sources/OverviewTab.tsx`, `src/hooks/useApiKeys.ts`, `src/i18n.ts`, `src/locales/{pt,en}/translation.json`
+
 ### Added - 2026-06-01 — Hub unificado de Fontes Externas
 <!-- area: admin · status: entregue · i18n: 1.117.0 -->
 - Nova aba `Knowledge Base → Fontes Externas` (`src/components/administrador/external-sources/ExternalSourcesHub.tsx`) consolida tudo que estava espalhado: status, chaves, mapeamento SNOMED/UMLS, importação de IDs (OMIA/MeSH/ChEBI), busca externa ao vivo e auditoria de ontologia em sub-abas (`?tab=external-sources&sub=...`).
