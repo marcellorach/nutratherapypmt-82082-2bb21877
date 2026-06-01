@@ -23,6 +23,7 @@ import OrganogramaCards from "@/components/administrador/organograma/Organograma
 import OrganogramaForceGraph from "@/components/administrador/organograma/OrganogramaForceGraph";
 import OrganogramaDiagram from "@/components/administrador/organograma/OrganogramaDiagram";
 import ChangelogTimeline from "@/components/administrador/organograma/ChangelogTimeline";
+import VersionBadge from "@/components/system/VersionBadge";
 
 const OrganogramaTab: React.FC = () => {
   const [tab, setTab] = useState<string>("grafo");
@@ -54,6 +55,7 @@ const OrganogramaTab: React.FC = () => {
             <Badge variant="secondary" className="text-xs">
               {t('organograma.updatedOn', { date: organogramaLastUpdated })}
             </Badge>
+            <VersionBadge compact />
           </div>
           <p className="text-sm text-muted-foreground mt-2 max-w-3xl">
             {t('organograma.pageSubtitle')}{" "}
