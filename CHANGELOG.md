@@ -24,6 +24,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.0 -->
 
+### Changed - 2026-06-01 — `kg-evidence-gap-fill` migrado para o registro único de prompts
+<!-- area: kg · status: entregue · i18n: n/a -->
+- Adicionados `kg_gap_fill_gemini` e `kg_gap_fill_perplexity` ao manifesto `_shared/system-prompts.ts` (com metadata, consumers e tags).
+- `assessWithGemini` e `assessWithPerplexity` agora carregam o system prompt via `fetchSystemPrompt(...)` com fallback verbatim para garantir continuidade quando o DB está indisponível.
+- Telemetria via `logPromptUsage` em ambos os caminhos (success/erro/HTTP-fail), com latência e tokens quando disponíveis.
+- Compliance do `npm run audit:prompts`: 7/24 funções com LLM agora usam o registro.
+- Files: supabase/functions/_shared/system-prompts.ts, supabase/functions/kg-evidence-gap-fill/index.ts
+
 ### Changed - 2026-06-01 — Sprint 1 (Clinical) concluído: registro único de prompts
 <!-- area: clinical-pipeline · status: entregue · i18n: - -->
 - `project-pet-trajectory` → `project_pet_trajectory` (Gompertz + KG, modelo gemini-2.5-pro, output via tool-call). Smoke test 400 ok.
