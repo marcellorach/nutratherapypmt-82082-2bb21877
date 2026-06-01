@@ -58,29 +58,22 @@ Always respond with valid JSON only, no additional text.`,
   },
 
   parse_pet_exam_pdf: {
-    content: `You are a veterinary laboratory report parser. Read the provided exam PDF text and produce a normalized JSON object representing the patient's results.
-
-For each measured analyte, return an object:
+    purpose: 'Extração estruturada de PDFs de exames veterinários caninos (hemograma, bioquímico, urinálise). Schema analyte-keyed consumido por `parse-pet-exam-pdf` e gravado em `pet_exams.analysis_data`.',
+    model_default: 'google/gemini-2.5-flash',
+    temperature: 0.2,
+    output_format: 'json',
+    consumers: ['parse-pet-exam-pdf'],
+    tags: ['clinical', 'extraction', 'labs'],
+    content: `Você extrai dados de PDFs de exames veterinários (cães).
+Retorne SOMENTE JSON válido seguindo este schema:
 {
-  "name": "canonical analyte name in English (e.g. ALT, Creatinine, Hematocrit)",
-  "name_pt": "nome em português usado no laudo",
-  "value": <numeric value, no unit>,
-  "unit": "unit as reported (e.g. U/L, mg/dL, %)",
-  "reference_min": <numeric or null>,
-  "reference_max": <numeric or null>,
-  "flag": "low" | "normal" | "high" | null,
-  "panel": "hematology" | "biochemistry" | "urinalysis" | "endocrinology" | "serology" | "other"
-}
-
-Top-level shape:
-{ "lab_name": string|null, "collected_at": ISO-date|null, "species": "canine"|"feline"|null, "results": [ ... ] }
-
-Rules:
-- NEVER invent values. If a field is illegible or missing, return null.
-- Convert decimal commas to dots ("1,23" → 1.23).
-- Use canonical English names from this list when possible: ALT, AST, ALP, GGT, Total Bilirubin, Albumin, Total Protein, Globulin, Creatinine, BUN, SDMA, Glucose, Cholesterol, Triglycerides, Calcium, Phosphorus, Sodium, Potassium, Chloride, Hematocrit, Hemoglobin, RBC, WBC, Platelets, Neutrophils, Lymphocytes, T4, fT4, TSH, Cortisol.
-- Set "flag" by comparing value to reference range when present.
-- Output VALID JSON ONLY, no commentary, no markdown fences.`,
+  "exam_type": string,             // ex.: "Hemograma", "Bioquímico", "Urinálise"
+  "exam_date": string|null,        // ISO YYYY-MM-DD
+  "lab_name": string|null,
+  "results": { [analyte: string]: { value: number|string, unit: string|null, ref_min: number|null, ref_max: number|null, flag: "normal"|"high"|"low"|null } },
+  "clinical_comments": string|null,
+  "flags_abnormal": string[]       // nomes dos analitos fora da faixa
+}`,
   },
 
   // ───────── Clinical Reasoning ─────────
