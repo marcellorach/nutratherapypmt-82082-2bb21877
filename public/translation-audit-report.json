@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-06-01T16:04:45.225Z",
+  "timestamp": "2026-06-01T17:07:25.416Z",
   "summary": {
-    "totalFiles": 945,
-    "totalIssues": 466,
+    "totalFiles": 946,
+    "totalIssues": 465,
     "hardcodedTexts": 54,
-    "missingKeys": 410,
+    "missingKeys": 409,
     "incompleteTranslations": 2
   },
   "issues": [
@@ -438,13 +438,6 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
-      "line": 147,
-      "text": "*",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
       "line": 148,
       "text": "*",
       "severity": "high"
@@ -453,14 +446,14 @@
       "type": "missing-key",
       "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
       "line": 149,
-      "text": "change_threshold",
+      "text": "*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
-      "line": 155,
-      "text": ".",
+      "line": 150,
+      "text": "change_threshold",
       "severity": "high"
     },
     {
@@ -473,28 +466,28 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
-      "line": 228,
+      "line": 157,
       "text": ".",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
-      "line": 353,
+      "line": 355,
       "text": ".",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
-      "line": 354,
+      "line": 356,
       "text": ".",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
-      "line": 542,
+      "line": 551,
       "text": "a",
       "severity": "high"
     },
@@ -564,14 +557,14 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/compliance/ComplianceDashboard.tsx",
-      "line": 69,
+      "line": 72,
       "text": "*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/compliance/ComplianceDashboard.tsx",
-      "line": 118,
+      "line": 121,
       "text": "a",
       "severity": "high"
     },
@@ -2678,28 +2671,28 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 243,
+      "line": 266,
       "text": "audit_base_system_{pt,en}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 1555,
+      "line": 1578,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 1766,
+      "line": 1789,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 4561,
+      "line": 4584,
       "text": "@",
       "severity": "high"
     },
@@ -3245,21 +3238,21 @@
     {
       "type": "hardcoded",
       "file": "src/pages/administrador/OrganogramaTab.tsx",
-      "line": 64,
+      "line": 66,
       "text": "CHANGELOG.md",
       "severity": "medium"
     },
     {
       "type": "hardcoded",
       "file": "src/pages/administrador/OrganogramaTab.tsx",
-      "line": 67,
+      "line": 69,
       "text": "Senex AI",
       "severity": "medium"
     },
     {
       "type": "hardcoded",
       "file": "src/pages/administrador/OrganogramaTab.tsx",
-      "line": 67,
+      "line": 69,
       "text": "PetMoreTime",
       "severity": "medium"
     },
