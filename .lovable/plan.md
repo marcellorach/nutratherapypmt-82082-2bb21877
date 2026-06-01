@@ -1,93 +1,53 @@
+## Escopo aprovado: Abordagem A (mascarar + travar por role) + registro de B no kanban
 
-# Hub de APIs Externas — Autossuficiente
+### Mudanças a implementar agora
 
-Objetivo: você nunca mais precisa abrir o Lovable Cloud para gerenciar chaves de API. Tudo (cadastro, teste, status, documentação) vive na tab **Fontes Externas**.
+**1. `supabase/functions/ai-config/index.ts` — endurecer a função**
+- Adicionar checagem de admin em TODAS as chamadas (GET, POST `get`, POST `set`, POST `test-neo4j`):
+  - Ler `Authorization: Bearer <jwt>`, validar via `supabase.auth.getClaims(token)` → obter `userId`.
+  - Consultar `public.user_roles` com service role: `user_id = userId AND role = 'admin'`.
+  - Sem admin → `403 Forbidden`. Sem token → `401 Unauthorized`.
+- Definir `SENSITIVE_KEY_PATTERN = /(_api_key|_password|_secret|_token)$/i`.
+- No `GET`:
+  - Para chaves sensíveis, devolver apenas máscara `"••••••••XXXX"` (últimos 4) em vez do valor cru.
+  - Adicionar `_meta: { [key]: { is_set, last4, updated_at } }` para a UI mostrar status sem precisar do valor.
+  - Chaves não-sensíveis (`neo4j_uri`, `neo4j_username`, prompts, model preferences) continuam voltando crus.
+- No `POST action='get'`: bloquear leitura individual de chave sensível (`403`). Continua permitido para não-sensíveis.
+- No `POST action='set'`: rejeitar (`400`) se o `value` enviado começar com `"••••"` (evita sobrescrever a chave real com o placeholder visual quando admin clica "Salvar" sem ter digitado nada).
+- Remover qualquer `console.log` que imprima `config_value` para chaves sensíveis (já evitado, revisar).
 
-## 1. Explicação no topo do Overview (colapsável)
+**2. `src/components/administrador/ConfiguracoesIATab.tsx` — ajuste mínimo**
+- Em `saveConfigToSupabase`: se `value.startsWith('••••')`, fazer early-return (não chamar a function). Evita o caso UX em que o admin salva sem editar e a validação de formato falha.
+- Não precisa redesenhar a tela: o input continua aparecendo, só que pré-preenchido com a máscara. Para trocar a chave, admin apaga e cola a nova. Status visual em `ConfigurationsSummary` continua funcionando porque a máscara é truthy (`isConfigured: true`).
 
-Novo componente `OverviewIntro.tsx` — card shadcn `Collapsible`, aberto por padrão na primeira visita (salva estado em `localStorage`), com 4 seções:
+**3. `ConfigurationsSummary.tsx`**
+- Sem mudança obrigatória. O botão "Mostrar tudo" passará a revelar `"••••3a2f"` em vez da chave real — esse é exatamente o comportamento desejado.
+- (Opcional pós-A) usar `data._meta[key].updated_at` para mostrar "última rotação em…". Não bloqueante.
 
-- **O que é esta página** — Hub central das 7 APIs externas (PubMed, Semantic Scholar, OpenAlex, Europe PMC, Crossref, Unpaywall, OpenFDA) que alimentam a base de conhecimento.
-- **Como operar** — Fluxo em 4 passos: (1) gerar chave no site do provedor, (2) colar no campo da API, (3) clicar em "Testar conexão", (4) status fica 🟢.
-- **Como ler os status** — 🟢 conectado · 🟡 chave salva mas sem teste · 🔴 erro no último teste · ⚪ sem chave (APIs públicas funcionam sem chave, com rate-limit menor).
-- **Quando depurar** — checklist: rate-limit excedido (429), chave expirada (401/403), API fora do ar, formato inválido. Botão "Ver logs" abre os logs da edge function `external-sources-status`.
-
-## 2. Tabela `api_keys` (criptografada, admin-only)
-
-Migration SQL com `pgcrypto`:
-
-```sql
-CREATE TABLE public.api_keys (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  key_name text UNIQUE NOT NULL,           -- ex: PUBMED_API_KEY
-  source_id text NOT NULL,                 -- ex: pubmed
-  encrypted_value bytea NOT NULL,          -- pgp_sym_encrypt
-  description text,
-  last_tested_at timestamptz,
-  last_test_status text,                   -- ok | error | untested
-  last_test_message text,
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now(),
-  updated_by uuid REFERENCES auth.users(id)
-);
-
--- View pública SEM o encrypted_value
-CREATE VIEW public.api_keys_public AS
-SELECT id, key_name, source_id, description, last_tested_at,
-       last_test_status, last_test_message, created_at, updated_at,
-       (encrypted_value IS NOT NULL) AS is_set
-FROM public.api_keys;
-
-GRANT SELECT ON public.api_keys_public TO authenticated;
-GRANT ALL ON public.api_keys TO service_role;
-ALTER TABLE public.api_keys ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "admins manage api_keys" ON public.api_keys
-  FOR ALL TO authenticated
-  USING (public.is_admin()) WITH CHECK (public.is_admin());
+**4. `.gitignore`** — Lovable marca esse arquivo como read-only no sandbox. Vou tentar a edição; se falhar, abro um aviso pedindo que você adicione manualmente:
 ```
+.env
+.env.*
+!.env.example
+```
+Lembrando: hoje o `.env` só tem `VITE_SUPABASE_*` (publicáveis), então o risco real é higiene/futuro — não é exfiltração ativa.
 
-`decrypt_api_key(p_key_name text)` — função `SECURITY DEFINER`, só executável por `service_role`, usa `API_KEYS_ENCRYPTION_KEY` (já salvo) via `pgp_sym_decrypt`.
+**5. `CHANGELOG.md` — registrar A como feito e B como kanban**
+Entrada em `[Unreleased]`:
+- `Security` → "ai-config edge function agora exige role admin via JWT e devolve apenas máscara (`••••XXXX`) para chaves sensíveis. Bloqueia leitura individual e salvamento de placeholder. `.env` adicionado ao `.gitignore`."
+- Nova seção `Backlog` (ou item dentro de `Unreleased → Planned`):
+  - "**[Kanban / Próximo ciclo de segurança]** Migrar segredos de `ai_configurations` para Supabase Secrets (Lovable Cloud). Refatorar edge functions consumidoras (`openai`, `claude`, `gemini`, `perplexity`, `neo4j`) para ler via `Deno.env.get`/helper `getApiKey`. Reescrever `ConfiguracoesIATab` como painel de status (sem inputs de chave). Limpar linhas de segredo da tabela após migração. Justificativa: elimina superfície de exposição residual via service role."
+- Rodar `npm run sync:changelog` ao final.
 
-## 3. Edge functions
+### Fora do escopo (confirmado: B fica só registrada, sem implementação agora)
+- Não mexer em `useAIConfig.ts` nem `useVetGraphRAGConfig.ts` (já são protegidos por RLS de admin na tabela e só leem chaves não-sensíveis ou são usados em contexto admin).
+- Não mover segredos para Supabase Secrets nesta rodada.
+- Não tocar nas edge functions consumidoras (openai, claude, etc.).
 
-- **`api-keys-manage`** (admin-only via JWT + `has_role`):
-  - `{ action: 'set', key_name, source_id, value }` → `pgp_sym_encrypt` + upsert
-  - `{ action: 'delete', key_name }`
-  - `{ action: 'test', key_name }` → decifra, faz ping leve no provedor, grava `last_test_*`
-- **`external-sources-status`** (já existe) — refatorado para ler `api_keys_public` (campo `is_set`) em vez de só `Deno.env.get()`, e usar `getApiKey()` para os testes ativos. Retorna por fonte: nome, ícone, status, `feeds[]` (o que alimenta), `tables[]`, link "Gerar chave", docs.
-- **`_shared/get-api-key.ts`** — helper: tenta `decrypt_api_key` na DB, fallback para `Deno.env.get()` (compatibilidade).
-- Refatorar as 5 edge functions que hoje usam `Deno.env.get('PUBMED_API_KEY')` etc. para usar `getApiKey()`.
+### Validação após deploy
+1. Logado como admin: abrir `/administrador?tab=external-sources` (ou a aba "Configurações IA"). Esperado: campos pré-preenchidos com `"••••XXXX"`, status "Configurada", botão de teste Neo4j funcionando.
+2. Logado como tutor/vet (não-admin): chamar `supabase.functions.invoke('ai-config', { method: 'GET' })` no console. Esperado: `403 Forbidden`.
+3. Como admin, clicar "Salvar" sem editar um campo sensível: esperado no-op (early-return), nenhuma chamada à function.
+4. Como admin, colar uma nova chave válida: esperado `200`, valor real salvo no DB.
 
-## 4. UI — `ApiKeysPanel.tsx` (substitui `SecretsPanel.tsx`)
-
-Um card expansível por API, contendo:
-- Ícone + nome + badge de status (🟢🟡🔴⚪)
-- **O que esta API alimenta** (lista dinâmica de `feeds[]`)
-- Link "🔗 Gerar chave" (abre site do provedor em nova aba)
-- Input `type="password"` + botão "Salvar"
-- Botão "Testar conexão" → mostra resultado inline
-- Botão "Remover chave" (com confirmação)
-- Último teste: data + mensagem
-
-Hook `useApiKeys.ts` com React Query (lista de `api_keys_public` + mutations para set/delete/test).
-
-## 5. Arquivos
-
-**Novos:** migration SQL · `api-keys-manage/index.ts` · `_shared/get-api-key.ts` · `OverviewIntro.tsx` · `ApiKeysPanel.tsx` · `useApiKeys.ts`
-
-**Editados:** `OverviewTab.tsx` (adiciona `OverviewIntro` no topo) · `ExternalSourcesHub.tsx` (substitui `SecretsPanel` por `ApiKeysPanel`) · `external-sources-status/index.ts` · 5 edge functions migráveis · `translation.json` PT/EN (~50 chaves) · `i18n.ts` (bump versão) · `CHANGELOG.md` · `projectOrganograma.ts` (se necessário)
-
-**Removidos:** `SecretsPanel.tsx`
-
-## 6. Segurança
-
-- `encrypted_value` nunca exposto via PostgREST (só `api_keys_public` é selecionável)
-- Decifragem só via edge function com `service_role`
-- RLS exige `is_admin()` para escrita
-- Input UI sempre `type="password"`
-- Se `API_KEYS_ENCRYPTION_KEY` vazar, rotacionar todas as chaves armazenadas
-
-## 7. Fora de escopo
-
-Rotação automática, histórico de auditoria por chave, failover entre múltiplas chaves da mesma API.
+Pode confirmar para eu sair do plan mode e aplicar?
