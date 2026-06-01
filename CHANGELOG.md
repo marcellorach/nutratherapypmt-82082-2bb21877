@@ -24,6 +24,20 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.0 -->
 
+### Changed - 2026-06-01 — Sprint 5 (final) — registro único 24/24: healthcheck, harness e planilha de nutracêuticos
+<!-- area: infra · status: entregue · i18n: n/a -->
+- Manifesto: 2 novas entradas em `_shared/system-prompts.ts`:
+  - `ai_task_healthcheck_ping` (gemini-3-flash-preview, text) — ping mínimo "ok" usado pelo cron de healthcheck por task×model.
+  - `process_nutraceutical_spreadsheet` (gpt-4o-mini, json) — extração estruturada preservando notas de eficácia EXATAS de planilhas CSV/XLSX.
+- Funções migradas:
+  - `ai-task-healthcheck`: ping user-message agora vem do registro (`fetchSystemPrompt` + fallback verbatim) e cada execução por task grava `logPromptUsage` (latência/sucesso/erro).
+  - `ai-task-test`: harness genérico de admin — adicionada telemetria `logPromptUsage` keyed pelo `task_id` testado, complementando o log já existente em `ai_prompt_test_runs`.
+  - `process-nutraceutical-spreadsheet/aiProcessor.ts`: system prompt agora resolvido via registro, com telemetria de sucesso/erro (tokens/latência) na chamada à OpenAI.
+- Fallback verbatim preservado em todas as funções → comportamento idêntico se o DB de prompts estiver indisponível.
+- Smoke test: `ai-task-healthcheck` retornou `{"checked":8, ...ok:true}` nas 8 tasks ativas; `ai-task-test` mantém 401 sem JWT (esperado).
+- **Marco**: 24/24 (100%) das edge functions com prompts agora consomem o registro único + telemetria centralizada (`ai_prompt_usage_log`). Encerramento da iniciativa de governança de prompts iniciada na Sprint 1.
+- Files: supabase/functions/_shared/system-prompts.ts, supabase/functions/ai-task-healthcheck/index.ts, supabase/functions/ai-task-test/index.ts, supabase/functions/process-nutraceutical-spreadsheet/aiProcessor.ts
+
 ### Changed - 2026-06-01 — Sprint 4 cohorts: 6 funções de geração/análise/originalidade no registro único
 <!-- area: infra · status: entregue · i18n: n/a -->
 - Manifesto: 8 novas entradas em `_shared/system-prompts.ts` cobrindo todo o pipeline de cohorts sintéticos:
