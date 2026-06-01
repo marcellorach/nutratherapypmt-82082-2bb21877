@@ -267,14 +267,25 @@ export default function TechnicalAuditsTab() {
     if (!progress || progress.status !== "processing") return;
     let cancelled = false;
     const id = progress.audit_id;
+    let lastTs = "";
     const tick = async () => {
       try {
         const { data } = await supabase.functions.invoke("generate-audit", {
-          body: { action: "progress", audit_id: id },
+          body: { action: "progress", audit_id: id, since_ts: lastTs || undefined },
         });
         if (cancelled || !data) return;
         const next = data as any;
-        setProgress((prev) => prev && prev.audit_id === id ? { ...prev, ...next } : prev);
+        const incoming = Array.isArray(next.log) ? next.log : [];
+        if (incoming.length > 0) {
+          const lastEntry = incoming[incoming.length - 1];
+          if (lastEntry?.ts) lastTs = lastEntry.ts;
+        }
+        setProgress((prev) => {
+          if (!prev || prev.audit_id !== id) return prev;
+          const prevLog = Array.isArray(prev.log) ? prev.log : [];
+          const mergedLog = lastTs && prevLog.length > 0 ? [...prevLog, ...incoming] : (incoming.length > 0 ? incoming : prevLog);
+          return { ...prev, ...next, log: mergedLog };
+        });
         if (next.status === "ready" || next.status === "ready_with_warnings" || next.status === "failed") {
           await load();
           if (next.status === "failed") {
