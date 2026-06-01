@@ -238,6 +238,11 @@ Deno.serve(async (req) => {
       );
     }
 
+    const systemPrompt = await fetchSystemPrompt(
+      'evaluate_meta_study_reliability',
+      SYSTEM_FALLBACK,
+    );
+
     const results: Array<{
       id: string;
       ok: boolean;
