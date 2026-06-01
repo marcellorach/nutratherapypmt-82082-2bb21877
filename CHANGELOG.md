@@ -24,6 +24,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.0 -->
 
+### Changed - 2026-06-01 — Perplexity trio (`query-perplexity`, `perplexity-health`, `web-dosage-lookup`) no registro único
+<!-- area: infra · status: entregue · i18n: n/a -->
+- Adicionados `query_perplexity_chat` e `perplexity_health_ping` ao manifesto `_shared/system-prompts.ts`; `web_dosage_lookup` recebeu metadata completa (model/temperature/output_format/consumers/tags).
+- `query-perplexity`: prompt agora via `fetchSystemPrompt('query_perplexity_chat', SYSTEM_FALLBACK)`. Telemetria com `logPromptUsage` em sucesso (tokens_in/out do payload Perplexity) e em erro HTTP.
+- `perplexity-health`: ping "ok" agora via `fetchSystemPrompt('perplexity_health_ping', …)`. Telemetria registra latência do ping e status.
+- `web-dosage-lookup`: prompt agora via `fetchSystemPrompt('web_dosage_lookup', SYSTEM_FALLBACK)`. Telemetria em sucesso/erro HTTP/`no_tool_call`.
+- Fallback verbatim (`SYSTEM_FALLBACK`) preservado em cada função → comportamento idêntico ao anterior se o DB estiver indisponível.
+- Smoke test: as três funções bootam 200/400 corretamente; sem regressão.
+- Compliance: **12/24** funções no registro único (50%).
+- Files: supabase/functions/_shared/system-prompts.ts, supabase/functions/query-perplexity/index.ts, supabase/functions/perplexity-health/index.ts, supabase/functions/web-dosage-lookup/index.ts
+
 ### Changed - 2026-06-01 — Meta-studies: `chat-meta-study` e `evaluate-meta-study-reliability` no registro único
 <!-- area: meta · status: entregue · i18n: n/a -->
 - Adicionados `chat_meta_study_persona` e `evaluate_meta_study_reliability` ao manifesto `_shared/system-prompts.ts`.
