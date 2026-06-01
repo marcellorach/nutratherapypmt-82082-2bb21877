@@ -322,21 +322,14 @@ async function assessWithPerplexity(
     ],
   };
 
+  const systemPrompt = await fetchSystemPrompt('kg_gap_fill_perplexity', PERPLEXITY_SYSTEM_FALLBACK);
   const body = {
     model,
     search_mode: 'academic',
     messages: [
       {
         role: 'system',
-        content:
-          'You are a veterinary evidence reviewer for canine geroprotector therapies. ' +
-          'Search the academic literature for evidence that the COMPOUND meaningfully treats, ' +
-          'attenuates, or modifies the CONDITION in dogs. Prefer canine evidence; if absent, ' +
-          'consider mechanistic / rodent / human evidence and downgrade efficacy accordingly. ' +
-          'Also consider geroscience-based therapeutic strategies (e.g. senolytics, NAD+ precursors, ' +
-          'rapamycin analogs, metformin) and any pharmaceutical or nutraceutical interventions with ' +
-          'emerging evidence for this condition in aging dogs. ' +
-          'Be conservative. Return ONLY structured JSON matching the schema.',
+        content: systemPrompt,
       },
       {
         role: 'user',
@@ -366,6 +359,7 @@ async function assessWithPerplexity(
   };
 
   let res: Response;
+  const t0 = Date.now();
   try {
     res = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
