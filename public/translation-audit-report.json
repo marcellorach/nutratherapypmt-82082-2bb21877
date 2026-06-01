@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-06-01T00:43:56.094Z",
+  "timestamp": "2026-06-01T14:21:47.282Z",
   "summary": {
     "totalFiles": 945,
-    "totalIssues": 461,
+    "totalIssues": 466,
     "hardcodedTexts": 54,
-    "missingKeys": 405,
+    "missingKeys": 410,
     "incompleteTranslations": 2
   },
   "issues": [
@@ -459,14 +459,42 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
-      "line": 218,
+      "line": 155,
       "text": ".",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
-      "line": 517,
+      "line": 156,
+      "text": ".",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
+      "line": 228,
+      "text": ".",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
+      "line": 353,
+      "text": ".",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
+      "line": 354,
+      "text": ".",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
+      "line": 542,
       "text": "a",
       "severity": "high"
     },
@@ -2650,21 +2678,28 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 1308,
+      "line": 243,
+      "text": "audit_base_system_{pt,en}",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/data/projectChangelog.generated.ts",
+      "line": 1555,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 1519,
+      "line": 1766,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 4314,
+      "line": 4561,
       "text": "@",
       "severity": "high"
     },
