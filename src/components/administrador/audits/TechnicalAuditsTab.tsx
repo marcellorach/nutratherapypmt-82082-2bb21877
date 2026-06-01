@@ -150,8 +150,18 @@ export default function TechnicalAuditsTab() {
     ]);
     if (a.data) {
       setAudits(a.data as unknown as TechnicalAudit[]);
-      const firstActive = (a.data as Array<{ id: string; superseded_by: string | null }>)
-        .find((x) => !x.superseded_by);
+      const actives = (a.data as unknown as TechnicalAudit[]).filter((x) => !x.superseded_by);
+      const sorted = [...actives].sort((x, y) => {
+        const px = (x.version || "0.0.0").split(".").map((n) => parseInt(n, 10) || 0);
+        const py = (y.version || "0.0.0").split(".").map((n) => parseInt(n, 10) || 0);
+        for (let i = 0; i < Math.max(px.length, py.length); i++) {
+          const dx = px[i] ?? 0;
+          const dy = py[i] ?? 0;
+          if (dx !== dy) return dy - dx;
+        }
+        return (y.audit_date || "").localeCompare(x.audit_date || "");
+      });
+      const firstActive = sorted[0];
       if (!selectedId && firstActive) setSelectedId(firstActive.id);
       // Reatar polling em auditorias ainda processando (ex.: usuário recarregou a aba).
       const inflight = (a.data as unknown as TechnicalAudit[]).find(
