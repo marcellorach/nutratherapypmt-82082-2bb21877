@@ -1,4 +1,54 @@
-## Escopo aprovado: Abordagem A (mascarar + travar por role) + registro de B no kanban
+## Escopo aprovado: corrigir auto-auditor v7.0.1 (4.1-A) + teste CI de órfãos (4.2)
+
+_(itens 4.3 deprecação de `medical_knowledge_graph[_edges]` e 4.4 expansão de `lab_reference_ranges` foram adiados; ficam registrados no CHANGELOG/Backlog mas sem implementação agora.)_
+
+### O que vai mudar
+
+**1. `supabase/functions/generate-audit/index.ts` — corrigir nomes e marcar tabelas inexistentes**
+- Substituir o array `tableNames` por `tableSpecs: { label, table }[]`, mantendo os rótulos históricos da auditoria mas resolvendo para os nomes canônicos:
+  - `studies → processed_studies` (+ adicionar `scientific_studies` separado)
+  - `pets → pet_profiles`
+  - `lab_ranges → lab_reference_ranges`
+  - `medical_knowledge_graph_edges → medical_knowledge_edges`
+  - Demais nomes seguem (já corretos).
+- Quando `service.from(table).select(..., { count: "exact", head: true })` retornar `error` (caso típico: relação inexistente), gravar `counts[label] = null` e empilhar uma string descritiva em `snapshot.unknown_tables`. O prompt da auditoria passa a distinguir "tabela ausente" de "zero linhas" — elimina a classe de falso positivo da v7.0.1.
+- Atualizar dois rótulos descritivos no checklist (linhas 125 e 137): `lab_ranges → lab_reference_ranges`, `flag is_demo em pets → flag is_demo em pet_profiles`.
+
+**2. `scripts/__tests__/db-referential-integrity.test.mjs` — novo teste CI de órfãos**
+- Padrão idêntico aos demais (`vitest` + `node:child_process`).
+- Para cada par filho→pai abaixo, rodar `psql -tAc "SELECT COUNT(*) FROM <child> c LEFT JOIN <parent> p ON p.id=c.<fk> WHERE p.id IS NULL"` e exigir `=== 0`:
+  - `pet_exams → pet_profiles`
+  - `pet_consultations → pet_profiles`
+  - `pet_conditions → pet_profiles`
+  - `pet_medications → pet_profiles`
+  - `study_embeddings → processed_studies`
+  - `triplet_extractions → processed_studies`
+- O teste faz `it.skip` quando `process.env.PGHOST` não estiver presente — assim roda no sandbox/local sem quebrar CI que não tem acesso ao Postgres.
+- Garante regressão futura: se alguém trocar `ON DELETE CASCADE` por `NO ACTION`/`SET NULL` e gerar órfãos, o teste falha.
+
+**3. CHANGELOG**
+- Em `[Unreleased]`:
+  - `Fixed` — "Auto-auditor (`generate-audit`) usava nomes legados (`pets`, `studies`, `lab_ranges`, `medical_knowledge_graph_edges`) e reportava `0` para tabelas que não existem. Agora resolve para os nomes canônicos e diferencia `unknown_tables` de `0 rows`. Corrige a classe de falso positivo da v7.0.1."
+  - `Added` — "Teste CI `scripts/__tests__/db-referential-integrity.test.mjs` verifica zero órfãos em filhos de `pet_profiles` e `processed_studies` (CASCADE)."
+- Manter no **Backlog**:
+  - "Deprecar tabelas `medical_knowledge_graph` / `medical_knowledge_edges` (modelo legado — KG vivo já é `hierarchical_edges` + Neo4j)."
+  - "Expandir `lab_reference_ranges` para 200+ analitos canino com curadoria veterinária (hoje: 31 linhas)."
+- Rodar `npm run sync:changelog`.
+
+**4. Deploy + re-auditoria**
+- Deploy de `generate-audit`.
+- Pedir para você (ou eu disparar via UI quando indicar) re-rodar a auditoria; comparar `snapshot.counts` com os valores reais (`pets: 728`, `studies: 59`, `lab_ranges: 31`, `medical_knowledge_*: 0` legítimo).
+
+### Fora do escopo (confirmado)
+- Não mexer em `medical_knowledge_graph[_edges]` (deprecação adiada).
+- Não popular `lab_reference_ranges` (expansão adiada).
+- Não tocar em FKs/CASCADE (já corretas; zero órfãos hoje).
+
+Pode confirmar para sair do plan mode e aplicar?
+
+---
+
+## Histórico: Escopo anterior já entregue (Abordagem A — mascarar + travar por role)
 
 ### Mudanças a implementar agora
 
@@ -50,4 +100,4 @@ Entrada em `[Unreleased]`:
 3. Como admin, clicar "Salvar" sem editar um campo sensível: esperado no-op (early-return), nenhuma chamada à function.
 4. Como admin, colar uma nova chave válida: esperado `200`, valor real salvo no DB.
 
-Pode confirmar para eu sair do plan mode e aplicar?
+_(escopo anterior — concluído e mantido como referência histórica)_
