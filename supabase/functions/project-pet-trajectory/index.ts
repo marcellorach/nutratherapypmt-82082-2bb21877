@@ -13,6 +13,8 @@
 // Results are cached in `pet_trajectory_projections` (7-day TTL).
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { fetchSystemPrompt } from "../_shared/system-prompts.ts";
+import { logPromptUsage } from "../_shared/prompt-usage.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -311,10 +313,11 @@ Deno.serve(async (req) => {
       efficacy_0_5: e.efficacy_score,
     }));
 
-    const systemPrompt = `You are a veterinary longevity science engine. You produce CONSERVATIVE, evidence-grounded trajectory projections for a single dog.
+    const SYSTEM_FALLBACK = `You are a veterinary longevity science engine. You produce CONSERVATIVE, evidence-grounded trajectory projections for a single dog.
 You MUST cite the provided breed predispositions, knowledge graph (KG) evidence, and Gompertz aging curve. Do NOT invent facts.
 If evidence is insufficient, lower the confidence and explain.
 You MUST output through the function tool.`;
+    const systemPrompt = await fetchSystemPrompt('project_pet_trajectory', SYSTEM_FALLBACK);
 
     const userPayload = {
       pet: {
@@ -526,6 +529,7 @@ OUTPUT REQUIREMENTS:
     const model = "google/gemini-2.5-pro";
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 120_000);
+    const t0 = Date.now();
     let aiResp: Response;
     try {
     aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -556,12 +560,14 @@ OUTPUT REQUIREMENTS:
 
     if (!aiResp.ok) {
       if (aiResp.status === 429) {
+        logPromptUsage({ prompt_key: 'project_pet_trajectory', function_name: 'project-pet-trajectory', model, latency_ms: Date.now() - t0, success: false, error: '429' });
         return jsonResponse(
           { error: "rate_limited", message: "Limite de requisições atingido, tente novamente em instantes." },
           429,
         );
       }
       if (aiResp.status === 402) {
+        logPromptUsage({ prompt_key: 'project_pet_trajectory', function_name: 'project-pet-trajectory', model, latency_ms: Date.now() - t0, success: false, error: '402' });
         return jsonResponse(
           { error: "credits_exhausted", message: "Créditos da IA esgotados — adicione saldo no workspace." },
           402,
@@ -569,10 +575,20 @@ OUTPUT REQUIREMENTS:
       }
       const txt = await aiResp.text();
       console.error("AI gateway error", aiResp.status, txt);
+      logPromptUsage({ prompt_key: 'project_pet_trajectory', function_name: 'project-pet-trajectory', model, latency_ms: Date.now() - t0, success: false, error: `${aiResp.status}: ${txt.slice(0, 200)}` });
       return jsonResponse({ error: "ai_gateway_error", status: aiResp.status }, 500);
     }
 
     let aiJson = await aiResp.json();
+    logPromptUsage({
+      prompt_key: 'project_pet_trajectory',
+      function_name: 'project-pet-trajectory',
+      model,
+      latency_ms: Date.now() - t0,
+      tokens_in: aiJson?.usage?.prompt_tokens ?? null,
+      tokens_out: aiJson?.usage?.completion_tokens ?? null,
+      success: true,
+    });
     let toolCall = aiJson?.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall?.function?.arguments) {
       // Retry once with stricter instruction — some models occasionally

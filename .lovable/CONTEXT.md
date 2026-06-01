@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-06-01T01:02:17.709Z
+Generated: 2026-06-01T01:07:37.768Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
@@ -10,11 +10,23 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **curation**: 7
 - **kg**: 6
 - **meta**: 5
+- **clinical-pipeline**: 4
 - **vet-ui**: 4
-- **clinical-pipeline**: 2
 - **tutor-ui**: 1
 
 ## Top 10 recent entries
+### 2026-06-01 · [clinical-pipeline] CHANGED — Sprint 1 (Clinical) concluído: registro único de prompts
+- `project-pet-trajectory` → `project_pet_trajectory` (Gompertz + KG, modelo gemini-2.5-pro, output via tool-call). Smoke test 400 ok.
+- `translate-and-categorize-conditions` → `translate_text`. Teste end-to-end retornou 200 (60 categorizadas).
+- Telemetria `logPromptUsage` ativada em ambas (latência, tokens, erros).
+_files: supabase/functions/project-pet-trajectory/index.ts, supabase/functions/translate-and-categorize-conditions/index.ts, supabase/functions/_shared/system-prompts.ts_
+
+### 2026-06-01 · [clinical-pipeline] CHANGED — Migração `parse-pet-exam-pdf` para registro único de prompts
+- `parse-pet-exam-pdf` agora consome `parse_pet_exam_pdf` via `fetchSystemPrompt` (manifesto atualizado para refletir o schema analyte-keyed real consumido por `pet_exams.analysis_data`).
+- Telemetria via `logPromptUsage` (latência, tokens, sucesso/erro).
+- Smoke test 400 (payload inválido) passou — boot sem erros.
+_files: supabase/functions/parse-pet-exam-pdf/index.ts, supabase/functions/_shared/system-prompts.ts_
+
 ### 2026-06-01 · [clinical-pipeline] CHANGED — Migração `hybrid-recommendation` para registro único de prompts
 - `hybrid-recommendation` agora consome `hybrid_recommendation` (modo enrich) e `hybrid_recommendation_fallback` (modo fallback) via `fetchSystemPrompt`.
 - Adicionada telemetria via `logPromptUsage` (latência, tokens, sucesso/erro) em `ai_prompt_usage_log`.
@@ -63,18 +75,6 @@ _files: src/i18n.ts, supabase/functions/generate-audit/index.ts, src/components/
 - Edge function aceita `insight_id` para re-analisar 1 insight existente (UPDATE in-place com a melhor evidência quantitativa).
 - Novo botão "🧪" em cada card de Population Insights chama a re-análise individual.
 _files: supabase/functions/analyze-cohort-patterns/index.ts, src/components/administrador/priorizacoes/PopulationInsightsV0.tsx, src/i18n.ts_
-
-### 2026-05-27 · [admin] CHANGED — Rebatizar "Priorizações" → "AI Scientist" e mover para Research & Development
-- Aba `priorizacoes` renomeada para AI Scientist e movida do grupo `governance-ai` para `research` (primeira posição da sidebar de R&D).
-- Sidebar: removido item de Governance & AI, adicionado em `ResearchGroup` com ícone `Sparkles`.
-- Header da página `PriorizacoesTab` atualizado; nova chave i18n `admin.sidebar.research.aiScientist` (PT/EN = "AI Scientist").
-_files: src/config/admin-tabs.ts, src/components/administrador/sidebar/groups/ResearchGroup.tsx, src/components/administrador/sidebar/groups/GovernanceAIGroup.tsx, src/pages/administrador/PriorizacoesTab.tsx…_
-
-### 2026-05-27 · [curation] CHANGED — Painel de evidência no dialog de validação vet-curador
-- Problema identificado: o dialog de validação mostrava só título/resumo/confiança/sinais, sem expor os dados que sustentariam a decisão. O campo `evidence` dos insights gerados por `analyze-cohort-patterns` veio vazio (`{}`) — a confiança 80% era auto-declarada pelo LLM, sem nada auditável.
-- Painel "Evidência disponível" embutido no `VetCuratorReviewDialog`, computado em tempo real a partir de `pet_profiles` + `pet_conditions` + `pet_exams` da cohort de origem (sem chamada de LLM):
-- Suporte populacional: N/total pets que casam com os sinais + barra de progresso; aviso âmbar automático se N<10 ou suporte<20%; aviso vermelho se zero matches.
-_files: src/hooks/useInsightEvidence.ts, src/components/administrador/priorizacoes/VetCuratorReviewDialog.tsx, src/components/administrador/priorizacoes/PopulationInsightsV0.tsx, src/data/prioritizationBoard.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
