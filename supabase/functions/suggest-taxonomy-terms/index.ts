@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { fetchSystemPrompt } from "../_shared/system-prompts.ts";
+import { logPromptUsage } from "../_shared/prompt-usage.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,6 +23,15 @@ const TAXONOMY_CATEGORIES = [
   { key: 'breeds', description: 'Specific breeds' },
   { key: 'age_groups', description: 'Life stages (puppy, adult, senior, etc.)' },
 ];
+
+const PERSONA_FALLBACK = `You are a biomedical ontology expert. Your task is to classify entity names into the most appropriate taxonomy category.
+
+Rules:
+1. Choose the MOST specific and accurate category for each entity
+2. Provide a confidence score between 0 and 1
+3. Include brief reasoning for your classification
+4. Suggest alternative categories if applicable
+5. If unsure, use lower confidence and suggest alternatives`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -50,18 +61,13 @@ serve(async (req) => {
 
     const categoryDescriptions = TAXONOMY_CATEGORIES.map(c => `- ${c.key}: ${c.description}`).join('\n');
 
-    const systemPrompt = `You are a biomedical ontology expert specializing in ${context}.
-Your task is to classify entity names into the most appropriate taxonomy category.
+    const persona = await fetchSystemPrompt('suggest_taxonomy_terms', PERSONA_FALLBACK);
+    const systemPrompt = `${persona}
+
+Domain context: ${context}.
 
 Available categories:
-${categoryDescriptions}
-
-Rules:
-1. Choose the MOST specific and accurate category for each entity
-2. Provide a confidence score between 0 and 1
-3. Include brief reasoning for your classification
-4. Suggest alternative categories if applicable
-5. If unsure, use lower confidence and suggest alternatives`;
+${categoryDescriptions}`;
 
     const userPrompt = `Classify these biomedical entities into taxonomy categories:
 
@@ -69,6 +75,8 @@ ${entities.map((e: string, i: number) => `${i + 1}. ${e}`).join('\n')}
 
 For each entity, determine the most appropriate category from the available taxonomy.`;
 
+    const model = "google/gemini-2.5-flash";
+    const t0 = Date.now();
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -76,7 +84,7 @@ For each entity, determine the most appropriate category from the available taxo
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
@@ -132,7 +140,15 @@ For each entity, determine the most appropriate category from the available taxo
     if (!response.ok) {
       const errorText = await response.text();
       console.error("❌ AI Gateway error:", response.status, errorText);
-      
+      await logPromptUsage({
+        prompt_key: 'suggest_taxonomy_terms',
+        function_name: 'suggest-taxonomy-terms',
+        model,
+        latency_ms: Date.now() - t0,
+        success: false,
+        error: `HTTP ${response.status}`,
+      });
+
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
@@ -169,11 +185,21 @@ For each entity, determine the most appropriate category from the available taxo
     const result = JSON.parse(toolCall.function.arguments);
     console.log(`✅ Classified ${result.suggestions?.length || 0} entities`);
 
+    await logPromptUsage({
+      prompt_key: 'suggest_taxonomy_terms',
+      function_name: 'suggest-taxonomy-terms',
+      model,
+      latency_ms: Date.now() - t0,
+      tokens_in: data?.usage?.prompt_tokens,
+      tokens_out: data?.usage?.completion_tokens,
+      success: true,
+    });
+
     return new Response(
       JSON.stringify({ 
         success: true, 
         suggestions: result.suggestions,
-        model: "google/gemini-2.5-flash",
+        model,
         processed_at: new Date().toISOString()
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
