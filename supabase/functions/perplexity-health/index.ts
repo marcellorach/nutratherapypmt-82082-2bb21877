@@ -1,10 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { fetchSystemPrompt } from "../_shared/system-prompts.ts";
+import { logPromptUsage } from "../_shared/prompt-usage.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
 };
+
+const SYSTEM_FALLBACK = "Reply with the single word: ok";
 
 // Sonar family currently exposed by Perplexity.
 // We hard-code the catalog (Perplexity has no public "list models" endpoint)
@@ -49,6 +53,7 @@ serve(async (req) => {
 
   const start = Date.now();
   try {
+    const systemPrompt = await fetchSystemPrompt("perplexity_health_ping", SYSTEM_FALLBACK);
     const resp = await fetch("https://api.perplexity.ai/chat/completions", {
       method: "POST",
       headers: {
@@ -58,7 +63,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: requestedModel,
         messages: [
-          { role: "system", content: "Reply with the single word: ok" },
+          { role: "system", content: systemPrompt },
           { role: "user", content: "ping" },
         ],
         max_tokens: 5,
@@ -69,6 +74,14 @@ serve(async (req) => {
     const text = await resp.text();
 
     if (!resp.ok) {
+      await logPromptUsage({
+        prompt_key: "perplexity_health_ping",
+        function_name: "perplexity-health",
+        model: requestedModel,
+        latency_ms,
+        success: false,
+        error: `HTTP ${resp.status}`,
+      });
       // Surface the most useful HTTP-error fields so the UI can explain
       // auth/scope failures (401 invalid key, 403 model not in plan, 429 quota…).
       let parsed: any = null;
@@ -110,6 +123,14 @@ serve(async (req) => {
       const data = JSON.parse(text);
       model = data?.model;
     } catch (_) { /* ignore */ }
+
+    await logPromptUsage({
+      prompt_key: "perplexity_health_ping",
+      function_name: "perplexity-health",
+      model: model ?? requestedModel,
+      latency_ms,
+      success: true,
+    });
 
     return new Response(
       JSON.stringify({
