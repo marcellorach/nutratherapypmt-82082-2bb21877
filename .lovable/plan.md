@@ -1,58 +1,102 @@
-## Diagnóstico do desencontro
+## Decisão
+Unificar tudo num único hub **"Fontes Externas de Conhecimento"** dentro de Knowledge Base, com sub-abas. As telas espalhadas hoje viram seções dentro do hub.
 
-Hoje cada superfície lê a "versão" de um lugar diferente, e nada valida que elas batem:
+---
 
-| Tela | Mostra | Fonte real |
+## Diagnóstico (6 fontes externas, hoje espalhadas)
+
+| Fonte | API key | Onde está hoje |
 |---|---|---|
-| Header/Footer | `v7.0.0 · 2026-06-01` | `SENEX_VERSION` ← `senexVersion` (gerado do marker `<!-- senex: 7.0.0 -->` em CHANGELOG.md) |
-| Aba **Auditorias técnicas** | "Auditoria técnica **V7.0.1** · sistema i18n **1.115.8**" | `nextVersion` no `TechnicalAuditsTab.tsx` faz **auto-bump de PATCH** quando já existe auditoria com a versão Senex atual (7.0.0 → 7.0.1). O número da auditoria **não corresponde a nenhuma versão real do sistema**. O i18n vem certo (de `I18N_VERSION`) mas ficou defasado 1 minor (1.115.8 vs 1.115.9 atual). |
-| **Organograma** | "Updated on 2026-06-01 · 209 changelog entries" | `organogramaLastUpdated` (gerado por `sync:changelog`). Não exibe a versão Senex em lugar nenhum — parece desconectado. |
-| **Regulatory Compliance Dashboard** | botão "Run compliance check" | `ComplianceDashboard.tsx:174` grava `i18n_version: '1.86.3'` **hardcoded** (real: 1.115.9). O `system_version` vem de `SENEX_VERSION` (ok), mas o "check" só faz snapshot do array estático `COMPLIANCE_ITEMS` — não inspeciona código nem corre nada dinâmico. A UI também não diz qual versão está sendo auditada antes de clicar. |
+| UMLS / SNOMED-CT | `NLM_UMLS_API_KEY` (faltando) | `OntologyMappingTab` |
+| MeSH | — (dump XML) | `OntologyBulkImportTab` |
+| OMIA | — (dump txt) | `OntologyBulkImportTab` |
+| ChEBI / PubChem / KEGG | — (live REST) | `ExternalSearchPanel` (base-knowledge) + `OntologyMappingTab` |
+| PubMed / NCBI E-utilities | `NCBI_API_KEY` (opcional) | `kg-evidence-gap-fill`, `search-scientific-studies` |
+| Perplexity | `PERPLEXITY_API_KEY` | `kg-evidence-gap-fill`, `query-perplexity` |
 
-Resultado: três números de versão diferentes na mesma sessão e um check que parece "rodar" mas só persiste a checklist curada.
+Problemas: status fragmentado, instruções espalhadas em 3 docs, duplicação de UI entre `ExternalSearchPanel` e `OntologyMappingTab`.
 
-## Política de versionamento proposta (fonte única + bump explícito)
+---
 
-**Regra de ouro: SENEX_VERSION é a única versão do sistema.** Auditorias e compliance runs herdam essa versão — não inventam a própria.
+## Arquitetura proposta
 
-1. **Remover auto-bump de PATCH no `TechnicalAuditsTab`**.
-   - Se já existe auditoria com `v{SENEX_VERSION}`, o botão "Run new audit" fica desabilitado com tooltip explicativo: *"v7.0.0 já foi auditada. Para rodar nova auditoria, bumpe o marker `<!-- senex: 7.0.x -->` em `CHANGELOG.md` e rode `npm run sync:changelog`."*
-   - Exibe link/botão "Como bumpar versão?" abrindo um dialog com o passo-a-passo.
-   - Alternativa opcional: botão "Re-rodar (substitui anterior)" que marca a antiga como `superseded_by` (campo já existe na tabela) sem criar versão fantasma.
+**Uma rota nova** `/administrador?tab=external-sources` substitui o `OntologyHub` atual. Estrutura:
 
-2. **Validação server-side em `generate-audit`**: rejeita request cujo `version` não é exatamente `v{senexVersion}` lido do CHANGELOG no servidor. Mensagem clara: "Audit version must match SENEX_VERSION. Bump the changelog marker first."
+```text
+Knowledge Base → 🌐 Fontes Externas
+├─ 📊 Visão Geral        ← overview cards + secrets + mapa de uso (NOVO)
+├─ 🔗 Mapeamento         ← ex-OntologyMappingTab (UMLS/SNOMED por entidade)
+├─ 📥 Importar IDs       ← ex-OntologyBulkImportTab (dumps OMIA/MeSH/ChEBI)
+├─ 🔍 Busca Externa      ← ex-ExternalSearchPanel (live ChEBI/PubChem/KEGG)
+└─ 🧪 Auditoria Ontologia ← ex-OntologyAuditTab (classificação de entidades)
+```
 
-3. **`ComplianceDashboard` — corrigir e amarrar à fonte única**:
-   - Importar `I18N_VERSION` de `@/i18n` e `SENEX_VERSION`, `SENEX_LAST_UPDATE` de `@/config/senex-version`. Remover o `'1.86.3'` hardcoded.
-   - Antes do botão "Run compliance check", mostrar um banner: *"Will snapshot: Senex AI v7.0.0 · i18n 1.115.9 · changelog 2026-05-31 · 17 requirements."* — usuário sabe o que está rodando antes de clicar.
-   - Após o run, toast com a mesma string + link "View history" para o accordion já existente.
-   - Indicar explicitamente que o "check" é um snapshot da checklist curada (`complianceData.ts`, last reviewed YYYY-MM-DD) — não scan dinâmico de código. Ou renomear o botão para "Snapshot compliance status" para ser honesto.
+A aba "Ontology Audit" que existe hoje vira sub-aba também — todo o `OntologyHub.tsx` é substituído pelo novo hub. `ExternalSearchPanel` deixa de viver dentro de Base Knowledge e migra para cá (Base Knowledge mantém apenas o link "Buscar em fontes externas → Fontes Externas").
 
-4. **Novo componente compartilhado `<VersionBadge />`** (em `src/components/system/`):
-   - Renderiza inline: `Senex AI v{SENEX_VERSION} · i18n {I18N_VERSION} · changelog {SENEX_LAST_UPDATE}`.
-   - Usado no cabeçalho de: `TechnicalAuditsTab`, `ComplianceDashboard`, `OrganogramaTab`, `AboutSenexTab`.
-   - Divergência fica visualmente impossível — todos leem da mesma fonte no mesmo render.
+### Sub-aba "Visão Geral" (a parte nova)
 
-5. **Organograma**: exibir o `<VersionBadge />` ao lado de "Updated on …" para amarrar o `organogramaLastUpdated` à versão Senex correspondente.
+```text
+┌─ Status das 6 fontes (cards clicáveis → vão p/ sub-aba relevante)
+│  UMLS · SNOMED · MeSH · OMIA · ChEBI · PubMed · Perplexity
+│  Cada card: configured? · last_sync · entries · last_error · [Test]
+│
+├─ Chaves & Configuração
+│  - NLM_UMLS_API_KEY    [status]  [docs ↗]  [add via Lovable Cloud]
+│  - NCBI_API_KEY        [status]  [docs ↗]
+│  - PERPLEXITY_API_KEY  [status]  [docs ↗]
+│
+└─ Mapa de Impacto (tabela)
+   Fonte → Pipelines que consomem → Tabelas afetadas → Link p/ sub-aba
+```
 
-6. **Documentar a política** em uma nova memória `mem://workflow/versioning-policy` + nota curta em `docs/CORE_RULES.md`:
-   - "Para rodar uma nova auditoria/compliance check: (1) bumpe `<!-- senex: x.y.z -->` em CHANGELOG.md, (2) rode `npm run sync:changelog`, (3) confirme que header/footer mostram a nova versão, (4) só então clique 'Run new audit' / 'Run compliance check'."
+### Edge function nova: `external-sources-status`
+Uma chamada retorna `{ source, configured, last_sync, entries, last_error, latency_ms }[]` para todas as 6 fontes. Reaproveita lógica de `fetch-external-ontologies` (action `check_status`) e adiciona ping NCBI + Perplexity.
 
-## Arquivos afetados
+### Doc consolidado: `docs/EXTERNAL_SOURCES.md`
+Consolida `docs/ONTOLOGY_SOURCES.md` + instruções de UMLS/NCBI/Perplexity (URLs de cadastro, licenças, refresh, citação). Links clicáveis da UI.
 
-- `src/components/administrador/audits/TechnicalAuditsTab.tsx` (remover auto-bump, adicionar guard + dialog explicativo)
-- `src/components/administrador/compliance/ComplianceDashboard.tsx` (importar I18N_VERSION, remover hardcode, banner pré-run, renomear botão)
-- `src/components/system/VersionBadge.tsx` (novo)
-- `src/pages/administrador/OrganogramaTab.tsx` (adicionar badge)
-- `src/components/administrador/AboutSenexTab.tsx` (adicionar badge)
-- `supabase/functions/generate-audit/index.ts` (validação `version === v{senexVersion}`)
-- `.lovable/memory/workflow/versioning-policy.md` + index update
-- `CHANGELOG.md` + `npm run sync:changelog`
-- `src/i18n.ts` → bump `I18N_VERSION`
-- `src/locales/{pt,en}/translation.json` → chaves do banner/dialog
+---
 
-## Não incluído (confirmar se quer)
+## O que muda no código
 
-- Tornar o "compliance check" um scan dinâmico real (analisar código/RLS/edge functions automaticamente) — é trabalho substancial; hoje proponho apenas tornar o snapshot honesto e bem-versionado. Posso fazer numa segunda rodada se quiser.
+**Criados:**
+- `src/components/administrador/external-sources/ExternalSourcesHub.tsx` (shell com 5 sub-abas)
+- `src/components/administrador/external-sources/OverviewTab.tsx`
+- `src/components/administrador/external-sources/SourceStatusCard.tsx`
+- `src/components/administrador/external-sources/SecretsPanel.tsx`
+- `src/components/administrador/external-sources/UsageMap.tsx`
+- `supabase/functions/external-sources-status/index.ts`
+- `docs/EXTERNAL_SOURCES.md`
 
-Confirma que avanço com isso? Se sim, na implementação eu já faço o bump para `<!-- senex: 7.0.1 -->` (refletindo essa própria mudança) para você ver a nova política funcionando end-to-end.
+**Movidos / renomeados (mesmo conteúdo, novo lar):**
+- `OntologyAuditTab` → `external-sources/AuditSubTab.tsx` (re-export do existente)
+- `OntologyMappingTab` → `external-sources/MappingSubTab.tsx` (re-export)
+- `OntologyBulkImportTab` → `external-sources/BulkImportSubTab.tsx` (re-export)
+- `ExternalSearchPanel` → `external-sources/SearchSubTab.tsx` (wrapper que mantém o componente em base-knowledge funcional pelos imports legados)
+
+**Editados:**
+- `src/config/admin-tabs.ts` — substituir `ontology-audit` por `external-sources` (rota e ícone `Globe`)
+- `src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx` — renomear item
+- `src/components/administrador/AdministradorContent.tsx` — trocar `OntologyHub` por `ExternalSourcesHub`
+- `src/components/administrador/base-knowledge/*` — onde usar `ExternalSearchPanel`, manter o componente; remover a sub-aba duplicada e adicionar link "Abrir Fontes Externas"
+- `src/locales/{pt,en}/translation.json` — strings da nova UI
+- `src/i18n.ts` — bump `I18N_VERSION`
+- `supabase/config.toml` — `[functions.external-sources-status] verify_jwt = true`
+- `CHANGELOG.md` + `src/data/projectOrganograma.ts` + `npm run sync:changelog`
+
+**Deletado:**
+- `src/components/administrador/OntologyHub.tsx` (substituído)
+
+**Sem alterações:** schema do banco, RLS, edge functions existentes (UMLS/MeSH/ChEBI/OMIA/PubMed continuam consumidas pelas mesmas funções).
+
+---
+
+## Compatibilidade
+- URL antiga `?tab=ontology-audit` redireciona para `?tab=external-sources&sub=audit` (preserva deep-links).
+- Nenhuma mudança em pipelines (gap-fill, classificação, mapeamento) — só reorganização visual + status unificado.
+
+## Riscos
+- Sub-abas dentro de tab podem ficar densas em telas menores → garantir overflow horizontal nas tabs.
+- Refatoração toca 5 componentes existentes — risco de regressão visual mitigado pelo padrão "wrapper que re-exporta o componente original sem mudar lógica".
+
+Pronto para implementar?
