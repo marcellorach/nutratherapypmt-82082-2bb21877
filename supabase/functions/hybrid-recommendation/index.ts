@@ -424,6 +424,15 @@ Return your response as valid JSON following the structure specified.`;
     const aiResponse = await response.json();
     const content = aiResponse.choices?.[0]?.message?.content || '';
     console.log('AI response received:', content.substring(0, 300));
+    logPromptUsage({
+      prompt_key: promptKey,
+      function_name: 'hybrid-recommendation',
+      model,
+      latency_ms: Date.now() - t0,
+      tokens_in: aiResponse?.usage?.prompt_tokens ?? null,
+      tokens_out: aiResponse?.usage?.completion_tokens ?? null,
+      success: true,
+    });
 
     const debugPayload = debug ? {
       longitudinal: longitudinalDebug,
