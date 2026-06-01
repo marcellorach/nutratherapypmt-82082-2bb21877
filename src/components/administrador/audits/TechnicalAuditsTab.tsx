@@ -150,8 +150,18 @@ export default function TechnicalAuditsTab() {
     ]);
     if (a.data) {
       setAudits(a.data as unknown as TechnicalAudit[]);
-      const firstActive = (a.data as Array<{ id: string; superseded_by: string | null }>)
-        .find((x) => !x.superseded_by);
+      const actives = (a.data as unknown as TechnicalAudit[]).filter((x) => !x.superseded_by);
+      const sorted = [...actives].sort((x, y) => {
+        const px = (x.version || "0.0.0").split(".").map((n) => parseInt(n, 10) || 0);
+        const py = (y.version || "0.0.0").split(".").map((n) => parseInt(n, 10) || 0);
+        for (let i = 0; i < Math.max(px.length, py.length); i++) {
+          const dx = px[i] ?? 0;
+          const dy = py[i] ?? 0;
+          if (dx !== dy) return dy - dx;
+        }
+        return (y.audit_date || "").localeCompare(x.audit_date || "");
+      });
+      const firstActive = sorted[0];
       if (!selectedId && firstActive) setSelectedId(firstActive.id);
       // Reatar polling em auditorias ainda processando (ex.: usuário recarregou a aba).
       const inflight = (a.data as unknown as TechnicalAudit[]).find(
@@ -337,7 +347,22 @@ export default function TechnicalAuditsTab() {
 
   const activeAudits = useMemo(() => audits.filter((a) => !a.superseded_by), [audits]);
   const supersededAudits = useMemo(() => audits.filter((a) => a.superseded_by), [audits]);
-  const visibleAudits = showSuperseded ? audits : activeAudits;
+  // Ordena por versão semântica desc (mais recente à esquerda), com fallback
+  // por audit_date desc quando a versão não é parseável.
+  const compareVersionDesc = (a: TechnicalAudit, b: TechnicalAudit) => {
+    const pa = (a.version || "0.0.0").split(".").map((n) => parseInt(n, 10) || 0);
+    const pb = (b.version || "0.0.0").split(".").map((n) => parseInt(n, 10) || 0);
+    for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+      const da = pa[i] ?? 0;
+      const db = pb[i] ?? 0;
+      if (da !== db) return db - da;
+    }
+    return (b.audit_date || "").localeCompare(a.audit_date || "");
+  };
+  const visibleAudits = useMemo(
+    () => [...(showSuperseded ? audits : activeAudits)].sort(compareVersionDesc),
+    [audits, activeAudits, showSuperseded],
+  );
 
   const runWatchdog = async () => {
     setWatching(true);
