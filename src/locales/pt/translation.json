@@ -439,7 +439,7 @@
     "library": {
       "title": "Biblioteca de Estudos",
       "studies": "estudos",
-      "searchPlaceholder": "Buscar por título ou autor...",
+      "searchPlaceholder": "Tema, condição, composto, autor, título...",
       "year": "Ano",
       "journal": "Periódico",
       "allYears": "Todos os Anos",
