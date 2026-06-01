@@ -411,13 +411,20 @@ export default function TechnicalAuditsTab() {
           <p className="text-[11px] text-muted-foreground mt-2 italic">
             {t("audits.ownership")}
           </p>
+          <div className="mt-3">
+            <VersionBadge />
+          </div>
         </div>
 
         <Dialog open={newOpen} onOpenChange={setNewOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2">
+            <Button className="gap-2" disabled={alreadyAuditedThisVersion} title={alreadyAuditedThisVersion
+              ? `v${SENEX_VERSION} já foi auditada. Bumpe o marker "<!-- senex: x.y.z -->" em CHANGELOG.md e rode npm run sync:changelog para liberar uma nova auditoria.`
+              : undefined}>
               <Plus className="h-4 w-4" />
-              {t("audits.newButton", { version: nextVersion })}
+              {alreadyAuditedThisVersion
+                ? `${nextVersion} já auditada — bumpe SENEX_VERSION`
+                : t("audits.newButton", { version: nextVersion })}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
