@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-06-01T00:33:04.268Z
+Generated: 2026-06-01T00:44:22.240Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
 ## Latest i18n version: 1.115.8
 
 ## Changes by area (last 14 days)
-- **admin**: 46
+- **admin**: 47
 - **curation**: 7
 - **kg**: 6
 - **meta**: 5
@@ -15,6 +15,13 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **clinical-pipeline**: 1
 
 ## Top 10 recent entries
+### 2026-06-01 · [admin] ADDED — Telemetria de uso de prompts + lint de compliance do registro
+_status: parcial_
+- Nova tabela `ai_prompt_usage_log` (prompt_key, function_name, model, latency_ms, tokens_in, tokens_out, success, error). Leitura admin-only via RLS; insert via service role.
+- Helper `supabase/functions/_shared/prompt-usage.ts` (`logPromptUsage`) — não-bloqueante, REST direta, zero deps. Pode ser chamado por qualquer edge function logo após a chamada LLM.
+- Script `scripts/audit-prompt-registry.mjs` (npm: `audit:prompts`) detecta edge functions com `role: 'system'` hardcoded que ainda não usam `fetchSystemPrompt`/`getSystemPrompt`. Suporta `--json` e `--strict` (CI-friendly).
+_files: supabase/functions/_shared/prompt-usage.ts, scripts/audit-prompt-registry.mjs, .lovable/plan.md_
+
 ### 2026-06-01 · [admin] ADDED — Catálogo de prompts com metadados + export PDF + log de auditoria completo
 - `ai_system_prompts` ganhou colunas de contexto: `purpose`, `model_default`, `temperature`, `output_format`, `consumers[]`, `tags[]`, `example_input`, `last_used_at`. Os 24 prompts existentes foram seedados com propósito, modelo padrão e tags.
 - `SystemPromptsCatalog` agora exibe badges (modelo, temperatura, formato, tags) e propósito de cada prompt, e oferece dois botões de export PDF: catálogo completo (com filtro aplicado) e prompt individual. PDFs são gerados via popup HTML estilizada + `window.print()`, preservando Unicode e dispensando libs externas.
@@ -68,12 +75,6 @@ _files: src/components/administrador/priorizacoes/VetCuratorReviewDialog.tsx, sr
 - Top flags laboratoriais normalizadas: novo `lab-flag-canonicalizer.ts` unifica abreviaturas/PT (HCT↔Hematócrito, PLT↔Plt, ALT↔TGP, AST↔TGO, FA↔ALP, Ureia↔BUN, Creatinina↔Creatinine, etc.). Counts somados, top-12 mantido.
 - `ref ?–?` ocultado: `formatLabValue` em `InsightDrillDownDialog` agora só emite a faixa de referência quando ao menos um dos limites é numérico — exames qualitativos (citologia de linfoma linfoblástico) ficam sem o bloco feio.
 _files: src/services/condition-name-localizer.ts, src/services/lab-flag-canonicalizer.ts, src/components/administrador/priorizacoes/CohortStatsPanel.tsx, src/components/administrador/priorizacoes/InsightDrillDownDialog.tsx…_
-
-### 2026-05-27 · [admin] ADDED — Painel de Priorizações: 2 cards novos + tag "Valida vet-curador"
-- Novo card `cohort-suggester-hardening` (in_test) representando o trabalho do dia: edge function `suggest-cohort-ideas` com gemini-3.1-pro-preview, validação server-side e fallback gpt-5.4.
-- Novo card `cohort-suggestions-clinical-review` (next) para a revisão clínica das 6 sugestões geradas pela vet-curadora — bloqueia o envio do documento ao parceiro clínico sem validação.
-- Novo campo `requiresVetCuratorValidation` no tipo `PrioritizationCard` + badge rosa "Valida vet-curador" (ícone estetoscópio) no `PrioritizationCardItem`. Aplicado inicialmente ao card de revisão clínica.
-_files: src/data/prioritizationBoard.ts, src/components/administrador/priorizacoes/PrioritizationCard.tsx_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

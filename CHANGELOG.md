@@ -24,6 +24,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.0 -->
 
+### Added - 2026-06-01 — Telemetria de uso de prompts + lint de compliance do registro
+<!-- area: admin · status: parcial · i18n: 1.115.8 -->
+- Nova tabela `ai_prompt_usage_log` (prompt_key, function_name, model, latency_ms, tokens_in, tokens_out, success, error). Leitura admin-only via RLS; insert via service role.
+- Helper `supabase/functions/_shared/prompt-usage.ts` (`logPromptUsage`) — não-bloqueante, REST direta, zero deps. Pode ser chamado por qualquer edge function logo após a chamada LLM.
+- Script `scripts/audit-prompt-registry.mjs` (npm: `audit:prompts`) detecta edge functions com `role: 'system'` hardcoded que ainda não usam `fetchSystemPrompt`/`getSystemPrompt`. Suporta `--json` e `--strict` (CI-friendly).
+- Estado inicial do lint: **1 compliant / 23 pendentes** — backlog para a Fase 2 (migração função-a-função) documentado em `.lovable/plan.md`.
+- Files: supabase/functions/_shared/prompt-usage.ts, scripts/audit-prompt-registry.mjs, package.json
+
 ### Added - 2026-06-01 — Catálogo de prompts com metadados + export PDF + log de auditoria completo
 <!-- area: admin · status: entregue · i18n: 1.115.8 -->
 - `ai_system_prompts` ganhou colunas de contexto: `purpose`, `model_default`, `temperature`, `output_format`, `consumers[]`, `tags[]`, `example_input`, `last_used_at`. Os 24 prompts existentes foram seedados com propósito, modelo padrão e tags.

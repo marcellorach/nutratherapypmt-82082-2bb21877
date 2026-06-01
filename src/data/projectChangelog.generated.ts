@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-01T00:33:04.262Z
+// Última geração: 2026-06-01T00:44:22.235Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,26 @@ export const lastChangelogDate = "2026-06-01";
 export const senexVersion = "7.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-01",
+    "kind": "added",
+    "area": "admin",
+    "status": "parcial",
+    "title": "Telemetria de uso de prompts + lint de compliance do registro",
+    "bullets": [
+      "Nova tabela `ai_prompt_usage_log` (prompt_key, function_name, model, latency_ms, tokens_in, tokens_out, success, error). Leitura admin-only via RLS; insert via service role.",
+      "Helper `supabase/functions/_shared/prompt-usage.ts` (`logPromptUsage`) — não-bloqueante, REST direta, zero deps. Pode ser chamado por qualquer edge function logo após a chamada LLM.",
+      "Script `scripts/audit-prompt-registry.mjs` (npm: `audit:prompts`) detecta edge functions com `role: 'system'` hardcoded que ainda não usam `fetchSystemPrompt`/`getSystemPrompt`. Suporta `--json` e `--strict` (CI-friendly).",
+      "Estado inicial do lint: 1 compliant / 23 pendentes — backlog para a Fase 2 (migração função-a-função) documentado em `.lovable/plan.md`.",
+      "Files: supabase/functions/_shared/prompt-usage.ts, scripts/audit-prompt-registry.mjs, package.json"
+    ],
+    "files": [
+      "supabase/functions/_shared/prompt-usage.ts",
+      "scripts/audit-prompt-registry.mjs",
+      ".lovable/plan.md"
+    ],
+    "i18nVersion": "1.115.8"
+  },
   {
     "date": "2026-06-01",
     "kind": "added",

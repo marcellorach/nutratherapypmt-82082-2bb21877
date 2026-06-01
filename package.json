@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "sync:changelog": "node scripts/sync-changelog.mjs",
     "check:translations": "node scripts/check-translation-duplicates.mjs",
+    "audit:prompts": "node scripts/audit-prompt-registry.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
   },
