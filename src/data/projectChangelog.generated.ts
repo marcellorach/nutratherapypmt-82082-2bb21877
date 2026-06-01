@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-01T01:07:37.763Z
+// Última geração: 2026-06-01T01:10:29.697Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,25 @@ export const lastChangelogDate = "2026-06-01";
 export const senexVersion = "7.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-01",
+    "kind": "changed",
+    "area": "kg",
+    "status": "entregue",
+    "title": "`kg-evidence-gap-fill` migrado para o registro único de prompts",
+    "bullets": [
+      "Adicionados `kg_gap_fill_gemini` e `kg_gap_fill_perplexity` ao manifesto `_shared/system-prompts.ts` (com metadata, consumers e tags).",
+      "`assessWithGemini` e `assessWithPerplexity` agora carregam o system prompt via `fetchSystemPrompt(...)` com fallback verbatim para garantir continuidade quando o DB está indisponível.",
+      "Telemetria via `logPromptUsage` em ambos os caminhos (success/erro/HTTP-fail), com latência e tokens quando disponíveis.",
+      "Compliance do `npm run audit:prompts`: 7/24 funções com LLM agora usam o registro.",
+      "Files: supabase/functions/_shared/system-prompts.ts, supabase/functions/kg-evidence-gap-fill/index.ts"
+    ],
+    "files": [
+      "supabase/functions/_shared/system-prompts.ts",
+      "supabase/functions/kg-evidence-gap-fill/index.ts"
+    ],
+    "i18nVersion": "n/a"
+  },
   {
     "date": "2026-06-01",
     "kind": "changed",

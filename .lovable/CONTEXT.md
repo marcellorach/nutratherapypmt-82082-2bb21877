@@ -1,20 +1,26 @@
 # Project context briefing (auto)
-Generated: 2026-06-01T01:07:37.768Z
+Generated: 2026-06-01T01:10:29.703Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: -
+## Latest i18n version: n/a
 
 ## Changes by area (last 14 days)
 - **admin**: 48
+- **kg**: 7
 - **curation**: 7
-- **kg**: 6
 - **meta**: 5
 - **clinical-pipeline**: 4
 - **vet-ui**: 4
 - **tutor-ui**: 1
 
 ## Top 10 recent entries
+### 2026-06-01 · [kg] CHANGED — `kg-evidence-gap-fill` migrado para o registro único de prompts
+- Adicionados `kg_gap_fill_gemini` e `kg_gap_fill_perplexity` ao manifesto `_shared/system-prompts.ts` (com metadata, consumers e tags).
+- `assessWithGemini` e `assessWithPerplexity` agora carregam o system prompt via `fetchSystemPrompt(...)` com fallback verbatim para garantir continuidade quando o DB está indisponível.
+- Telemetria via `logPromptUsage` em ambos os caminhos (success/erro/HTTP-fail), com latência e tokens quando disponíveis.
+_files: supabase/functions/_shared/system-prompts.ts, supabase/functions/kg-evidence-gap-fill/index.ts_
+
 ### 2026-06-01 · [clinical-pipeline] CHANGED — Sprint 1 (Clinical) concluído: registro único de prompts
 - `project-pet-trajectory` → `project_pet_trajectory` (Gompertz + KG, modelo gemini-2.5-pro, output via tool-call). Smoke test 400 ok.
 - `translate-and-categorize-conditions` → `translate_text`. Teste end-to-end retornou 200 (60 categorizadas).
@@ -69,12 +75,6 @@ _files: supabase/functions/generate-audit/index.ts_
 - O prompt passou a tratar qualquer escopo curto como ênfase adicional, nunca como permissão para gerar auditoria reduzida; o padrão obrigatório agora é standalone + cumulativo.
 - `TechnicalAuditsTab` deixou de usar uma versão i18n hardcoded antiga e passou a ler `I18N_VERSION` diretamente de `src/i18n.ts`, evitando novos relatórios com metadado retrocedido.
 _files: src/i18n.ts, supabase/functions/generate-audit/index.ts, src/components/administrador/audits/TechnicalAuditsTab.tsx_
-
-### 2026-05-27 · [curation] CHANGED — Evidência quantitativa obrigatória + re-análise por insight
-- `analyze-cohort-patterns`: schema de `evidence` agora exige campos estruturados (`n_supporting`, `n_total`, `prevalence`, `comparison_baseline`, `effect_size`, `notes`). Prompt reforçado para derivar números dos agregados ou não emitir o insight.
-- Edge function aceita `insight_id` para re-analisar 1 insight existente (UPDATE in-place com a melhor evidência quantitativa).
-- Novo botão "🧪" em cada card de Population Insights chama a re-análise individual.
-_files: supabase/functions/analyze-cohort-patterns/index.ts, src/components/administrador/priorizacoes/PopulationInsightsV0.tsx, src/i18n.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
