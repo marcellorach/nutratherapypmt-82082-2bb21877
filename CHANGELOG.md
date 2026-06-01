@@ -24,6 +24,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.0 -->
 
+### Changed - 2026-06-01 — Migração `parse-pet-exam-pdf` para registro único de prompts
+<!-- area: clinical-pipeline · status: entregue · i18n: - -->
+- `parse-pet-exam-pdf` agora consome `parse_pet_exam_pdf` via `fetchSystemPrompt` (manifesto atualizado para refletir o schema analyte-keyed real consumido por `pet_exams.analysis_data`).
+- Telemetria via `logPromptUsage` (latência, tokens, sucesso/erro).
+- Smoke test 400 (payload inválido) passou — boot sem erros.
+- Compliance: 4/24 funções no registro (próximo: `project-pet-trajectory`).
+- Files: supabase/functions/parse-pet-exam-pdf/index.ts, supabase/functions/_shared/system-prompts.ts
+
 ### Changed - 2026-06-01 — Migração `hybrid-recommendation` para registro único de prompts
 <!-- area: clinical-pipeline · status: entregue · i18n: - -->
 - `hybrid-recommendation` agora consome `hybrid_recommendation` (modo enrich) e `hybrid_recommendation_fallback` (modo fallback) via `fetchSystemPrompt`.
