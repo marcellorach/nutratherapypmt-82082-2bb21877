@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-06-01T17:07:25.416Z",
+  "timestamp": "2026-06-01T17:46:08.968Z",
   "summary": {
-    "totalFiles": 946,
-    "totalIssues": 465,
+    "totalFiles": 951,
+    "totalIssues": 468,
     "hardcodedTexts": 54,
-    "missingKeys": 409,
+    "missingKeys": 412,
     "incompleteTranslations": 2
   },
   "issues": [
@@ -1634,6 +1634,27 @@
     },
     {
       "type": "missing-key",
+      "file": "src/components/administrador/external-sources/ExternalSourcesHub.tsx",
+      "line": 20,
+      "text": "sub",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/external-sources/ExternalSourcesHub.tsx",
+      "line": 25,
+      "text": "tab",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/external-sources/ExternalSourcesHub.tsx",
+      "line": 28,
+      "text": "sub",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/administrador/fundamentos/CoreRulesEvidenceBadge.tsx",
       "line": 37,
       "text": "relation, weight, quote, rule_id, core_rules!inner(title, rule_id)",
@@ -2671,28 +2692,28 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 266,
+      "line": 289,
       "text": "audit_base_system_{pt,en}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 1578,
+      "line": 1601,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 1789,
+      "line": 1812,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 4584,
+      "line": 4607,
       "text": "@",
       "severity": "high"
     },
