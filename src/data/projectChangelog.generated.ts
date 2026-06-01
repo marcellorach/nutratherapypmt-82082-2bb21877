@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-01T01:02:17.704Z
+// Última geração: 2026-06-01T01:07:37.763Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,46 @@ export const lastChangelogDate = "2026-06-01";
 export const senexVersion = "7.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-01",
+    "kind": "changed",
+    "area": "clinical-pipeline",
+    "status": "entregue",
+    "title": "Sprint 1 (Clinical) concluído: registro único de prompts",
+    "bullets": [
+      "`project-pet-trajectory` → `project_pet_trajectory` (Gompertz + KG, modelo gemini-2.5-pro, output via tool-call). Smoke test 400 ok.",
+      "`translate-and-categorize-conditions` → `translate_text`. Teste end-to-end retornou 200 (60 categorizadas).",
+      "Telemetria `logPromptUsage` ativada em ambas (latência, tokens, erros).",
+      "Sprint 1 completa: 6/24 funções com LLM no registro (generate-audit, relations-auditor, hybrid-recommendation, parse-pet-exam-pdf, project-pet-trajectory, translate-and-categorize-conditions).",
+      "Próximo: Sprint 2 (KG) — kg-evidence-gap-fill, chat-meta-study, evaluate-meta-study-reliability, analyze-cohort-patterns, analyze-all-cohorts-patterns.",
+      "Files: supabase/functions/project-pet-trajectory/index.ts, supabase/functions/translate-and-categorize-conditions/index.ts, supabase/functions/_shared/system-prompts.ts"
+    ],
+    "files": [
+      "supabase/functions/project-pet-trajectory/index.ts",
+      "supabase/functions/translate-and-categorize-conditions/index.ts",
+      "supabase/functions/_shared/system-prompts.ts"
+    ],
+    "i18nVersion": "-"
+  },
+  {
+    "date": "2026-06-01",
+    "kind": "changed",
+    "area": "clinical-pipeline",
+    "status": "entregue",
+    "title": "Migração `parse-pet-exam-pdf` para registro único de prompts",
+    "bullets": [
+      "`parse-pet-exam-pdf` agora consome `parse_pet_exam_pdf` via `fetchSystemPrompt` (manifesto atualizado para refletir o schema analyte-keyed real consumido por `pet_exams.analysis_data`).",
+      "Telemetria via `logPromptUsage` (latência, tokens, sucesso/erro).",
+      "Smoke test 400 (payload inválido) passou — boot sem erros.",
+      "Compliance: 4/24 funções no registro (próximo: `project-pet-trajectory`).",
+      "Files: supabase/functions/parse-pet-exam-pdf/index.ts, supabase/functions/_shared/system-prompts.ts"
+    ],
+    "files": [
+      "supabase/functions/parse-pet-exam-pdf/index.ts",
+      "supabase/functions/_shared/system-prompts.ts"
+    ],
+    "i18nVersion": "-"
+  },
   {
     "date": "2026-06-01",
     "kind": "changed",
