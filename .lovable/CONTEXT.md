@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-06-01T16:07:27.777Z
+Generated: 2026-06-01T17:17:55.062Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.116.0
+## Latest i18n version: 1.117.0
 
 ## Changes by area (last 14 days)
-- **admin**: 49
+- **admin**: 50
 - **kg**: 7
 - **curation**: 7
 - **meta**: 6
@@ -16,6 +16,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **tutor-ui**: 1
 
 ## Top 10 recent entries
+### 2026-06-01 · [admin] ADDED — Hub unificado de Fontes Externas
+- Nova aba `Knowledge Base → Fontes Externas` (`src/components/administrador/external-sources/ExternalSourcesHub.tsx`) consolida tudo que estava espalhado: status, chaves, mapeamento SNOMED/UMLS, importação de IDs (OMIA/MeSH/ChEBI), busca externa ao vivo e auditoria de ontologia em sub-abas (`?tab=external-sources&sub=...`).
+- Sub-aba "Visão Geral" nova: cards por fonte (UMLS, SNOMED, MeSH, OMIA, ChEBI, PubMed, Perplexity) com configured/reachable/latência/entries, painel de chaves (`NLM_UMLS_API_KEY`, `NCBI_API_KEY`, `PERPLEXITY_API_KEY`) com links "Como obter", e mapa de impacto mostrando para cada fonte os pipelines e tabelas consumidores.
+- Edge function `external-sources-status` (`verify_jwt = true`) faz ping ao vivo em todas as fontes públicas + endpoints autenticados e devolve contagens reais de `health_conditions.snomed_code`/`umls_cui`.
+_files: src/components/administrador/external-sources/ExternalSourcesHub.tsx, supabase/functions/external-sources-status/index.ts, src/config/admin-tabs.ts, src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx…_
+
 ### 2026-06-01 · [admin] CHANGED — Versionamento unificado: SENEX_VERSION como fonte única
 - Novo `<VersionBadge />` (`src/components/system/VersionBadge.tsx`) — lê de `SENEX_VERSION`, `I18N_VERSION` e `lastChangelogDate` e é usado em header de Auditorias, Compliance e Organograma. Divergência entre superfícies fica visualmente impossível.
 - `ComplianceDashboard`: removido `i18n_version: '1.86.3'` hardcoded — agora persiste `I18N_VERSION` real. Botão renomeado para "Snapshot compliance (v… · i18n …)" com badge da versão acima, deixando explícito que é snapshot da checklist curada amarrado à versão atual.
@@ -69,12 +75,6 @@ _files: supabase/functions/project-pet-trajectory/index.ts, supabase/functions/t
 - Telemetria via `logPromptUsage` (latência, tokens, sucesso/erro).
 - Smoke test 400 (payload inválido) passou — boot sem erros.
 _files: supabase/functions/parse-pet-exam-pdf/index.ts, supabase/functions/_shared/system-prompts.ts_
-
-### 2026-06-01 · [clinical-pipeline] CHANGED — Migração `hybrid-recommendation` para registro único de prompts
-- `hybrid-recommendation` agora consome `hybrid_recommendation` (modo enrich) e `hybrid_recommendation_fallback` (modo fallback) via `fetchSystemPrompt`.
-- Adicionada telemetria via `logPromptUsage` (latência, tokens, sucesso/erro) em `ai_prompt_usage_log`.
-- Strings antigas preservadas como fallback verbatim caso o registro DB esteja inacessível.
-_files: supabase/functions/hybrid-recommendation/index.ts, supabase/functions/_shared/system-prompts.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

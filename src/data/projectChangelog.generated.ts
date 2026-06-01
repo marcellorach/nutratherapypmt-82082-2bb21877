@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-01T16:07:27.771Z
+// Última geração: 2026-06-01T17:17:55.057Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,29 @@ export const lastChangelogDate = "2026-06-01";
 export const senexVersion = "7.0.1";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-01",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Hub unificado de Fontes Externas",
+    "bullets": [
+      "Nova aba `Knowledge Base → Fontes Externas` (`src/components/administrador/external-sources/ExternalSourcesHub.tsx`) consolida tudo que estava espalhado: status, chaves, mapeamento SNOMED/UMLS, importação de IDs (OMIA/MeSH/ChEBI), busca externa ao vivo e auditoria de ontologia em sub-abas (`?tab=external-sources&sub=...`).",
+      "Sub-aba \"Visão Geral\" nova: cards por fonte (UMLS, SNOMED, MeSH, OMIA, ChEBI, PubMed, Perplexity) com configured/reachable/latência/entries, painel de chaves (`NLM_UMLS_API_KEY`, `NCBI_API_KEY`, `PERPLEXITY_API_KEY`) com links \"Como obter\", e mapa de impacto mostrando para cada fonte os pipelines e tabelas consumidores.",
+      "Edge function `external-sources-status` (`verify_jwt = true`) faz ping ao vivo em todas as fontes públicas + endpoints autenticados e devolve contagens reais de `health_conditions.snomed_code`/`umls_cui`.",
+      "Alias legado: `?tab=ontology-audit` continua resolvendo (redireciona transparentemente para `external-sources` na sub-aba `audit`), preservando deep-links existentes.",
+      "i18n PT/EN parity (namespace `externalSources.*`) + sidebar renomeado para \"Fontes Externas\" com ícone `Globe`.",
+      "Files: src/components/administrador/external-sources/{ExternalSourcesHub,OverviewTab,SourceStatusCard,SecretsPanel,UsageMap}.tsx, supabase/functions/external-sources-status/index.ts, src/config/admin-tabs.ts, src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx, src/locales/{pt,en}/translation.json, src/i18n.ts, supabase/config.toml"
+    ],
+    "files": [
+      "src/components/administrador/external-sources/ExternalSourcesHub.tsx",
+      "supabase/functions/external-sources-status/index.ts",
+      "src/config/admin-tabs.ts",
+      "src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.117.0"
+  },
   {
     "date": "2026-06-01",
     "kind": "changed",
