@@ -131,13 +131,40 @@ Contexto: nutracêuticos veterinários para longevidade/geroproteção canina. A
 
   if (!resp.ok) {
     const text = await resp.text();
+    logPromptUsage({
+      prompt_key: 'evaluate_meta_study_reliability',
+      function_name: 'evaluate-meta-study-reliability',
+      model,
+      latency_ms: Date.now() - t0,
+      success: false,
+      error: `http_${resp.status}`,
+    });
     throw new Error(`AI gateway ${resp.status}: ${text.slice(0, 300)}`);
   }
 
   const data = await resp.json();
   const toolCall = data?.choices?.[0]?.message?.tool_calls?.[0];
-  if (!toolCall) throw new Error("Sem tool call na resposta");
+  if (!toolCall) {
+    logPromptUsage({
+      prompt_key: 'evaluate_meta_study_reliability',
+      function_name: 'evaluate-meta-study-reliability',
+      model,
+      latency_ms: Date.now() - t0,
+      success: false,
+      error: 'no_tool_call',
+    });
+    throw new Error("Sem tool call na resposta");
+  }
   const args = JSON.parse(toolCall.function.arguments || "{}");
+  logPromptUsage({
+    prompt_key: 'evaluate_meta_study_reliability',
+    function_name: 'evaluate-meta-study-reliability',
+    model,
+    latency_ms: Date.now() - t0,
+    tokens_in: data?.usage?.prompt_tokens ?? null,
+    tokens_out: data?.usage?.completion_tokens ?? null,
+    success: true,
+  });
 
   return {
     methodology: clamp(args.methodology),
@@ -225,7 +252,7 @@ Deno.serve(async (req) => {
         continue;
       }
       try {
-        const r = await evaluateOne(s);
+        const r = await evaluateOne(s, systemPrompt);
         const update = {
           reliability_methodology: r.methodology,
           reliability_evidence_base: r.evidence_base,
