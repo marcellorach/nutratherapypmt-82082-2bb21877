@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-06-01T00:59:57.201Z
+Generated: 2026-06-01T01:02:17.709Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
@@ -11,10 +11,16 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **kg**: 6
 - **meta**: 5
 - **vet-ui**: 4
+- **clinical-pipeline**: 2
 - **tutor-ui**: 1
-- **clinical-pipeline**: 1
 
 ## Top 10 recent entries
+### 2026-06-01 · [clinical-pipeline] CHANGED — Migração `hybrid-recommendation` para registro único de prompts
+- `hybrid-recommendation` agora consome `hybrid_recommendation` (modo enrich) e `hybrid_recommendation_fallback` (modo fallback) via `fetchSystemPrompt`.
+- Adicionada telemetria via `logPromptUsage` (latência, tokens, sucesso/erro) em `ai_prompt_usage_log`.
+- Strings antigas preservadas como fallback verbatim caso o registro DB esteja inacessível.
+_files: supabase/functions/hybrid-recommendation/index.ts, supabase/functions/_shared/system-prompts.ts_
+
 ### 2026-06-01 · [admin] CHANGED — Migração `generate-audit` para registro único de prompts
 - `generate-audit` agora carrega o prompt-base PT/EN via `fetchSystemPrompt('audit_base_system_{pt,en}')` (manifest em `_shared/system-prompts.ts`).
 - Override legado por `audit_prompt_versions` preservado; fallback verbatim mantém comportamento atual se o DB estiver offline.
@@ -69,12 +75,6 @@ _files: src/config/admin-tabs.ts, src/components/administrador/sidebar/groups/Re
 - Painel "Evidência disponível" embutido no `VetCuratorReviewDialog`, computado em tempo real a partir de `pet_profiles` + `pet_conditions` + `pet_exams` da cohort de origem (sem chamada de LLM):
 - Suporte populacional: N/total pets que casam com os sinais + barra de progresso; aviso âmbar automático se N<10 ou suporte<20%; aviso vermelho se zero matches.
 _files: src/hooks/useInsightEvidence.ts, src/components/administrador/priorizacoes/VetCuratorReviewDialog.tsx, src/components/administrador/priorizacoes/PopulationInsightsV0.tsx, src/data/prioritizationBoard.ts_
-
-### 2026-05-27 · [curation] ADDED — Validação vet-curador de insights de cohort
-- Governança clínica fechada: cada `cohort_insights` ganhou `vet_review_status` (`pending`/`approved`/`rejected`/`needs_changes`), `vet_review_notes`, `vet_reviewed_by` e `vet_reviewed_at`. Default `pending`, com check constraint e índice no status.
-- Badge no card do kanban Population Insights v0 mostra o status com cor (cinza/verde/vermelho/âmbar) e abre o dialog de revisão ao clicar.
-- Botão "validar" em cada card abre `VetCuratorReviewDialog`: exibe título, resumo, confiança, sinais, model e o status atual; campo de notas clínicas; três ações — Aprovar (verde), Rejeitar (vermelho), Requer ajustes (âmbar).
-_files: src/components/administrador/priorizacoes/VetCuratorReviewDialog.tsx, src/components/administrador/priorizacoes/PopulationInsightsV0.tsx, src/data/prioritizationBoard.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

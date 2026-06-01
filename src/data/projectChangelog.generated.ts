@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-01T00:59:57.196Z
+// Última geração: 2026-06-01T01:02:17.704Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,25 @@ export const lastChangelogDate = "2026-06-01";
 export const senexVersion = "7.0.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-01",
+    "kind": "changed",
+    "area": "clinical-pipeline",
+    "status": "entregue",
+    "title": "Migração `hybrid-recommendation` para registro único de prompts",
+    "bullets": [
+      "`hybrid-recommendation` agora consome `hybrid_recommendation` (modo enrich) e `hybrid_recommendation_fallback` (modo fallback) via `fetchSystemPrompt`.",
+      "Adicionada telemetria via `logPromptUsage` (latência, tokens, sucesso/erro) em `ai_prompt_usage_log`.",
+      "Strings antigas preservadas como fallback verbatim caso o registro DB esteja inacessível.",
+      "Compliance: 3/24 funções com LLM no registro (próximo alvo: `parse-pet-exam-pdf`).",
+      "Files: supabase/functions/hybrid-recommendation/index.ts, supabase/functions/_shared/system-prompts.ts"
+    ],
+    "files": [
+      "supabase/functions/hybrid-recommendation/index.ts",
+      "supabase/functions/_shared/system-prompts.ts"
+    ],
+    "i18nVersion": "-"
+  },
   {
     "date": "2026-06-01",
     "kind": "changed",
