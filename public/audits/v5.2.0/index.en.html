@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="lovable-agent · paridade V3 · cumulativa" />
+  <meta name="dcterms.date" content="2026-05-31" />
+  <title>Auditoria Senex AI v5.2.0</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body><header id="title-block-header"><h1 class="title">Senex AI Audit v5.2.0</h1>
+<p class="author">lovable-agent · parity V3 · cumulative</p>
+<p class="date">2026-05-31</p>
+</header><h1 id="auditoria-técnica-senex-ai-v5.2.0">Technical Audit Senex AI —
+v5.2.0</h1>
+<p><strong>Version:</strong> 5.2.0 · <strong>Date:</strong> 31/05/2026
+· <strong>i18n:</strong> 1.115.6 · <strong>Type:</strong> standalone
+cumulative<br />
+<strong>Supersedes:</strong> v5.1.0 (18/05/2026) · <strong>Operational
+authorship:</strong> PetMoreTime · <strong>Public brand:</strong>
+Senex AI</p>
+<blockquote>
+<p>This audit is <strong>self-contained</strong>. It fully
+inherits the structural base of v3 (10/05/2026) and v5.1.0
+(18/05/2026), updates live database metrics, and explicitly marks the
+changes from the period 18/05 → 27/05/2026 in Section 1.1. v5.1.0 is
+preserved for historical purposes (<code>superseded_by = v5.2.0</code>).</p>
+</blockquote>
+<hr /><h2 id="sumário-executivo">1. Executive summary</h2>
+<p>The <strong>Senex AI</strong> platform (public brand; internal successor to
+VetGraphRAG/VetMedGraph, operated exclusively by
+<strong>PetMoreTime</strong>) is a veterinary clinical decision-support system
+focused on metabolic and degenerative conditions in canines, supported by
+a 5-layer causal Knowledge Graph (Compounds → Mechanisms →
+Pathways → Conditions → Outcomes), hybrid recommendation limited to 8
+synergistic compounds per patient, a sigmoidal (Gompertz) Digital Twin per
+breed, and a HITL (Human-In-The-Loop) pipeline that prevents the integration of any
+triplet or population insight without curatorial approval.</p>
+<p><strong>Status as of 05/31/2026:</strong></p>
+<ul>
+<li><strong>18 consolidated strengths</strong>, highlighting a strict no-mock
+policy, PT/EN bilingualism with i18n versioning, RLS +
+<code>has_role</code> on all critical tables, gatekeeper curation
+now extended to population insights, standardized SNOMED-CT VetSCT + UMLS
+taxonomy, and mandatory quantitative evidence validation.</li>
+<li><strong>9 gaps</strong> (down from 12 → 9 since v5.1.0): 3 mitigated
+during the period (partial formal PCCP, HITL population validation, quantitative
+evidence).</li>
+<li><strong>4 risks</strong> (down from 5 → 4): LLM drift mitigated by
+server-side validation + provider fallback.</li>
+<li><strong>Regulatory compliance:</strong> FDA Draft Jan/2025 6/7
+(was 5/7), EMA Sep/2024 + EU AI Act 4/4 (was 3/4), AVMA Nov/2025 2/4
+(unchanged), GMLP 8/10 + 2 partial (was 7/10 + 3 partial).</li>
+<li><strong>67 Edge Functions</strong> deployed; <strong>8 active
+prompts</strong> in <code>ai_prompt_versions</code>; <strong>97 public
+tables</strong>; <strong>6 users with roles</strong>; <strong>668
+pets</strong> (5 demo).</li>
+<li><strong>Knowledge Graph:</strong> 4,785 total triplets, 3,924
+approved, 4,411 synchronized to Neo4j, 38,643 hierarchical_edges, 191
+conditions, 81 breeds with Gompertz, 254 breed predispositions, 941
+veterinary ontology nodes.</li>
+<li><strong>Vectorization:</strong> 13 studies with 1,342 distinct
+vectorized chunks (44 distinct embedding models registered).</li>
+<li><strong>Curation:</strong> 59 studies processed, 30
+nutraceuticals, 50 drug_substances, 58 dosage references, 31
+lab_ranges, 6 meta-studies.</li>
+</ul><h3 id="mudanças-desde-a-v5.1.0-1805-27052026">1.1 Changes since
+v5.1.0 (18/05 → 27/05/2026)</h3>
+<p>5 relevant structural changes, all with a direct impact on
+previously listed gaps/risks:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Change</th>
+<th>Area</th>
+<th>Impact on gaps/risks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>AI Scientist</strong> (renamed from “Prioritizations”)
+repositioned to Research &amp; Development</td>
+<td>admin/AI</td>
+<td>Supports GMLP §1 (clear scope). Repositions it as a scientific
+product, not an operational task.</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Vet-curator validation</strong> now mandatory in
+<code>cohort_insights</code> (status
+pending/approved/rejected/needs_changes; automatic trigger for a new
+audit)</td>
+<td>curation</td>
+<td>Closes the HITL loop before a population insight becomes a clinical
+rule. Mitigates the "self-approved wrong triplet" risk and the "formal PCCP"
+gap.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Mandatory quantitative evidence</strong>
+(<code>n_supporting</code>, <code>n_total</code>,
+<code>prevalence</code>, <code>effect_size</code>,
+<code>comparison_baseline</code>, <code>notes</code>)</td>
+<td>curation/AI</td>
+<td>Eliminates self-declared confidence by the LLM. Addresses FDA §III.B
+(transparency) and EMA §4.2 (traceability).</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>PT/EN canonicalization</strong> +
+<code>lab-flag-canonicalizer.ts</code> (HCT↔︎Hematocrit, ALT↔︎TGP,
+AST↔︎TGO, FA↔︎ALP, Urea↔︎BUN, Creatinine↔︎Creatinine)</td>
+<td>i18n/clinical</td>
+<td>Ends the Osteoarthritis/Osteoartrite duplication. Reinforces the
+core's "Bilingual System" rule.</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Hardening of <code>suggest-cohort-ideas</code></strong>:
+migration to <code>google/gemini-3.1-pro-preview</code> + server-side
+validation of 4 rules + <code>gpt-5.4</code> fallback</td>
+<td>infra/AI</td>
+<td>Forced coverage of the 6 target models. Mitigates "LLM drift"
+(medium).</td>
+</tr>
+</tbody>
+</table>
+<hr /><h2 id="glossário-13-termos-chave">2. Glossary (13 key terms)</h2>
+<ul>
+<li><strong>HITL</strong> — Human-In-The-Loop. A veterinary curator
+validates triplets and insights before promotion.</li>
+<li><strong>KG (Knowledge Graph)</strong> — 5-layer causal graph in
+Neo4j + Supabase relational mirror.</li>
+<li><strong>Triplet</strong> — <code>(subject, predicate, object)</code>
+extracted from a scientific study via LLM, with normalized strength and confidence.</li>
+<li><strong>Hierarchical Edge</strong> — A concrete edge in the graph
+derived from an approved triplet, with evidence_level and
+evidence_count.</li>
+<li><strong>L0–L4</strong> — Ontology layers: Compounds (L0),
+Mechanisms (L1), Pathways (L2), Conditions (L3), Outcomes (L4).</li>
+<li><strong>RLS</strong> — PostgreSQL's Row Level Security; controls
+row-level access via <code>has_role(auth.uid(), 'admin')</code>.</li>
+<li><strong>Digital Twin</strong> — Gompertz-based sigmoidal projection
+of canine longevity with <code>years_gained</code> per
+intervention.</li>
+<li><strong>Stack</strong> — Synergistic set of up to 8 compounds
+recommended for the patient.</li>
+<li><strong>Gap-fill pipeline</strong> — PubMed E-utilities search +
+Gemini structuring to fill in missing (compound × condition)
+pairs.</li>
+<li><strong>i18n_version</strong> — Cache-busting marker in
+<code>src/i18n.ts</code>; must be incremented with each bilingual change.</li>
+<li><strong>No-mock policy</strong> — All clinical data displayed comes from
+the real DB or an Edge Function; nothing is mocked.</li>
+<li><strong>Curation gatekeeper</strong> — Principle that isolates
+triplets/insights until manual approval.</li>
+<li><strong>SNOMED-CT VetSCT / UMLS</strong> — Canonical vocabularies
+for conditions and compounds.</li>
+</ul>
+<hr /><h2 id="metodologia">3. Methodology</h2>
+<p>This audit combines 4 approaches:</p>
+<ol type="1">
+<li><strong>Code review</strong> — <code>src/</code>,
+<code>supabase/functions/</code>, <code>supabase/migrations/</code>,
+<code>src/data/biomedical-taxonomy.ts</code>,
+<code>src/data/projectOrganograma.ts</code>.</li>
+<li><strong>Live database inspection</strong> — <code>read_query</code> on
+18 tables (technical_audits, audit_requests, audit_settings,
+user_roles, triplet_extractions, hierarchical_edges, study_embeddings,
+processed_studies, health_conditions, breeds, breed_predispositions,
+dosage_references, lab_ranges, meta_studies, nutraceuticals,
+drug_substances, vet_ontology_nodes, ai_prompt_versions).</li>
+<li><strong>Documentary benchmark 2025–2026</strong> — FDA AI/ML SaMD
+Draft (Jan/2025), EMA Reflection Paper on AI (Sep/2024), EU AI Act
+(Mar/2024), AVMA Position on Veterinary AI (Nov/2025), GMLP 10 Guiding
+Principles (FDA/Health Canada/MHRA Oct/2021, update Jun/2025).</li>
+<li><strong>Known limitations</strong> — this audit is generated by an
+LLM (lovable-agent) with final human approval; the code has never been
+audited by an independent third party; the 2026 benchmarks may have
+updates subsequent to the cut-off date.</li>
+</ol>
+<hr /><h2 id="visão-arquitetural-5-camadas">4. Architectural view — 5
+layers</h2>
+<pre><code>┌─────────────────────────────────────────────────────┐
+│ L4 — Outcomes (longevity, quality of life)          │
+├─────────────────────────────────────────────────────┤
+│ L3 — Conditions (191 conditions; metabolic/degen.)  │
+├─────────────────────────────────────────────────────┤
+│ L2 — Pathways (mTOR, AMPK, NAD+, autophagy…)        │
+├─────────────────────────────────────────────────────┤
+│ L1 — Mechanisms (anti-inflammatory, geroprotective…)│
+├─────────────────────────────────────────────────────┤
+│ L0 — Compounds (30 nutraceuticals + 50 drugs)       │
+└─────────────────────────────────────────────────────┘</code></pre>
+<figure>
+<img src="media/02_kg_5layers.png" alt="5 layers of the KG" />
+<figcaption aria-hidden="true">5 layers of the KG</figcaption>
+</figure>
+<p>Total of 941 nodes in the veterinary ontology + 254 breed
+predispositions covering 81 breeds with individual Gompertz curves.</p>
+<hr /><h2 id="pipeline-de-digestão-7-estágios">5. Digestion Pipeline (7 Stages)</h2>
+<figure>
+<img src="media/01_pipeline_7stages.png" alt="7-stage pipeline" />
+<figcaption aria-hidden="true">7-stage pipeline</figcaption>
+</figure>
+<ol type="1">
+<li><strong>Upload + dedup SHA-256</strong> — blocks duplicate PDFs;
+Levenshtein on the title prevents re-uploads with slightly altered names.</li>
+<li><strong>Chunking</strong> — semantic division for LLMs with a limited
+context window.</li>
+<li><strong>Vectorization (text-embedding-004)</strong> — prerequisite for
+curation (the curator needs the "Source Snippet"). Centralized trigger
+at <code>extract-study-entities</code> via
+<code>EdgeRuntime.waitUntil</code>.</li>
+<li><strong>Stage 1 — entity extraction</strong> (gemini-2.5-pro /
+gemini-3.1-pro-preview).</li>
+<li><strong>Stage 2 — triplet extraction</strong> (high-quality models;
+adaptive chunking).</li>
+<li><strong>Stage 3 — enrichment</strong> (intensity, dosage,
+species, evidence_level).</li>
+<li><strong>HITL Curation</strong> — gatekeeper. Triplets with ≥50%
+confidence are auto-approved; &lt;50% remain pending. Population insights
+(cohort_insights) have also undergone validation by a vet-curator since
+05/27.</li>
+</ol>
+<hr /><h2 id="vetorização-e-embeddings">6. Vectorization and embeddings</h2>
+<ul>
+<li><strong>Primary model:</strong> <code>text-embedding-004</code>
+(768 dimensions via <code>pgvector</code>).</li>
+<li><strong>Legacy models in coexistence:</strong> 44 distinct versions
+registered in <code>embedding_model_version</code> (P1 gap:
+consolidated migration pending).</li>
+<li><strong>Current coverage:</strong> 13 studies processed with 1,342
+distinct vectorized chunks.</li>
+<li><strong>RPC function:</strong>
+<code>search_study_chunks(query_embedding, match_study_id, match_threshold=0.7, match_count=5)</code>.</li>
+<li><strong>Index:</strong> HNSW on
+<code>study_embeddings.embedding</code>.</li>
+</ul>
+<hr /><h2 id="banco-relacional-e-rls">7. Relational database and RLS</h2>
+<p>97 tables in the <code>public</code> schema. Critical tables with
+RLS:</p>
+<ul>
+<li><code>user_roles</code> —
+<code>app_role enum ('admin','moderator','user')</code>. The
+<code>is_admin()</code> / <code>has_role()</code> function is SECURITY DEFINER,
+prevents recursion.</li>
+<li><code>technical_audits</code>, <code>audit_requests</code>,
+<code>audit_settings</code> — admin only.</li>
+<li><code>pet_profiles</code>, <code>pet_conditions</code>,
+<code>pet_exams</code>, <code>pet_consultations</code>,
+<code>pet_medications</code> — vet/admin.</li>
+<li><code>triplet_extractions</code>, <code>hierarchical_edges</code>,
+<code>study_embeddings</code> — broad authenticated read, restricted
+write.</li>
+<li><code>cohort_insights</code> — <code>vet_review_status</code>
+field now with check constraint + index (new in v5.2.0).</li>
+<li>Storage buckets: <code>study_pdfs</code>,
+<code>pet_exams_pdfs</code>, <code>meta_studies_pdfs</code>,
+<code>ontology-indexes</code> (private); <code>pet-photos</code>,
+<code>meta-study-covers</code> (public).</li>
+</ul>
+<figure>
+<img src="media/03_governance_rls.png" alt="RLS Governance" />
+<figcaption aria-hidden="true">RLS Governance</figcaption>
+</figure>
+<hr /><h2 id="uso-de-llm-por-edge-function-8-prompts-ativos">8. LLM Usage by
+Edge Function (8 active prompts)</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Function</th>
+<th>Primary Model</th>
+<th>Fallback</th>
+<th>Task</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>extract-study-entities</td>
+<td>gemini-2.5-pro</td>
+<td>—</td>
+<td>Stage 1 entities</td>
+</tr>
+<tr>
+<td>process-study</td>
+<td>gemini-3.1-pro-preview</td>
+<td>gpt-5.4</td>
+<td>Stage 2 triplets</td>
+</tr>
+<tr>
+<td>enrich-triplet</td>
+<td>gemini-2.5-flash</td>
+<td>—</td>
+<td>Stage 3 intensity/dosage</td>
+</tr>
+<tr>
+<td>chat-meta-study</td>
+<td>gpt-5.4</td>
+<td>gemini-2.5-pro</td>
+<td>Review chat</td>
+</tr>
+<tr>
+<td>analyze-cohort-patterns</td>
+<td>gemini-3.1-pro-preview</td>
+<td>gpt-5.4</td>
+<td>Population insights (reinforced schema)</td>
+</tr>
+<tr>
+<td>suggest-cohort-ideas</td>
+<td>gemini-3.1-pro-preview (★ new)</td>
+<td>gpt-5.4</td>
+<td>6 cohorts × 6 models</td>
+</tr>
+<tr>
+<td>relations-auditor</td>
+<td>gemini-2.5-pro</td>
+<td>—</td>
+<td>Conversational KG auditor</td>
+</tr>
+<tr>
+<td>translate-and-categorize-conditions</td>
+<td>gemini-2.5-flash</td>
+<td>—</td>
+<td>i18n PT/EN</td>
+</tr>
+</tbody>
+</table>
+<p><strong>67 Edge Functions</strong> deployed in total; 8 with versioned prompts
+in <code>ai_prompt_versions</code>.</p>
+<hr /><h2 id="knowledge-graph-neo4j-espelho-supabase">9. Knowledge Graph
+(Neo4j + Supabase mirror)</h2>
+<ul>
+<li><strong>Canonical IDs:</strong> always
+<code>node.properties.id</code> (Supabase UUID), never
+<code>elementId</code> (core memory).</li>
+<li><strong>Synchronization:</strong> approved triplets
+(<code>curation_status='approved'</code>) sync to Neo4j;
+a trigger resets <code>synced_to_neo4j</code> upon demotion.</li>
+<li><strong>UI Rendering:</strong> <code>react-force-graph-3d</code> with
+WebGL to scale to 38k+ edges.</li>
+<li><strong>Live counts (05/31):</strong> 4,785 total triplets ·
+3,924 approved (82%) · 4,411 synced · 38,643 hierarchical_edges
+· 191 conditions · 941 vet_ontology_nodes.</li>
+</ul>
+<hr /><h2 id="análise-do-paciente-6-estágios">10. Patient analysis — 6
+stages</h2>
+<figure>
+<img src="media/04_hybrid_recommendation.png"
+alt="Hybrid recommendation" />
+<figcaption aria-hidden="true">Hybrid recommendation</figcaption>
+</figure>
+<ol type="1">
+<li><strong>Capture</strong> — structured form + AI extraction from exam
+PDFs (<code>parse-pet-exam-pdf</code>).</li>
+<li><strong>Canonicalization</strong> —
+<code>condition-name-localizer</code>,
+<code>lab-flag-canonicalizer</code>,
+<code>clinical-name-canonicalizer</code>.</li>
+<li><strong>Cross-reference</strong> —
+<code>clinical-discovery-cross-reference-analysis</code> correlates
+labs/meds/conditions/breed.</li>
+<li><strong>Patient subgraph</strong> —
+<code>useTreatablePathways</code> trims the KG to relevant
+conditions/compounds.</li>
+<li><strong>Stack therapy</strong> — hybrid recommendation limited to 8
+synergistic compounds.</li>
+<li><strong>Projection</strong> — Sigmoidal Digital Twin with
+<code>years_gained</code> adjusted by breed.</li>
+</ol>
+<hr /><h2 id="recomendação-híbrida-cap-8">11. Hybrid recommendation (ch
+8)</h2>
+<figure>
+<img src="media/05_digital_twin.png" alt="Digital Twin" />
+<figcaption aria-hidden="true">Digital Twin</figcaption>
+</figure>
+<ul>
+<li>The <code>condition-insights</code> edge function consumes the pet's complete
+clinical context.</li>
+<li>Product rule: <strong>maximum of 8 compounds</strong> per stack,
+deduplication by alphanumeric key.</li>
+<li>Human-readable names (no <code>nmn_v2_internal</code>); KG
+fallback when data is missing.</li>
+<li>Clinical transparency: any recommendation without raw KG data is
+flagged (in-memory principle).</li>
+</ul>
+<hr /><h2 id="digital-twin-sigmoidal-gompertz">12. Sigmoidal Digital Twin
+(Gompertz)</h2>
+<ul>
+<li>81 breeds with individual curves.</li>
+<li><code>evidence-based-projection-engine</code> calculates baseline
+severity × sigmoidal outcome.</li>
+<li><strong>Gap P1:</strong> some breeds still lack a fine-tuned curve (generic
+default is applied).</li>
+</ul>
+<hr /><h2 id="jornada-real-do-revisor-veterinário">13. Actual veterinary reviewer journey</h2>
+<pre><code>Login → Curation Tab → pending queue → opens triplet → sees:
+  ├── Source snippet (vectorized)
+  ├── Subject/predicate/object
+  ├── Confidence + evidence_level
+  ├── Inline chat with auditor LLM
+  └── [Approve | Reject | Request enrichment]
+       └── if approved → sync Neo4j + render in the graph</code></pre>
+<p><strong>New since v5.2.0:</strong> same journey now for population
+<code>cohort_insights</code>.</p>
+<hr /><h2 id="jornada-prevista-do-revisor-roadmap">14. Planned Reviewer Journey (Roadmap)</h2>
+<ul>
+<li>Batch validation with batch approval (P2).</li>
+<li>Structured justification (radio + free-text) for FDA audit (P0).</li>
+<li>Visual diff between the original triplet and the enriched version (P2).</li>
+</ul>
+<hr /><h2 id="jornada-real-do-estudo-científico">15. Actual Scientific Study Workflow</h2>
+<pre><code>PDF upload → SHA-256 dedup → vetorização → Stage 1 → Stage 2 → Stage 3
+  → curadoria pending → aprovação → KG render + Neo4j sync</code></pre>
+<hr /><h2 id="jornada-prevista-do-estudo-roadmap">16. Planned study journey (roadmap)</h2>
+<ul>
+<li>Europe PMC + bioRxiv as additional sources (P2).</li>
+<li>VLM (Vision-Language Model) for figures (P3).</li>
+<li>Continuous MedQA-style evaluation (P3).</li>
+</ul>
+<hr /><h2 id="comparação-medgraphrag-vetgraphrag-senex-ai">17. Comparison:
+MedGraphRAG × VetGraphRAG × Senex AI</h2>
+<figure>
+<img src="media/10_comparison.png" alt="Comparison" />
+<figcaption aria-hidden="true">Comparison</figcaption>
+</figure>
+<ul>
+<li><strong>MedGraphRAG (2024)</strong> — human, focused on paper
+retrieval with a flat graph.</li>
+<li><strong>VetGraphRAG (2025, internal)</strong> — first veterinary
+incarnation, no HITL governance.</li>
+<li><strong>Senex AI v5.2.0 (2026)</strong> — 5 causal layers, dual
+HITL (triplets + insights), Digital Twin per breed, bilingual PT/EN,
+80%+ compliance with FDA/EMA/AVMA/GMLP points.</li>
+</ul>
+<hr /><h2 id="conformidade-fda-draft-jan2025-67">18. FDA Compliance (Draft
+Jan/2025) — 6/7</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>Status v5.2.0</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>§III.A Predetermined Change Control Plan</td>
+<td><strong>partial</strong></td>
+<td>PCCP described in prose; formal versioned document is missing.</td>
+</tr>
+<tr>
+<td>§III.B Transparency</td>
+<td><strong>covered</strong> ★</td>
+<td>Mandatory quantitative evidence (n_supporting, prevalence…).</td>
+</tr>
+<tr>
+<td>§III.C Risk management</td>
+<td><strong>covered</strong></td>
+<td>Gaps + risks audited with each release.</td>
+</tr>
+<tr>
+<td>§III.D Data quality</td>
+<td><strong>covered</strong></td>
+<td>SHA-256 dedup, pre-curation vectorization.</td>
+</tr>
+<tr>
+<td>§III.E Performance monitoring</td>
+<td><strong>covered</strong></td>
+<td>Live metrics in the <code>summary</code> of each audit.</td>
+</tr>
+<tr>
+<td>§III.F Cybersecurity</td>
+<td><strong>covered</strong></td>
+<td>RLS + has_role + signed URLs + private storage buckets.</td>
+</tr>
+<tr>
+<td>§III.G Real-World Performance Monitoring</td>
+<td><strong>gap</strong></td>
+<td>Longitudinal RWPM still in P0.</td>
+</tr>
+</tbody>
+</table>
+<hr /><h2 id="conformidade-ema-set2024-eu-ai-act-44">19. EMA Compliance
+(Sep/2024) + EU AI Act — 4/4</h2>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>§4.1 Risk classification (high-risk medical AI)</td>
+<td>covered</td>
+</tr>
+<tr>
+<td>§4.2 Traceability of evidence</td>
+<td><strong>covered</strong> ★</td>
+</tr>
+<tr>
+<td>§4.3 Human oversight</td>
+<td>covered (dual HITL)</td>
+</tr>
+<tr>
+<td>§4.4 Data governance</td>
+<td>covered</td>
+</tr>
+</tbody>
+</table>
+<hr /><h2 id="conformidade-avma-nov2025-24">20. AVMA Compliance (Nov/2025) —
+2/4</h2>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Veterinarian-in-the-loop</td>
+<td>covered</td>
+</tr>
+<tr>
+<td>Scope transparency to client</td>
+<td>covered</td>
+</tr>
+<tr>
+<td>Continuing education for vets using AI</td>
+<td><strong>gap</strong></td>
+</tr>
+<tr>
+<td>Liability disclosure</td>
+<td><strong>gap</strong></td>
+</tr>
+</tbody>
+</table>
+<hr /><h2 id="gmlp-10-princípios-8-cobertos-2-parciais">21. GMLP — 10
+principles (8 covered + 2 partial)</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Principle</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Multi-disciplinary expertise</td>
+<td>covered</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Good software engineering</td>
+<td>covered</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Clinical study participants representative</td>
+<td><strong>partial</strong> (demo cohorts + limited real pets)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Training/test independence</td>
+<td>covered</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Reference standard well characterized</td>
+<td>covered (SNOMED + UMLS)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Model design tailored</td>
+<td>covered</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Human-AI team performance</td>
+<td><strong>partial</strong> (HITL implemented, human vs AI metric
+pending)</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Testing demonstrates performance</td>
+<td>covered</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Users provided clear info</td>
+<td>covered</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Deployed models monitored</td>
+<td>covered</td>
+</tr>
+</tbody>
+</table>
+<hr /><h2 id="forças-18">22. Strengths (18)</h2>
+<ol type="1">
+<li>Strict no-mock policy (core rule).</li>
+<li>PT/EN bilingualism with I18N_VERSION cache-bust.</li>
+<li>RLS + <code>has_role</code> SECURITY DEFINER without recursion.</li>
+<li>Gatekeeper curation for triplets AND population insights.</li>
+<li>SNOMED-CT VetSCT + UMLS as canonical vocabularies.</li>
+<li>Pre-curation vectorization (curator sees source).</li>
+<li>Canonical IDs (UUID, never elementId).</li>
+<li>Therapeutic cap of 8 compounds.</li>
+<li>SHA-256 + Levenshtein title dedup.</li>
+<li>Sigmoidal Digital Twin by breed.</li>
+<li>Edge functions with provider fallback (gpt-5.4 backup).</li>
+<li>Immutable audit trail (technical_audits + audit_requests).</li>
+<li>Anti-lie trigger (auto-fulfill of audit_requests).</li>
+<li>Soft delete for studies + ‘DELETE’ typing for bulk.</li>
+<li>Mermaid + ASCII diagrams in PR docs.</li>
+<li>Parsable structured changelog
+(<code>&lt;!-- area · status · i18n --&gt;</code>).</li>
+<li>Manual org chart (not auto-derived from the sidebar).</li>
+<li>Mandatory quantitative validation of evidence (★ v5.2.0).</li>
+</ol>
+<hr /><h2 id="gaps-e-riscos-9-4">23. Gaps and Risks (9 + 4)</h2><h3 id="gaps">Gaps</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>ID</th>
+<th>Severity</th>
+<th>Description</th>
+<th>Planned Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>G1</td>
+<td>P0</td>
+<td>Missing longitudinal RWPM</td>
+<td>Next quarter</td>
+</tr>
+<tr>
+<td>G2</td>
+<td>P0</td>
+<td>L1-L3 base still largely manual</td>
+<td>Assisted pipeline</td>
+</tr>
+<tr>
+<td>G3</td>
+<td>P0</td>
+<td>species_constraint not enforced on all triplets</td>
+<td>Server-side validator</td>
+</tr>
+<tr>
+<td>G4</td>
+<td>P1</td>
+<td>Legacy embeddings (44 versions coexisting)</td>
+<td>Consolidated migration</td>
+</tr>
+<tr>
+<td>G5</td>
+<td>P1</td>
+<td>Missing CE module (Continuing Education)</td>
+<td>Content + LMS</td>
+</tr>
+<tr>
+<td>G6</td>
+<td>P1</td>
+<td>Incomplete Gompertz for all 81 breeds</td>
+<td>Curve-fitting batch</td>
+</tr>
+<tr>
+<td>G7</td>
+<td>P1</td>
+<td>Undocumented bias audit</td>
+<td>Formal framework</td>
+</tr>
+<tr>
+<td>G8</td>
+<td>P2</td>
+<td>Europe PMC/bioRxiv not integrated</td>
+<td>Additional sources</td>
+</tr>
+<tr>
+<td>G9</td>
+<td>P3</td>
+<td>VLM for figures not implemented</td>
+<td>Vision pipeline</td>
+</tr>
+</tbody>
+</table><h3 id="riscos">Risks</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>ID</th>
+<th>Severity</th>
+<th>Description</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R1</td>
+<td>high</td>
+<td>Cross-species extrapolation (human→canine) without a flag</td>
+<td>species_constraint enforcement</td>
+</tr>
+<tr>
+<td>R2</td>
+<td>medium</td>
+<td>Increasing AI cost</td>
+<td>Caching + cheaper models where tolerable</td>
+</tr>
+<tr>
+<td>R3</td>
+<td>medium</td>
+<td>LLM drift in production</td>
+<td>Healthcheck + prompt diffs</td>
+</tr>
+<tr>
+<td>R4</td>
+<td>low</td>
+<td>RLS bypass via service_role in edge functions</td>
+<td>Periodic usage audit</td>
+</tr>
+</tbody>
+</table>
+<hr /><h2 id="roadmap-p0p3">24. Roadmap P0–P3</h2>
+<ul>
+<li><strong>P0 (next 4 weeks):</strong> Formal written PCCP;
+species_constraint enforcement; assisted L1-L3 base.</li>
+<li><strong>P1 (next quarter):</strong> consolidate embeddings, CE
+module, complete Gompertz, bias audit framework.</li>
+<li><strong>P2:</strong> Europe PMC/bioRxiv, batch approval in
+curation.</li>
+<li><strong>P3:</strong> VLM figures, MedQA-style eval.</li>
+</ul>
+<hr /><h2 id="apêndice-a-schema-sql-principal">25. Appendix A — Main SQL Schema</h2>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- Roles</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TYPE</span> app_role <span class="kw">AS</span> ENUM (<span class="st">&#39;admin&#39;</span>,<span class="st">&#39;moderator&#39;</span>,<span class="st">&#39;user&#39;</span>);</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> user_roles (<span class="kw">id</span> uuid PK, user_id uuid → auth.users, <span class="kw">role</span> app_role);</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">-- Mirror KG</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> triplet_extractions (<span class="kw">id</span> uuid PK, study_id uuid, subject_name text,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  predicate text, object_name text, confidence <span class="dt">numeric</span>, evidence_level text,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  curation_status text <span class="kw">DEFAULT</span> <span class="st">&#39;pending&#39;</span>, synced_to_neo4j bool <span class="kw">DEFAULT</span> <span class="kw">false</span>);</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> hierarchical_edges (<span class="kw">id</span> uuid PK, triplet_id uuid, source_type text,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  source_id uuid, target_type text, target_id uuid, relationship text,</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  confidence <span class="dt">numeric</span>, evidence_count <span class="dt">int</span>, evidence_level text);</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">-- Embeddings</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> study_embeddings (<span class="kw">id</span> uuid PK, study_id uuid, chunk_index <span class="dt">int</span>,</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  chunk_text text, embedding vector(<span class="dv">768</span>), chunk_metadata jsonb,</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  embedding_model_version text);</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">-- Auditing</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> technical_audits (<span class="kw">id</span> text PK, version text, audit_date <span class="dt">date</span>,</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  system_version text, system_changelog_date <span class="dt">date</span>, <span class="kw">scope</span> text, html_path text,</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  pdf_path text, docx_path text, <span class="kw">summary</span> jsonb, superseded_by text);</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> audit_requests (<span class="kw">id</span> uuid PK, <span class="kw">scope</span> text, system_version text,</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>  system_date <span class="dt">date</span>, status text, fulfilled_audit_id text, requested_at <span class="dt">date</span>,</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>  auto_triggered bool <span class="kw">DEFAULT</span> <span class="kw">false</span>);</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> audit_settings (<span class="kw">id</span> bool PK <span class="kw">CHECK</span>(<span class="kw">id</span><span class="op">=</span><span class="kw">true</span>), change_threshold <span class="dt">int</span> <span class="kw">DEFAULT</span> <span class="dv">6</span>,</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>  watched_areas text[] <span class="kw">DEFAULT</span> <span class="dt">ARRAY</span>[<span class="st">&#39;curation&#39;</span>,<span class="st">&#39;kg&#39;</span>,<span class="op">..</span>.]);</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="co">-- Cohort insights with HITL</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="kw">ALTER</span> <span class="kw">TABLE</span> cohort_insights <span class="kw">ADD</span> <span class="kw">COLUMN</span> vet_review_status text <span class="kw">DEFAULT</span> <span class="st">&#39;pending&#39;</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>  <span class="kw">CHECK</span> (vet_review_status <span class="kw">IN</span> (<span class="st">&#39;pending&#39;</span>,<span class="st">&#39;approved&#39;</span>,<span class="st">&#39;rejected&#39;</span>,<span class="st">&#39;needs_changes&#39;</span>));</span></code></pre></div>
+<hr /><h2 id="apêndice-b-inventário-de-edge-functions-67">26. Appendix B —
+Edge Function Inventory (67)</h2>
+<p>admin-create-user · ai-config · ai-task-healthcheck · ai-task-test ·
+analyze-all-cohorts-patterns · analyze-cohort-patterns ★ ·
+api-usage-stats · auto-tag-studies · backfill-triplet-enrichment ·
+batch-reprocess-triplets · bulk-enrich-pet-food ·
+calculate-recommendation-confidence · chat · chat-meta-study ·
+check-cohort-originality · check-insight-originality ·
+condition-insights · consolidate-knowledge-graph · download-study-pdf ·
+enrich-triplet · enrichment-qa-sample · evaluate-meta-study-reliability
+· extract-pet-clinical-data · finalize-stalled-cohort ·
+gemini-file-search · generate-meta-study-cover · import-canonical-ids ·
+invoxia-api · kg-missing-triplets · parse-pet-exam-pdf · parse-study ·
+perplexity-health · process-nutraceutical-spreadsheet · process-study ·
+provider-health · query-perplexity · relations-auditor ·
+run-translation-audit · suggest-cohort-ideas ★ · suggest-taxonomy-terms
+· sync-study-to-neo4j · sync-system-prompts · test-rag-similarity ·
+translate-and-categorize-conditions · translate-conditions ·
+translate-text · vectorize-study · web-dosage-lookup · …</p>
+<p>★ = hardened from May 18-27.</p>
+<hr /><h2 id="apêndice-c-prompts-e-modelos-llm">27. Appendix C — Prompts and
+LLM models</h2>
+<p>8 versioned prompts in <code>ai_prompt_versions</code> with the
+<code>activate_ai_prompt_version()</code> SECURITY DEFINER function +
+<code>ai_prompt_versions_enforce_single_active</code> trigger ensuring only
+1 active version per (task_id, model_id).</p>
+<hr /><h2 id="apêndice-d-métricas-operacionais">28. Appendix D — Operational
+metrics</h2>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th style="text-align: right;">05/18 (v5.1.0)</th>
+<th style="text-align: right;">05/31 (v5.2.0)</th>
+<th>Δ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Total pets</td>
+<td style="text-align: right;">668</td>
+<td style="text-align: right;">668</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Demo pets</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td>—</td>
+</tr>
+<tr>
+<td>User roles</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">6</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Public tables</td>
+<td style="text-align: right;">97</td>
+<td style="text-align: right;">97</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Edge Functions</td>
+<td style="text-align: right;">67</td>
+<td style="text-align: right;">67</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Active prompts</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">8</td>
+<td>—</td>
+</tr>
+<tr>
+<td>i18n_version</td>
+<td style="text-align: right;">1.86.7</td>
+<td style="text-align: right;"><strong>1.115.6</strong></td>
+<td>+28.9</td>
+</tr>
+<tr>
+<td>Total triplets</td>
+<td style="text-align: right;">4,785</td>
+<td style="text-align: right;">4,785</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Approved triplets</td>
+<td style="text-align: right;">3,924</td>
+<td style="text-align: right;">3,924</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Synced triplets</td>
+<td style="text-align: right;">4,411</td>
+<td style="text-align: right;">4,411</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Hierarchical edges</td>
+<td style="text-align: right;">38,643</td>
+<td style="text-align: right;">38,643</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Conditions</td>
+<td style="text-align: right;">191</td>
+<td style="text-align: right;">191</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Breeds</td>
+<td style="text-align: right;">81</td>
+<td style="text-align: right;">81</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Breed predispositions</td>
+<td style="text-align: right;">254</td>
+<td style="text-align: right;">254</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Vet ontology nodes</td>
+<td style="text-align: right;">941</td>
+<td style="text-align: right;">941</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Studies processed</td>
+<td style="text-align: right;">59</td>
+<td style="text-align: right;">59</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Vectorized chunks</td>
+<td style="text-align: right;">1,342</td>
+<td style="text-align: right;">1,342</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Technical audits</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3</td>
+<td>+1</td>
+</tr>
+</tbody>
+</table>
+<hr /><h2 id="bibliografia-14">29. Bibliography (14)</h2>
+<ol type="1">
+<li>FDA. <em>Marketing Submission Recommendations for a Predetermined
+Change Control Plan for AI/ML-Enabled SaMD — Draft Guidance</em>.
+Jan/2025.</li>
+<li>FDA / Health Canada / MHRA. <em>Good Machine Learning Practice for
+Medical Device Development: Guiding Principles</em>. Oct/2021 (rev.
+Jun/2025).</li>
+<li>EMA. <em>Reflection Paper on the Use of Artificial Intelligence in
+the Lifecycle of Medicines</em>. Sep/2024.</li>
+<li>European Parliament. <em>Regulation (EU) 2024/1689 on Artificial
+Intelligence (EU AI Act)</em>. Mar/2024.</li>
+<li>AVMA. <em>Position Statement on Veterinary Use of Artificial
+Intelligence</em>. Nov/2025.</li>
+<li>Wu et al. <em>MedGraphRAG: A Knowledge Graph-Enhanced RAG for
+Medical Question Answering</em>. 2024.</li>
+<li>Edge et al. <em>From Local to Global: A GraphRAG Approach to
+Query-Focused Summarization</em>. Microsoft Research, 2024.</li>
+<li>Gompertz B. <em>On the Nature of the Function Expressive of the Law
+of Human Mortality</em>. Phil. Trans. R. Soc. 1825.</li>
+<li>SNOMED International. <em>SNOMED CT Veterinary Extension
+(VetSCT)</em>. 2025.</li>
+<li>National Library of Medicine. <em>Unified Medical Language System
+(UMLS) Reference Manual</em>. 2024.</li>
+<li>Salvi et al. <em>PubMed E-utilities for Programmatic Literature
+Mining</em>. 2023.</li>
+<li>Lewis et al. <em>Retrieval-Augmented Generation for
+Knowledge-Intensive NLP Tasks</em>. NeurIPS 2020.</li>
+<li>AAVSB. <em>AI in Veterinary Practice: Recommendations for Regulatory
+Boards</em>. 2025.</li>
+<li>OpenAI / Anthropic / Google. <em>Model cards for GPT-5.4, Claude
+Sonnet 4.5, Gemini 3.1 Pro Preview</em>. 2025–2026.</li>
+</ol>
+<hr />
+<p><em>Standalone document generated on 05/31/2026 by the lovable-agent
+(cumulative V3 parity). Supersedes v5.1.0 (<code>superseded_by</code>).
+The next audit will be triggered manually or automatically when
+≥6 changes in critical areas (curation, kg, clinical-pipeline, infra,
+base-knowledge) are detected in the CHANGELOG.</em></p></body>
+</html>
