@@ -325,9 +325,11 @@ serve(async (req) => {
     };
     let systemPrompt: string;
     let userPrompt: string;
+    let promptKey: string;
 
     if (mode === 'enrich') {
-      systemPrompt = SYSTEM_PROMPT_ENRICH;
+      promptKey = 'hybrid_recommendation';
+      systemPrompt = await fetchSystemPrompt(promptKey, SYSTEM_PROMPT_ENRICH_FALLBACK);
       userPrompt = `
 Pet Profile:
 - Species: ${petProfile.species || 'Unknown'}
@@ -353,7 +355,8 @@ For each recommended compound, specify which condition/finding it targets.
 Keep response to 3-5 focused paragraphs.`;
 
     } else {
-      systemPrompt = SYSTEM_PROMPT_FALLBACK;
+      promptKey = 'hybrid_recommendation_fallback';
+      systemPrompt = await fetchSystemPrompt(promptKey, SYSTEM_PROMPT_FALLBACK_VERBATIM);
       userPrompt = `
 Pet Profile:
 - Species: ${petProfile.species || 'Unknown'}
@@ -376,6 +379,8 @@ CRITICAL REQUIREMENTS:
 Return your response as valid JSON following the structure specified.`;
     }
 
+    const t0 = Date.now();
+    const model = 'google/gemini-2.5-flash';
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -383,7 +388,7 @@ Return your response as valid JSON following the structure specified.`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
@@ -395,7 +400,14 @@ Return your response as valid JSON following the structure specified.`;
     if (!response.ok) {
       const errorText = await response.text();
       console.error('AI Gateway error:', response.status, errorText);
-      
+      logPromptUsage({
+        prompt_key: promptKey,
+        function_name: 'hybrid-recommendation',
+        model,
+        latency_ms: Date.now() - t0,
+        success: false,
+        error: `${response.status}: ${errorText.slice(0, 200)}`,
+      });
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }), {
           status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
