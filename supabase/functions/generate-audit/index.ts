@@ -1,5 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { fetchSystemPrompt } from "../_shared/system-prompts.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -296,16 +297,31 @@ async function readAuditContext(service: ReturnType<typeof createClient>) {
   return { snapshot, prevAuditsCtx };
 }
 
-function buildBaseSystem(
+/**
+ * Renders the audit base system prompt.
+ * Source of truth: `ai_system_prompts.audit_base_system_{pt,en}` (via fetchSystemPrompt).
+ * The function performs placeholder substitution for {{CHECKLIST}}, {{SNAPSHOT}}, {{PRIOR_AUDITS}}.
+ * If a `promptOverride` is provided (legacy audit_prompt_versions), it wins over the registry.
+ */
+async function buildBaseSystem(
   auditContext: { snapshot: Record<string, any>; prevAuditsCtx: string },
   lang: Lang = "pt",
   promptOverride?: string,
-) {
-  if (lang === "en") {
-    if (promptOverride && promptOverride.trim() && promptOverride.trim() !== "__SEED_FALLBACK__") {
-      return `${promptOverride}\n\nCANONICAL CHECKLIST (all ids must appear in the report):\n${checklistForPrompt("en")}\n\nFACTUAL DB SNAPSHOT (use real numbers):\n${JSON.stringify(auditContext.snapshot, null, 2)}\n\nPRIOR AUDITS (context):\n${auditContext.prevAuditsCtx}`;
+): Promise<string> {
+  const checklist = checklistForPrompt(lang);
+  const snapshotJson = JSON.stringify(auditContext.snapshot, null, 2);
+  const priorAudits = auditContext.prevAuditsCtx;
+
+  // Legacy override path (audit_prompt_versions): just append the dynamic context.
+  if (promptOverride && promptOverride.trim() && promptOverride.trim() !== "__SEED_FALLBACK__") {
+    if (lang === "en") {
+      return `${promptOverride}\n\nCANONICAL CHECKLIST (all ids must appear in the report):\n${checklist}\n\nFACTUAL DB SNAPSHOT (use real numbers):\n${snapshotJson}\n\nPRIOR AUDITS (context):\n${priorAudits}`;
     }
-    return `You are the internal technical auditor of the Senex AI platform (PetMoreTime).
+    return `${promptOverride}\n\nCHECKLIST CANÔNICO (todos os ids devem aparecer no relatório):\n${checklist}\n\nSNAPSHOT FACTUAL DO BANCO (use números reais):\n${snapshotJson}\n\nAUDITORIAS ANTERIORES (contexto):\n${priorAudits}`;
+  }
+
+  // Unified registry path. Fallback strings below preserve previous behavior verbatim.
+  const FALLBACK_EN = `You are the internal technical auditor of the Senex AI platform (PetMoreTime).
 NEVER mention "Lovable", "Lovable AI" or development tools. Use "Senex AI" as the brand and "PetMoreTime" as the engine.
 Write in ENGLISH, dense, analytical, in semantic HTML.
 
@@ -330,18 +346,15 @@ INLINE CITATIONS (MANDATORY):
 - Prefer at least 2 inline citations per main block. Never invent references — only use authors/years from the canonical influence list (Himmelstein, Huang/TxGNN, Chandak/PrimeKG, Hastings/ChEBI, Vasilevsky/MONDO, NLM MeSH, Nicholas/OMIA, Kaeberlein, Creevy/Dog Aging Project, Urfer, Zhang/NMN, Yoshino, Baur/Resveratrol, Harrison/Rapamycin, Roush/Omega-3, Comblain/Curcumin, Adin/DCM, Roudebush/CKD, Suchodolski, López-Otín, Gompertz, FDA-GMLP, EMA, AVMA, Lewis/RAG, Singhal/Med-PaLM, Wei/CoT, Ouyang/InstructGPT, Karpas/MRKL, Khattab/DSPy, Robinson/Neo4j).
 
 CANONICAL CHECKLIST (all ids must appear in the report):
-${checklistForPrompt("en")}
+{{CHECKLIST}}
 
 FACTUAL DB SNAPSHOT (use real numbers):
-${JSON.stringify(auditContext.snapshot, null, 2)}
+{{SNAPSHOT}}
 
 PRIOR AUDITS (context):
-${auditContext.prevAuditsCtx}`;
-  }
-  if (promptOverride && promptOverride.trim() && promptOverride.trim() !== "__SEED_FALLBACK__") {
-    return `${promptOverride}\n\nCHECKLIST CANÔNICO (todos os ids devem aparecer no relatório):\n${checklistForPrompt("pt")}\n\nSNAPSHOT FACTUAL DO BANCO (use números reais):\n${JSON.stringify(auditContext.snapshot, null, 2)}\n\nAUDITORIAS ANTERIORES (contexto):\n${auditContext.prevAuditsCtx}`;
-  }
-  return `Você é o auditor técnico interno da plataforma Senex AI (PetMoreTime).
+{{PRIOR_AUDITS}}`;
+
+  const FALLBACK_PT = `Você é o auditor técnico interno da plataforma Senex AI (PetMoreTime).
 NUNCA mencione "Lovable", "Lovable AI" ou ferramentas de desenvolvimento. Use "Senex AI" como marca e "PetMoreTime" como motor.
 Escreva em PORTUGUÊS, denso, analítico, em HTML semântico.
 
@@ -373,13 +386,21 @@ CITAÇÕES INLINE (OBRIGATÓRIO):
 - Mínimo recomendado: 2 citações inline por bloco principal. NUNCA invente referências — use apenas autores/anos da lista canônica de influência (Himmelstein, Huang/TxGNN, Chandak/PrimeKG, Hastings/ChEBI, Vasilevsky/MONDO, NLM MeSH, Nicholas/OMIA, Kaeberlein, Creevy/Dog Aging Project, Urfer, Zhang/NMN, Yoshino, Baur/Resveratrol, Harrison/Rapamycin, Roush/Omega-3, Comblain/Curcumin, Adin/DCM, Roudebush/CKD, Suchodolski, López-Otín, Gompertz, FDA-GMLP, EMA, AVMA, Lewis/RAG, Singhal/Med-PaLM, Wei/CoT, Ouyang/InstructGPT, Karpas/MRKL, Khattab/DSPy, Robinson/Neo4j).
 
 CHECKLIST CANÔNICO (todos os ids devem aparecer no relatório):
-${checklistForPrompt("pt")}
+{{CHECKLIST}}
 
 SNAPSHOT FACTUAL DO BANCO (use números reais):
-${JSON.stringify(auditContext.snapshot, null, 2)}
+{{SNAPSHOT}}
 
 AUDITORIAS ANTERIORES (contexto):
-${auditContext.prevAuditsCtx}`;
+{{PRIOR_AUDITS}}`;
+
+  const key = lang === "en" ? "audit_base_system_en" : "audit_base_system_pt";
+  const fallback = lang === "en" ? FALLBACK_EN : FALLBACK_PT;
+  const template = await fetchSystemPrompt(key, fallback);
+  return template
+    .replace("{{CHECKLIST}}", checklist)
+    .replace("{{SNAPSHOT}}", snapshotJson)
+    .replace("{{PRIOR_AUDITS}}", priorAudits);
 }
 
 async function loadActivePrompts(
@@ -789,7 +810,7 @@ Deno.serve(async (req) => {
           await updateSummary({ audit_context: computed });
         }
 
-        const baseSystem = buildBaseSystem({ snapshot: snapshot!, prevAuditsCtx: prevAuditsCtx! });
+        const baseSystem = await buildBaseSystem({ snapshot: snapshot!, prevAuditsCtx: prevAuditsCtx! });
         const currentRow = await refreshAuditRow();
         if (!currentRow) throw new Error("audit row missing");
         const effectiveScope = String(currentRow.scope ?? scope ?? "");
@@ -1132,7 +1153,7 @@ ${(outline.rendered_blocks ?? []).map((item) => item.html).join("\n").slice(0, 1
             blocks_total: totalBlocks,
           });
           const prompts = await loadActivePrompts(service);
-          const baseSystemEn = buildBaseSystem(
+          const baseSystemEn = await buildBaseSystem(
             { snapshot: snapshot!, prevAuditsCtx: prevAuditsCtx! },
             "en",
             prompts.en?.system,
