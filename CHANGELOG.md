@@ -24,6 +24,19 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.0 -->
 
+### Changed - 2026-06-01 — Sprint 3 utilitários: `enrich-pet-food-product`, `document-chat`, `suggest-taxonomy-terms` no registro único
+<!-- area: infra · status: entregue · i18n: n/a -->
+- `enrich_pet_food_product`: entrada do manifesto reescrita com o prompt PT-BR real (schema AAFCO/FEDIAF verbatim) + metadata completa (model/temp/output/consumers/tags).
+- `suggest_taxonomy_terms`: entrada reescrita como persona-base; a função concatena dinamicamente o `context` e a lista de categorias (`TAXONOMY_CATEGORIES`).
+- Novo `document_chat_persona`: persona Markdown do chat sobre estudo (RAG + GraphRAG), com regras de citação literal e formato de seções.
+- `enrich-pet-food-product/index.ts`: prompt via `fetchSystemPrompt('enrich_pet_food_product', SYSTEM_FALLBACK)`; telemetria em sucesso (tokens) e erro HTTP.
+- `suggest-taxonomy-terms/index.ts`: persona via `fetchSystemPrompt('suggest_taxonomy_terms', PERSONA_FALLBACK)` + concatenação dinâmica de categorias; telemetria em sucesso/erro HTTP.
+- `document-chat/index.ts`: persona principal via `fetchSystemPrompt('document_chat_persona', PERSONA_FALLBACK)`; contexto dinâmico (RAG/GraphRAG/dosagens/citação literal) preservado na user-message; telemetria em sucesso/erro HTTP. Entity-extraction permanece inline (instrução curta e dinâmica por pergunta).
+- Fallback verbatim em cada função → comportamento idêntico se o DB estiver indisponível.
+- Smoke test: 400 esperado para payload vazio nas três funções (validações OK, boot saudável).
+- Compliance: **15/24** funções no registro único (62.5%).
+- Files: supabase/functions/_shared/system-prompts.ts, supabase/functions/enrich-pet-food-product/index.ts, supabase/functions/suggest-taxonomy-terms/index.ts, supabase/functions/document-chat/index.ts
+
 ### Changed - 2026-06-01 — Perplexity trio (`query-perplexity`, `perplexity-health`, `web-dosage-lookup`) no registro único
 <!-- area: infra · status: entregue · i18n: n/a -->
 - Adicionados `query_perplexity_chat` e `perplexity_health_ping` ao manifesto `_shared/system-prompts.ts`; `web_dosage_lookup` recebeu metadata completa (model/temperature/output_format/consumers/tags).

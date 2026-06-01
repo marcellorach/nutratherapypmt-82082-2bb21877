@@ -1,10 +1,30 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { fetchSystemPrompt } from '../_shared/system-prompts.ts';
+import { logPromptUsage } from '../_shared/prompt-usage.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const PERSONA_FALLBACK = `Você é um assistente especializado em estudos científicos veterinários sobre nutracêuticos.
+
+**Suas responsabilidades:**
+1. Responder perguntas baseadas EXCLUSIVAMENTE no estudo fornecido e no conhecimento científico do Knowledge Graph
+2. Citar partes específicas do estudo quando relevante usando o formato [Citação: texto - Seção X]
+3. Se houver informações do Knowledge Graph (Neo4j), integre-as naturalmente, mencionando que vem de "dados conectados de outros estudos"
+4. Ser preciso e técnico, mas acessível
+5. Indicar claramente quando algo NÃO está presente no estudo nem no Knowledge Graph
+
+**REGRA CRÍTICA PARA CITAÇÕES:**
+- SEMPRE use trechos LITERAIS do "TEXTO ORIGINAL DO DOCUMENTO" fornecido acima
+- Formato obrigatório: [Citação: "texto exato copiado do documento" - Seção/Contexto]
+- NUNCA invente ou parafrase citações - copie palavra por palavra do texto original
+
+**Limites estritos:**
+- NÃO invente informações que não estão no estudo
+- Se não souber, diga claramente: "⚠️ Esta informação não está presente neste estudo"`;
 
 interface ChatRequest {
   studyId: string;
@@ -521,62 +541,11 @@ Return format:
     console.log(`📊 Mecanismos no contexto: ${mechanisms.length}`);
 
     // Build messages for AI
+    const persona = await fetchSystemPrompt('document_chat_persona', PERSONA_FALLBACK);
     const messages = [
       {
         role: 'system',
-        content: `Você é um assistente especializado em estudos científicos veterinários sobre nutracêuticos.
-
-**Suas responsabilidades:**
-1. Responder perguntas baseadas EXCLUSIVAMENTE no estudo fornecido e no conhecimento científico do Knowledge Graph
-2. Citar partes específicas do estudo quando relevante usando o formato [Citação: texto - Seção X]
-3. Se houver informações do Knowledge Graph (Neo4j), integre-as naturalmente, mencionando que vem de "dados conectados de outros estudos"
-4. Ser preciso e técnico, mas acessível
-5. Indicar claramente quando algo NÃO está presente no estudo nem no Knowledge Graph
-
-**Formato OBRIGATÓRIO das respostas em Markdown:**
-
-### 🔬 [Título da Resposta]
-
-[Parágrafo introdutório breve e claro]
-
-#### 📊 Principais Achados
-1. **[Nome do achado]**: [Descrição detalhada] [Citação: texto relevante - Seção X]
-2. **[Outro achado]**: [Descrição] [Citação: texto - Seção Y]
-
-#### ⚙️ Mecanismos de Ação
-- **[Nutracêutico]**: [Mecanismo explicado] [Citação: detalhes - Seção Z]
-- **[Outro]**: [Mecanismo]
-
-#### ⚠️ Considerações Importantes
-[Se houver contraindicações, efeitos colaterais, limitações do estudo, etc]
-
----
-
-**💡 Perguntas sugeridas relacionadas:**
-- [Pergunta específica 1]
-- [Pergunta específica 2]
-- [Pergunta específica 3]
-
-**REGRA CRÍTICA PARA CITAÇÕES:**
-- SEMPRE use trechos LITERAIS do "TEXTO ORIGINAL DO DOCUMENTO" fornecido acima
-- Formato obrigatório: [Citação: "texto exato copiado do documento" - Seção/Contexto]
-- NUNCA invente ou parafrase citações - copie palavra por palavra do texto original
-- Se não houver trecho relevante no texto fornecido, NÃO inclua citação
-- Cada citação DEVE ser uma frase ou parágrafo que apareça no texto original acima
-
-**Diretrizes de formatação obrigatórias:**
-- Use emojis para destacar seções principais (🔬 📊 ⚙️ ⚠️ 💡 📈)
-- Use **negrito** para termos-chave e nomes de nutracêuticos
-- Use listas numeradas (1. 2. 3.) para achados sequenciais ou hierárquicos
-- Use listas com bullet (- ) para mecanismos, características e perguntas
-- Separe seções principais com --- (linha horizontal)
-- Para scores de eficácia, use formato: **Eficácia**: 4/5 (será renderizado como barra de progresso)
-- Destaque nutracêuticos específicos em \`backticks\` para badges visuais
-
-**Limites estritos:**
-- NÃO invente informações que não estão no estudo
-- Se não souber, diga claramente: "⚠️ Esta informação não está presente neste estudo"
-- Todas as citações devem ser texto real extraído do documento original fornecido`
+        content: persona
       },
       {
         role: 'user',
@@ -595,6 +564,7 @@ Return format:
     console.log(`📊 System prompt length: ${messages[0]?.content?.length || 0}`);
     console.log(`📊 User prompt length: ${messages[1]?.content?.length || 0}`);
 
+    const t0 = Date.now();
     // Call Lovable AI - usar modelo estável
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -615,7 +585,15 @@ Return format:
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
       console.error('❌ Lovable AI error:', aiResponse.status, errorText);
-      
+      await logPromptUsage({
+        prompt_key: 'document_chat_persona',
+        function_name: 'document-chat',
+        model: chatModel,
+        latency_ms: Date.now() - t0,
+        success: false,
+        error: `HTTP ${aiResponse.status}`,
+      });
+
       if (aiResponse.status === 429) {
         return new Response(
           JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
@@ -634,6 +612,15 @@ Return format:
     }
 
     const aiData = await aiResponse.json();
+    await logPromptUsage({
+      prompt_key: 'document_chat_persona',
+      function_name: 'document-chat',
+      model: chatModel,
+      latency_ms: Date.now() - t0,
+      tokens_in: aiData?.usage?.prompt_tokens,
+      tokens_out: aiData?.usage?.completion_tokens,
+      success: true,
+    });
     console.log(`📊 AI Data structure: ${JSON.stringify(Object.keys(aiData))}`);
     console.log(`📊 Choices count: ${aiData.choices?.length || 0}`);
     

@@ -2,6 +2,8 @@
 // Input: { product_id: string } OR { brand_name, product_name, species?, life_stage? }
 // If product_id is provided, the row is updated and a pet_food_nutrition row is upserted.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.0";
+import { fetchSystemPrompt } from "../_shared/system-prompts.ts";
+import { logPromptUsage } from "../_shared/prompt-usage.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,7 +15,7 @@ const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-const SYSTEM = `Você é um especialista em nutrição animal. Dado o nome de uma marca e produto de ração para pets,
+const SYSTEM_FALLBACK = `Você é um especialista em nutrição animal. Dado o nome de uma marca e produto de ração para pets,
 retorne SOMENTE JSON válido com a composição garantida COMPLETA (AAFCO/FEDIAF) e classificação.
 Use dados públicos do fabricante (rótulo, site oficial) quando conhecidos. Se não souber um campo, use null.
 Marque "confidence" 0..1 indicando certeza geral. NUNCA invente valores — prefira null.
@@ -135,13 +137,16 @@ Deno.serve(async (req) => {
       (species ? `\nEspécie: ${species}` : "") +
       (life_stage ? `\nFase: ${life_stage}` : "");
 
+    const systemPrompt = await fetchSystemPrompt("enrich_pet_food_product", SYSTEM_FALLBACK);
+    const model = "google/gemini-2.5-pro";
+    const t0 = Date.now();
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model,
         messages: [
-          { role: "system", content: SYSTEM },
+          { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
         response_format: { type: "json_object" },
@@ -149,9 +154,26 @@ Deno.serve(async (req) => {
     });
     if (!aiRes.ok) {
       const txt = await aiRes.text();
+      await logPromptUsage({
+        prompt_key: "enrich_pet_food_product",
+        function_name: "enrich-pet-food-product",
+        model,
+        latency_ms: Date.now() - t0,
+        success: false,
+        error: `HTTP ${aiRes.status}`,
+      });
       throw new Error(`AI ${aiRes.status}: ${txt.slice(0, 300)}`);
     }
     const aiJson = await aiRes.json();
+    await logPromptUsage({
+      prompt_key: "enrich_pet_food_product",
+      function_name: "enrich-pet-food-product",
+      model,
+      latency_ms: Date.now() - t0,
+      tokens_in: aiJson?.usage?.prompt_tokens,
+      tokens_out: aiJson?.usage?.completion_tokens,
+      success: true,
+    });
     const content = aiJson.choices?.[0]?.message?.content ?? "{}";
     const parsed = typeof content === "string" ? JSON.parse(content) : content;
 
