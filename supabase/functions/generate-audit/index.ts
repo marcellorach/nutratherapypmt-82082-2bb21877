@@ -463,6 +463,12 @@ Deno.serve(async (req) => {
         .maybeSingle();
       const summary = asObject(row?.summary, {} as Record<string, any>);
       const log = Array.isArray((row as any)?.progress_log) ? (row as any).progress_log : [];
+      // Optional incremental fetch: client passes ?since_ts=ISO to get only newer entries.
+      const sinceTs = String((body as any)?.since_ts ?? "").trim();
+      let logOut = log;
+      if (sinceTs) {
+        logOut = log.filter((e: any) => typeof e?.ts === "string" && e.ts > sinceTs);
+      }
       return new Response(JSON.stringify({
         audit_id: id,
         status: summary.status ?? (row ? "unknown" : "missing"),
@@ -473,7 +479,8 @@ Deno.serve(async (req) => {
         blocks_total: typeof summary.blocks_total === "number" ? summary.blocks_total : null,
         warnings: Array.isArray(summary.warnings) ? summary.warnings : null,
         coverage_missing: Array.isArray(summary.coverage_missing) ? summary.coverage_missing : null,
-        log: log.slice(-30),
+        log: logOut,
+        log_total: log.length,
         last_heartbeat: (row as any)?.last_heartbeat ?? null,
         resume_count: (row as any)?.resume_count ?? 0,
         error: summary.error ?? null,

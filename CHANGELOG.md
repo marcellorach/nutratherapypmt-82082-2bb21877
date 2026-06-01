@@ -24,6 +24,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.0 -->
 
+### Added - 2026-06-01 — Catálogo de prompts com metadados + export PDF + log de auditoria completo
+<!-- area: admin · status: entregue · i18n: 1.115.8 -->
+- `ai_system_prompts` ganhou colunas de contexto: `purpose`, `model_default`, `temperature`, `output_format`, `consumers[]`, `tags[]`, `example_input`, `last_used_at`. Os 24 prompts existentes foram seedados com propósito, modelo padrão e tags.
+- `SystemPromptsCatalog` agora exibe badges (modelo, temperatura, formato, tags) e propósito de cada prompt, e oferece dois botões de export PDF: **catálogo completo** (com filtro aplicado) e **prompt individual**. PDFs são gerados via popup HTML estilizada + `window.print()`, preservando Unicode e dispensando libs externas.
+- `sync-system-prompts` atualizado para sincronizar também os novos campos de metadados do manifest (`SystemPromptDef.purpose`, `model_default`, `temperature`, `output_format`, `consumers`, `tags`, `example_input`).
+- **Fix log da auditoria**: `generate-audit` (action=`progress`) deixou de truncar em 30 entradas. Agora devolve o log completo (com suporte opcional a `since_ts` para fetch incremental). `TechnicalAuditsTab` acumula entradas localmente e adiciona botão "Baixar log completo (.txt)".
+- Files: supabase/functions/generate-audit/index.ts, supabase/functions/sync-system-prompts/index.ts, supabase/functions/_shared/system-prompts.ts, src/components/administrador/audits/TechnicalAuditsTab.tsx, src/components/administrador/configuracoes/SystemPromptsCatalog.tsx
+
 ### Added - 2026-05-31 — Auditoria técnica: auto-bump de versão + bibliografia obrigatória
 <!-- area: admin · status: entregue · i18n: 1.115.8 -->
 - Botão "Run new audit" no `TechnicalAuditsTab` agora calcula a próxima versão automaticamente: se `v{SENEX_VERSION}` já existe na tabela `technical_audits`, incrementa o PATCH (7.0.0 → 7.0.1 → 7.0.2...) até achar uma versão livre. Isso permite re-rodar auditorias sem sobrescrever a anterior nem editar manualmente o senex version.

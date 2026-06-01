@@ -267,14 +267,25 @@ export default function TechnicalAuditsTab() {
     if (!progress || progress.status !== "processing") return;
     let cancelled = false;
     const id = progress.audit_id;
+    let lastTs = "";
     const tick = async () => {
       try {
         const { data } = await supabase.functions.invoke("generate-audit", {
-          body: { action: "progress", audit_id: id },
+          body: { action: "progress", audit_id: id, since_ts: lastTs || undefined },
         });
         if (cancelled || !data) return;
         const next = data as any;
-        setProgress((prev) => prev && prev.audit_id === id ? { ...prev, ...next } : prev);
+        const incoming = Array.isArray(next.log) ? next.log : [];
+        if (incoming.length > 0) {
+          const lastEntry = incoming[incoming.length - 1];
+          if (lastEntry?.ts) lastTs = lastEntry.ts;
+        }
+        setProgress((prev) => {
+          if (!prev || prev.audit_id !== id) return prev;
+          const prevLog = Array.isArray(prev.log) ? prev.log : [];
+          const mergedLog = lastTs && prevLog.length > 0 ? [...prevLog, ...incoming] : (incoming.length > 0 ? incoming : prevLog);
+          return { ...prev, ...next, log: mergedLog };
+        });
         if (next.status === "ready" || next.status === "ready_with_warnings" || next.status === "failed") {
           await load();
           if (next.status === "failed") {
@@ -489,13 +500,31 @@ export default function TechnicalAuditsTab() {
             {/* Live log panel */}
             {progress.log && progress.log.length > 0 && (
               <div className="mt-1">
-                <button
-                  type="button"
-                  onClick={() => setLogOpen((v) => !v)}
-                  className="text-[11px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
-                >
-                  {logOpen ? "▾" : "▸"} Log da geração ({progress.log.length} entradas)
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setLogOpen((v) => !v)}
+                    className="text-[11px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+                  >
+                    {logOpen ? "▾" : "▸"} Log da geração ({progress.log.length} entradas)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const lines = (progress.log || []).map((e) => `[${e.ts}] ${e.level.toUpperCase()} ${e.phase}: ${e.message}`);
+                      const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `auditoria-${progress.audit_id}-log.txt`;
+                      a.click();
+                      setTimeout(() => URL.revokeObjectURL(url), 30000);
+                    }}
+                    className="text-[11px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+                  >
+                    ⬇ Baixar log completo (.txt)
+                  </button>
+                </div>
                 {logOpen && (
                   <ScrollArea className="mt-1 h-48 rounded border bg-background/60 p-2">
                     <ul className="space-y-1 font-mono text-[10.5px] leading-snug">

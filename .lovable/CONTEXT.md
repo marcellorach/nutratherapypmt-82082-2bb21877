@@ -1,20 +1,26 @@
 # Project context briefing (auto)
-Generated: 2026-05-31T23:34:21.781Z
+Generated: 2026-06-01T00:33:04.268Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
 ## Latest i18n version: 1.115.8
 
 ## Changes by area (last 14 days)
-- **admin**: 54
+- **admin**: 46
 - **curation**: 7
 - **kg**: 6
 - **meta**: 5
 - **vet-ui**: 4
-- **tutor-ui**: 2
+- **tutor-ui**: 1
 - **clinical-pipeline**: 1
 
 ## Top 10 recent entries
+### 2026-06-01 · [admin] ADDED — Catálogo de prompts com metadados + export PDF + log de auditoria completo
+- `ai_system_prompts` ganhou colunas de contexto: `purpose`, `model_default`, `temperature`, `output_format`, `consumers[]`, `tags[]`, `example_input`, `last_used_at`. Os 24 prompts existentes foram seedados com propósito, modelo padrão e tags.
+- `SystemPromptsCatalog` agora exibe badges (modelo, temperatura, formato, tags) e propósito de cada prompt, e oferece dois botões de export PDF: catálogo completo (com filtro aplicado) e prompt individual. PDFs são gerados via popup HTML estilizada + `window.print()`, preservando Unicode e dispensando libs externas.
+- `sync-system-prompts` atualizado para sincronizar também os novos campos de metadados do manifest (`SystemPromptDef.purpose`, `model_default`, `temperature`, `output_format`, `consumers`, `tags`, `example_input`).
+_files: supabase/functions/generate-audit/index.ts, supabase/functions/sync-system-prompts/index.ts, supabase/functions/_shared/system-prompts.ts, src/components/administrador/audits/TechnicalAuditsTab.tsx…_
+
 ### 2026-05-31 · [admin] ADDED — Auditoria técnica: auto-bump de versão + bibliografia obrigatória
 - Botão "Run new audit" no `TechnicalAuditsTab` agora calcula a próxima versão automaticamente: se `v{SENEX_VERSION}` já existe na tabela `technical_audits`, incrementa o PATCH (7.0.0 → 7.0.1 → 7.0.2...) até achar uma versão livre. Isso permite re-rodar auditorias sem sobrescrever a anterior nem editar manualmente o senex version.
 - `generate-audit` passou a anexar uma seção `<section id="references">` ao final dos relatórios PT e EN com bibliografia curada (37 entradas: Hetionet, TxGNN, PrimeKG, ChEBI, MONDO, MeSH, OMIA, Dog Aging Project, Hallmarks of Aging, GMLP/FDA, EMA, AVMA, RAG/Med-PaLM, etc.) ordenada por ano. Os prompts PT/EN exigem agora citações inline no formato (Autor, Ano) em todos os blocos, sem invenção de fontes.
@@ -68,12 +74,6 @@ _files: src/services/condition-name-localizer.ts, src/services/lab-flag-canonica
 - Novo card `cohort-suggestions-clinical-review` (next) para a revisão clínica das 6 sugestões geradas pela vet-curadora — bloqueia o envio do documento ao parceiro clínico sem validação.
 - Novo campo `requiresVetCuratorValidation` no tipo `PrioritizationCard` + badge rosa "Valida vet-curador" (ícone estetoscópio) no `PrioritizationCardItem`. Aplicado inicialmente ao card de revisão clínica.
 _files: src/data/prioritizationBoard.ts, src/components/administrador/priorizacoes/PrioritizationCard.tsx_
-
-### 2026-05-26 · [admin] FIXED — suggest-cohort-ideas: modelo + validação + retry/fallback
-- Trocado modelo primário de `gemini-3.5-flash` (ignorava o JSON Schema do tool-call: devolvia 5 cohorts sem `target_model_id` nem `record_requirements`) para `google/gemini-3.1-pro-preview`.
-- Adicionada validação server-side das 4 regras duras: exatamente 6 cohorts, 6 `target_model_id` distintos cobrindo todos os modelos, `record_requirements` não-vazio em todos, ≥2 cohorts com `cohort_population` deceased/mixed.
-- Pipeline com 3 camadas: tentativa primária → retry no primário com mensagem de correção apontando as `issues` → fallback automático para `openai/gpt-5.4`. 429/402 do primário disparam fallback direto.
-_files: supabase/functions/suggest-cohort-ideas/index.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

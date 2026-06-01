@@ -249,49 +249,73 @@ export type Database = {
       }
       ai_system_prompts: {
         Row: {
+          consumers: string[] | null
           created_at: string
           default_content: string
           description: string | null
           display_name: string
+          example_input: string | null
           family: string
           function_name: string | null
           has_override: boolean | null
           id: string
           is_active: boolean
+          last_used_at: string | null
+          model_default: string | null
+          output_format: string | null
           override_content: string | null
           prompt_key: string
+          purpose: string | null
+          tags: string[] | null
+          temperature: number | null
           updated_at: string
           updated_by: string | null
           variables: Json | null
         }
         Insert: {
+          consumers?: string[] | null
           created_at?: string
           default_content?: string
           description?: string | null
           display_name: string
+          example_input?: string | null
           family: string
           function_name?: string | null
           has_override?: boolean | null
           id?: string
           is_active?: boolean
+          last_used_at?: string | null
+          model_default?: string | null
+          output_format?: string | null
           override_content?: string | null
           prompt_key: string
+          purpose?: string | null
+          tags?: string[] | null
+          temperature?: number | null
           updated_at?: string
           updated_by?: string | null
           variables?: Json | null
         }
         Update: {
+          consumers?: string[] | null
           created_at?: string
           default_content?: string
           description?: string | null
           display_name?: string
+          example_input?: string | null
           family?: string
           function_name?: string | null
           has_override?: boolean | null
           id?: string
           is_active?: boolean
+          last_used_at?: string | null
+          model_default?: string | null
+          output_format?: string | null
           override_content?: string | null
           prompt_key?: string
+          purpose?: string | null
+          tags?: string[] | null
+          temperature?: number | null
           updated_at?: string
           updated_by?: string | null
           variables?: Json | null

@@ -20,24 +20,35 @@ Deno.serve(async (req) => {
     // Load current rows to compare
     const { data: existing, error: loadErr } = await supabase
       .from('ai_system_prompts')
-      .select('prompt_key, default_content');
+      .select('prompt_key, default_content, purpose, model_default, temperature, output_format, consumers, tags, example_input');
     if (loadErr) throw loadErr;
-    const currentMap = new Map<string, string | null>(
-      (existing ?? []).map((r: any) => [r.prompt_key, r.default_content ?? null]),
+    const currentMap = new Map<string, any>(
+      (existing ?? []).map((r: any) => [r.prompt_key, r]),
     );
 
     for (const [key, def] of Object.entries(SYSTEM_PROMPTS)) {
-      if (!currentMap.has(key)) {
+      const cur = currentMap.get(key);
+      if (!cur) {
         results.push({ key, status: 'missing' });
         continue;
       }
-      if ((currentMap.get(key) ?? '') === def.content) {
+      const patch: Record<string, unknown> = {};
+      if ((cur.default_content ?? '') !== def.content) patch.default_content = def.content;
+      if (def.purpose !== undefined && cur.purpose !== def.purpose) patch.purpose = def.purpose;
+      if (def.model_default !== undefined && cur.model_default !== def.model_default) patch.model_default = def.model_default;
+      if (def.temperature !== undefined && Number(cur.temperature) !== def.temperature) patch.temperature = def.temperature;
+      if (def.output_format !== undefined && cur.output_format !== def.output_format) patch.output_format = def.output_format;
+      if (def.consumers !== undefined && JSON.stringify(cur.consumers ?? []) !== JSON.stringify(def.consumers)) patch.consumers = def.consumers;
+      if (def.tags !== undefined && JSON.stringify(cur.tags ?? []) !== JSON.stringify(def.tags)) patch.tags = def.tags;
+      if (def.example_input !== undefined && cur.example_input !== def.example_input) patch.example_input = def.example_input;
+      if (Object.keys(patch).length === 0) {
         results.push({ key, status: 'unchanged' });
         continue;
       }
+      patch.updated_at = new Date().toISOString();
       const { error: updErr } = await supabase
         .from('ai_system_prompts')
-        .update({ default_content: def.content, updated_at: new Date().toISOString() })
+        .update(patch)
         .eq('prompt_key', key);
       if (updErr) {
         results.push({ key, status: 'error', error: updErr.message });
