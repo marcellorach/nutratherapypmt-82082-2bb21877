@@ -297,6 +297,43 @@ serve(async (req) => {
     
     console.log('Hybrid recommendation request:', { mode, condition, petProfile, hasContext: !!clinicalContext });
 
+    // ── Pré-flight de abstenção (Card #3) ─────────────────────────────────
+    // abstain SOMENTE por falta de sinal de entrada. KG vazio NÃO dispara
+    // abstain — esse caso vira resposta marcada `source:'llm_fallback' +
+    // disclaimer:'no_kg_data'` (preservada, nunca apagada).
+    const hasCondition =
+      (typeof condition === 'string' && condition.trim().length > 0) ||
+      !!(clinicalContext?.allConditions?.length);
+    const hasPetSignal =
+      !!(petProfile?.species || petProfile?.breed || petProfile?.age || petProfile?.weight);
+    const hasClinicalSignal =
+      hasCondition ||
+      !!(clinicalContext?.labAlerts?.length) ||
+      !!(clinicalContext?.currentMedications?.length) ||
+      !!(clinicalContext?.examSummary?.length) ||
+      !!(clinicalContext?.latestConsultation?.assessment) ||
+      !!(clinicalContext?.latestConsultation?.chief_complaint);
+
+    if (!hasCondition || (!hasPetSignal && !hasClinicalSignal)) {
+      const missing: string[] = [];
+      if (!hasCondition) missing.push('condition');
+      if (!hasPetSignal) missing.push('pet_profile');
+      if (!hasClinicalSignal) missing.push('clinical_signal');
+      console.warn('hybrid-recommendation abstaining: clinical_signal_insufficient', { missing });
+      return new Response(JSON.stringify({
+        abstain: true,
+        abstain_reason: 'clinical_signal_insufficient',
+        abstain_detail: `Faltando: ${missing.join(', ')}`,
+        source: mode === 'enrich' ? 'hybrid' : 'llm_fallback',
+        disclaimer: 'no_kg_data',
+        nutraceuticals: [],
+        rationale: 'Entrada insuficiente para gerar recomendação responsável (sem condição informada ou sem dados clínicos do paciente).',
+        precautions: ['Forneça condição-alvo e perfil clínico mínimo antes de gerar recomendação.'],
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
@@ -465,7 +502,11 @@ Return your response as valid JSON following the structure specified.`;
               condition: n.condition || n.targetCondition || condition,
             })),
           ];
+          const kgEmpty = !(kgData?.nutraceuticals?.length);
           return new Response(JSON.stringify({
+            source: 'hybrid',
+            disclaimer: kgEmpty ? 'no_kg_data' : 'low_confidence',
+            abstain: false,
             nutraceuticals: enrichedNutraceuticals,
             rationale: parsed.rationale || kgData?.rationale || `Recomendação enriquecida por IA para ${condition}.`,
             precautions: [...(kgData?.precautions || []), ...(parsed.precautions || [])],
@@ -480,7 +521,11 @@ Return your response as valid JSON following the structure specified.`;
       }
 
       // Fallback: return KG compounds + text enrichment
+      const kgEmpty = !(kgData?.nutraceuticals?.length);
       return new Response(JSON.stringify({
+        source: 'hybrid',
+        disclaimer: kgEmpty ? 'no_kg_data' : 'low_confidence',
+        abstain: false,
         nutraceuticals: (kgData?.nutraceuticals || []).map((n: any) => ({
           ...n,
           evidenceLevel: n.evidenceLevel || 'KG-backed',
@@ -503,8 +548,13 @@ Return your response as valid JSON following the structure specified.`;
       
       const parsed = JSON.parse(jsonContent);
       const result = {
+        source: 'llm_fallback',
+        disclaimer: 'no_kg_data',
+        abstain: false,
         nutraceuticals: (parsed.nutraceuticals || []).map((n: any) => ({
           ...n,
+          // Card #3: branch llm_fallback agora carimba provenance per-composto.
+          evidenceLevel: n.evidenceLevel || 'AI-enriched',
           condition: n.condition || n.targetCondition || condition,
           targetCondition: n.targetCondition || n.condition || condition,
         })),
@@ -523,6 +573,9 @@ Return your response as valid JSON following the structure specified.`;
     } catch (parseError) {
       console.error('Failed to parse AI response as JSON:', parseError);
       return new Response(JSON.stringify({
+        source: 'llm_fallback',
+        disclaimer: 'no_kg_data',
+        abstain: false,
         nutraceuticals: [],
         rationale: content || 'Não foi possível gerar uma recomendação estruturada. Consulte um veterinário.',
         precautions: ['Esta recomendação requer validação por veterinário', 'Iniciar com doses conservadoras'],
