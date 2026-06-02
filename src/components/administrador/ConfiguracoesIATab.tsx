@@ -565,8 +565,8 @@ const ConfiguracoesIATab: React.FC = () => {
                     </p>
                     <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                       <li>Grafo hierárquico 3-tier (documento → chunk → entidade)</li>
-                      <li>U-Retrieval: Top-down (summaries) + Bottom-up (detalhes)</li>
-                      <li>Validação de triplas via KGARevion pattern (Generate-Review-Revise)</li>
+                      <li>Recuperação híbrida: Cypher (Neo4j) + pgvector (Supabase) — inspirada em U-Retrieval, mas sem fusão top-down/bottom-up implementada</li>
+                      <li>Validação de triplas: Generate + scoring heurístico (0.65–0.75) + auto-approve ≥ 0,50 + HITL — inspirado em KGARevion/GRRA, sem modelo Review independente</li>
                       <li>Complementa pgvector (Supabase) para hybrid search</li>
                       <li>Predisposições raciais: (:Breed)-[:PREDISPOSED_TO]→(:Condition)</li>
                     </ul>
