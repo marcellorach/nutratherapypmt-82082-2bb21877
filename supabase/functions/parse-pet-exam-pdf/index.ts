@@ -180,7 +180,7 @@ Deno.serve(async (req) => {
                   unit: { type: ["string", "null"] },
                   ref_min: { type: ["number", "null"] },
                   ref_max: { type: ["number", "null"] },
-                  flag: { type: ["string", "null"], enum: ["normal", "high", "low", null] },
+                  flag: { type: ["string", "null"], enum: ["normal", "high", "low", "unreadable", null] },
                 },
                 required: ["analyte", "value"],
                 additionalProperties: false,
