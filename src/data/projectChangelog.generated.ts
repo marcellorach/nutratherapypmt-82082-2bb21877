@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-02T02:52:23.538Z
+// Última geração: 2026-06-02T02:57:13.140Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,31 @@ export const lastChangelogDate = "2026-06-02";
 export const senexVersion = "7.0.1";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-02",
+    "kind": "changed",
+    "area": "clinical-pipeline",
+    "status": "entregue",
+    "title": "IA Hardening Card #5b: extract-pet-clinical-data migrado para tool_choice (Gateway + abstain tipado)",
+    "bullets": [
+      "Migração #2 do Card #5 (extract-pet-clinical-data): substituído `responseMimeType: 'application/json'` (Gemini direto) por `tools: [extract_clinical_entities]` + `tool_choice: { type: \"function\", function: { name: \"extract_clinical_entities\" } }` via Lovable AI Gateway. Unifica o caminho com o #3 (parse-pet-exam-pdf) já migrado — uma única autenticação (`LOVABLE_API_KEY`), uma única semântica de tool-calling.",
+      "GUARDRAIL Card #4 preservado: o schema do tool INCLUI `abstain: boolean`, `abstain_reason` (enum), `abstain_detail`. `abstain=true` com 5 listas vazias é resposta VÁLIDA do tool, não erro de parse. Pré-flight de abstain (texto curto, key ausente) PERMANECE — agora roda ANTES da chamada ao Gateway.",
+      "Buckets de abstain desambiguados (essencial para a verificação ANTES/DEPOIS pedida):",
+      "`clinical_signal_insufficient` — HONESTA. Texto sem sinal (pré-flight) OU modelo declarou abstain via tool. Única que deve existir em regime.",
+      "`model_unavailable` — INFRA. `LOVABLE_API_KEY` ausente ou Gateway 5xx.",
+      "`model_response_invalid` — PARSE/SCHEMA. Sem `tool_calls` apesar de `tool_choice` forçado, ou args malformados. Com tool_choice, este bucket DEVE cair a ~0 — termômetro do sucesso.",
+      "Telemetria: `logPromptUsage` agora chamado em todos os caminhos (sucesso E abstain). Caminhos de abstain usam `success=false` + `error=\"abstain:<reason>\"` como proxy de bucket (sem alterar schema de `ai_prompt_usage_log`). Para o ANTES/DEPOIS basta `grep \"abstain:<reason>\"` nos logs e contar por bucket.",
+      "`AbstainEnvelope` (`src/types/recommendation-confidence.ts`): `abstain_reason` ampliado de literal único para union de 3 buckets. Nenhum caller hoje consome `abstain_reason` (verificado em `src/` — `PetClinicalChat.tsx` só itera as 5 listas, sempre presentes). Sem breaking change na UI.",
+      "Sem mudança contratual para o caller (`PetClinicalChat.tsx`): forma do JSON (5 arrays + envelope) preservada bit-a-bit. `abstain=false` continua produzindo `disclaimer:'none'`; `abstain=true` continua produzindo `disclaimer:'no_kg_data' + source:'llm_fallback'`.",
+      "Critério de sucesso (mensurável): razão `count(abstain:clinical_signal_insufficient) / total_abstain` deve subir significativamente; `count(abstain:model_response_invalid)` deve cair próximo de 0. As abstenções remanescentes serão majoritariamente as honestas (input insuficiente de verdade).",
+      "Files: `supabase/functions/extract-pet-clinical-data/index.ts`, `src/types/recommendation-confidence.ts`"
+    ],
+    "files": [
+      "src/types/recommendation-confidence.ts",
+      "supabase/functions/extract-pet-clinical-data/index.ts"
+    ],
+    "i18nVersion": "1.118.1"
+  },
   {
     "date": "2026-06-02",
     "kind": "changed",
