@@ -655,7 +655,6 @@ Return your response as valid JSON following the structure specified.`;
       success: true,
     });
 
-    if (mode === 'enrich') {
     // ── Sucesso: tool retornou estrutura válida ──────────────────────────
     const llmNutra = Array.isArray(toolArgs.nutraceuticals) ? toolArgs.nutraceuticals : [];
 
