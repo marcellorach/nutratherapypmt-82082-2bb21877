@@ -312,13 +312,13 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
           { feature: { pt: '3. Tipos de Entidade', en: '3. Entity Types' }, values: [ { pt: 'Drug, Disease, Gene', en: 'Drug, Disease, Gene' }, { pt: 'Entidades biomédicas', en: 'Biomedical entities' }, { pt: 'Nutraceutical, Drug, Condition, Mechanism, Breed, Species, Pet', en: 'Nutraceutical, Drug, Condition, Mechanism, Breed, Species, Pet' } ] },
           { feature: { pt: '4. Tipos de Relação', en: '4. Relation Types' }, values: [ { pt: 'TREATS, CAUSES', en: 'TREATS, CAUSES' }, { pt: 'Relações genéricas', en: 'Generic relations' }, { pt: '20+ tipos (TREATS, MODULATES, SYNERGIZES, ANTAGONIZES, PREDISPOSED_TO…)', en: '20+ types (TREATS, MODULATES, SYNERGIZES, ANTAGONIZES, PREDISPOSED_TO…)' } ] },
           { feature: { pt: '5. Suporte a Ontologias', en: '5. Ontology Support' }, values: [ { pt: 'UMLS, MeSH', en: 'UMLS, MeSH' }, { pt: 'PrimeKG', en: 'PrimeKG' }, { pt: 'SNOMED-CT VetSCT + UMLS + VeNom + AAHA/WSAVA', en: 'SNOMED-CT VetSCT + UMLS + VeNom + AAHA/WSAVA' } ] },
-          { feature: { pt: '6. Método de Retrieval', en: '6. Retrieval Method' }, values: [ { pt: 'U-Retrieval (top + bottom)', en: 'U-Retrieval (top + bottom)' }, { pt: 'Busca grounded no KG', en: 'KG-grounded search' }, { pt: 'Híbrido: U-Retrieval + validação KG + confidence scoring', en: 'Hybrid: U-Retrieval + KG validation + confidence scoring' } ] },
-          { feature: { pt: '7. Ciclo de Validação', en: '7. Validation Cycle' }, values: [ { pt: 'Não explícito', en: 'Not explicit' }, { pt: 'Ciclo GRRA', en: 'GRRA cycle' }, { pt: 'GRRA + human-in-the-loop + GRADE + auto-approve ≥ 0,50', en: 'GRRA + human-in-the-loop + GRADE + auto-approve ≥ 0.50' } ] },
-          { feature: { pt: '8. Redução de Alucinações', en: '8. Hallucination Reduction' }, values: [ { pt: '~40%', en: '~40%' }, { pt: '~87% de erros eliminados', en: '~87% errors eliminated' }, { pt: 'Combinado: ~50% esperado', en: 'Combined: ~50% expected' } ] },
+          { feature: { pt: '6. Método de Retrieval', en: '6. Retrieval Method' }, values: [ { pt: 'U-Retrieval (top + bottom)', en: 'U-Retrieval (top + bottom)' }, { pt: 'Busca grounded no KG', en: 'KG-grounded search' }, { pt: 'Híbrido Cypher (Neo4j) + pgvector (Supabase), sem fusão top-down/bottom-up', en: 'Hybrid Cypher (Neo4j) + pgvector (Supabase), no top-down/bottom-up fusion' } ] },
+          { feature: { pt: '7. Ciclo de Validação', en: '7. Validation Cycle' }, values: [ { pt: 'Não explícito', en: 'Not explicit' }, { pt: 'Ciclo GRRA', en: 'GRRA cycle' }, { pt: 'Generate + scoring heurístico (0,65–0,75) + auto-approve ≥ 0,50 + HITL (sem Review independente)', en: 'Generate + heuristic scoring (0.65–0.75) + auto-approve ≥ 0.50 + HITL (no independent Review model)' } ] },
+          { feature: { pt: '8. Redução de Alucinações (benchmark do paper)', en: '8. Hallucination Reduction (paper benchmark)' }, values: [ { pt: '~40% (benchmark do paper)', en: '~40% (paper benchmark)' }, { pt: '~87% (benchmark do paper)', en: '~87% (paper benchmark)' }, { pt: 'Não medido no Senex AI', en: 'Not measured in Senex AI' } ] },
           { feature: { pt: '9. Foco em Longevidade', en: '9. Longevity Focus' }, values: [ { pt: 'Não coberto', en: 'Not covered' }, { pt: 'Não coberto', en: 'Not covered' }, { pt: '✅ Geroprotetores, marcadores de idade biológica, frailty index', en: '✅ Geroprotectors, biological-age markers, frailty index' } ] },
           { feature: { pt: '10. Score de Sinergia', en: '10. Synergy Scoring' }, values: [ { pt: 'Não coberto', en: 'Not covered' }, { pt: 'Não coberto', en: 'Not covered' }, { pt: '✅ Quantificação de pathways compartilhados + stack ≤ 8 compostos', en: '✅ Shared-pathway quantification + stack capped at 8 compounds' } ] },
           { feature: { pt: '11. Predisposição por Raça', en: '11. Breed Predisposition' }, values: [ { pt: 'Não coberto', en: 'Not covered' }, { pt: 'Não coberto', en: 'Not covered' }, { pt: '✅ Caminhos Species → BreedGroup → Breed → Condition', en: '✅ Species → BreedGroup → Breed → Condition paths' } ] },
-          { feature: { pt: '12. Auto-Descoberta (Link Prediction)', en: '12. Auto-Discovery (Link Prediction)' }, values: [ { pt: 'Não coberto', en: 'Not covered' }, { pt: 'Não coberto', en: 'Not covered' }, { pt: '✅ TransE link prediction para pathways novos', en: '✅ TransE link prediction for novel pathways' } ] },
+          { feature: { pt: '12. Auto-Descoberta (Link Prediction)', en: '12. Auto-Discovery (Link Prediction)' }, values: [ { pt: 'Não coberto', en: 'Not covered' }, { pt: 'Não coberto', en: 'Not covered' }, { pt: 'Gap-fill via PubMed E-utilities + Gemini (TransE permanece apenas inspiração, não implementado)', en: 'Gap-fill via PubMed E-utilities + Gemini (TransE remains inspiration only, not implemented)' } ] },
           { feature: { pt: '13. Gap-Fill PubMed', en: '13. PubMed Gap-Fill' }, values: [ { pt: 'Não coberto', en: 'Not covered' }, { pt: 'Não coberto', en: 'Not covered' }, { pt: '✅ PubMed E-utilities + Gemini → triplets pendentes automáticos', en: '✅ PubMed E-utilities + Gemini → automatic pending triplets' } ] },
           { feature: { pt: '14. Digital Twin Longitudinal', en: '14. Longitudinal Digital Twin' }, values: [ { pt: 'Não coberto', en: 'Not covered' }, { pt: 'Não coberto', en: 'Not covered' }, { pt: '✅ Projeção sigmoide + métrica years_gained', en: '✅ Sigmoid projection + years_gained metric' } ] }
         ]
@@ -340,12 +340,11 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
     L3 --> L4["L4 - Outcome<br/>(condition · breed · species)"]
   end
   subgraph P4["Phase 4 - Validation & Gap-Fill"]
-    V1["GRRA cycle<br/>(KGARevion)"] --> V2["Auto-approve >= 0.50<br/>+ human curation"]
-    V2 --> V3["TransE link prediction"]
-    V3 --> V4["PubMed E-utilities<br/>+ Gemini gap-fill"]
+    V1["Generate + heuristic<br/>scoring (0.65-0.75)"] --> V2["Auto-approve >= 0.50<br/>+ human curation (HITL)"]
+    V2 --> V4["PubMed E-utilities<br/>+ Gemini gap-fill"]
   end
   subgraph OUT["Clinical Output"]
-    O1["U-Retrieval<br/>(top-down + bottom-up)"] --> O2["Recommendation engine<br/>(stack <= 8 compounds)"]
+    O1["Hybrid retrieval<br/>Cypher (Neo4j) + pgvector"] --> O2["Recommendation engine<br/>(stack <= 8 compounds)"]
     O2 --> O3["Digital Twin<br/>sigmoid · years_gained"]
   end
   A4 --> B1
