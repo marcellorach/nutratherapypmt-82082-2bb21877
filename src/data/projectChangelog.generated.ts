@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-01T20:50:18.048Z
+// Última geração: 2026-06-02T01:30:18.757Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,51 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-06-01";
+export const lastChangelogDate = "2026-06-02";
 
 export const senexVersion = "7.0.1";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-02",
+    "kind": "added",
+    "area": "infra",
+    "status": "entregue",
+    "title": "IA Hardening Card #1: interpolate blindado + telemetria de variáveis ausentes",
+    "bullets": [
+      "`interpolate(tpl, vars, missing?)` em `supabase/functions/_shared/ai-task-router.ts` agora coleta toda chave `{{var}}` cujo valor cai para `undefined`/`null`/`\"\"` em vez de substituir silenciosamente. Comportamento legado preservado (ainda retorna `\"\"`), mas as ocorrências são registradas.",
+      "`callAITask` agora emite `console.warn` por invocação com variáveis ausentes (`task=… caller=… missing_variables=[…]`) e persiste o array em `ai_task_invocations.missing_variables` (nova coluna `text[]` + índice GIN parcial via migração).",
+      "Pré-requisito do card #6 (auditoria de `required_variables` por task) — sem este log, \"variável nunca ausente\" é indistinguível de \"task nunca exercitada\".",
+      "Cards aceitos no kanban de robustez IA (ordem confirmada): (1) interpolate blindado ✅, (2) migração `validation_status text` + `abstained` em `ai_task_invocations`, (3) B+D+bridge (`output_schema` no router + 1 retry de reparo + `abstain` válido + `response_format: json_object` nos 2 P0 + few-shot), (4) remover `simpleExtraction()` (sem 4a/4b), (5) migrar N callers (critério: persistem dado estruturado que molda registro clínico/recomendação E hoje não usam `tool_choice`; lista confirmada contra código no card #5, exclui chat/retrieval livre), (6) `required_variables text[]` em `ai_prompt_versions` + warn-only, (7) C-Fase 2 (throw) — gate: ≥14 dias E cada contrato invocado ≥K vezes (K=5–10) sem variável-surpresa nova.",
+      "Files: `supabase/functions/_shared/ai-task-router.ts`, migration `ai_task_invocations.missing_variables`"
+    ],
+    "files": [
+      "supabase/functions/_shared/ai-task-router.ts"
+    ],
+    "i18nVersion": "1.118.1"
+  },
+  {
+    "date": "2026-06-01",
+    "kind": "security",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Endurece ai-config: admin-only + segredos mascarados",
+    "bullets": [
+      "`supabase/functions/ai-config/index.ts` agora valida `Authorization: Bearer <jwt>` via `getClaims` e checa `user_roles.role = 'admin'` em TODAS as chamadas (GET, POST `get`/`set`/`test-neo4j`). Sem token → 401; sem admin → 403.",
+      "GET deixa de devolver valores crus de segredos (`*_api_key`, `*_password`, `*_secret`, `*_token`): retorna apenas máscara `\"••••XXXX\"` (últimos 4) e um objeto `_meta` por chave com `{ is_set, last4, updated_at }`. Chaves não-sensíveis (URI, username, prompts) seguem retornando cruas para admins.",
+      "POST `action='get'` bloqueia (403) leitura individual de chave sensível.",
+      "POST `action='set'` rejeita (400) qualquer `value` que comece com `\"••••\"` (impede sobrescrever a chave real com o placeholder visual).",
+      "`ConfiguracoesIATab.saveConfigToSupabase` faz early-return quando o input ainda contém a máscara, evitando falsos erros de validação ao \"salvar sem editar\".",
+      "Backlog / Kanban — próximo ciclo de segurança (Abordagem B): migrar segredos de `ai_configurations` para Supabase Secrets (Lovable Cloud), refatorar edge functions consumidoras (`openai`, `claude`, `gemini`, `perplexity`, `neo4j`) para ler via `Deno.env.get` / helper `getApiKey` (já padrão para `NLM_UMLS_API_KEY`, `NCBI_API_KEY`, `PERPLEXITY_API_KEY`), transformar `ConfiguracoesIATab` em painel de status sem inputs de chave, e limpar linhas de segredo da tabela após migração. Objetivo: eliminar a superfície residual em que a service role consegue ler segredos da `ai_configurations`.",
+      "Pendência manual: `.gitignore` é read-only no sandbox Lovable — adicionar manualmente as linhas `.env`, `.env.*`, `!.env.example`. Hoje o `.env` só contém `VITE_SUPABASE_*` (chaves publicáveis), então o risco é higiene/futuro, não exfiltração ativa.",
+      "Files: `supabase/functions/ai-config/index.ts`, `src/components/administrador/ConfiguracoesIATab.tsx`"
+    ],
+    "files": [
+      "supabase/functions/ai-config/index.ts",
+      "src/components/administrador/ConfiguracoesIATab.tsx"
+    ],
+    "i18nVersion": "1.118.1"
+  },
   {
     "date": "2026-06-01",
     "kind": "added",

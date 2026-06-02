@@ -1,21 +1,32 @@
 # Project context briefing (auto)
-Generated: 2026-06-01T20:50:18.058Z
+Generated: 2026-06-02T01:30:18.764Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.118.0
+## Latest i18n version: 1.118.1
 
 ## Changes by area (last 14 days)
-- **admin**: 51
+- **admin**: 42
 - **kg**: 7
-- **curation**: 7
-- **meta**: 6
-- **infra**: 4
-- **clinical-pipeline**: 4
-- **vet-ui**: 4
-- **tutor-ui**: 1
+- **infra**: 5
+- **meta**: 5
+- **curation**: 5
+- **clinical-pipeline**: 3
+- **vet-ui**: 1
 
 ## Top 10 recent entries
+### 2026-06-02 · [infra] ADDED — IA Hardening Card #1: interpolate blindado + telemetria de variáveis ausentes
+- `interpolate(tpl, vars, missing?)` em `supabase/functions/_shared/ai-task-router.ts` agora coleta toda chave `{{var}}` cujo valor cai para `undefined`/`null`/`""` em vez de substituir silenciosamente. Comportamento legado preservado (ainda retorna `""`), mas as ocorrências são registradas.
+- `callAITask` agora emite `console.warn` por invocação com variáveis ausentes (`task=… caller=… missing_variables=[…]`) e persiste o array em `ai_task_invocations.missing_variables` (nova coluna `text[]` + índice GIN parcial via migração).
+- Pré-requisito do card #6 (auditoria de `required_variables` por task) — sem este log, "variável nunca ausente" é indistinguível de "task nunca exercitada".
+_files: supabase/functions/_shared/ai-task-router.ts_
+
+### 2026-06-01 · [admin] SECURITY — Endurece ai-config: admin-only + segredos mascarados
+- `supabase/functions/ai-config/index.ts` agora valida `Authorization: Bearer <jwt>` via `getClaims` e checa `user_roles.role = 'admin'` em TODAS as chamadas (GET, POST `get`/`set`/`test-neo4j`). Sem token → 401; sem admin → 403.
+- GET deixa de devolver valores crus de segredos (`*_api_key`, `*_password`, `*_secret`, `*_token`): retorna apenas máscara `"••••XXXX"` (últimos 4) e um objeto `_meta` por chave com `{ is_set, last4, updated_at }`. Chaves não-sensíveis (URI, username, prompts) seguem retornando cruas para admins.
+- POST `action='get'` bloqueia (403) leitura individual de chave sensível.
+_files: supabase/functions/ai-config/index.ts, src/components/administrador/ConfiguracoesIATab.tsx_
+
 ### 2026-06-01 · [admin] ADDED — Gerenciamento in-app de chaves de API (sem Lovable Cloud)
 - Nova tabela criptografada `public.api_keys` (pgcrypto) + view `api_keys_public` (somente metadados) + funções `encrypt_api_key`/`decrypt_api_key` (SECURITY DEFINER, restritas a `service_role`).
 - Nova edge function `api-keys-manage` (admin-only, valida JWT + role) com ações `set` / `delete` / `test` — encripta o valor antes de gravar e faz ping real ao provedor para registrar `last_test_status` / `last_test_message`.
@@ -63,18 +74,6 @@ _files: supabase/functions/_shared/system-prompts.ts, supabase/functions/query-p
 - `chat-meta-study`: persona estática agora vem do registro (com fallback verbatim); contexto dinâmico do paper (claims/regras/evidências) preservado. Telemetria via `logPromptUsage` em sucesso e erro HTTP.
 - `evaluate-meta-study-reliability`: prompt do sistema (curador sênior, tool-call `rate_study_reliability`) movido para o registro; carregado uma vez por chamada e reutilizado no loop sequencial. `logPromptUsage` em sucesso, erro HTTP e tool-call ausente.
 _files: supabase/functions/_shared/system-prompts.ts, supabase/functions/chat-meta-study/index.ts, supabase/functions/evaluate-meta-study-reliability/index.ts_
-
-### 2026-06-01 · [kg] CHANGED — `kg-evidence-gap-fill` migrado para o registro único de prompts
-- Adicionados `kg_gap_fill_gemini` e `kg_gap_fill_perplexity` ao manifesto `_shared/system-prompts.ts` (com metadata, consumers e tags).
-- `assessWithGemini` e `assessWithPerplexity` agora carregam o system prompt via `fetchSystemPrompt(...)` com fallback verbatim para garantir continuidade quando o DB está indisponível.
-- Telemetria via `logPromptUsage` em ambos os caminhos (success/erro/HTTP-fail), com latência e tokens quando disponíveis.
-_files: supabase/functions/_shared/system-prompts.ts, supabase/functions/kg-evidence-gap-fill/index.ts_
-
-### 2026-06-01 · [clinical-pipeline] CHANGED — Sprint 1 (Clinical) concluído: registro único de prompts
-- `project-pet-trajectory` → `project_pet_trajectory` (Gompertz + KG, modelo gemini-2.5-pro, output via tool-call). Smoke test 400 ok.
-- `translate-and-categorize-conditions` → `translate_text`. Teste end-to-end retornou 200 (60 categorizadas).
-- Telemetria `logPromptUsage` ativada em ambas (latência, tokens, erros).
-_files: supabase/functions/project-pet-trajectory/index.ts, supabase/functions/translate-and-categorize-conditions/index.ts, supabase/functions/_shared/system-prompts.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
