@@ -45,21 +45,43 @@ serve(async (req: Request) => {
       );
     }
 
+    // ── Pré-flight de abstenção (Card #3/#4) ────────────────────────────
+    // abstain por falta de sinal clínico de entrada — substitui o antigo
+    // `simpleExtraction` rule-based, que silenciosamente fabricava entidades
+    // marcando confiança como se fosse extração real.
+    const trimmed = clinicalText.trim();
+    if (trimmed.length < 12) {
+      console.warn('extract-pet-clinical-data abstaining: clinical_signal_insufficient (text too short)');
+      return new Response(JSON.stringify({
+        abstain: true,
+        abstain_reason: 'clinical_signal_insufficient',
+        abstain_detail: 'Texto clínico muito curto para extração responsável.',
+        source: 'llm_fallback',
+        disclaimer: 'no_kg_data',
+        conditions: [], medications: [], symptoms: [], examResults: [], biomarkers: [],
+      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
     const promptTemplate = await fetchSystemPrompt('extract_pet_clinical_data', SYSTEM_PROMPT_FALLBACK);
     const systemPrompt = promptTemplate
       .replace('{{breed}}', existingProfile?.breed || 'Unknown')
       .replace('{{age}}', String(existingProfile?.age || 'Unknown'));
 
-    // Use Lovable AI (Gemini) via the built-in endpoint
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
-    
+
     if (!geminiApiKey) {
-      // Fallback: use a simple rule-based extraction for demo
-      const extracted = simpleExtraction(clinicalText);
-      return new Response(
-        JSON.stringify(extracted),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      // Card #4: removido `simpleExtraction` (regex rule-based) — substituído
+      // por abstain explícito. Antes, a ausência da chave fazia o sistema
+      // fabricar entidades silenciosamente.
+      console.error('extract-pet-clinical-data: GEMINI_API_KEY missing — abstaining');
+      return new Response(JSON.stringify({
+        abstain: true,
+        abstain_reason: 'clinical_signal_insufficient',
+        abstain_detail: 'Modelo de extração indisponível (chave ausente).',
+        source: 'llm_fallback',
+        disclaimer: 'no_kg_data',
+        conditions: [], medications: [], symptoms: [], examResults: [], biomarkers: [],
+      }), { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     const response = await fetch(
@@ -83,23 +105,28 @@ serve(async (req: Request) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Gemini API error:', errorText);
-      // Fallback to simple extraction
-      const extracted = simpleExtraction(clinicalText);
-      return new Response(
-        JSON.stringify(extracted),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({
+        abstain: true,
+        abstain_reason: 'clinical_signal_insufficient',
+        abstain_detail: `Falha do modelo de extração (${response.status}).`,
+        source: 'llm_fallback',
+        disclaimer: 'no_kg_data',
+        conditions: [], medications: [], symptoms: [], examResults: [], biomarkers: [],
+      }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     const result = await response.json();
     const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!text) {
-      const extracted = simpleExtraction(clinicalText);
-      return new Response(
-        JSON.stringify(extracted),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({
+        abstain: true,
+        abstain_reason: 'clinical_signal_insufficient',
+        abstain_detail: 'Resposta vazia do modelo de extração.',
+        source: 'llm_fallback',
+        disclaimer: 'no_kg_data',
+        conditions: [], medications: [], symptoms: [], examResults: [], biomarkers: [],
+      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     // Parse the JSON response
@@ -112,12 +139,22 @@ serve(async (req: Request) => {
       if (jsonMatch) {
         parsed = JSON.parse(jsonMatch[1]);
       } else {
-        parsed = simpleExtraction(clinicalText);
+        return new Response(JSON.stringify({
+          abstain: true,
+          abstain_reason: 'clinical_signal_insufficient',
+          abstain_detail: 'Resposta do modelo não pôde ser parseada como JSON.',
+          source: 'llm_fallback',
+          disclaimer: 'no_kg_data',
+          conditions: [], medications: [], symptoms: [], examResults: [], biomarkers: [],
+        }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
     }
 
     return new Response(
       JSON.stringify({
+        abstain: false,
+        source: 'llm_fallback',
+        disclaimer: 'none',
         conditions: parsed.conditions || [],
         medications: parsed.medications || [],
         symptoms: parsed.symptoms || [],
@@ -134,101 +171,3 @@ serve(async (req: Request) => {
     );
   }
 });
-
-// Simple rule-based extraction fallback
-function simpleExtraction(text: string) {
-  const lowerText = text.toLowerCase();
-  const conditions: any[] = [];
-  const medications: any[] = [];
-  const symptoms: any[] = [];
-  const examResults: any[] = [];
-  const biomarkers: any[] = [];
-
-  // Common conditions
-  const conditionPatterns = [
-    { pattern: /displasia\s*(coxofemoral|de quadril|hip)/i, name: 'Hip Dysplasia' },
-    { pattern: /artrite|arthritis|osteoartrite|osteoarthritis/i, name: 'Osteoarthritis' },
-    { pattern: /epilepsia|epilepsy|convuls/i, name: 'Epilepsy' },
-    { pattern: /diabetes/i, name: 'Diabetes Mellitus' },
-    { pattern: /hipotireoidismo|hypothyroidism/i, name: 'Hypothyroidism' },
-    { pattern: /insufici[eê]ncia card[ií]aca|heart failure|cardiac/i, name: 'Heart Disease' },
-    { pattern: /doença valv|mitral valve|valve disease/i, name: 'Mitral Valve Disease' },
-    { pattern: /dermatite|dermatitis|atopi/i, name: 'Atopic Dermatitis' },
-    { pattern: /insufici[eê]ncia pancre[aá]tica|EPI|pancreatic insufficiency/i, name: 'Exocrine Pancreatic Insufficiency' },
-    { pattern: /disfunção cognitiva|cognitive dysfunction|CCD/i, name: 'Canine Cognitive Dysfunction' },
-    { pattern: /siringomielia|syringomyelia/i, name: 'Syringomyelia' },
-    { pattern: /espondilose|spondylosis/i, name: 'Spondylosis' },
-  ];
-
-  for (const { pattern, name } of conditionPatterns) {
-    if (pattern.test(text)) {
-      const severity = /grave|sever/i.test(text) ? 'severe' : /moderado|moderate/i.test(text) ? 'moderate' : /leve|mild/i.test(text) ? 'mild' : undefined;
-      conditions.push({ name, severity });
-    }
-  }
-
-  // Common medications
-  const medPatterns = [
-    { pattern: /meloxicam/i, name: 'Meloxicam' },
-    { pattern: /carprofeno|carprofen/i, name: 'Carprofen' },
-    { pattern: /fenobarbital|phenobarbital/i, name: 'Phenobarbital' },
-    { pattern: /brometo de pot[aá]ssio|potassium bromide/i, name: 'Potassium Bromide' },
-    { pattern: /pimobendan/i, name: 'Pimobendan' },
-    { pattern: /furosemida|furosemide/i, name: 'Furosemide' },
-    { pattern: /selegilina|selegiline/i, name: 'Selegiline' },
-    { pattern: /levotiroxina|levothyroxine/i, name: 'Levothyroxine' },
-    { pattern: /gabapentina|gabapentin/i, name: 'Gabapentin' },
-    { pattern: /tramadol/i, name: 'Tramadol' },
-  ];
-
-  for (const { pattern, name } of medPatterns) {
-    if (pattern.test(text)) {
-      const dosageMatch = text.match(new RegExp(`${name}[^.]*?(\\d+[.,]?\\d*\\s*mg\\/kg)`, 'i'));
-      medications.push({ name, dosage: dosageMatch?.[1] || undefined });
-    }
-  }
-
-  // Symptoms
-  const symptomPatterns = [
-    { pattern: /claudica|limping|lameness|mancando/i, name: 'Lameness/Claudication' },
-    { pattern: /vomit/i, name: 'Vomiting' },
-    { pattern: /diarreia|diarrhea/i, name: 'Diarrhea' },
-    { pattern: /coçando|prurido|itching|scratching/i, name: 'Pruritus' },
-    { pattern: /tosse|cough/i, name: 'Cough' },
-    { pattern: /letargia|letharg/i, name: 'Lethargy' },
-    { pattern: /desorient|confusion|confused/i, name: 'Disorientation' },
-    { pattern: /perda de peso|weight loss/i, name: 'Weight Loss' },
-    { pattern: /apetite reduzido|inapetência|decreased appetite/i, name: 'Decreased Appetite' },
-  ];
-
-  for (const { pattern, name } of symptomPatterns) {
-    if (pattern.test(text)) {
-      const durationMatch = text.match(/h[aá]\s*(\d+)\s*(meses?|semanas?|dias?|months?|weeks?|days?)/i);
-      symptoms.push({ name, duration: durationMatch ? `${durationMatch[1]} ${durationMatch[2]}` : undefined });
-    }
-  }
-
-  // Exam types
-  const examPatterns = [
-    { pattern: /radiografia|x-ray|raio-?x/i, name: 'X-Ray' },
-    { pattern: /ecocardiograma|echocardiogram/i, name: 'Echocardiogram' },
-    { pattern: /hemograma|blood count|CBC/i, name: 'Complete Blood Count' },
-    { pattern: /ultrassom|ultrasound|ultrasonografia/i, name: 'Ultrasound' },
-    { pattern: /resson[aâ]ncia|MRI/i, name: 'MRI' },
-    { pattern: /urin[aá]lise|urinalysis/i, name: 'Urinalysis' },
-  ];
-
-  for (const { pattern, name } of examPatterns) {
-    if (pattern.test(text)) {
-      examResults.push({ type: name, finding: 'See clinical notes' });
-    }
-  }
-
-  // Biomarkers
-  const bioMarkerMatch = text.match(/leuc[oó]citos?\s*:?\s*(\d+[.,]?\d*)/i);
-  if (bioMarkerMatch) {
-    biomarkers.push({ name: 'Leukocytes', value: parseFloat(bioMarkerMatch[1].replace(',', '.')), unit: '/µL' });
-  }
-
-  return { conditions, medications, symptoms, examResults, biomarkers };
-}
