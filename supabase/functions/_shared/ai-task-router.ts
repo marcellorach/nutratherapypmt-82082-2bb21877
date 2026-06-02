@@ -225,6 +225,7 @@ export async function callAITask(
 
   const systemPrompt = opts.override_system_prompt ?? resolved.system_prompt;
   let messages: Array<{ role: string; content: string }>;
+  const missingVars: string[] = [];
   if (opts.messages && opts.messages.length > 0) {
     messages = systemPrompt
       ? [{ role: "system", content: systemPrompt }, ...opts.messages]
@@ -233,11 +234,16 @@ export async function callAITask(
     const userTpl = opts.override_user_prompt ?? resolved.user_prompt ?? "";
     const vars: Record<string, string> = { ...(opts.variables ?? {}) };
     if (opts.input !== undefined) vars.input = opts.input;
-    const userMsg = userTpl ? interpolate(userTpl, vars) : (opts.input ?? "");
+    const userMsg = userTpl ? interpolate(userTpl, vars, missingVars) : (opts.input ?? "");
     messages = [
       ...(systemPrompt ? [{ role: "system", content: systemPrompt }] : []),
       { role: "user", content: userMsg },
     ];
+  }
+  if (missingVars.length > 0) {
+    console.warn(
+      `[ai-task-router] task=${taskId} caller=${opts.caller} missing_variables=${JSON.stringify(missingVars)}`,
+    );
   }
 
   const payload: Record<string, unknown> = {
@@ -274,6 +280,7 @@ export async function callAITask(
       cost_estimate: 0,
       ok: false,
       error: `${resp.status}: ${text.slice(0, 300)}`,
+      missing_variables: missingVars,
     });
     throw new Error(`AI Gateway ${resp.status}: ${text.slice(0, 300)}`);
   }
@@ -295,6 +302,7 @@ export async function callAITask(
     tokens_out: tOut,
     cost_estimate: cost,
     ok: true,
+    missing_variables: missingVars,
   });
 
   return {
