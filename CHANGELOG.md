@@ -24,6 +24,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.1 -->
 
+### Changed - 2026-06-02 — IA Hardening Card #5a: parse-pet-exam-pdf migrado para tool_choice (schema fechado)
+<!-- area: clinical-pipeline · status: entregue · i18n: 1.118.1 -->
+- **Migração #3 do Card #5 (parse-pet-exam-pdf)**: substituído `response_format: { type: "json_object" }` por tool-calling forçado (`tools: [extract_exam_data]` + `tool_choice: { type: "function", function: { name: "extract_exam_data" } }`). `json_object` garantia apenas "é JSON válido", não "tem os campos certos" — agora o schema dos analitos (analyte/value/unit/ref_min/ref_max/flag) é parte do contrato com o modelo. Risco mitigado: unidade/valor no campo errado = interpretação clínica errada (ALT em mg/dL vs U/L muda a leitura).
+- **Schema fechado**: `results` migrou de dict `{ analyte: { ... } }` para `array [{ analyte, value, unit, ref_min, ref_max, flag }]` no contrato do modelo. `additionalProperties: false` no item. Tipos opcionais expressos como `["number","null"]` para evitar inferência ambígua. `normalizeResults` ganhou compat dupla (aceita dict legado E array novo) — nenhum exame antigo persistido quebra.
+- **Extração de resposta**: lê de `choices[0].message.tool_calls[0].function.arguments` (forçado pelo `tool_choice`). Fallback para `message.content` mantido por defesa, mas não deve ser exercido.
+- **Ordem do Card #5** (escolhida pelo usuário): #3 parse-pet-exam-pdf PRIMEIRO (isolado, alto risco, não tocado nas mudanças recentes — migração limpa para validar o padrão) → #2 extract-pet-clinical-data → #1 hybrid-recommendation. #4 enrich-pet-food-product adiado (clínico-adjacente, catálogo tolera re-run).
+- **Fora desta migração** (mantido fora explicitamente): abstain envelope. Esta função tem `exam_id` obrigatório — não há "sem sinal de entrada"; falha de parse continua subindo via `extraction_status:'failed'` no row, sem fabricar `abstain` semanticamente errado.
+- Files: `supabase/functions/parse-pet-exam-pdf/index.ts`
+
 ### Added - 2026-06-02 — IA Hardening Cards #3+#4: abstain válido + provenance tipada + remoção do simpleExtraction
 <!-- area: clinical-pipeline · status: entregue · i18n: 1.118.1 -->
 - **Card #3 (envelope abstain + carimbo de proveniência em `hybrid-recommendation`)**: pré-flight de abstenção dispara SOMENTE por falta de sinal de entrada (sem `condition` OU sem qualquer sinal de pet/clínico). KG vazio NUNCA aciona abstain — gera resposta marcada com `source:'llm_fallback' + disclaimer:'no_kg_data'` (preservada). Toda resposta agora carrega envelope `{ source, disclaimer, abstain }`. Branch `llm_fallback` passa a carimbar `evidenceLevel:'AI-enriched'` por composto (antes ficava sem marca de origem, abrindo brecha para tutor receber recomendação sem tarja).
