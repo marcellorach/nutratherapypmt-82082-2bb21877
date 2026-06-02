@@ -24,6 +24,27 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.1 -->
 
+### Changed - 2026-06-02 — IA Hardening Card #5c: hybrid-recommendation migrado para tool_choice (último do Card #5)
+<!-- area: clinical-pipeline · status: entregue · i18n: 1.118.1 -->
+- **Migração #1 do Card #5 (hybrid-recommendation)** — última e mais sensível: substituído free-text JSON (regex `match(/```json/)` + `JSON.parse`) por `tools: [recommend_nutraceuticals]` + `tool_choice: { type: "function", function: { name: "recommend_nutraceuticals" } }`. O parse-via-regex era o ponto mais frágil dos 3 callers; com tool_choice o `model_response_invalid` deve cair próximo de zero.
+- **Schema único cobre ambos os modos** (enrich / fallback): `nutraceuticals[]` com `{name, dosage, mechanism, evidenceLevel('AI-enriched'|'AI-generated'), condition, targetCondition?, closes_gaps?[]}` + `rationale` + `precautions[]` + envelope `abstain/abstain_reason('clinical_signal_insufficient')/abstain_detail`. `additionalProperties:false`. System prompt orienta qual `evidenceLevel` usar por modo.
+- **Card #3 PRESERVADO bit-a-bit** (não desfeito):
+  - KG vazio em fallback mode → `source:'llm_fallback' + disclaimer:'no_kg_data' + abstain:false` (resposta MARCADA, nunca abstain).
+  - KG vazio em enrich mode → `source:'hybrid' + disclaimer:'no_kg_data' + abstain:false`.
+  - Pré-flight de abstain (sem `condition`/sem sinal clínico) intacto — continua sendo `clinical_signal_insufficient` antes da chamada ao Gateway.
+- **Buckets de abstain (mesma desambiguação do #5b)**:
+  - `clinical_signal_insufficient` — pré-flight OU modelo declarou via tool. Honesta.
+  - `model_unavailable` — Gateway non-2xx (exceto 429/402 que mantêm status code próprio).
+  - `model_response_invalid` — `tool_calls` ausente ou args malformados. Termômetro: deve cair a ~0.
+- **Decisão de design: parse-fail em enrich com KG presente NÃO abstém** — retorna `source:'hybrid' + disclaimer:'low_confidence' + abstain:false` com os compostos KG-backed e nota "enriquecimento por IA indisponível". Jogar fora KG útil porque o LLM falhou seria regressão. Abstain só quando NÃO há nada utilizável (fallback mode, ou enrich+KG-vazio).
+- **Telemetria** via `logPromptUsage`: caminhos de abstain logam `success=false` + `error="abstain:<reason>"` (mesmo padrão do #5b para grep antes/depois). Sucesso logado uma vez após detectar abstain do modelo.
+- **DÍVIDA ABERTA — telemetria fragmentada (subir p/ Bloco 2)**: a "espinha" do Card #2 (`ai_task_invocations.validation_status`/`abstained`) cobre só callers via `ai-task-router`. `extract-pet-clinical-data` e `hybrid-recommendation` (migrados nos cards #5b e #5c) logam em `ai_prompt_usage_log.error="abstain:<reason>"` — tabela diferente. Bloco 2 herda medição partida; reconciliar definindo `ai_task_invocations` como canônica e roteando estes dois callers via router (recomendado) OU adicionando `validation_status`/`abstained` a `ai_prompt_usage_log`.
+- **QUESTÕES PINADAS p/ Bloco 4** (não fechadas no Card #5):
+  - Q-4.1: `hybrid + no_kg_data` é coerente? O disclaimer é nível-resposta ou derivado do pior-caso por-composto?
+  - Q-4.2: `AI-generated` só sob `llm_fallback`, ou também sob `hybrid`? Hoje o branch enrich não distingue AI-enriched (KG-anchored) de AI-generated (novo) — `CompoundProvenance` pode estar grosso.
+- **Critério de sucesso** (após deploy): `count(abstain:model_response_invalid) → ~0`; razão `count(abstain:clinical_signal_insufficient) / total_abstain` sobe (sobram só as honestas). Mesma métrica do #5b, agora cobre os 3 callers persistentes.
+- Files: `supabase/functions/hybrid-recommendation/index.ts`
+
 ### Changed - 2026-06-02 — IA Hardening Card #5b: extract-pet-clinical-data migrado para tool_choice (Gateway + abstain tipado)
 <!-- area: clinical-pipeline · status: entregue · i18n: 1.118.1 -->
 - **Migração #2 do Card #5 (extract-pet-clinical-data)**: substituído `responseMimeType: 'application/json'` (Gemini direto) por `tools: [extract_clinical_entities]` + `tool_choice: { type: "function", function: { name: "extract_clinical_entities" } }` via Lovable AI Gateway. Unifica o caminho com o #3 (parse-pet-exam-pdf) já migrado — uma única autenticação (`LOVABLE_API_KEY`), uma única semântica de tool-calling.

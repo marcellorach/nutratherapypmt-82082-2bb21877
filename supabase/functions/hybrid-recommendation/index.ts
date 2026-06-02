@@ -7,6 +7,98 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// ── Card #5c: tool_choice forçado ─────────────────────────────────────────
+// Schema único cobre ambos os modos (enrich / fallback). O modelo é
+// orientado via system prompt sobre qual `evidenceLevel` usar por composto.
+// `abstain` + `abstain_reason` ficam expostos no schema para que o modelo
+// possa abster-se de forma estruturada (paridade com card #5b). Os buckets
+// seguem a mesma desambiguação:
+//   - clinical_signal_insufficient  (honesta — sem sinal útil)
+//   - model_unavailable             (infra — Gateway 5xx, sem chave)
+//   - model_response_invalid        (parse/schema — deve cair a ~0)
+const RECOMMEND_TOOL = {
+  type: 'function' as const,
+  function: {
+    name: 'recommend_nutraceuticals',
+    description:
+      'Emit an individualized nutraceutical recommendation, OR abstain (abstain:true + clinical_signal_insufficient) if the inputs do not justify any responsible recommendation.',
+    parameters: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        abstain: {
+          type: 'boolean',
+          description: 'true if you cannot responsibly emit any recommendation given the inputs.',
+        },
+        abstain_reason: {
+          type: 'string',
+          enum: ['clinical_signal_insufficient'],
+          description: "Only emit when abstain=true. Use 'clinical_signal_insufficient' when the patient/clinical data does not justify any recommendation.",
+        },
+        abstain_detail: { type: 'string' },
+        nutraceuticals: {
+          type: 'array',
+          description: 'Empty array when abstain=true. Otherwise 1–8 compounds.',
+          items: {
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+              name: { type: 'string' },
+              dosage: { type: 'string', description: 'Weight-adjusted dosage for THIS patient.' },
+              mechanism: { type: 'string', description: 'Why this compound for THIS patient (bridge clinical→geroscience→compound).' },
+              evidenceLevel: {
+                type: 'string',
+                enum: ['AI-enriched', 'AI-generated'],
+                description: "Use 'AI-enriched' in enrich mode (KG-backed exists), 'AI-generated' in fallback mode (no KG data).",
+              },
+              condition: { type: 'string' },
+              targetCondition: { type: 'string' },
+              closes_gaps: {
+                type: 'array',
+                items: { type: 'string' },
+                description: "EXACT nutrient labels from NUTRITION_GAPS block this compound closes. [] when none.",
+              },
+            },
+            required: ['name', 'dosage', 'mechanism', 'evidenceLevel', 'condition'],
+          },
+        },
+        rationale: { type: 'string' },
+        precautions: { type: 'array', items: { type: 'string' } },
+      },
+      required: ['abstain', 'nutraceuticals', 'rationale', 'precautions'],
+    },
+  },
+};
+
+type ToolArgs = {
+  abstain?: boolean;
+  abstain_reason?: 'clinical_signal_insufficient';
+  abstain_detail?: string;
+  nutraceuticals?: Array<Record<string, any>>;
+  rationale?: string;
+  precautions?: string[];
+};
+
+function extractToolArgs(aiResponse: any): ToolArgs | null {
+  const tc = aiResponse?.choices?.[0]?.message?.tool_calls?.[0];
+  if (tc?.function?.arguments) {
+    try {
+      return typeof tc.function.arguments === 'string'
+        ? JSON.parse(tc.function.arguments)
+        : tc.function.arguments;
+    } catch (_) { /* fall through */ }
+  }
+  // Defensive fallback: legacy content (model ignored tool_choice).
+  const content = aiResponse?.choices?.[0]?.message?.content;
+  if (typeof content === 'string' && content.trim()) {
+    try {
+      const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+      return JSON.parse(jsonMatch ? jsonMatch[1] : content);
+    } catch (_) { /* fall through */ }
+  }
+  return null;
+}
+
 interface PetProfile {
   species?: string;
   breed?: string;
@@ -431,6 +523,8 @@ Return your response as valid JSON following the structure specified.`;
           { role: 'user', content: userPrompt }
         ],
         temperature: 0.4,
+        tools: [RECOMMEND_TOOL],
+        tool_choice: { type: 'function', function: { name: 'recommend_nutraceuticals' } },
       }),
     });
 
@@ -455,12 +549,102 @@ Return your response as valid JSON following the structure specified.`;
           status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
-      throw new Error(`AI Gateway error: ${response.status}`);
+      // Card #5c: infra fail → abstain envelope (model_unavailable).
+      // Preserva eixos source/disclaimer por modo (card #3 intacto).
+      const kgEmpty = !(kgData?.nutraceuticals?.length);
+      return new Response(JSON.stringify({
+        abstain: true,
+        abstain_reason: 'model_unavailable',
+        abstain_detail: `AI Gateway ${response.status}`,
+        source: mode === 'enrich' ? 'hybrid' : 'llm_fallback',
+        disclaimer: mode === 'enrich' && !kgEmpty ? 'low_confidence' : 'no_kg_data',
+        nutraceuticals: [],
+        rationale: 'Serviço de IA temporariamente indisponível. Tente novamente em instantes.',
+        precautions: ['Recomendação não foi gerada — consulte veterinário.'],
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     const aiResponse = await response.json();
-    const content = aiResponse.choices?.[0]?.message?.content || '';
-    console.log('AI response received:', content.substring(0, 300));
+    const toolArgs = extractToolArgs(aiResponse);
+    const content = aiResponse?.choices?.[0]?.message?.content || '';
+    console.log('AI response received:', toolArgs ? `[tool] ${JSON.stringify(toolArgs).slice(0, 300)}` : content.substring(0, 300));
+
+    const debugPayload = debug ? {
+      longitudinal: longitudinalDebug,
+      renderedContextBlock: contextBlock,
+    } : undefined;
+    const kgEmpty = !(kgData?.nutraceuticals?.length);
+
+    // Card #5c: parse/schema fail → abstain envelope (model_response_invalid).
+    // Com tool_choice forçado, deve cair a ~0 — termômetro da migração.
+    if (!toolArgs) {
+      logPromptUsage({
+        prompt_key: promptKey,
+        function_name: 'hybrid-recommendation',
+        model,
+        latency_ms: Date.now() - t0,
+        tokens_in: aiResponse?.usage?.prompt_tokens ?? null,
+        tokens_out: aiResponse?.usage?.completion_tokens ?? null,
+        success: false,
+        error: 'abstain:model_response_invalid',
+      });
+      // Em enrich mode com KG presente, ainda devolvemos os compostos KG —
+      // não jogar fora informação útil. abstain marca que NÃO houve enrichment.
+      if (mode === 'enrich' && !kgEmpty) {
+        return new Response(JSON.stringify({
+          source: 'hybrid',
+          disclaimer: 'low_confidence',
+          abstain: false,
+          nutraceuticals: (kgData!.nutraceuticals || []).map((n: any) => ({
+            ...n,
+            evidenceLevel: n.evidenceLevel || 'KG-backed',
+            condition: n.condition || condition,
+          })),
+          rationale: kgData?.rationale || `Recomendação baseada no KG para ${condition} (enriquecimento por IA falhou).`,
+          precautions: [...(kgData?.precautions || []), 'Enriquecimento por IA indisponível nesta resposta.'],
+          debug: debugPayload,
+        }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      return new Response(JSON.stringify({
+        abstain: true,
+        abstain_reason: 'model_response_invalid',
+        abstain_detail: 'Tool call ausente ou argumentos malformados.',
+        source: mode === 'enrich' ? 'hybrid' : 'llm_fallback',
+        disclaimer: 'no_kg_data',
+        nutraceuticals: [],
+        rationale: 'Resposta da IA não veio em formato estruturado.',
+        precautions: ['Recomendação não foi gerada — consulte veterinário.'],
+        debug: debugPayload,
+      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    // Card #5c: abstain declarado pelo modelo via tool.
+    if (toolArgs.abstain === true) {
+      logPromptUsage({
+        prompt_key: promptKey,
+        function_name: 'hybrid-recommendation',
+        model,
+        latency_ms: Date.now() - t0,
+        tokens_in: aiResponse?.usage?.prompt_tokens ?? null,
+        tokens_out: aiResponse?.usage?.completion_tokens ?? null,
+        success: false,
+        error: `abstain:${toolArgs.abstain_reason || 'clinical_signal_insufficient'}`,
+      });
+      return new Response(JSON.stringify({
+        abstain: true,
+        abstain_reason: toolArgs.abstain_reason || 'clinical_signal_insufficient',
+        abstain_detail: toolArgs.abstain_detail || 'Modelo declarou abstain.',
+        source: mode === 'enrich' ? 'hybrid' : 'llm_fallback',
+        disclaimer: mode === 'enrich' && !kgEmpty ? 'low_confidence' : 'no_kg_data',
+        nutraceuticals: [],
+        rationale: toolArgs.rationale || 'Sinal clínico insuficiente para recomendar com responsabilidade.',
+        precautions: toolArgs.precautions || ['Forneça contexto clínico adicional.'],
+        debug: debugPayload,
+      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
     logPromptUsage({
       prompt_key: promptKey,
       function_name: 'hybrid-recommendation',
@@ -471,119 +655,58 @@ Return your response as valid JSON following the structure specified.`;
       success: true,
     });
 
-    const debugPayload = debug ? {
-      longitudinal: longitudinalDebug,
-      renderedContextBlock: contextBlock,
-    } : undefined;
+    // ── Sucesso: tool retornou estrutura válida ──────────────────────────
+    const llmNutra = Array.isArray(toolArgs.nutraceuticals) ? toolArgs.nutraceuticals : [];
 
     if (mode === 'enrich') {
-      // Try to parse structured JSON from enrich mode too
-      // The LLM may return structured recommendations or free text
-      try {
-        let jsonContent = content;
-        const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-        if (jsonMatch) jsonContent = jsonMatch[1];
-        
-        const parsed = JSON.parse(jsonContent);
-        if (parsed.nutraceuticals && Array.isArray(parsed.nutraceuticals)) {
-          // Merge KG compounds with LLM-enriched ones
-          const enrichedNutraceuticals = [
-            ...(kgData?.nutraceuticals || []).map((n: any) => ({
-              ...n,
-              evidenceLevel: n.evidenceLevel || 'KG-backed',
-              condition: n.condition || condition,
-            })),
-            ...parsed.nutraceuticals.filter((n: any) => {
-              const existingNames = (kgData?.nutraceuticals || []).map((k: any) => k.name?.toLowerCase());
-              return !existingNames.includes(n.name?.toLowerCase());
-            }).map((n: any) => ({
-              ...n,
-              evidenceLevel: 'AI-enriched',
-              condition: n.condition || n.targetCondition || condition,
-            })),
-          ];
-          const kgEmpty = !(kgData?.nutraceuticals?.length);
-          return new Response(JSON.stringify({
-            source: 'hybrid',
-            disclaimer: kgEmpty ? 'no_kg_data' : 'low_confidence',
-            abstain: false,
-            nutraceuticals: enrichedNutraceuticals,
-            rationale: parsed.rationale || kgData?.rationale || `Recomendação enriquecida por IA para ${condition}.`,
-            precautions: [...(kgData?.precautions || []), ...(parsed.precautions || [])],
-            enrichment: content,
-            debug: debugPayload,
-          }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
-        }
-      } catch (_) {
-        // Not JSON — treat as text enrichment, but still return structured payload
-      }
-
-      // Fallback: return KG compounds + text enrichment
-      const kgEmpty = !(kgData?.nutraceuticals?.length);
-      return new Response(JSON.stringify({
-        source: 'hybrid',
-        disclaimer: kgEmpty ? 'no_kg_data' : 'low_confidence',
-        abstain: false,
-        nutraceuticals: (kgData?.nutraceuticals || []).map((n: any) => ({
+      // Merge KG-backed + AI-enriched (dedup por nome lowercased).
+      const existingNames = (kgData?.nutraceuticals || []).map((k: any) => (k.name || '').toLowerCase());
+      const enrichedNutraceuticals = [
+        ...(kgData?.nutraceuticals || []).map((n: any) => ({
           ...n,
           evidenceLevel: n.evidenceLevel || 'KG-backed',
           condition: n.condition || condition,
         })),
-        rationale: `${kgData?.rationale || ''}\n\nConsiderações adicionais: ${content}`,
-        precautions: [...(kgData?.precautions || []), 'Alguns dados foram enriquecidos por IA - verificar com veterinário'],
-        enrichment: content,
-        debug: debugPayload,
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
-    // Parse JSON response for fallback mode
-    try {
-      let jsonContent = content;
-      const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-      if (jsonMatch) jsonContent = jsonMatch[1];
-      
-      const parsed = JSON.parse(jsonContent);
-      const result = {
-        source: 'llm_fallback',
-        disclaimer: 'no_kg_data',
-        abstain: false,
-        nutraceuticals: (parsed.nutraceuticals || []).map((n: any) => ({
-          ...n,
-          // Card #3: branch llm_fallback agora carimba provenance per-composto.
-          evidenceLevel: n.evidenceLevel || 'AI-enriched',
-          condition: n.condition || n.targetCondition || condition,
-          targetCondition: n.targetCondition || n.condition || condition,
-        })),
-        rationale: parsed.rationale || 'Recomendação gerada por IA com base em contexto clínico individualizado.',
-        precautions: parsed.precautions || [
-          'Esta recomendação requer validação por veterinário',
-          'Iniciar com doses conservadoras',
-          'Monitorar reações de perto'
-        ],
-        debug: debugPayload,
-      };
-
-      return new Response(JSON.stringify(result), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    } catch (parseError) {
-      console.error('Failed to parse AI response as JSON:', parseError);
+        ...llmNutra
+          .filter((n: any) => !existingNames.includes((n.name || '').toLowerCase()))
+          .map((n: any) => ({
+            ...n,
+            evidenceLevel: 'AI-enriched',
+            condition: n.condition || n.targetCondition || condition,
+          })),
+      ];
       return new Response(JSON.stringify({
-        source: 'llm_fallback',
-        disclaimer: 'no_kg_data',
+        source: 'hybrid',
+        disclaimer: kgEmpty ? 'no_kg_data' : 'low_confidence',
         abstain: false,
-        nutraceuticals: [],
-        rationale: content || 'Não foi possível gerar uma recomendação estruturada. Consulte um veterinário.',
-        precautions: ['Esta recomendação requer validação por veterinário', 'Iniciar com doses conservadoras'],
+        nutraceuticals: enrichedNutraceuticals,
+        rationale: toolArgs.rationale || kgData?.rationale || `Recomendação enriquecida por IA para ${condition}.`,
+        precautions: [...(kgData?.precautions || []), ...((toolArgs.precautions) || [])],
+        enrichment: content || undefined,
         debug: debugPayload,
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
+
+    // fallback mode — preserva source='llm_fallback' + disclaimer='no_kg_data' (card #3).
+    return new Response(JSON.stringify({
+      source: 'llm_fallback',
+      disclaimer: 'no_kg_data',
+      abstain: false,
+      nutraceuticals: llmNutra.map((n: any) => ({
+        ...n,
+        // Card #3: branch llm_fallback carimba provenance per-composto.
+        evidenceLevel: n.evidenceLevel || 'AI-generated',
+        condition: n.condition || n.targetCondition || condition,
+        targetCondition: n.targetCondition || n.condition || condition,
+      })),
+      rationale: toolArgs.rationale || 'Recomendação gerada por IA com base em contexto clínico individualizado.',
+      precautions: toolArgs.precautions || [
+        'Esta recomendação requer validação por veterinário',
+        'Iniciar com doses conservadoras',
+        'Monitorar reações de perto',
+      ],
+      debug: debugPayload,
+    }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
   } catch (error) {
     console.error('Error in hybrid recommendation:', error);
