@@ -137,6 +137,34 @@ export type RecommendationSource = 'knowledge_graph' | 'hybrid' | 'llm_fallback'
 
 export type DisclaimerType = 'none' | 'low_confidence' | 'no_kg_data';
 
+/**
+ * Provenance per-composto (Eixo B — granularidade fina, ortogonal ao Eixo A
+ * de qualidade científica em `src/rules/general/evidence-levels.ts`).
+ *
+ * Valores MANTIDOS em PascalCase/kebab por compatibilidade com UI existente.
+ * Bloco 2(e) do plano vai (1) normalizar para snake_case e (2) separar
+ * value↔label. Não migrar agora — evita dois churns no mesmo campo.
+ */
+export type CompoundProvenance = 'KG-backed' | 'AI-enriched' | 'AI-generated';
+
+/**
+ * Envelope de abstenção retornado por funções IA quando NÃO há sinal de
+ * entrada suficiente para formar uma hipótese marcada.
+ *
+ * IMPORTANTE — fronteira do Bloco 3:
+ *   abstain ≠ "KG vazio". KG vazio gera resposta marcada (`source:'llm_fallback'`
+ *   + `disclaimer:'no_kg_data'`), nunca abstain.
+ *   abstain = "não dá para dizer nada com responsabilidade, nem marcado"
+ *   (ex.: sem condição informada, sem dados do pet, texto sem sinal clínico).
+ */
+export interface AbstainEnvelope {
+  abstain: true;
+  abstain_reason: 'clinical_signal_insufficient';
+  abstain_detail?: string;
+  source: RecommendationSource;
+  disclaimer: DisclaimerType;
+}
+
 export interface HybridRecommendationResult {
   source: RecommendationSource;
   confidence: RecommendationConfidence;
