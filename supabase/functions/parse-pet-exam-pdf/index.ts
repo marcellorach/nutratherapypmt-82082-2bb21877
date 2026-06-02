@@ -22,10 +22,15 @@ Retorne SOMENTE JSON válido seguindo este schema:
   "exam_type": string,             // ex.: "Hemograma", "Bioquímico", "Urinálise"
   "exam_date": string|null,        // ISO YYYY-MM-DD
   "lab_name": string|null,
-  "results": { [analyte: string]: { value: number|string, unit: string|null, ref_min: number|null, ref_max: number|null, flag: "normal"|"high"|"low"|null } },
+  "results": { [analyte: string]: { value: number|string, unit: string|null, ref_min: number|null, ref_max: number|null, flag: "normal"|"high"|"low"|"unreadable"|null } },
   "clinical_comments": string|null,
   "flags_abnormal": string[]       // nomes dos analitos fora da faixa
-}`;
+}
+
+REGRA CRÍTICA DE SEGURANÇA DE LAB (anti-alucinação):
+- Se um valor estiver ILEGÍVEL, BORRADO, PARCIALMENTE VISÍVEL ou AMBÍGUO, NÃO ADIVINHE.
+- Nesse caso: ou OMITA o item completamente, ou inclua o item com flag="unreadable" e value=null.
+- Viés de completude (preencher para parecer útil) em valor de lab causa interpretação clínica errada (ex.: creatinina alucinada → falsa lesão renal).`;
 
 // Canonical unit aliases — normalize common variations to a single form.
 const UNIT_ALIASES: Record<string, string> = {
@@ -56,8 +61,9 @@ function toNumber(v: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-function deriveFlag(value: number | null, ref_min: number | null, ref_max: number | null, given: unknown): "normal" | "high" | "low" | null {
+function deriveFlag(value: number | null, ref_min: number | null, ref_max: number | null, given: unknown): "normal" | "high" | "low" | "unreadable" | null {
   const g = typeof given === "string" ? given.toLowerCase() : null;
+  if (g === "unreadable") return "unreadable";
   if (g === "high" || g === "low" || g === "normal") return g;
   if (value == null) return null;
   if (ref_max != null && value > ref_max) return "high";
@@ -96,6 +102,7 @@ function normalizeResults(raw: unknown): { results: Record<string, any>; flags: 
       flag,
     };
     if (flag === "high" || flag === "low") flags.push(k.trim());
+    // 'unreadable' NÃO entra em flags_abnormal — desconhecido ≠ anormal.
   }
   return { results: out, flags };
 }
@@ -173,7 +180,7 @@ Deno.serve(async (req) => {
                   unit: { type: ["string", "null"] },
                   ref_min: { type: ["number", "null"] },
                   ref_max: { type: ["number", "null"] },
-                  flag: { type: ["string", "null"], enum: ["normal", "high", "low", null] },
+                  flag: { type: ["string", "null"], enum: ["normal", "high", "low", "unreadable", null] },
                 },
                 required: ["analyte", "value"],
                 additionalProperties: false,

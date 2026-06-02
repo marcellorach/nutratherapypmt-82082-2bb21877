@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-02T02:46:08.765Z
+// Última geração: 2026-06-02T02:52:23.538Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -36,6 +36,8 @@ export const changelog: ChangelogEntry[] = [
       "Extração de resposta: lê de `choices[0].message.tool_calls[0].function.arguments` (forçado pelo `tool_choice`). Fallback para `message.content` mantido por defesa, mas não deve ser exercido.",
       "Ordem do Card #5 (escolhida pelo usuário): #3 parse-pet-exam-pdf PRIMEIRO (isolado, alto risco, não tocado nas mudanças recentes — migração limpa para validar o padrão) → #2 extract-pet-clinical-data → #1 hybrid-recommendation. #4 enrich-pet-food-product adiado (clínico-adjacente, catálogo tolera re-run).",
       "Fora desta migração (mantido fora explicitamente): abstain envelope. Esta função tem `exam_id` obrigatório — não há \"sem sinal de entrada\"; falha de parse continua subindo via `extraction_status:'failed'` no row, sem fabricar `abstain` semanticamente errado.",
+      "Anti-alucinação de lab (refinamento pós-revisão): `tool_choice` fecha a POSIÇÃO do valor mas não a EXATIDÃO — valor borrado/ambíguo pode virar número confiante (viés de completude). Mitigação: (a) regra explícita no system prompt (\"se valor ilegível, OMITA ou marque `flag='unreadable'`, NÃO adivinhe\"); (b) `unreadable` adicionado ao enum do schema do tool E ao `deriveFlag`; (c) `unreadable` NÃO entra em `flags_abnormal` (desconhecido ≠ anormal). Anotado p/ Bloco 2: valor de lab extraído é alvo ideal de verificação-contra-fonte (KGARevion-style).",
+      "Verificação ANTES/DEPOIS (`normalizeResults`): teste de identidade rodado em `/tmp/test-normalize-identity.mjs` — input dict legado e input array novo produzem `JSON.stringify` IDÊNTICOS (5 analitos: ALT/Creatinina/Glicose/Ureia/Hb-unreadable, com mix de flag inferida e dada, sanity de min/max invertido). Nenhum exame antigo quebra.",
       "Files: `supabase/functions/parse-pet-exam-pdf/index.ts`"
     ],
     "files": [
