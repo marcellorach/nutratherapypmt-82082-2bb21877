@@ -7,6 +7,25 @@
 **Responsável:** AI Assistant  
 ---
 
+> ## ⚠️ Aviso de honestidade arquitetural (2026-06-02)
+>
+> Este documento descreve a **visão/inspiração** do sistema. Nem tudo aqui descrito está
+> implementado em produção. Para o estado **real** (capacidade afirmada × implementada ×
+> ponteiro para o código), consulte sempre `docs/generated/ARCHITECTURE_LIVE.md`, gerado
+> a partir do código por `npm run docs:architecture`.
+>
+> Em particular:
+> - **GRRA / KGARevion** — não implementado. O que existe é `generate-triplets` com
+>   *Generate + scoring heurístico (0.65–0.75) + auto-approve ≥ 0,50 + HITL*. Não há um
+>   modelo *Review* independente nem ciclo Revise.
+> - **U-Retrieval bidirecional** — não implementado. `graph-rag-search` faz Cypher/path
+>   puro; `hybrid-recommendation` é **Cypher + pgvector**. Sem fusão top-down/bottom-up.
+> - **TransE link prediction** — não implementado. `kg-evidence-gap-fill` usa PubMed
+>   E-utilities + Gemini, não embeddings TransE.
+>
+> Trate as menções abaixo a esses três conceitos como **inspiração científica / planejado**,
+> não como descrição do runtime atual.
+
 ## 📋 Índice
 
 1. [Visão Geral](#visão-geral)
