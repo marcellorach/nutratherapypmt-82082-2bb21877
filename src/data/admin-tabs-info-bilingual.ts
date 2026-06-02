@@ -202,30 +202,30 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
   'estudos': {
     // ⚠️ MAINTENANCE: every change to the Senex engine that touches this modal
     // MUST bump `version` (semver) and set `lastUpdate` to the current ISO date.
-    version: '5.1.0',
-    lastUpdate: '2026-05-18',
+    version: '5.2.0',
+    lastUpdate: '2026-06-02',
     keyExcerpts: [
       {
         source: 'MedGraphRAG — Wu et al., 2024 (arXiv:2408.04187)',
         quote: {
-          pt: 'A construção em Triple Graph (Document → Chunk → Entity → Mechanism) combinada com U-Retrieval bidirecional reduz alucinações em ~40% em QA médico e fundamenta a hierarquia L0–L4 do Senex AI.',
-          en: 'Triple Graph Construction (Document → Chunk → Entity → Mechanism) combined with bidirectional U-Retrieval reduces hallucinations by ~40% on medical QA and underpins the L0–L4 hierarchy used by Senex AI.'
+          pt: 'Paper de inspiração: a construção em Triple Graph (Document → Chunk → Entity → Mechanism) combinada com U-Retrieval bidirecional reporta ~40% de redução de alucinações em QA médico. O Senex AI adota a Triple Graph (hierarquia L0–L4) mas NÃO implementa U-Retrieval — a recuperação real é Cypher (Neo4j) + pgvector (Supabase). O ~40% é benchmark do paper, não métrica do Senex.',
+          en: 'Inspiration paper: Triple Graph Construction (Document → Chunk → Entity → Mechanism) combined with bidirectional U-Retrieval reports ~40% hallucination reduction on medical QA. Senex AI adopts the Triple Graph (L0–L4 hierarchy) but does NOT implement U-Retrieval — actual retrieval is Cypher (Neo4j) + pgvector (Supabase). The ~40% is the paper benchmark, not a Senex metric.'
         },
         url: 'https://arxiv.org/abs/2408.04187'
       },
       {
         source: 'KGARevion — Su et al., ICLR 2025',
         quote: {
-          pt: 'O ciclo GRRA (Generate → Review → Revise → Answer) valida triplets contra um KG fundamentado e elimina ~87% dos erros de extração biomédica — base do nosso auto-approve threshold e da curadoria humana.',
-          en: 'The GRRA cycle (Generate → Review → Revise → Answer) validates triplets against a grounded KG and removes ~87% of biomedical extraction errors — the basis for our auto-approve threshold and human-in-the-loop curation.'
+          pt: 'Paper de inspiração: o ciclo GRRA (Generate → Review → Revise → Answer) reporta ~87% de redução de erros ao validar triplets contra um KG fundamentado. O Senex AI NÃO implementa GRRA — roda Generate + scoring heurístico (0,65–0,75) + auto-approve ≥ 0,50 + curadoria humana (HITL), sem modelo Review independente nem etapa Revise. O ~87% é benchmark do paper, não métrica do Senex.',
+          en: 'Inspiration paper: the GRRA cycle (Generate → Review → Revise → Answer) reports ~87% error reduction by validating triplets against a grounded KG. Senex AI does NOT implement GRRA — it runs Generate + heuristic scoring (0.65–0.75) + auto-approve ≥ 0.50 + human-in-the-loop curation, with no independent Review model or Revise step. The ~87% is the paper benchmark, not a Senex metric.'
         },
         url: 'https://openreview.net/forum?id=OOq3W1MEVT'
       },
       {
         source: 'TransE — Bordes et al., NeurIPS 2013',
         quote: {
-          pt: 'Modelagem de relações como translações no espaço de embeddings (h + r ≈ t) habilita link prediction de pathways ausentes — usado no nosso pipeline de gap-fill (compound × condition).',
-          en: 'Modelling relations as translations in embedding space (h + r ≈ t) enables link prediction of missing pathways — used by our (compound × condition) gap-fill pipeline.'
+          pt: 'Paper de inspiração: modelagem de relações como translações no espaço de embeddings (h + r ≈ t) habilita link prediction. O Senex AI NÃO implementa TransE — o gap-fill (compound × condition) é feito por PubMed E-utilities + estruturação por Gemini (sem treinamento ou inferência de embeddings de grafo).',
+          en: 'Inspiration paper: modelling relations as translations in embedding space (h + r ≈ t) enables link prediction. Senex AI does NOT implement TransE — gap-fill (compound × condition) is performed via PubMed E-utilities + Gemini structuring (no graph embedding training or inference).'
         },
         url: 'https://papers.nips.cc/paper/2013/hash/1cecc7a77928ca8133fa24680a88d2f9-Abstract.html'
       },
