@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-06-02T02:57:13.146Z
+Generated: 2026-06-02T03:04:10.126Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
@@ -7,14 +7,20 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 
 ## Changes by area (last 14 days)
 - **admin**: 42
+- **clinical-pipeline**: 7
 - **kg**: 7
-- **clinical-pipeline**: 6
 - **infra**: 5
 - **meta**: 5
 - **curation**: 5
 - **vet-ui**: 1
 
 ## Top 10 recent entries
+### 2026-06-02 · [clinical-pipeline] CHANGED — IA Hardening Card #5c: hybrid-recommendation migrado para tool_choice (último do Card #5)
+- Migração #1 do Card #5 (hybrid-recommendation) — última e mais sensível: substituído free-text JSON (regex `match(/```json/)` + `JSON.parse`) por `tools: [recommend_nutraceuticals]` + `tool_choice: { type: "function", function: { name: "recommend_nutraceuticals" } }`. O parse-via-regex era o ponto mais frágil dos 3 callers; com tool_choice o `model_response_invalid` deve cair próximo de zero.
+- Schema único cobre ambos os modos (enrich / fallback): `nutraceuticals[]` com `{name, dosage, mechanism, evidenceLevel('AI-enriched'|'AI-generated'), condition, targetCondition?, closes_gaps?[]}` + `rationale` + `precautions[]` + envelope `abstain/abstain_reason('clinical_signal_insufficient')/abstain_detail`. `additionalProperties:false`. System prompt orienta qual `evidenceLevel` usar por modo.
+- Card #3 PRESERVADO bit-a-bit (não desfeito):
+_files: supabase/functions/hybrid-recommendation/index.ts_
+
 ### 2026-06-02 · [clinical-pipeline] CHANGED — IA Hardening Card #5b: extract-pet-clinical-data migrado para tool_choice (Gateway + abstain tipado)
 - Migração #2 do Card #5 (extract-pet-clinical-data): substituído `responseMimeType: 'application/json'` (Gemini direto) por `tools: [extract_clinical_entities]` + `tool_choice: { type: "function", function: { name: "extract_clinical_entities" } }` via Lovable AI Gateway. Unifica o caminho com o #3 (parse-pet-exam-pdf) já migrado — uma única autenticação (`LOVABLE_API_KEY`), uma única semântica de tool-calling.
 - GUARDRAIL Card #4 preservado: o schema do tool INCLUI `abstain: boolean`, `abstain_reason` (enum), `abstain_detail`. `abstain=true` com 5 listas vazias é resposta VÁLIDA do tool, não erro de parse. Pré-flight de abstain (texto curto, key ausente) PERMANECE — agora roda ANTES da chamada ao Gateway.
@@ -68,12 +74,6 @@ _files: src/components/system/VersionBadge.tsx, src/components/administrador/com
 - `ai_task_healthcheck_ping` (gemini-3-flash-preview, text) — ping mínimo "ok" usado pelo cron de healthcheck por task×model.
 - `process_nutraceutical_spreadsheet` (gpt-4o-mini, json) — extração estruturada preservando notas de eficácia EXATAS de planilhas CSV/XLSX.
 _files: supabase/functions/_shared/system-prompts.ts, supabase/functions/ai-task-healthcheck/index.ts, supabase/functions/ai-task-test/index.ts, supabase/functions/process-nutraceutical-spreadsheet/aiProcessor.ts_
-
-### 2026-06-01 · [infra] CHANGED — Sprint 4 cohorts: 6 funções de geração/análise/originalidade no registro único
-- Manifesto: 8 novas entradas em `_shared/system-prompts.ts` cobrindo todo o pipeline de cohorts sintéticos:
-- `analyze_cohort_patterns` (gemini-3.5-flash, tool-call) — insights bilíngues por cohort com evidência quantitativa obrigatória.
-- `analyze_all_cohorts_patterns` (gemini-3.5-flash, tool-call) — insights pan-populacionais cruzando múltiplos cohorts.
-_files: supabase/functions/_shared/system-prompts.ts, supabase/functions/analyze-cohort-patterns/index.ts, supabase/functions/analyze-all-cohorts-patterns/index.ts, supabase/functions/check-cohort-originality/index.ts…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
