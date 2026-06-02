@@ -61,9 +61,9 @@ function toNumber(v: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-function deriveFlag(value: number | null, ref_min: number | null, ref_max: number | null, given: unknown): "normal" | "high" | "low" | null {
+function deriveFlag(value: number | null, ref_min: number | null, ref_max: number | null, given: unknown): "normal" | "high" | "low" | "unreadable" | null {
   const g = typeof given === "string" ? given.toLowerCase() : null;
-  if (g === "unreadable") return "unreadable" as any;
+  if (g === "unreadable") return "unreadable";
   if (g === "high" || g === "low" || g === "normal") return g;
   if (value == null) return null;
   if (ref_max != null && value > ref_max) return "high";
