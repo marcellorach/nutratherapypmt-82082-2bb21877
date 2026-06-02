@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-06-02T01:30:18.764Z
+Generated: 2026-06-02T02:00:06.104Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
@@ -11,10 +11,16 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **infra**: 5
 - **meta**: 5
 - **curation**: 5
-- **clinical-pipeline**: 3
+- **clinical-pipeline**: 4
 - **vet-ui**: 1
 
 ## Top 10 recent entries
+### 2026-06-02 · [clinical-pipeline] ADDED — IA Hardening Cards #3+#4: abstain válido + provenance tipada + remoção do simpleExtraction
+- Card #3 (envelope abstain + carimbo de proveniência em `hybrid-recommendation`): pré-flight de abstenção dispara SOMENTE por falta de sinal de entrada (sem `condition` OU sem qualquer sinal de pet/clínico). KG vazio NUNCA aciona abstain — gera resposta marcada com `source:'llm_fallback' + disclaimer:'no_kg_data'` (preservada). Toda resposta agora carrega envelope `{ source, disclaimer, abstain }`. Branch `llm_fallback` passa a carimbar `evidenceLevel:'AI-enriched'` por composto (antes ficava sem marca de origem, abrindo brecha para tutor receber recomendação sem tarja).
+- Card #4 (remoção do `simpleExtraction`): `supabase/functions/extract-pet-clinical-data/index.ts` perdeu o fallback regex rule-based que fabricava entidades silenciosamente quando a chave do modelo estava ausente, o modelo retornava erro/vazio, ou o parse JSON falhava. Todos esses caminhos agora retornam envelope abstain (`clinical_signal_insufficient`) com arrays vazios — comportamento honesto, mensurável e rastreável pela telemetria do card #2.
+- Tipos centralizados (Eixo B — proveniência): novo `CompoundProvenance = 'KG-backed' | 'AI-enriched' | 'AI-generated'` e `AbstainEnvelope` em `src/types/recommendation-confidence.ts`. Valores MANTIDOS em PascalCase/kebab por compatibilidade de UI — Bloco 2(e) do plano fica responsável por normalizar para snake_case e separar value↔label (evita dois churns no mesmo campo). Eixo A (qualidade científica em `src/rules/general/evidence-levels.ts`) permanece ortogonal e intocado.
+_files: supabase/functions/extract-pet-clinical-data/index.ts, src/types/recommendation-confidence.ts, src/rules/general/evidence-levels.ts, supabase/functions/hybrid-recommendation/index.ts_
+
 ### 2026-06-02 · [infra] ADDED — IA Hardening Card #1: interpolate blindado + telemetria de variáveis ausentes
 - `interpolate(tpl, vars, missing?)` em `supabase/functions/_shared/ai-task-router.ts` agora coleta toda chave `{{var}}` cujo valor cai para `undefined`/`null`/`""` em vez de substituir silenciosamente. Comportamento legado preservado (ainda retorna `""`), mas as ocorrências são registradas.
 - `callAITask` agora emite `console.warn` por invocação com variáveis ausentes (`task=… caller=… missing_variables=[…]`) e persiste o array em `ai_task_invocations.missing_variables` (nova coluna `text[]` + índice GIN parcial via migração).
@@ -68,12 +74,6 @@ _files: supabase/functions/_shared/system-prompts.ts, supabase/functions/enrich-
 - `query-perplexity`: prompt agora via `fetchSystemPrompt('query_perplexity_chat', SYSTEM_FALLBACK)`. Telemetria com `logPromptUsage` em sucesso (tokens_in/out do payload Perplexity) e em erro HTTP.
 - `perplexity-health`: ping "ok" agora via `fetchSystemPrompt('perplexity_health_ping', …)`. Telemetria registra latência do ping e status.
 _files: supabase/functions/_shared/system-prompts.ts, supabase/functions/query-perplexity/index.ts, supabase/functions/perplexity-health/index.ts, supabase/functions/web-dosage-lookup/index.ts_
-
-### 2026-06-01 · [meta] CHANGED — Meta-studies: `chat-meta-study` e `evaluate-meta-study-reliability` no registro único
-- Adicionados `chat_meta_study_persona` e `evaluate_meta_study_reliability` ao manifesto `_shared/system-prompts.ts`.
-- `chat-meta-study`: persona estática agora vem do registro (com fallback verbatim); contexto dinâmico do paper (claims/regras/evidências) preservado. Telemetria via `logPromptUsage` em sucesso e erro HTTP.
-- `evaluate-meta-study-reliability`: prompt do sistema (curador sênior, tool-call `rate_study_reliability`) movido para o registro; carregado uma vez por chamada e reutilizado no loop sequencial. `logPromptUsage` em sucesso, erro HTTP e tool-call ausente.
-_files: supabase/functions/_shared/system-prompts.ts, supabase/functions/chat-meta-study/index.ts, supabase/functions/evaluate-meta-study-reliability/index.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
