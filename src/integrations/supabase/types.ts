@@ -369,6 +369,7 @@ export type Database = {
           error: string | null
           id: string
           latency_ms: number | null
+          missing_variables: string[] | null
           model_id: string
           ok: boolean
           prompt_version_id: string | null
@@ -383,6 +384,7 @@ export type Database = {
           error?: string | null
           id?: string
           latency_ms?: number | null
+          missing_variables?: string[] | null
           model_id: string
           ok?: boolean
           prompt_version_id?: string | null
@@ -397,6 +399,7 @@ export type Database = {
           error?: string | null
           id?: string
           latency_ms?: number | null
+          missing_variables?: string[] | null
           model_id?: string
           ok?: boolean
           prompt_version_id?: string | null
