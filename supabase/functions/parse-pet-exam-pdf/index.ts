@@ -69,8 +69,16 @@ function deriveFlag(value: number | null, ref_min: number | null, ref_max: numbe
 function normalizeResults(raw: unknown): { results: Record<string, any>; flags: string[] } {
   const out: Record<string, any> = {};
   const flags: string[] = [];
-  if (!raw || typeof raw !== "object") return { results: out, flags };
-  for (const [k, vRaw] of Object.entries(raw as Record<string, any>)) {
+  if (!raw) return { results: out, flags };
+  // Aceita dois formatos:
+  //   (a) dict { analyte: { value, unit, ... } }  — legado / fallback
+  //   (b) array [ { analyte, value, unit, ... } ] — tool_choice (Card #5)
+  const entries: Array<[string, any]> = Array.isArray(raw)
+    ? (raw as any[]).map((it) => [String(it?.analyte ?? "").trim(), it])
+    : typeof raw === "object"
+      ? Object.entries(raw as Record<string, any>)
+      : [];
+  for (const [k, vRaw] of entries) {
     if (!k) continue;
     const v = vRaw && typeof vRaw === "object" ? vRaw : { value: vRaw };
     const numericValue = toNumber(v.value);
@@ -139,6 +147,51 @@ Deno.serve(async (req) => {
     const SYSTEM = await fetchSystemPrompt('parse_pet_exam_pdf', SYSTEM_FALLBACK);
     const t0 = Date.now();
     const model = "google/gemini-2.5-flash";
+    // Card #5 (migração #3 — parse-pet-exam-pdf): tool_choice fecha o schema.
+    // Substitui `response_format: json_object` (que só garantia "é JSON", não
+    // "tem os campos certos") por tool-calling forçado. Valores de lab são
+    // alto risco — unidade/valor no campo errado = interpretação errada.
+    const EXTRACT_EXAM_TOOL = {
+      type: "function" as const,
+      function: {
+        name: "extract_exam_data",
+        description: "Extrai dados estruturados de um PDF de exame veterinário canino.",
+        parameters: {
+          type: "object",
+          properties: {
+            exam_type: { type: "string", description: "Ex.: Hemograma, Bioquímico, Urinálise." },
+            exam_date: { type: ["string", "null"], description: "ISO YYYY-MM-DD se presente." },
+            lab_name: { type: ["string", "null"] },
+            results: {
+              type: "array",
+              description: "Lista de analitos. Use ARRAY (não objeto) — um item por analito.",
+              items: {
+                type: "object",
+                properties: {
+                  analyte: { type: "string", description: "Nome do analito (ex.: ALT, Creatinina)." },
+                  value: { type: ["number", "string", "null"] },
+                  unit: { type: ["string", "null"] },
+                  ref_min: { type: ["number", "null"] },
+                  ref_max: { type: ["number", "null"] },
+                  flag: { type: ["string", "null"], enum: ["normal", "high", "low", null] },
+                },
+                required: ["analyte", "value"],
+                additionalProperties: false,
+              },
+            },
+            clinical_comments: { type: ["string", "null"] },
+            flags_abnormal: {
+              type: "array",
+              items: { type: "string" },
+              description: "Nomes dos analitos fora da faixa.",
+            },
+          },
+          required: ["exam_type", "results", "flags_abnormal"],
+          additionalProperties: false,
+        },
+      },
+    };
+
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -151,7 +204,8 @@ Deno.serve(async (req) => {
             { type: "file", file: { filename: "exam.pdf", file_data: `data:application/pdf;base64,${b64}` } },
           ] },
         ],
-        response_format: { type: "json_object" },
+        tools: [EXTRACT_EXAM_TOOL],
+        tool_choice: { type: "function", function: { name: "extract_exam_data" } },
       }),
     });
 
@@ -177,10 +231,17 @@ Deno.serve(async (req) => {
       tokens_out: aiJson?.usage?.completion_tokens ?? null,
       success: true,
     });
-    const content = aiJson.choices?.[0]?.message?.content ?? "{}";
+    // Card #5: extrair de tool_calls (forçado por tool_choice). Fallback para
+    // message.content só por defesa — não deveria acontecer com tool_choice.
+    const msg = aiJson.choices?.[0]?.message ?? {};
+    const toolCall = Array.isArray(msg.tool_calls) ? msg.tool_calls[0] : null;
+    const rawArgs = toolCall?.function?.arguments ?? msg.content ?? "{}";
     let parsed: any;
-    try { parsed = typeof content === "string" ? JSON.parse(content) : content; }
-    catch { parsed = { raw: content }; }
+    try {
+      parsed = typeof rawArgs === "string" ? JSON.parse(rawArgs) : rawArgs;
+    } catch {
+      parsed = { raw: rawArgs };
+    }
 
     // Normalize before persisting.
     const { results: normResults, flags: derivedFlags } = normalizeResults(parsed.results);

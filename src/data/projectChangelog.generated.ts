@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-02T02:00:06.094Z
+// Última geração: 2026-06-02T02:46:08.765Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,25 @@ export const lastChangelogDate = "2026-06-02";
 export const senexVersion = "7.0.1";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-02",
+    "kind": "changed",
+    "area": "clinical-pipeline",
+    "status": "entregue",
+    "title": "IA Hardening Card #5a: parse-pet-exam-pdf migrado para tool_choice (schema fechado)",
+    "bullets": [
+      "Migração #3 do Card #5 (parse-pet-exam-pdf): substituído `response_format: { type: \"json_object\" }` por tool-calling forçado (`tools: [extract_exam_data]` + `tool_choice: { type: \"function\", function: { name: \"extract_exam_data\" } }`). `json_object` garantia apenas \"é JSON válido\", não \"tem os campos certos\" — agora o schema dos analitos (analyte/value/unit/ref_min/ref_max/flag) é parte do contrato com o modelo. Risco mitigado: unidade/valor no campo errado = interpretação clínica errada (ALT em mg/dL vs U/L muda a leitura).",
+      "Schema fechado: `results` migrou de dict `{ analyte: { ... } }` para `array [{ analyte, value, unit, ref_min, ref_max, flag }]` no contrato do modelo. `additionalProperties: false` no item. Tipos opcionais expressos como `[\"number\",\"null\"]` para evitar inferência ambígua. `normalizeResults` ganhou compat dupla (aceita dict legado E array novo) — nenhum exame antigo persistido quebra.",
+      "Extração de resposta: lê de `choices[0].message.tool_calls[0].function.arguments` (forçado pelo `tool_choice`). Fallback para `message.content` mantido por defesa, mas não deve ser exercido.",
+      "Ordem do Card #5 (escolhida pelo usuário): #3 parse-pet-exam-pdf PRIMEIRO (isolado, alto risco, não tocado nas mudanças recentes — migração limpa para validar o padrão) → #2 extract-pet-clinical-data → #1 hybrid-recommendation. #4 enrich-pet-food-product adiado (clínico-adjacente, catálogo tolera re-run).",
+      "Fora desta migração (mantido fora explicitamente): abstain envelope. Esta função tem `exam_id` obrigatório — não há \"sem sinal de entrada\"; falha de parse continua subindo via `extraction_status:'failed'` no row, sem fabricar `abstain` semanticamente errado.",
+      "Files: `supabase/functions/parse-pet-exam-pdf/index.ts`"
+    ],
+    "files": [
+      "supabase/functions/parse-pet-exam-pdf/index.ts"
+    ],
+    "i18nVersion": "1.118.1"
+  },
   {
     "date": "2026-06-02",
     "kind": "added",
