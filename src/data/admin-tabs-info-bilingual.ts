@@ -355,7 +355,7 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
 `,
       calculations: [
         {
-          name: { pt: '1. KGARevion - Confidence Score', en: '1. KGARevion - Confidence Score' },
+          name: { pt: '1. Confidence Score heurístico (inspirado em KGARevion)', en: '1. Heuristic confidence score (inspired by KGARevion)' },
           formula: 'confidence = 0.4 * grounding + 0.3 * consistency + 0.2 * source_quality + 0.1 * llm_agreement\nauto-approve when confidence >= 0.50',
           example: {
             pt: 'Triplet "Omega-3 → MODULATES → COX-2 pathway": grounding 0.9, consistency 0.8, source_quality 0.7, llm_agreement 0.85 ⇒ 0.84 → auto-aprovado.',
@@ -382,9 +382,9 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
       ],
       glossary: [
         { term: { pt: 'Triple Graph', en: 'Triple Graph' }, definition: { pt: 'Estrutura hierárquica Document → Chunk → Entity → Mechanism', en: 'Hierarchical structure Document → Chunk → Entity → Mechanism' } },
-        { term: { pt: 'U-Retrieval', en: 'U-Retrieval' }, definition: { pt: 'Busca em U: top-down (graph) + bottom-up (vector)', en: 'U-shaped search: top-down (graph) + bottom-up (vector)' } },
-        { term: { pt: 'Ciclo GRRA', en: 'GRRA Cycle' }, definition: { pt: 'Generate → Review → Revise → Answer (validação iterativa contra o KG)', en: 'Generate → Review → Revise → Answer (iterative validation against the KG)' } },
-        { term: { pt: 'TransE', en: 'TransE' }, definition: { pt: 'Translating Embeddings: h + r ≈ t para link prediction', en: 'Translating Embeddings: h + r ≈ t for link prediction' } },
+        { term: { pt: 'U-Retrieval (apenas inspiração)', en: 'U-Retrieval (inspiration only)' }, definition: { pt: 'Conceito do MedGraphRAG: busca em U combinando top-down (graph) + bottom-up (vector). NÃO implementado no Senex AI — a recuperação real é Cypher (Neo4j) + pgvector (Supabase), sem fusão hierárquica.', en: 'MedGraphRAG concept: U-shaped search combining top-down (graph) + bottom-up (vector). NOT implemented in Senex AI — actual retrieval is Cypher (Neo4j) + pgvector (Supabase), without hierarchical fusion.' } },
+        { term: { pt: 'Ciclo GRRA (apenas inspiração)', en: 'GRRA Cycle (inspiration only)' }, definition: { pt: 'Conceito do KGARevion: Generate → Review → Revise → Answer (validação iterativa contra o KG por um modelo Reviewer independente). NÃO implementado no Senex AI — usamos Generate + scoring heurístico + auto-approve ≥ 0,50 + HITL.', en: 'KGARevion concept: Generate → Review → Revise → Answer (iterative validation against the KG by an independent Reviewer model). NOT implemented in Senex AI — we use Generate + heuristic scoring + auto-approve ≥ 0.50 + HITL.' } },
+        { term: { pt: 'TransE (apenas inspiração)', en: 'TransE (inspiration only)' }, definition: { pt: 'Translating Embeddings: h + r ≈ t para link prediction. NÃO implementado no Senex AI — o gap-fill é feito por PubMed E-utilities + Gemini.', en: 'Translating Embeddings: h + r ≈ t for link prediction. NOT implemented in Senex AI — gap-fill is done via PubMed E-utilities + Gemini.' } },
         { term: { pt: 'GRADE', en: 'GRADE' }, definition: { pt: 'Sistema de classificação de evidências: High / Moderate / Low / Very Low', en: 'Evidence grading system: High / Moderate / Low / Very Low' } },
         { term: { pt: 'VeNom', en: 'VeNom' }, definition: { pt: 'Veterinary Nomenclature (Purdue) — vocabulário veterinário padronizado', en: 'Veterinary Nomenclature (Purdue) — standardised veterinary vocabulary' } },
         { term: { pt: 'Digital Twin', en: 'Digital Twin' }, definition: { pt: 'Réplica computacional do pet: projeta severidade × tempo sob diferentes protocolos', en: 'Computational replica of the pet: projects severity × time under different protocols' } },
@@ -393,7 +393,7 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
       ],
       limitations: [
         { pt: 'Neo4j AuraDB integrado para sincronização e exploração (sync-approved-triplets / sync-study-to-neo4j), mas o read-path clínico principal ainda é via RPC Postgres — Cypher direto está no roadmap', en: 'Neo4j AuraDB is integrated for sync and exploration (sync-approved-triplets / sync-study-to-neo4j), but the main clinical read-path still goes through Postgres RPC — direct Cypher is on the roadmap' },
-        { pt: 'TransE link prediction roda em batch noturno; ainda não opera online por requisição', en: 'TransE link prediction runs as a nightly batch; not yet served online per request' },
+        { pt: 'TransE link prediction não está implementado (apenas inspiração científica); o gap-fill em produção é feito por PubMed E-utilities + Gemini', en: 'TransE link prediction is not implemented (scientific inspiration only); production gap-fill is done via PubMed E-utilities + Gemini' },
         { pt: 'Predisposição por raça populada para ~120 raças principais — long tail em expansão', en: 'Breed predisposition populated for ~120 main breeds — long tail still expanding' },
         { pt: 'Escopo clínico limitado a doenças metabólicas/degenerativas em cães (felinos e imagens complexas fora de escopo)', en: 'Clinical scope limited to canine metabolic/degenerative conditions (felines and complex imaging out of scope)' },
         { pt: 'Digital Twin usa projeção sigmoide simplificada — modelos compartimentais multi-órgão estão no roadmap', en: 'Digital Twin uses a simplified sigmoid projection — multi-organ compartmental models are on the roadmap' }
