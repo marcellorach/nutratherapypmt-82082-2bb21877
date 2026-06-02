@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-06-02T02:52:23.546Z
+Generated: 2026-06-02T02:57:13.146Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
@@ -8,13 +8,19 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 ## Changes by area (last 14 days)
 - **admin**: 42
 - **kg**: 7
-- **clinical-pipeline**: 5
+- **clinical-pipeline**: 6
 - **infra**: 5
 - **meta**: 5
 - **curation**: 5
 - **vet-ui**: 1
 
 ## Top 10 recent entries
+### 2026-06-02 · [clinical-pipeline] CHANGED — IA Hardening Card #5b: extract-pet-clinical-data migrado para tool_choice (Gateway + abstain tipado)
+- Migração #2 do Card #5 (extract-pet-clinical-data): substituído `responseMimeType: 'application/json'` (Gemini direto) por `tools: [extract_clinical_entities]` + `tool_choice: { type: "function", function: { name: "extract_clinical_entities" } }` via Lovable AI Gateway. Unifica o caminho com o #3 (parse-pet-exam-pdf) já migrado — uma única autenticação (`LOVABLE_API_KEY`), uma única semântica de tool-calling.
+- GUARDRAIL Card #4 preservado: o schema do tool INCLUI `abstain: boolean`, `abstain_reason` (enum), `abstain_detail`. `abstain=true` com 5 listas vazias é resposta VÁLIDA do tool, não erro de parse. Pré-flight de abstain (texto curto, key ausente) PERMANECE — agora roda ANTES da chamada ao Gateway.
+- Buckets de abstain desambiguados (essencial para a verificação ANTES/DEPOIS pedida):
+_files: src/types/recommendation-confidence.ts, supabase/functions/extract-pet-clinical-data/index.ts_
+
 ### 2026-06-02 · [clinical-pipeline] CHANGED — IA Hardening Card #5a: parse-pet-exam-pdf migrado para tool_choice (schema fechado)
 - Migração #3 do Card #5 (parse-pet-exam-pdf): substituído `response_format: { type: "json_object" }` por tool-calling forçado (`tools: [extract_exam_data]` + `tool_choice: { type: "function", function: { name: "extract_exam_data" } }`). `json_object` garantia apenas "é JSON válido", não "tem os campos certos" — agora o schema dos analitos (analyte/value/unit/ref_min/ref_max/flag) é parte do contrato com o modelo. Risco mitigado: unidade/valor no campo errado = interpretação clínica errada (ALT em mg/dL vs U/L muda a leitura).
 - Schema fechado: `results` migrou de dict `{ analyte: { ... } }` para `array [{ analyte, value, unit, ref_min, ref_max, flag }]` no contrato do modelo. `additionalProperties: false` no item. Tipos opcionais expressos como `["number","null"]` para evitar inferência ambígua. `normalizeResults` ganhou compat dupla (aceita dict legado E array novo) — nenhum exame antigo persistido quebra.
@@ -68,12 +74,6 @@ _files: supabase/functions/_shared/system-prompts.ts, supabase/functions/ai-task
 - `analyze_cohort_patterns` (gemini-3.5-flash, tool-call) — insights bilíngues por cohort com evidência quantitativa obrigatória.
 - `analyze_all_cohorts_patterns` (gemini-3.5-flash, tool-call) — insights pan-populacionais cruzando múltiplos cohorts.
 _files: supabase/functions/_shared/system-prompts.ts, supabase/functions/analyze-cohort-patterns/index.ts, supabase/functions/analyze-all-cohorts-patterns/index.ts, supabase/functions/check-cohort-originality/index.ts…_
-
-### 2026-06-01 · [infra] CHANGED — Sprint 3 utilitários: `enrich-pet-food-product`, `document-chat`, `suggest-taxonomy-terms` no registro único
-- `enrich_pet_food_product`: entrada do manifesto reescrita com o prompt PT-BR real (schema AAFCO/FEDIAF verbatim) + metadata completa (model/temp/output/consumers/tags).
-- `suggest_taxonomy_terms`: entrada reescrita como persona-base; a função concatena dinamicamente o `context` e a lista de categorias (`TAXONOMY_CATEGORIES`).
-- Novo `document_chat_persona`: persona Markdown do chat sobre estudo (RAG + GraphRAG), com regras de citação literal e formato de seções.
-_files: supabase/functions/_shared/system-prompts.ts, supabase/functions/enrich-pet-food-product/index.ts, supabase/functions/suggest-taxonomy-terms/index.ts, supabase/functions/document-chat/index.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

@@ -159,7 +159,18 @@ export type CompoundProvenance = 'KG-backed' | 'AI-enriched' | 'AI-generated';
  */
 export interface AbstainEnvelope {
   abstain: true;
-  abstain_reason: 'clinical_signal_insufficient';
+  /**
+   * Buckets desambiguados (Card #5, migração #2 — `extract-pet-clinical-data`):
+   * - `clinical_signal_insufficient` — HONESTA. Sem sinal de entrada (texto vazio/ruído
+   *   OU modelo declarou abstain via tool). Única que deve existir em regime.
+   * - `model_unavailable` — INFRA. Chave/Gateway indisponível, 5xx.
+   * - `model_response_invalid` — PARSE/SCHEMA. Sem tool_call, args malformados.
+   *   Com `tool_choice` forçado, deve cair a ~0 — termômetro da migração.
+   */
+  abstain_reason:
+    | 'clinical_signal_insufficient'
+    | 'model_unavailable'
+    | 'model_response_invalid';
   abstain_detail?: string;
   source: RecommendationSource;
   disclaimer: DisclaimerType;
