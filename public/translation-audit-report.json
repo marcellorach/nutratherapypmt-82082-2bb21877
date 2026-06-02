@@ -1,9 +1,9 @@
 {
-  "timestamp": "2026-06-02T17:39:59.695Z",
+  "timestamp": "2026-06-02T18:43:02.913Z",
   "summary": {
     "totalFiles": 953,
-    "totalIssues": 468,
-    "hardcodedTexts": 54,
+    "totalIssues": 471,
+    "hardcodedTexts": 57,
     "missingKeys": 412,
     "incompleteTranslations": 2
   },
@@ -2937,28 +2937,49 @@
     {
       "type": "hardcoded",
       "file": "src/components/administrador/AboutSenexTab.tsx",
-      "line": 203,
+      "line": 162,
+      "text": "U-Retrieval bidirecional",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/AboutSenexTab.tsx",
+      "line": 162,
+      "text": "TransE",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/AboutSenexTab.tsx",
+      "line": 163,
+      "text": "TransE",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/AboutSenexTab.tsx",
+      "line": 226,
       "text": "No-mock policy",
       "severity": "medium"
     },
     {
       "type": "hardcoded",
       "file": "src/components/administrador/AboutSenexTab.tsx",
-      "line": 209,
+      "line": 232,
       "text": "Curation gatekeeper",
       "severity": "medium"
     },
     {
       "type": "hardcoded",
       "file": "src/components/administrador/AboutSenexTab.tsx",
-      "line": 221,
+      "line": 244,
       "text": "Canine scope",
       "severity": "medium"
     },
     {
       "type": "hardcoded",
       "file": "src/components/administrador/AboutSenexTab.tsx",
-      "line": 227,
+      "line": 250,
       "text": "Therapeutic cap",
       "severity": "medium"
     },

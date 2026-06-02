@@ -39,11 +39,12 @@ const ENGINE_DIAGRAM = `flowchart TB
   %% ============ VALIDATION & GAP-FILL ============
   subgraph VAL["4 - VALIDATION + GAP-FILL"]
     direction TB
-    V1["GRRA cycle (KGARevion)<br/>Generate -> Review -> Revise -> Answer"]
+    V1["Generate (Gemini)<br/>+ heuristic scoring 0.65-0.75<br/>(inspired by GRRA, no independent reviewer)"]
     V2["Auto-approve >= 0.50<br/>+ human-in-the-loop curation"]
-    V3["TransE link prediction<br/>(h + r approx t)"]
-    V4["PubMed E-utilities + Gemini<br/>gap-fill (compound x condition)"]
-    V1 --> V2 --> V3 --> V4
+    V3["PubMed E-utilities + Gemini<br/>gap-fill (compound x condition)"]
+    V4["Planned: independent Reviewer model<br/>+ Revise step + TransE link prediction"]
+    V1 --> V2 --> V3
+    V2 -.planned.-> V4
   end
 
   %% ============ STORAGE ============
@@ -55,9 +56,9 @@ const ENGINE_DIAGRAM = `flowchart TB
   end
 
   %% ============ RETRIEVAL & CLINICAL OUTPUT ============
-  subgraph OUT["6 - U-RETRIEVAL + CLINICAL SYNTHESIS"]
+  subgraph OUT["6 - HYBRID RETRIEVAL + CLINICAL SYNTHESIS"]
     direction TB
-    O1["U-Retrieval<br/>top-down graph + bottom-up vector"]
+    O1["Hybrid retrieval<br/>Cypher (Neo4j) + pgvector (Supabase)<br/>(inspired by U-Retrieval, no top-down/bottom-up fusion)"]
     O2["Patient subgraph<br/>(breed + labs + meds + conditions)"]
     O3["Recommendation engine<br/>stack <= 8 synergistic compounds"]
     O4["Digital Twin<br/>sigmoid severity x time<br/>years_gained metric"]
@@ -71,7 +72,7 @@ const ENGINE_DIAGRAM = `flowchart TB
   L4 --> V1
   V2 --> S1
   V2 --> S2
-  V4 --> L0
+  V3 --> L0
   S2 --> O1
   S1 --> O1
   L4 --> O1
@@ -82,30 +83,35 @@ const PILLARS: Array<{
   en: string;
   detail_pt: string;
   detail_en: string;
+  status: 'implemented' | 'partial' | 'inspiration';
 }> = [
   {
     pt: 'MedGraphRAG (Wu et al., 2024)',
     en: 'MedGraphRAG (Wu et al., 2024)',
-    detail_pt: 'Triple Graph Construction (Document → Chunk → Entity → Mechanism) + U-Retrieval bidirecional. Reduz alucinações ~40% em QA médico.',
-    detail_en: 'Triple Graph Construction (Document → Chunk → Entity → Mechanism) + bidirectional U-Retrieval. Reduces hallucinations ~40% on medical QA.'
+    detail_pt: 'Triple Graph Construction (Document → Chunk → Entity → Mechanism) — **implementado**. U-Retrieval bidirecional permanece **inspiração**: hoje a recuperação é híbrida Cypher (Neo4j) + pgvector (Supabase), sem fusão top-down/bottom-up. O número ~40% é do paper original, não medido no Senex.',
+    detail_en: 'Triple Graph Construction (Document → Chunk → Entity → Mechanism) — **implemented**. Bidirectional U-Retrieval remains **inspiration only**: today retrieval is hybrid Cypher (Neo4j) + pgvector (Supabase), with no top-down/bottom-up fusion. The ~40% figure is from the source paper, not measured inside Senex.',
+    status: 'partial'
   },
   {
     pt: 'KGARevion (Su et al., ICLR 2025)',
     en: 'KGARevion (Su et al., ICLR 2025)',
-    detail_pt: 'Ciclo GRRA (Generate → Review → Revise → Answer) com auto-approve ≥ 0,50 — elimina ~87% dos erros de extração biomédica.',
-    detail_en: 'GRRA cycle (Generate → Review → Revise → Answer) with auto-approve ≥ 0.50 — removes ~87% of biomedical extraction errors.'
+    detail_pt: '**Inspiração** — o ciclo GRRA completo (Review independente + Revise) **não está implementado**. O que existe em `generate-triplets` é: Generate (Gemini) + scoring heurístico (0,65–0,75) + auto-approve ≥ 0,50 + HITL. O número ~87% é benchmark do paper, não medido no Senex.',
+    detail_en: '**Inspiration** — the full GRRA cycle (independent Review + Revise) is **not implemented**. What runs in `generate-triplets` is: Generate (Gemini) + heuristic scoring (0.65–0.75) + auto-approve ≥ 0.50 + HITL. The ~87% figure is a benchmark from the paper, not measured inside Senex.',
+    status: 'inspiration'
   },
   {
     pt: 'TransE (Bordes et al., NeurIPS 2013)',
     en: 'TransE (Bordes et al., NeurIPS 2013)',
-    detail_pt: 'h + r ≈ t no espaço de embeddings — link prediction de pathways ausentes alimentando o gap-fill PubMed.',
-    detail_en: 'h + r ≈ t in embedding space — link prediction of missing pathways feeding the PubMed gap-fill.'
+    detail_pt: '**Inspiração / planejado** — TransE link prediction **não roda em runtime**. O gap-fill (`kg-evidence-gap-fill`) é feito por PubMed E-utilities + Gemini, sem embeddings TransE.',
+    detail_en: '**Inspiration / planned** — TransE link prediction is **not running in runtime**. The gap-fill (`kg-evidence-gap-fill`) uses PubMed E-utilities + Gemini, with no TransE embeddings.',
+    status: 'inspiration'
   },
   {
     pt: 'Geriatria canina (Dog Aging Project + AgeXtend + frailty index)',
     en: 'Canine geroscience (Dog Aging Project + AgeXtend + frailty index)',
     detail_pt: 'Coortes longitudinais reais (>45.000 cães), screening de ~1,1B compostos geroprotetores e operacionalização do frailty index canino.',
-    detail_en: 'Real longitudinal cohorts (>45,000 dogs), screening of ~1.1B geroprotector compounds and operationalisation of the canine frailty index.'
+    detail_en: 'Real longitudinal cohorts (>45,000 dogs), screening of ~1.1B geroprotector compounds and operationalisation of the canine frailty index.',
+    status: 'partial'
   }
 ];
 
@@ -151,11 +157,16 @@ const AboutSenexTab: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="mb-4 p-3 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900 text-xs text-amber-900 dark:text-amber-200">
+            {isPt
+              ? <><strong>Honestidade arquitetural:</strong> o diagrama abaixo descreve a visão e o que está implementado. <strong>GRRA</strong>, <strong>U-Retrieval bidirecional</strong> e <strong>TransE</strong> são inspiração/planejado — não estão em runtime. Verdade-base em <code>docs/generated/ARCHITECTURE_LIVE.md</code>.</>
+              : <><strong>Architectural honesty:</strong> the diagram below describes the vision and what is implemented. <strong>GRRA</strong>, <strong>bidirectional U-Retrieval</strong> and <strong>TransE</strong> are inspiration/planned — not in runtime. Ground truth in <code>docs/generated/ARCHITECTURE_LIVE.md</code>.</>}
+          </div>
           <MermaidBlock code={ENGINE_DIAGRAM} />
           <p className="text-xs text-muted-foreground mt-4">
             {isPt
-              ? 'Fluxo real em produção: ingestion (Gemini File API) → extração em 3 estágios → KG hierárquico L0–L4 → validação GRRA + gap-fill PubMed → storage híbrido Supabase pgvector + Neo4j AuraDB → U-Retrieval + síntese clínica (stack ≤ 8 + Digital Twin).'
-              : 'Production flow: ingestion (Gemini File API) → 3-stage extraction → L0–L4 hierarchical KG → GRRA validation + PubMed gap-fill → hybrid Supabase pgvector + Neo4j AuraDB storage → U-Retrieval + clinical synthesis (stack ≤ 8 + Digital Twin).'}
+              ? 'Fluxo real em produção: ingestion (Gemini File API) → extração em 3 estágios → KG hierárquico L0–L4 → validação por scoring heurístico + auto-approve + HITL + gap-fill PubMed → storage híbrido Supabase pgvector + Neo4j AuraDB → recuperação híbrida Cypher + pgvector → síntese clínica (stack ≤ 8 + Digital Twin).'
+              : 'Production flow: ingestion (Gemini File API) → 3-stage extraction → L0–L4 hierarchical KG → heuristic-scoring validation + auto-approve + HITL + PubMed gap-fill → hybrid Supabase pgvector + Neo4j AuraDB storage → hybrid Cypher + pgvector retrieval → clinical synthesis (stack ≤ 8 + Digital Twin).'}
           </p>
         </CardContent>
       </Card>
@@ -176,13 +187,25 @@ const AboutSenexTab: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle>
-            {isPt ? 'Pilares científicos' : 'Scientific pillars'}
+            {isPt ? 'Pilares científicos (inspiração × implementação)' : 'Scientific pillars (inspiration × implementation)'}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {PILLARS.map((p) => (
             <div key={p.en} className="border rounded-lg p-3">
-              <div className="font-semibold">{isPt ? p.pt : p.en}</div>
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="font-semibold">{isPt ? p.pt : p.en}</div>
+                <Badge
+                  variant={p.status === 'implemented' ? 'default' : p.status === 'partial' ? 'secondary' : 'outline'}
+                  className="text-[10px] uppercase tracking-wide"
+                >
+                  {p.status === 'implemented'
+                    ? (isPt ? 'implementado' : 'implemented')
+                    : p.status === 'partial'
+                      ? (isPt ? 'parcial' : 'partial')
+                      : (isPt ? 'inspiração' : 'inspiration')}
+                </Badge>
+              </div>
               <div className="text-sm text-muted-foreground mt-1">
                 {isPt ? p.detail_pt : p.detail_en}
               </div>
