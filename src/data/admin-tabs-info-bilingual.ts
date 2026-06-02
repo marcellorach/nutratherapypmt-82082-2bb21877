@@ -401,8 +401,8 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
     },
     scientific: {
       foundation: {
-        pt: 'Sistema híbrido fundamentado em quatro pilares: (1) MedGraphRAG para grafos hierárquicos + U-Retrieval; (2) KGARevion para validação GRRA + auto-approve; (3) TransE para link prediction e gap-fill; (4) ciência da longevidade canina (Dog Aging Project, AgeXtend, frailty index, AAHA/WSAVA). Toda recomendação clínica é rastreável a um estudo no KG ou explicitamente marcada como "apenas-LLM".',
-        en: 'Hybrid system built on four pillars: (1) MedGraphRAG for hierarchical graphs + U-Retrieval; (2) KGARevion for GRRA validation + auto-approve; (3) TransE for link prediction and gap-fill; (4) canine longevity science (Dog Aging Project, AgeXtend, frailty index, AAHA/WSAVA). Every clinical recommendation is traceable to a study in the KG or explicitly flagged as "LLM-only".'
+        pt: 'Sistema híbrido fundamentado em quatro pilares — separando o que **roda hoje** do que é **apenas inspiração científica**. **Implementado:** (1) Triple Graph Construction hierárquica L0–L4 (inspirada em MedGraphRAG); (2) extração de triplets com Generate + scoring heurístico (0,65–0,75) + auto-approve ≥ 0,50 + HITL (inspirada em KGARevion, sem ciclo GRRA); (3) recuperação híbrida Cypher (Neo4j) + pgvector (Supabase), sem fusão U-Retrieval; (4) gap-fill via PubMed E-utilities + Gemini (sem TransE); (5) ciência da longevidade canina (Dog Aging Project, AgeXtend, frailty index, AAHA/WSAVA). **Apenas inspiração (não implementado):** U-Retrieval bidirecional, ciclo GRRA completo com revisor independente, TransE link prediction. Toda recomendação clínica é rastreável a um estudo no KG ou explicitamente marcada como "apenas-LLM". Verdade-base em `docs/generated/ARCHITECTURE_LIVE.md`.',
+        en: 'Hybrid system built on four pillars — separating what **runs today** from **scientific inspiration only**. **Implemented:** (1) hierarchical Triple Graph Construction L0–L4 (inspired by MedGraphRAG); (2) triplet extraction via Generate + heuristic scoring (0.65–0.75) + auto-approve ≥ 0.50 + HITL (inspired by KGARevion, no GRRA cycle); (3) hybrid retrieval Cypher (Neo4j) + pgvector (Supabase), no U-Retrieval fusion; (4) gap-fill via PubMed E-utilities + Gemini (no TransE); (5) canine longevity science (Dog Aging Project, AgeXtend, frailty index, AAHA/WSAVA). **Inspiration only (not implemented):** bidirectional U-Retrieval, full GRRA cycle with independent reviewer, TransE link prediction. Every clinical recommendation is traceable to a study in the KG or explicitly flagged as "LLM-only". Ground truth in `docs/generated/ARCHITECTURE_LIVE.md`.'
       },
       implementationStatus: {
         implemented: [
@@ -417,14 +417,14 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
         ],
         inProgress: [
           { pt: 'Cobertura nutricional do catálogo de rações (admin Pet Food Coverage + bulk-enrich)', en: 'Nutrition coverage for the pet-food catalog (Pet Food Coverage admin + bulk-enrich)' },
-          { pt: 'TransE link prediction online (hoje em batch noturno)', en: 'Online TransE link prediction (currently a nightly batch)' },
           { pt: 'Expansão da predisposição por raça para o long-tail (~120 raças cobertas)', en: 'Expanding breed predisposition to the long-tail (~120 breeds covered)' }
         ],
         planned: [
-          { pt: 'TransE link prediction online por requisição (hoje batch noturno)', en: 'Online TransE link prediction per request (currently a nightly batch)' },
+          { pt: 'TransE link prediction (apenas inspiração científica hoje — não há treinamento nem inferência implementados)', en: 'TransE link prediction (scientific inspiration only today — no training or inference implemented)' },
           { pt: 'Modelos compartimentais multi-órgão para o Digital Twin (rim, fígado, articular)', en: 'Multi-organ compartmental models for the Digital Twin (kidney, liver, joint)' },
           { pt: 'Curadoria colaborativa em tempo real (vários veterinários no mesmo triplet)', en: 'Real-time collaborative curation (multiple vets on the same triplet)' },
-          { pt: 'Cypher queries diretas no Neo4j AuraDB para o U-Retrieval clínico (hoje read-path principal vive em RPC Postgres)', en: 'Direct Cypher queries against Neo4j AuraDB for clinical U-Retrieval (current main read-path lives in Postgres RPC)' },
+          { pt: 'Recuperação U-Retrieval bidirecional real (top-down + bottom-up com fusão hierárquica) — hoje recuperação é Cypher + pgvector concatenados', en: 'Real bidirectional U-Retrieval (top-down + bottom-up with hierarchical fusion) — today retrieval is concatenated Cypher + pgvector' },
+          { pt: 'Ciclo GRRA completo com modelo Reviewer independente e etapa Revise (hoje: scoring heurístico + HITL)', en: 'Full GRRA cycle with independent Reviewer model and Revise step (today: heuristic scoring + HITL)' },
           { pt: 'Extensão controlada para felinos após validação da curva canina', en: 'Controlled extension to felines after the canine curve is validated' }
         ]
       },
