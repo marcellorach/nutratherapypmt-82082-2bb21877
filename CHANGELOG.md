@@ -24,6 +24,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.1 -->
 
+### Added - 2026-06-02 — IA Hardening Card #1: interpolate blindado + telemetria de variáveis ausentes
+<!-- area: infra · status: entregue · i18n: 1.118.1 -->
+- `interpolate(tpl, vars, missing?)` em `supabase/functions/_shared/ai-task-router.ts` agora coleta toda chave `{{var}}` cujo valor cai para `undefined`/`null`/`""` em vez de substituir silenciosamente. Comportamento legado preservado (ainda retorna `""`), mas as ocorrências são registradas.
+- `callAITask` agora emite `console.warn` por invocação com variáveis ausentes (`task=… caller=… missing_variables=[…]`) e persiste o array em `ai_task_invocations.missing_variables` (nova coluna `text[]` + índice GIN parcial via migração).
+- Pré-requisito do card #6 (auditoria de `required_variables` por task) — sem este log, "variável nunca ausente" é indistinguível de "task nunca exercitada".
+- Cards aceitos no kanban de robustez IA (ordem confirmada): (1) interpolate blindado ✅, (2) migração `validation_status text` + `abstained` em `ai_task_invocations`, (3) B+D+bridge (`output_schema` no router + 1 retry de reparo + `abstain` válido + `response_format: json_object` nos 2 P0 + few-shot), (4) **remover** `simpleExtraction()` (sem 4a/4b), (5) migrar N callers (critério: persistem dado estruturado que molda registro clínico/recomendação E hoje não usam `tool_choice`; lista confirmada contra código no card #5, exclui chat/retrieval livre), (6) `required_variables text[]` em `ai_prompt_versions` + warn-only, (7) C-Fase 2 (throw) — gate: ≥14 dias E cada contrato invocado ≥K vezes (K=5–10) sem variável-surpresa nova.
+- Files: `supabase/functions/_shared/ai-task-router.ts`, migration `ai_task_invocations.missing_variables`
+
 ### Security - 2026-06-01 — Endurece ai-config: admin-only + segredos mascarados
 <!-- area: admin · status: entregue · i18n: 1.118.1 -->
 - `supabase/functions/ai-config/index.ts` agora valida `Authorization: Bearer <jwt>` via `getClaims` e checa `user_roles.role = 'admin'` em TODAS as chamadas (GET, POST `get`/`set`/`test-neo4j`). Sem token → 401; sem admin → 403.

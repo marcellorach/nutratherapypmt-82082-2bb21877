@@ -157,8 +157,25 @@ export async function resolveTask(
   return value;
 }
 
-function interpolate(tpl: string, vars: Record<string, string>): string {
-  return tpl.replace(/\{\{\s*(\w+)\s*\}\}/g, (_m, k) => vars[k] ?? "");
+/**
+ * Substitui {{var}} no template. Toda variável referenciada cujo valor
+ * cai em "" (undefined, null ou string vazia) é coletada em `missing`
+ * para telemetria. Mantém o comportamento legado (substitui por "")
+ * — card #1: blindagem do interpolate, pré-requisito do contrato C.
+ */
+function interpolate(
+  tpl: string,
+  vars: Record<string, string>,
+  missing?: string[],
+): string {
+  return tpl.replace(/\{\{\s*(\w+)\s*\}\}/g, (_m, k) => {
+    const v = vars[k];
+    if (v === undefined || v === null || v === "") {
+      if (missing && !missing.includes(k)) missing.push(k);
+      return "";
+    }
+    return v;
+  });
 }
 
 export async function logInvocation(row: {
@@ -172,9 +189,16 @@ export async function logInvocation(row: {
   cost_estimate: number;
   ok: boolean;
   error?: string | null;
+  missing_variables?: string[] | null;
 }) {
   try {
-    await admin.from("ai_task_invocations").insert(row);
+    await admin.from("ai_task_invocations").insert({
+      ...row,
+      missing_variables:
+        row.missing_variables && row.missing_variables.length > 0
+          ? row.missing_variables
+          : null,
+    });
     await admin.from("ai_task_status").upsert({
       task_id: row.task_id,
       last_run_at: new Date().toISOString(),
@@ -201,6 +225,7 @@ export async function callAITask(
 
   const systemPrompt = opts.override_system_prompt ?? resolved.system_prompt;
   let messages: Array<{ role: string; content: string }>;
+  const missingVars: string[] = [];
   if (opts.messages && opts.messages.length > 0) {
     messages = systemPrompt
       ? [{ role: "system", content: systemPrompt }, ...opts.messages]
@@ -209,11 +234,16 @@ export async function callAITask(
     const userTpl = opts.override_user_prompt ?? resolved.user_prompt ?? "";
     const vars: Record<string, string> = { ...(opts.variables ?? {}) };
     if (opts.input !== undefined) vars.input = opts.input;
-    const userMsg = userTpl ? interpolate(userTpl, vars) : (opts.input ?? "");
+    const userMsg = userTpl ? interpolate(userTpl, vars, missingVars) : (opts.input ?? "");
     messages = [
       ...(systemPrompt ? [{ role: "system", content: systemPrompt }] : []),
       { role: "user", content: userMsg },
     ];
+  }
+  if (missingVars.length > 0) {
+    console.warn(
+      `[ai-task-router] task=${taskId} caller=${opts.caller} missing_variables=${JSON.stringify(missingVars)}`,
+    );
   }
 
   const payload: Record<string, unknown> = {
@@ -250,6 +280,7 @@ export async function callAITask(
       cost_estimate: 0,
       ok: false,
       error: `${resp.status}: ${text.slice(0, 300)}`,
+      missing_variables: missingVars,
     });
     throw new Error(`AI Gateway ${resp.status}: ${text.slice(0, 300)}`);
   }
@@ -271,6 +302,7 @@ export async function callAITask(
     tokens_out: tOut,
     cost_estimate: cost,
     ok: true,
+    missing_variables: missingVars,
   });
 
   return {
