@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-06-02T02:00:06.104Z
+Generated: 2026-06-02T02:46:08.771Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
@@ -8,13 +8,19 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 ## Changes by area (last 14 days)
 - **admin**: 42
 - **kg**: 7
+- **clinical-pipeline**: 5
 - **infra**: 5
 - **meta**: 5
 - **curation**: 5
-- **clinical-pipeline**: 4
 - **vet-ui**: 1
 
 ## Top 10 recent entries
+### 2026-06-02 · [clinical-pipeline] CHANGED — IA Hardening Card #5a: parse-pet-exam-pdf migrado para tool_choice (schema fechado)
+- Migração #3 do Card #5 (parse-pet-exam-pdf): substituído `response_format: { type: "json_object" }` por tool-calling forçado (`tools: [extract_exam_data]` + `tool_choice: { type: "function", function: { name: "extract_exam_data" } }`). `json_object` garantia apenas "é JSON válido", não "tem os campos certos" — agora o schema dos analitos (analyte/value/unit/ref_min/ref_max/flag) é parte do contrato com o modelo. Risco mitigado: unidade/valor no campo errado = interpretação clínica errada (ALT em mg/dL vs U/L muda a leitura).
+- Schema fechado: `results` migrou de dict `{ analyte: { ... } }` para `array [{ analyte, value, unit, ref_min, ref_max, flag }]` no contrato do modelo. `additionalProperties: false` no item. Tipos opcionais expressos como `["number","null"]` para evitar inferência ambígua. `normalizeResults` ganhou compat dupla (aceita dict legado E array novo) — nenhum exame antigo persistido quebra.
+- Extração de resposta: lê de `choices[0].message.tool_calls[0].function.arguments` (forçado pelo `tool_choice`). Fallback para `message.content` mantido por defesa, mas não deve ser exercido.
+_files: supabase/functions/parse-pet-exam-pdf/index.ts_
+
 ### 2026-06-02 · [clinical-pipeline] ADDED — IA Hardening Cards #3+#4: abstain válido + provenance tipada + remoção do simpleExtraction
 - Card #3 (envelope abstain + carimbo de proveniência em `hybrid-recommendation`): pré-flight de abstenção dispara SOMENTE por falta de sinal de entrada (sem `condition` OU sem qualquer sinal de pet/clínico). KG vazio NUNCA aciona abstain — gera resposta marcada com `source:'llm_fallback' + disclaimer:'no_kg_data'` (preservada). Toda resposta agora carrega envelope `{ source, disclaimer, abstain }`. Branch `llm_fallback` passa a carimbar `evidenceLevel:'AI-enriched'` por composto (antes ficava sem marca de origem, abrindo brecha para tutor receber recomendação sem tarja).
 - Card #4 (remoção do `simpleExtraction`): `supabase/functions/extract-pet-clinical-data/index.ts` perdeu o fallback regex rule-based que fabricava entidades silenciosamente quando a chave do modelo estava ausente, o modelo retornava erro/vazio, ou o parse JSON falhava. Todos esses caminhos agora retornam envelope abstain (`clinical_signal_insufficient`) com arrays vazios — comportamento honesto, mensurável e rastreável pela telemetria do card #2.
@@ -68,12 +74,6 @@ _files: supabase/functions/_shared/system-prompts.ts, supabase/functions/analyze
 - `suggest_taxonomy_terms`: entrada reescrita como persona-base; a função concatena dinamicamente o `context` e a lista de categorias (`TAXONOMY_CATEGORIES`).
 - Novo `document_chat_persona`: persona Markdown do chat sobre estudo (RAG + GraphRAG), com regras de citação literal e formato de seções.
 _files: supabase/functions/_shared/system-prompts.ts, supabase/functions/enrich-pet-food-product/index.ts, supabase/functions/suggest-taxonomy-terms/index.ts, supabase/functions/document-chat/index.ts_
-
-### 2026-06-01 · [infra] CHANGED — Perplexity trio (`query-perplexity`, `perplexity-health`, `web-dosage-lookup`) no registro único
-- Adicionados `query_perplexity_chat` e `perplexity_health_ping` ao manifesto `_shared/system-prompts.ts`; `web_dosage_lookup` recebeu metadata completa (model/temperature/output_format/consumers/tags).
-- `query-perplexity`: prompt agora via `fetchSystemPrompt('query_perplexity_chat', SYSTEM_FALLBACK)`. Telemetria com `logPromptUsage` em sucesso (tokens_in/out do payload Perplexity) e em erro HTTP.
-- `perplexity-health`: ping "ok" agora via `fetchSystemPrompt('perplexity_health_ping', …)`. Telemetria registra latência do ping e status.
-_files: supabase/functions/_shared/system-prompts.ts, supabase/functions/query-perplexity/index.ts, supabase/functions/perplexity-health/index.ts, supabase/functions/web-dosage-lookup/index.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
