@@ -202,30 +202,30 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
   'estudos': {
     // ⚠️ MAINTENANCE: every change to the Senex engine that touches this modal
     // MUST bump `version` (semver) and set `lastUpdate` to the current ISO date.
-    version: '5.1.0',
-    lastUpdate: '2026-05-18',
+    version: '5.2.0',
+    lastUpdate: '2026-06-02',
     keyExcerpts: [
       {
         source: 'MedGraphRAG — Wu et al., 2024 (arXiv:2408.04187)',
         quote: {
-          pt: 'A construção em Triple Graph (Document → Chunk → Entity → Mechanism) combinada com U-Retrieval bidirecional reduz alucinações em ~40% em QA médico e fundamenta a hierarquia L0–L4 do Senex AI.',
-          en: 'Triple Graph Construction (Document → Chunk → Entity → Mechanism) combined with bidirectional U-Retrieval reduces hallucinations by ~40% on medical QA and underpins the L0–L4 hierarchy used by Senex AI.'
+          pt: 'Paper de inspiração: a construção em Triple Graph (Document → Chunk → Entity → Mechanism) combinada com U-Retrieval bidirecional reporta ~40% de redução de alucinações em QA médico. O Senex AI adota a Triple Graph (hierarquia L0–L4) mas NÃO implementa U-Retrieval — a recuperação real é Cypher (Neo4j) + pgvector (Supabase). O ~40% é benchmark do paper, não métrica do Senex.',
+          en: 'Inspiration paper: Triple Graph Construction (Document → Chunk → Entity → Mechanism) combined with bidirectional U-Retrieval reports ~40% hallucination reduction on medical QA. Senex AI adopts the Triple Graph (L0–L4 hierarchy) but does NOT implement U-Retrieval — actual retrieval is Cypher (Neo4j) + pgvector (Supabase). The ~40% is the paper benchmark, not a Senex metric.'
         },
         url: 'https://arxiv.org/abs/2408.04187'
       },
       {
         source: 'KGARevion — Su et al., ICLR 2025',
         quote: {
-          pt: 'O ciclo GRRA (Generate → Review → Revise → Answer) valida triplets contra um KG fundamentado e elimina ~87% dos erros de extração biomédica — base do nosso auto-approve threshold e da curadoria humana.',
-          en: 'The GRRA cycle (Generate → Review → Revise → Answer) validates triplets against a grounded KG and removes ~87% of biomedical extraction errors — the basis for our auto-approve threshold and human-in-the-loop curation.'
+          pt: 'Paper de inspiração: o ciclo GRRA (Generate → Review → Revise → Answer) reporta ~87% de redução de erros ao validar triplets contra um KG fundamentado. O Senex AI NÃO implementa GRRA — roda Generate + scoring heurístico (0,65–0,75) + auto-approve ≥ 0,50 + curadoria humana (HITL), sem modelo Review independente nem etapa Revise. O ~87% é benchmark do paper, não métrica do Senex.',
+          en: 'Inspiration paper: the GRRA cycle (Generate → Review → Revise → Answer) reports ~87% error reduction by validating triplets against a grounded KG. Senex AI does NOT implement GRRA — it runs Generate + heuristic scoring (0.65–0.75) + auto-approve ≥ 0.50 + human-in-the-loop curation, with no independent Review model or Revise step. The ~87% is the paper benchmark, not a Senex metric.'
         },
         url: 'https://openreview.net/forum?id=OOq3W1MEVT'
       },
       {
         source: 'TransE — Bordes et al., NeurIPS 2013',
         quote: {
-          pt: 'Modelagem de relações como translações no espaço de embeddings (h + r ≈ t) habilita link prediction de pathways ausentes — usado no nosso pipeline de gap-fill (compound × condition).',
-          en: 'Modelling relations as translations in embedding space (h + r ≈ t) enables link prediction of missing pathways — used by our (compound × condition) gap-fill pipeline.'
+          pt: 'Paper de inspiração: modelagem de relações como translações no espaço de embeddings (h + r ≈ t) habilita link prediction. O Senex AI NÃO implementa TransE — o gap-fill (compound × condition) é feito por PubMed E-utilities + estruturação por Gemini (sem treinamento ou inferência de embeddings de grafo).',
+          en: 'Inspiration paper: modelling relations as translations in embedding space (h + r ≈ t) enables link prediction. Senex AI does NOT implement TransE — gap-fill (compound × condition) is performed via PubMed E-utilities + Gemini structuring (no graph embedding training or inference).'
         },
         url: 'https://papers.nips.cc/paper/2013/hash/1cecc7a77928ca8133fa24680a88d2f9-Abstract.html'
       },
@@ -312,13 +312,13 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
           { feature: { pt: '3. Tipos de Entidade', en: '3. Entity Types' }, values: [ { pt: 'Drug, Disease, Gene', en: 'Drug, Disease, Gene' }, { pt: 'Entidades biomédicas', en: 'Biomedical entities' }, { pt: 'Nutraceutical, Drug, Condition, Mechanism, Breed, Species, Pet', en: 'Nutraceutical, Drug, Condition, Mechanism, Breed, Species, Pet' } ] },
           { feature: { pt: '4. Tipos de Relação', en: '4. Relation Types' }, values: [ { pt: 'TREATS, CAUSES', en: 'TREATS, CAUSES' }, { pt: 'Relações genéricas', en: 'Generic relations' }, { pt: '20+ tipos (TREATS, MODULATES, SYNERGIZES, ANTAGONIZES, PREDISPOSED_TO…)', en: '20+ types (TREATS, MODULATES, SYNERGIZES, ANTAGONIZES, PREDISPOSED_TO…)' } ] },
           { feature: { pt: '5. Suporte a Ontologias', en: '5. Ontology Support' }, values: [ { pt: 'UMLS, MeSH', en: 'UMLS, MeSH' }, { pt: 'PrimeKG', en: 'PrimeKG' }, { pt: 'SNOMED-CT VetSCT + UMLS + VeNom + AAHA/WSAVA', en: 'SNOMED-CT VetSCT + UMLS + VeNom + AAHA/WSAVA' } ] },
-          { feature: { pt: '6. Método de Retrieval', en: '6. Retrieval Method' }, values: [ { pt: 'U-Retrieval (top + bottom)', en: 'U-Retrieval (top + bottom)' }, { pt: 'Busca grounded no KG', en: 'KG-grounded search' }, { pt: 'Híbrido: U-Retrieval + validação KG + confidence scoring', en: 'Hybrid: U-Retrieval + KG validation + confidence scoring' } ] },
-          { feature: { pt: '7. Ciclo de Validação', en: '7. Validation Cycle' }, values: [ { pt: 'Não explícito', en: 'Not explicit' }, { pt: 'Ciclo GRRA', en: 'GRRA cycle' }, { pt: 'GRRA + human-in-the-loop + GRADE + auto-approve ≥ 0,50', en: 'GRRA + human-in-the-loop + GRADE + auto-approve ≥ 0.50' } ] },
-          { feature: { pt: '8. Redução de Alucinações', en: '8. Hallucination Reduction' }, values: [ { pt: '~40%', en: '~40%' }, { pt: '~87% de erros eliminados', en: '~87% errors eliminated' }, { pt: 'Combinado: ~50% esperado', en: 'Combined: ~50% expected' } ] },
+          { feature: { pt: '6. Método de Retrieval', en: '6. Retrieval Method' }, values: [ { pt: 'U-Retrieval (top + bottom)', en: 'U-Retrieval (top + bottom)' }, { pt: 'Busca grounded no KG', en: 'KG-grounded search' }, { pt: 'Híbrido Cypher (Neo4j) + pgvector (Supabase), sem fusão top-down/bottom-up', en: 'Hybrid Cypher (Neo4j) + pgvector (Supabase), no top-down/bottom-up fusion' } ] },
+          { feature: { pt: '7. Ciclo de Validação', en: '7. Validation Cycle' }, values: [ { pt: 'Não explícito', en: 'Not explicit' }, { pt: 'Ciclo GRRA', en: 'GRRA cycle' }, { pt: 'Generate + scoring heurístico (0,65–0,75) + auto-approve ≥ 0,50 + HITL (sem Review independente)', en: 'Generate + heuristic scoring (0.65–0.75) + auto-approve ≥ 0.50 + HITL (no independent Review model)' } ] },
+          { feature: { pt: '8. Redução de Alucinações (benchmark do paper)', en: '8. Hallucination Reduction (paper benchmark)' }, values: [ { pt: '~40% (benchmark do paper)', en: '~40% (paper benchmark)' }, { pt: '~87% (benchmark do paper)', en: '~87% (paper benchmark)' }, { pt: 'Não medido no Senex AI', en: 'Not measured in Senex AI' } ] },
           { feature: { pt: '9. Foco em Longevidade', en: '9. Longevity Focus' }, values: [ { pt: 'Não coberto', en: 'Not covered' }, { pt: 'Não coberto', en: 'Not covered' }, { pt: '✅ Geroprotetores, marcadores de idade biológica, frailty index', en: '✅ Geroprotectors, biological-age markers, frailty index' } ] },
           { feature: { pt: '10. Score de Sinergia', en: '10. Synergy Scoring' }, values: [ { pt: 'Não coberto', en: 'Not covered' }, { pt: 'Não coberto', en: 'Not covered' }, { pt: '✅ Quantificação de pathways compartilhados + stack ≤ 8 compostos', en: '✅ Shared-pathway quantification + stack capped at 8 compounds' } ] },
           { feature: { pt: '11. Predisposição por Raça', en: '11. Breed Predisposition' }, values: [ { pt: 'Não coberto', en: 'Not covered' }, { pt: 'Não coberto', en: 'Not covered' }, { pt: '✅ Caminhos Species → BreedGroup → Breed → Condition', en: '✅ Species → BreedGroup → Breed → Condition paths' } ] },
-          { feature: { pt: '12. Auto-Descoberta (Link Prediction)', en: '12. Auto-Discovery (Link Prediction)' }, values: [ { pt: 'Não coberto', en: 'Not covered' }, { pt: 'Não coberto', en: 'Not covered' }, { pt: '✅ TransE link prediction para pathways novos', en: '✅ TransE link prediction for novel pathways' } ] },
+          { feature: { pt: '12. Auto-Descoberta (Link Prediction)', en: '12. Auto-Discovery (Link Prediction)' }, values: [ { pt: 'Não coberto', en: 'Not covered' }, { pt: 'Não coberto', en: 'Not covered' }, { pt: 'Gap-fill via PubMed E-utilities + Gemini (TransE permanece apenas inspiração, não implementado)', en: 'Gap-fill via PubMed E-utilities + Gemini (TransE remains inspiration only, not implemented)' } ] },
           { feature: { pt: '13. Gap-Fill PubMed', en: '13. PubMed Gap-Fill' }, values: [ { pt: 'Não coberto', en: 'Not covered' }, { pt: 'Não coberto', en: 'Not covered' }, { pt: '✅ PubMed E-utilities + Gemini → triplets pendentes automáticos', en: '✅ PubMed E-utilities + Gemini → automatic pending triplets' } ] },
           { feature: { pt: '14. Digital Twin Longitudinal', en: '14. Longitudinal Digital Twin' }, values: [ { pt: 'Não coberto', en: 'Not covered' }, { pt: 'Não coberto', en: 'Not covered' }, { pt: '✅ Projeção sigmoide + métrica years_gained', en: '✅ Sigmoid projection + years_gained metric' } ] }
         ]
@@ -340,12 +340,11 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
     L3 --> L4["L4 - Outcome<br/>(condition · breed · species)"]
   end
   subgraph P4["Phase 4 - Validation & Gap-Fill"]
-    V1["GRRA cycle<br/>(KGARevion)"] --> V2["Auto-approve >= 0.50<br/>+ human curation"]
-    V2 --> V3["TransE link prediction"]
-    V3 --> V4["PubMed E-utilities<br/>+ Gemini gap-fill"]
+    V1["Generate + heuristic<br/>scoring (0.65-0.75)"] --> V2["Auto-approve >= 0.50<br/>+ human curation (HITL)"]
+    V2 --> V4["PubMed E-utilities<br/>+ Gemini gap-fill"]
   end
   subgraph OUT["Clinical Output"]
-    O1["U-Retrieval<br/>(top-down + bottom-up)"] --> O2["Recommendation engine<br/>(stack <= 8 compounds)"]
+    O1["Hybrid retrieval<br/>Cypher (Neo4j) + pgvector"] --> O2["Recommendation engine<br/>(stack <= 8 compounds)"]
     O2 --> O3["Digital Twin<br/>sigmoid · years_gained"]
   end
   A4 --> B1
@@ -356,7 +355,7 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
 `,
       calculations: [
         {
-          name: { pt: '1. KGARevion - Confidence Score', en: '1. KGARevion - Confidence Score' },
+          name: { pt: '1. Confidence Score heurístico (inspirado em KGARevion)', en: '1. Heuristic confidence score (inspired by KGARevion)' },
           formula: 'confidence = 0.4 * grounding + 0.3 * consistency + 0.2 * source_quality + 0.1 * llm_agreement\nauto-approve when confidence >= 0.50',
           example: {
             pt: 'Triplet "Omega-3 → MODULATES → COX-2 pathway": grounding 0.9, consistency 0.8, source_quality 0.7, llm_agreement 0.85 ⇒ 0.84 → auto-aprovado.',
@@ -383,9 +382,9 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
       ],
       glossary: [
         { term: { pt: 'Triple Graph', en: 'Triple Graph' }, definition: { pt: 'Estrutura hierárquica Document → Chunk → Entity → Mechanism', en: 'Hierarchical structure Document → Chunk → Entity → Mechanism' } },
-        { term: { pt: 'U-Retrieval', en: 'U-Retrieval' }, definition: { pt: 'Busca em U: top-down (graph) + bottom-up (vector)', en: 'U-shaped search: top-down (graph) + bottom-up (vector)' } },
-        { term: { pt: 'Ciclo GRRA', en: 'GRRA Cycle' }, definition: { pt: 'Generate → Review → Revise → Answer (validação iterativa contra o KG)', en: 'Generate → Review → Revise → Answer (iterative validation against the KG)' } },
-        { term: { pt: 'TransE', en: 'TransE' }, definition: { pt: 'Translating Embeddings: h + r ≈ t para link prediction', en: 'Translating Embeddings: h + r ≈ t for link prediction' } },
+        { term: { pt: 'U-Retrieval (apenas inspiração)', en: 'U-Retrieval (inspiration only)' }, definition: { pt: 'Conceito do MedGraphRAG: busca em U combinando top-down (graph) + bottom-up (vector). NÃO implementado no Senex AI — a recuperação real é Cypher (Neo4j) + pgvector (Supabase), sem fusão hierárquica.', en: 'MedGraphRAG concept: U-shaped search combining top-down (graph) + bottom-up (vector). NOT implemented in Senex AI — actual retrieval is Cypher (Neo4j) + pgvector (Supabase), without hierarchical fusion.' } },
+        { term: { pt: 'Ciclo GRRA (apenas inspiração)', en: 'GRRA Cycle (inspiration only)' }, definition: { pt: 'Conceito do KGARevion: Generate → Review → Revise → Answer (validação iterativa contra o KG por um modelo Reviewer independente). NÃO implementado no Senex AI — usamos Generate + scoring heurístico + auto-approve ≥ 0,50 + HITL.', en: 'KGARevion concept: Generate → Review → Revise → Answer (iterative validation against the KG by an independent Reviewer model). NOT implemented in Senex AI — we use Generate + heuristic scoring + auto-approve ≥ 0.50 + HITL.' } },
+        { term: { pt: 'TransE (apenas inspiração)', en: 'TransE (inspiration only)' }, definition: { pt: 'Translating Embeddings: h + r ≈ t para link prediction. NÃO implementado no Senex AI — o gap-fill é feito por PubMed E-utilities + Gemini.', en: 'Translating Embeddings: h + r ≈ t for link prediction. NOT implemented in Senex AI — gap-fill is done via PubMed E-utilities + Gemini.' } },
         { term: { pt: 'GRADE', en: 'GRADE' }, definition: { pt: 'Sistema de classificação de evidências: High / Moderate / Low / Very Low', en: 'Evidence grading system: High / Moderate / Low / Very Low' } },
         { term: { pt: 'VeNom', en: 'VeNom' }, definition: { pt: 'Veterinary Nomenclature (Purdue) — vocabulário veterinário padronizado', en: 'Veterinary Nomenclature (Purdue) — standardised veterinary vocabulary' } },
         { term: { pt: 'Digital Twin', en: 'Digital Twin' }, definition: { pt: 'Réplica computacional do pet: projeta severidade × tempo sob diferentes protocolos', en: 'Computational replica of the pet: projects severity × time under different protocols' } },
@@ -394,7 +393,7 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
       ],
       limitations: [
         { pt: 'Neo4j AuraDB integrado para sincronização e exploração (sync-approved-triplets / sync-study-to-neo4j), mas o read-path clínico principal ainda é via RPC Postgres — Cypher direto está no roadmap', en: 'Neo4j AuraDB is integrated for sync and exploration (sync-approved-triplets / sync-study-to-neo4j), but the main clinical read-path still goes through Postgres RPC — direct Cypher is on the roadmap' },
-        { pt: 'TransE link prediction roda em batch noturno; ainda não opera online por requisição', en: 'TransE link prediction runs as a nightly batch; not yet served online per request' },
+        { pt: 'TransE link prediction não está implementado (apenas inspiração científica); o gap-fill em produção é feito por PubMed E-utilities + Gemini', en: 'TransE link prediction is not implemented (scientific inspiration only); production gap-fill is done via PubMed E-utilities + Gemini' },
         { pt: 'Predisposição por raça populada para ~120 raças principais — long tail em expansão', en: 'Breed predisposition populated for ~120 main breeds — long tail still expanding' },
         { pt: 'Escopo clínico limitado a doenças metabólicas/degenerativas em cães (felinos e imagens complexas fora de escopo)', en: 'Clinical scope limited to canine metabolic/degenerative conditions (felines and complex imaging out of scope)' },
         { pt: 'Digital Twin usa projeção sigmoide simplificada — modelos compartimentais multi-órgão estão no roadmap', en: 'Digital Twin uses a simplified sigmoid projection — multi-organ compartmental models are on the roadmap' }
@@ -402,8 +401,8 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
     },
     scientific: {
       foundation: {
-        pt: 'Sistema híbrido fundamentado em quatro pilares: (1) MedGraphRAG para grafos hierárquicos + U-Retrieval; (2) KGARevion para validação GRRA + auto-approve; (3) TransE para link prediction e gap-fill; (4) ciência da longevidade canina (Dog Aging Project, AgeXtend, frailty index, AAHA/WSAVA). Toda recomendação clínica é rastreável a um estudo no KG ou explicitamente marcada como "apenas-LLM".',
-        en: 'Hybrid system built on four pillars: (1) MedGraphRAG for hierarchical graphs + U-Retrieval; (2) KGARevion for GRRA validation + auto-approve; (3) TransE for link prediction and gap-fill; (4) canine longevity science (Dog Aging Project, AgeXtend, frailty index, AAHA/WSAVA). Every clinical recommendation is traceable to a study in the KG or explicitly flagged as "LLM-only".'
+        pt: 'Sistema híbrido fundamentado em quatro pilares — separando o que **roda hoje** do que é **apenas inspiração científica**. **Implementado:** (1) Triple Graph Construction hierárquica L0–L4 (inspirada em MedGraphRAG); (2) extração de triplets com Generate + scoring heurístico (0,65–0,75) + auto-approve ≥ 0,50 + HITL (inspirada em KGARevion, sem ciclo GRRA); (3) recuperação híbrida Cypher (Neo4j) + pgvector (Supabase), sem fusão U-Retrieval; (4) gap-fill via PubMed E-utilities + Gemini (sem TransE); (5) ciência da longevidade canina (Dog Aging Project, AgeXtend, frailty index, AAHA/WSAVA). **Apenas inspiração (não implementado):** U-Retrieval bidirecional, ciclo GRRA completo com revisor independente, TransE link prediction. Toda recomendação clínica é rastreável a um estudo no KG ou explicitamente marcada como "apenas-LLM". Verdade-base em `docs/generated/ARCHITECTURE_LIVE.md`.',
+        en: 'Hybrid system built on four pillars — separating what **runs today** from **scientific inspiration only**. **Implemented:** (1) hierarchical Triple Graph Construction L0–L4 (inspired by MedGraphRAG); (2) triplet extraction via Generate + heuristic scoring (0.65–0.75) + auto-approve ≥ 0.50 + HITL (inspired by KGARevion, no GRRA cycle); (3) hybrid retrieval Cypher (Neo4j) + pgvector (Supabase), no U-Retrieval fusion; (4) gap-fill via PubMed E-utilities + Gemini (no TransE); (5) canine longevity science (Dog Aging Project, AgeXtend, frailty index, AAHA/WSAVA). **Inspiration only (not implemented):** bidirectional U-Retrieval, full GRRA cycle with independent reviewer, TransE link prediction. Every clinical recommendation is traceable to a study in the KG or explicitly flagged as "LLM-only". Ground truth in `docs/generated/ARCHITECTURE_LIVE.md`.'
       },
       implementationStatus: {
         implemented: [
@@ -418,14 +417,14 @@ export const adminTabsInfoBilingual: Record<string, TabInfoContentBilingual> = {
         ],
         inProgress: [
           { pt: 'Cobertura nutricional do catálogo de rações (admin Pet Food Coverage + bulk-enrich)', en: 'Nutrition coverage for the pet-food catalog (Pet Food Coverage admin + bulk-enrich)' },
-          { pt: 'TransE link prediction online (hoje em batch noturno)', en: 'Online TransE link prediction (currently a nightly batch)' },
           { pt: 'Expansão da predisposição por raça para o long-tail (~120 raças cobertas)', en: 'Expanding breed predisposition to the long-tail (~120 breeds covered)' }
         ],
         planned: [
-          { pt: 'TransE link prediction online por requisição (hoje batch noturno)', en: 'Online TransE link prediction per request (currently a nightly batch)' },
+          { pt: 'TransE link prediction (apenas inspiração científica hoje — não há treinamento nem inferência implementados)', en: 'TransE link prediction (scientific inspiration only today — no training or inference implemented)' },
           { pt: 'Modelos compartimentais multi-órgão para o Digital Twin (rim, fígado, articular)', en: 'Multi-organ compartmental models for the Digital Twin (kidney, liver, joint)' },
           { pt: 'Curadoria colaborativa em tempo real (vários veterinários no mesmo triplet)', en: 'Real-time collaborative curation (multiple vets on the same triplet)' },
-          { pt: 'Cypher queries diretas no Neo4j AuraDB para o U-Retrieval clínico (hoje read-path principal vive em RPC Postgres)', en: 'Direct Cypher queries against Neo4j AuraDB for clinical U-Retrieval (current main read-path lives in Postgres RPC)' },
+          { pt: 'Recuperação U-Retrieval bidirecional real (top-down + bottom-up com fusão hierárquica) — hoje recuperação é Cypher + pgvector concatenados', en: 'Real bidirectional U-Retrieval (top-down + bottom-up with hierarchical fusion) — today retrieval is concatenated Cypher + pgvector' },
+          { pt: 'Ciclo GRRA completo com modelo Reviewer independente e etapa Revise (hoje: scoring heurístico + HITL)', en: 'Full GRRA cycle with independent Reviewer model and Revise step (today: heuristic scoring + HITL)' },
           { pt: 'Extensão controlada para felinos após validação da curva canina', en: 'Controlled extension to felines after the canine curve is validated' }
         ]
       },

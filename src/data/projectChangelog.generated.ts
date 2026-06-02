@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-02T03:04:10.121Z
+// Última geração: 2026-06-02T23:39:39.980Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,30 @@ export const lastChangelogDate = "2026-06-02";
 export const senexVersion = "7.0.1";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-02",
+    "kind": "changed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Honestidade da narrativa pública: 2ª passada (excerpts, comparison table, glossário)",
+    "bullets": [
+      "2ª passada de honestidade em `admin-tabs-info-bilingual.ts` (estudos.*) — todas as ~15 menções restantes a GRRA / U-Retrieval / TransE como atributos do Senex foram convertidas em rótulos honestos. Papers continuam citados, mas apenas como inspiração científica, nunca como capacidade implementada.",
+      "keyExcerpts (MedGraphRAG / KGARevion / TransE): cada quote agora abre com \"Paper de inspiração: …\" e termina com \"O Senex AI NÃO implementa X — roda Y\" + \"benchmark do paper, não métrica do Senex\".",
+      "comparisonTable: coluna \"Senex AI\" da linha 6 (Retrieval) = \"Híbrido Cypher + pgvector, sem fusão top-down/bottom-up\"; linha 7 (Validação) = \"Generate + scoring heurístico + auto-approve ≥ 0,50 + HITL (sem Review independente)\"; linha 8 (Alucinações) = \"Não medido no Senex AI\" (os ~40% e ~87% rotulados como \"benchmark do paper\"); linha 12 (Link Prediction) = \"Gap-fill via PubMed + Gemini (TransE permanece apenas inspiração)\".",
+      "architectureDiagram (Phase 4 + OUT): `GRRA cycle (KGARevion)` → `Generate + heuristic scoring (0.65-0.75)`; bloco `TransE link prediction` removido; `U-Retrieval (top-down + bottom-up)` → `Hybrid retrieval Cypher (Neo4j) + pgvector`.",
+      "glossary: termos U-Retrieval, Ciclo GRRA e TransE renomeados para \"(apenas inspiração)\" com definição dupla — conceito original + \"NÃO implementado no Senex AI / usamos X\".",
+      "calculations[0].name: \"1. KGARevion - Confidence Score\" → \"1. Confidence Score heurístico (inspirado em KGARevion)\".",
+      "limitations / implementationStatus.inProgress / .planned: a alegação falsa \"TransE roda em batch noturno\" foi substituída por \"TransE não está implementado (apenas inspiração científica)\". As linhas que listavam TransE online em inProgress/planned foram reclassificadas: removida de inProgress, reescrita em planned como \"TransE link prediction (apenas inspiração científica hoje — não há treinamento nem inferência implementados)\". Acrescentada linha planned para \"Recuperação U-Retrieval bidirecional real\" e \"Ciclo GRRA completo com modelo Reviewer independente\".",
+      "foundation (scientific): reescrita separando explicitamente \"Implementado\" (Triple Graph L0–L4, Generate + heurístico + HITL, Cypher+pgvector, gap-fill PubMed+Gemini, ciência canina) de \"Apenas inspiração (não implementado)\" (U-Retrieval, GRRA, TransE).",
+      "Bumps: `version: 5.1.0 → 5.2.0`, `lastUpdate: 2026-05-18 → 2026-06-02`. Sem mudança de i18n (estáticos `.ts`, não chaves de tradução).",
+      "Próximo passo (em espera): prompt da auto-auditoria (`audit_base`) NÃO foi tocado — aguarda revisão da matriz `docs/generated/ARCHITECTURE_LIVE.md` pelo usuário.",
+      "Files: src/data/admin-tabs-info-bilingual.ts"
+    ],
+    "files": [
+      "src/data/admin-tabs-info-bilingual.ts"
+    ],
+    "i18nVersion": "1.118.1"
+  },
   {
     "date": "2026-06-02",
     "kind": "changed",

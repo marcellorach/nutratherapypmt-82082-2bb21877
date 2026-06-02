@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-06-02T03:04:10.126Z
+Generated: 2026-06-02T23:39:39.985Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
 ## Latest i18n version: 1.118.1
 
 ## Changes by area (last 14 days)
-- **admin**: 42
+- **admin**: 43
 - **clinical-pipeline**: 7
 - **kg**: 7
 - **infra**: 5
@@ -15,6 +15,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **vet-ui**: 1
 
 ## Top 10 recent entries
+### 2026-06-02 · [admin] CHANGED — Honestidade da narrativa pública: 2ª passada (excerpts, comparison table, glossário)
+- 2ª passada de honestidade em `admin-tabs-info-bilingual.ts` (estudos.*) — todas as ~15 menções restantes a GRRA / U-Retrieval / TransE como atributos do Senex foram convertidas em rótulos honestos. Papers continuam citados, mas apenas como inspiração científica, nunca como capacidade implementada.
+- keyExcerpts (MedGraphRAG / KGARevion / TransE): cada quote agora abre com "Paper de inspiração: …" e termina com "O Senex AI NÃO implementa X — roda Y" + "benchmark do paper, não métrica do Senex".
+- comparisonTable: coluna "Senex AI" da linha 6 (Retrieval) = "Híbrido Cypher + pgvector, sem fusão top-down/bottom-up"; linha 7 (Validação) = "Generate + scoring heurístico + auto-approve ≥ 0,50 + HITL (sem Review independente)"; linha 8 (Alucinações) = "Não medido no Senex AI" (os ~40% e ~87% rotulados como "benchmark do paper"); linha 12 (Link Prediction) = "Gap-fill via PubMed + Gemini (TransE permanece apenas inspiração)".
+_files: src/data/admin-tabs-info-bilingual.ts_
+
 ### 2026-06-02 · [clinical-pipeline] CHANGED — IA Hardening Card #5c: hybrid-recommendation migrado para tool_choice (último do Card #5)
 - Migração #1 do Card #5 (hybrid-recommendation) — última e mais sensível: substituído free-text JSON (regex `match(/```json/)` + `JSON.parse`) por `tools: [recommend_nutraceuticals]` + `tool_choice: { type: "function", function: { name: "recommend_nutraceuticals" } }`. O parse-via-regex era o ponto mais frágil dos 3 callers; com tool_choice o `model_response_invalid` deve cair próximo de zero.
 - Schema único cobre ambos os modos (enrich / fallback): `nutraceuticals[]` com `{name, dosage, mechanism, evidenceLevel('AI-enriched'|'AI-generated'), condition, targetCondition?, closes_gaps?[]}` + `rationale` + `precautions[]` + envelope `abstain/abstain_reason('clinical_signal_insufficient')/abstain_detail`. `additionalProperties:false`. System prompt orienta qual `evidenceLevel` usar por modo.
@@ -68,12 +74,6 @@ _files: src/components/administrador/external-sources/ExternalSourcesHub.tsx, su
 - `ComplianceDashboard`: removido `i18n_version: '1.86.3'` hardcoded — agora persiste `I18N_VERSION` real. Botão renomeado para "Snapshot compliance (v… · i18n …)" com badge da versão acima, deixando explícito que é snapshot da checklist curada amarrado à versão atual.
 - `TechnicalAuditsTab`: removido auto-bump de PATCH. A auditoria SEMPRE herda exatamente `v{SENEX_VERSION}` — não inventa versão. Se já existe auditoria para a versão atual, o botão "Run new audit" fica desabilitado com tooltip instruindo a bumpar o marker `<!-- senex: x.y.z -->` em CHANGELOG.md + `npm run sync:changelog`.
 _files: src/components/system/VersionBadge.tsx, src/components/administrador/compliance/ComplianceDashboard.tsx, src/components/administrador/audits/TechnicalAuditsTab.tsx, src/pages/administrador/OrganogramaTab.tsx…_
-
-### 2026-06-01 · [infra] CHANGED — Sprint 5 (final) — registro único 24/24: healthcheck, harness e planilha de nutracêuticos
-- Manifesto: 2 novas entradas em `_shared/system-prompts.ts`:
-- `ai_task_healthcheck_ping` (gemini-3-flash-preview, text) — ping mínimo "ok" usado pelo cron de healthcheck por task×model.
-- `process_nutraceutical_spreadsheet` (gpt-4o-mini, json) — extração estruturada preservando notas de eficácia EXATAS de planilhas CSV/XLSX.
-_files: supabase/functions/_shared/system-prompts.ts, supabase/functions/ai-task-healthcheck/index.ts, supabase/functions/ai-task-test/index.ts, supabase/functions/process-nutraceutical-spreadsheet/aiProcessor.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
