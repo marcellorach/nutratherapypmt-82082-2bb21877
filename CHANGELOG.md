@@ -24,6 +24,20 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.1 -->
 
+### Changed - 2026-06-02 — Honestidade da narrativa pública: 2ª passada (excerpts, comparison table, glossário)
+<!-- area: admin · status: entregue · i18n: 1.118.1 -->
+- **2ª passada de honestidade em `admin-tabs-info-bilingual.ts` (estudos.*)** — todas as ~15 menções restantes a GRRA / U-Retrieval / TransE como atributos do Senex foram convertidas em rótulos honestos. Papers continuam citados, mas apenas como inspiração científica, nunca como capacidade implementada.
+- **keyExcerpts (MedGraphRAG / KGARevion / TransE)**: cada quote agora abre com "Paper de inspiração: …" e termina com "O Senex AI NÃO implementa X — roda Y" + "benchmark do paper, não métrica do Senex".
+- **comparisonTable**: coluna "Senex AI" da linha 6 (Retrieval) = "Híbrido Cypher + pgvector, sem fusão top-down/bottom-up"; linha 7 (Validação) = "Generate + scoring heurístico + auto-approve ≥ 0,50 + HITL (sem Review independente)"; linha 8 (Alucinações) = "Não medido no Senex AI" (os ~40% e ~87% rotulados como "benchmark do paper"); linha 12 (Link Prediction) = "Gap-fill via PubMed + Gemini (TransE permanece apenas inspiração)".
+- **architectureDiagram (Phase 4 + OUT)**: `GRRA cycle (KGARevion)` → `Generate + heuristic scoring (0.65-0.75)`; bloco `TransE link prediction` removido; `U-Retrieval (top-down + bottom-up)` → `Hybrid retrieval Cypher (Neo4j) + pgvector`.
+- **glossary**: termos U-Retrieval, Ciclo GRRA e TransE renomeados para "(apenas inspiração)" com definição dupla — conceito original + "NÃO implementado no Senex AI / usamos X".
+- **calculations[0].name**: "1. KGARevion - Confidence Score" → "1. Confidence Score heurístico (inspirado em KGARevion)".
+- **limitations / implementationStatus.inProgress / .planned**: a alegação falsa "TransE roda em batch noturno" foi substituída por "TransE não está implementado (apenas inspiração científica)". As linhas que listavam TransE online em inProgress/planned foram reclassificadas: removida de inProgress, reescrita em planned como "TransE link prediction (apenas inspiração científica hoje — não há treinamento nem inferência implementados)". Acrescentada linha planned para "Recuperação U-Retrieval bidirecional real" e "Ciclo GRRA completo com modelo Reviewer independente".
+- **foundation (scientific)**: reescrita separando explicitamente "Implementado" (Triple Graph L0–L4, Generate + heurístico + HITL, Cypher+pgvector, gap-fill PubMed+Gemini, ciência canina) de "Apenas inspiração (não implementado)" (U-Retrieval, GRRA, TransE).
+- **Bumps**: `version: 5.1.0 → 5.2.0`, `lastUpdate: 2026-05-18 → 2026-06-02`. Sem mudança de i18n (estáticos `.ts`, não chaves de tradução).
+- **Próximo passo (em espera)**: prompt da auto-auditoria (`audit_base`) NÃO foi tocado — aguarda revisão da matriz `docs/generated/ARCHITECTURE_LIVE.md` pelo usuário.
+- Files: src/data/admin-tabs-info-bilingual.ts
+
 ### Changed - 2026-06-02 — IA Hardening Card #5c: hybrid-recommendation migrado para tool_choice (último do Card #5)
 <!-- area: clinical-pipeline · status: entregue · i18n: 1.118.1 -->
 - **Migração #1 do Card #5 (hybrid-recommendation)** — última e mais sensível: substituído free-text JSON (regex `match(/```json/)` + `JSON.parse`) por `tools: [recommend_nutraceuticals]` + `tool_choice: { type: "function", function: { name: "recommend_nutraceuticals" } }`. O parse-via-regex era o ponto mais frágil dos 3 callers; com tool_choice o `model_response_invalid` deve cair próximo de zero.
