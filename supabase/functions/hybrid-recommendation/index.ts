@@ -7,6 +7,98 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// ── Card #5c: tool_choice forçado ─────────────────────────────────────────
+// Schema único cobre ambos os modos (enrich / fallback). O modelo é
+// orientado via system prompt sobre qual `evidenceLevel` usar por composto.
+// `abstain` + `abstain_reason` ficam expostos no schema para que o modelo
+// possa abster-se de forma estruturada (paridade com card #5b). Os buckets
+// seguem a mesma desambiguação:
+//   - clinical_signal_insufficient  (honesta — sem sinal útil)
+//   - model_unavailable             (infra — Gateway 5xx, sem chave)
+//   - model_response_invalid        (parse/schema — deve cair a ~0)
+const RECOMMEND_TOOL = {
+  type: 'function' as const,
+  function: {
+    name: 'recommend_nutraceuticals',
+    description:
+      'Emit an individualized nutraceutical recommendation, OR abstain (abstain:true + clinical_signal_insufficient) if the inputs do not justify any responsible recommendation.',
+    parameters: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        abstain: {
+          type: 'boolean',
+          description: 'true if you cannot responsibly emit any recommendation given the inputs.',
+        },
+        abstain_reason: {
+          type: 'string',
+          enum: ['clinical_signal_insufficient'],
+          description: "Only emit when abstain=true. Use 'clinical_signal_insufficient' when the patient/clinical data does not justify any recommendation.",
+        },
+        abstain_detail: { type: 'string' },
+        nutraceuticals: {
+          type: 'array',
+          description: 'Empty array when abstain=true. Otherwise 1–8 compounds.',
+          items: {
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+              name: { type: 'string' },
+              dosage: { type: 'string', description: 'Weight-adjusted dosage for THIS patient.' },
+              mechanism: { type: 'string', description: 'Why this compound for THIS patient (bridge clinical→geroscience→compound).' },
+              evidenceLevel: {
+                type: 'string',
+                enum: ['AI-enriched', 'AI-generated'],
+                description: "Use 'AI-enriched' in enrich mode (KG-backed exists), 'AI-generated' in fallback mode (no KG data).",
+              },
+              condition: { type: 'string' },
+              targetCondition: { type: 'string' },
+              closes_gaps: {
+                type: 'array',
+                items: { type: 'string' },
+                description: "EXACT nutrient labels from NUTRITION_GAPS block this compound closes. [] when none.",
+              },
+            },
+            required: ['name', 'dosage', 'mechanism', 'evidenceLevel', 'condition'],
+          },
+        },
+        rationale: { type: 'string' },
+        precautions: { type: 'array', items: { type: 'string' } },
+      },
+      required: ['abstain', 'nutraceuticals', 'rationale', 'precautions'],
+    },
+  },
+};
+
+type ToolArgs = {
+  abstain?: boolean;
+  abstain_reason?: 'clinical_signal_insufficient';
+  abstain_detail?: string;
+  nutraceuticals?: Array<Record<string, any>>;
+  rationale?: string;
+  precautions?: string[];
+};
+
+function extractToolArgs(aiResponse: any): ToolArgs | null {
+  const tc = aiResponse?.choices?.[0]?.message?.tool_calls?.[0];
+  if (tc?.function?.arguments) {
+    try {
+      return typeof tc.function.arguments === 'string'
+        ? JSON.parse(tc.function.arguments)
+        : tc.function.arguments;
+    } catch (_) { /* fall through */ }
+  }
+  // Defensive fallback: legacy content (model ignored tool_choice).
+  const content = aiResponse?.choices?.[0]?.message?.content;
+  if (typeof content === 'string' && content.trim()) {
+    try {
+      const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+      return JSON.parse(jsonMatch ? jsonMatch[1] : content);
+    } catch (_) { /* fall through */ }
+  }
+  return null;
+}
+
 interface PetProfile {
   species?: string;
   breed?: string;
