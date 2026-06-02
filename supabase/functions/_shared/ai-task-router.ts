@@ -157,8 +157,25 @@ export async function resolveTask(
   return value;
 }
 
-function interpolate(tpl: string, vars: Record<string, string>): string {
-  return tpl.replace(/\{\{\s*(\w+)\s*\}\}/g, (_m, k) => vars[k] ?? "");
+/**
+ * Substitui {{var}} no template. Toda variável referenciada cujo valor
+ * cai em "" (undefined, null ou string vazia) é coletada em `missing`
+ * para telemetria. Mantém o comportamento legado (substitui por "")
+ * — card #1: blindagem do interpolate, pré-requisito do contrato C.
+ */
+function interpolate(
+  tpl: string,
+  vars: Record<string, string>,
+  missing?: string[],
+): string {
+  return tpl.replace(/\{\{\s*(\w+)\s*\}\}/g, (_m, k) => {
+    const v = vars[k];
+    if (v === undefined || v === null || v === "") {
+      if (missing && !missing.includes(k)) missing.push(k);
+      return "";
+    }
+    return v;
+  });
 }
 
 export async function logInvocation(row: {
@@ -172,9 +189,16 @@ export async function logInvocation(row: {
   cost_estimate: number;
   ok: boolean;
   error?: string | null;
+  missing_variables?: string[] | null;
 }) {
   try {
-    await admin.from("ai_task_invocations").insert(row);
+    await admin.from("ai_task_invocations").insert({
+      ...row,
+      missing_variables:
+        row.missing_variables && row.missing_variables.length > 0
+          ? row.missing_variables
+          : null,
+    });
     await admin.from("ai_task_status").upsert({
       task_id: row.task_id,
       last_run_at: new Date().toISOString(),
