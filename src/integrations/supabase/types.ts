@@ -363,6 +363,8 @@ export type Database = {
       }
       ai_task_invocations: {
         Row: {
+          abstain_reason: string | null
+          abstained: boolean
           caller_function: string | null
           cost_estimate: number | null
           created_at: string
@@ -376,8 +378,11 @@ export type Database = {
           task_id: string
           tokens_in: number | null
           tokens_out: number | null
+          validation_status: string | null
         }
         Insert: {
+          abstain_reason?: string | null
+          abstained?: boolean
           caller_function?: string | null
           cost_estimate?: number | null
           created_at?: string
@@ -391,8 +396,11 @@ export type Database = {
           task_id: string
           tokens_in?: number | null
           tokens_out?: number | null
+          validation_status?: string | null
         }
         Update: {
+          abstain_reason?: string | null
+          abstained?: boolean
           caller_function?: string | null
           cost_estimate?: number | null
           created_at?: string
@@ -406,6 +414,7 @@ export type Database = {
           task_id?: string
           tokens_in?: number | null
           tokens_out?: number | null
+          validation_status?: string | null
         }
         Relationships: [
           {
