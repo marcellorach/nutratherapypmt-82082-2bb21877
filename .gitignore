@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Defense-in-depth: never commit local env overrides
+.env.local
+.env.*.local
