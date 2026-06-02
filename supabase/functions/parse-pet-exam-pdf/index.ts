@@ -22,10 +22,15 @@ Retorne SOMENTE JSON válido seguindo este schema:
   "exam_type": string,             // ex.: "Hemograma", "Bioquímico", "Urinálise"
   "exam_date": string|null,        // ISO YYYY-MM-DD
   "lab_name": string|null,
-  "results": { [analyte: string]: { value: number|string, unit: string|null, ref_min: number|null, ref_max: number|null, flag: "normal"|"high"|"low"|null } },
+  "results": { [analyte: string]: { value: number|string, unit: string|null, ref_min: number|null, ref_max: number|null, flag: "normal"|"high"|"low"|"unreadable"|null } },
   "clinical_comments": string|null,
   "flags_abnormal": string[]       // nomes dos analitos fora da faixa
-}`;
+}
+
+REGRA CRÍTICA DE SEGURANÇA DE LAB (anti-alucinação):
+- Se um valor estiver ILEGÍVEL, BORRADO, PARCIALMENTE VISÍVEL ou AMBÍGUO, NÃO ADIVINHE.
+- Nesse caso: ou OMITA o item completamente, ou inclua o item com flag="unreadable" e value=null.
+- Viés de completude (preencher para parecer útil) em valor de lab causa interpretação clínica errada (ex.: creatinina alucinada → falsa lesão renal).`;
 
 // Canonical unit aliases — normalize common variations to a single form.
 const UNIT_ALIASES: Record<string, string> = {
