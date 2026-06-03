@@ -24,6 +24,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.1 -->
 
+### Added - 2026-06-03 — Matriz LIVE v2 + ROADMAP + STATE_REAL_VS_MOCK + PROMPTS snapshot + registro de honestidade no audit_base
+<!-- area: meta · status: entregue · i18n: 1.118.1 -->
+- **`docs/generated/ARCHITECTURE_LIVE.md` regenerada (15 linhas)** com correções cosméticas: abstain/tool_choice/telemetria reetiquetados como **Bloco 1** (cards #3/#1/#2), não Bloco 2. O terceiro caller clínico com `tool_choice` é nomeado: **`parse-pet-exam-pdf`** (junto com `hybrid-recommendation` e `extract-pet-clinical-data`). Linha 7 (auto-aprovação) expõe os **três sources não-reconciliados** (código `≥0.85 & ≥0.50` × RC-013 `≥0.70` × ADR/CONTEXT `≥0.50`) sem escolher um. Linha 8 (Digital Twin) marca explicitamente que código É sigmoide. Linha 13 nova para **RC-003** (modulador translacional ×0.7, planned/off), distinta de RC-013.
+- **Resumo v2**: 🟢 9 · 🟡 0 · 🟠 3 · ⚪ 3 · Total 15.
+- **`supabase/functions/_shared/system-prompts.ts` — `audit_base_system_pt` + `_en`**: injetado bloco "REGISTRO DE HONESTIDADE / HONESTY REGISTER" que (i) proíbe descrever GRRA / U-Retrieval / TransE como mecanismos do Senex; (ii) dá os nomes honestos do que roda hoje; (iii) exige proveniência por número (medido vs paper); (iv) força exposição do conflito de threshold; (v) descreve fallback de recomendação como `source='llm_fallback' + disclaimer='no_kg_data'`; (vi) lista lacunas planned explicitamente.
+- **`docs/ROADMAP.md`** (novo, curado): Now / Next / Later / Fora-de-escopo, ancorado na matriz LIVE e nos gaps de `complianceData.ts`. Reconciliação do threshold de auto-aprovação fica como item Now bloqueante.
+- **`docs/STATE_REAL_VS_MOCK.md`** (novo, curado): tabelas ✅ REAL / 🟡 PARCIAL / 🟠 INSPIRAÇÃO / ⚪ PLANNED, com ponteiros de código.
+- **`scripts/generate-prompts-snapshot.mjs` + `docs/generated/PROMPTS.md`** (novo, gerado): snapshot read-only dos 44 system prompts (default_content apenas — overrides de DB ficam de fora por design).
+- **`package.json`**: novos scripts `docs:prompts` e `docs:all` (regenera architecture + prompts juntos).
+- Files: scripts/generate-architecture-live.mjs, scripts/generate-prompts-snapshot.mjs, supabase/functions/_shared/system-prompts.ts, docs/generated/ARCHITECTURE_LIVE.md, docs/generated/PROMPTS.md, docs/ROADMAP.md, docs/STATE_REAL_VS_MOCK.md, package.json
+
 ### Changed - 2026-06-02 — Honestidade da narrativa pública: 2ª passada (excerpts, comparison table, glossário)
 <!-- area: admin · status: entregue · i18n: 1.118.1 -->
 - **2ª passada de honestidade em `admin-tabs-info-bilingual.ts` (estudos.*)** — todas as ~15 menções restantes a GRRA / U-Retrieval / TransE como atributos do Senex foram convertidas em rótulos honestos. Papers continuam citados, mas apenas como inspiração científica, nunca como capacidade implementada.
