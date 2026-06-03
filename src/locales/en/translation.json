@@ -6296,7 +6296,7 @@
       "metric3": "Annual pet market revenue",
       "metric4": "Of dogs are adults/seniors eligible for geroprotection",
       "b2cTitle": "Already in Market",
-      "b2cDesc": "Our B2C platform petmoretime.com.br is already selling personalized geroprotective treatments directly to pet owners, validating the business model and generating real-world outcome data.",
+      "b2cDesc": "Our B2C platform petmoretime.com.br is already selling personalized geroprotective treatments directly to pet owners, validating the business model. Longitudinal outcome data collection is not yet structured (no outcome_observations table in production).",
       "b2cLink": "Visit petmoretime.com.br →",
       "monetizationTitle": "Win-Win Business Model",
       "monetizationDesc": "Monetization through mass-scale sale of preventive geroprotective treatments to PetLove's 1.4M plan members — creating value for everyone.",
