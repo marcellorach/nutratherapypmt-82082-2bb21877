@@ -24,6 +24,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.1 -->
 
+### Added - 2026-06-03 — Bloco 2: telemetria do verificador + página admin de runs
+<!-- area: kg · status: entregue · i18n: 1.118.3 -->
+- **Migração**: 4 colunas em `triplet_verifications` (`tool_choice_used`, `abstain_reason` ∈ {no_chunks, low_similarity, chunks_off_topic, verifier_error, tool_call_missing, other}, `recalled_chunks` jsonb com snippet+similaridade por chunk, `recall_similarity_top`) + `stratification_snapshot` em `triplet_verification_runs` (snapshot verdade-base de quantos itens foram sorteados por banda/enrichment/camada).
+- **Runner** (`triplet-verification-runner`): preenche os novos campos por linha; classifica `abstain_reason` automaticamente quando o verdict é `unverifiable`; serializa chunks recuperados com snippet (320 chars) marcando quais o verificador alegou suportar a claim.
+- **Admin UI** — nova tab `verification-runs` (grupo Base de Conhecimento, sidebar com ícone ShieldCheck): lista runs com control_specificity, drill-down por run com filtros (tipo: triplet/control · verdict · camada de controle), linha expansível mostra rationale do verificador + chunks recuperados (com badge verde nos suportados) + latência/custo/tool_choice.
+- **Por que importa**: auditar **por que** o verificador errou (não só **se** errou) — `abstain_reason` separa "modelo abstinente" de "retrieval falhou"; `recalled_chunks` permite o curador re-julgar sem nova query.
+- Files: supabase/migrations/20260603155800_*.sql, supabase/functions/triplet-verification-runner/index.ts, src/components/administrador/verification/VerificationRunsTab.tsx, src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx, src/config/admin-tabs.ts, src/locales/{pt,en}/translation.json, src/i18n.ts
+
 ### Added - 2026-06-03 — Bloco 2 infra: verificador independente (tabelas + runner + prompt)
 <!-- area: kg · status: parcial · i18n: 1.118.2 -->
 - **Migração**: 3 tabelas novas — `triplet_verification_runs` (metadata de batch), `verification_controls` (banco de controles negativos em **camadas**: backbone_swap, pubmed_null, realistic_cross_species, realistic_breed_general, realistic_preliminary, synthetic_floor, gold_set), `triplet_verifications` (uma linha por `{triplet|control} × run` com verdict/confidence/chunks/model/latência/custo).
