@@ -24,6 +24,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.1 -->
 
+### Added - 2026-06-03 — Bloco 2 infra: verificador independente (tabelas + runner + prompt)
+<!-- area: kg · status: parcial · i18n: 1.118.2 -->
+- **Migração**: 3 tabelas novas — `triplet_verification_runs` (metadata de batch), `verification_controls` (banco de controles negativos em **camadas**: backbone_swap, pubmed_null, realistic_cross_species, realistic_breed_general, realistic_preliminary, synthetic_floor, gold_set), `triplet_verifications` (uma linha por `{triplet|control} × run` com verdict/confidence/chunks/model/latência/custo).
+- **Edge function** `triplet-verification-runner`: amostra estratificada (banda cinza 0.50–0.84 + alta 0.85–1.00, estratificada por `enrichment_source`); recall top-k via `search_study_chunks` (RPC) com fallback `ilike` instrumentado; verificador de **família diferente** (default `openai/gpt-5.4-mini`, vs. extrator Gemini); `tool_choice` forçado em `submit_verification`; persistência + sumarização (histograma de verdict, especificidade por layer).
+- **System prompt** `triplet_verification`: abstain honesto obrigatório (chunks não tratam claim → `unverifiable`), regras de downgrade (preliminar/cross-species/breed-generalizado → `correct`), null-result phrasing → `discard`, sem rescate por conhecimento externo.
+- **Backbone swap gate**: controles `backbone_swap` exigem `swap_validated=true` (revisão humana confirmando que o swap não criou relação verdadeira por acidente) antes de entrarem em qualquer run.
+- **Status: parcial** — infra pronta, banco de controles **vazio**. Próximos passos: gold-set do vet (~20 reais rotulados), backbone-swap builder, PubMed null-result fetcher, layers 2 (cross-species/breed/preliminary). Só depois roda a primeira medição.
+- **Sinal coletado**: dos 10 triplets rejeitados, todos confiança ≤0.59 e padrão de "abstração semântica" (ex.: `Neurological Protection PRODUCES Cellular Damage`). Erros fáceis já são pegos na curadoria — a zona de risco é a banda 0.50–0.84 aprovada com claims clínicos densos (`Curcumin TREATS Sarcopenia` etc.), exatamente onde as camadas 2 modelam a falha real.
+- Files: supabase/functions/triplet-verification-runner/index.ts, supabase/functions/_shared/system-prompts.ts, supabase/config.toml, docs/BLOCK2_VERIFICATION.md
+
 ### Changed - 2026-06-03 — Sweep "RWD ≠ sintético" em todas as superfícies + ponteiro de circularidade (Bloco 3)
 <!-- area: meta · status: entregue · i18n: 1.118.2 -->
 - Extensão da regra do REGISTRO DE HONESTIDADE (auto-auditoria) para TODA superfície narrativa — o claim "Real-World Data" / "dados reais de pacientes" não pode sobreviver em UI, prompts, docs nem deck.

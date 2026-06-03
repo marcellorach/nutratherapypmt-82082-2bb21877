@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-03T02:39:53.984Z
+// Última geração: 2026-06-03T15:18:03.770Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
