@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-06-02T23:39:39.985Z
+Generated: 2026-06-03T00:51:26.263Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
@@ -9,12 +9,18 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **admin**: 43
 - **clinical-pipeline**: 7
 - **kg**: 7
+- **meta**: 6
 - **infra**: 5
-- **meta**: 5
-- **curation**: 5
+- **curation**: 3
 - **vet-ui**: 1
 
 ## Top 10 recent entries
+### 2026-06-03 · [meta] ADDED — Matriz LIVE v2 + ROADMAP + STATE_REAL_VS_MOCK + PROMPTS snapshot + registro de honestidade no audit_base
+- `docs/generated/ARCHITECTURE_LIVE.md` regenerada (15 linhas) com correções cosméticas: abstain/tool_choice/telemetria reetiquetados como Bloco 1 (cards #3/#1/#2), não Bloco 2. O terceiro caller clínico com `tool_choice` é nomeado: `parse-pet-exam-pdf` (junto com `hybrid-recommendation` e `extract-pet-clinical-data`). Linha 7 (auto-aprovação) expõe os três sources não-reconciliados (código `≥0.85 & ≥0.50` × RC-013 `≥0.70` × ADR/CONTEXT `≥0.50`) sem escolher um. Linha 8 (Digital Twin) marca explicitamente que código É sigmoide. Linha 13 nova para RC-003 (modulador translacional ×0.7, planned/off), distinta de RC-013.
+- Resumo v2: 🟢 9 · 🟡 0 · 🟠 3 · ⚪ 3 · Total 15.
+- `supabase/functions/_shared/system-prompts.ts` — `audit_base_system_pt` + `_en`: injetado bloco "REGISTRO DE HONESTIDADE / HONESTY REGISTER" que (i) proíbe descrever GRRA / U-Retrieval / TransE como mecanismos do Senex; (ii) dá os nomes honestos do que roda hoje; (iii) exige proveniência por número (medido vs paper); (iv) força exposição do conflito de threshold; (v) descreve fallback de recomendação como `source='llm_fallback' + disclaimer='no_kg_data'`; (vi) lista lacunas planned explicitamente.
+_files: supabase/functions/_shared/system-prompts.ts, scripts/generate-prompts-snapshot.mjs, scripts/generate-architecture-live.mjs_
+
 ### 2026-06-02 · [admin] CHANGED — Honestidade da narrativa pública: 2ª passada (excerpts, comparison table, glossário)
 - 2ª passada de honestidade em `admin-tabs-info-bilingual.ts` (estudos.*) — todas as ~15 menções restantes a GRRA / U-Retrieval / TransE como atributos do Senex foram convertidas em rótulos honestos. Papers continuam citados, mas apenas como inspiração científica, nunca como capacidade implementada.
 - keyExcerpts (MedGraphRAG / KGARevion / TransE): cada quote agora abre com "Paper de inspiração: …" e termina com "O Senex AI NÃO implementa X — roda Y" + "benchmark do paper, não métrica do Senex".
@@ -68,12 +74,6 @@ _files: supabase/functions/_shared/get-api-key.ts, src/hooks/useApiKeys.ts, supa
 - Sub-aba "Visão Geral" nova: cards por fonte (UMLS, SNOMED, MeSH, OMIA, ChEBI, PubMed, Perplexity) com configured/reachable/latência/entries, painel de chaves (`NLM_UMLS_API_KEY`, `NCBI_API_KEY`, `PERPLEXITY_API_KEY`) com links "Como obter", e mapa de impacto mostrando para cada fonte os pipelines e tabelas consumidores.
 - Edge function `external-sources-status` (`verify_jwt = true`) faz ping ao vivo em todas as fontes públicas + endpoints autenticados e devolve contagens reais de `health_conditions.snomed_code`/`umls_cui`.
 _files: src/components/administrador/external-sources/ExternalSourcesHub.tsx, supabase/functions/external-sources-status/index.ts, src/config/admin-tabs.ts, src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx…_
-
-### 2026-06-01 · [admin] CHANGED — Versionamento unificado: SENEX_VERSION como fonte única
-- Novo `<VersionBadge />` (`src/components/system/VersionBadge.tsx`) — lê de `SENEX_VERSION`, `I18N_VERSION` e `lastChangelogDate` e é usado em header de Auditorias, Compliance e Organograma. Divergência entre superfícies fica visualmente impossível.
-- `ComplianceDashboard`: removido `i18n_version: '1.86.3'` hardcoded — agora persiste `I18N_VERSION` real. Botão renomeado para "Snapshot compliance (v… · i18n …)" com badge da versão acima, deixando explícito que é snapshot da checklist curada amarrado à versão atual.
-- `TechnicalAuditsTab`: removido auto-bump de PATCH. A auditoria SEMPRE herda exatamente `v{SENEX_VERSION}` — não inventa versão. Se já existe auditoria para a versão atual, o botão "Run new audit" fica desabilitado com tooltip instruindo a bumpar o marker `<!-- senex: x.y.z -->` em CHANGELOG.md + `npm run sync:changelog`.
-_files: src/components/system/VersionBadge.tsx, src/components/administrador/compliance/ComplianceDashboard.tsx, src/components/administrador/audits/TechnicalAuditsTab.tsx, src/pages/administrador/OrganogramaTab.tsx…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

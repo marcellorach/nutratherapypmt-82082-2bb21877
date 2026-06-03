@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-02T23:39:39.980Z
+// Última geração: 2026-06-03T00:51:26.257Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,34 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-06-02";
+export const lastChangelogDate = "2026-06-03";
 
 export const senexVersion = "7.0.1";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-03",
+    "kind": "added",
+    "area": "meta",
+    "status": "entregue",
+    "title": "Matriz LIVE v2 + ROADMAP + STATE_REAL_VS_MOCK + PROMPTS snapshot + registro de honestidade no audit_base",
+    "bullets": [
+      "`docs/generated/ARCHITECTURE_LIVE.md` regenerada (15 linhas) com correções cosméticas: abstain/tool_choice/telemetria reetiquetados como Bloco 1 (cards #3/#1/#2), não Bloco 2. O terceiro caller clínico com `tool_choice` é nomeado: `parse-pet-exam-pdf` (junto com `hybrid-recommendation` e `extract-pet-clinical-data`). Linha 7 (auto-aprovação) expõe os três sources não-reconciliados (código `≥0.85 & ≥0.50` × RC-013 `≥0.70` × ADR/CONTEXT `≥0.50`) sem escolher um. Linha 8 (Digital Twin) marca explicitamente que código É sigmoide. Linha 13 nova para RC-003 (modulador translacional ×0.7, planned/off), distinta de RC-013.",
+      "Resumo v2: 🟢 9 · 🟡 0 · 🟠 3 · ⚪ 3 · Total 15.",
+      "`supabase/functions/_shared/system-prompts.ts` — `audit_base_system_pt` + `_en`: injetado bloco \"REGISTRO DE HONESTIDADE / HONESTY REGISTER\" que (i) proíbe descrever GRRA / U-Retrieval / TransE como mecanismos do Senex; (ii) dá os nomes honestos do que roda hoje; (iii) exige proveniência por número (medido vs paper); (iv) força exposição do conflito de threshold; (v) descreve fallback de recomendação como `source='llm_fallback' + disclaimer='no_kg_data'`; (vi) lista lacunas planned explicitamente.",
+      "`docs/ROADMAP.md` (novo, curado): Now / Next / Later / Fora-de-escopo, ancorado na matriz LIVE e nos gaps de `complianceData.ts`. Reconciliação do threshold de auto-aprovação fica como item Now bloqueante.",
+      "`docs/STATE_REAL_VS_MOCK.md` (novo, curado): tabelas ✅ REAL / 🟡 PARCIAL / 🟠 INSPIRAÇÃO / ⚪ PLANNED, com ponteiros de código.",
+      "`scripts/generate-prompts-snapshot.mjs` + `docs/generated/PROMPTS.md` (novo, gerado): snapshot read-only dos 44 system prompts (default_content apenas — overrides de DB ficam de fora por design).",
+      "`package.json`: novos scripts `docs:prompts` e `docs:all` (regenera architecture + prompts juntos).",
+      "Files: scripts/generate-architecture-live.mjs, scripts/generate-prompts-snapshot.mjs, supabase/functions/_shared/system-prompts.ts, docs/generated/ARCHITECTURE_LIVE.md, docs/generated/PROMPTS.md, docs/ROADMAP.md, docs/STATE_REAL_VS_MOCK.md, package.json"
+    ],
+    "files": [
+      "supabase/functions/_shared/system-prompts.ts",
+      "scripts/generate-prompts-snapshot.mjs",
+      "scripts/generate-architecture-live.mjs"
+    ],
+    "i18nVersion": "1.118.1"
+  },
   {
     "date": "2026-06-02",
     "kind": "changed",
