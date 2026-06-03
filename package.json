@@ -11,6 +11,8 @@
     "preview": "vite preview",
     "sync:changelog": "node scripts/sync-changelog.mjs",
     "docs:architecture": "node scripts/generate-architecture-live.mjs",
+    "docs:prompts": "node scripts/generate-prompts-snapshot.mjs",
+    "docs:all": "node scripts/generate-architecture-live.mjs && node scripts/generate-prompts-snapshot.mjs",
     "check:translations": "node scripts/check-translation-duplicates.mjs",
     "audit:prompts": "node scripts/audit-prompt-registry.mjs",
     "test": "vitest run",
