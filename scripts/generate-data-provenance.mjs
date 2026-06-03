@@ -19,12 +19,13 @@ function psqlAvailable() {
   if (!process.env.PGHOST) return false;
   try { execSync("command -v psql", { stdio: "ignore" }); return true; } catch { return false; }
 }
+function flat(sql) { return sql.replace(/\s+/g, " ").trim(); }
 function psqlScalar(sql) {
-  const out = execSync(`psql -tAX -c ${JSON.stringify(sql)}`, { encoding: "utf8" }).trim();
+  const out = execSync(`psql -tAX -c ${JSON.stringify(flat(sql))}`, { encoding: "utf8" }).trim();
   return out === "" ? null : out;
 }
 function psqlRows(sql) {
-  const out = execSync(`psql -tAXF$'\\t' -c ${JSON.stringify(sql)}`, { encoding: "utf8" }).trim();
+  const out = execSync(`psql -tAX -F '\t' -c ${JSON.stringify(flat(sql))}`, { encoding: "utf8" }).trim();
   if (!out) return [];
   return out.split("\n").map((l) => l.split("\t"));
 }
