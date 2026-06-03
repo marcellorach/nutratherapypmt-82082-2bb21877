@@ -32,7 +32,7 @@ function psqlRows(sql) {
 async function buildFromPsql() {
   const edges = Number(psqlScalar("SELECT count(*) FROM hierarchical_edges")) || 0;
   const mkg = Number(psqlScalar("SELECT count(*) FROM medical_knowledge_graph")) || 0;
-  const studies = Number(psqlScalar("SELECT count(*) FROM studies")) || 0;
+  const studies = Number(psqlScalar("SELECT count(*) FROM processed_studies WHERE deleted_at IS NULL")) || 0;
   const ne = Number(psqlScalar("SELECT count(*) FROM nutraceuticals")) || 0;
   const tripRows = psqlRows("SELECT curation_status, count(*) FROM triplet_extractions GROUP BY 1");
   const tripGroups = Object.fromEntries(tripRows.map(([s, c]) => [s, Number(c)]));
@@ -120,7 +120,7 @@ async function build() {
     return count ?? 0;
   };
   const [studies, edges, mkg, ne] = await Promise.all([
-    count("studies"), count("hierarchical_edges"), count("medical_knowledge_graph"), count("nutraceuticals"),
+    count("processed_studies"), count("hierarchical_edges"), count("medical_knowledge_graph"), count("nutraceuticals"),
   ]);
   const { data: trip } = await sb.from("triplet_extractions").select("curation_status");
   const tripGroups = (trip ?? []).reduce((m, r) => { m[r.curation_status] = (m[r.curation_status] ?? 0) + 1; return m; }, {});
