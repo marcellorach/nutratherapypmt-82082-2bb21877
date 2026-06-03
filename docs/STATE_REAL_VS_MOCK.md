@@ -32,7 +32,9 @@
 
 ## 🟠 SINTÉTICO (NÃO é Real-World Data)
 
-Dados clínicos da maioria das tabelas `pet_*` foram **gerados pelo prompt `generate_synthetic_cohort`** (Gemini, calibrado em medicina real) — **não foram observados em pacientes reais**. Verificado em ${" "}2026-06-03: ~98% das linhas em `pet_exams` e `pet_consultations`.
+Dados clínicos da maioria das tabelas `pet_*` foram **gerados pelo prompt `generate_synthetic_cohort`** (Gemini, calibrado em medicina real) — **não foram observados em pacientes reais**. Verificado em 2026-06-03: ~98% das linhas em `pet_exams` e `pet_consultations` (ver `docs/generated/DATA_PROVENANCE.md` para split por tabela).
+
+> ⚠️ **Circularidade — não confundir "calibrado" com "validado".** O cohort sintético foi gerado a partir de deltas e correlações ESCOLHIDOS pela equipe (prompt-engineered). Qualquer padrão "descoberto" sobre ele pode ser eco das suposições plantadas no próprio prompt — não evidência independente. Para o auditor basta o rótulo "sintético, não observado". **Tratamento completo da circularidade (controle de leakage prompt→achado, hold-out sintético, comparação contra cohort real assim que existir) é trabalho do Bloco 3 — ainda não iniciado.** Ver ROADMAP.md.
 
 | Tabela | Origem dominante | Risco de overclaim |
 |---|---|---|

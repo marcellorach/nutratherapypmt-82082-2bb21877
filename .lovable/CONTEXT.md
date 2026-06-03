@@ -1,20 +1,26 @@
 # Project context briefing (auto)
-Generated: 2026-06-03T00:51:26.263Z
+Generated: 2026-06-03T02:39:53.989Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.118.1
+## Latest i18n version: 1.118.2
 
 ## Changes by area (last 14 days)
 - **admin**: 43
+- **meta**: 7
 - **clinical-pipeline**: 7
 - **kg**: 7
-- **meta**: 6
 - **infra**: 5
 - **curation**: 3
 - **vet-ui**: 1
 
 ## Top 10 recent entries
+### 2026-06-03 · [meta] CHANGED — Sweep "RWD ≠ sintético" em todas as superfícies + ponteiro de circularidade (Bloco 3)
+- Extensão da regra do REGISTRO DE HONESTIDADE (auto-auditoria) para TODA superfície narrativa — o claim "Real-World Data" / "dados reais de pacientes" não pode sobreviver em UI, prompts, docs nem deck.
+- `src/components/administrador/ai-insights/mockInsights.ts` (insight-002): removidas as menções a "Real-world monitoring of 3,421 dogs", "large-scale real-world evidence" e `p < 0.001`. Card relabeled como `[MOCK — illustrative]`; `dataSource`, `summary`, `basedOn`, `findings`, `recommendation.impact` todos marcados explicitamente como placeholders ilustrativos. Senex NÃO observou 3.421 cães — o número era fabricação que aparecia no admin como se fosse achado real.
+- `src/locales/{pt,en}/translation.json` (`investment.alreadyMarket.b2cDesc`): removido "gerando dados reais de resultados" / "real-world outcome data". Texto novo é honesto sobre o estado: "Coleta de dados longitudinais de desfecho ainda não está estruturada (sem tabela `outcome_observations` em produção)" / equivalente EN.
+_files: src/components/administrador/ai-insights/mockInsights.ts, .lovable/memory/constraints/synthetic-cohort-not-rwd.md, src/locales/pt/translation.json, src/locales/en/translation.json…_
+
 ### 2026-06-03 · [meta] ADDED — Matriz LIVE v2 + ROADMAP + STATE_REAL_VS_MOCK + PROMPTS snapshot + registro de honestidade no audit_base
 - `docs/generated/ARCHITECTURE_LIVE.md` regenerada (15 linhas) com correções cosméticas: abstain/tool_choice/telemetria reetiquetados como Bloco 1 (cards #3/#1/#2), não Bloco 2. O terceiro caller clínico com `tool_choice` é nomeado: `parse-pet-exam-pdf` (junto com `hybrid-recommendation` e `extract-pet-clinical-data`). Linha 7 (auto-aprovação) expõe os três sources não-reconciliados (código `≥0.85 & ≥0.50` × RC-013 `≥0.70` × ADR/CONTEXT `≥0.50`) sem escolher um. Linha 8 (Digital Twin) marca explicitamente que código É sigmoide. Linha 13 nova para RC-003 (modulador translacional ×0.7, planned/off), distinta de RC-013.
 - Resumo v2: 🟢 9 · 🟡 0 · 🟠 3 · ⚪ 3 · Total 15.
@@ -68,12 +74,6 @@ _files: supabase/functions/ai-config/index.ts, src/components/administrador/Conf
 - Nova edge function `api-keys-manage` (admin-only, valida JWT + role) com ações `set` / `delete` / `test` — encripta o valor antes de gravar e faz ping real ao provedor para registrar `last_test_status` / `last_test_message`.
 - Novo helper `supabase/functions/_shared/get-api-key.ts` — resolve chave do DB primeiro, fallback para `Deno.env`. `external-sources-status` já consome via helper, então UMLS/NCBI/Perplexity passam a refletir chaves cadastradas pelo UI.
 _files: supabase/functions/_shared/get-api-key.ts, src/hooks/useApiKeys.ts, supabase/functions/api-keys-manage/index.ts, supabase/functions/external-sources-status/index.ts…_
-
-### 2026-06-01 · [admin] ADDED — Hub unificado de Fontes Externas
-- Nova aba `Knowledge Base → Fontes Externas` (`src/components/administrador/external-sources/ExternalSourcesHub.tsx`) consolida tudo que estava espalhado: status, chaves, mapeamento SNOMED/UMLS, importação de IDs (OMIA/MeSH/ChEBI), busca externa ao vivo e auditoria de ontologia em sub-abas (`?tab=external-sources&sub=...`).
-- Sub-aba "Visão Geral" nova: cards por fonte (UMLS, SNOMED, MeSH, OMIA, ChEBI, PubMed, Perplexity) com configured/reachable/latência/entries, painel de chaves (`NLM_UMLS_API_KEY`, `NCBI_API_KEY`, `PERPLEXITY_API_KEY`) com links "Como obter", e mapa de impacto mostrando para cada fonte os pipelines e tabelas consumidores.
-- Edge function `external-sources-status` (`verify_jwt = true`) faz ping ao vivo em todas as fontes públicas + endpoints autenticados e devolve contagens reais de `health_conditions.snomed_code`/`umls_cui`.
-_files: src/components/administrador/external-sources/ExternalSourcesHub.tsx, supabase/functions/external-sources-status/index.ts, src/config/admin-tabs.ts, src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

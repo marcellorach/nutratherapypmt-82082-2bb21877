@@ -66,35 +66,33 @@ export const mockInsights: AIInsight[] = [
   {
     id: 'insight-002',
     type: 'efficacy-analysis',
-    title: 'Glucosamine + Chondroitin efficacy validation in 3,421 dogs with osteoarthritis (12-month follow-up)',
+    title: '[MOCK — illustrative] Glucosamine + Chondroitin efficacy hypothesis (synthetic example, NOT observed cohort)',
     confidence: 87,
     discoveredAt: '2025-02-01',
     overview: {
-      summary: 'Real-world monitoring of 3,421 dogs diagnosed with osteoarthritis and prescribed Glucosamine (1500mg) + Chondroitin (1200mg) showed 67% clinical improvement in mobility scores after 12 months.',
+      summary: 'ILLUSTRATIVE MOCK (not a real cohort). Hypothetical example of what an efficacy-analysis card would show IF a real Glucosamine + Chondroitin follow-up were available. Numbers below are placeholders — Senex has NOT observed 3,421 dogs and does NOT have real-world outcome data for this compound.',
       basedOn: [
-        'Platform clinical monitoring data (Jan/2024 - Jan/2025)',
-        'Veterinary mobility assessments (0-10 scale)',
-        'Owner-reported quality of life surveys',
-        'Comparison with control group (n=1,205) not receiving supplementation'
+        '[MOCK] Placeholder describing the kind of source this card would cite',
+        '[MOCK] Veterinary mobility assessments (0-10 scale) — illustrative only',
+        '[MOCK] Owner-reported quality of life surveys — illustrative only',
+        '[MOCK] No real control group exists; numbers are synthetic placeholders'
       ]
     },
     evidence: {
-      dataSource: 'Platform clinical monitoring + veterinary assessments',
+      dataSource: '[MOCK] illustrative placeholder — no real outcome dataset',
       sampleSize: 3421,
       timeframe: 'Jan/2024 - Jan/2025',
-      statisticalSignificance: 'p < 0.001, CI 95%',
+      statisticalSignificance: '[MOCK] illustrative p-value, not computed from data',
       findings: [
-        '67% of dogs showed improvement in mobility scores (≥2 points increase)',
-        'Control group showed only 23% improvement (natural variation)',
-        'Medium and large breeds showed better response (72%) vs small breeds (58%)',
-        'Early intervention (<6 months from diagnosis) had 81% efficacy vs late intervention 54%',
-        'No significant adverse events reported'
+        '[MOCK] All findings on this card are illustrative — no observed cohort',
+        '[MOCK] Numbers are placeholders to show the card layout, not measurements',
+        '[MOCK] Replace once real outcome_observations table is populated'
       ]
     },
     recommendation: {
       action: 'Reinforce Glucosamine + Chondroitin as first-line intervention for canine osteoarthritis',
       priority: 'high',
-      impact: 'Validates current recommendation with large-scale real-world evidence'
+      impact: '[MOCK] Placeholder — no real-world evidence has been collected by Senex'
     }
   },
   {
