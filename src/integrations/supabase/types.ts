@@ -5407,6 +5407,7 @@ export type Database = {
           sampling_strategy: Json
           started_at: string | null
           status: string
+          stratification_snapshot: Json | null
           summary: Json
           verifier_model_id: string
         }
@@ -5421,6 +5422,7 @@ export type Database = {
           sampling_strategy?: Json
           started_at?: string | null
           status?: string
+          stratification_snapshot?: Json | null
           summary?: Json
           verifier_model_id: string
         }
@@ -5435,6 +5437,7 @@ export type Database = {
           sampling_strategy?: Json
           started_at?: string | null
           status?: string
+          stratification_snapshot?: Json | null
           summary?: Json
           verifier_model_id?: string
         }
@@ -5442,6 +5445,7 @@ export type Database = {
       }
       triplet_verifications: {
         Row: {
+          abstain_reason: string | null
           ai_task_invocation_id: string | null
           chunk_recall_method: string
           confidence: number | null
@@ -5454,14 +5458,18 @@ export type Database = {
           matched_expected: boolean | null
           rationale: string | null
           raw_response: Json | null
+          recall_similarity_top: number | null
+          recalled_chunks: Json | null
           run_id: string | null
           source_chunk_ids: string[]
+          tool_choice_used: boolean | null
           triplet_id: string | null
           verdict: string
           verifier_model_id: string
           verifier_task_id: string
         }
         Insert: {
+          abstain_reason?: string | null
           ai_task_invocation_id?: string | null
           chunk_recall_method?: string
           confidence?: number | null
@@ -5474,14 +5482,18 @@ export type Database = {
           matched_expected?: boolean | null
           rationale?: string | null
           raw_response?: Json | null
+          recall_similarity_top?: number | null
+          recalled_chunks?: Json | null
           run_id?: string | null
           source_chunk_ids?: string[]
+          tool_choice_used?: boolean | null
           triplet_id?: string | null
           verdict: string
           verifier_model_id: string
           verifier_task_id?: string
         }
         Update: {
+          abstain_reason?: string | null
           ai_task_invocation_id?: string | null
           chunk_recall_method?: string
           confidence?: number | null
@@ -5494,8 +5506,11 @@ export type Database = {
           matched_expected?: boolean | null
           rationale?: string | null
           raw_response?: Json | null
+          recall_similarity_top?: number | null
+          recalled_chunks?: Json | null
           run_id?: string | null
           source_chunk_ids?: string[]
+          tool_choice_used?: boolean | null
           triplet_id?: string | null
           verdict?: string
           verifier_model_id?: string
