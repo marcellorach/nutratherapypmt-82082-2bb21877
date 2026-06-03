@@ -5395,6 +5395,143 @@ export type Database = {
           },
         ]
       }
+      triplet_verification_runs: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          finished_at: string | null
+          id: string
+          label: string | null
+          n_controls: number
+          n_triplets: number
+          sampling_strategy: Json
+          started_at: string | null
+          status: string
+          summary: Json
+          verifier_model_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          finished_at?: string | null
+          id?: string
+          label?: string | null
+          n_controls?: number
+          n_triplets?: number
+          sampling_strategy?: Json
+          started_at?: string | null
+          status?: string
+          summary?: Json
+          verifier_model_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          finished_at?: string | null
+          id?: string
+          label?: string | null
+          n_controls?: number
+          n_triplets?: number
+          sampling_strategy?: Json
+          started_at?: string | null
+          status?: string
+          summary?: Json
+          verifier_model_id?: string
+        }
+        Relationships: []
+      }
+      triplet_verifications: {
+        Row: {
+          ai_task_invocation_id: string | null
+          chunk_recall_method: string
+          confidence: number | null
+          control_id: string | null
+          cost_estimate: number | null
+          created_at: string
+          expected_verdict: string | null
+          id: string
+          latency_ms: number | null
+          matched_expected: boolean | null
+          rationale: string | null
+          raw_response: Json | null
+          run_id: string | null
+          source_chunk_ids: string[]
+          triplet_id: string | null
+          verdict: string
+          verifier_model_id: string
+          verifier_task_id: string
+        }
+        Insert: {
+          ai_task_invocation_id?: string | null
+          chunk_recall_method?: string
+          confidence?: number | null
+          control_id?: string | null
+          cost_estimate?: number | null
+          created_at?: string
+          expected_verdict?: string | null
+          id?: string
+          latency_ms?: number | null
+          matched_expected?: boolean | null
+          rationale?: string | null
+          raw_response?: Json | null
+          run_id?: string | null
+          source_chunk_ids?: string[]
+          triplet_id?: string | null
+          verdict: string
+          verifier_model_id: string
+          verifier_task_id?: string
+        }
+        Update: {
+          ai_task_invocation_id?: string | null
+          chunk_recall_method?: string
+          confidence?: number | null
+          control_id?: string | null
+          cost_estimate?: number | null
+          created_at?: string
+          expected_verdict?: string | null
+          id?: string
+          latency_ms?: number | null
+          matched_expected?: boolean | null
+          rationale?: string | null
+          raw_response?: Json | null
+          run_id?: string | null
+          source_chunk_ids?: string[]
+          triplet_id?: string | null
+          verdict?: string
+          verifier_model_id?: string
+          verifier_task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "triplet_verifications_ai_task_invocation_id_fkey"
+            columns: ["ai_task_invocation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_task_invocations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "triplet_verifications_control_id_fkey"
+            columns: ["control_id"]
+            isOneToOne: false
+            referencedRelation: "verification_controls"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "triplet_verifications_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "triplet_verification_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "triplet_verifications_triplet_id_fkey"
+            columns: ["triplet_id"]
+            isOneToOne: false
+            referencedRelation: "triplet_extractions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -5418,6 +5555,91 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      verification_controls: {
+        Row: {
+          active: boolean
+          control_metadata: Json
+          created_at: string
+          created_by: string | null
+          expected_verdict: string
+          id: string
+          label: string | null
+          layer: string
+          notes: string | null
+          object_name: string
+          predicate: string
+          source_chunk_id: string | null
+          source_study_id: string | null
+          source_text: string | null
+          source_triplet_id: string | null
+          subject_name: string
+          swap_validated: boolean
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          control_metadata?: Json
+          created_at?: string
+          created_by?: string | null
+          expected_verdict: string
+          id?: string
+          label?: string | null
+          layer: string
+          notes?: string | null
+          object_name: string
+          predicate: string
+          source_chunk_id?: string | null
+          source_study_id?: string | null
+          source_text?: string | null
+          source_triplet_id?: string | null
+          subject_name: string
+          swap_validated?: boolean
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          control_metadata?: Json
+          created_at?: string
+          created_by?: string | null
+          expected_verdict?: string
+          id?: string
+          label?: string | null
+          layer?: string
+          notes?: string | null
+          object_name?: string
+          predicate?: string
+          source_chunk_id?: string | null
+          source_study_id?: string | null
+          source_text?: string | null
+          source_triplet_id?: string | null
+          subject_name?: string
+          swap_validated?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verification_controls_source_chunk_id_fkey"
+            columns: ["source_chunk_id"]
+            isOneToOne: false
+            referencedRelation: "study_embeddings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "verification_controls_source_study_id_fkey"
+            columns: ["source_study_id"]
+            isOneToOne: false
+            referencedRelation: "processed_studies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "verification_controls_source_triplet_id_fkey"
+            columns: ["source_triplet_id"]
+            isOneToOne: false
+            referencedRelation: "triplet_extractions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       veterinary_ontology: {
         Row: {

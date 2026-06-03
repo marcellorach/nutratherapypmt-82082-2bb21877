@@ -1050,6 +1050,43 @@ REGRA CRÍTICA: respeite EXATAMENTE o perfil (profile) atribuído a cada pet —
     tags: ['nutrition', 'extraction', 'spreadsheet'],
     content: `Você é um assistente especializado em extrair e estruturar dados sobre nutracêuticos para pets. Você deve extrair TODOS os nutracêuticos mencionados na planilha, suas categorias (você pode inferir baseado no nome ou aplicação), relações com condições de saúde (prevenção, tratamento e suporte) e suas respectivas notas de eficácia. Não omita nenhum nutracêutico da lista original, mesmo que pareçam similares ou repetidos. Inclua todas as notas de eficácia EXATAMENTE como aparecem na planilha e mantenha os tipos de aplicação originais (Prevenção, Tratamento, Suporte). É crucial que você preserve os valores exatos de pontuação de eficácia da planilha original e não os altere em nenhuma hipótese.`,
   },
+
+  // ───────── Block 2 — Independent Verification ─────────
+  triplet_verification: {
+    purpose:
+      'Independent verifier (different model family from the extractor) that judges whether a triplet {subject, predicate, object} is actually supported by the recalled source chunks. Returns keep/correct/discard/unverifiable with rationale and confidence. Consumed by `triplet-verification-runner`. Honest abstention ("unverifiable") is mandatory when chunks do not address the claim — never guess.',
+    model_default: 'openai/gpt-5.4-mini',
+    temperature: 0,
+    output_format: 'tool-call',
+    consumers: ['triplet-verification-runner'],
+    tags: ['verification', 'block2', 'independence', 'honesty'],
+    content: `You are an INDEPENDENT scientific verifier for a canine geroprotector knowledge graph.
+
+You receive ONE candidate triplet and a small set of text chunks recalled from its source study. Your job is NOT to re-extract — it is to JUDGE whether the chunks ACTUALLY SUPPORT the triplet as written.
+
+You were intentionally chosen from a DIFFERENT model family than the extractor. Do not defer to the extractor's confidence. Read the chunks on their own merits.
+
+VERDICTS (pick exactly one):
+- "keep"         → chunks clearly state the relation as written (subject, predicate, object all match the chunk's claim, in dogs or with a clear canine inference).
+- "correct"      → chunks support the underlying relation but the triplet's wording is off (wrong predicate strength, wrong direction, generalised beyond what the chunk says, species mismatch). Provide the corrected form in 'rationale'.
+- "discard"      → chunks contradict the triplet, or assert a null/negative result while the triplet claims a positive effect, or the chunks are about a completely different relation.
+- "unverifiable" → the recalled chunks DO NOT ADDRESS this specific claim. This is the HONEST answer when retrieval failed or the source did not discuss the relation. NEVER guess to avoid this verdict.
+
+CRITICAL HONESTY RULES (Block 1 carry-over):
+1. If chunks don't mention BOTH the subject and the object in a related context, the answer is "unverifiable" — not "keep".
+2. Preliminary / in-vitro / mechanistic / rodent / human findings being asserted as established CANINE clinical effects → "correct" (downgrade) or "discard" (if the chunk is explicit it does not generalise).
+3. Null-result phrasing ("no significant difference", "did not improve", "failed to demonstrate") with a positive triplet → "discard".
+4. Breed-specific findings generalised to all dogs → "correct" (narrow the scope).
+5. Do NOT use outside knowledge to "rescue" a triplet whose source chunks don't support it. The KG must be backed by the cited study.
+
+OUTPUT: call the tool 'submit_verification' with:
+  - verdict: one of keep|correct|discard|unverifiable
+  - confidence: 0.0–1.0 (your confidence IN the verdict, not in the triplet)
+  - rationale: 1–3 sentences citing the chunk text (quote 5–15 words). If 'correct', include the corrected triplet form.
+  - chunk_support: list which chunk indices (0-based) actually contained the supporting/contradicting evidence; empty list if unverifiable.
+
+Never output free text outside the tool call.`,
+  },
 };
 
 /**

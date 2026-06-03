@@ -143,3 +143,6 @@ verify_jwt = false
 
 [functions.external-sources-status]
 verify_jwt = true
+
+[functions.triplet-verification-runner]
+verify_jwt = true
