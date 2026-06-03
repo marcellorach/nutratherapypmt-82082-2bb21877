@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BookOpen, Beaker, Target, Sparkles, Network, ChevronRight, Share2, ClipboardCheck, CircleCheck, PawPrint, FlaskConical, Database, Pill, GitBranch, AlertTriangle, Scale, UtensilsCrossed, Globe } from "lucide-react";
+import { BookOpen, Beaker, Target, Sparkles, Network, ChevronRight, Share2, ClipboardCheck, CircleCheck, PawPrint, FlaskConical, Database, Pill, GitBranch, AlertTriangle, Scale, UtensilsCrossed, Globe, ShieldCheck } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from 'react-i18next';
@@ -77,6 +77,22 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
               <StatusBadge statusKey="admin.sidebar.knowledgeBase.tripletCurationStatus" tooltipKey="admin.sidebar.knowledgeBase.tripletCurationStatusTooltip" color="text-yellow-500" />
             </div>
             {currentStep === "triplet-curation" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
+          </div>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          isActive={currentStep === "verification-runs"}
+          onClick={() => handleStepClick("verification-runs")}
+          className={currentStep === "verification-runs" ? "bg-primary/10 text-primary" : ""}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              <ShieldCheck className={`h-4 w-4 mr-2 ${currentStep === "verification-runs" ? "text-primary" : ""}`} />
+              <span>{t('admin.sidebar.knowledgeBase.verificationRuns', 'Verificação Independente')}</span>
+            </div>
+            {currentStep === "verification-runs" && <ChevronRight className="h-4 w-4 ml-auto text-primary" />}
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
