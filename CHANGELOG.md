@@ -24,6 +24,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.1 -->
 
+### Changed - 2026-06-03 — Sweep "RWD ≠ sintético" em todas as superfícies + ponteiro de circularidade (Bloco 3)
+<!-- area: meta · status: entregue · i18n: 1.118.2 -->
+- Extensão da regra do REGISTRO DE HONESTIDADE (auto-auditoria) para TODA superfície narrativa — o claim "Real-World Data" / "dados reais de pacientes" não pode sobreviver em UI, prompts, docs nem deck.
+- **`src/components/administrador/ai-insights/mockInsights.ts` (insight-002)**: removidas as menções a "Real-world monitoring of 3,421 dogs", "large-scale real-world evidence" e `p < 0.001`. Card relabeled como `[MOCK — illustrative]`; `dataSource`, `summary`, `basedOn`, `findings`, `recommendation.impact` todos marcados explicitamente como placeholders ilustrativos. Senex NÃO observou 3.421 cães — o número era fabricação que aparecia no admin como se fosse achado real.
+- **`src/locales/{pt,en}/translation.json` (`investment.alreadyMarket.b2cDesc`)**: removido "gerando dados reais de resultados" / "real-world outcome data". Texto novo é honesto sobre o estado: "Coleta de dados longitudinais de desfecho ainda não está estruturada (sem tabela `outcome_observations` em produção)" / equivalente EN.
+- **`docs/STATE_REAL_VS_MOCK.md`**: (a) corrigido typo `${" "}` na data; (b) adicionado bloco de **circularidade** — "calibrado em medicina real" ≠ "validado". Padrão "achado" no cohort sintético pode ser eco da suposição plantada no prompt `generate_synthetic_cohort` (prompt-engineered). Para a auto-auditoria basta o rótulo "sintético, não observado"; tratamento completo (controle de leakage prompt→achado, hold-out sintético, comparação contra cohort real) fica como **Bloco 3 — não iniciado**, ponteiro no ROADMAP.
+- **Memória nova** (`.lovable/memory/constraints/synthetic-cohort-not-rwd.md`, type=constraint): regra explícita "synthetic_cohort ≠ RWD" + lista de termos proibidos + ponteiro para circularidade. Carrega automaticamente em sessões futuras.
+- **`I18N_VERSION` 1.118.0 → 1.118.2** (mudança de string PT/EN obriga cache-bust).
+- Surfaces verificadas como JÁ corretas (não tocadas): `AboutSenexTab`, `admin-tabs-info-bilingual` (downgrade da v5.2.0 segue válido); `complianceData.ts:63` (`Real-World Performance Monitoring` é o NOME da requirement FDA, não claim do Senex); `CohortAISuggester` / `SyntheticCohortsManager` (já distinguem `is_synthetic=true` de "dados reais").
+- Files: src/components/administrador/ai-insights/mockInsights.ts, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts, docs/STATE_REAL_VS_MOCK.md, .lovable/memory/constraints/synthetic-cohort-not-rwd.md
+
 ### Added - 2026-06-03 — Matriz LIVE v2 + ROADMAP + STATE_REAL_VS_MOCK + PROMPTS snapshot + registro de honestidade no audit_base
 <!-- area: meta · status: entregue · i18n: 1.118.1 -->
 - **`docs/generated/ARCHITECTURE_LIVE.md` regenerada (15 linhas)** com correções cosméticas: abstain/tool_choice/telemetria reetiquetados como **Bloco 1** (cards #3/#1/#2), não Bloco 2. O terceiro caller clínico com `tool_choice` é nomeado: **`parse-pet-exam-pdf`** (junto com `hybrid-recommendation` e `extract-pet-clinical-data`). Linha 7 (auto-aprovação) expõe os **três sources não-reconciliados** (código `≥0.85 & ≥0.50` × RC-013 `≥0.70` × ADR/CONTEXT `≥0.50`) sem escolher um. Linha 8 (Digital Twin) marca explicitamente que código É sigmoide. Linha 13 nova para **RC-003** (modulador translacional ×0.7, planned/off), distinta de RC-013.
