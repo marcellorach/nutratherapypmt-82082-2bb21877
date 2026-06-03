@@ -1,20 +1,33 @@
 # Project context briefing (auto)
-Generated: 2026-06-03T15:18:03.805Z
+Generated: 2026-06-03T16:01:38.694Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.118.2
+## Latest i18n version: 1.118.3
 
 ## Changes by area (last 14 days)
 - **admin**: 43
+- **kg**: 9
 - **meta**: 7
 - **clinical-pipeline**: 7
-- **kg**: 7
 - **infra**: 5
 - **curation**: 3
 - **vet-ui**: 1
 
 ## Top 10 recent entries
+### 2026-06-03 · [kg] ADDED — Bloco 2: telemetria do verificador + página admin de runs
+- Migração: 4 colunas em `triplet_verifications` (`tool_choice_used`, `abstain_reason` ∈ {no_chunks, low_similarity, chunks_off_topic, verifier_error, tool_call_missing, other}, `recalled_chunks` jsonb com snippet+similaridade por chunk, `recall_similarity_top`) + `stratification_snapshot` em `triplet_verification_runs` (snapshot verdade-base de quantos itens foram sorteados por banda/enrichment/camada).
+- Runner (`triplet-verification-runner`): preenche os novos campos por linha; classifica `abstain_reason` automaticamente quando o verdict é `unverifiable`; serializa chunks recuperados com snippet (320 chars) marcando quais o verificador alegou suportar a claim.
+- Admin UI — nova tab `verification-runs` (grupo Base de Conhecimento, sidebar com ícone ShieldCheck): lista runs com control_specificity, drill-down por run com filtros (tipo: triplet/control · verdict · camada de controle), linha expansível mostra rationale do verificador + chunks recuperados (com badge verde nos suportados) + latência/custo/tool_choice.
+_files: supabase/functions/triplet-verification-runner/index.ts, src/components/administrador/verification/VerificationRunsTab.tsx, src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx, src/config/admin-tabs.ts…_
+
+### 2026-06-03 · [kg] ADDED — Bloco 2 infra: verificador independente (tabelas + runner + prompt)
+_status: parcial_
+- Migração: 3 tabelas novas — `triplet_verification_runs` (metadata de batch), `verification_controls` (banco de controles negativos em camadas: backbone_swap, pubmed_null, realistic_cross_species, realistic_breed_general, realistic_preliminary, synthetic_floor, gold_set), `triplet_verifications` (uma linha por `{triplet|control} × run` com verdict/confidence/chunks/model/latência/custo).
+- Edge function `triplet-verification-runner`: amostra estratificada (banda cinza 0.50–0.84 + alta 0.85–1.00, estratificada por `enrichment_source`); recall top-k via `search_study_chunks` (RPC) com fallback `ilike` instrumentado; verificador de família diferente (default `openai/gpt-5.4-mini`, vs. extrator Gemini); `tool_choice` forçado em `submit_verification`; persistência + sumarização (histograma de verdict, especificidade por layer).
+- System prompt `triplet_verification`: abstain honesto obrigatório (chunks não tratam claim → `unverifiable`), regras de downgrade (preliminar/cross-species/breed-generalizado → `correct`), null-result phrasing → `discard`, sem rescate por conhecimento externo.
+_files: supabase/functions/triplet-verification-runner/index.ts, supabase/functions/_shared/system-prompts.ts_
+
 ### 2026-06-03 · [meta] CHANGED — Sweep "RWD ≠ sintético" em todas as superfícies + ponteiro de circularidade (Bloco 3)
 - Extensão da regra do REGISTRO DE HONESTIDADE (auto-auditoria) para TODA superfície narrativa — o claim "Real-World Data" / "dados reais de pacientes" não pode sobreviver em UI, prompts, docs nem deck.
 - `src/components/administrador/ai-insights/mockInsights.ts` (insight-002): removidas as menções a "Real-world monitoring of 3,421 dogs", "large-scale real-world evidence" e `p < 0.001`. Card relabeled como `[MOCK — illustrative]`; `dataSource`, `summary`, `basedOn`, `findings`, `recommendation.impact` todos marcados explicitamente como placeholders ilustrativos. Senex NÃO observou 3.421 cães — o número era fabricação que aparecia no admin como se fosse achado real.
@@ -62,18 +75,6 @@ _files: supabase/functions/extract-pet-clinical-data/index.ts, src/types/recomme
 - `callAITask` agora emite `console.warn` por invocação com variáveis ausentes (`task=… caller=… missing_variables=[…]`) e persiste o array em `ai_task_invocations.missing_variables` (nova coluna `text[]` + índice GIN parcial via migração).
 - Pré-requisito do card #6 (auditoria de `required_variables` por task) — sem este log, "variável nunca ausente" é indistinguível de "task nunca exercitada".
 _files: supabase/functions/_shared/ai-task-router.ts_
-
-### 2026-06-01 · [admin] SECURITY — Endurece ai-config: admin-only + segredos mascarados
-- `supabase/functions/ai-config/index.ts` agora valida `Authorization: Bearer <jwt>` via `getClaims` e checa `user_roles.role = 'admin'` em TODAS as chamadas (GET, POST `get`/`set`/`test-neo4j`). Sem token → 401; sem admin → 403.
-- GET deixa de devolver valores crus de segredos (`*_api_key`, `*_password`, `*_secret`, `*_token`): retorna apenas máscara `"••••XXXX"` (últimos 4) e um objeto `_meta` por chave com `{ is_set, last4, updated_at }`. Chaves não-sensíveis (URI, username, prompts) seguem retornando cruas para admins.
-- POST `action='get'` bloqueia (403) leitura individual de chave sensível.
-_files: supabase/functions/ai-config/index.ts, src/components/administrador/ConfiguracoesIATab.tsx_
-
-### 2026-06-01 · [admin] ADDED — Gerenciamento in-app de chaves de API (sem Lovable Cloud)
-- Nova tabela criptografada `public.api_keys` (pgcrypto) + view `api_keys_public` (somente metadados) + funções `encrypt_api_key`/`decrypt_api_key` (SECURITY DEFINER, restritas a `service_role`).
-- Nova edge function `api-keys-manage` (admin-only, valida JWT + role) com ações `set` / `delete` / `test` — encripta o valor antes de gravar e faz ping real ao provedor para registrar `last_test_status` / `last_test_message`.
-- Novo helper `supabase/functions/_shared/get-api-key.ts` — resolve chave do DB primeiro, fallback para `Deno.env`. `external-sources-status` já consome via helper, então UMLS/NCBI/Perplexity passam a refletir chaves cadastradas pelo UI.
-_files: supabase/functions/_shared/get-api-key.ts, src/hooks/useApiKeys.ts, supabase/functions/api-keys-manage/index.ts, supabase/functions/external-sources-status/index.ts…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

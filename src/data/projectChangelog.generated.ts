@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-03T15:18:03.770Z
+// Última geração: 2026-06-03T16:01:38.688Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,49 @@ export const lastChangelogDate = "2026-06-03";
 export const senexVersion = "7.0.1";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-03",
+    "kind": "added",
+    "area": "kg",
+    "status": "entregue",
+    "title": "Bloco 2: telemetria do verificador + página admin de runs",
+    "bullets": [
+      "Migração: 4 colunas em `triplet_verifications` (`tool_choice_used`, `abstain_reason` ∈ {no_chunks, low_similarity, chunks_off_topic, verifier_error, tool_call_missing, other}, `recalled_chunks` jsonb com snippet+similaridade por chunk, `recall_similarity_top`) + `stratification_snapshot` em `triplet_verification_runs` (snapshot verdade-base de quantos itens foram sorteados por banda/enrichment/camada).",
+      "Runner (`triplet-verification-runner`): preenche os novos campos por linha; classifica `abstain_reason` automaticamente quando o verdict é `unverifiable`; serializa chunks recuperados com snippet (320 chars) marcando quais o verificador alegou suportar a claim.",
+      "Admin UI — nova tab `verification-runs` (grupo Base de Conhecimento, sidebar com ícone ShieldCheck): lista runs com control_specificity, drill-down por run com filtros (tipo: triplet/control · verdict · camada de controle), linha expansível mostra rationale do verificador + chunks recuperados (com badge verde nos suportados) + latência/custo/tool_choice.",
+      "Por que importa: auditar por que o verificador errou (não só se errou) — `abstain_reason` separa \"modelo abstinente\" de \"retrieval falhou\"; `recalled_chunks` permite o curador re-julgar sem nova query.",
+      "Files: supabase/migrations/20260603155800_*.sql, supabase/functions/triplet-verification-runner/index.ts, src/components/administrador/verification/VerificationRunsTab.tsx, src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx, src/config/admin-tabs.ts, src/locales/{pt,en}/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "supabase/functions/triplet-verification-runner/index.ts",
+      "src/components/administrador/verification/VerificationRunsTab.tsx",
+      "src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx",
+      "src/config/admin-tabs.ts",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.118.3"
+  },
+  {
+    "date": "2026-06-03",
+    "kind": "added",
+    "area": "kg",
+    "status": "parcial",
+    "title": "Bloco 2 infra: verificador independente (tabelas + runner + prompt)",
+    "bullets": [
+      "Migração: 3 tabelas novas — `triplet_verification_runs` (metadata de batch), `verification_controls` (banco de controles negativos em camadas: backbone_swap, pubmed_null, realistic_cross_species, realistic_breed_general, realistic_preliminary, synthetic_floor, gold_set), `triplet_verifications` (uma linha por `{triplet|control} × run` com verdict/confidence/chunks/model/latência/custo).",
+      "Edge function `triplet-verification-runner`: amostra estratificada (banda cinza 0.50–0.84 + alta 0.85–1.00, estratificada por `enrichment_source`); recall top-k via `search_study_chunks` (RPC) com fallback `ilike` instrumentado; verificador de família diferente (default `openai/gpt-5.4-mini`, vs. extrator Gemini); `tool_choice` forçado em `submit_verification`; persistência + sumarização (histograma de verdict, especificidade por layer).",
+      "System prompt `triplet_verification`: abstain honesto obrigatório (chunks não tratam claim → `unverifiable`), regras de downgrade (preliminar/cross-species/breed-generalizado → `correct`), null-result phrasing → `discard`, sem rescate por conhecimento externo.",
+      "Backbone swap gate: controles `backbone_swap` exigem `swap_validated=true` (revisão humana confirmando que o swap não criou relação verdadeira por acidente) antes de entrarem em qualquer run.",
+      "Status: parcial — infra pronta, banco de controles vazio. Próximos passos: gold-set do vet (~20 reais rotulados), backbone-swap builder, PubMed null-result fetcher, layers 2 (cross-species/breed/preliminary). Só depois roda a primeira medição.",
+      "Sinal coletado: dos 10 triplets rejeitados, todos confiança ≤0.59 e padrão de \"abstração semântica\" (ex.: `Neurological Protection PRODUCES Cellular Damage`). Erros fáceis já são pegos na curadoria — a zona de risco é a banda 0.50–0.84 aprovada com claims clínicos densos (`Curcumin TREATS Sarcopenia` etc.), exatamente onde as camadas 2 modelam a falha real.",
+      "Files: supabase/functions/triplet-verification-runner/index.ts, supabase/functions/_shared/system-prompts.ts, supabase/config.toml, docs/BLOCK2_VERIFICATION.md"
+    ],
+    "files": [
+      "supabase/functions/triplet-verification-runner/index.ts",
+      "supabase/functions/_shared/system-prompts.ts"
+    ],
+    "i18nVersion": "1.118.2"
+  },
   {
     "date": "2026-06-03",
     "kind": "changed",

@@ -2041,6 +2041,7 @@
         "veterinaryTargetsStatusTooltip": "Complete condition mapping with treatability calculation and real data.",
         "tripletCuration": "Triplet Curation",
         "triplets": "Triplets (Curation + Quality)",
+        "verificationRuns": "Independent Verification",
         "ontologyHub": "Ontology & SNOMED/UMLS",
         "externalSources": "External Sources",
         "externalSourcesStatus": "Unified hub",

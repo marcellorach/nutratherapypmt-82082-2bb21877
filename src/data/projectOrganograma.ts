@@ -122,6 +122,16 @@ export const organograma: OrganogramaArea[] = [
         description_en: "Canonical resolution by expert when studies conflict.",
         files: ["src/components/administrador/conflicts/ConflictReviewPanel.tsx"],
       },
+      {
+        title: "Verificação Independente (Bloco 2)",
+        title_en: "Independent Verification (Block 2)",
+        description: "2ª passada de família diferente sobre triplets aprovados + controles em camadas; admin lista runs com filtros e abre rationale + chunks recuperados.",
+        description_en: "Different-family 2nd pass over approved triplets + layered controls; admin lists runs with filters and opens rationale + recalled chunks.",
+        files: [
+          "supabase/functions/triplet-verification-runner/index.ts",
+          "src/components/administrador/verification/VerificationRunsTab.tsx",
+        ],
+      },
     ],
   },
   {

@@ -56,6 +56,7 @@ const AdminPetManagementTab = lazy(() => import('@/components/administrador/pati
 
 // Knowledge Graph & Curation
 const TripletsHub = lazy(() => import('@/components/administrador/TripletsHub'));
+const VerificationRunsTab = lazy(() => import('@/components/administrador/verification/VerificationRunsTab'));
 const KnowledgeGraphViewer = lazy(() => import('@/components/administrador/visualizations/KnowledgeGraphViewer'));
 const ConflictReviewPanel = lazy(() => import('@/components/administrador/conflicts/ConflictReviewPanel'));
 // BaseKnowledgeTab removido — funcionalidade consolidada em Ontology Hub.
@@ -116,6 +117,13 @@ export const adminTabsConfig: AdminTabConfig[] = [
     group: 'knowledge-base',
     component: TripletsHub,
     description: 'Curadoria + Qualidade de triplets em uma só aba'
+  },
+  {
+    id: 'verification-runs',
+    label: 'Verificação Independente',
+    group: 'knowledge-base',
+    component: VerificationRunsTab,
+    description: 'Bloco 2: runs do verificador independente (2ª passada) — estratificação, recall, abstain e specificity por camada de controle'
   },
   {
     id: 'knowledge-graph',

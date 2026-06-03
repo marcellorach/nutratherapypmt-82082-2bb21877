@@ -96,7 +96,7 @@ async function embed(text: string): Promise<number[] | null> {
 async function recallChunks(
   item: VerificationItem,
   topK: number,
-): Promise<{ chunk_id: string; chunk_text: string; method: string }[]> {
+): Promise<{ chunk_id: string; chunk_text: string; method: string; similarity?: number }[]> {
   // direct_chunk takes precedence (controls with explicit source_chunk_id)
   if (item.direct_chunk_id) {
     const { data } = await admin
@@ -121,6 +121,7 @@ async function recallChunks(
         chunk_id: r.chunk_id,
         chunk_text: r.chunk_text,
         method: "embedding_top_k",
+        similarity: typeof r.similarity === "number" ? r.similarity : undefined,
       }));
     }
   }
@@ -190,6 +191,10 @@ async function verifyOne(
   rationale: string;
   chunk_ids: string[];
   chunk_method: string;
+  recalled_chunks: any[];
+  recall_similarity_top: number | null;
+  tool_choice_used: boolean;
+  abstain_reason: string | null;
   latency_ms: number;
   cost_estimate: number;
   raw: any;
@@ -221,6 +226,7 @@ async function verifyOne(
 
   const call = res.tool_calls?.[0];
   let parsed: any = {};
+  const toolChoiceUsed = !!call?.function?.arguments;
   try {
     parsed = JSON.parse(call?.function?.arguments ?? "{}");
   } catch (_e) { /* leave empty → unverifiable */ }
@@ -231,12 +237,37 @@ async function verifyOne(
     .filter((i: number) => i >= 0 && i < recalled.length)
     .map((i: number) => recalled[i].chunk_id);
 
+  const topSim = recalled.reduce<number | null>(
+    (acc, c) => (typeof c.similarity === "number" && (acc === null || c.similarity > acc) ? c.similarity : acc),
+    null,
+  );
+
+  let abstainReason: string | null = null;
+  if (verdict === "unverifiable") {
+    if (!toolChoiceUsed) abstainReason = "tool_call_missing";
+    else if (recalled.length === 0) abstainReason = "no_chunks";
+    else if (topSim !== null && topSim < 0.55) abstainReason = "low_similarity";
+    else if (chunkIds.length === 0) abstainReason = "chunks_off_topic";
+    else abstainReason = "other";
+  }
+
   return {
     verdict,
     confidence: typeof parsed.confidence === "number" ? parsed.confidence : null,
     rationale: typeof parsed.rationale === "string" ? parsed.rationale : "",
     chunk_ids: chunkIds.length > 0 ? chunkIds : recalled.map((c) => c.chunk_id),
     chunk_method: recalled[0]?.method ?? "embedding_top_k",
+    recalled_chunks: recalled.map((c, i) => ({
+      idx: i,
+      chunk_id: c.chunk_id,
+      similarity: c.similarity ?? null,
+      method: c.method,
+      snippet: (c.chunk_text ?? "").slice(0, 320),
+      supported: chunkSupport.includes(i),
+    })),
+    recall_similarity_top: topSim,
+    tool_choice_used: toolChoiceUsed,
+    abstain_reason: abstainReason,
     latency_ms: res.latency_ms,
     cost_estimate: res.cost_estimate,
     raw: { tool_call_args: parsed, recalled_n: recalled.length },
@@ -346,12 +377,33 @@ Deno.serve(async (req) => {
     const controlItems = includeControls ? await loadControls(body.control_layers) : [];
     const all = [...tripletItems, ...controlItems].slice(0, maxTotal);
 
+    // Stratification snapshot (verdade-base do que foi efetivamente sorteado)
+    const strat: any = {
+      triplets_by_band: {} as Record<string, number>,
+      triplets_by_enrichment: {} as Record<string, number>,
+      controls_by_layer: {} as Record<string, number>,
+      top_k_chunks: topK,
+      verifier_model: verifierModel,
+      tool_choice: { type: "function", function: "submit_verification" },
+    };
+    for (const it of tripletItems) {
+      const b = it.band ?? "unknown";
+      strat.triplets_by_band[b] = (strat.triplets_by_band[b] ?? 0) + 1;
+      const e = it.enrichment_source ?? "none";
+      strat.triplets_by_enrichment[e] = (strat.triplets_by_enrichment[e] ?? 0) + 1;
+    }
+    for (const it of controlItems) {
+      const l = it.layer ?? "unknown";
+      strat.controls_by_layer[l] = (strat.controls_by_layer[l] ?? 0) + 1;
+    }
+
     // Create run row
     const { data: run, error: runErr } = await admin
       .from("triplet_verification_runs")
       .insert({
         label: body.label ?? `verify-${new Date().toISOString()}`,
         sampling_strategy: body.sample ?? {},
+        stratification_snapshot: strat,
         verifier_model_id: verifierModel,
         n_triplets: tripletItems.length,
         n_controls: controlItems.length,
@@ -397,6 +449,10 @@ Deno.serve(async (req) => {
           matched_expected: matched,
           latency_ms: res.latency_ms,
           cost_estimate: res.cost_estimate,
+          tool_choice_used: res.tool_choice_used,
+          abstain_reason: res.abstain_reason,
+          recalled_chunks: res.recalled_chunks,
+          recall_similarity_top: res.recall_similarity_top,
           raw_response: { ...res.raw, band: item.band, layer: item.layer, enrichment_source: item.enrichment_source },
         });
       } catch (e) {
@@ -413,6 +469,10 @@ Deno.serve(async (req) => {
           rationale: `Verifier error: ${e instanceof Error ? e.message : String(e)}`,
           expected_verdict: item.expected_verdict ?? null,
           matched_expected: false,
+          tool_choice_used: false,
+          abstain_reason: "verifier_error",
+          recalled_chunks: [],
+          recall_similarity_top: null,
           raw_response: { error: true, band: item.band, layer: item.layer },
         });
       }
