@@ -128,12 +128,16 @@ const MATRIX = [];
 
 for (const row of MATRIX) {
   if (row.pointer.startsWith("—")) continue; // explicitly not implemented
-  const tokens = row.pointer.split(/[,\s;]+/).map((s) => s.trim()).filter(Boolean);
+  // Strip parenthetical prose so "(scoring around heuristic ...)" doesn't become tokens.
+  const cleaned = row.pointer.replace(/\(.*?\)/g, " ");
+  const tokens = cleaned.split(/[,\s;]+/).map((s) => s.trim()).filter(Boolean);
   for (const tok of tokens) {
-    // strip "(...)" annotations and ":line"
-    const path = tok.replace(/\(.*$/, "").replace(/:\d+.*$/, "").replace(/[.,;]+$/, "");
+    const path = tok.replace(/:\d+.*$/, "").replace(/[.,;]+$/, "");
     if (!path || path.length < 3) continue;
-    if (path.startsWith("docs/") || path.startsWith("mem://") || path.includes("(DB)")) continue;
+    // Only treat as filesystem path if it has a directory separator or a known extension.
+    const looksLikePath = path.includes("/") || /\.(ts|tsx|js|mjs|md|json|sql|css|html)$/i.test(path);
+    if (!looksLikePath) continue;
+    if (path.startsWith("docs/") || path.startsWith("mem://")) continue;
     const abs = resolve(ROOT, path.replace(/\/$/, ""));
     if (!existsSync(abs)) {
       push({
