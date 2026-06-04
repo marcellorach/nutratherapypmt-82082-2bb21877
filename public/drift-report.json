@@ -1,18 +1,11 @@
 {
   "generated_at": "2026-06-04",
-  "total": 61,
+  "total": 56,
   "by_layer": {
-    "A": 59,
+    "A": 54,
     "D": 2
   },
   "findings": [
-    {
-      "layer": "A",
-      "severity": "warn",
-      "surface": "src/components/administrador/AboutSenexTab.tsx",
-      "message": "Termo \"U-Retrieval\" sem mitigador (inspiração/planned/sintético) no parágrafo.",
-      "evidence": "src/components/administrador/AboutSenexTab.tsx:61 — O1[\"Hybrid retrieval<br/>Cypher (Neo4j) + pgvector (Supabase)<br/>(inspired by U-Retrieval, no top-down/bottom-up fusion)\"]"
-    },
     {
       "layer": "A",
       "severity": "warn",
@@ -200,20 +193,6 @@
       "severity": "warn",
       "surface": "src/data/admin-tabs-info-bilingual.ts",
       "message": "Termo \"GRRA\" sem mitigador (inspiração/planned/sintético) no parágrafo.",
-      "evidence": "src/data/admin-tabs-info-bilingual.ts:276 — en: 'Senex AI is a hybrid GraphRAG engine dedicated to canine longevity. **Implemented today:** (1) Triple Graph Construction inspired by MedGraphRAG (Document → Chunk → Entity → Mechanism); (2) tripl"
-    },
-    {
-      "layer": "A",
-      "severity": "warn",
-      "surface": "src/data/admin-tabs-info-bilingual.ts",
-      "message": "Termo \"GRRA\" sem mitigador (inspiração/planned/sintético) no parágrafo.",
-      "evidence": "src/data/admin-tabs-info-bilingual.ts:282 — { pt: '4. Validação de triplets → Generate (Gemini) + scoring heurístico (0,65–0,75) + auto-approve ≥ 0,50 + HITL para o restante. Inspirado no GRRA do KGARevion, **sem** modelo Review independente ne"
-    },
-    {
-      "layer": "A",
-      "severity": "warn",
-      "surface": "src/data/admin-tabs-info-bilingual.ts",
-      "message": "Termo \"GRRA\" sem mitigador (inspiração/planned/sintético) no parágrafo.",
       "evidence": "src/data/admin-tabs-info-bilingual.ts:282 — { pt: '4. Validação de triplets → Generate (Gemini) + scoring heurístico (0,65–0,75) + auto-approve ≥ 0,50 + HITL para o restante. Inspirado no GRRA do KGARevion, **sem** modelo Review independente ne"
     },
     {
@@ -271,20 +250,6 @@
       "surface": "src/data/admin-tabs-info-bilingual.ts",
       "message": "Termo \"U-Retrieval\" sem mitigador (inspiração/planned/sintético) no parágrafo.",
       "evidence": "src/data/admin-tabs-info-bilingual.ts:212 — en: 'Inspiration paper: Triple Graph Construction (Document → Chunk → Entity → Mechanism) combined with bidirectional U-Retrieval reports ~40% hallucination reduction on medical QA. Senex AI adopts th"
-    },
-    {
-      "layer": "A",
-      "severity": "warn",
-      "surface": "src/data/admin-tabs-info-bilingual.ts",
-      "message": "Termo \"U-Retrieval\" sem mitigador (inspiração/planned/sintético) no parágrafo.",
-      "evidence": "src/data/admin-tabs-info-bilingual.ts:284 — { pt: '6. Recuperação híbrida → Cypher (Neo4j) + pgvector (Supabase) sobre o KG do paciente. Inspirada em U-Retrieval, **sem** fusão top-down/bottom-up — implementada em `graph-rag-search` e `hybrid-r"
-    },
-    {
-      "layer": "A",
-      "severity": "warn",
-      "surface": "src/data/admin-tabs-info-bilingual.ts",
-      "message": "Termo \"U-Retrieval\" sem mitigador (inspiração/planned/sintético) no parágrafo.",
-      "evidence": "src/data/admin-tabs-info-bilingual.ts:284 — { pt: '6. Recuperação híbrida → Cypher (Neo4j) + pgvector (Supabase) sobre o KG do paciente. Inspirada em U-Retrieval, **sem** fusão top-down/bottom-up — implementada em `graph-rag-search` e `hybrid-r"
     },
     {
       "layer": "A",
