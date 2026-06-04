@@ -311,6 +311,21 @@ async function readAuditContext(service: ReturnType<typeof createClient>) {
     snapshot.clinical_data_provenance = { error: (e as any)?.message ?? String(e) };
   }
 
+  // Drift-guard report (warn-only). Produced by `npm run drift:guard` and
+  // shipped as public/drift-report.json. If absent, the LLM is told so explicitly.
+  try {
+    const baseUrl = Deno.env.get("APP_PUBLIC_URL") ?? "https://nutratherapypmt-82082.lovable.app";
+    const res = await fetch(`${baseUrl}/drift-report.json`, { signal: AbortSignal.timeout(10_000) });
+    if (res.ok) {
+      const drift = await res.json();
+      snapshot.drift_guard = drift;
+    } else {
+      snapshot.drift_guard = { error: `HTTP ${res.status}`, hint: "rode `npm run drift:guard` antes da auditoria" };
+    }
+  } catch (e) {
+    snapshot.drift_guard = { error: (e as any)?.message ?? String(e), hint: "rode `npm run drift:guard` antes da auditoria" };
+  }
+
   let prevAuditsCtx = "";
   try {
     const { data: prevAudits } = await service

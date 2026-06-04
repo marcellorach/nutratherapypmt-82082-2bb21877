@@ -24,6 +24,19 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.1 -->
 
+### Added - 2026-06-04 — Drift-guard A+B+C+D dobrado no pipeline da auditoria
+<!-- area: meta · status: entregue · i18n: 1.118.3 -->
+- **Novo script** `scripts/drift-guard.mjs` (`npm run drift:guard`) — checagem WARN-only que compara as superfícies à mão (AboutSenexTab, CORE_RULES.md, GRAPHRAG_ARCHITECTURE.md, admin-tabs-info, landing) com a MATRIX em `generate-architecture-live.mjs`. Quatro camadas:
+  - **A** — vocabulário proibido (`GRRA`, `U-Retrieval`, `TransE`, `RWD`, "Real-World Data", "dados reais", "ingestão massiva", "base de pacientes reais") sem mitigador (`inspiração|inspiration|planned|sintético|...`) no parágrafo.
+  - **B** — ponteiros mortos: cada caminho citado em `pointer:` da MATRIX precisa existir no repo.
+  - **C** — `🟢 implemented` apontando para arquivo com <20 LOC (sintoma de stub). Severidade `info`.
+  - **D** — conflito numérico entre doc e código: RC-013 (auto-approve) e RC-003 (modulador translacional). Não escolhe número; expõe lado-a-lado.
+- **Saídas**: `docs/generated/DRIFT_REPORT.md` (humano) + `public/drift-report.json` (consumido pelo edge).
+- **Pipeline da auditoria**: novo script `audit:prebuild` (= sync:changelog + docs:all + drift:guard) regenera deriváveis antes do botão. `generate-audit/readAuditContext` faz fetch de `/drift-report.json` e injeta como `snapshot.drift_guard`.
+- **Prompts PT/EN** (`audit_base_system_pt/en`): bloco "DRIFT GUARD" obriga a primeira `<section id="drift-guard">` do relatório a listar os achados (agrupados por camada A/B/C/D) quando `total > 0`, com instrução explícita de **não auto-corrigir** as superfícies à mão — só DETECTA, humano conserta.
+- **Política**: WARN-only. Drift-guard nunca bloqueia build nem falha auditoria. A primeira rodada já encontrou 59 achados de vocab (vários em `admin-tabs-info.ts` descrevendo GRRA/U-Retrieval/TransE como "Senex AI") + 2 conflitos numéricos (RC-013: doc n/d × código `extractionConfidence ≥ 0.85 AND kgMatchScore ≥ 0.50`; RC-003: doc n/d × `ScoreCriteriaPopover.tsx`).
+- Files: scripts/drift-guard.mjs, package.json, supabase/functions/generate-audit/index.ts, supabase/functions/_shared/system-prompts.ts
+
 ### Added - 2026-06-03 — Bloco 2: telemetria do verificador + página admin de runs
 <!-- area: kg · status: entregue · i18n: 1.118.3 -->
 - **Migração**: 4 colunas em `triplet_verifications` (`tool_choice_used`, `abstain_reason` ∈ {no_chunks, low_similarity, chunks_off_topic, verifier_error, tool_call_missing, other}, `recalled_chunks` jsonb com snippet+similaridade por chunk, `recall_similarity_top`) + `stratification_snapshot` em `triplet_verification_runs` (snapshot verdade-base de quantos itens foram sorteados por banda/enrichment/camada).
