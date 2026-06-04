@@ -5,8 +5,8 @@
 
 ## Resumo
 
-- **Total de achados:** 70
-- Por camada: {"A":59,"B":9,"D":2}
+- **Total de achados:** 61
+- Por camada: {"A":59,"D":2}
 
 ## Camadas
 
@@ -311,42 +311,6 @@
 - **Severidade:** warn
 - Termo "dados reais" sem mitigador (inspiração/planned/sintético) no parágrafo.
 - Evidência: `docs/STANFORD_DEMO.md:1079 — 2. **Implementar Modelos Básicos**: Regressão linear/logística com dados reais`
-
-### [B] ARCHITECTURE_LIVE.MATRIX
-- **Severidade:** warn
-- Ponteiro morto para "GRRA cycle (Generate → Review → Revise → Answer)": caminho não existe → around
-
-### [B] ARCHITECTURE_LIVE.MATRIX
-- **Severidade:** warn
-- Ponteiro morto para "GRRA cycle (Generate → Review → Revise → Answer)": caminho não existe → heuristic
-
-### [B] ARCHITECTURE_LIVE.MATRIX
-- **Severidade:** warn
-- Ponteiro morto para "GRRA cycle (Generate → Review → Revise → Answer)": caminho não existe → thresholds
-
-### [B] ARCHITECTURE_LIVE.MATRIX
-- **Severidade:** warn
-- Ponteiro morto para "GRRA cycle (Generate → Review → Revise → Answer)": caminho não existe → independent
-
-### [B] ARCHITECTURE_LIVE.MATRIX
-- **Severidade:** warn
-- Ponteiro morto para "GRRA cycle (Generate → Review → Revise → Answer)": caminho não existe → Reviewer
-
-### [B] ARCHITECTURE_LIVE.MATRIX
-- **Severidade:** warn
-- Ponteiro morto para "GRRA cycle (Generate → Review → Revise → Answer)": caminho não existe → model)
-
-### [B] ARCHITECTURE_LIVE.MATRIX
-- **Severidade:** warn
-- Ponteiro morto para "Honest-failure abstain envelope (3 buckets)": caminho não existe → callers
-
-### [B] ARCHITECTURE_LIVE.MATRIX
-- **Severidade:** warn
-- Ponteiro morto para "validation_status + abstained telemetry": caminho não existe → ai_task_invocations
-
-### [B] ARCHITECTURE_LIVE.MATRIX
-- **Severidade:** warn
-- Ponteiro morto para "validation_status + abstained telemetry": caminho não existe → callers
 
 ### [D] CORE_RULES.md × código
 - **Severidade:** info

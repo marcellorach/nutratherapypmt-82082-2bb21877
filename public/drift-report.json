@@ -1,9 +1,8 @@
 {
   "generated_at": "2026-06-04",
-  "total": 70,
+  "total": 61,
   "by_layer": {
     "A": 59,
-    "B": 9,
     "D": 2
   },
   "findings": [
@@ -419,60 +418,6 @@
       "surface": "docs/STANFORD_DEMO.md",
       "message": "Termo \"dados reais\" sem mitigador (inspiração/planned/sintético) no parágrafo.",
       "evidence": "docs/STANFORD_DEMO.md:1079 — 2. **Implementar Modelos Básicos**: Regressão linear/logística com dados reais"
-    },
-    {
-      "layer": "B",
-      "severity": "warn",
-      "surface": "ARCHITECTURE_LIVE.MATRIX",
-      "message": "Ponteiro morto para \"GRRA cycle (Generate → Review → Revise → Answer)\": caminho não existe → around"
-    },
-    {
-      "layer": "B",
-      "severity": "warn",
-      "surface": "ARCHITECTURE_LIVE.MATRIX",
-      "message": "Ponteiro morto para \"GRRA cycle (Generate → Review → Revise → Answer)\": caminho não existe → heuristic"
-    },
-    {
-      "layer": "B",
-      "severity": "warn",
-      "surface": "ARCHITECTURE_LIVE.MATRIX",
-      "message": "Ponteiro morto para \"GRRA cycle (Generate → Review → Revise → Answer)\": caminho não existe → thresholds"
-    },
-    {
-      "layer": "B",
-      "severity": "warn",
-      "surface": "ARCHITECTURE_LIVE.MATRIX",
-      "message": "Ponteiro morto para \"GRRA cycle (Generate → Review → Revise → Answer)\": caminho não existe → independent"
-    },
-    {
-      "layer": "B",
-      "severity": "warn",
-      "surface": "ARCHITECTURE_LIVE.MATRIX",
-      "message": "Ponteiro morto para \"GRRA cycle (Generate → Review → Revise → Answer)\": caminho não existe → Reviewer"
-    },
-    {
-      "layer": "B",
-      "severity": "warn",
-      "surface": "ARCHITECTURE_LIVE.MATRIX",
-      "message": "Ponteiro morto para \"GRRA cycle (Generate → Review → Revise → Answer)\": caminho não existe → model)"
-    },
-    {
-      "layer": "B",
-      "severity": "warn",
-      "surface": "ARCHITECTURE_LIVE.MATRIX",
-      "message": "Ponteiro morto para \"Honest-failure abstain envelope (3 buckets)\": caminho não existe → callers"
-    },
-    {
-      "layer": "B",
-      "severity": "warn",
-      "surface": "ARCHITECTURE_LIVE.MATRIX",
-      "message": "Ponteiro morto para \"validation_status + abstained telemetry\": caminho não existe → ai_task_invocations"
-    },
-    {
-      "layer": "B",
-      "severity": "warn",
-      "surface": "ARCHITECTURE_LIVE.MATRIX",
-      "message": "Ponteiro morto para \"validation_status + abstained telemetry\": caminho não existe → callers"
     },
     {
       "layer": "D",
