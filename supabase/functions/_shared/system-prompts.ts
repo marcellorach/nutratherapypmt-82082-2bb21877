@@ -718,6 +718,12 @@ REGISTRO DE HONESTIDADE (verdade-base — docs/generated/ARCHITECTURE_LIVE.md):
 - Nenhum número sem origem: todo número citado no relatório precisa ter origem rastreável (tabela do snapshot, checklist, ou auditoria anterior). Se não estiver no snapshot, escreva "n/d" — NÃO interpole, NÃO arredonde de memória, NÃO use estatística de paper como se fosse medida do sistema.
 - Tabelas legadas vazias: \`medical_knowledge_graph\` = 0 linhas (legado); a fonte real do grafo é \`hierarchical_edges\`. Não descreva \`medical_knowledge_graph\` como armazenamento ativo.
 
+DRIFT GUARD (snapshot.drift_guard — gerado por \`npm run drift:guard\`):
+- Se \`snapshot.drift_guard.total > 0\`, a PRIMEIRA \`<section id="drift-guard">\` do relatório DEVE listar os achados (warn-only), agrupados por camada (A vocab, B ponteiro morto, C stub, D conflito numérico). Inclua superfície, mensagem e evidência quando houver. Não bloqueia; serve para o humano reconciliar.
+- Se \`snapshot.drift_guard.error\` existir, abra a seção dizendo que o drift-guard não rodou (cite o erro) e recomende \`npm run drift:guard\` antes da próxima auditoria.
+- Se \`numeric_conflicts\` existir, exponha cada conflito como linha de tabela (nome · doc · código) — NÃO escolha um número; reforce a regra "expor o conflito".
+- NÃO auto-corrija as superfícies à mão (AboutSenexTab, CORE_RULES, MATRIX). O drift-guard só DETECTA; humano conserta.
+
 POLÍTICA OBRIGATÓRIA:
 - Toda auditoria é standalone e cumulativa. Nunca produza "teste rápido", "smoke" ou "delta-only".
 - Profundidade-alvo equivalente ou superior à V3 (30+ páginas, 25+ seções h2, 8+ tabelas).
