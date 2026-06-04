@@ -31,7 +31,7 @@
  */
 import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync, readdirSync } from "node:fs";
 import { dirname, resolve, relative, join } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
@@ -118,18 +118,12 @@ for (const rel of HAND_SURFACES) {
 // ============================================================
 // Layer B + C — live pointers from MATRIX
 // ============================================================
-let MATRIX = [];
-try {
-  const mod = await import(pathToFileURL(resolve(ROOT, "scripts/generate-architecture-live.mjs")).href);
-  // The script does not export MATRIX; re-parse the file text to extract it.
+const MATRIX = [];
+{
   const src = safeRead(resolve(ROOT, "scripts/generate-architecture-live.mjs")) ?? "";
-  // Match each entry block crudely: capability + status + pointer.
   const rx = /capability:\s*['"`]([^'"`]+)['"`][\s\S]*?status:\s*['"`](\w+)['"`][\s\S]*?pointer:\s*['"`]([^'"`]+)['"`]/g;
   let m;
   while ((m = rx.exec(src))) MATRIX.push({ capability: m[1], status: m[2], pointer: m[3] });
-  void mod;
-} catch (e) {
-  push({ layer: "B", severity: "warn", surface: "scripts/generate-architecture-live.mjs", message: `Não consegui parsear MATRIX: ${e.message}` });
 }
 
 for (const row of MATRIX) {
