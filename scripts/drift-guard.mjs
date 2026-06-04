@@ -70,7 +70,7 @@ const FORBIDDEN = [
   { rx: /\bdados (clínicos )?reais\b/gi, term: "dados reais" },
 ];
 const MITIGATOR =
-  /(inspira[çc][ãa]o|inspiration|planned|planejado|n[ãa]o implementado|not implemented|sint[ée]tico|synthetic|cohort sint|synthetic_cohort)/i;
+  /(inspira[çc][ãa]o|inspired by|inspiration|planned|planejado|n[ãa]o implementado|not implemented|sint[ée]tico|synthetic|cohort sint|synthetic_cohort)/i;
 
 const HAND_SURFACES = [
   "src/components/administrador/AboutSenexTab.tsx",
