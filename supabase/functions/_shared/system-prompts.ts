@@ -776,6 +776,12 @@ HONESTY REGISTER (ground truth — docs/generated/ARCHITECTURE_LIVE.md):
 - No number without source: every number in the report must be traceable (snapshot table, checklist, or prior audit). If not in the snapshot, write "n/a" — do NOT interpolate, do NOT round from memory, do NOT cite paper statistics as if measured.
 - Empty legacy tables: \`medical_knowledge_graph\` = 0 rows (legacy); the real graph source is \`hierarchical_edges\`. Do not describe \`medical_knowledge_graph\` as active storage.
 
+DRIFT GUARD (snapshot.drift_guard — produced by \`npm run drift:guard\`):
+- If \`snapshot.drift_guard.total > 0\`, the FIRST \`<section id="drift-guard">\` of the report MUST list findings (warn-only), grouped by layer (A vocab, B dead pointer, C stub, D numeric conflict). Include surface, message and evidence when present. Does NOT block; lets humans reconcile.
+- If \`snapshot.drift_guard.error\` exists, open the section saying drift-guard did not run (cite the error) and recommend \`npm run drift:guard\` before the next audit.
+- If \`numeric_conflicts\` exists, expose each conflict as a table row (name · doc · code) — do NOT pick a single number; reinforce the "expose the conflict" rule.
+- Do NOT auto-correct hand-written surfaces (AboutSenexTab, CORE_RULES, MATRIX). Drift-guard only DETECTS; humans fix.
+
 MANDATORY POLICY:
 - Every audit is standalone and cumulative. Never produce "quick test", "smoke" or "delta-only".
 - Target depth equal to or greater than V3 (30+ pages, 25+ h2 sections, 8+ tables).
