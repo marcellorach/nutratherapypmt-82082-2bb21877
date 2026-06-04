@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-06-03T16:01:38.694Z
+Generated: 2026-06-04T00:54:20.486Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
 ## Latest i18n version: 1.118.3
 
 ## Changes by area (last 14 days)
-- **admin**: 43
+- **admin**: 34
 - **kg**: 9
 - **meta**: 7
 - **clinical-pipeline**: 7
@@ -15,6 +15,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **vet-ui**: 1
 
 ## Top 10 recent entries
+### 2026-06-04 · [meta] ADDED — Drift-guard A+B+C+D dobrado no pipeline da auditoria
+- Novo script `scripts/drift-guard.mjs` (`npm run drift:guard`) — checagem WARN-only que compara as superfícies à mão (AboutSenexTab, CORE_RULES.md, GRAPHRAG_ARCHITECTURE.md, admin-tabs-info, landing) com a MATRIX em `generate-architecture-live.mjs`. Quatro camadas:
+- A — vocabulário proibido (`GRRA`, `U-Retrieval`, `TransE`, `RWD`, "Real-World Data", "dados reais", "ingestão massiva", "base de pacientes reais") sem mitigador (`inspiração|inspiration|planned|sintético|...`) no parágrafo.
+- B — ponteiros mortos: cada caminho citado em `pointer:` da MATRIX precisa existir no repo.
+_files: scripts/drift-guard.mjs, public/drift-report.json, supabase/functions/generate-audit/index.ts, supabase/functions/_shared/system-prompts.ts_
+
 ### 2026-06-03 · [kg] ADDED — Bloco 2: telemetria do verificador + página admin de runs
 - Migração: 4 colunas em `triplet_verifications` (`tool_choice_used`, `abstain_reason` ∈ {no_chunks, low_similarity, chunks_off_topic, verifier_error, tool_call_missing, other}, `recalled_chunks` jsonb com snippet+similaridade por chunk, `recall_similarity_top`) + `stratification_snapshot` em `triplet_verification_runs` (snapshot verdade-base de quantos itens foram sorteados por banda/enrichment/camada).
 - Runner (`triplet-verification-runner`): preenche os novos campos por linha; classifica `abstain_reason` automaticamente quando o verdict é `unverifiable`; serializa chunks recuperados com snippet (320 chars) marcando quais o verificador alegou suportar a claim.
@@ -69,12 +75,6 @@ _files: supabase/functions/parse-pet-exam-pdf/index.ts_
 - Card #4 (remoção do `simpleExtraction`): `supabase/functions/extract-pet-clinical-data/index.ts` perdeu o fallback regex rule-based que fabricava entidades silenciosamente quando a chave do modelo estava ausente, o modelo retornava erro/vazio, ou o parse JSON falhava. Todos esses caminhos agora retornam envelope abstain (`clinical_signal_insufficient`) com arrays vazios — comportamento honesto, mensurável e rastreável pela telemetria do card #2.
 - Tipos centralizados (Eixo B — proveniência): novo `CompoundProvenance = 'KG-backed' | 'AI-enriched' | 'AI-generated'` e `AbstainEnvelope` em `src/types/recommendation-confidence.ts`. Valores MANTIDOS em PascalCase/kebab por compatibilidade de UI — Bloco 2(e) do plano fica responsável por normalizar para snake_case e separar value↔label (evita dois churns no mesmo campo). Eixo A (qualidade científica em `src/rules/general/evidence-levels.ts`) permanece ortogonal e intocado.
 _files: supabase/functions/extract-pet-clinical-data/index.ts, src/types/recommendation-confidence.ts, src/rules/general/evidence-levels.ts, supabase/functions/hybrid-recommendation/index.ts_
-
-### 2026-06-02 · [infra] ADDED — IA Hardening Card #1: interpolate blindado + telemetria de variáveis ausentes
-- `interpolate(tpl, vars, missing?)` em `supabase/functions/_shared/ai-task-router.ts` agora coleta toda chave `{{var}}` cujo valor cai para `undefined`/`null`/`""` em vez de substituir silenciosamente. Comportamento legado preservado (ainda retorna `""`), mas as ocorrências são registradas.
-- `callAITask` agora emite `console.warn` por invocação com variáveis ausentes (`task=… caller=… missing_variables=[…]`) e persiste o array em `ai_task_invocations.missing_variables` (nova coluna `text[]` + índice GIN parcial via migração).
-- Pré-requisito do card #6 (auditoria de `required_variables` por task) — sem este log, "variável nunca ausente" é indistinguível de "task nunca exercitada".
-_files: supabase/functions/_shared/ai-task-router.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
