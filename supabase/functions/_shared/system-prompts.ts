@@ -719,7 +719,8 @@ REGISTRO DE HONESTIDADE (verdade-base — docs/generated/ARCHITECTURE_LIVE.md):
 - Tabelas legadas vazias: \`medical_knowledge_graph\` = 0 linhas (legado); a fonte real do grafo é \`hierarchical_edges\`. Não descreva \`medical_knowledge_graph\` como armazenamento ativo.
 
 DRIFT GUARD (snapshot.drift_guard — gerado por \`npm run drift:guard\`):
-- Se \`snapshot.drift_guard.total > 0\`, a PRIMEIRA \`<section id="drift-guard">\` do relatório DEVE listar os achados (warn-only), agrupados por camada (A vocab, B ponteiro morto, C stub, D conflito numérico). Inclua superfície, mensagem e evidência quando houver. Não bloqueia; serve para o humano reconciliar.
+- ANTES de qualquer outra seção, emita \`<section id="audit-target">\` com um bloco "Auditado em" listando: ambiente (\`snapshot.audit_target.environment\` — preview/publicado), origem (\`origin\`), timestamp do drift-report.json lido (\`drift_generated_at\`, ou "ausente" se null), \`fetched_at\`, status HTTP, e commit/deploy (\`commit\` — escreva "n/d" se null). Acrescente a nota: "Banco compartilhado entre preview e publicado; ambiente identifica APENAS qual frontend/drift-report foi medido". Sem este bloco a auditoria é desonesta sobre o que mediu.
+- Depois do bloco de carimbo, se \`snapshot.drift_guard.total > 0\`, a próxima \`<section id="drift-guard">\` DEVE listar os achados (warn-only), agrupados por camada (A vocab, B ponteiro morto, C stub, D conflito numérico). Inclua superfície, mensagem e evidência quando houver. Não bloqueia; serve para o humano reconciliar.
 - Se \`snapshot.drift_guard.error\` existir, abra a seção dizendo que o drift-guard não rodou (cite o erro) e recomende \`npm run drift:guard\` antes da próxima auditoria.
 - Se \`numeric_conflicts\` existir, exponha cada conflito como linha de tabela (nome · doc · código) — NÃO escolha um número; reforce a regra "expor o conflito".
 - NÃO auto-corrija as superfícies à mão (AboutSenexTab, CORE_RULES, MATRIX). O drift-guard só DETECTA; humano conserta.
@@ -777,7 +778,8 @@ HONESTY REGISTER (ground truth — docs/generated/ARCHITECTURE_LIVE.md):
 - Empty legacy tables: \`medical_knowledge_graph\` = 0 rows (legacy); the real graph source is \`hierarchical_edges\`. Do not describe \`medical_knowledge_graph\` as active storage.
 
 DRIFT GUARD (snapshot.drift_guard — produced by \`npm run drift:guard\`):
-- If \`snapshot.drift_guard.total > 0\`, the FIRST \`<section id="drift-guard">\` of the report MUST list findings (warn-only), grouped by layer (A vocab, B dead pointer, C stub, D numeric conflict). Include surface, message and evidence when present. Does NOT block; lets humans reconcile.
+- BEFORE any other section, emit \`<section id="audit-target">\` with an "Audited at" block listing: environment (\`snapshot.audit_target.environment\` — preview/published), origin (\`origin\`), drift-report.json timestamp (\`drift_generated_at\`, or "missing" if null), \`fetched_at\`, HTTP status, and commit/deploy (\`commit\` — write "n/a" if null). Add the note: "DB is shared between preview and published; environment identifies ONLY which frontend/drift-report was measured". Without this block the audit is dishonest about what it measured.
+- After the stamp block, if \`snapshot.drift_guard.total > 0\`, the next \`<section id="drift-guard">\` MUST list findings (warn-only), grouped by layer (A vocab, B dead pointer, C stub, D numeric conflict). Include surface, message and evidence when present. Does NOT block; lets humans reconcile.
 - If \`snapshot.drift_guard.error\` exists, open the section saying drift-guard did not run (cite the error) and recommend \`npm run drift:guard\` before the next audit.
 - If \`numeric_conflicts\` exists, expose each conflict as a table row (name · doc · code) — do NOT pick a single number; reinforce the "expose the conflict" rule.
 - Do NOT auto-correct hand-written surfaces (AboutSenexTab, CORE_RULES, MATRIX). Drift-guard only DETECTS; humans fix.
