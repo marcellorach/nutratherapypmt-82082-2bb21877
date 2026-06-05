@@ -252,7 +252,7 @@ function uniqueStrings(values: string[]) {
   return Array.from(new Set(values.filter(Boolean)));
 }
 
-async function readAuditContext(service: ReturnType<typeof createClient>) {
+async function readAuditContext(service: ReturnType<typeof createClient>, appOrigin?: string) {
   const snapshot: Record<string, any> = {};
   const tableNames = [
     "studies", "study_embeddings", "triplet_extractions", "medical_knowledge_graph",
@@ -313,18 +313,39 @@ async function readAuditContext(service: ReturnType<typeof createClient>) {
 
   // Drift-guard report (warn-only). Produced by `npm run drift:guard` and
   // shipped as public/drift-report.json. If absent, the LLM is told so explicitly.
+  // We also stamp `snapshot.audit_target` so the report can declare WHICH
+  // surface it actually measured (preview vs published) — the DB is shared,
+  // so the only honest differentiator is which origin served the drift JSON.
+  const envDefault = Deno.env.get("APP_PUBLIC_URL") ?? "https://nutratherapypmt-82082.lovable.app";
+  const rawOrigin = (typeof appOrigin === "string" && /^https?:\/\//i.test(appOrigin)) ? appOrigin.replace(/\/$/, "") : envDefault;
+  const environment = /preview|lovableproject\.com|localhost|127\.0\.0\.1/i.test(rawOrigin) ? "preview" : "published";
+  const driftUrl = `${rawOrigin}/drift-report.json`;
+  const fetchedAt = new Date().toISOString();
+  let driftGeneratedAt: string | null = null;
+  let httpStatus: number | null = null;
   try {
-    const baseUrl = Deno.env.get("APP_PUBLIC_URL") ?? "https://nutratherapypmt-82082.lovable.app";
-    const res = await fetch(`${baseUrl}/drift-report.json`, { signal: AbortSignal.timeout(10_000) });
+    const res = await fetch(driftUrl, { signal: AbortSignal.timeout(10_000) });
+    httpStatus = res.status;
     if (res.ok) {
       const drift = await res.json();
       snapshot.drift_guard = drift;
+      driftGeneratedAt = typeof drift?.generated_at === "string" ? drift.generated_at : null;
     } else {
       snapshot.drift_guard = { error: `HTTP ${res.status}`, hint: "rode `npm run drift:guard` antes da auditoria" };
     }
   } catch (e) {
     snapshot.drift_guard = { error: (e as any)?.message ?? String(e), hint: "rode `npm run drift:guard` antes da auditoria" };
   }
+  snapshot.audit_target = {
+    environment,                       // 'preview' | 'published'
+    origin: rawOrigin,                 // which host actually served the drift JSON
+    drift_url: driftUrl,
+    drift_generated_at: driftGeneratedAt, // timestamp INSIDE the JSON read
+    drift_http_status: httpStatus,
+    fetched_at: fetchedAt,             // when generate-audit fetched it
+    commit: Deno.env.get("DEPLOY_COMMIT") ?? Deno.env.get("VERCEL_GIT_COMMIT_SHA") ?? null,
+    note: "DB é compartilhado entre preview e publicado; o único diferenciador honesto é o drift-report.json e o frontend carregado.",
+  };
 
   let prevAuditsCtx = "";
   try {
@@ -594,6 +615,9 @@ Deno.serve(async (req) => {
     const scope = String((body as any)?.scope ?? "").trim();
     const systemVersion = String((body as any)?.system_version ?? "").trim();
     const systemChangelogDate = (body as any)?.system_changelog_date ?? null;
+    // Optional: caller (UI) passes window.location.origin so the audit can
+    // declare whether it measured PREVIEW or PUBLISHED. Falls back to env.
+    const appOrigin = typeof (body as any)?.app_origin === "string" ? (body as any).app_origin : "";
 
     // Auto-discovery: front-end may pass dynamic scope items derived from admin-tabs/organograma.
     const incomingScopeItems = (body as any)?.scope_items;
@@ -857,7 +881,7 @@ Deno.serve(async (req) => {
         let snapshot = auditContext.snapshot as Record<string, any> | undefined;
         let prevAuditsCtx = typeof auditContext.prevAuditsCtx === "string" ? auditContext.prevAuditsCtx : undefined;
         if (!snapshot || !prevAuditsCtx) {
-          const computed = await readAuditContext(service);
+          const computed = await readAuditContext(service, appOrigin);
           snapshot = computed.snapshot;
           prevAuditsCtx = computed.prevAuditsCtx;
           await updateSummary({ audit_context: computed });
