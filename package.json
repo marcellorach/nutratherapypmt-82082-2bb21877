@@ -15,7 +15,7 @@
     "docs:provenance": "node scripts/generate-data-provenance.mjs",
     "docs:all": "node scripts/generate-architecture-live.mjs && node scripts/generate-prompts-snapshot.mjs && node scripts/generate-data-provenance.mjs",
     "drift:guard": "node scripts/drift-guard.mjs",
-    "audit:prebuild": "node scripts/sync-changelog.mjs && node scripts/generate-architecture-live.mjs && node scripts/generate-prompts-snapshot.mjs && node scripts/generate-data-provenance.mjs && node scripts/drift-guard.mjs",
+    "audit:prebuild": "node scripts/sync-changelog.mjs && node scripts/generate-architecture-live.mjs && node scripts/generate-prompts-snapshot.mjs && node scripts/generate-data-provenance.mjs && node scripts/drift-guard.mjs && node scripts/copy-snapshots-to-public.mjs",
     "check:translations": "node scripts/check-translation-duplicates.mjs",
     "audit:prompts": "node scripts/audit-prompt-registry.mjs",
     "test": "vitest run",
