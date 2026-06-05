@@ -8489,6 +8489,23 @@
       "requestSuccessDesc": "Report created and available below.",
       "saveError": "Error saving",
       "scopeUpdated": "Scope updated"
+    },
+    "previewVsPublished": {
+      "title": "Preview vs Published",
+      "subtitle": "Real-time comparison of auditable snapshots between preview and the published environment. Useful before deploying.",
+      "reload": "Reload",
+      "allEqual": "All equal",
+      "hasDiff": "Differences found",
+      "equal": "equal",
+      "differs": "differs",
+      "viewDiff": "View diff",
+      "preview": "Preview (not published)",
+      "published": "Published",
+      "empty": "Click Reload to compare.",
+      "linesAdded": "lines added",
+      "linesRemoved": "lines removed",
+      "missingNote": "A snapshot did not return 200. If the published one returns 404, run npm run audit:prebuild locally and publish a new version.",
+      "dbNote": "Note: preview and published share the same database (Supabase). Diffs here refer only to static files and the frontend bundle."
     }
   },
   "fundamentos": {

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-06-05T15:44:40.868Z",
+  "timestamp": "2026-06-05T16:16:58.943Z",
   "summary": {
     "totalFiles": 954,
     "totalIssues": 471,
@@ -473,21 +473,21 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
-      "line": 355,
+      "line": 358,
       "text": ".",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
-      "line": 356,
+      "line": 359,
       "text": ".",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
-      "line": 551,
+      "line": 554,
       "text": "a",
       "severity": "high"
     },

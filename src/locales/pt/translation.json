@@ -8493,6 +8493,23 @@
       "requestSuccessDesc": "Relatório criado e disponível abaixo.",
       "saveError": "Erro ao salvar",
       "scopeUpdated": "Escopo atualizado"
+    },
+    "previewVsPublished": {
+      "title": "Preview vs Publicado",
+      "subtitle": "Compara em tempo real os snapshots auditáveis entre o preview e o ambiente publicado. Útil antes de dar deploy.",
+      "reload": "Recarregar",
+      "allEqual": "Tudo igual",
+      "hasDiff": "Há diferenças",
+      "equal": "igual",
+      "differs": "difere",
+      "viewDiff": "Ver diff",
+      "preview": "Preview (não publicado)",
+      "published": "Publicado",
+      "empty": "Clique em Recarregar para comparar.",
+      "linesAdded": "linhas adicionadas",
+      "linesRemoved": "linhas removidas",
+      "missingNote": "Algum snapshot não respondeu 200. Se o publicado retornar 404, rode npm run audit:prebuild localmente e publique uma nova versão.",
+      "dbNote": "Observação: preview e publicado compartilham o mesmo banco (Supabase). Diferenças aqui referem-se apenas a arquivos estáticos e ao bundle frontend."
     }
   },
   "fundamentos": {

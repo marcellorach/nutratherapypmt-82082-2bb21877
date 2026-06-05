@@ -24,14 +24,6 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.0.1 -->
 
-### Added - 2026-06-05 — Painel Preview vs Publicado na aba de Auditorias
-<!-- area: admin · status: entregue · i18n: 1.118.4 -->
-- **Novo componente** `PreviewVsPublishedPanel` (admin → Auditorias) — compara em tempo real os 4 snapshots auditáveis (`drift-report.json`, `ARCHITECTURE_LIVE.md`, `CHANGELOG.md`, `PROMPTS.md`) entre o ambiente de preview (`window.location.origin`) e o publicado (`https://longevidade.ai`). Status verde/amarelo por sha-256, botão "Ver diff" abre `SnapshotDiffDialog` lado a lado (lib `diff`).
-- **Nova edge function** `compare-snapshots` — fetch server-side paralelo dos dois ambientes (contorna CORS de hospedagem estática), whitelist fixa de arquivos, devolve `{file, equal, preview, published}` com sha-256.
-- **Novo passo de build** `scripts/copy-snapshots-to-public.mjs` (último passo de `npm run audit:prebuild`) — copia os 4 artefatos para `public/snapshots/` + `manifest.json` com sha-256/bytes/timestamp. Sem esse passo, navegador não consegue baixar `ARCHITECTURE_LIVE.md`/`CHANGELOG.md`/`PROMPTS.md` (estão fora de `/public/`).
-- **Nota explícita no painel:** preview e publicado compartilham o mesmo Supabase; diffs aqui referem-se apenas a arquivos estáticos e ao bundle frontend.
-- Files: src/components/administrador/audits/PreviewVsPublishedPanel.tsx, src/components/administrador/audits/SnapshotDiffDialog.tsx, src/components/administrador/audits/TechnicalAuditsTab.tsx, supabase/functions/compare-snapshots/index.ts, scripts/copy-snapshots-to-public.mjs, package.json, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json
-
 ### Added - 2026-06-04 — Drift-guard A+B+C+D dobrado no pipeline da auditoria
 <!-- area: meta · status: entregue · i18n: 1.118.3 -->
 - **Novo script** `scripts/drift-guard.mjs` (`npm run drift:guard`) — checagem WARN-only que compara as superfícies à mão (AboutSenexTab, CORE_RULES.md, GRAPHRAG_ARCHITECTURE.md, admin-tabs-info, landing) com a MATRIX em `generate-architecture-live.mjs`. Quatro camadas:

@@ -1,0 +1,29 @@
+{
+  "generated_at": "2026-06-05T16:18:28.585Z",
+  "files": [
+    {
+      "file": "drift-report.json",
+      "bytes": 24104,
+      "sha256": "999bd1affe809b03462b32e6e17462fad85df4f46dcb2d55007e6d3f8b5643f8",
+      "status": "ok"
+    },
+    {
+      "file": "ARCHITECTURE_LIVE.md",
+      "bytes": 7716,
+      "sha256": "fc3982bdbffd8d61d3b76e628288400f1af58c004be1a61bd035236251f675b2",
+      "status": "ok"
+    },
+    {
+      "file": "CHANGELOG.md",
+      "bytes": 341357,
+      "sha256": "570960129acea102033b2903c3c7698394448ac2183f3cded38ff4c20d35f20b",
+      "status": "ok"
+    },
+    {
+      "file": "PROMPTS.md",
+      "bytes": 61083,
+      "sha256": "2f0b6c342ec9520873e00fc6bae5d4e5615e25802e2d8c7433b1d714793599fe",
+      "status": "ok"
+    }
+  ]
+}

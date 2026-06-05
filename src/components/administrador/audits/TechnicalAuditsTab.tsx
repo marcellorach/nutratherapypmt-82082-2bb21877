@@ -22,6 +22,7 @@ import { I18N_VERSION } from "@/i18n";
 import { useTranslation } from "react-i18next";
 import AuditVersionComparison from "./AuditVersionComparison";
 import ComplianceHistoryChart from "./ComplianceHistoryChart";
+import PreviewVsPublishedPanel from "./PreviewVsPublishedPanel";
 import { openAuditForPrint, fetchAuditHtml } from "./audit-pdf-generator";
 import { renderCoverageScopePt, COVERAGE_VERSION } from "@/data/audit-coverage";
 import VersionBadge from "@/components/system/VersionBadge";
@@ -480,6 +481,8 @@ export default function TechnicalAuditsTab() {
       </div>
 
       {/* Banner de fila removido: a geração agora é instantânea. */}
+
+      <PreviewVsPublishedPanel />
 
       {progress && (
         <Card className="border-primary/40 bg-primary/5">
