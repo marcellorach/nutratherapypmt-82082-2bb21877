@@ -245,6 +245,9 @@ export default function TechnicalAuditsTab() {
           scope: newScope,
           system_version: `Senex v${SENEX_VERSION} · i18n ${CURRENT_I18N_VERSION}`,
           system_changelog_date: lastChangelogDate || new Date().toISOString().slice(0, 10),
+          // Carimbo de ambiente: backend usa para declarar preview vs publicado
+          // (banco compartilhado; diferenciador é o /drift-report.json servido).
+          app_origin: typeof window !== "undefined" ? window.location.origin : "",
         },
       });
       if (error) throw error;
