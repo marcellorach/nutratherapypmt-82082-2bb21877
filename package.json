@@ -18,6 +18,7 @@
     "audit:prebuild": "node scripts/sync-changelog.mjs && node scripts/generate-architecture-live.mjs && node scripts/generate-prompts-snapshot.mjs && node scripts/generate-data-provenance.mjs && node scripts/drift-guard.mjs && node scripts/copy-snapshots-to-public.mjs",
     "check:translations": "node scripts/check-translation-duplicates.mjs",
     "audit:prompts": "node scripts/audit-prompt-registry.mjs",
+    "verify:deploy": "node scripts/verify-deploy-chunks.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
   },
