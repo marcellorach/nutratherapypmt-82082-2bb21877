@@ -1,18 +1,17 @@
 # Project context briefing (auto)
-Generated: 2026-06-04T00:54:20.486Z
+Generated: 2026-06-05T14:53:19.802Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
 ## Latest i18n version: 1.118.3
 
 ## Changes by area (last 14 days)
-- **admin**: 34
-- **kg**: 9
-- **meta**: 7
+- **admin**: 30
 - **clinical-pipeline**: 7
+- **meta**: 5
 - **infra**: 5
+- **kg**: 4
 - **curation**: 3
-- **vet-ui**: 1
 
 ## Top 10 recent entries
 ### 2026-06-04 · [meta] ADDED — Drift-guard A+B+C+D dobrado no pipeline da auditoria

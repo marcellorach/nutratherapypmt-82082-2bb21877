@@ -1,6 +1,6 @@
 # DATA_PROVENANCE — proveniência dos números clínicos
 
-> **Gerado automaticamente** em 2026-06-03 por `scripts/generate-data-provenance.mjs`. NÃO editar à mão.
+> **Gerado automaticamente** em 2026-06-05 por `scripts/generate-data-provenance.mjs`. NÃO editar à mão.
 > Origem: `count(*)` direto no Supabase + breakdown por `pet_profiles.is_demo` / `is_synthetic`.
 
 ## Knowledge Graph

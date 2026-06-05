@@ -1,7 +1,7 @@
 # ARCHITECTURE_LIVE — Capacidade afirmada × Implementação real
 
 > **DO NOT EDIT.** Gerado por `npm run docs:architecture`
-> (scripts/generate-architecture-live.mjs). Última geração: 2026-06-04.
+> (scripts/generate-architecture-live.mjs). Última geração: 2026-06-05.
 
 ## Propósito
 
