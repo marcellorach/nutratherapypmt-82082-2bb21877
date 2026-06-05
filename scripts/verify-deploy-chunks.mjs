@@ -39,20 +39,35 @@ async function main() {
   }
   const html = await indexRes.text();
 
-  // Pull every /assets/*.js path (script src + modulepreload href).
-  const chunks = Array.from(
+  // Pull entry chunk(s) from index.html, then crawl them for the lazy
+  // chunk filenames that Vite inlines as string literals (e.g.
+  // "assets/TechnicalAuditsTab-D_tiKK5e.js"). One level of crawl is enough
+  // for our setup — lazy chunks are all referenced from the entry bundle.
+  const entryChunks = Array.from(
     new Set(
       Array.from(html.matchAll(/["'](\/assets\/[^"']+?\.js)["']/g)).map(
         (m) => m[1],
       ),
     ),
   );
-
-  if (chunks.length === 0) {
+  if (entryChunks.length === 0) {
     log("✗", "no /assets/*.js references found in index.html");
     process.exit(1);
   }
-  log("ℹ", `${chunks.length} chunk reference(s) found`);
+  const lazyChunks = new Set();
+  for (const entry of entryChunks) {
+    const r = await fetch(`${target}${entry}`, { cache: "no-store" });
+    if (!r.ok) {
+      log("✗", `entry chunk ${entry} HTTP ${r.status}`);
+      process.exit(1);
+    }
+    const body = await r.text();
+    for (const m of body.matchAll(/["']assets\/([A-Za-z0-9._-]+\.js)["']/g)) {
+      lazyChunks.add(`/assets/${m[1]}`);
+    }
+  }
+  const chunks = Array.from(new Set([...entryChunks, ...lazyChunks]));
+  log("ℹ", `${entryChunks.length} entry + ${lazyChunks.size} lazy chunk(s) found`);
 
   const results = await Promise.all(
     chunks.map(async (path) => {
