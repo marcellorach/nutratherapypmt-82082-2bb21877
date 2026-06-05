@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-06-05T16:16:58.943Z",
+  "timestamp": "2026-06-05T22:27:37.839Z",
   "summary": {
-    "totalFiles": 954,
+    "totalFiles": 956,
     "totalIssues": 471,
     "hardcodedTexts": 57,
     "missingKeys": 412,
@@ -438,13 +438,6 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
-      "line": 148,
-      "text": "*",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
       "line": 149,
       "text": "*",
       "severity": "high"
@@ -453,14 +446,14 @@
       "type": "missing-key",
       "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
       "line": 150,
-      "text": "change_threshold",
+      "text": "*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
-      "line": 156,
-      "text": ".",
+      "line": 151,
+      "text": "change_threshold",
       "severity": "high"
     },
     {
@@ -473,7 +466,7 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
-      "line": 358,
+      "line": 158,
       "text": ".",
       "severity": "high"
     },
@@ -487,7 +480,14 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
-      "line": 554,
+      "line": 360,
+      "text": ".",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
+      "line": 557,
       "text": "a",
       "severity": "high"
     },
