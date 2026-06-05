@@ -615,6 +615,9 @@ Deno.serve(async (req) => {
     const scope = String((body as any)?.scope ?? "").trim();
     const systemVersion = String((body as any)?.system_version ?? "").trim();
     const systemChangelogDate = (body as any)?.system_changelog_date ?? null;
+    // Optional: caller (UI) passes window.location.origin so the audit can
+    // declare whether it measured PREVIEW or PUBLISHED. Falls back to env.
+    const appOrigin = typeof (body as any)?.app_origin === "string" ? (body as any).app_origin : "";
 
     // Auto-discovery: front-end may pass dynamic scope items derived from admin-tabs/organograma.
     const incomingScopeItems = (body as any)?.scope_items;
