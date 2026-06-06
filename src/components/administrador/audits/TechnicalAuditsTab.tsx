@@ -653,6 +653,17 @@ export default function TechnicalAuditsTab() {
                           size="sm"
                           variant="outline"
                           className="h-6 px-2 text-[10px] gap-1"
+                          onClick={(e) => { e.stopPropagation(); window.open(a.html_path!, "_blank"); }}
+                          title="Abrir HTML em nova aba"
+                        >
+                          <ExternalLink className="h-2.5 w-2.5" /> Ver
+                        </Button>
+                      )}
+                      {a.html_path && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-6 px-2 text-[10px] gap-1"
                           onClick={(e) => {
                             e.stopPropagation();
                             downloadAuditHtml(a).catch((err) =>
