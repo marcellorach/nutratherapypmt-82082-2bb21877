@@ -22,7 +22,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ---
 
 ## [Unreleased]
-<!-- senex: 7.0.1 -->
+<!-- senex: 7.1.0 -->
 
 ### Added - 2026-06-05 — Painel Preview vs Publicado na aba de Auditorias
 <!-- area: admin · status: entregue · i18n: 1.118.4 -->
