@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-05T16:18:50.695Z
+// Última geração: 2026-06-06T13:54:16.641Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,36 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-06-04";
+export const lastChangelogDate = "2026-06-05";
 
-export const senexVersion = "7.0.1";
+export const senexVersion = "7.1.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-05",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Painel Preview vs Publicado na aba de Auditorias",
+    "bullets": [
+      "Novo componente `PreviewVsPublishedPanel` (admin → Auditorias) — compara em tempo real os 4 snapshots auditáveis (`drift-report.json`, `ARCHITECTURE_LIVE.md`, `CHANGELOG.md`, `PROMPTS.md`) entre o ambiente de preview (`window.location.origin`) e o publicado (`https://longevidade.ai`). Status verde/amarelo por sha-256, botão \"Ver diff\" abre `SnapshotDiffDialog` lado a lado (lib `diff`).",
+      "Nova edge function `compare-snapshots` — fetch server-side paralelo dos dois ambientes (contorna CORS de hospedagem estática), whitelist fixa de arquivos, devolve `{file, equal, preview, published}` com sha-256.",
+      "Novo passo de build `scripts/copy-snapshots-to-public.mjs` (último passo de `npm run audit:prebuild`) — copia os 4 artefatos para `public/snapshots/` + `manifest.json` com sha-256/bytes/timestamp. Sem esse passo, navegador não consegue baixar `ARCHITECTURE_LIVE.md`/`CHANGELOG.md`/`PROMPTS.md` (estão fora de `/public/`).",
+      "Nota explícita no painel: preview e publicado compartilham o mesmo Supabase; diffs aqui referem-se apenas a arquivos estáticos e ao bundle frontend.",
+      "Files: src/components/administrador/audits/PreviewVsPublishedPanel.tsx, src/components/administrador/audits/SnapshotDiffDialog.tsx, src/components/administrador/audits/TechnicalAuditsTab.tsx, supabase/functions/compare-snapshots/index.ts, scripts/copy-snapshots-to-public.mjs, package.json, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json"
+    ],
+    "files": [
+      "scripts/copy-snapshots-to-public.mjs",
+      "src/components/administrador/audits/PreviewVsPublishedPanel.tsx",
+      "src/components/administrador/audits/SnapshotDiffDialog.tsx",
+      "src/components/administrador/audits/TechnicalAuditsTab.tsx",
+      "supabase/functions/compare-snapshots/index.ts",
+      "src/i18n.ts",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json"
+    ],
+    "i18nVersion": "1.118.4"
+  },
   {
     "date": "2026-06-04",
     "kind": "added",

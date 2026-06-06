@@ -1,19 +1,25 @@
 # Project context briefing (auto)
-Generated: 2026-06-05T16:18:50.701Z
+Generated: 2026-06-06T13:54:16.647Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.118.3
+## Latest i18n version: 1.118.4
 
 ## Changes by area (last 14 days)
-- **admin**: 30
+- **admin**: 25
 - **clinical-pipeline**: 7
 - **meta**: 5
 - **infra**: 5
-- **kg**: 4
+- **kg**: 3
 - **curation**: 3
 
 ## Top 10 recent entries
+### 2026-06-05 · [admin] ADDED — Painel Preview vs Publicado na aba de Auditorias
+- Novo componente `PreviewVsPublishedPanel` (admin → Auditorias) — compara em tempo real os 4 snapshots auditáveis (`drift-report.json`, `ARCHITECTURE_LIVE.md`, `CHANGELOG.md`, `PROMPTS.md`) entre o ambiente de preview (`window.location.origin`) e o publicado (`https://longevidade.ai`). Status verde/amarelo por sha-256, botão "Ver diff" abre `SnapshotDiffDialog` lado a lado (lib `diff`).
+- Nova edge function `compare-snapshots` — fetch server-side paralelo dos dois ambientes (contorna CORS de hospedagem estática), whitelist fixa de arquivos, devolve `{file, equal, preview, published}` com sha-256.
+- Novo passo de build `scripts/copy-snapshots-to-public.mjs` (último passo de `npm run audit:prebuild`) — copia os 4 artefatos para `public/snapshots/` + `manifest.json` com sha-256/bytes/timestamp. Sem esse passo, navegador não consegue baixar `ARCHITECTURE_LIVE.md`/`CHANGELOG.md`/`PROMPTS.md` (estão fora de `/public/`).
+_files: scripts/copy-snapshots-to-public.mjs, src/components/administrador/audits/PreviewVsPublishedPanel.tsx, src/components/administrador/audits/SnapshotDiffDialog.tsx, src/components/administrador/audits/TechnicalAuditsTab.tsx…_
+
 ### 2026-06-04 · [meta] ADDED — Drift-guard A+B+C+D dobrado no pipeline da auditoria
 - Novo script `scripts/drift-guard.mjs` (`npm run drift:guard`) — checagem WARN-only que compara as superfícies à mão (AboutSenexTab, CORE_RULES.md, GRAPHRAG_ARCHITECTURE.md, admin-tabs-info, landing) com a MATRIX em `generate-architecture-live.mjs`. Quatro camadas:
 - A — vocabulário proibido (`GRRA`, `U-Retrieval`, `TransE`, `RWD`, "Real-World Data", "dados reais", "ingestão massiva", "base de pacientes reais") sem mitigador (`inspiração|inspiration|planned|sintético|...`) no parágrafo.
@@ -68,12 +74,6 @@ _files: src/types/recommendation-confidence.ts, supabase/functions/extract-pet-c
 - Schema fechado: `results` migrou de dict `{ analyte: { ... } }` para `array [{ analyte, value, unit, ref_min, ref_max, flag }]` no contrato do modelo. `additionalProperties: false` no item. Tipos opcionais expressos como `["number","null"]` para evitar inferência ambígua. `normalizeResults` ganhou compat dupla (aceita dict legado E array novo) — nenhum exame antigo persistido quebra.
 - Extração de resposta: lê de `choices[0].message.tool_calls[0].function.arguments` (forçado pelo `tool_choice`). Fallback para `message.content` mantido por defesa, mas não deve ser exercido.
 _files: supabase/functions/parse-pet-exam-pdf/index.ts_
-
-### 2026-06-02 · [clinical-pipeline] ADDED — IA Hardening Cards #3+#4: abstain válido + provenance tipada + remoção do simpleExtraction
-- Card #3 (envelope abstain + carimbo de proveniência em `hybrid-recommendation`): pré-flight de abstenção dispara SOMENTE por falta de sinal de entrada (sem `condition` OU sem qualquer sinal de pet/clínico). KG vazio NUNCA aciona abstain — gera resposta marcada com `source:'llm_fallback' + disclaimer:'no_kg_data'` (preservada). Toda resposta agora carrega envelope `{ source, disclaimer, abstain }`. Branch `llm_fallback` passa a carimbar `evidenceLevel:'AI-enriched'` por composto (antes ficava sem marca de origem, abrindo brecha para tutor receber recomendação sem tarja).
-- Card #4 (remoção do `simpleExtraction`): `supabase/functions/extract-pet-clinical-data/index.ts` perdeu o fallback regex rule-based que fabricava entidades silenciosamente quando a chave do modelo estava ausente, o modelo retornava erro/vazio, ou o parse JSON falhava. Todos esses caminhos agora retornam envelope abstain (`clinical_signal_insufficient`) com arrays vazios — comportamento honesto, mensurável e rastreável pela telemetria do card #2.
-- Tipos centralizados (Eixo B — proveniência): novo `CompoundProvenance = 'KG-backed' | 'AI-enriched' | 'AI-generated'` e `AbstainEnvelope` em `src/types/recommendation-confidence.ts`. Valores MANTIDOS em PascalCase/kebab por compatibilidade de UI — Bloco 2(e) do plano fica responsável por normalizar para snake_case e separar value↔label (evita dois churns no mesmo campo). Eixo A (qualidade científica em `src/rules/general/evidence-levels.ts`) permanece ortogonal e intocado.
-_files: supabase/functions/extract-pet-clinical-data/index.ts, src/types/recommendation-confidence.ts, src/rules/general/evidence-levels.ts, supabase/functions/hybrid-recommendation/index.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
