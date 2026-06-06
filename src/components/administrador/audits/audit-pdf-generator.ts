@@ -35,6 +35,24 @@ export async function fetchAuditHtml(url: string): Promise<string> {
 }
 
 /**
+ * Download the audit HTML as a standalone .html file (with <base> injected
+ * so relative assets keep resolving when the file is opened locally).
+ */
+export async function downloadAuditHtml(audit: AuditLike): Promise<void> {
+  if (!audit.html_path) throw new Error("Auditoria sem HTML");
+  const html = await fetchAuditHtml(audit.html_path);
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `senex-audit-v${audit.version}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}
+
+/**
  * Open the audit HTML in a new tab/window and trigger the native print
  * dialog. Users save as PDF from the browser — works in every browser,
  * preserves Unicode and styling, and avoids the broken html2pdf path.
