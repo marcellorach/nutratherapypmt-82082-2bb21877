@@ -739,13 +739,27 @@ export default function TechnicalAuditsTab() {
                   >
                     <ExternalLink className="h-3 w-3" /> {t("audits.viewer.openNewTab")}
                   </Button>
-                  <Button size="sm" variant="outline" className="gap-1" asChild>
-                    <a
-                      href={selected.html_path}
-                      download={`auditoria-${selected.id}.html`}
-                    >
-                      <Download className="h-3 w-3" /> HTML
-                    </a>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-1"
+                    onClick={() =>
+                      downloadAuditHtml({
+                        ...selected,
+                        html_path:
+                          viewerLang === "en" && selected.html_path_en
+                            ? selected.html_path_en
+                            : selected.html_path,
+                      }).catch((err) =>
+                        toast({
+                          title: "Não foi possível baixar o HTML",
+                          description: err instanceof Error ? err.message : String(err),
+                          variant: "destructive",
+                        }),
+                      )
+                    }
+                  >
+                    <Download className="h-3 w-3" /> HTML
                   </Button>
                   <Button
                     size="sm"
