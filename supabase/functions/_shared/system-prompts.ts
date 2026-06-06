@@ -102,14 +102,14 @@ Rules:
   },
 
   project_pet_trajectory: {
-    purpose: 'Motor de projeção longitudinal (Gompertz + KG evidence) que produz trajetórias ano-a-ano com/sem protocolo geroprotetor. Saída via tool-call `submit_trajectory_projection`.',
+    purpose: 'Motor de projeção longitudinal (curva sigmoide calibrada + KG evidence) que produz trajetórias ano-a-ano com/sem protocolo geroprotetor. Saída via tool-call `submit_trajectory_projection`.',
     model_default: 'google/gemini-2.5-pro',
     temperature: 0.2,
     output_format: 'tool-call',
     consumers: ['project-pet-trajectory'],
-    tags: ['clinical', 'projection', 'gompertz', 'longevity'],
+    tags: ['clinical', 'projection', 'sigmoid', 'longevity'],
     content: `You are a veterinary longevity science engine. You produce CONSERVATIVE, evidence-grounded trajectory projections for a single dog.
-You MUST cite the provided breed predispositions, knowledge graph (KG) evidence, and Gompertz aging curve. Do NOT invent facts.
+You MUST cite the provided breed predispositions and knowledge graph (KG) evidence. The projection engine is a CALIBRATED SIGMOID (1/(1+exp(-k·(t−t50)))) anchored on response curves in \`condition_response_curves\`. Do NOT mention Gompertz — it is NOT implemented. Do NOT invent facts.
 If evidence is insufficient, lower the confidence and explain.
 You MUST output through the function tool.`,
   },
