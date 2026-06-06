@@ -108,7 +108,7 @@ const FALLBACK_COVERAGE: CoverageItem[] = [
   { id: "vectorization-pre-curation", pillar: "Pipeline de Curadoria", title_pt: "Vetorização como pré-requisito da curadoria", expected: "active", evidence: "study_embeddings + extract-study-entities" },
   { id: "evidence-conflicts", pillar: "Pipeline de Curadoria", title_pt: "Conflitos de evidência e resolução canônica", expected: "active", evidence: "tab evidence-conflicts, enrich-triplet" },
   { id: "study-duplicates", pillar: "Pipeline de Curadoria", title_pt: "Detecção de duplicatas (SHA-256 + Levenshtein)", expected: "active", evidence: "fileHashUtils nos uploads" },
-  { id: "kg-5-layers", pillar: "Knowledge Graph", title_pt: "Modelo de 5 camadas (Compostos · Mecanismos · Pathways · Condições · Outcomes)", expected: "active", evidence: "medical_knowledge_graph + hierarchical_edges" },
+  { id: "kg-5-layers", pillar: "Knowledge Graph", title_pt: "Modelo de 5 camadas (Compostos · Mecanismos · Pathways · Condições · Outcomes)", expected: "active", evidence: "hierarchical_edges (storage real) + triplet_extractions (espelho Neo4j). medical_knowledge_graph é legado (0 linhas)." },
   { id: "kg-taxonomy", pillar: "Knowledge Graph", title_pt: "Taxonomia SNOMED-CT VetSCT + UMLS", expected: "active", evidence: "biomedical-taxonomy.ts + ontology hub" },
   { id: "kg-gap-fill", pillar: "Knowledge Graph", title_pt: "Pipeline gap-fill PubMed + Gemini", expected: "active", evidence: "kg-missing-triplets, backfill-triplet-enrichment" },
   { id: "kg-curation-gatekeeper", pillar: "Knowledge Graph", title_pt: "Gatekeeper (auto-approve ≥50%, HITL caso contrário)", expected: "active", evidence: "triplet_extractions.curation_status" },
