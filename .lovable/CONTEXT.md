@@ -1,5 +1,5 @@
 # Project context briefing (auto)
-Generated: 2026-06-06T14:13:35.779Z
+Generated: 2026-06-06T23:06:40.889Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
@@ -7,13 +7,19 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 
 ## Changes by area (last 14 days)
 - **admin**: 25
+- **meta**: 7
 - **clinical-pipeline**: 7
-- **meta**: 6
 - **infra**: 5
 - **kg**: 3
 - **curation**: 3
 
 ## Top 10 recent entries
+### 2026-06-06 · [meta] CHANGED — Auditoria v7.2.0: split clínico no snapshot + KG honesto + Gompertz erradicado
+- `generate-audit/readAuditContext` — `tableNames` corrigido: `pets`→removido, `studies`→`processed_studies`, `medical_knowledge_graph` removido (legado). As 5 tabelas de população clínica (`pet_profiles`, `pet_exams`, `pet_consultations`, `pet_medications`, `pet_conditions`) saíram de `counts` de propósito — agora a ÚNICA fonte de verdade é `clinical_data_provenance` com `{real, demo, synthetic_cohort}`. Sem total bruto, o LLM não consegue mais apresentar "1234 exames processados" como atividade real.
+- Novo `snapshot.kg_storage` — expõe top relacionamentos de `hierarchical_edges` (TREATS / PREVENTS / HAS_MECHANISM / ...), confirmando que os 38k+ edges são relações clínicas curadas e NÃO taxonomia legada. Inclui `triplet_extractions_approved` e `triplet_extractions_synced_to_neo4j` para reportar honestamente o espelho Neo4j.
+- `audit_base_system_{pt,en}` — (1) contrato positivo: toda contagem clínica DEVE ser escrita inline como "N total (R real / D demo / S sintético)" — blacklist léxica reduzida a backstop fraco (RWD / "base de pacientes reais"); (2) Gompertz erradicado: "Gompertz NÃO está implementado em lugar nenhum, NÃO existe `breed_aging_curves`, sigmoide é o único motor"; (3) `medical_knowledge_graph` proibido como armazenamento ativo; (4) drift-guard tem renderização obrigatória mesmo com erro.
+_files: supabase/functions/generate-audit/index.ts, supabase/functions/_shared/system-prompts.ts, src/data/audit-coverage.ts_
+
 ### 2026-06-06 · [meta] CHANGED — Auditoria v7.1.0: ênfases de honestidade no prompt do auditor
 - `buildBaseSystem` (generate-audit) agora anexa um bloco "ÊNFASES DESTA RODADA" (PT/EN) no topo do system prompt antes do checklist, reforçando 3 correções de honestidade que o auditor v7.0.x escorregava: (1) Digital Twin = sigmóide (qualquer "Gompertz" como motor de resposta a tratamento deve ser reportado como erro doc; Gompertz só vale para `breed_aging_curves`); (2) dados clínicos exigem split real/demo/synthetic_cohort do snapshot — proibido "RWD"/"dados do mundo real" com ~98% synthetic; (3) GRRA, U-Retrieval e TransE são inspiração, não mecanismos do Senex.
 - Checklist canônico (`FALLBACK_COVERAGE`) corrigido:
@@ -68,12 +74,6 @@ _files: src/data/admin-tabs-info-bilingual.ts_
 - Schema único cobre ambos os modos (enrich / fallback): `nutraceuticals[]` com `{name, dosage, mechanism, evidenceLevel('AI-enriched'|'AI-generated'), condition, targetCondition?, closes_gaps?[]}` + `rationale` + `precautions[]` + envelope `abstain/abstain_reason('clinical_signal_insufficient')/abstain_detail`. `additionalProperties:false`. System prompt orienta qual `evidenceLevel` usar por modo.
 - Card #3 PRESERVADO bit-a-bit (não desfeito):
 _files: supabase/functions/hybrid-recommendation/index.ts_
-
-### 2026-06-02 · [clinical-pipeline] CHANGED — IA Hardening Card #5b: extract-pet-clinical-data migrado para tool_choice (Gateway + abstain tipado)
-- Migração #2 do Card #5 (extract-pet-clinical-data): substituído `responseMimeType: 'application/json'` (Gemini direto) por `tools: [extract_clinical_entities]` + `tool_choice: { type: "function", function: { name: "extract_clinical_entities" } }` via Lovable AI Gateway. Unifica o caminho com o #3 (parse-pet-exam-pdf) já migrado — uma única autenticação (`LOVABLE_API_KEY`), uma única semântica de tool-calling.
-- GUARDRAIL Card #4 preservado: o schema do tool INCLUI `abstain: boolean`, `abstain_reason` (enum), `abstain_detail`. `abstain=true` com 5 listas vazias é resposta VÁLIDA do tool, não erro de parse. Pré-flight de abstain (texto curto, key ausente) PERMANECE — agora roda ANTES da chamada ao Gateway.
-- Buckets de abstain desambiguados (essencial para a verificação ANTES/DEPOIS pedida):
-_files: src/types/recommendation-confidence.ts, supabase/functions/extract-pet-clinical-data/index.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
