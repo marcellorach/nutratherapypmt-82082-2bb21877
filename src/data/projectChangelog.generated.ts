@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-06T14:13:35.773Z
+// Última geração: 2026-06-06T23:06:40.884Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,28 @@ export const lastChangelogDate = "2026-06-06";
 export const senexVersion = "7.1.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-06",
+    "kind": "changed",
+    "area": "meta",
+    "status": "entregue",
+    "title": "Auditoria v7.2.0: split clínico no snapshot + KG honesto + Gompertz erradicado",
+    "bullets": [
+      "`generate-audit/readAuditContext` — `tableNames` corrigido: `pets`→removido, `studies`→`processed_studies`, `medical_knowledge_graph` removido (legado). As 5 tabelas de população clínica (`pet_profiles`, `pet_exams`, `pet_consultations`, `pet_medications`, `pet_conditions`) saíram de `counts` de propósito — agora a ÚNICA fonte de verdade é `clinical_data_provenance` com `{real, demo, synthetic_cohort}`. Sem total bruto, o LLM não consegue mais apresentar \"1234 exames processados\" como atividade real.",
+      "Novo `snapshot.kg_storage` — expõe top relacionamentos de `hierarchical_edges` (TREATS / PREVENTS / HAS_MECHANISM / ...), confirmando que os 38k+ edges são relações clínicas curadas e NÃO taxonomia legada. Inclui `triplet_extractions_approved` e `triplet_extractions_synced_to_neo4j` para reportar honestamente o espelho Neo4j.",
+      "`audit_base_system_{pt,en}` — (1) contrato positivo: toda contagem clínica DEVE ser escrita inline como \"N total (R real / D demo / S sintético)\" — blacklist léxica reduzida a backstop fraco (RWD / \"base de pacientes reais\"); (2) Gompertz erradicado: \"Gompertz NÃO está implementado em lugar nenhum, NÃO existe `breed_aging_curves`, sigmoide é o único motor\"; (3) `medical_knowledge_graph` proibido como armazenamento ativo; (4) drift-guard tem renderização obrigatória mesmo com erro.",
+      "Checklist `kg-5-layers` (`FALLBACK_COVERAGE` + `audit-coverage.ts`) — evidence trocado de `medical_knowledge_graph + hierarchical_edges` para `hierarchical_edges (storage real) + triplet_extractions (espelho Neo4j)`. `curation-7-stages` também perdeu `studies`/`medical_knowledge_graph`.",
+      "Checklist `digital-twin` (`audit-coverage.ts`) — título reescrito: \"(sigmoide calibrada em condition_response_curves)\"; evidence cita explicitamente \"Gompertz NÃO está implementado\".",
+      "`project_pet_trajectory` prompt — removida menção a \"Gompertz aging curve\" no system content e na tag.",
+      "Files: supabase/functions/generate-audit/index.ts, supabase/functions/_shared/system-prompts.ts, src/data/audit-coverage.ts"
+    ],
+    "files": [
+      "supabase/functions/generate-audit/index.ts",
+      "supabase/functions/_shared/system-prompts.ts",
+      "src/data/audit-coverage.ts"
+    ],
+    "i18nVersion": "—"
+  },
   {
     "date": "2026-06-06",
     "kind": "changed",

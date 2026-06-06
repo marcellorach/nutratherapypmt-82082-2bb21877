@@ -121,7 +121,7 @@ export const AUDIT_COVERAGE: CoverageItem[] = [
     evidence: {
       tabs: ["estudos", "triplet-curation", "knowledge-graph"],
       edge_functions: ["parse-study", "vectorize-study", "extract-study-entities", "process-study", "sync-study-to-neo4j"],
-      tables: ["studies", "study_embeddings", "triplet_extractions", "medical_knowledge_graph"],
+      tables: ["processed_studies", "study_embeddings", "triplet_extractions", "hierarchical_edges"],
     },
     expected_status_hint: "active",
   },
@@ -156,7 +156,7 @@ export const AUDIT_COVERAGE: CoverageItem[] = [
     pillar: "knowledge-graph",
     title_pt: "Modelo de 5 camadas (Compostos · Mecanismos · Pathways · Condições · Outcomes)",
     title_en: "5-layer model (Compounds · Mechanisms · Pathways · Conditions · Outcomes)",
-    evidence: { tabs: ["knowledge-graph", "relacoes"], tables: ["medical_knowledge_graph", "medical_knowledge_graph_edges", "hierarchical_edges"] },
+    evidence: { tabs: ["knowledge-graph", "relacoes"], tables: ["hierarchical_edges", "triplet_extractions"], notes: ["medical_knowledge_graph é legado (0 linhas) — storage real = hierarchical_edges + Neo4j mirror"] },
     expected_status_hint: "active",
   },
   {
@@ -298,9 +298,9 @@ export const AUDIT_COVERAGE: CoverageItem[] = [
   {
     id: "digital-twin",
     pillar: "digital-twin",
-    title_pt: "Digital Twin & projeções de longevidade (Gompertz por raça)",
-    title_en: "Digital Twin & longevity projections (per-breed Gompertz)",
-    evidence: { notes: ["condition-progression-engine.ts", "proposal-roi.ts"] },
+    title_pt: "Digital Twin & projeções de longevidade (sigmoide calibrada em condition_response_curves)",
+    title_en: "Digital Twin & longevity projections (calibrated sigmoid anchored on condition_response_curves)",
+    evidence: { notes: ["condition-progression-engine.ts (motor sigmoide 1/(1+exp(-k·(t−t50)))) — Gompertz NÃO está implementado", "proposal-roi.ts", "condition_response_curves (tabela de calibração)"] },
     expected_status_hint: "active",
   },
   {
