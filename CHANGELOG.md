@@ -24,6 +24,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.1.0 -->
 
+### Changed - 2026-06-06 — Auditoria v7.1.0: ênfases de honestidade no prompt do auditor
+<!-- area: meta · status: entregue · i18n: — -->
+- **`buildBaseSystem` (generate-audit)** agora anexa um bloco "ÊNFASES DESTA RODADA" (PT/EN) no topo do system prompt antes do checklist, reforçando 3 correções de honestidade que o auditor v7.0.x escorregava: (1) Digital Twin = sigmóide (qualquer "Gompertz" como motor de resposta a tratamento deve ser reportado como erro doc; Gompertz só vale para `breed_aging_curves`); (2) dados clínicos exigem split real/demo/synthetic_cohort do snapshot — proibido "RWD"/"dados do mundo real" com ~98% synthetic; (3) GRRA, U-Retrieval e TransE são inspiração, não mecanismos do Senex.
+- **Checklist canônico** (`FALLBACK_COVERAGE`) corrigido:
+  - `digital-twin`: título agora separa explicitamente os dois motores (sigmóide para condição × nutracêutico vs. Gompertz para envelhecimento por raça) e cita `breed_aging_curves + project-pet-trajectory` no evidence.
+  - `breed-predispositions`: removido o número hardcoded "81 raças" — auditor deve puxar contagem real do snapshot ou marcar n/d.
+  - `ai-scientist-predictive-models`: removido "6 modelos" hardcoded pela mesma razão.
+- Files: supabase/functions/generate-audit/index.ts
+
 ### Added - 2026-06-05 — Painel Preview vs Publicado na aba de Auditorias
 <!-- area: admin · status: entregue · i18n: 1.118.4 -->
 - **Novo componente** `PreviewVsPublishedPanel` (admin → Auditorias) — compara em tempo real os 4 snapshots auditáveis (`drift-report.json`, `ARCHITECTURE_LIVE.md`, `CHANGELOG.md`, `PROMPTS.md`) entre o ambiente de preview (`window.location.origin`) e o publicado (`https://longevidade.ai`). Status verde/amarelo por sha-256, botão "Ver diff" abre `SnapshotDiffDialog` lado a lado (lib `diff`).
