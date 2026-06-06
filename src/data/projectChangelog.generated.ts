@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-06T13:54:16.641Z
+// Última geração: 2026-06-06T14:13:35.773Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,30 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-06-05";
+export const lastChangelogDate = "2026-06-06";
 
 export const senexVersion = "7.1.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-06",
+    "kind": "changed",
+    "area": "meta",
+    "status": "entregue",
+    "title": "Auditoria v7.1.0: ênfases de honestidade no prompt do auditor",
+    "bullets": [
+      "`buildBaseSystem` (generate-audit) agora anexa um bloco \"ÊNFASES DESTA RODADA\" (PT/EN) no topo do system prompt antes do checklist, reforçando 3 correções de honestidade que o auditor v7.0.x escorregava: (1) Digital Twin = sigmóide (qualquer \"Gompertz\" como motor de resposta a tratamento deve ser reportado como erro doc; Gompertz só vale para `breed_aging_curves`); (2) dados clínicos exigem split real/demo/synthetic_cohort do snapshot — proibido \"RWD\"/\"dados do mundo real\" com ~98% synthetic; (3) GRRA, U-Retrieval e TransE são inspiração, não mecanismos do Senex.",
+      "Checklist canônico (`FALLBACK_COVERAGE`) corrigido:",
+      "`digital-twin`: título agora separa explicitamente os dois motores (sigmóide para condição × nutracêutico vs. Gompertz para envelhecimento por raça) e cita `breed_aging_curves + project-pet-trajectory` no evidence.",
+      "`breed-predispositions`: removido o número hardcoded \"81 raças\" — auditor deve puxar contagem real do snapshot ou marcar n/d.",
+      "`ai-scientist-predictive-models`: removido \"6 modelos\" hardcoded pela mesma razão.",
+      "Files: supabase/functions/generate-audit/index.ts"
+    ],
+    "files": [
+      "supabase/functions/generate-audit/index.ts"
+    ],
+    "i18nVersion": "—"
+  },
   {
     "date": "2026-06-05",
     "kind": "added",

@@ -1,19 +1,25 @@
 # Project context briefing (auto)
-Generated: 2026-06-06T13:54:16.647Z
+Generated: 2026-06-06T14:13:35.779Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.118.4
+## Latest i18n version: —
 
 ## Changes by area (last 14 days)
 - **admin**: 25
 - **clinical-pipeline**: 7
-- **meta**: 5
+- **meta**: 6
 - **infra**: 5
 - **kg**: 3
 - **curation**: 3
 
 ## Top 10 recent entries
+### 2026-06-06 · [meta] CHANGED — Auditoria v7.1.0: ênfases de honestidade no prompt do auditor
+- `buildBaseSystem` (generate-audit) agora anexa um bloco "ÊNFASES DESTA RODADA" (PT/EN) no topo do system prompt antes do checklist, reforçando 3 correções de honestidade que o auditor v7.0.x escorregava: (1) Digital Twin = sigmóide (qualquer "Gompertz" como motor de resposta a tratamento deve ser reportado como erro doc; Gompertz só vale para `breed_aging_curves`); (2) dados clínicos exigem split real/demo/synthetic_cohort do snapshot — proibido "RWD"/"dados do mundo real" com ~98% synthetic; (3) GRRA, U-Retrieval e TransE são inspiração, não mecanismos do Senex.
+- Checklist canônico (`FALLBACK_COVERAGE`) corrigido:
+- `digital-twin`: título agora separa explicitamente os dois motores (sigmóide para condição × nutracêutico vs. Gompertz para envelhecimento por raça) e cita `breed_aging_curves + project-pet-trajectory` no evidence.
+_files: supabase/functions/generate-audit/index.ts_
+
 ### 2026-06-05 · [admin] ADDED — Painel Preview vs Publicado na aba de Auditorias
 - Novo componente `PreviewVsPublishedPanel` (admin → Auditorias) — compara em tempo real os 4 snapshots auditáveis (`drift-report.json`, `ARCHITECTURE_LIVE.md`, `CHANGELOG.md`, `PROMPTS.md`) entre o ambiente de preview (`window.location.origin`) e o publicado (`https://longevidade.ai`). Status verde/amarelo por sha-256, botão "Ver diff" abre `SnapshotDiffDialog` lado a lado (lib `diff`).
 - Nova edge function `compare-snapshots` — fetch server-side paralelo dos dois ambientes (contorna CORS de hospedagem estática), whitelist fixa de arquivos, devolve `{file, equal, preview, published}` com sha-256.
@@ -68,12 +74,6 @@ _files: supabase/functions/hybrid-recommendation/index.ts_
 - GUARDRAIL Card #4 preservado: o schema do tool INCLUI `abstain: boolean`, `abstain_reason` (enum), `abstain_detail`. `abstain=true` com 5 listas vazias é resposta VÁLIDA do tool, não erro de parse. Pré-flight de abstain (texto curto, key ausente) PERMANECE — agora roda ANTES da chamada ao Gateway.
 - Buckets de abstain desambiguados (essencial para a verificação ANTES/DEPOIS pedida):
 _files: src/types/recommendation-confidence.ts, supabase/functions/extract-pet-clinical-data/index.ts_
-
-### 2026-06-02 · [clinical-pipeline] CHANGED — IA Hardening Card #5a: parse-pet-exam-pdf migrado para tool_choice (schema fechado)
-- Migração #3 do Card #5 (parse-pet-exam-pdf): substituído `response_format: { type: "json_object" }` por tool-calling forçado (`tools: [extract_exam_data]` + `tool_choice: { type: "function", function: { name: "extract_exam_data" } }`). `json_object` garantia apenas "é JSON válido", não "tem os campos certos" — agora o schema dos analitos (analyte/value/unit/ref_min/ref_max/flag) é parte do contrato com o modelo. Risco mitigado: unidade/valor no campo errado = interpretação clínica errada (ALT em mg/dL vs U/L muda a leitura).
-- Schema fechado: `results` migrou de dict `{ analyte: { ... } }` para `array [{ analyte, value, unit, ref_min, ref_max, flag }]` no contrato do modelo. `additionalProperties: false` no item. Tipos opcionais expressos como `["number","null"]` para evitar inferência ambígua. `normalizeResults` ganhou compat dupla (aceita dict legado E array novo) — nenhum exame antigo persistido quebra.
-- Extração de resposta: lê de `choices[0].message.tool_calls[0].function.arguments` (forçado pelo `tool_choice`). Fallback para `message.content` mantido por defesa, mas não deve ser exercido.
-_files: supabase/functions/parse-pet-exam-pdf/index.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
