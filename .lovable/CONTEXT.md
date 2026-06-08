@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-06-08T22:56:16.286Z
+Generated: 2026-06-08T23:32:54.403Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.118.5
+## Latest i18n version: —
 
 ## Changes by area (last 14 days)
-- **admin**: 29
+- **admin**: 30
 - **meta**: 8
 - **clinical-pipeline**: 7
 - **infra**: 5
@@ -14,6 +14,12 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **curation**: 3
 
 ## Top 10 recent entries
+### 2026-06-08 · [admin] CHANGED — Pilares científicos: TxGNN e Hetionet adicionados como PARTIAL
+- AboutSenexTab: incluídos TxGNN (Huang 2024, Nature Medicine) e Hetionet/DWPC (Himmelstein 2017, eLife) no card "Pilares científicos (inspiração × implementação)" com status `PARTIAL`, refletindo `core_rule_evidence` já existente: TxGNN → RC-001 (doc-only), RC-008 e RC-013 (ativas); Hetionet → RC-008 e RC-014 (ativas). Inspirações ainda fora de runtime (zero-shot via metric learning + GraphMask; DWPC + permutação de rede) explicitadas.
+- Diagrama do engine: nota em `O3` (Recommendation engine) marca TxGNN zero-shot + Hetionet DWPC como inspirações não-runtime. Banner de "Honestidade arquitetural" amplia a lista de inspirações/planejado.
+- Esclarecimento: a lista de Pilares não é gerada por LLM — é um array TypeScript curado em `AboutSenexTab.tsx`. A fonte dinâmica papel↔RC continua sendo `core_rule_evidence` (consumida pela aba Fundamentos Arquiteturais).
+_files: src/components/administrador/AboutSenexTab.tsx_
+
 ### 2026-06-08 · [admin] FIXED — Fundamentos Arquiteturais 100% bilíngue (UI + DB)
 - Adicionadas todas as 150+ chaves `fundamentos.*` em PT e EN (`FundamentosTab`, `MetaKgRoadmapCard`, `MetaStudyDetailedCard`, `CoreRuleHistory`, `MetaStudyKanban`, `IngestaoMetaEstudo`): tabs, badges, roadmap (Fase A/B/C, gatilhos), confiabilidade (5 dimensões + descrições), filtros do histórico (placeholder, stances, ações, refresh), painel de ingestão (estágios, seções de lições, botões de stance promote/attach/discard/resolve_keep, toasts).
 - DB `core_rules`: preenchido `justification_en` para RC-001/002/003 e `application_en` para as 18 regras; `FundamentosTab` agora consome `application_en` quando lang=en.
@@ -64,12 +70,6 @@ _files: scripts/copy-snapshots-to-public.mjs, src/components/administrador/audit
 - A — vocabulário proibido (`GRRA`, `U-Retrieval`, `TransE`, `RWD`, "Real-World Data", "dados reais", "ingestão massiva", "base de pacientes reais") sem mitigador (`inspiração|inspiration|planned|sintético|...`) no parágrafo.
 - B — ponteiros mortos: cada caminho citado em `pointer:` da MATRIX precisa existir no repo.
 _files: scripts/drift-guard.mjs, public/drift-report.json, supabase/functions/generate-audit/index.ts, supabase/functions/_shared/system-prompts.ts_
-
-### 2026-06-03 · [kg] ADDED — Bloco 2: telemetria do verificador + página admin de runs
-- Migração: 4 colunas em `triplet_verifications` (`tool_choice_used`, `abstain_reason` ∈ {no_chunks, low_similarity, chunks_off_topic, verifier_error, tool_call_missing, other}, `recalled_chunks` jsonb com snippet+similaridade por chunk, `recall_similarity_top`) + `stratification_snapshot` em `triplet_verification_runs` (snapshot verdade-base de quantos itens foram sorteados por banda/enrichment/camada).
-- Runner (`triplet-verification-runner`): preenche os novos campos por linha; classifica `abstain_reason` automaticamente quando o verdict é `unverifiable`; serializa chunks recuperados com snippet (320 chars) marcando quais o verificador alegou suportar a claim.
-- Admin UI — nova tab `verification-runs` (grupo Base de Conhecimento, sidebar com ícone ShieldCheck): lista runs com control_specificity, drill-down por run com filtros (tipo: triplet/control · verdict · camada de controle), linha expansível mostra rationale do verificador + chunks recuperados (com badge verde nos suportados) + latência/custo/tool_choice.
-_files: supabase/functions/triplet-verification-runner/index.ts, src/components/administrador/verification/VerificationRunsTab.tsx, src/components/administrador/sidebar/groups/KnowledgeBaseGroup.tsx, src/config/admin-tabs.ts…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

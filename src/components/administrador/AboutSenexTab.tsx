@@ -60,7 +60,7 @@ const ENGINE_DIAGRAM = `flowchart TB
     direction TB
     O1["Hybrid retrieval<br/>Cypher (Neo4j) + pgvector (Supabase)<br/>(inspired by U-Retrieval, no top-down/bottom-up fusion)"]
     O2["Patient subgraph<br/>(breed + labs + meds + conditions)"]
-    O3["Recommendation engine<br/>stack <= 8 synergistic compounds"]
+    O3["Recommendation engine<br/>stack <= 8 synergistic compounds<br/>(inspired by TxGNN zero-shot + Hetionet DWPC,<br/>not yet in runtime)"]
     O4["Digital Twin<br/>sigmoid severity x time<br/>years_gained metric"]
     O5["Treatment Proposal<br/>bilingual PT/EN + milestones"]
     O1 --> O2 --> O3 --> O4 --> O5
@@ -97,6 +97,20 @@ const PILLARS: Array<{
     en: 'KGARevion (Su et al., ICLR 2025)',
     detail_pt: '**Parcial.** Em runtime, o dicionário de normalização de predicados (RC-014) e a adoção de taxonomia padrão SNOMED-CT VetSCT + UMLS (RC-008) seguem KGARevion como evidência ativa (vide aba Fundamentos Arquiteturais). **Inspiração ainda não implementada:** o ciclo GRRA completo (Review + Revise independentes) — hoje `generate-triplets` roda Generate (Gemini) + scoring heurístico (0,65–0,75) + auto-approve ≥ 0,50 + HITL. O número ~87% é benchmark do paper, não medido no Senex.',
     detail_en: '**Partial.** In runtime, the predicate-normalization dictionary (RC-014) and the SNOMED-CT VetSCT + UMLS standard taxonomy adoption (RC-008) follow KGARevion as active evidence (see Architectural Foundations tab). **Inspiration not yet implemented:** the full GRRA cycle (independent Review + Revise) — today `generate-triplets` runs Generate (Gemini) + heuristic scoring (0.65–0.75) + auto-approve ≥ 0.50 + HITL. The ~87% figure is a paper benchmark, not measured inside Senex.',
+    status: 'partial'
+  },
+  {
+    pt: 'TxGNN (Huang et al., Nature Medicine 2024)',
+    en: 'TxGNN (Huang et al., Nature Medicine 2024)',
+    detail_pt: '**Parcial.** Em runtime, a adoção de taxonomia padrão SNOMED-CT VetSCT + UMLS (RC-008) e a governança tiered por confiança (RC-013, auto-approve ≥ 0,50 + HITL) seguem TxGNN como evidência ativa (vide `core_rule_evidence` na aba Fundamentos Arquiteturais). RC-001 (Exclusão ≠ Contraindicação) é doc-only. **Inspiração ainda não implementada:** zero-shot drug repurposing via metric learning degree-gated e explainer GraphMask multi-hop — o motor atual só recomenda compostos com triplets curados, sem inferência zero-shot. Os ganhos de +46% accuracy / +49% confidence são benchmarks do paper, não medidos no Senex.',
+    detail_en: '**Partial.** In runtime, the SNOMED-CT VetSCT + UMLS standard taxonomy adoption (RC-008) and the confidence-tiered governance (RC-013, auto-approve ≥ 0.50 + HITL) follow TxGNN as active evidence (see `core_rule_evidence` in the Architectural Foundations tab). RC-001 (Exclusion ≠ Contraindication) is doc-only. **Inspiration not yet implemented:** zero-shot drug repurposing via degree-gated metric learning and multi-hop GraphMask explainer — the current engine only recommends compounds with curated triplets, with no zero-shot inference. The +46% accuracy / +49% confidence gains are paper benchmarks, not measured inside Senex.',
+    status: 'partial'
+  },
+  {
+    pt: 'Hetionet / DWPC (Himmelstein et al., eLife 2017)',
+    en: 'Hetionet / DWPC (Himmelstein et al., eLife 2017)',
+    detail_pt: '**Parcial.** Em runtime, a adoção de taxonomia padrão SNOMED-CT VetSCT + UMLS (RC-008) e a normalização de predicados via dicionário (RC-014) seguem Hetionet como evidência ativa (vide `core_rule_evidence`). **Inspiração ainda não implementada:** Degree-Weighted Path Count (DWPC) sobre metapaths heterogêneos com baselines de permutação de rede — hoje o ranking de compostos usa scoring heurístico + KG hierárquico L0→L4, sem DWPC nem teste de permutação.',
+    detail_en: '**Partial.** In runtime, the SNOMED-CT VetSCT + UMLS standard taxonomy adoption (RC-008) and the dictionary-based predicate normalization (RC-014) follow Hetionet as active evidence (see `core_rule_evidence`). **Inspiration not yet implemented:** Degree-Weighted Path Count (DWPC) over heterogeneous metapaths with permuted-network baselines — today compound ranking uses heuristic scoring + L0→L4 hierarchical KG, with no DWPC and no permutation test.',
     status: 'partial'
   },
   {
@@ -159,8 +173,8 @@ const AboutSenexTab: React.FC = () => {
         <CardContent>
           <div className="mb-4 p-3 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900 text-xs text-amber-900 dark:text-amber-200">
             {isPt
-              ? <><strong>Honestidade arquitetural:</strong> o diagrama abaixo descreve a visão e o que está implementado. <strong>GRRA</strong>, <strong>U-Retrieval bidirecional</strong> e <strong>TransE</strong> são inspiração/planejado — não estão em runtime. Verdade-base em <code>docs/generated/ARCHITECTURE_LIVE.md</code>.</>
-              : <><strong>Architectural honesty:</strong> the diagram below describes the vision and what is implemented. <strong>GRRA</strong>, <strong>bidirectional U-Retrieval</strong> and <strong>TransE</strong> are inspiration/planned — not in runtime. Ground truth in <code>docs/generated/ARCHITECTURE_LIVE.md</code>.</>}
+              ? <><strong>Honestidade arquitetural:</strong> o diagrama abaixo descreve a visão e o que está implementado. <strong>GRRA</strong>, <strong>U-Retrieval bidirecional</strong>, <strong>TransE</strong>, <strong>TxGNN zero-shot</strong> e <strong>Hetionet DWPC</strong> são inspiração/planejado — não estão em runtime (suas contribuições ativas estão listadas nos Pilares Científicos abaixo). Verdade-base em <code>docs/generated/ARCHITECTURE_LIVE.md</code>.</>
+              : <><strong>Architectural honesty:</strong> the diagram below describes the vision and what is implemented. <strong>GRRA</strong>, <strong>bidirectional U-Retrieval</strong>, <strong>TransE</strong>, <strong>TxGNN zero-shot</strong> and <strong>Hetionet DWPC</strong> are inspiration/planned — not in runtime (their active contributions are listed in Scientific Pillars below). Ground truth in <code>docs/generated/ARCHITECTURE_LIVE.md</code>.</>}
           </div>
           <MermaidBlock code={ENGINE_DIAGRAM} />
           <p className="text-xs text-muted-foreground mt-4">
