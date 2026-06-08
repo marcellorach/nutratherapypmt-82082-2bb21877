@@ -953,11 +953,26 @@ Deno.serve(async (req) => {
       }
     }
 
-    async function resilientCall(messages: any[], tool: any, opts: { phase: LogPhase; label: string; block_id?: string }) {
-      const attempts = [
-        { model: PRIMARY_MODEL, timeoutMs: PRIMARY_CALL_TIMEOUT_MS, backoffMs: 0 },
-        { model: FALLBACK_MODEL, timeoutMs: FALLBACK_CALL_TIMEOUT_MS, backoffMs: FALLBACK_BACKOFF_MS },
-      ];
+    // Cadeia padrão (BLOCOS): Flash → Pro → mini.
+    const BLOCK_ATTEMPTS = [
+      { model: FLASH_MODEL, timeoutMs: FLASH_TIMEOUT_MS, backoffMs: 0 },
+      { model: PRO_MODEL, timeoutMs: PRO_TIMEOUT_MS, backoffMs: FALLBACK_BACKOFF_MS },
+      { model: MINI_MODEL, timeoutMs: MINI_TIMEOUT_MS, backoffMs: FALLBACK_BACKOFF_MS },
+    ];
+    // Cadeia PESADA (outline + sumário executivo): Pro primeiro (define tom),
+    // Flash como fallback rápido, mini como último.
+    const HEAVY_ATTEMPTS = [
+      { model: PRO_MODEL, timeoutMs: PRO_TIMEOUT_MS, backoffMs: 0 },
+      { model: FLASH_MODEL, timeoutMs: FLASH_TIMEOUT_MS, backoffMs: FALLBACK_BACKOFF_MS },
+      { model: MINI_MODEL, timeoutMs: MINI_TIMEOUT_MS, backoffMs: FALLBACK_BACKOFF_MS },
+    ];
+
+    async function resilientCall(
+      messages: any[],
+      tool: any,
+      opts: { phase: LogPhase; label: string; block_id?: string; attempts?: Array<{ model: string; timeoutMs: number; backoffMs: number }> },
+    ) {
+      const attempts = opts.attempts ?? BLOCK_ATTEMPTS;
       let lastError: any;
       for (let i = 0; i < attempts.length; i++) {
         const attempt = attempts[i];
