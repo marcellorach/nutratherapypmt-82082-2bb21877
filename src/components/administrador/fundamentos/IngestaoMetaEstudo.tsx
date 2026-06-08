@@ -664,29 +664,29 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
           <CardHeader>
             <div className="flex items-center justify-between gap-2">
               <CardTitle className="text-base flex items-center gap-2">
-                <FileText className="h-4 w-4" /> Rascunho — revise antes de aprovar
+                <FileText className="h-4 w-4" /> {t('fundamentos.ingest.draftTitle', 'Rascunho — revise antes de aprovar')}
               </CardTitle>
               <Button variant="ghost" size="sm" onClick={() => setDraft(null)}>
-                <Trash2 className="h-3 w-3 mr-1" /> Descartar
+                <Trash2 className="h-3 w-3 mr-1" /> {t('fundamentos.ingest.discard', 'Descartar')}
               </Button>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
-                <Label className="text-xs">Título</Label>
+                <Label className="text-xs">{t('fundamentos.ingest.fields.title', 'Título')}</Label>
                 <Input value={draft.title} onChange={e => setDraft({ ...draft, title: e.target.value })} />
               </div>
-              <div><Label className="text-xs">Autores</Label>
+              <div><Label className="text-xs">{t('fundamentos.ingest.fields.authors', 'Autores')}</Label>
                 <Input value={draft.authors || ''} onChange={e => setDraft({ ...draft, authors: e.target.value })} /></div>
-              <div><Label className="text-xs">Ano</Label>
+              <div><Label className="text-xs">{t('fundamentos.ingest.fields.year', 'Ano')}</Label>
                 <Input type="number" value={draft.year || ''} onChange={e => setDraft({ ...draft, year: parseInt(e.target.value) || undefined })} /></div>
-              <div><Label className="text-xs">Journal</Label>
+              <div><Label className="text-xs">{t('fundamentos.ingest.fields.journal', 'Journal')}</Label>
                 <Input value={draft.journal || ''} onChange={e => setDraft({ ...draft, journal: e.target.value })} /></div>
-              <div><Label className="text-xs">DOI</Label>
+              <div><Label className="text-xs">{t('fundamentos.ingest.fields.doi', 'DOI')}</Label>
                 <Input value={draft.doi || ''} onChange={e => setDraft({ ...draft, doi: e.target.value })} /></div>
               <div className="col-span-2">
-                <Label className="text-xs">Tipo</Label>
+                <Label className="text-xs">{t('fundamentos.ingest.fields.kind', 'Tipo')}</Label>
                 <Select value={draft.kind} onValueChange={(v) => setDraft({ ...draft, kind: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -698,13 +698,13 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                 </Select>
               </div>
               <div className="col-span-2">
-                <Label className="text-xs">Resumo</Label>
+                <Label className="text-xs">{t('fundamentos.ingest.fields.summary', 'Resumo')}</Label>
                 <Textarea value={draft.summary || ''} onChange={e => setDraft({ ...draft, summary: e.target.value })} className="min-h-20 text-xs" />
               </div>
             </div>
 
             <div>
-              <Label className="text-xs font-semibold uppercase tracking-wide">Claims-chave ({draft.key_claims.length})</Label>
+              <Label className="text-xs font-semibold uppercase tracking-wide">{t('fundamentos.ingest.keyClaims', 'Claims-chave')} ({draft.key_claims.length})</Label>
               <ul className="space-y-1 mt-1 text-xs">
                 {draft.key_claims.map((c, i) => (
                   <li key={i} className="border rounded px-2 py-1.5">
@@ -719,7 +719,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
             {/* Lições estruturadas (schema v2) */}
             <div className="space-y-2">
               <Label className="text-xs font-semibold uppercase tracking-wide">
-                Lições estruturadas ({LESSON_SECTIONS.reduce((n, s) => n + ((draft as any)[s.key]?.length || 0), 0)})
+                {t('fundamentos.ingest.structuredLessons', 'Lições estruturadas')} ({LESSON_SECTIONS.reduce((n, s) => n + ((draft as any)[s.key]?.length || 0), 0)})
               </Label>
               {LESSON_SECTIONS.map(section => {
                 const items = ((draft as any)[section.key] || []) as LessonItem[];
@@ -727,7 +727,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                 return (
                   <details key={String(section.key)} className={`border-l-2 ${section.tone} pl-2`} open={items.length <= 3}>
                     <summary className="cursor-pointer text-xs font-medium select-none">
-                      {section.label} <span className="text-muted-foreground">({items.length})</span>
+                      {t(`fundamentos.ingest.section.${String(section.key)}`, section.label)} <span className="text-muted-foreground">({items.length})</span>
                     </summary>
                     <ul className="space-y-1 mt-1.5 text-xs">
                       {items.map((it, i) => (
@@ -746,17 +746,17 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
               })}
               {LESSON_SECTIONS.every(s => !((draft as any)[s.key]?.length)) && (
                 <p className="text-[11px] text-muted-foreground italic">
-                  Nenhuma lição estruturada extraída — o paper pode ser denso demais para uma única passada ou o schema v2 ainda não foi aplicado. Considere re-digerir.
+                  {t('fundamentos.ingest.noLessons', 'Nenhuma lição estruturada extraída — o paper pode ser denso demais para uma única passada ou o schema v2 ainda não foi aplicado. Considere re-digerir.')}
                 </p>
               )}
             </div>
 
             <div>
               <Label className="text-xs font-semibold uppercase tracking-wide">
-                Vínculos sugeridos com Regras-Core ({draft.suggested_links.filter(l => l._enabled).length}/{draft.suggested_links.length})
+                {t('fundamentos.ingest.suggestedLinks', 'Vínculos sugeridos com Regras-Core')} ({draft.suggested_links.filter(l => l._enabled).length}/{draft.suggested_links.length})
               </Label>
               {draft.suggested_links.length === 0 ? (
-                <p className="text-xs text-muted-foreground italic mt-1">Nenhum vínculo sugerido — você ainda pode aprovar o meta-estudo isoladamente.</p>
+                <p className="text-xs text-muted-foreground italic mt-1">{t('fundamentos.ingest.noSuggestedLinks', 'Nenhum vínculo sugerido — você ainda pode aprovar o meta-estudo isoladamente.')}</p>
               ) : (
                 <ul className="space-y-1.5 mt-1 text-xs">
                   {draft.suggested_links.map((l, i) => (
