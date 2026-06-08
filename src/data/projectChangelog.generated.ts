@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-06T23:06:40.884Z
+// Última geração: 2026-06-08T22:25:37.270Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,61 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-06-06";
+export const lastChangelogDate = "2026-06-08";
 
-export const senexVersion = "7.1.0";
+export const senexVersion = "7.2.0";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-08",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Showcase Mode (documento paralelo para parceiro)",
+    "bullets": [
+      "Novo botão \"Gerar showcase para parceiro\" na aba Auditorias Técnicas. Lê o MESMO snapshot factual da auditoria (counts, kg_storage, clinical_data_provenance) e escreve 6 seções comerciais curadas (Visão, Por que importa, Diferenciais, Visão maior, Credibilidade, Parceria).",
+      "Honestidade preservada: capacidades em presente, resultado de sinistralidade prospectivo; split R/D/S obrigatório; RC-001/002 (evidência negativa) destacada como diferencial; GRRA/U-Retrieval/TransE rotulados como inspiração.",
+      "Roteamento: §1/4/6 Pro→Flash (define tom); §2/3/5 Flash→Pro→gpt-5-mini.",
+      "Persistido em `technical_audits` com `version=<vX.Y.Z>-showcase` e `summary.kind=showcase`, com PT+EN no bucket `audit-reports`. Reutiliza viewer/download/polling existentes; cards de showcase ganham badge âmbar e ficam priorizados à esquerda da régua.",
+      "Files: supabase/functions/generate-showcase/index.ts, src/components/administrador/audits/TechnicalAuditsTab.tsx"
+    ],
+    "files": [
+      "supabase/functions/generate-showcase/index.ts",
+      "src/components/administrador/audits/TechnicalAuditsTab.tsx"
+    ],
+    "i18nVersion": "—"
+  },
+  {
+    "date": "2026-06-08",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Download de auditoria respeita idioma do header",
+    "bullets": [
+      "O seletor PT/EN do header agora controla o idioma padrão dos botões Ver / HTML / PDF nos cards e no viewer de auditoria. Antes a versão baixada sempre era PT.",
+      "Files: src/components/administrador/audits/TechnicalAuditsTab.tsx, src/components/administrador/audits/audit-pdf-generator.ts"
+    ],
+    "files": [
+      "src/components/administrador/audits/TechnicalAuditsTab.tsx",
+      "src/components/administrador/audits/audit-pdf-generator.ts"
+    ],
+    "i18nVersion": "—"
+  },
+  {
+    "date": "2026-06-08",
+    "kind": "fixed",
+    "area": "meta",
+    "status": "entregue",
+    "title": "Auditoria v7.1.3: refinos de honestidade",
+    "bullets": [
+      "Ajustes no `generate-audit` sobre fatiamento de blocos (fatos-âncora de honestidade replicados em todo bloco que toca dados/coortes/KG/recomendação/compliance/twin) e contexto amplo no sumário executivo.",
+      "Files: supabase/functions/generate-audit/index.ts"
+    ],
+    "files": [
+      "supabase/functions/generate-audit/index.ts"
+    ],
+    "i18nVersion": "—"
+  },
   {
     "date": "2026-06-06",
     "kind": "changed",

@@ -22,7 +22,25 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ---
 
 ## [Unreleased]
-<!-- senex: 7.1.0 -->
+<!-- senex: 7.2.0 -->
+
+### Added - 2026-06-08 — Showcase Mode (documento paralelo para parceiro)
+<!-- area: admin · status: entregue · i18n: — -->
+- Novo botão **"Gerar showcase para parceiro"** na aba Auditorias Técnicas. Lê o MESMO snapshot factual da auditoria (counts, kg_storage, clinical_data_provenance) e escreve 6 seções comerciais curadas (Visão, Por que importa, Diferenciais, Visão maior, Credibilidade, Parceria).
+- Honestidade preservada: capacidades em presente, resultado de sinistralidade prospectivo; split R/D/S obrigatório; RC-001/002 (evidência negativa) destacada como diferencial; GRRA/U-Retrieval/TransE rotulados como inspiração.
+- Roteamento: §1/4/6 Pro→Flash (define tom); §2/3/5 Flash→Pro→gpt-5-mini.
+- Persistido em `technical_audits` com `version=<vX.Y.Z>-showcase` e `summary.kind=showcase`, com PT+EN no bucket `audit-reports`. Reutiliza viewer/download/polling existentes; cards de showcase ganham badge âmbar e ficam priorizados à esquerda da régua.
+- Files: supabase/functions/generate-showcase/index.ts, src/components/administrador/audits/TechnicalAuditsTab.tsx
+
+### Added - 2026-06-08 — Download de auditoria respeita idioma do header
+<!-- area: admin · status: entregue · i18n: — -->
+- O seletor PT/EN do header agora controla o idioma padrão dos botões **Ver / HTML / PDF** nos cards e no viewer de auditoria. Antes a versão baixada sempre era PT.
+- Files: src/components/administrador/audits/TechnicalAuditsTab.tsx, src/components/administrador/audits/audit-pdf-generator.ts
+
+### Fixed - 2026-06-08 — Auditoria v7.1.3: refinos de honestidade
+<!-- area: meta · status: entregue · i18n: — -->
+- Ajustes no `generate-audit` sobre fatiamento de blocos (fatos-âncora de honestidade replicados em todo bloco que toca dados/coortes/KG/recomendação/compliance/twin) e contexto amplo no sumário executivo.
+- Files: supabase/functions/generate-audit/index.ts
 
 ### Changed - 2026-06-06 — Auditoria v7.2.0: split clínico no snapshot + KG honesto + Gompertz erradicado
 <!-- area: meta · status: entregue · i18n: — -->
