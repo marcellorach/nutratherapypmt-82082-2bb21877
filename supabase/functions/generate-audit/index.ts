@@ -433,10 +433,15 @@ async function buildBaseSystem(
   auditContext: { snapshot: Record<string, any>; prevAuditsCtx: string },
   lang: Lang = "pt",
   promptOverride?: string,
+  sliceOpts?: { scope: "full" | "block"; blockHint?: { block_id?: string; pillar_title?: string } | null },
 ): Promise<string> {
   const checklist = checklistForPrompt(lang);
-  const snapshotJson = JSON.stringify(auditContext.snapshot, null, 2);
-  const priorAudits = auditContext.prevAuditsCtx;
+  const slicedSnapshot = sliceSnapshotForScope(auditContext.snapshot, sliceOpts);
+  const snapshotJson = JSON.stringify(slicedSnapshot, null, 2);
+  // priorAudits: full no escopo "full" (outline/close); slim no "block".
+  const priorAudits = sliceOpts?.scope === "block"
+    ? slimPriorAudits(auditContext.prevAuditsCtx)
+    : auditContext.prevAuditsCtx;
 
   // Legacy override path (audit_prompt_versions): just append the dynamic context.
   if (promptOverride && promptOverride.trim() && promptOverride.trim() !== "__SEED_FALLBACK__") {
