@@ -95,9 +95,9 @@ const PILLARS: Array<{
   {
     pt: 'KGARevion (Su et al., ICLR 2025)',
     en: 'KGARevion (Su et al., ICLR 2025)',
-    detail_pt: '**Inspiração** — o ciclo GRRA completo (Review independente + Revise) **não está implementado**. O que existe em `generate-triplets` é: Generate (Gemini) + scoring heurístico (0,65–0,75) + auto-approve ≥ 0,50 + HITL. O número ~87% é benchmark do paper, não medido no Senex.',
-    detail_en: '**Inspiration** — the full GRRA cycle (independent Review + Revise) is **not implemented**. What runs in `generate-triplets` is: Generate (Gemini) + heuristic scoring (0.65–0.75) + auto-approve ≥ 0.50 + HITL. The ~87% figure is a benchmark from the paper, not measured inside Senex.',
-    status: 'inspiration'
+    detail_pt: '**Parcial.** Em runtime, o dicionário de normalização de predicados (RC-014) e a adoção de taxonomia padrão SNOMED-CT VetSCT + UMLS (RC-008) seguem KGARevion como evidência ativa (vide aba Fundamentos Arquiteturais). **Inspiração ainda não implementada:** o ciclo GRRA completo (Review + Revise independentes) — hoje `generate-triplets` roda Generate (Gemini) + scoring heurístico (0,65–0,75) + auto-approve ≥ 0,50 + HITL. O número ~87% é benchmark do paper, não medido no Senex.',
+    detail_en: '**Partial.** In runtime, the predicate-normalization dictionary (RC-014) and the SNOMED-CT VetSCT + UMLS standard taxonomy adoption (RC-008) follow KGARevion as active evidence (see Architectural Foundations tab). **Inspiration not yet implemented:** the full GRRA cycle (independent Review + Revise) — today `generate-triplets` runs Generate (Gemini) + heuristic scoring (0.65–0.75) + auto-approve ≥ 0.50 + HITL. The ~87% figure is a paper benchmark, not measured inside Senex.',
+    status: 'partial'
   },
   {
     pt: 'TransE (Bordes et al., NeurIPS 2013)',
