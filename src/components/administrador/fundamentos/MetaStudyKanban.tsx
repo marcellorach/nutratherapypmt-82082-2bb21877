@@ -471,7 +471,7 @@ const MetaStudyKanban: React.FC = () => {
                                   key={k as string}
                                   className={DIM_COLOR[k as string]}
                                   style={{ flex: v }}
-                                  title={`${DIM_SHORT[k as string]} ${v.toFixed(1)}`}
+                                  title={`${t(DIM_SHORT_KEYS[k as string].key, DIM_SHORT_KEYS[k as string].fallback)} ${v.toFixed(1)}`}
                                 />
                               );
                             })}
@@ -537,7 +537,7 @@ const MetaStudyKanban: React.FC = () => {
                               const v = scores[k as string];
                               return (
                                 <div key={k as string} className="flex items-center gap-2">
-                                  <span className="text-[10px] font-medium w-12 text-muted-foreground">{DIM_SHORT[k as string]}</span>
+                                  <span className="text-[10px] font-medium w-12 text-muted-foreground">{t(DIM_SHORT_KEYS[k as string].key, DIM_SHORT_KEYS[k as string].fallback)}</span>
                                   <Slider
                                     className="flex-1"
                                     value={[v ?? 0]}
