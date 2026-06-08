@@ -1152,7 +1152,7 @@ Monte o ÍNDICE: um bloco por pilar do checklist + blocos extras (sumário execu
           };
 
           const messages = [
-            { role: "system", content: baseSystem },
+            { role: "system", content: await buildBaseSystem(auditCtx, "pt", undefined, { scope: "block", blockHint: { block_id: block.block_id, pillar_title: block.pillar_title } }) },
             {
               role: "user",
               content: `Renderize o bloco "${block.pillar_title}" (block_id=${block.block_id}). Use exatamente os section_id propostos.
