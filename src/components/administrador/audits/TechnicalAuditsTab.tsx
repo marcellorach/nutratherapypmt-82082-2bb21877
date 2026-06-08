@@ -871,7 +871,7 @@ export default function TechnicalAuditsTab() {
                     variant="default"
                     className="gap-1"
                     onClick={() =>
-                      openAuditForPrint(selected).catch((err) =>
+                      openAuditForPrint(selected, viewerLang).catch((err) =>
                         toast({
                           title: "Não foi possível abrir o PDF",
                           description: err instanceof Error ? err.message : String(err),
