@@ -429,6 +429,79 @@ async function readAuditContext(service: ReturnType<typeof createClient>, appOri
  * The function performs placeholder substitution for {{CHECKLIST}}, {{SNAPSHOT}}, {{PRIOR_AUDITS}}.
  * If a `promptOverride` is provided (legacy audit_prompt_versions), it wins over the registry.
  */
+// ============================================================================
+// Snapshot slicing (v7.1.3)
+// ----------------------------------------------------------------------------
+// Estratégia: para cada bloco, enviar SOMENTE o que ele precisa do snapshot,
+// MAS sempre incluir as ÂNCORAS DE HONESTIDADE (split R/D/S, kg_storage,
+// counts). Os blocos de SUMÁRIO EXECUTIVO / OUTLINE / CLOSE recebem o snapshot
+// inteiro (são sínteses globais). Sempre acrescentamos `_other_snapshot_keys`
+// listando as chaves omitidas — assim o modelo não conclui que algo "não existe"
+// só porque não veio na fatia.
+// ============================================================================
+const ANCHOR_KEYS = ["counts", "counts_note", "kg_storage", "clinical_data_provenance"] as const;
+
+/** Heurística keyword → chaves extras do snapshot para esse bloco. */
+function extraKeysForBlock(blockHint?: { block_id?: string; pillar_title?: string } | null): string[] {
+  if (!blockHint) return [];
+  const hay = `${blockHint.block_id ?? ""} ${blockHint.pillar_title ?? ""}`.toLowerCase();
+  const extra: string[] = [];
+  if (/drift|metadata|metadados|plataforma|platform|opera(ç|c)(õ|o)es|ops|deploy|build|environment|ambiente/.test(hay)) {
+    extra.push("drift_guard", "audit_target");
+  }
+  if (/knowledge\s*graph|kg|grafo|ontolog|triplet/.test(hay)) {
+    // kg_storage já é âncora; nada adicional necessário.
+  }
+  if (/twin|trajector|projection|aging|gompertz|sigmo|geroscience/.test(hay)) {
+    // âncoras já bastam — engines vivem em código, não no snapshot.
+  }
+  if (/compliance|fda|ema|avma|gmlp|governan/.test(hay)) {
+    extra.push("audit_target");
+  }
+  return Array.from(new Set(extra));
+}
+
+function sliceSnapshotForScope(
+  snapshot: Record<string, any>,
+  sliceOpts?: { scope: "full" | "block"; blockHint?: { block_id?: string; pillar_title?: string } | null },
+): Record<string, any> {
+  if (!sliceOpts || sliceOpts.scope === "full") return snapshot;
+  const include = new Set<string>([...ANCHOR_KEYS, ...extraKeysForBlock(sliceOpts.blockHint)]);
+  const out: Record<string, any> = {};
+  const omitted: string[] = [];
+  for (const k of Object.keys(snapshot)) {
+    if (include.has(k)) out[k] = snapshot[k];
+    else omitted.push(k);
+  }
+  if (omitted.length > 0) {
+    out._other_snapshot_keys = {
+      note: "Chaves do snapshot omitidas nesta fatia (existem, só não foram enviadas para este bloco). Não conclua que algo está ausente do sistema com base nesta lista — para detalhes, consulte os blocos específicos.",
+      keys: omitted,
+    };
+  }
+  return out;
+}
+
+/** Para blocos individuais: encolhe priorAudits a um resumo curto. */
+function slimPriorAudits(prevAuditsCtx: string): string {
+  try {
+    const arr = JSON.parse(prevAuditsCtx);
+    if (!Array.isArray(arr)) return prevAuditsCtx;
+    const slim = arr.slice(0, 4).map((a: any) => ({
+      version: a?.version,
+      date: a?.date,
+      i18n: a?.i18n,
+      pages: a?.pages,
+      strengths: a?.strengths,
+      gaps: a?.gaps,
+      risks: a?.risks,
+    }));
+    return JSON.stringify(slim);
+  } catch {
+    return prevAuditsCtx.slice(0, 2000);
+  }
+}
+
 async function buildBaseSystem(
   auditContext: { snapshot: Record<string, any>; prevAuditsCtx: string },
   lang: Lang = "pt",
