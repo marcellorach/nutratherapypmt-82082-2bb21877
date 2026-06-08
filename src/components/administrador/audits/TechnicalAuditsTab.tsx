@@ -98,7 +98,8 @@ const DEFAULT_NEW_SCOPE = renderCoverageScopePt();
 
 export default function TechnicalAuditsTab() {
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const headerLang: "pt" | "en" = i18n.language?.startsWith("en") ? "en" : "pt";
   const [audits, setAudits] = useState<TechnicalAudit[]>([]);
   const [requests, setRequests] = useState<AuditRequest[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -109,7 +110,12 @@ export default function TechnicalAuditsTab() {
   const [viewerHtml, setViewerHtml] = useState<string | null>(null);
   const [viewerLoading, setViewerLoading] = useState(false);
   const [viewerError, setViewerError] = useState<string | null>(null);
-  const [viewerLang, setViewerLang] = useState<"pt" | "en">("pt");
+  const [viewerLang, setViewerLang] = useState<"pt" | "en">(headerLang);
+
+  // Mantém a caixinha PT/EN sincronizada com o idioma do header.
+  useEffect(() => {
+    setViewerLang(headerLang);
+  }, [headerLang]);
 
   // dialog state
   const [newScope, setNewScope] = useState(DEFAULT_NEW_SCOPE);
@@ -653,7 +659,11 @@ export default function TechnicalAuditsTab() {
                           size="sm"
                           variant="outline"
                           className="h-6 px-2 text-[10px] gap-1"
-                          onClick={(e) => { e.stopPropagation(); window.open(a.html_path!, "_blank"); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const path = headerLang === "en" && a.html_path_en ? a.html_path_en : a.html_path!;
+                            window.open(path, "_blank");
+                          }}
                           title="Abrir HTML em nova aba"
                         >
                           <ExternalLink className="h-2.5 w-2.5" /> Ver
@@ -666,7 +676,7 @@ export default function TechnicalAuditsTab() {
                           className="h-6 px-2 text-[10px] gap-1"
                           onClick={(e) => {
                             e.stopPropagation();
-                            downloadAuditHtml(a).catch((err) =>
+                            downloadAuditHtml(a, headerLang).catch((err) =>
                               toast({
                                 title: "Não foi possível baixar o HTML",
                                 description: err instanceof Error ? err.message : String(err),
@@ -686,7 +696,7 @@ export default function TechnicalAuditsTab() {
                           className="h-6 px-2 text-[10px] gap-1"
                           onClick={(e) => {
                             e.stopPropagation();
-                            openAuditForPrint(a).catch((err) =>
+                            openAuditForPrint(a, headerLang).catch((err) =>
                               toast({
                                 title: "Não foi possível abrir o PDF",
                                 description: err instanceof Error ? err.message : String(err),

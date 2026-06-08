@@ -8,6 +8,12 @@ interface AuditLike {
   id: string;
   version: string;
   html_path: string | null;
+  html_path_en?: string | null;
+}
+
+function resolvePath(audit: AuditLike, lang?: "pt" | "en"): string {
+  if (lang === "en" && audit.html_path_en) return audit.html_path_en;
+  return audit.html_path || "";
 }
 
 export async function fetchAuditHtml(url: string): Promise<string> {
@@ -38,14 +44,15 @@ export async function fetchAuditHtml(url: string): Promise<string> {
  * Download the audit HTML as a standalone .html file (with <base> injected
  * so relative assets keep resolving when the file is opened locally).
  */
-export async function downloadAuditHtml(audit: AuditLike): Promise<void> {
-  if (!audit.html_path) throw new Error("Auditoria sem HTML");
-  const html = await fetchAuditHtml(audit.html_path);
+export async function downloadAuditHtml(audit: AuditLike, lang?: "pt" | "en"): Promise<void> {
+  const path = resolvePath(audit, lang);
+  if (!path) throw new Error("Auditoria sem HTML");
+  const html = await fetchAuditHtml(path);
   const blob = new Blob([html], { type: "text/html;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `senex-audit-v${audit.version}.html`;
+  a.download = `senex-audit-v${audit.version}${lang === "en" ? "-en" : ""}.html`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -57,9 +64,10 @@ export async function downloadAuditHtml(audit: AuditLike): Promise<void> {
  * dialog. Users save as PDF from the browser — works in every browser,
  * preserves Unicode and styling, and avoids the broken html2pdf path.
  */
-export async function openAuditForPrint(audit: AuditLike): Promise<void> {
-  if (!audit.html_path) throw new Error("Auditoria sem HTML");
-  const html = await fetchAuditHtml(audit.html_path);
+export async function openAuditForPrint(audit: AuditLike, lang?: "pt" | "en"): Promise<void> {
+  const path = resolvePath(audit, lang);
+  if (!path) throw new Error("Auditoria sem HTML");
+  const html = await fetchAuditHtml(path);
   const printScript = `
 <script>
   window.addEventListener('load', function () {
