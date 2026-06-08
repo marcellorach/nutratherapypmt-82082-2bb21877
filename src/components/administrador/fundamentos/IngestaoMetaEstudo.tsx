@@ -12,6 +12,8 @@ import {
   Circle, XCircle, ChevronDown, X,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 interface Claim { claim: string; quote?: string; weight?: number }
 interface SuggestedLink {
@@ -117,6 +119,7 @@ function StatusIcon({ status }: { status: TraceStatus }) {
 interface Props { onSaved?: () => void }
 
 const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
+  const { t } = useTranslation();
   const [sourceUrl, setSourceUrl] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [curatorNotes, setCuratorNotes] = useState('');
@@ -124,8 +127,9 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
   const [analyzing, setAnalyzing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [draft, setDraft] = useState<Draft | null>(null);
+  const stageLabel = (key: string, fallback: string) => t(`fundamentos.ingest.stage.${key}`, fallback);
   const [trace, setTrace] = useState<TraceLine[]>(
-    STAGES.map(s => ({ stage: s.key, label: s.label, status: 'pending' as TraceStatus }))
+    STAGES.map(s => ({ stage: s.key, label: stageLabel(s.key, s.label), status: 'pending' as TraceStatus }))
   );
   const [failure, setFailure] = useState<FailureInfo | null>(null);
 
@@ -133,14 +137,14 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
     setTrace(prev => prev.map(t => t.stage === key ? { ...t, ...patch } : t));
   };
   const resetTrace = () => {
-    setTrace(STAGES.map(s => ({ stage: s.key, label: s.label, status: 'pending' as TraceStatus })));
+    setTrace(STAGES.map(s => ({ stage: s.key, label: stageLabel(s.key, s.label), status: 'pending' as TraceStatus })));
     setFailure(null);
   };
 
   const onFile = (f: File | null) => {
     if (!f) { setFile(null); return; }
     if (f.size > MAX_BYTES) {
-      toast.error('Arquivo excede 20MB.');
+      toast.error(t('fundamentos.ingest.fileTooLarge', 'Arquivo excede 20MB.'));
       return;
     }
     setFile(f);
@@ -155,7 +159,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
 
   const analyze = async () => {
     if (!file) {
-      toast.error('Anexe um documento (PDF, .md, .txt ou .docx) para iniciar.');
+      toast.error(t('fundamentos.ingest.attachRequired', 'Anexe um documento (PDF, .md, .txt ou .docx) para iniciar.'));
       return;
     }
     setAnalyzing(true);
@@ -221,8 +225,8 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
       }
 
       if (error || data?.error) {
-        setTrace(prev => prev.map(t => t.status === 'running' ? { ...t, status: 'error', detail: t.detail || 'Não executado' } : t));
-        const msg = (effective?.error as string) || (error as any)?.message || 'Falha desconhecida.';
+        setTrace(prev => prev.map(tr => tr.status === 'running' ? { ...tr, status: 'error', detail: tr.detail || t('fundamentos.ingest.stage.notExecuted', 'Não executado') } : tr));
+        const msg = (effective?.error as string) || (error as any)?.message || t('fundamentos.ingest.stage.unknownFailure', 'Falha desconhecida.');
         const opts: string[] | undefined = Array.isArray(effective?.options) ? effective.options : undefined;
         const stg: string = effective?.stage || 'llm_analysis';
         setFailure({ stage: stg, message: msg, options: opts });
@@ -237,10 +241,10 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
         proposed_rules: (data.draft.proposed_rules || []).map((p: ProposedRule) => ({ ...p, _action: null })),
       };
       setDraft(d);
-      toast.success('Rascunho gerado — revise antes de aprovar.');
+      toast.success(t('fundamentos.ingest.draftReady', 'Rascunho gerado — revise antes de aprovar.'));
     } catch (err: any) {
       console.error(err);
-      toast.error(err?.message || 'Falha ao analisar. Veja o log de digestão.');
+      toast.error(err?.message || t('fundamentos.ingest.analyzeFail', 'Falha ao analisar. Veja o log de digestão.'));
     } finally {
       setAnalyzing(false);
     }
@@ -341,7 +345,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
       );
       if (blockedPromotions.length) {
         toast.error(
-          `${blockedPromotions.length} proposta(s) em CONFLITO com RCs ativas não podem ser promovidas diretamente. Use "Manter RC atual" ou edite a stance.`,
+          t('fundamentos.ingest.conflictsBlocked', '{{n}} proposta(s) em CONFLITO com RCs ativas não podem ser promovidas diretamente. Use "Manter RC atual" ou edite a stance.', { n: blockedPromotions.length }),
         );
         setSaving(false);
         return;
@@ -382,9 +386,9 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
           const { error: evErr } = await supabase.from('core_rule_evidence').insert(evRows);
           if (evErr) {
             console.warn('Falha ao anexar evidências de stance:', evErr);
-            toast.warning(`Meta-estudo salvo, mas ${evRows.length} evidência(s) de stance falharam: ${evErr.message}`);
+            toast.warning(t('fundamentos.ingest.stanceAttachFail', 'Meta-estudo salvo, mas {{n}} evidência(s) de stance falharam: {{msg}}', { n: evRows.length, msg: evErr.message }));
           } else {
-            toast.success(`${evRows.length} evidência(s) de stance anexada(s) a RCs existentes.`);
+            toast.success(t('fundamentos.ingest.stanceAttachOk', '{{n}} evidência(s) de stance anexada(s) a RCs existentes.', { n: evRows.length }));
           }
         }
         // Audit attach / resolve_keep actions
@@ -435,9 +439,9 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
           .from('core_rules').insert(rows as any).select('id, rule_id');
         if (rcErr) {
           console.warn('Falha ao promover RCs propostas:', rcErr);
-          toast.warning(`Meta-estudo salvo, mas ${toPromote.length} RC(s) propostas não foram promovidas: ${rcErr.message}`);
+          toast.warning(t('fundamentos.ingest.promotedFail', 'Meta-estudo salvo, mas {{n}} RC(s) propostas não foram promovidas: {{msg}}', { n: toPromote.length, msg: rcErr.message }));
         } else {
-          toast.success(`${toPromote.length} nova(s) RC(s) deduzida(s) promovida(s).`);
+          toast.success(t('fundamentos.ingest.promotedOk', '{{n}} nova(s) RC(s) deduzida(s) promovida(s).', { n: toPromote.length }));
           for (let i = 0; i < toPromote.length; i++) {
             const p = toPromote[i];
             const created = (inserted || [])[i];
@@ -493,16 +497,16 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
         const { error: alErr } = await supabase.from('core_rule_audit_log').insert(auditRows);
         if (alErr) {
           console.warn('Falha ao gravar audit log:', alErr);
-          toast.warning(`Meta-estudo salvo, mas log de auditoria falhou: ${alErr.message}`);
+          toast.warning(t('fundamentos.ingest.auditFail', 'Meta-estudo salvo, mas log de auditoria falhou: {{msg}}', { msg: alErr.message }));
         }
       }
 
-      toast.success('Meta-estudo aprovado e vinculado.');
+      toast.success(t('fundamentos.ingest.approved', 'Meta-estudo aprovado e vinculado.'));
       setDraft(null); setFile(null); setSourceUrl(''); setCuratorNotes(''); resetTrace();
       onSaved?.();
     } catch (err: any) {
       console.error(err);
-      toast.error(err?.message || 'Falha ao salvar.');
+      toast.error(err?.message || t('fundamentos.ingest.saveFail', 'Falha ao salvar.'));
     } finally {
       setSaving(false);
     }
