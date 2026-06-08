@@ -1095,7 +1095,7 @@ REGRAS:
                 {
                   block_id: block.block_id,
                   pillar_title: block.pillar_title,
-                  html: `<section id="${block.block_id}" class="block-gap"><h2>${block.pillar_title} — Lacuna de geração</h2><p>Bloco não pôde ser gerado após 2 tentativas. Motivo: ${reason}. Re-execute para preencher.</p></section>`,
+                  html: `<section id="${block.block_id}" class="block-gap" data-status="unavailable"><h2>${block.pillar_title} — seção indisponível</h2><p><strong>Falha de geração.</strong> Bloco não pôde ser produzido após 2 tentativas (primária + fallback). Motivo: ${reason}. A honestidade da auditoria exige sinalizar a ausência em vez de deixar um buraco silencioso. Re-execute para preencher.</p></section>`,
                 },
               ],
               skipped_blocks: uniqueStrings([...(outline.skipped_blocks ?? []), block.block_id]),
