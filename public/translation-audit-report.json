@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-06-08T22:04:30.832Z",
+  "timestamp": "2026-06-08T23:31:38.935Z",
   "summary": {
     "totalFiles": 956,
-    "totalIssues": 471,
+    "totalIssues": 480,
     "hardcodedTexts": 57,
-    "missingKeys": 412,
+    "missingKeys": 421,
     "incompleteTranslations": 2
   },
   "issues": [
@@ -487,7 +487,7 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/audits/TechnicalAuditsTab.tsx",
-      "line": 619,
+      "line": 628,
       "text": "a",
       "severity": "high"
     },
@@ -1655,9 +1655,72 @@
     },
     {
       "type": "missing-key",
+      "file": "src/components/administrador/fundamentos/CoreRuleHistory.tsx",
+      "line": 63,
+      "text": "id, rule_id, title, status, category",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/fundamentos/CoreRuleHistory.tsx",
+      "line": 64,
+      "text": "id, title, year",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/fundamentos/CoreRuleHistory.tsx",
+      "line": 65,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/fundamentos/CoreRuleHistory.tsx",
+      "line": 66,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/administrador/fundamentos/CoreRulesEvidenceBadge.tsx",
       "line": 37,
       "text": "relation, weight, quote, rule_id, core_rules!inner(title, rule_id)",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/fundamentos/IngestaoMetaEstudo.tsx",
+      "line": 287,
+      "text": "id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/fundamentos/IngestaoMetaEstudo.tsx",
+      "line": 318,
+      "text": "id, rule_id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/fundamentos/IngestaoMetaEstudo.tsx",
+      "line": 366,
+      "text": "id, rule_id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/fundamentos/IngestaoMetaEstudo.tsx",
+      "line": 417,
+      "text": "rule_id",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/fundamentos/IngestaoMetaEstudo.tsx",
+      "line": 439,
+      "text": "id, rule_id",
       "severity": "high"
     },
     {
@@ -2692,28 +2755,28 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 663,
+      "line": 748,
       "text": "audit_base_system_{pt,en}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 1975,
+      "line": 2060,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2186,
+      "line": 2271,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 4981,
+      "line": 5066,
       "text": "@",
       "severity": "high"
     },
@@ -2797,13 +2860,6 @@
     {
       "type": "missing-key",
       "file": "src/pages/administrador/FundamentosTab.tsx",
-      "line": 102,
-      "text": "*",
-      "severity": "high"
-    },
-    {
-      "type": "missing-key",
-      "file": "src/pages/administrador/FundamentosTab.tsx",
       "line": 103,
       "text": "*",
       "severity": "high"
@@ -2819,6 +2875,13 @@
       "type": "missing-key",
       "file": "src/pages/administrador/FundamentosTab.tsx",
       "line": 105,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/pages/administrador/FundamentosTab.tsx",
+      "line": 106,
       "text": "*",
       "severity": "high"
     },
