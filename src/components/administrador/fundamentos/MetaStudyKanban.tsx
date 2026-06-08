@@ -76,12 +76,12 @@ const DIM_KEYS: Array<keyof MetaStudyRow> = [
   'reliability_relevance',
 ];
 
-const DIM_SHORT: Record<string, string> = {
-  reliability_methodology: 'Metod.',
-  reliability_evidence_base: 'Evid.',
-  reliability_applicability: 'Aplic.',
-  reliability_reproducibility: 'Reprod.',
-  reliability_relevance: 'Relev.',
+const DIM_SHORT_KEYS: Record<string, { key: string; fallback: string }> = {
+  reliability_methodology: { key: 'fundamentos.kanban.dim.methodologyShort', fallback: 'Metod.' },
+  reliability_evidence_base: { key: 'fundamentos.kanban.dim.evidenceBaseShort', fallback: 'Evid.' },
+  reliability_applicability: { key: 'fundamentos.kanban.dim.applicabilityShort', fallback: 'Aplic.' },
+  reliability_reproducibility: { key: 'fundamentos.kanban.dim.reproducibilityShort', fallback: 'Reprod.' },
+  reliability_relevance: { key: 'fundamentos.kanban.dim.relevanceShort', fallback: 'Relev.' },
 };
 
 const DIM_COLOR: Record<string, string> = {
@@ -471,7 +471,7 @@ const MetaStudyKanban: React.FC = () => {
                                   key={k as string}
                                   className={DIM_COLOR[k as string]}
                                   style={{ flex: v }}
-                                  title={`${DIM_SHORT[k as string]} ${v.toFixed(1)}`}
+                                  title={`${t(DIM_SHORT_KEYS[k as string].key, DIM_SHORT_KEYS[k as string].fallback)} ${v.toFixed(1)}`}
                                 />
                               );
                             })}
@@ -537,7 +537,7 @@ const MetaStudyKanban: React.FC = () => {
                               const v = scores[k as string];
                               return (
                                 <div key={k as string} className="flex items-center gap-2">
-                                  <span className="text-[10px] font-medium w-12 text-muted-foreground">{DIM_SHORT[k as string]}</span>
+                                  <span className="text-[10px] font-medium w-12 text-muted-foreground">{t(DIM_SHORT_KEYS[k as string].key, DIM_SHORT_KEYS[k as string].fallback)}</span>
                                   <Slider
                                     className="flex-1"
                                     value={[v ?? 0]}

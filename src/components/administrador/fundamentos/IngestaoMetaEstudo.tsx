@@ -12,6 +12,8 @@ import {
   Circle, XCircle, ChevronDown, X,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 interface Claim { claim: string; quote?: string; weight?: number }
 interface SuggestedLink {
@@ -117,6 +119,7 @@ function StatusIcon({ status }: { status: TraceStatus }) {
 interface Props { onSaved?: () => void }
 
 const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
+  const { t } = useTranslation();
   const [sourceUrl, setSourceUrl] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [curatorNotes, setCuratorNotes] = useState('');
@@ -124,8 +127,9 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
   const [analyzing, setAnalyzing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [draft, setDraft] = useState<Draft | null>(null);
+  const stageLabel = (key: string, fallback: string) => t(`fundamentos.ingest.stage.${key}`, fallback);
   const [trace, setTrace] = useState<TraceLine[]>(
-    STAGES.map(s => ({ stage: s.key, label: s.label, status: 'pending' as TraceStatus }))
+    STAGES.map(s => ({ stage: s.key, label: stageLabel(s.key, s.label), status: 'pending' as TraceStatus }))
   );
   const [failure, setFailure] = useState<FailureInfo | null>(null);
 
@@ -133,14 +137,14 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
     setTrace(prev => prev.map(t => t.stage === key ? { ...t, ...patch } : t));
   };
   const resetTrace = () => {
-    setTrace(STAGES.map(s => ({ stage: s.key, label: s.label, status: 'pending' as TraceStatus })));
+    setTrace(STAGES.map(s => ({ stage: s.key, label: stageLabel(s.key, s.label), status: 'pending' as TraceStatus })));
     setFailure(null);
   };
 
   const onFile = (f: File | null) => {
     if (!f) { setFile(null); return; }
     if (f.size > MAX_BYTES) {
-      toast.error('Arquivo excede 20MB.');
+      toast.error(t('fundamentos.ingest.fileTooLarge', 'Arquivo excede 20MB.'));
       return;
     }
     setFile(f);
@@ -155,7 +159,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
 
   const analyze = async () => {
     if (!file) {
-      toast.error('Anexe um documento (PDF, .md, .txt ou .docx) para iniciar.');
+      toast.error(t('fundamentos.ingest.attachRequired', 'Anexe um documento (PDF, .md, .txt ou .docx) para iniciar.'));
       return;
     }
     setAnalyzing(true);
@@ -221,8 +225,8 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
       }
 
       if (error || data?.error) {
-        setTrace(prev => prev.map(t => t.status === 'running' ? { ...t, status: 'error', detail: t.detail || 'Não executado' } : t));
-        const msg = (effective?.error as string) || (error as any)?.message || 'Falha desconhecida.';
+        setTrace(prev => prev.map(tr => tr.status === 'running' ? { ...tr, status: 'error', detail: tr.detail || t('fundamentos.ingest.stage.notExecuted', 'Não executado') } : tr));
+        const msg = (effective?.error as string) || (error as any)?.message || t('fundamentos.ingest.stage.unknownFailure', 'Falha desconhecida.');
         const opts: string[] | undefined = Array.isArray(effective?.options) ? effective.options : undefined;
         const stg: string = effective?.stage || 'llm_analysis';
         setFailure({ stage: stg, message: msg, options: opts });
@@ -237,10 +241,10 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
         proposed_rules: (data.draft.proposed_rules || []).map((p: ProposedRule) => ({ ...p, _action: null })),
       };
       setDraft(d);
-      toast.success('Rascunho gerado — revise antes de aprovar.');
+      toast.success(t('fundamentos.ingest.draftReady', 'Rascunho gerado — revise antes de aprovar.'));
     } catch (err: any) {
       console.error(err);
-      toast.error(err?.message || 'Falha ao analisar. Veja o log de digestão.');
+      toast.error(err?.message || t('fundamentos.ingest.analyzeFail', 'Falha ao analisar. Veja o log de digestão.'));
     } finally {
       setAnalyzing(false);
     }
@@ -341,7 +345,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
       );
       if (blockedPromotions.length) {
         toast.error(
-          `${blockedPromotions.length} proposta(s) em CONFLITO com RCs ativas não podem ser promovidas diretamente. Use "Manter RC atual" ou edite a stance.`,
+          t('fundamentos.ingest.conflictsBlocked', '{{n}} proposta(s) em CONFLITO com RCs ativas não podem ser promovidas diretamente. Use "Manter RC atual" ou edite a stance.', { n: blockedPromotions.length }),
         );
         setSaving(false);
         return;
@@ -382,9 +386,9 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
           const { error: evErr } = await supabase.from('core_rule_evidence').insert(evRows);
           if (evErr) {
             console.warn('Falha ao anexar evidências de stance:', evErr);
-            toast.warning(`Meta-estudo salvo, mas ${evRows.length} evidência(s) de stance falharam: ${evErr.message}`);
+            toast.warning(t('fundamentos.ingest.stanceAttachFail', 'Meta-estudo salvo, mas {{n}} evidência(s) de stance falharam: {{msg}}', { n: evRows.length, msg: evErr.message }));
           } else {
-            toast.success(`${evRows.length} evidência(s) de stance anexada(s) a RCs existentes.`);
+            toast.success(t('fundamentos.ingest.stanceAttachOk', '{{n}} evidência(s) de stance anexada(s) a RCs existentes.', { n: evRows.length }));
           }
         }
         // Audit attach / resolve_keep actions
@@ -435,9 +439,9 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
           .from('core_rules').insert(rows as any).select('id, rule_id');
         if (rcErr) {
           console.warn('Falha ao promover RCs propostas:', rcErr);
-          toast.warning(`Meta-estudo salvo, mas ${toPromote.length} RC(s) propostas não foram promovidas: ${rcErr.message}`);
+          toast.warning(t('fundamentos.ingest.promotedFail', 'Meta-estudo salvo, mas {{n}} RC(s) propostas não foram promovidas: {{msg}}', { n: toPromote.length, msg: rcErr.message }));
         } else {
-          toast.success(`${toPromote.length} nova(s) RC(s) deduzida(s) promovida(s).`);
+          toast.success(t('fundamentos.ingest.promotedOk', '{{n}} nova(s) RC(s) deduzida(s) promovida(s).', { n: toPromote.length }));
           for (let i = 0; i < toPromote.length; i++) {
             const p = toPromote[i];
             const created = (inserted || [])[i];
@@ -493,16 +497,16 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
         const { error: alErr } = await supabase.from('core_rule_audit_log').insert(auditRows);
         if (alErr) {
           console.warn('Falha ao gravar audit log:', alErr);
-          toast.warning(`Meta-estudo salvo, mas log de auditoria falhou: ${alErr.message}`);
+          toast.warning(t('fundamentos.ingest.auditFail', 'Meta-estudo salvo, mas log de auditoria falhou: {{msg}}', { msg: alErr.message }));
         }
       }
 
-      toast.success('Meta-estudo aprovado e vinculado.');
+      toast.success(t('fundamentos.ingest.approved', 'Meta-estudo aprovado e vinculado.'));
       setDraft(null); setFile(null); setSourceUrl(''); setCuratorNotes(''); resetTrace();
       onSaved?.();
     } catch (err: any) {
       console.error(err);
-      toast.error(err?.message || 'Falha ao salvar.');
+      toast.error(err?.message || t('fundamentos.ingest.saveFail', 'Falha ao salvar.'));
     } finally {
       setSaving(false);
     }
@@ -514,9 +518,9 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
         <CardContent className="py-3 text-xs text-muted-foreground flex items-start gap-2">
           <AlertTriangle className="h-3.5 w-3.5 mt-0.5" />
           <span>
-            Ingestão <b>NÃO grava direto</b>: a IA produz um rascunho, você revisa/edita os
-            vínculos com Regras-Core sugeridos e aprova manualmente. Estudos aqui são <b>arquiteturais</b>
-            {' '}(governança do pipeline), não clínicos.
+            <Trans i18nKey="fundamentos.ingest.intro" components={{ 1: <b /> }}>
+              {'Ingestão <1>NÃO grava direto</1>: a IA produz um rascunho, você revisa/edita os vínculos com Regras-Core sugeridos e aprova manualmente. Estudos aqui são <1>arquiteturais</1> (governança do pipeline), não clínicos.'}
+            </Trans>
           </span>
         </CardContent>
       </Card>
@@ -525,18 +529,19 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-purple-600" /> Novo meta-estudo
+              <Sparkles className="h-4 w-4 text-purple-600" /> {t('fundamentos.ingest.newStudy', 'Novo meta-estudo')}
             </CardTitle>
             <CardDescription>
-              Anexe o documento-fonte (PDF, .md, .txt ou .docx). Opcionalmente acrescente notas
-              do curador para orientar a IA. Processado por <b>Gemini 3 Pro</b>.
+              <Trans i18nKey="fundamentos.ingest.newStudyDesc" components={{ 1: <b /> }}>
+                {'Anexe o documento-fonte (PDF, .md, .txt ou .docx). Opcionalmente acrescente notas do curador para orientar a IA. Processado por <1>Gemini 3 Pro</1>.'}
+              </Trans>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Dropzone — required */}
             <div>
               <Label className="text-xs flex items-center gap-1">
-                <Upload className="h-3 w-3" /> Documento-fonte <span className="text-red-600">*</span>
+                <Upload className="h-3 w-3" /> {t('fundamentos.ingest.sourceDoc', 'Documento-fonte')} <span className="text-red-600">*</span>
               </Label>
               <div
                 onDragOver={e => { e.preventDefault(); setDragOver(true); }}
@@ -565,8 +570,12 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                 ) : (
                   <div className="text-sm text-muted-foreground">
                     <Upload className="h-5 w-5 mx-auto mb-1.5 opacity-60" />
-                    <div>Arraste o arquivo aqui ou <span className="text-purple-700 font-medium">clique para selecionar</span></div>
-                    <div className="text-[10px] mt-1">PDF, .md, .txt, .docx · até 20MB</div>
+                    <div>
+                      <Trans i18nKey="fundamentos.ingest.dragOrClick" components={{ 1: <span className="text-purple-700 font-medium" /> }}>
+                        {'Arraste o arquivo aqui ou <1>clique para selecionar</1>'}
+                      </Trans>
+                    </div>
+                    <div className="text-[10px] mt-1">{t('fundamentos.ingest.fileLimit', 'PDF, .md, .txt, .docx · até 20MB')}</div>
                   </div>
                 )}
                 <input
@@ -581,38 +590,38 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
 
             {/* Curator notes */}
             <div>
-              <Label className="text-xs">Notas do curador <span className="text-muted-foreground">(opcional)</span></Label>
+              <Label className="text-xs">{t('fundamentos.ingest.curatorNotes', 'Notas do curador')} <span className="text-muted-foreground">({t('fundamentos.ingest.optional', 'opcional')})</span></Label>
               <Textarea
                 value={curatorNotes}
                 onChange={e => setCuratorNotes(e.target.value)}
-                placeholder="Diretrizes para a IA sobre este paper: como ponderar, claims a ignorar, RCs já cobertas, contexto histórico, etc. Aceita markdown."
+                placeholder={t('fundamentos.ingest.curatorNotesPlaceholder', 'Diretrizes para a IA sobre este paper: como ponderar, claims a ignorar, RCs já cobertas, contexto histórico, etc. Aceita markdown.')}
                 className="min-h-24 text-xs"
                 maxLength={4000}
               />
               <p className="text-[10px] text-muted-foreground mt-1">
-                {curatorNotes.length}/4000 — injetado no prompt como contexto vinculante, não como conteúdo do estudo.
+                {t('fundamentos.ingest.curatorNotesHelp', '{{n}}/4000 — injetado no prompt como contexto vinculante, não como conteúdo do estudo.', { n: curatorNotes.length })}
               </p>
             </div>
 
             {/* Optional metadata */}
             <details className="text-xs">
               <summary className="cursor-pointer text-muted-foreground hover:text-foreground flex items-center gap-1 select-none">
-                <ChevronDown className="h-3 w-3" /> Metadados adicionais (opcional)
+                <ChevronDown className="h-3 w-3" /> {t('fundamentos.ingest.extraMetadata', 'Metadados adicionais (opcional)')}
               </summary>
               <div className="mt-2 pl-4">
-                <Label className="text-xs">DOI / URL da fonte</Label>
+                <Label className="text-xs">{t('fundamentos.ingest.doiUrl', 'DOI / URL da fonte')}</Label>
                 <Input value={sourceUrl} onChange={e => setSourceUrl(e.target.value)} placeholder="https://doi.org/..." />
               </div>
             </details>
 
             <Button onClick={analyze} disabled={analyzing || !file}>
-              {analyzing ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Analisando…</> : <><Sparkles className="h-4 w-4 mr-1" /> Analisar com IA</>}
+              {analyzing ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> {t('fundamentos.ingest.analyzing', 'Analisando…')}</> : <><Sparkles className="h-4 w-4 mr-1" /> {t('fundamentos.ingest.analyze', 'Analisar com IA')}</>}
             </Button>
 
             {/* Digestion log */}
             <div className="border rounded-md p-3 bg-muted/20">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-                Log de digestão
+                {t('fundamentos.ingest.digestionLog', 'Log de digestão')}
               </div>
               <ol className="space-y-1.5">
                 {trace.map((t, i) => (
@@ -638,7 +647,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
               {failure?.options && failure.options.length > 0 && (
                 <div className="mt-3 border border-amber-300 bg-amber-50 rounded p-2.5">
                   <div className="text-[11px] font-semibold uppercase tracking-wide text-amber-800 mb-1.5 flex items-center gap-1">
-                    <AlertTriangle className="h-3 w-3" /> Opções para contornar (sem descartar parte do estudo)
+                    <AlertTriangle className="h-3 w-3" /> {t('fundamentos.ingest.workaroundOptions', 'Opções para contornar (sem descartar parte do estudo)')}
                   </div>
                   <ul className="list-disc pl-5 space-y-1 text-[11px] text-amber-900">
                     {failure.options.map((o, i) => <li key={i}>{o}</li>)}
@@ -655,29 +664,29 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
           <CardHeader>
             <div className="flex items-center justify-between gap-2">
               <CardTitle className="text-base flex items-center gap-2">
-                <FileText className="h-4 w-4" /> Rascunho — revise antes de aprovar
+                <FileText className="h-4 w-4" /> {t('fundamentos.ingest.draftTitle', 'Rascunho — revise antes de aprovar')}
               </CardTitle>
               <Button variant="ghost" size="sm" onClick={() => setDraft(null)}>
-                <Trash2 className="h-3 w-3 mr-1" /> Descartar
+                <Trash2 className="h-3 w-3 mr-1" /> {t('fundamentos.ingest.discard', 'Descartar')}
               </Button>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
-                <Label className="text-xs">Título</Label>
+                <Label className="text-xs">{t('fundamentos.ingest.fields.title', 'Título')}</Label>
                 <Input value={draft.title} onChange={e => setDraft({ ...draft, title: e.target.value })} />
               </div>
-              <div><Label className="text-xs">Autores</Label>
+              <div><Label className="text-xs">{t('fundamentos.ingest.fields.authors', 'Autores')}</Label>
                 <Input value={draft.authors || ''} onChange={e => setDraft({ ...draft, authors: e.target.value })} /></div>
-              <div><Label className="text-xs">Ano</Label>
+              <div><Label className="text-xs">{t('fundamentos.ingest.fields.year', 'Ano')}</Label>
                 <Input type="number" value={draft.year || ''} onChange={e => setDraft({ ...draft, year: parseInt(e.target.value) || undefined })} /></div>
-              <div><Label className="text-xs">Journal</Label>
+              <div><Label className="text-xs">{t('fundamentos.ingest.fields.journal', 'Journal')}</Label>
                 <Input value={draft.journal || ''} onChange={e => setDraft({ ...draft, journal: e.target.value })} /></div>
-              <div><Label className="text-xs">DOI</Label>
+              <div><Label className="text-xs">{t('fundamentos.ingest.fields.doi', 'DOI')}</Label>
                 <Input value={draft.doi || ''} onChange={e => setDraft({ ...draft, doi: e.target.value })} /></div>
               <div className="col-span-2">
-                <Label className="text-xs">Tipo</Label>
+                <Label className="text-xs">{t('fundamentos.ingest.fields.kind', 'Tipo')}</Label>
                 <Select value={draft.kind} onValueChange={(v) => setDraft({ ...draft, kind: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -689,13 +698,13 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                 </Select>
               </div>
               <div className="col-span-2">
-                <Label className="text-xs">Resumo</Label>
+                <Label className="text-xs">{t('fundamentos.ingest.fields.summary', 'Resumo')}</Label>
                 <Textarea value={draft.summary || ''} onChange={e => setDraft({ ...draft, summary: e.target.value })} className="min-h-20 text-xs" />
               </div>
             </div>
 
             <div>
-              <Label className="text-xs font-semibold uppercase tracking-wide">Claims-chave ({draft.key_claims.length})</Label>
+              <Label className="text-xs font-semibold uppercase tracking-wide">{t('fundamentos.ingest.keyClaims', 'Claims-chave')} ({draft.key_claims.length})</Label>
               <ul className="space-y-1 mt-1 text-xs">
                 {draft.key_claims.map((c, i) => (
                   <li key={i} className="border rounded px-2 py-1.5">
@@ -710,7 +719,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
             {/* Lições estruturadas (schema v2) */}
             <div className="space-y-2">
               <Label className="text-xs font-semibold uppercase tracking-wide">
-                Lições estruturadas ({LESSON_SECTIONS.reduce((n, s) => n + ((draft as any)[s.key]?.length || 0), 0)})
+                {t('fundamentos.ingest.structuredLessons', 'Lições estruturadas')} ({LESSON_SECTIONS.reduce((n, s) => n + ((draft as any)[s.key]?.length || 0), 0)})
               </Label>
               {LESSON_SECTIONS.map(section => {
                 const items = ((draft as any)[section.key] || []) as LessonItem[];
@@ -718,7 +727,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                 return (
                   <details key={String(section.key)} className={`border-l-2 ${section.tone} pl-2`} open={items.length <= 3}>
                     <summary className="cursor-pointer text-xs font-medium select-none">
-                      {section.label} <span className="text-muted-foreground">({items.length})</span>
+                      {t(`fundamentos.ingest.section.${String(section.key)}`, section.label)} <span className="text-muted-foreground">({items.length})</span>
                     </summary>
                     <ul className="space-y-1 mt-1.5 text-xs">
                       {items.map((it, i) => (
@@ -737,17 +746,17 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
               })}
               {LESSON_SECTIONS.every(s => !((draft as any)[s.key]?.length)) && (
                 <p className="text-[11px] text-muted-foreground italic">
-                  Nenhuma lição estruturada extraída — o paper pode ser denso demais para uma única passada ou o schema v2 ainda não foi aplicado. Considere re-digerir.
+                  {t('fundamentos.ingest.noLessons', 'Nenhuma lição estruturada extraída — o paper pode ser denso demais para uma única passada ou o schema v2 ainda não foi aplicado. Considere re-digerir.')}
                 </p>
               )}
             </div>
 
             <div>
               <Label className="text-xs font-semibold uppercase tracking-wide">
-                Vínculos sugeridos com Regras-Core ({draft.suggested_links.filter(l => l._enabled).length}/{draft.suggested_links.length})
+                {t('fundamentos.ingest.suggestedLinks', 'Vínculos sugeridos com Regras-Core')} ({draft.suggested_links.filter(l => l._enabled).length}/{draft.suggested_links.length})
               </Label>
               {draft.suggested_links.length === 0 ? (
-                <p className="text-xs text-muted-foreground italic mt-1">Nenhum vínculo sugerido — você ainda pode aprovar o meta-estudo isoladamente.</p>
+                <p className="text-xs text-muted-foreground italic mt-1">{t('fundamentos.ingest.noSuggestedLinks', 'Nenhum vínculo sugerido — você ainda pode aprovar o meta-estudo isoladamente.')}</p>
               ) : (
                 <ul className="space-y-1.5 mt-1 text-xs">
                   {draft.suggested_links.map((l, i) => (
@@ -798,7 +807,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                   <div className="text-muted-foreground mt-0.5">{p.enunciado}</div>
                   {p.justification_quote && <div className="text-muted-foreground italic mt-1">"{p.justification_quote}"</div>}
                   {p.suggested_application && (
-                    <div className="text-[11px] mt-1"><span className="text-muted-foreground">Aplicação sugerida:</span> <code className="text-[10px]">{p.suggested_application}</code></div>
+                    <div className="text-[11px] mt-1"><span className="text-muted-foreground">{t('fundamentos.ingest.proposed.applicationSuggested', 'Aplicação sugerida:')}</span> <code className="text-[10px]">{p.suggested_application}</code></div>
                   )}
                 </>
               );
@@ -808,10 +817,10 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                   <div>
                     <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5">
                       <Sparkles className="h-3 w-3 text-purple-600" />
-                      Regras-Core deduzidas deste paper (0)
+                      {t('fundamentos.ingest.proposed.title', 'Regras-Core deduzidas deste paper')} (0)
                     </Label>
                     <p className="text-xs text-muted-foreground italic mt-1">
-                      A IA não propôs novas regras — todas as lições já mapearam para RCs existentes (ou o paper é mais ilustrativo do que normativo).
+                      {t('fundamentos.ingest.proposed.empty', 'A IA não propôs novas regras — todas as lições já mapearam para RCs existentes (ou o paper é mais ilustrativo do que normativo).')}
                     </p>
                   </div>
                 );
@@ -824,18 +833,18 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                     <div className="border border-red-300 rounded-md bg-red-50/40 p-2">
                       <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5 text-red-800">
                         <AlertTriangle className="h-3 w-3" />
-                        Conflitos com Regras-Core ativas ({contradicts.length})
+                        {t('fundamentos.ingest.proposed.conflicts', 'Conflitos com Regras-Core ativas')} ({contradicts.length})
                         <span className="text-[10px] font-normal text-red-700/80 normal-case">
-                          — promoção bloqueada, requer decisão humana
+                          {t('fundamentos.ingest.proposed.conflictsHint', '— promoção bloqueada, requer decisão humana')}
                         </span>
                       </Label>
                       <ul className="space-y-1.5 mt-1.5 text-xs">
                         {contradicts.map(({ p, i }) => (
                           <li key={i} className={`border border-red-200 rounded px-2 py-2 bg-white ${p._action === 'discard' ? 'opacity-40' : ''}`}>
                             <div className="flex items-center gap-2 flex-wrap mb-1">
-                              <Badge className="bg-red-100 text-red-800 border-red-300">CONTRADIZ</Badge>
+                              <Badge className="bg-red-100 text-red-800 border-red-300">{t('fundamentos.ingest.proposed.contradicts', 'CONTRADIZ')}</Badge>
                               {(p.conflicts_with || []).map(rid => (
-                                <Badge key={rid} variant="outline" className="font-mono text-[10px] border-red-300 text-red-800">vs {rid}</Badge>
+                                <Badge key={rid} variant="outline" className="font-mono text-[10px] border-red-300 text-red-800">{t('fundamentos.ingest.proposed.vs', 'vs')} {rid}</Badge>
                               ))}
                               {renderHeader(p)}
                             </div>
@@ -847,7 +856,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                                 className="h-6 text-[11px]"
                                 onClick={() => updateAction(i, 'resolve_keep')}
                               >
-                                {p._action === 'resolve_keep' ? '✓ Manter RC atual (arquivar proposta)' : 'Manter RC atual (arquivar)'}
+                                {p._action === 'resolve_keep' ? t('fundamentos.ingest.proposed.keepActiveRCDone', '✓ Manter RC atual (arquivar proposta)') : t('fundamentos.ingest.proposed.keepActiveRC', 'Manter RC atual (arquivar)')}
                               </Button>
                               <Button
                                 size="sm"
@@ -855,10 +864,10 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                                 className="h-6 text-[11px]"
                                 onClick={() => updateAction(i, 'discard')}
                               >
-                                {p._action === 'discard' ? '✓ Descartar' : 'Descartar'}
+                                {p._action === 'discard' ? t('fundamentos.ingest.proposed.discardDone', '✓ Descartar') : t('fundamentos.ingest.proposed.discard', 'Descartar')}
                               </Button>
                               <span className="text-[10px] text-red-700/80 italic self-center">
-                                Substituir/mesclar/coexistir → próxima fase (versionamento de RCs).
+                                {t('fundamentos.ingest.proposed.futurePhase', 'Substituir/mesclar/coexistir → próxima fase (versionamento de RCs).')}
                               </span>
                             </div>
                           </li>
@@ -872,16 +881,16 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                     <div className="border border-emerald-300 rounded-md bg-emerald-50/40 p-2">
                       <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5 text-emerald-800">
                         <CheckCircle2 className="h-3 w-3" />
-                        Confirmações de RCs ativas ({confirms.length})
+                        {t('fundamentos.ingest.proposed.confirms', 'Confirmações de RCs ativas')} ({confirms.length})
                         <span className="text-[10px] font-normal text-emerald-700/80 normal-case">
-                          — anexar como evidência, não duplicar RC
+                          {t('fundamentos.ingest.proposed.confirmsHint', '— anexar como evidência, não duplicar RC')}
                         </span>
                       </Label>
                       <ul className="space-y-1.5 mt-1.5 text-xs">
                         {confirms.map(({ p, i }) => (
                           <li key={i} className={`border border-emerald-200 rounded px-2 py-2 bg-white ${p._action === 'attach' ? 'border-emerald-500' : ''} ${p._action === 'discard' ? 'opacity-40' : ''}`}>
                             <div className="flex items-center gap-2 flex-wrap mb-1">
-                              <Badge className="bg-emerald-100 text-emerald-800 border-emerald-300">CONFIRMA</Badge>
+                              <Badge className="bg-emerald-100 text-emerald-800 border-emerald-300">{t('fundamentos.ingest.proposed.confirmsBadge', 'CONFIRMA')}</Badge>
                               {(p.conflicts_with || []).map(rid => (
                                 <Badge key={rid} variant="outline" className="font-mono text-[10px] border-emerald-300 text-emerald-800">→ {rid}</Badge>
                               ))}
@@ -895,7 +904,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                                 className="h-6 text-[11px]"
                                 onClick={() => updateAction(i, 'attach')}
                               >
-                                {p._action === 'attach' ? '✓ Anexar como evidência' : 'Anexar como evidência'}
+                                {p._action === 'attach' ? t('fundamentos.ingest.proposed.attachDone', '✓ Anexar como evidência') : t('fundamentos.ingest.proposed.attach', 'Anexar como evidência')}
                               </Button>
                               <Button
                                 size="sm"
@@ -903,7 +912,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                                 className="h-6 text-[11px]"
                                 onClick={() => updateAction(i, 'discard')}
                               >
-                                {p._action === 'discard' ? '✓ Descartar' : 'Descartar'}
+                                {p._action === 'discard' ? t('fundamentos.ingest.proposed.discardDone', '✓ Descartar') : t('fundamentos.ingest.proposed.discard', 'Descartar')}
                               </Button>
                             </div>
                           </li>
@@ -916,14 +925,14 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                   <div>
                     <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5">
                       <Sparkles className="h-3 w-3 text-purple-600" />
-                      Novas Regras-Core propostas ({extendsOrOther.length})
+                      {t('fundamentos.ingest.proposed.extends', 'Novas Regras-Core propostas')} ({extendsOrOther.length})
                       <span className="text-[10px] font-normal text-muted-foreground normal-case">
-                        — origem='deductive', sem conflito com catálogo atual
+                        {t('fundamentos.ingest.proposed.extendsHint', "— origem='deductive', sem conflito com catálogo atual")}
                       </span>
                     </Label>
                     {extendsOrOther.length === 0 ? (
                       <p className="text-xs text-muted-foreground italic mt-1">
-                        Nenhuma proposta inédita — tudo virou confirmação ou conflito.
+                        {t('fundamentos.ingest.proposed.extendsEmpty', 'Nenhuma proposta inédita — tudo virou confirmação ou conflito.')}
                       </p>
                     ) : (
                       <ul className="space-y-1.5 mt-1 text-xs">
@@ -931,7 +940,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                           <li key={i} className={`border rounded px-2 py-2 ${p._action === 'promote' ? 'border-purple-400 bg-purple-50/40' : p._action === 'discard' ? 'opacity-40' : ''}`}>
                             <div className="flex items-center gap-2 flex-wrap mb-1">
                               <Badge className="bg-purple-100 text-purple-800 border-purple-200">
-                                {p.stance === 'unrelated' ? 'NOVA (sem overlap)' : 'ESTENDE'}
+                                {p.stance === 'unrelated' ? t('fundamentos.ingest.proposed.newNoOverlap', 'NOVA (sem overlap)') : t('fundamentos.ingest.proposed.extendsBadge', 'ESTENDE')}
                               </Badge>
                               {renderHeader(p)}
                             </div>
@@ -943,7 +952,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                                 className="h-6 text-[11px]"
                                 onClick={() => updateAction(i, 'promote')}
                               >
-                                {p._action === 'promote' ? '✓ Promover para nova RC' : 'Promover para nova RC'}
+                                {p._action === 'promote' ? t('fundamentos.ingest.proposed.promoteDone', '✓ Promover para nova RC') : t('fundamentos.ingest.proposed.promote', 'Promover para nova RC')}
                               </Button>
                               <Button
                                 size="sm"
@@ -951,7 +960,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                                 className="h-6 text-[11px]"
                                 onClick={() => updateAction(i, 'discard')}
                               >
-                                {p._action === 'discard' ? '✓ Descartar' : 'Descartar'}
+                                {p._action === 'discard' ? t('fundamentos.ingest.proposed.discardDone', '✓ Descartar') : t('fundamentos.ingest.proposed.discard', 'Descartar')}
                               </Button>
                             </div>
                           </li>
@@ -964,15 +973,15 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
             })()}
             <div>
               <p className="text-[10px] text-muted-foreground mt-1.5 italic">
-                Não marcadas serão salvas no meta-estudo como candidatas (campo <code>proposed_rules</code>) sem virar RC ativa — você pode promovê-las depois.
+                {t('fundamentos.ingest.proposed.unsavedNote', 'Não marcadas serão salvas no meta-estudo como candidatas (campo proposed_rules) sem virar RC ativa — você pode promovê-las depois.')}
               </p>
             </div>
 
             <div className="flex gap-2">
               <Button onClick={approve} disabled={saving || !draft.title}>
-                {saving ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Salvando…</> : <><CheckCircle2 className="h-4 w-4 mr-1" /> Aprovar e salvar</>}
+                {saving ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> {t('fundamentos.ingest.saving', 'Salvando…')}</> : <><CheckCircle2 className="h-4 w-4 mr-1" /> {t('fundamentos.ingest.approveSave', 'Aprovar e salvar')}</>}
               </Button>
-              <Button variant="outline" onClick={() => setDraft(null)}>Cancelar</Button>
+              <Button variant="outline" onClick={() => setDraft(null)}>{t('fundamentos.ingest.cancel', 'Cancelar')}</Button>
             </div>
           </CardContent>
         </Card>

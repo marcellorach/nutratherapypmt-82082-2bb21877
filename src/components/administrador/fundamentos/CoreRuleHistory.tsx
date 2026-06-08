@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Search, Filter, ChevronDown, ChevronRight, History, BookOpen, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface CoreRule { id: string; rule_id: string; title: string; status: string; category: string; }
 interface MetaStudy { id: string; title: string; year?: number | null; }
@@ -44,6 +45,7 @@ const RELATION_COLOR: Record<string, string> = {
 };
 
 const CoreRuleHistory: React.FC = () => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [rules, setRules] = useState<CoreRule[]>([]);
   const [studies, setStudies] = useState<MetaStudy[]>([]);
@@ -70,7 +72,7 @@ const CoreRuleHistory: React.FC = () => {
       setAudit((a.data as any) || []);
     } catch (err: any) {
       console.error(err);
-      toast.error(err?.message || 'Falha ao carregar histórico');
+      toast.error(err?.message || t('fundamentos.history.loadError', 'Falha ao carregar histórico'));
     } finally {
       setLoading(false);
     }
@@ -137,7 +139,7 @@ const CoreRuleHistory: React.FC = () => {
           <div className="relative flex-1">
             <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar por RC-ID, título ou categoria…"
+              placeholder={t('fundamentos.history.searchPlaceholder', 'Buscar por RC-ID, título ou categoria…')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-8 h-9"
@@ -148,7 +150,7 @@ const CoreRuleHistory: React.FC = () => {
             <Select value={stanceFilter} onValueChange={setStanceFilter}>
               <SelectTrigger className="h-9 w-[180px]"><SelectValue placeholder="Stance" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todas as stances</SelectItem>
+                <SelectItem value="all">{t('fundamentos.history.stanceAll', 'Todas as stances')}</SelectItem>
                 <SelectItem value="confirms">confirms</SelectItem>
                 <SelectItem value="extends">extends</SelectItem>
                 <SelectItem value="contradicts">contradicts</SelectItem>
@@ -156,9 +158,9 @@ const CoreRuleHistory: React.FC = () => {
               </SelectContent>
             </Select>
             <Select value={actionFilter} onValueChange={setActionFilter}>
-              <SelectTrigger className="h-9 w-[200px]"><SelectValue placeholder="Ação" /></SelectTrigger>
+              <SelectTrigger className="h-9 w-[200px]"><SelectValue placeholder={t('common.action', 'Ação')} /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todas as ações</SelectItem>
+                <SelectItem value="all">{t('fundamentos.history.actionAll', 'Todas as ações')}</SelectItem>
                 <SelectItem value="stance_detected">stance_detected</SelectItem>
                 <SelectItem value="promote">promote</SelectItem>
                 <SelectItem value="attach">attach</SelectItem>
@@ -167,13 +169,13 @@ const CoreRuleHistory: React.FC = () => {
                 <SelectItem value="approve_meta_study">approve_meta_study</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" size="sm" onClick={load}>Atualizar</Button>
+            <Button variant="outline" size="sm" onClick={load}>{t('fundamentos.history.refresh', 'Atualizar')}</Button>
           </div>
         </CardContent>
       </Card>
 
       {filtered.length === 0 && (
-        <Card><CardContent className="py-8 text-center text-muted-foreground">Nenhuma RC encontrada.</CardContent></Card>
+        <Card><CardContent className="py-8 text-center text-muted-foreground">{t('fundamentos.history.noRulesFound', 'Nenhuma RC encontrada.')}</CardContent></Card>
       )}
 
       {filtered.map(rule => {
@@ -194,8 +196,8 @@ const CoreRuleHistory: React.FC = () => {
                 <Badge variant="secondary" className="text-xs">{rule.category}</Badge>
                 <Badge variant="outline" className="text-xs">{rule.status}</Badge>
                 <span className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
-                  <BookOpen className="h-3 w-3" /> {ev.length} evidência(s)
-                  <History className="h-3 w-3 ml-2" /> {alTotal} log(s)
+                  <BookOpen className="h-3 w-3" /> {ev.length} {t('fundamentos.evidenceCount', 'evidência(s)')}
+                  <History className="h-3 w-3 ml-2" /> {alTotal} {t('fundamentos.logCount', 'log(s)')}
                   {Object.entries(stanceCounts).map(([k, v]) => (
                     <Badge key={k} variant="outline" className={STANCE_COLOR[k] || ''}>{k}: {v}</Badge>
                   ))}
@@ -205,9 +207,9 @@ const CoreRuleHistory: React.FC = () => {
             {isOpen && (
               <CardContent className="space-y-3 text-sm">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Evidências vinculadas ({ev.length})</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">{t('fundamentos.history.linkedEvidence', 'Evidências vinculadas')} ({ev.length})</p>
                   {ev.length === 0 ? (
-                    <p className="text-xs text-muted-foreground italic">Nenhuma evidência registrada.</p>
+                    <p className="text-xs text-muted-foreground italic">{t('fundamentos.history.noEvidence', 'Nenhuma evidência registrada.')}</p>
                   ) : (
                     <ul className="space-y-1">
                       {ev.map(e => {
@@ -217,7 +219,7 @@ const CoreRuleHistory: React.FC = () => {
                             <div className="flex items-center gap-2 flex-wrap">
                               <Badge variant="outline" className={RELATION_COLOR[e.relation] || ''}>{e.relation}</Badge>
                               <span className="text-xs">{st?.title || e.meta_study_id.slice(0, 8)}</span>
-                              <span className="text-[10px] text-muted-foreground ml-auto">peso {e.weight} · {new Date(e.created_at).toLocaleDateString()}</span>
+                              <span className="text-[10px] text-muted-foreground ml-auto">{t('fundamentos.history.weight', 'peso')} {e.weight} · {new Date(e.created_at).toLocaleDateString()}</span>
                             </div>
                             {e.quote && <p className="text-xs text-muted-foreground italic mt-1">"{e.quote}"</p>}
                             {e.notes && <p className="text-[11px] text-muted-foreground mt-0.5">{e.notes}</p>}
@@ -229,9 +231,9 @@ const CoreRuleHistory: React.FC = () => {
                 </div>
 
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Log de auditoria ({al.length})</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">{t('fundamentos.history.auditLog', 'Log de auditoria')} ({al.length})</p>
                   {al.length === 0 ? (
-                    <p className="text-xs text-muted-foreground italic">Nenhuma entrada de auditoria com os filtros atuais.</p>
+                    <p className="text-xs text-muted-foreground italic">{t('fundamentos.history.noAudit', 'Nenhuma entrada de auditoria com os filtros atuais.')}</p>
                   ) : (
                     <ul className="space-y-1">
                       {al.map(a => {
@@ -248,13 +250,13 @@ const CoreRuleHistory: React.FC = () => {
                               </span>
                             </div>
                             {a.payload?.proposed_title && (
-                              <p className="text-xs mt-1"><b>Proposta:</b> {a.payload.proposed_title}</p>
+                              <p className="text-xs mt-1"><b>{t('fundamentos.history.proposal', 'Proposta')}:</b> {a.payload.proposed_title}</p>
                             )}
                             {a.payload?.enunciado && (
                               <p className="text-[11px] text-muted-foreground mt-0.5">{a.payload.enunciado}</p>
                             )}
                             {a.justification && (
-                              <p className="text-[11px] text-muted-foreground mt-0.5"><b>Justificativa:</b> {a.justification}</p>
+                              <p className="text-[11px] text-muted-foreground mt-0.5"><b>{t('fundamentos.history.justification', 'Justificativa')}:</b> {a.justification}</p>
                             )}
                           </li>
                         );
@@ -273,7 +275,7 @@ const CoreRuleHistory: React.FC = () => {
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
               <ShieldAlert className="h-4 w-4 text-amber-600" />
-              <CardTitle className="text-sm">Entradas sem RC mapeada ({orphanAudit.length})</CardTitle>
+              <CardTitle className="text-sm">{t('fundamentos.history.orphanTitle', 'Entradas sem RC mapeada')} ({orphanAudit.length})</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
