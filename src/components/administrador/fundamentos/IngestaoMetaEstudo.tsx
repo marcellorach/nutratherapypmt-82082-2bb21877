@@ -518,9 +518,9 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
         <CardContent className="py-3 text-xs text-muted-foreground flex items-start gap-2">
           <AlertTriangle className="h-3.5 w-3.5 mt-0.5" />
           <span>
-            Ingestão <b>NÃO grava direto</b>: a IA produz um rascunho, você revisa/edita os
-            vínculos com Regras-Core sugeridos e aprova manualmente. Estudos aqui são <b>arquiteturais</b>
-            {' '}(governança do pipeline), não clínicos.
+            <Trans i18nKey="fundamentos.ingest.intro" components={{ 1: <b /> }}>
+              {'Ingestão <1>NÃO grava direto</1>: a IA produz um rascunho, você revisa/edita os vínculos com Regras-Core sugeridos e aprova manualmente. Estudos aqui são <1>arquiteturais</1> (governança do pipeline), não clínicos.'}
+            </Trans>
           </span>
         </CardContent>
       </Card>
@@ -529,18 +529,19 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-purple-600" /> Novo meta-estudo
+              <Sparkles className="h-4 w-4 text-purple-600" /> {t('fundamentos.ingest.newStudy', 'Novo meta-estudo')}
             </CardTitle>
             <CardDescription>
-              Anexe o documento-fonte (PDF, .md, .txt ou .docx). Opcionalmente acrescente notas
-              do curador para orientar a IA. Processado por <b>Gemini 3 Pro</b>.
+              <Trans i18nKey="fundamentos.ingest.newStudyDesc" components={{ 1: <b /> }}>
+                {'Anexe o documento-fonte (PDF, .md, .txt ou .docx). Opcionalmente acrescente notas do curador para orientar a IA. Processado por <1>Gemini 3 Pro</1>.'}
+              </Trans>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Dropzone — required */}
             <div>
               <Label className="text-xs flex items-center gap-1">
-                <Upload className="h-3 w-3" /> Documento-fonte <span className="text-red-600">*</span>
+                <Upload className="h-3 w-3" /> {t('fundamentos.ingest.sourceDoc', 'Documento-fonte')} <span className="text-red-600">*</span>
               </Label>
               <div
                 onDragOver={e => { e.preventDefault(); setDragOver(true); }}
@@ -569,8 +570,12 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                 ) : (
                   <div className="text-sm text-muted-foreground">
                     <Upload className="h-5 w-5 mx-auto mb-1.5 opacity-60" />
-                    <div>Arraste o arquivo aqui ou <span className="text-purple-700 font-medium">clique para selecionar</span></div>
-                    <div className="text-[10px] mt-1">PDF, .md, .txt, .docx · até 20MB</div>
+                    <div>
+                      <Trans i18nKey="fundamentos.ingest.dragOrClick" components={{ 1: <span className="text-purple-700 font-medium" /> }}>
+                        {'Arraste o arquivo aqui ou <1>clique para selecionar</1>'}
+                      </Trans>
+                    </div>
+                    <div className="text-[10px] mt-1">{t('fundamentos.ingest.fileLimit', 'PDF, .md, .txt, .docx · até 20MB')}</div>
                   </div>
                 )}
                 <input
@@ -585,38 +590,38 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
 
             {/* Curator notes */}
             <div>
-              <Label className="text-xs">Notas do curador <span className="text-muted-foreground">(opcional)</span></Label>
+              <Label className="text-xs">{t('fundamentos.ingest.curatorNotes', 'Notas do curador')} <span className="text-muted-foreground">({t('fundamentos.ingest.optional', 'opcional')})</span></Label>
               <Textarea
                 value={curatorNotes}
                 onChange={e => setCuratorNotes(e.target.value)}
-                placeholder="Diretrizes para a IA sobre este paper: como ponderar, claims a ignorar, RCs já cobertas, contexto histórico, etc. Aceita markdown."
+                placeholder={t('fundamentos.ingest.curatorNotesPlaceholder', 'Diretrizes para a IA sobre este paper: como ponderar, claims a ignorar, RCs já cobertas, contexto histórico, etc. Aceita markdown.')}
                 className="min-h-24 text-xs"
                 maxLength={4000}
               />
               <p className="text-[10px] text-muted-foreground mt-1">
-                {curatorNotes.length}/4000 — injetado no prompt como contexto vinculante, não como conteúdo do estudo.
+                {t('fundamentos.ingest.curatorNotesHelp', '{{n}}/4000 — injetado no prompt como contexto vinculante, não como conteúdo do estudo.', { n: curatorNotes.length })}
               </p>
             </div>
 
             {/* Optional metadata */}
             <details className="text-xs">
               <summary className="cursor-pointer text-muted-foreground hover:text-foreground flex items-center gap-1 select-none">
-                <ChevronDown className="h-3 w-3" /> Metadados adicionais (opcional)
+                <ChevronDown className="h-3 w-3" /> {t('fundamentos.ingest.extraMetadata', 'Metadados adicionais (opcional)')}
               </summary>
               <div className="mt-2 pl-4">
-                <Label className="text-xs">DOI / URL da fonte</Label>
+                <Label className="text-xs">{t('fundamentos.ingest.doiUrl', 'DOI / URL da fonte')}</Label>
                 <Input value={sourceUrl} onChange={e => setSourceUrl(e.target.value)} placeholder="https://doi.org/..." />
               </div>
             </details>
 
             <Button onClick={analyze} disabled={analyzing || !file}>
-              {analyzing ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Analisando…</> : <><Sparkles className="h-4 w-4 mr-1" /> Analisar com IA</>}
+              {analyzing ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> {t('fundamentos.ingest.analyzing', 'Analisando…')}</> : <><Sparkles className="h-4 w-4 mr-1" /> {t('fundamentos.ingest.analyze', 'Analisar com IA')}</>}
             </Button>
 
             {/* Digestion log */}
             <div className="border rounded-md p-3 bg-muted/20">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-                Log de digestão
+                {t('fundamentos.ingest.digestionLog', 'Log de digestão')}
               </div>
               <ol className="space-y-1.5">
                 {trace.map((t, i) => (
@@ -642,7 +647,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
               {failure?.options && failure.options.length > 0 && (
                 <div className="mt-3 border border-amber-300 bg-amber-50 rounded p-2.5">
                   <div className="text-[11px] font-semibold uppercase tracking-wide text-amber-800 mb-1.5 flex items-center gap-1">
-                    <AlertTriangle className="h-3 w-3" /> Opções para contornar (sem descartar parte do estudo)
+                    <AlertTriangle className="h-3 w-3" /> {t('fundamentos.ingest.workaroundOptions', 'Opções para contornar (sem descartar parte do estudo)')}
                   </div>
                   <ul className="list-disc pl-5 space-y-1 text-[11px] text-amber-900">
                     {failure.options.map((o, i) => <li key={i}>{o}</li>)}
