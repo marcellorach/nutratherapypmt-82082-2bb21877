@@ -100,6 +100,20 @@ const PILLARS: Array<{
     status: 'partial'
   },
   {
+    pt: 'TxGNN (Huang et al., Nature Medicine 2024)',
+    en: 'TxGNN (Huang et al., Nature Medicine 2024)',
+    detail_pt: '**Parcial.** Em runtime, a adoção de taxonomia padrão SNOMED-CT VetSCT + UMLS (RC-008) e a governança tiered por confiança (RC-013, auto-approve ≥ 0,50 + HITL) seguem TxGNN como evidência ativa (vide `core_rule_evidence` na aba Fundamentos Arquiteturais). RC-001 (Exclusão ≠ Contraindicação) é doc-only. **Inspiração ainda não implementada:** zero-shot drug repurposing via metric learning degree-gated e explainer GraphMask multi-hop — o motor atual só recomenda compostos com triplets curados, sem inferência zero-shot. Os ganhos de +46% accuracy / +49% confidence são benchmarks do paper, não medidos no Senex.',
+    detail_en: '**Partial.** In runtime, the SNOMED-CT VetSCT + UMLS standard taxonomy adoption (RC-008) and the confidence-tiered governance (RC-013, auto-approve ≥ 0.50 + HITL) follow TxGNN as active evidence (see `core_rule_evidence` in the Architectural Foundations tab). RC-001 (Exclusion ≠ Contraindication) is doc-only. **Inspiration not yet implemented:** zero-shot drug repurposing via degree-gated metric learning and multi-hop GraphMask explainer — the current engine only recommends compounds with curated triplets, with no zero-shot inference. The +46% accuracy / +49% confidence gains are paper benchmarks, not measured inside Senex.',
+    status: 'partial'
+  },
+  {
+    pt: 'Hetionet / DWPC (Himmelstein et al., eLife 2017)',
+    en: 'Hetionet / DWPC (Himmelstein et al., eLife 2017)',
+    detail_pt: '**Parcial.** Em runtime, a adoção de taxonomia padrão SNOMED-CT VetSCT + UMLS (RC-008) e a normalização de predicados via dicionário (RC-014) seguem Hetionet como evidência ativa (vide `core_rule_evidence`). **Inspiração ainda não implementada:** Degree-Weighted Path Count (DWPC) sobre metapaths heterogêneos com baselines de permutação de rede — hoje o ranking de compostos usa scoring heurístico + KG hierárquico L0→L4, sem DWPC nem teste de permutação.',
+    detail_en: '**Partial.** In runtime, the SNOMED-CT VetSCT + UMLS standard taxonomy adoption (RC-008) and the dictionary-based predicate normalization (RC-014) follow Hetionet as active evidence (see `core_rule_evidence`). **Inspiration not yet implemented:** Degree-Weighted Path Count (DWPC) over heterogeneous metapaths with permuted-network baselines — today compound ranking uses heuristic scoring + L0→L4 hierarchical KG, with no DWPC and no permutation test.',
+    status: 'partial'
+  },
+  {
     pt: 'TransE (Bordes et al., NeurIPS 2013)',
     en: 'TransE (Bordes et al., NeurIPS 2013)',
     detail_pt: '**Inspiração / planejado** — TransE link prediction **não roda em runtime**. O gap-fill (`kg-evidence-gap-fill`) é feito por PubMed E-utilities + Gemini, sem embeddings TransE.',
