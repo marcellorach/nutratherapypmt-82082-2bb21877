@@ -298,9 +298,9 @@ export const AUDIT_COVERAGE: CoverageItem[] = [
   {
     id: "digital-twin",
     pillar: "digital-twin",
-    title_pt: "Digital Twin & projeções de longevidade (sigmoide calibrada em condition_response_curves)",
-    title_en: "Digital Twin & longevity projections (calibrated sigmoid anchored on condition_response_curves)",
-    evidence: { notes: ["condition-progression-engine.ts (motor sigmoide 1/(1+exp(-k·(t−t50)))) — Gompertz NÃO está implementado", "proposal-roi.ts", "condition_response_curves (tabela de calibração)"] },
+    title_pt: "Digital Twin & projeções — DOIS motores distintos: (a) progressão de condição × nutracêutico = SIGMOIDE calibrada 1/(1+exp(-k·(t−t50))) em condition-progression-engine.ts:86 ancorada em condition_response_curves; (b) envelhecimento biológico = curva de GOMPERTZ por SIZE CATEGORY (4 categorias calibradas — small/medium/large/giant — Dog Aging Project/Kraus 2013) em breed_aging_curves + supabase/functions/project-pet-trajectory/index.ts:332, aplicada a qualquer raça via mapping raça→size. NÃO descrever (a) como Gompertz.",
+    title_en: "Digital Twin & projections — TWO distinct engines: (a) condition × nutraceutical progression = calibrated SIGMOID 1/(1+exp(-k·(t−t50))) in condition-progression-engine.ts:86 anchored on condition_response_curves; (b) biological aging = GOMPERTZ curve per SIZE CATEGORY (4 calibrated categories — small/medium/large/giant — Dog Aging Project/Kraus 2013) in breed_aging_curves + supabase/functions/project-pet-trajectory/index.ts:332, applied to any breed via breed→size mapping. Do NOT describe (a) as Gompertz.",
+    evidence: { notes: ["condition-progression-engine.ts:86 (sigmoide para condição × tratamento)", "condition_response_curves (calibração da sigmoide)", "breed_aging_curves (4 linhas, por size category, Kraus 2013)", "project-pet-trajectory/index.ts:332 (gompertz_alpha/beta aplicados via size mapping; função ATIVA via usePetTrajectoryProjection)", "proposal-roi.ts"] },
     expected_status_hint: "active",
   },
   {
