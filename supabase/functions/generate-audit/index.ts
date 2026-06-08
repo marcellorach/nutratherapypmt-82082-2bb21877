@@ -1389,6 +1389,7 @@ ${(outline.rendered_blocks ?? []).map((item) => item.html).join("\n").slice(0, 1
             { snapshot: snapshot!, prevAuditsCtx: prevAuditsCtx! },
             "en",
             prompts.en?.system,
+            { scope: "block" }, // EN é rewrite — só âncoras bastam
           );
           const blocksToTranslate = outline.rendered_blocks ?? [];
           const enHtmlByBlock: Record<string, string> = { ...(outline.en_blocks ?? {}) };
