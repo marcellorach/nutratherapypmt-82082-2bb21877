@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-06-06T23:03:12.530Z",
+  "timestamp": "2026-06-08T14:42:08.881Z",
   "summary": {
     "totalFiles": 956,
     "totalIssues": 471,
@@ -2692,28 +2692,28 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 641,
+      "line": 663,
       "text": "audit_base_system_{pt,en}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 1953,
+      "line": 1975,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2164,
+      "line": 2186,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 4959,
+      "line": 4981,
       "text": "@",
       "severity": "high"
     },
