@@ -832,19 +832,24 @@ Deno.serve(async (req) => {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
       try {
+        // FIX-1: temperature condicional ao modelo.
+        // gpt-5 / gpt-5-mini só aceitam temperature=1 (default); passar 0.2 derruba a chamada com 400
+        // e o fallback inteiro deixa de funcionar. Gemini aceita 0.2 e ganha tom sóbrio.
+        const supportsTemperature = !/^openai\/gpt-5/i.test(model);
+        const payload: Record<string, unknown> = {
+          model,
+          messages,
+          tools: [tool],
+          tool_choice: { type: "function", function: { name: tool.function.name } },
+        };
+        if (supportsTemperature) payload.temperature = 0.2;
         const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${LOVABLE_API_KEY}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            model,
-            messages,
-            tools: [tool],
-            tool_choice: { type: "function", function: { name: tool.function.name } },
-            temperature: 0.2,
-          }),
+          body: JSON.stringify(payload),
           signal: controller.signal,
         });
         if (!response.ok) {
