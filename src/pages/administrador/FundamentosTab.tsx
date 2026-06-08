@@ -25,6 +25,7 @@ interface CoreRule {
   justification: string;
   justification_en?: string | null;
   application?: string | null;
+  application_en?: string | null;
   evidence_summary?: string | null;
   doc_anchor?: string | null;
 }
@@ -208,7 +209,7 @@ const FundamentosTab: React.FC = () => {
                   {r.application && (
                     <div>
                       <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{t('fundamentos.application', 'Aplicação no código')}</p>
-                      <p className="text-muted-foreground font-mono text-xs">{r.application}</p>
+                      <p className="text-muted-foreground font-mono text-xs">{lang === 'en' && r.application_en ? r.application_en : r.application}</p>
                     </div>
                   )}
                   {evForRule.length > 0 && (
