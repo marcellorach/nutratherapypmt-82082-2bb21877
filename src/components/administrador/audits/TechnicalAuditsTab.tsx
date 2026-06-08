@@ -697,9 +697,19 @@ export default function TechnicalAuditsTab() {
                       </CardTitle>
                       <Badge variant="outline" className="text-[10px]">{a.audit_date}</Badge>
                     </div>
-                    {isShowcase && (
-                      <Badge className="text-[9px] mt-1 w-fit bg-amber-100 text-amber-900 hover:bg-amber-100 border-amber-200">
+                    {isShowcase ? (
+                      <Badge
+                        className="text-[9px] mt-1 w-fit bg-amber-100 text-amber-900 hover:bg-amber-100 border-amber-200"
+                        title="Documento comercial para parceiro — mesma espinha de fatos da auditoria, com ênfase em visão, diferenciais e parceria. 6 seções curadas."
+                      >
                         SHOWCASE · parceiro
+                      </Badge>
+                    ) : (
+                      <Badge
+                        className="text-[9px] mt-1 w-fit bg-sky-100 text-sky-900 hover:bg-sky-100 border-sky-200"
+                        title="Auditoria técnica interna — checklist de honestidade arquitetural, lacunas, riscos e drift entre preview e publicado."
+                      >
+                        AUDITORIA · técnica
                       </Badge>
                     )}
                     <p className="text-[10px] text-muted-foreground truncate">
