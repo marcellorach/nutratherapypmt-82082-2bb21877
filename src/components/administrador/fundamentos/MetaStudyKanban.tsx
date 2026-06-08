@@ -76,12 +76,12 @@ const DIM_KEYS: Array<keyof MetaStudyRow> = [
   'reliability_relevance',
 ];
 
-const DIM_SHORT: Record<string, string> = {
-  reliability_methodology: 'Metod.',
-  reliability_evidence_base: 'Evid.',
-  reliability_applicability: 'Aplic.',
-  reliability_reproducibility: 'Reprod.',
-  reliability_relevance: 'Relev.',
+const DIM_SHORT_KEYS: Record<string, { key: string; fallback: string }> = {
+  reliability_methodology: { key: 'fundamentos.kanban.dim.methodologyShort', fallback: 'Metod.' },
+  reliability_evidence_base: { key: 'fundamentos.kanban.dim.evidenceBaseShort', fallback: 'Evid.' },
+  reliability_applicability: { key: 'fundamentos.kanban.dim.applicabilityShort', fallback: 'Aplic.' },
+  reliability_reproducibility: { key: 'fundamentos.kanban.dim.reproducibilityShort', fallback: 'Reprod.' },
+  reliability_relevance: { key: 'fundamentos.kanban.dim.relevanceShort', fallback: 'Relev.' },
 };
 
 const DIM_COLOR: Record<string, string> = {
