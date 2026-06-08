@@ -1,12 +1,12 @@
 # Project context briefing (auto)
-Generated: 2026-06-08T22:25:37.275Z
+Generated: 2026-06-08T22:39:43.078Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
 ## Latest i18n version: —
 
 ## Changes by area (last 14 days)
-- **admin**: 27
+- **admin**: 28
 - **meta**: 8
 - **clinical-pipeline**: 7
 - **infra**: 5
@@ -14,6 +14,11 @@ Read this file BEFORE starting any non-trivial task. It is the project's working
 - **curation**: 3
 
 ## Top 10 recent entries
+### 2026-06-08 · [admin] CHANGED — Pilares científicos: KGARevion reclassificado de Inspiração → Parcial
+- No card "Pilares científicos (inspiração × implementação)" em About-Senex, KGARevion passa de `INSPIRATION` para `PARTIAL`, refletindo o que já está vinculado em `core_rule_evidence`: RC-014 (Normalização de Predicados via Dicionário, w=0.90) e RC-008 (Taxonomia Padrão SNOMED-CT VetSCT + UMLS, w=0.95) — ambas ativas em runtime. O ciclo GRRA completo (Review + Revise independentes) segue rotulado como inspiração não implementada. Sem mudança no banco; ajuste de copy para alinhar com a aba Fundamentos Arquiteturais.
+- Files: src/components/administrador/AboutSenexTab.tsx
+_files: src/components/administrador/AboutSenexTab.tsx_
+
 ### 2026-06-08 · [admin] ADDED — Showcase Mode (documento paralelo para parceiro)
 - Novo botão "Gerar showcase para parceiro" na aba Auditorias Técnicas. Lê o MESMO snapshot factual da auditoria (counts, kg_storage, clinical_data_provenance) e escreve 6 seções comerciais curadas (Visão, Por que importa, Diferenciais, Visão maior, Credibilidade, Parceria).
 - Honestidade preservada: capacidades em presente, resultado de sinistralidade prospectivo; split R/D/S obrigatório; RC-001/002 (evidência negativa) destacada como diferencial; GRRA/U-Retrieval/TransE rotulados como inspiração.
@@ -66,12 +71,6 @@ _status: parcial_
 - Edge function `triplet-verification-runner`: amostra estratificada (banda cinza 0.50–0.84 + alta 0.85–1.00, estratificada por `enrichment_source`); recall top-k via `search_study_chunks` (RPC) com fallback `ilike` instrumentado; verificador de família diferente (default `openai/gpt-5.4-mini`, vs. extrator Gemini); `tool_choice` forçado em `submit_verification`; persistência + sumarização (histograma de verdict, especificidade por layer).
 - System prompt `triplet_verification`: abstain honesto obrigatório (chunks não tratam claim → `unverifiable`), regras de downgrade (preliminar/cross-species/breed-generalizado → `correct`), null-result phrasing → `discard`, sem rescate por conhecimento externo.
 _files: supabase/functions/triplet-verification-runner/index.ts, supabase/functions/_shared/system-prompts.ts_
-
-### 2026-06-03 · [meta] CHANGED — Sweep "RWD ≠ sintético" em todas as superfícies + ponteiro de circularidade (Bloco 3)
-- Extensão da regra do REGISTRO DE HONESTIDADE (auto-auditoria) para TODA superfície narrativa — o claim "Real-World Data" / "dados reais de pacientes" não pode sobreviver em UI, prompts, docs nem deck.
-- `src/components/administrador/ai-insights/mockInsights.ts` (insight-002): removidas as menções a "Real-world monitoring of 3,421 dogs", "large-scale real-world evidence" e `p < 0.001`. Card relabeled como `[MOCK — illustrative]`; `dataSource`, `summary`, `basedOn`, `findings`, `recommendation.impact` todos marcados explicitamente como placeholders ilustrativos. Senex NÃO observou 3.421 cães — o número era fabricação que aparecia no admin como se fosse achado real.
-- `src/locales/{pt,en}/translation.json` (`investment.alreadyMarket.b2cDesc`): removido "gerando dados reais de resultados" / "real-world outcome data". Texto novo é honesto sobre o estado: "Coleta de dados longitudinais de desfecho ainda não está estruturada (sem tabela `outcome_observations` em produção)" / equivalente EN.
-_files: src/components/administrador/ai-insights/mockInsights.ts, .lovable/memory/constraints/synthetic-cohort-not-rwd.md, src/locales/pt/translation.json, src/locales/en/translation.json…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

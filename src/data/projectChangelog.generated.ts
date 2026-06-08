@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-08T22:25:37.270Z
+// Última geração: 2026-06-08T22:39:43.073Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -21,9 +21,24 @@ export interface ChangelogEntry {
 
 export const lastChangelogDate = "2026-06-08";
 
-export const senexVersion = "7.2.0";
+export const senexVersion = "7.2.1";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-08",
+    "kind": "changed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Pilares científicos: KGARevion reclassificado de Inspiração → Parcial",
+    "bullets": [
+      "No card \"Pilares científicos (inspiração × implementação)\" em About-Senex, KGARevion passa de `INSPIRATION` para `PARTIAL`, refletindo o que já está vinculado em `core_rule_evidence`: RC-014 (Normalização de Predicados via Dicionário, w=0.90) e RC-008 (Taxonomia Padrão SNOMED-CT VetSCT + UMLS, w=0.95) — ambas ativas em runtime. O ciclo GRRA completo (Review + Revise independentes) segue rotulado como inspiração não implementada. Sem mudança no banco; ajuste de copy para alinhar com a aba Fundamentos Arquiteturais.",
+      "Files: src/components/administrador/AboutSenexTab.tsx"
+    ],
+    "files": [
+      "src/components/administrador/AboutSenexTab.tsx"
+    ],
+    "i18nVersion": "—"
+  },
   {
     "date": "2026-06-08",
     "kind": "added",
