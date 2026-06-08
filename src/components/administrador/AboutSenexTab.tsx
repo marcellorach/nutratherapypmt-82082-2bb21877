@@ -60,7 +60,7 @@ const ENGINE_DIAGRAM = `flowchart TB
     direction TB
     O1["Hybrid retrieval<br/>Cypher (Neo4j) + pgvector (Supabase)<br/>(inspired by U-Retrieval, no top-down/bottom-up fusion)"]
     O2["Patient subgraph<br/>(breed + labs + meds + conditions)"]
-    O3["Recommendation engine<br/>stack <= 8 synergistic compounds"]
+    O3["Recommendation engine<br/>stack <= 8 synergistic compounds<br/>(inspired by TxGNN zero-shot + Hetionet DWPC,<br/>not yet in runtime)"]
     O4["Digital Twin<br/>sigmoid severity x time<br/>years_gained metric"]
     O5["Treatment Proposal<br/>bilingual PT/EN + milestones"]
     O1 --> O2 --> O3 --> O4 --> O5
@@ -173,8 +173,8 @@ const AboutSenexTab: React.FC = () => {
         <CardContent>
           <div className="mb-4 p-3 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900 text-xs text-amber-900 dark:text-amber-200">
             {isPt
-              ? <><strong>Honestidade arquitetural:</strong> o diagrama abaixo descreve a visão e o que está implementado. <strong>GRRA</strong>, <strong>U-Retrieval bidirecional</strong> e <strong>TransE</strong> são inspiração/planejado — não estão em runtime. Verdade-base em <code>docs/generated/ARCHITECTURE_LIVE.md</code>.</>
-              : <><strong>Architectural honesty:</strong> the diagram below describes the vision and what is implemented. <strong>GRRA</strong>, <strong>bidirectional U-Retrieval</strong> and <strong>TransE</strong> are inspiration/planned — not in runtime. Ground truth in <code>docs/generated/ARCHITECTURE_LIVE.md</code>.</>}
+              ? <><strong>Honestidade arquitetural:</strong> o diagrama abaixo descreve a visão e o que está implementado. <strong>GRRA</strong>, <strong>U-Retrieval bidirecional</strong>, <strong>TransE</strong>, <strong>TxGNN zero-shot</strong> e <strong>Hetionet DWPC</strong> são inspiração/planejado — não estão em runtime (suas contribuições ativas estão listadas nos Pilares Científicos abaixo). Verdade-base em <code>docs/generated/ARCHITECTURE_LIVE.md</code>.</>
+              : <><strong>Architectural honesty:</strong> the diagram below describes the vision and what is implemented. <strong>GRRA</strong>, <strong>bidirectional U-Retrieval</strong>, <strong>TransE</strong>, <strong>TxGNN zero-shot</strong> and <strong>Hetionet DWPC</strong> are inspiration/planned — not in runtime (their active contributions are listed in Scientific Pillars below). Ground truth in <code>docs/generated/ARCHITECTURE_LIVE.md</code>.</>}
           </div>
           <MermaidBlock code={ENGINE_DIAGRAM} />
           <p className="text-xs text-muted-foreground mt-4">
