@@ -1268,7 +1268,7 @@ REGRAS:
           let closePayload: OutlineState["close"];
           try {
             closePayload = await resilientCall([
-              { role: "system", content: baseSystem },
+              { role: "system", content: baseSystemFull },
               {
                 role: "user",
                 content: `Gere o SUMÁRIO EXECUTIVO da auditoria ${auditId} com base nas seções já renderizadas, e o resumo estruturado JSON.
@@ -1281,7 +1281,7 @@ Inclua no exec_summary_html (<section id="executive-summary">):
 SEÇÕES JÁ RENDERIZADAS (resumo):
 ${(outline.rendered_blocks ?? []).map((item) => item.html).join("\n").slice(0, 14000)}`,
               },
-            ], closeTool, { phase: "cierre", label: "Sumário executivo" });
+            ], closeTool, { phase: "cierre", label: "Sumário executivo", attempts: HEAVY_ATTEMPTS });
           } catch (error: any) {
             await pushLog({ level: "warn", phase: "cierre", message: `Sumário executivo falhou — usando placeholder (${error?.message ?? error})` });
             closePayload = {
