@@ -832,19 +832,24 @@ Deno.serve(async (req) => {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
       try {
+        // FIX-1: temperature condicional ao modelo.
+        // gpt-5 / gpt-5-mini só aceitam temperature=1 (default); passar 0.2 derruba a chamada com 400
+        // e o fallback inteiro deixa de funcionar. Gemini aceita 0.2 e ganha tom sóbrio.
+        const supportsTemperature = !/^openai\/gpt-5/i.test(model);
+        const payload: Record<string, unknown> = {
+          model,
+          messages,
+          tools: [tool],
+          tool_choice: { type: "function", function: { name: tool.function.name } },
+        };
+        if (supportsTemperature) payload.temperature = 0.2;
         const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${LOVABLE_API_KEY}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            model,
-            messages,
-            tools: [tool],
-            tool_choice: { type: "function", function: { name: tool.function.name } },
-            temperature: 0.2,
-          }),
+          body: JSON.stringify(payload),
           signal: controller.signal,
         });
         if (!response.ok) {
@@ -1090,7 +1095,7 @@ REGRAS:
                 {
                   block_id: block.block_id,
                   pillar_title: block.pillar_title,
-                  html: `<section id="${block.block_id}" class="block-gap"><h2>${block.pillar_title} — Lacuna de geração</h2><p>Bloco não pôde ser gerado após 2 tentativas. Motivo: ${reason}. Re-execute para preencher.</p></section>`,
+                  html: `<section id="${block.block_id}" class="block-gap" data-status="unavailable"><h2>${block.pillar_title} — seção indisponível</h2><p><strong>Falha de geração.</strong> Bloco não pôde ser produzido após 2 tentativas (primária + fallback). Motivo: ${reason}. A honestidade da auditoria exige sinalizar a ausência em vez de deixar um buraco silencioso. Re-execute para preencher.</p></section>`,
                 },
               ],
               skipped_blocks: uniqueStrings([...(outline.skipped_blocks ?? []), block.block_id]),
