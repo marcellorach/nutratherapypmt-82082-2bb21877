@@ -40,6 +40,7 @@ import {
   EyeOff,
   RefreshCw,
   Settings as SettingsIcon,
+  Presentation,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
@@ -121,6 +122,7 @@ export default function TechnicalAuditsTab() {
   const [newScope, setNewScope] = useState(DEFAULT_NEW_SCOPE);
   const [newOpen, setNewOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [generatingShowcase, setGeneratingShowcase] = useState(false);
 
   const [editTarget, setEditTarget] = useState<TechnicalAudit | null>(null);
   const [editScope, setEditScope] = useState("");
@@ -242,6 +244,48 @@ export default function TechnicalAuditsTab() {
     () => audits.some((a) => a.version === SENEX_VERSION || a.version === `v${SENEX_VERSION}`),
     [audits],
   );
+
+  // O showcase é um documento paralelo (mesma espinha de fatos, ênfase para
+  // parceiro). Não bloqueamos por versão — pode haver várias rodadas de
+  // showcase enquanto a auditoria técnica daquela versão já existe.
+  const handleGenerateShowcase = async () => {
+    setGeneratingShowcase(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-showcase", {
+        body: {
+          version: nextVersion,
+          system_version: `Senex v${SENEX_VERSION} · i18n ${CURRENT_I18N_VERSION}`,
+          system_changelog_date: lastChangelogDate || new Date().toISOString().slice(0, 10),
+        },
+      });
+      if (error) throw error;
+      const newId = (data as any)?.audit?.id ?? null;
+      const isProcessing = (data as any)?.status === "processing";
+      toast({
+        title: `Showcase ${nextVersion} em geração`,
+        description: isProcessing
+          ? "Documento para parceiro sendo escrito em segundo plano (PT + EN). 6 seções em paralelo."
+          : "Showcase solicitado.",
+      });
+      await load();
+      if (newId) setSelectedId(newId);
+      if (isProcessing && newId) {
+        setProgress({
+          audit_id: newId, status: "processing",
+          stage: "queued", stage_label: "Na fila",
+          progress: 5, error: null,
+        });
+      }
+    } catch (e) {
+      toast({
+        title: "Falha ao gerar showcase",
+        description: e instanceof Error ? e.message : String(e),
+        variant: "destructive",
+      });
+    } finally {
+      setGeneratingShowcase(false);
+    }
+  };
 
   const handleRequestNew = async () => {
     setSubmitting(true);
@@ -426,6 +470,17 @@ export default function TechnicalAuditsTab() {
           </div>
         </div>
 
+        <div className="flex items-center gap-2 flex-wrap">
+        <Button
+          variant="outline"
+          className="gap-2"
+          onClick={handleGenerateShowcase}
+          disabled={generatingShowcase}
+          title="Gera documento de showcase para parceiro (mesma espinha de fatos da auditoria, ênfase comercial em 6 seções curadas). Pode ser reexecutado livremente."
+        >
+          <Presentation className="h-4 w-4" />
+          {generatingShowcase ? "Gerando showcase…" : "Gerar showcase para parceiro"}
+        </Button>
         <Dialog open={newOpen} onOpenChange={setNewOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2" disabled={alreadyAuditedThisVersion} title={alreadyAuditedThisVersion
@@ -484,6 +539,7 @@ export default function TechnicalAuditsTab() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Banner de fila removido: a geração agora é instantânea. */}
@@ -612,6 +668,8 @@ export default function TechnicalAuditsTab() {
             {visibleAudits.map((a) => {
               const isSelected = a.id === selectedId;
               const isSuperseded = !!a.superseded_by;
+              const isShowcase = (a.version || "").includes("-showcase")
+                || (a.summary as any)?.kind === "showcase";
               return (
                 <Card
                   key={a.id}
@@ -623,11 +681,18 @@ export default function TechnicalAuditsTab() {
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-primary" />
+                        {isShowcase
+                          ? <Presentation className="h-4 w-4 text-accent-foreground" />
+                          : <FileText className="h-4 w-4 text-primary" />}
                         {a.id.toUpperCase()}
                       </CardTitle>
                       <Badge variant="outline" className="text-[10px]">{a.audit_date}</Badge>
                     </div>
+                    {isShowcase && (
+                      <Badge className="text-[9px] mt-1 w-fit bg-amber-100 text-amber-900 hover:bg-amber-100 border-amber-200">
+                        SHOWCASE · parceiro
+                      </Badge>
+                    )}
                     <p className="text-[10px] text-muted-foreground truncate">
                       <span className="font-mono">{a.system_version}</span>
                     </p>
