@@ -1041,7 +1041,8 @@ Deno.serve(async (req) => {
           await updateSummary({ audit_context: computed });
         }
 
-        const baseSystem = await buildBaseSystem({ snapshot: snapshot!, prevAuditsCtx: prevAuditsCtx! });
+        const auditCtx = { snapshot: snapshot!, prevAuditsCtx: prevAuditsCtx! };
+        const baseSystemFull = await buildBaseSystem(auditCtx, "pt", undefined, { scope: "full" });
         const currentRow = await refreshAuditRow();
         if (!currentRow) throw new Error("audit row missing");
         const effectiveScope = String(currentRow.scope ?? scope ?? "");
@@ -1092,7 +1093,7 @@ Deno.serve(async (req) => {
             },
           };
           const generatedOutline = await resilientCall([
-            { role: "system", content: baseSystem },
+            { role: "system", content: baseSystemFull },
             {
               role: "user",
               content: `Auditoria ${auditId} (i18n ${effectiveSystemVersion || "n/a"}).
@@ -1101,7 +1102,7 @@ ${effectiveScope}
 
 Monte o ÍNDICE: um bloco por pilar do checklist + blocos extras (sumário executivo já será gerado separado, então NÃO o inclua; inclua: mudanças desde versão anterior, comparação histórica, forças, gaps e riscos consolidados, roadmap, apêndices, bibliografia). Cada seção tem 3-6 bullets. TODOS os section_id do checklist canônico devem aparecer pelo menos uma vez.`,
             },
-          ], outlineTool, { phase: "outline", label: "Outline" });
+          ], outlineTool, { phase: "outline", label: "Outline", attempts: HEAVY_ATTEMPTS });
           outline = {
             title: String(generatedOutline.title ?? `Auditoria técnica ${auditId.toUpperCase()}`),
             blocks: Array.isArray(generatedOutline.blocks) ? generatedOutline.blocks : [],
