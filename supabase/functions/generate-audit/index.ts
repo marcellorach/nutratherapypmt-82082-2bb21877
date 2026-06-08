@@ -12,15 +12,25 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 
-const PRIMARY_MODEL = "google/gemini-3.1-pro-preview";
-const FALLBACK_MODEL = "openai/gpt-5-mini";
+// v7.1.3 — cadeia 3 modelos. Flash primário (rápido, schema-driven), Pro fallback
+// (mantém riqueza narrativa), gpt-5-mini 3º backstop.
+// Para outline+close (que definem tom + sintetizam tudo) usamos a cadeia com Pro
+// na frente — ver `HEAVY_ATTEMPTS` abaixo.
+const FLASH_MODEL = "google/gemini-3-flash-preview";
+const PRO_MODEL = "google/gemini-3.1-pro-preview";
+const MINI_MODEL = "openai/gpt-5-mini";
+const PRIMARY_MODEL = FLASH_MODEL; // usado em logs/summary final
+const FALLBACK_MODEL = PRO_MODEL;
 
-// Timeouts ampliados: blocos densos com SVG/tabelas no Gemini 3.1 Pro Preview
-// regularmente levam 60–120s. Antes ficava em 85s/45s e disparava AbortError
-// no meio da geração, travando a auditoria. Agora damos folga real.
-const PRIMARY_CALL_TIMEOUT_MS = 180_000;
-const FALLBACK_CALL_TIMEOUT_MS = 120_000;
+// Timeouts. Flash é bem mais rápido, então pode ficar mais curto; Pro precisa
+// dos 180s antigos; mini é último recurso.
+const FLASH_TIMEOUT_MS = 90_000;
+const PRO_TIMEOUT_MS = 180_000;
+const MINI_TIMEOUT_MS = 120_000;
 const FALLBACK_BACKOFF_MS = 5_000;
+// Aliases legados (usados em outras partes do arquivo / logs).
+const PRIMARY_CALL_TIMEOUT_MS = FLASH_TIMEOUT_MS;
+const FALLBACK_CALL_TIMEOUT_MS = PRO_TIMEOUT_MS;
 const HEARTBEAT_INTERVAL_MS = 5_000;
 const MAX_LOG_ENTRIES = 200;
 
@@ -419,14 +429,92 @@ async function readAuditContext(service: ReturnType<typeof createClient>, appOri
  * The function performs placeholder substitution for {{CHECKLIST}}, {{SNAPSHOT}}, {{PRIOR_AUDITS}}.
  * If a `promptOverride` is provided (legacy audit_prompt_versions), it wins over the registry.
  */
+// ============================================================================
+// Snapshot slicing (v7.1.3)
+// ----------------------------------------------------------------------------
+// Estratégia: para cada bloco, enviar SOMENTE o que ele precisa do snapshot,
+// MAS sempre incluir as ÂNCORAS DE HONESTIDADE (split R/D/S, kg_storage,
+// counts). Os blocos de SUMÁRIO EXECUTIVO / OUTLINE / CLOSE recebem o snapshot
+// inteiro (são sínteses globais). Sempre acrescentamos `_other_snapshot_keys`
+// listando as chaves omitidas — assim o modelo não conclui que algo "não existe"
+// só porque não veio na fatia.
+// ============================================================================
+const ANCHOR_KEYS = ["counts", "counts_note", "kg_storage", "clinical_data_provenance"] as const;
+
+/** Heurística keyword → chaves extras do snapshot para esse bloco. */
+function extraKeysForBlock(blockHint?: { block_id?: string; pillar_title?: string } | null): string[] {
+  if (!blockHint) return [];
+  const hay = `${blockHint.block_id ?? ""} ${blockHint.pillar_title ?? ""}`.toLowerCase();
+  const extra: string[] = [];
+  if (/drift|metadata|metadados|plataforma|platform|opera(ç|c)(õ|o)es|ops|deploy|build|environment|ambiente/.test(hay)) {
+    extra.push("drift_guard", "audit_target");
+  }
+  if (/knowledge\s*graph|kg|grafo|ontolog|triplet/.test(hay)) {
+    // kg_storage já é âncora; nada adicional necessário.
+  }
+  if (/twin|trajector|projection|aging|gompertz|sigmo|geroscience/.test(hay)) {
+    // âncoras já bastam — engines vivem em código, não no snapshot.
+  }
+  if (/compliance|fda|ema|avma|gmlp|governan/.test(hay)) {
+    extra.push("audit_target");
+  }
+  return Array.from(new Set(extra));
+}
+
+function sliceSnapshotForScope(
+  snapshot: Record<string, any>,
+  sliceOpts?: { scope: "full" | "block"; blockHint?: { block_id?: string; pillar_title?: string } | null },
+): Record<string, any> {
+  if (!sliceOpts || sliceOpts.scope === "full") return snapshot;
+  const include = new Set<string>([...ANCHOR_KEYS, ...extraKeysForBlock(sliceOpts.blockHint)]);
+  const out: Record<string, any> = {};
+  const omitted: string[] = [];
+  for (const k of Object.keys(snapshot)) {
+    if (include.has(k)) out[k] = snapshot[k];
+    else omitted.push(k);
+  }
+  if (omitted.length > 0) {
+    out._other_snapshot_keys = {
+      note: "Chaves do snapshot omitidas nesta fatia (existem, só não foram enviadas para este bloco). Não conclua que algo está ausente do sistema com base nesta lista — para detalhes, consulte os blocos específicos.",
+      keys: omitted,
+    };
+  }
+  return out;
+}
+
+/** Para blocos individuais: encolhe priorAudits a um resumo curto. */
+function slimPriorAudits(prevAuditsCtx: string): string {
+  try {
+    const arr = JSON.parse(prevAuditsCtx);
+    if (!Array.isArray(arr)) return prevAuditsCtx;
+    const slim = arr.slice(0, 4).map((a: any) => ({
+      version: a?.version,
+      date: a?.date,
+      i18n: a?.i18n,
+      pages: a?.pages,
+      strengths: a?.strengths,
+      gaps: a?.gaps,
+      risks: a?.risks,
+    }));
+    return JSON.stringify(slim);
+  } catch {
+    return prevAuditsCtx.slice(0, 2000);
+  }
+}
+
 async function buildBaseSystem(
   auditContext: { snapshot: Record<string, any>; prevAuditsCtx: string },
   lang: Lang = "pt",
   promptOverride?: string,
+  sliceOpts?: { scope: "full" | "block"; blockHint?: { block_id?: string; pillar_title?: string } | null },
 ): Promise<string> {
   const checklist = checklistForPrompt(lang);
-  const snapshotJson = JSON.stringify(auditContext.snapshot, null, 2);
-  const priorAudits = auditContext.prevAuditsCtx;
+  const slicedSnapshot = sliceSnapshotForScope(auditContext.snapshot, sliceOpts);
+  const snapshotJson = JSON.stringify(slicedSnapshot, null, 2);
+  // priorAudits: full no escopo "full" (outline/close); slim no "block".
+  const priorAudits = sliceOpts?.scope === "block"
+    ? slimPriorAudits(auditContext.prevAuditsCtx)
+    : auditContext.prevAuditsCtx;
 
   // Legacy override path (audit_prompt_versions): just append the dynamic context.
   if (promptOverride && promptOverride.trim() && promptOverride.trim() !== "__SEED_FALLBACK__") {
@@ -865,11 +953,26 @@ Deno.serve(async (req) => {
       }
     }
 
-    async function resilientCall(messages: any[], tool: any, opts: { phase: LogPhase; label: string; block_id?: string }) {
-      const attempts = [
-        { model: PRIMARY_MODEL, timeoutMs: PRIMARY_CALL_TIMEOUT_MS, backoffMs: 0 },
-        { model: FALLBACK_MODEL, timeoutMs: FALLBACK_CALL_TIMEOUT_MS, backoffMs: FALLBACK_BACKOFF_MS },
-      ];
+    // Cadeia padrão (BLOCOS): Flash → Pro → mini.
+    const BLOCK_ATTEMPTS = [
+      { model: FLASH_MODEL, timeoutMs: FLASH_TIMEOUT_MS, backoffMs: 0 },
+      { model: PRO_MODEL, timeoutMs: PRO_TIMEOUT_MS, backoffMs: FALLBACK_BACKOFF_MS },
+      { model: MINI_MODEL, timeoutMs: MINI_TIMEOUT_MS, backoffMs: FALLBACK_BACKOFF_MS },
+    ];
+    // Cadeia PESADA (outline + sumário executivo): Pro primeiro (define tom),
+    // Flash como fallback rápido, mini como último.
+    const HEAVY_ATTEMPTS = [
+      { model: PRO_MODEL, timeoutMs: PRO_TIMEOUT_MS, backoffMs: 0 },
+      { model: FLASH_MODEL, timeoutMs: FLASH_TIMEOUT_MS, backoffMs: FALLBACK_BACKOFF_MS },
+      { model: MINI_MODEL, timeoutMs: MINI_TIMEOUT_MS, backoffMs: FALLBACK_BACKOFF_MS },
+    ];
+
+    async function resilientCall(
+      messages: any[],
+      tool: any,
+      opts: { phase: LogPhase; label: string; block_id?: string; attempts?: Array<{ model: string; timeoutMs: number; backoffMs: number }> },
+    ) {
+      const attempts = opts.attempts ?? BLOCK_ATTEMPTS;
       let lastError: any;
       for (let i = 0; i < attempts.length; i++) {
         const attempt = attempts[i];
@@ -938,7 +1041,8 @@ Deno.serve(async (req) => {
           await updateSummary({ audit_context: computed });
         }
 
-        const baseSystem = await buildBaseSystem({ snapshot: snapshot!, prevAuditsCtx: prevAuditsCtx! });
+        const auditCtx = { snapshot: snapshot!, prevAuditsCtx: prevAuditsCtx! };
+        const baseSystemFull = await buildBaseSystem(auditCtx, "pt", undefined, { scope: "full" });
         const currentRow = await refreshAuditRow();
         if (!currentRow) throw new Error("audit row missing");
         const effectiveScope = String(currentRow.scope ?? scope ?? "");
@@ -989,7 +1093,7 @@ Deno.serve(async (req) => {
             },
           };
           const generatedOutline = await resilientCall([
-            { role: "system", content: baseSystem },
+            { role: "system", content: baseSystemFull },
             {
               role: "user",
               content: `Auditoria ${auditId} (i18n ${effectiveSystemVersion || "n/a"}).
@@ -998,7 +1102,7 @@ ${effectiveScope}
 
 Monte o ÍNDICE: um bloco por pilar do checklist + blocos extras (sumário executivo já será gerado separado, então NÃO o inclua; inclua: mudanças desde versão anterior, comparação histórica, forças, gaps e riscos consolidados, roadmap, apêndices, bibliografia). Cada seção tem 3-6 bullets. TODOS os section_id do checklist canônico devem aparecer pelo menos uma vez.`,
             },
-          ], outlineTool, { phase: "outline", label: "Outline" });
+          ], outlineTool, { phase: "outline", label: "Outline", attempts: HEAVY_ATTEMPTS });
           outline = {
             title: String(generatedOutline.title ?? `Auditoria técnica ${auditId.toUpperCase()}`),
             blocks: Array.isArray(generatedOutline.blocks) ? generatedOutline.blocks : [],
@@ -1048,7 +1152,7 @@ Monte o ÍNDICE: um bloco por pilar do checklist + blocos extras (sumário execu
           };
 
           const messages = [
-            { role: "system", content: baseSystem },
+            { role: "system", content: await buildBaseSystem(auditCtx, "pt", undefined, { scope: "block", blockHint: { block_id: block.block_id, pillar_title: block.pillar_title } }) },
             {
               role: "user",
               content: `Renderize o bloco "${block.pillar_title}" (block_id=${block.block_id}). Use exatamente os section_id propostos.
@@ -1164,7 +1268,7 @@ REGRAS:
           let closePayload: OutlineState["close"];
           try {
             closePayload = await resilientCall([
-              { role: "system", content: baseSystem },
+              { role: "system", content: baseSystemFull },
               {
                 role: "user",
                 content: `Gere o SUMÁRIO EXECUTIVO da auditoria ${auditId} com base nas seções já renderizadas, e o resumo estruturado JSON.
@@ -1177,7 +1281,7 @@ Inclua no exec_summary_html (<section id="executive-summary">):
 SEÇÕES JÁ RENDERIZADAS (resumo):
 ${(outline.rendered_blocks ?? []).map((item) => item.html).join("\n").slice(0, 14000)}`,
               },
-            ], closeTool, { phase: "cierre", label: "Sumário executivo" });
+            ], closeTool, { phase: "cierre", label: "Sumário executivo", attempts: HEAVY_ATTEMPTS });
           } catch (error: any) {
             await pushLog({ level: "warn", phase: "cierre", message: `Sumário executivo falhou — usando placeholder (${error?.message ?? error})` });
             closePayload = {
@@ -1285,6 +1389,7 @@ ${(outline.rendered_blocks ?? []).map((item) => item.html).join("\n").slice(0, 1
             { snapshot: snapshot!, prevAuditsCtx: prevAuditsCtx! },
             "en",
             prompts.en?.system,
+            { scope: "block" }, // EN é rewrite — só âncoras bastam
           );
           const blocksToTranslate = outline.rendered_blocks ?? [];
           const enHtmlByBlock: Record<string, string> = { ...(outline.en_blocks ?? {}) };
