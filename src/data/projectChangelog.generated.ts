@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-08T22:56:02.779Z
+// Última geração: 2026-06-08T22:56:16.281Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -21,9 +21,29 @@ export interface ChangelogEntry {
 
 export const lastChangelogDate = "2026-06-08";
 
-export const senexVersion = "7.2.1";
+export const senexVersion = "7.2.2";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-08",
+    "kind": "fixed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Fundamentos Arquiteturais 100% bilíngue (UI + DB)",
+    "bullets": [
+      "Adicionadas todas as 150+ chaves `fundamentos.*` em PT e EN (`FundamentosTab`, `MetaKgRoadmapCard`, `MetaStudyDetailedCard`, `CoreRuleHistory`, `MetaStudyKanban`, `IngestaoMetaEstudo`): tabs, badges, roadmap (Fase A/B/C, gatilhos), confiabilidade (5 dimensões + descrições), filtros do histórico (placeholder, stances, ações, refresh), painel de ingestão (estágios, seções de lições, botões de stance promote/attach/discard/resolve_keep, toasts).",
+      "DB `core_rules`: preenchido `justification_en` para RC-001/002/003 e `application_en` para as 18 regras; `FundamentosTab` agora consome `application_en` quando lang=en.",
+      "Auditoria dos 6 papers arquiteturais (TxGNN, Geroscience-Dogs, KGARevion, MedGraphRAG, OptimusKG, Hetionet) — cobertura RC documentada no `.lovable/plan.md` deste turno; nenhum vínculo de evidência foi alterado.",
+      "I18N_VERSION: 1.118.4 → 1.118.5.",
+      "Files: src/locales/{pt,en}/translation.json, src/i18n.ts, src/pages/administrador/FundamentosTab.tsx, src/components/administrador/fundamentos/{CoreRuleHistory,MetaStudyKanban,IngestaoMetaEstudo}.tsx"
+    ],
+    "files": [
+      ".lovable/plan.md",
+      "src/i18n.ts",
+      "src/pages/administrador/FundamentosTab.tsx"
+    ],
+    "i18nVersion": "1.118.5"
+  },
   {
     "date": "2026-06-08",
     "kind": "changed",
