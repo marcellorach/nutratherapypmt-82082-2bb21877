@@ -22,7 +22,12 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ---
 
 ## [Unreleased]
-<!-- senex: 7.2.0 -->
+<!-- senex: 7.2.1 -->
+
+### Changed - 2026-06-08 — Pilares científicos: KGARevion reclassificado de Inspiração → Parcial
+<!-- area: admin · status: entregue · i18n: — -->
+- No card "Pilares científicos (inspiração × implementação)" em About-Senex, KGARevion passa de `INSPIRATION` para `PARTIAL`, refletindo o que já está vinculado em `core_rule_evidence`: RC-014 (Normalização de Predicados via Dicionário, w=0.90) e RC-008 (Taxonomia Padrão SNOMED-CT VetSCT + UMLS, w=0.95) — ambas ativas em runtime. O ciclo GRRA completo (Review + Revise independentes) segue rotulado como inspiração não implementada. Sem mudança no banco; ajuste de copy para alinhar com a aba Fundamentos Arquiteturais.
+- Files: src/components/administrador/AboutSenexTab.tsx
 
 ### Added - 2026-06-08 — Showcase Mode (documento paralelo para parceiro)
 <!-- area: admin · status: entregue · i18n: — -->
