@@ -22,7 +22,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ---
 
 ## [Unreleased]
-<!-- senex: 7.2.1 -->
+<!-- senex: 7.2.2 -->
+
+### Fixed - 2026-06-08 — Fundamentos Arquiteturais 100% bilíngue (UI + DB)
+<!-- area: admin · status: entregue · i18n: 1.118.5 -->
+- Adicionadas todas as 150+ chaves `fundamentos.*` em PT e EN (`FundamentosTab`, `MetaKgRoadmapCard`, `MetaStudyDetailedCard`, `CoreRuleHistory`, `MetaStudyKanban`, `IngestaoMetaEstudo`): tabs, badges, roadmap (Fase A/B/C, gatilhos), confiabilidade (5 dimensões + descrições), filtros do histórico (placeholder, stances, ações, refresh), painel de ingestão (estágios, seções de lições, botões de stance promote/attach/discard/resolve_keep, toasts).
+- DB `core_rules`: preenchido `justification_en` para RC-001/002/003 e `application_en` para as 18 regras; `FundamentosTab` agora consome `application_en` quando lang=en.
+- Auditoria dos 6 papers arquiteturais (TxGNN, Geroscience-Dogs, KGARevion, MedGraphRAG, OptimusKG, Hetionet) — cobertura RC documentada no `.lovable/plan.md` deste turno; nenhum vínculo de evidência foi alterado.
+- I18N_VERSION: 1.118.4 → 1.118.5.
+- Files: src/locales/{pt,en}/translation.json, src/i18n.ts, src/pages/administrador/FundamentosTab.tsx, src/components/administrador/fundamentos/{CoreRuleHistory,MetaStudyKanban,IngestaoMetaEstudo}.tsx
 
 ### Changed - 2026-06-08 — Pilares científicos: KGARevion reclassificado de Inspiração → Parcial
 <!-- area: admin · status: entregue · i18n: — -->
