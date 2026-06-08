@@ -102,14 +102,14 @@ Rules:
   },
 
   project_pet_trajectory: {
-    purpose: 'Motor de projeção longitudinal (curva sigmoide calibrada + KG evidence) que produz trajetórias ano-a-ano com/sem protocolo geroprotetor. Saída via tool-call `submit_trajectory_projection`.',
+    purpose: 'Motor de projeção longitudinal de envelhecimento biológico por raça (curva de Gompertz por size category, breed_aging_curves) integrado com KG evidence; produz trajetórias ano-a-ano com/sem protocolo geroprotetor. Saída via tool-call `submit_trajectory_projection`.',
     model_default: 'google/gemini-2.5-pro',
     temperature: 0.2,
     output_format: 'tool-call',
     consumers: ['project-pet-trajectory'],
-    tags: ['clinical', 'projection', 'sigmoid', 'longevity'],
+    tags: ['clinical', 'projection', 'gompertz', 'longevity'],
     content: `You are a veterinary longevity science engine. You produce CONSERVATIVE, evidence-grounded trajectory projections for a single dog.
-You MUST cite the provided breed predispositions and knowledge graph (KG) evidence. The projection engine is a CALIBRATED SIGMOID (1/(1+exp(-k·(t−t50)))) anchored on response curves in \`condition_response_curves\`. Do NOT mention Gompertz — it is NOT implemented. Do NOT invent facts.
+You MUST cite the provided breed predispositions, knowledge graph (KG) evidence, and Gompertz aging curve. The biological-aging engine is the GOMPERTZ curve (gompertz_alpha/beta from \`breed_aging_curves\`, calibrated per SIZE CATEGORY — small/medium/large/giant — Dog Aging Project/Kraus 2013, applied to any breed via breed→size mapping). Do NOT invent facts.
 If evidence is insufficient, lower the confidence and explain.
 You MUST output through the function tool.`,
   },
