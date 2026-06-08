@@ -22,7 +22,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ---
 
 ## [Unreleased]
-<!-- senex: 7.2.2 -->
+<!-- senex: 7.2.3 -->
+
+### Changed - 2026-06-08 — Pilares científicos: TxGNN e Hetionet adicionados como PARTIAL
+<!-- area: admin · status: entregue · i18n: — -->
+- AboutSenexTab: incluídos **TxGNN (Huang 2024, Nature Medicine)** e **Hetionet/DWPC (Himmelstein 2017, eLife)** no card "Pilares científicos (inspiração × implementação)" com status `PARTIAL`, refletindo `core_rule_evidence` já existente: TxGNN → RC-001 (doc-only), RC-008 e RC-013 (ativas); Hetionet → RC-008 e RC-014 (ativas). Inspirações ainda fora de runtime (zero-shot via metric learning + GraphMask; DWPC + permutação de rede) explicitadas.
+- Diagrama do engine: nota em `O3` (Recommendation engine) marca TxGNN zero-shot + Hetionet DWPC como inspirações não-runtime. Banner de "Honestidade arquitetural" amplia a lista de inspirações/planejado.
+- Esclarecimento: a lista de Pilares não é gerada por LLM — é um array TypeScript curado em `AboutSenexTab.tsx`. A fonte dinâmica papel↔RC continua sendo `core_rule_evidence` (consumida pela aba Fundamentos Arquiteturais).
+- Files: src/components/administrador/AboutSenexTab.tsx
 
 ### Fixed - 2026-06-08 — Fundamentos Arquiteturais 100% bilíngue (UI + DB)
 <!-- area: admin · status: entregue · i18n: 1.118.5 -->
