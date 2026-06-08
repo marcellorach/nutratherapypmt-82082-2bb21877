@@ -659,7 +659,11 @@ export default function TechnicalAuditsTab() {
                           size="sm"
                           variant="outline"
                           className="h-6 px-2 text-[10px] gap-1"
-                          onClick={(e) => { e.stopPropagation(); window.open(a.html_path!, "_blank"); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const path = headerLang === "en" && a.html_path_en ? a.html_path_en : a.html_path!;
+                            window.open(path, "_blank");
+                          }}
                           title="Abrir HTML em nova aba"
                         >
                           <ExternalLink className="h-2.5 w-2.5" /> Ver
@@ -672,7 +676,7 @@ export default function TechnicalAuditsTab() {
                           className="h-6 px-2 text-[10px] gap-1"
                           onClick={(e) => {
                             e.stopPropagation();
-                            downloadAuditHtml(a).catch((err) =>
+                            downloadAuditHtml(a, headerLang).catch((err) =>
                               toast({
                                 title: "Não foi possível baixar o HTML",
                                 description: err instanceof Error ? err.message : String(err),
@@ -692,7 +696,7 @@ export default function TechnicalAuditsTab() {
                           className="h-6 px-2 text-[10px] gap-1"
                           onClick={(e) => {
                             e.stopPropagation();
-                            openAuditForPrint(a).catch((err) =>
+                            openAuditForPrint(a, headerLang).catch((err) =>
                               toast({
                                 title: "Não foi possível abrir o PDF",
                                 description: err instanceof Error ? err.message : String(err),
