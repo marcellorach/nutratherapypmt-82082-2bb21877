@@ -416,7 +416,16 @@ export default function TechnicalAuditsTab() {
     return (b.audit_date || "").localeCompare(a.audit_date || "");
   };
   const visibleAudits = useMemo(
-    () => [...(showSuperseded ? audits : activeAudits)].sort(compareVersionDesc),
+    () => {
+      const list = [...(showSuperseded ? audits : activeAudits)].sort(compareVersionDesc);
+      // Showcases ficam à esquerda do carrossel para serem encontrados
+      // imediatamente após reload (versão "x.y.z-showcase" empata no sort
+      // semântico e ficava escondido entre as auditorias técnicas).
+      const isShow = (a: TechnicalAudit) =>
+        (a.version || "").includes("-showcase") ||
+        (a.summary as any)?.kind === "showcase";
+      return [...list.filter(isShow), ...list.filter((a) => !isShow(a))];
+    },
     [audits, activeAudits, showSuperseded],
   );
 
