@@ -1,19 +1,35 @@
 # Project context briefing (auto)
-Generated: 2026-06-06T23:06:40.889Z
+Generated: 2026-06-08T22:25:37.275Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
 ## Latest i18n version: —
 
 ## Changes by area (last 14 days)
-- **admin**: 25
-- **meta**: 7
+- **admin**: 27
+- **meta**: 8
 - **clinical-pipeline**: 7
 - **infra**: 5
 - **kg**: 3
 - **curation**: 3
 
 ## Top 10 recent entries
+### 2026-06-08 · [admin] ADDED — Showcase Mode (documento paralelo para parceiro)
+- Novo botão "Gerar showcase para parceiro" na aba Auditorias Técnicas. Lê o MESMO snapshot factual da auditoria (counts, kg_storage, clinical_data_provenance) e escreve 6 seções comerciais curadas (Visão, Por que importa, Diferenciais, Visão maior, Credibilidade, Parceria).
+- Honestidade preservada: capacidades em presente, resultado de sinistralidade prospectivo; split R/D/S obrigatório; RC-001/002 (evidência negativa) destacada como diferencial; GRRA/U-Retrieval/TransE rotulados como inspiração.
+- Roteamento: §1/4/6 Pro→Flash (define tom); §2/3/5 Flash→Pro→gpt-5-mini.
+_files: supabase/functions/generate-showcase/index.ts, src/components/administrador/audits/TechnicalAuditsTab.tsx_
+
+### 2026-06-08 · [admin] ADDED — Download de auditoria respeita idioma do header
+- O seletor PT/EN do header agora controla o idioma padrão dos botões Ver / HTML / PDF nos cards e no viewer de auditoria. Antes a versão baixada sempre era PT.
+- Files: src/components/administrador/audits/TechnicalAuditsTab.tsx, src/components/administrador/audits/audit-pdf-generator.ts
+_files: src/components/administrador/audits/TechnicalAuditsTab.tsx, src/components/administrador/audits/audit-pdf-generator.ts_
+
+### 2026-06-08 · [meta] FIXED — Auditoria v7.1.3: refinos de honestidade
+- Ajustes no `generate-audit` sobre fatiamento de blocos (fatos-âncora de honestidade replicados em todo bloco que toca dados/coortes/KG/recomendação/compliance/twin) e contexto amplo no sumário executivo.
+- Files: supabase/functions/generate-audit/index.ts
+_files: supabase/functions/generate-audit/index.ts_
+
 ### 2026-06-06 · [meta] CHANGED — Auditoria v7.2.0: split clínico no snapshot + KG honesto + Gompertz erradicado
 - `generate-audit/readAuditContext` — `tableNames` corrigido: `pets`→removido, `studies`→`processed_studies`, `medical_knowledge_graph` removido (legado). As 5 tabelas de população clínica (`pet_profiles`, `pet_exams`, `pet_consultations`, `pet_medications`, `pet_conditions`) saíram de `counts` de propósito — agora a ÚNICA fonte de verdade é `clinical_data_provenance` com `{real, demo, synthetic_cohort}`. Sem total bruto, o LLM não consegue mais apresentar "1234 exames processados" como atividade real.
 - Novo `snapshot.kg_storage` — expõe top relacionamentos de `hierarchical_edges` (TREATS / PREVENTS / HAS_MECHANISM / ...), confirmando que os 38k+ edges são relações clínicas curadas e NÃO taxonomia legada. Inclui `triplet_extractions_approved` e `triplet_extractions_synced_to_neo4j` para reportar honestamente o espelho Neo4j.
@@ -56,24 +72,6 @@ _files: supabase/functions/triplet-verification-runner/index.ts, supabase/functi
 - `src/components/administrador/ai-insights/mockInsights.ts` (insight-002): removidas as menções a "Real-world monitoring of 3,421 dogs", "large-scale real-world evidence" e `p < 0.001`. Card relabeled como `[MOCK — illustrative]`; `dataSource`, `summary`, `basedOn`, `findings`, `recommendation.impact` todos marcados explicitamente como placeholders ilustrativos. Senex NÃO observou 3.421 cães — o número era fabricação que aparecia no admin como se fosse achado real.
 - `src/locales/{pt,en}/translation.json` (`investment.alreadyMarket.b2cDesc`): removido "gerando dados reais de resultados" / "real-world outcome data". Texto novo é honesto sobre o estado: "Coleta de dados longitudinais de desfecho ainda não está estruturada (sem tabela `outcome_observations` em produção)" / equivalente EN.
 _files: src/components/administrador/ai-insights/mockInsights.ts, .lovable/memory/constraints/synthetic-cohort-not-rwd.md, src/locales/pt/translation.json, src/locales/en/translation.json…_
-
-### 2026-06-03 · [meta] ADDED — Matriz LIVE v2 + ROADMAP + STATE_REAL_VS_MOCK + PROMPTS snapshot + registro de honestidade no audit_base
-- `docs/generated/ARCHITECTURE_LIVE.md` regenerada (15 linhas) com correções cosméticas: abstain/tool_choice/telemetria reetiquetados como Bloco 1 (cards #3/#1/#2), não Bloco 2. O terceiro caller clínico com `tool_choice` é nomeado: `parse-pet-exam-pdf` (junto com `hybrid-recommendation` e `extract-pet-clinical-data`). Linha 7 (auto-aprovação) expõe os três sources não-reconciliados (código `≥0.85 & ≥0.50` × RC-013 `≥0.70` × ADR/CONTEXT `≥0.50`) sem escolher um. Linha 8 (Digital Twin) marca explicitamente que código É sigmoide. Linha 13 nova para RC-003 (modulador translacional ×0.7, planned/off), distinta de RC-013.
-- Resumo v2: 🟢 9 · 🟡 0 · 🟠 3 · ⚪ 3 · Total 15.
-- `supabase/functions/_shared/system-prompts.ts` — `audit_base_system_pt` + `_en`: injetado bloco "REGISTRO DE HONESTIDADE / HONESTY REGISTER" que (i) proíbe descrever GRRA / U-Retrieval / TransE como mecanismos do Senex; (ii) dá os nomes honestos do que roda hoje; (iii) exige proveniência por número (medido vs paper); (iv) força exposição do conflito de threshold; (v) descreve fallback de recomendação como `source='llm_fallback' + disclaimer='no_kg_data'`; (vi) lista lacunas planned explicitamente.
-_files: supabase/functions/_shared/system-prompts.ts, scripts/generate-prompts-snapshot.mjs, scripts/generate-architecture-live.mjs_
-
-### 2026-06-02 · [admin] CHANGED — Honestidade da narrativa pública: 2ª passada (excerpts, comparison table, glossário)
-- 2ª passada de honestidade em `admin-tabs-info-bilingual.ts` (estudos.*) — todas as ~15 menções restantes a GRRA / U-Retrieval / TransE como atributos do Senex foram convertidas em rótulos honestos. Papers continuam citados, mas apenas como inspiração científica, nunca como capacidade implementada.
-- keyExcerpts (MedGraphRAG / KGARevion / TransE): cada quote agora abre com "Paper de inspiração: …" e termina com "O Senex AI NÃO implementa X — roda Y" + "benchmark do paper, não métrica do Senex".
-- comparisonTable: coluna "Senex AI" da linha 6 (Retrieval) = "Híbrido Cypher + pgvector, sem fusão top-down/bottom-up"; linha 7 (Validação) = "Generate + scoring heurístico + auto-approve ≥ 0,50 + HITL (sem Review independente)"; linha 8 (Alucinações) = "Não medido no Senex AI" (os ~40% e ~87% rotulados como "benchmark do paper"); linha 12 (Link Prediction) = "Gap-fill via PubMed + Gemini (TransE permanece apenas inspiração)".
-_files: src/data/admin-tabs-info-bilingual.ts_
-
-### 2026-06-02 · [clinical-pipeline] CHANGED — IA Hardening Card #5c: hybrid-recommendation migrado para tool_choice (último do Card #5)
-- Migração #1 do Card #5 (hybrid-recommendation) — última e mais sensível: substituído free-text JSON (regex `match(/```json/)` + `JSON.parse`) por `tools: [recommend_nutraceuticals]` + `tool_choice: { type: "function", function: { name: "recommend_nutraceuticals" } }`. O parse-via-regex era o ponto mais frágil dos 3 callers; com tool_choice o `model_response_invalid` deve cair próximo de zero.
-- Schema único cobre ambos os modos (enrich / fallback): `nutraceuticals[]` com `{name, dosage, mechanism, evidenceLevel('AI-enriched'|'AI-generated'), condition, targetCondition?, closes_gaps?[]}` + `rationale` + `precautions[]` + envelope `abstain/abstain_reason('clinical_signal_insufficient')/abstain_detail`. `additionalProperties:false`. System prompt orienta qual `evidenceLevel` usar por modo.
-- Card #3 PRESERVADO bit-a-bit (não desfeito):
-_files: supabase/functions/hybrid-recommendation/index.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
