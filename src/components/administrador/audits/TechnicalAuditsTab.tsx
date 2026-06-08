@@ -668,6 +668,8 @@ export default function TechnicalAuditsTab() {
             {visibleAudits.map((a) => {
               const isSelected = a.id === selectedId;
               const isSuperseded = !!a.superseded_by;
+              const isShowcase = (a.version || "").includes("-showcase")
+                || (a.summary as any)?.kind === "showcase";
               return (
                 <Card
                   key={a.id}
@@ -679,11 +681,18 @@ export default function TechnicalAuditsTab() {
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-primary" />
+                        {isShowcase
+                          ? <Presentation className="h-4 w-4 text-accent-foreground" />
+                          : <FileText className="h-4 w-4 text-primary" />}
                         {a.id.toUpperCase()}
                       </CardTitle>
                       <Badge variant="outline" className="text-[10px]">{a.audit_date}</Badge>
                     </div>
+                    {isShowcase && (
+                      <Badge className="text-[9px] mt-1 w-fit bg-amber-100 text-amber-900 hover:bg-amber-100 border-amber-200">
+                        SHOWCASE · parceiro
+                      </Badge>
+                    )}
                     <p className="text-[10px] text-muted-foreground truncate">
                       <span className="font-mono">{a.system_version}</span>
                     </p>
