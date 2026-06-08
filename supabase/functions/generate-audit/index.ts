@@ -12,15 +12,25 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 
-const PRIMARY_MODEL = "google/gemini-3.1-pro-preview";
-const FALLBACK_MODEL = "openai/gpt-5-mini";
+// v7.1.3 — cadeia 3 modelos. Flash primário (rápido, schema-driven), Pro fallback
+// (mantém riqueza narrativa), gpt-5-mini 3º backstop.
+// Para outline+close (que definem tom + sintetizam tudo) usamos a cadeia com Pro
+// na frente — ver `HEAVY_ATTEMPTS` abaixo.
+const FLASH_MODEL = "google/gemini-3-flash-preview";
+const PRO_MODEL = "google/gemini-3.1-pro-preview";
+const MINI_MODEL = "openai/gpt-5-mini";
+const PRIMARY_MODEL = FLASH_MODEL; // usado em logs/summary final
+const FALLBACK_MODEL = PRO_MODEL;
 
-// Timeouts ampliados: blocos densos com SVG/tabelas no Gemini 3.1 Pro Preview
-// regularmente levam 60–120s. Antes ficava em 85s/45s e disparava AbortError
-// no meio da geração, travando a auditoria. Agora damos folga real.
-const PRIMARY_CALL_TIMEOUT_MS = 180_000;
-const FALLBACK_CALL_TIMEOUT_MS = 120_000;
+// Timeouts. Flash é bem mais rápido, então pode ficar mais curto; Pro precisa
+// dos 180s antigos; mini é último recurso.
+const FLASH_TIMEOUT_MS = 90_000;
+const PRO_TIMEOUT_MS = 180_000;
+const MINI_TIMEOUT_MS = 120_000;
 const FALLBACK_BACKOFF_MS = 5_000;
+// Aliases legados (usados em outras partes do arquivo / logs).
+const PRIMARY_CALL_TIMEOUT_MS = FLASH_TIMEOUT_MS;
+const FALLBACK_CALL_TIMEOUT_MS = PRO_TIMEOUT_MS;
 const HEARTBEAT_INTERVAL_MS = 5_000;
 const MAX_LOG_ENTRIES = 200;
 
