@@ -40,6 +40,7 @@ import {
   EyeOff,
   RefreshCw,
   Settings as SettingsIcon,
+  Presentation,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
