@@ -98,7 +98,8 @@ const DEFAULT_NEW_SCOPE = renderCoverageScopePt();
 
 export default function TechnicalAuditsTab() {
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const headerLang: "pt" | "en" = i18n.language?.startsWith("en") ? "en" : "pt";
   const [audits, setAudits] = useState<TechnicalAudit[]>([]);
   const [requests, setRequests] = useState<AuditRequest[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -109,7 +110,12 @@ export default function TechnicalAuditsTab() {
   const [viewerHtml, setViewerHtml] = useState<string | null>(null);
   const [viewerLoading, setViewerLoading] = useState(false);
   const [viewerError, setViewerError] = useState<string | null>(null);
-  const [viewerLang, setViewerLang] = useState<"pt" | "en">("pt");
+  const [viewerLang, setViewerLang] = useState<"pt" | "en">(headerLang);
+
+  // Mantém a caixinha PT/EN sincronizada com o idioma do header.
+  useEffect(() => {
+    setViewerLang(headerLang);
+  }, [headerLang]);
 
   // dialog state
   const [newScope, setNewScope] = useState(DEFAULT_NEW_SCOPE);
