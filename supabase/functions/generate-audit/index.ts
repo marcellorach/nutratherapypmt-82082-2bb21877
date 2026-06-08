@@ -843,6 +843,7 @@ Deno.serve(async (req) => {
             messages,
             tools: [tool],
             tool_choice: { type: "function", function: { name: tool.function.name } },
+            temperature: 0.2,
           }),
           signal: controller.signal,
         });
