@@ -470,6 +470,17 @@ export default function TechnicalAuditsTab() {
           </div>
         </div>
 
+        <div className="flex items-center gap-2 flex-wrap">
+        <Button
+          variant="outline"
+          className="gap-2"
+          onClick={handleGenerateShowcase}
+          disabled={generatingShowcase}
+          title="Gera documento de showcase para parceiro (mesma espinha de fatos da auditoria, ênfase comercial em 6 seções curadas). Pode ser reexecutado livremente."
+        >
+          <Presentation className="h-4 w-4" />
+          {generatingShowcase ? "Gerando showcase…" : "Gerar showcase para parceiro"}
+        </Button>
         <Dialog open={newOpen} onOpenChange={setNewOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2" disabled={alreadyAuditedThisVersion} title={alreadyAuditedThisVersion
@@ -528,6 +539,7 @@ export default function TechnicalAuditsTab() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Banner de fila removido: a geração agora é instantânea. */}
