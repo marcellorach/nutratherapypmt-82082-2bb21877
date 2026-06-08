@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-08T22:56:16.281Z
+// Última geração: 2026-06-08T23:32:54.397Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -21,9 +21,26 @@ export interface ChangelogEntry {
 
 export const lastChangelogDate = "2026-06-08";
 
-export const senexVersion = "7.2.2";
+export const senexVersion = "7.2.3";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-08",
+    "kind": "changed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Pilares científicos: TxGNN e Hetionet adicionados como PARTIAL",
+    "bullets": [
+      "AboutSenexTab: incluídos TxGNN (Huang 2024, Nature Medicine) e Hetionet/DWPC (Himmelstein 2017, eLife) no card \"Pilares científicos (inspiração × implementação)\" com status `PARTIAL`, refletindo `core_rule_evidence` já existente: TxGNN → RC-001 (doc-only), RC-008 e RC-013 (ativas); Hetionet → RC-008 e RC-014 (ativas). Inspirações ainda fora de runtime (zero-shot via metric learning + GraphMask; DWPC + permutação de rede) explicitadas.",
+      "Diagrama do engine: nota em `O3` (Recommendation engine) marca TxGNN zero-shot + Hetionet DWPC como inspirações não-runtime. Banner de \"Honestidade arquitetural\" amplia a lista de inspirações/planejado.",
+      "Esclarecimento: a lista de Pilares não é gerada por LLM — é um array TypeScript curado em `AboutSenexTab.tsx`. A fonte dinâmica papel↔RC continua sendo `core_rule_evidence` (consumida pela aba Fundamentos Arquiteturais).",
+      "Files: src/components/administrador/AboutSenexTab.tsx"
+    ],
+    "files": [
+      "src/components/administrador/AboutSenexTab.tsx"
+    ],
+    "i18nVersion": "—"
+  },
   {
     "date": "2026-06-08",
     "kind": "fixed",
