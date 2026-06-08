@@ -1,9 +1,9 @@
 {
-  "timestamp": "2026-06-08T23:31:38.935Z",
+  "timestamp": "2026-06-08T23:38:45.175Z",
   "summary": {
     "totalFiles": 956,
-    "totalIssues": 480,
-    "hardcodedTexts": 57,
+    "totalIssues": 484,
+    "hardcodedTexts": 61,
     "missingKeys": 421,
     "incompleteTranslations": 2
   },
@@ -2755,28 +2755,28 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 748,
+      "line": 765,
       "text": "audit_base_system_{pt,en}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2060,
+      "line": 2077,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2271,
+      "line": 2288,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 5066,
+      "line": 5083,
       "text": "@",
       "severity": "high"
     },
@@ -3000,49 +3000,77 @@
     {
       "type": "hardcoded",
       "file": "src/components/administrador/AboutSenexTab.tsx",
-      "line": 162,
+      "line": 176,
       "text": "U-Retrieval bidirecional",
       "severity": "medium"
     },
     {
       "type": "hardcoded",
       "file": "src/components/administrador/AboutSenexTab.tsx",
-      "line": 162,
+      "line": 176,
       "text": "TransE",
       "severity": "medium"
     },
     {
       "type": "hardcoded",
       "file": "src/components/administrador/AboutSenexTab.tsx",
-      "line": 163,
+      "line": 176,
+      "text": "TxGNN zero-shot",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/AboutSenexTab.tsx",
+      "line": 176,
+      "text": "Hetionet DWPC",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/AboutSenexTab.tsx",
+      "line": 177,
       "text": "TransE",
       "severity": "medium"
     },
     {
       "type": "hardcoded",
       "file": "src/components/administrador/AboutSenexTab.tsx",
-      "line": 226,
+      "line": 177,
+      "text": "TxGNN zero-shot",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/AboutSenexTab.tsx",
+      "line": 177,
+      "text": "Hetionet DWPC",
+      "severity": "medium"
+    },
+    {
+      "type": "hardcoded",
+      "file": "src/components/administrador/AboutSenexTab.tsx",
+      "line": 240,
       "text": "No-mock policy",
       "severity": "medium"
     },
     {
       "type": "hardcoded",
       "file": "src/components/administrador/AboutSenexTab.tsx",
-      "line": 232,
+      "line": 246,
       "text": "Curation gatekeeper",
       "severity": "medium"
     },
     {
       "type": "hardcoded",
       "file": "src/components/administrador/AboutSenexTab.tsx",
-      "line": 244,
+      "line": 258,
       "text": "Canine scope",
       "severity": "medium"
     },
     {
       "type": "hardcoded",
       "file": "src/components/administrador/AboutSenexTab.tsx",
-      "line": 250,
+      "line": 264,
       "text": "Therapeutic cap",
       "severity": "medium"
     },

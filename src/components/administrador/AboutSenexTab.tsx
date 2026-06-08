@@ -225,6 +225,29 @@ const AboutSenexTab: React.FC = () => {
               </div>
             </div>
           ))}
+          <div className="mt-2 text-sm text-muted-foreground border-t pt-3">
+            {isPt ? (
+              <>Para saber mais, veja{' '}
+                <a
+                  href="/administrador?tab=fundamentos"
+                  className="text-primary underline underline-offset-2 font-medium hover:opacity-80"
+                >
+                  Fundamentos Arquiteturais
+                </a>
+                {' '}— mapeamento completo paper → Core Rules ativas, com citações e evidências.
+              </>
+            ) : (
+              <>To learn more, see{' '}
+                <a
+                  href="/administrador?tab=fundamentos"
+                  className="text-primary underline underline-offset-2 font-medium hover:opacity-80"
+                >
+                  Architectural Foundations
+                </a>
+                {' '}— full paper → active Core Rules mapping, with citations and evidence.
+              </>
+            )}
+          </div>
         </CardContent>
       </Card>
 
