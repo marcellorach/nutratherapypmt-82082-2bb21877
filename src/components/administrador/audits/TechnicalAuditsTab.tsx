@@ -122,6 +122,7 @@ export default function TechnicalAuditsTab() {
   const [newScope, setNewScope] = useState(DEFAULT_NEW_SCOPE);
   const [newOpen, setNewOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [generatingShowcase, setGeneratingShowcase] = useState(false);
 
   const [editTarget, setEditTarget] = useState<TechnicalAudit | null>(null);
   const [editScope, setEditScope] = useState("");
