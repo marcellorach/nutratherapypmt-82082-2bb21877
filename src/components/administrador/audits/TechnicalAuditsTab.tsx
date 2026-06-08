@@ -245,6 +245,48 @@ export default function TechnicalAuditsTab() {
     [audits],
   );
 
+  // O showcase é um documento paralelo (mesma espinha de fatos, ênfase para
+  // parceiro). Não bloqueamos por versão — pode haver várias rodadas de
+  // showcase enquanto a auditoria técnica daquela versão já existe.
+  const handleGenerateShowcase = async () => {
+    setGeneratingShowcase(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-showcase", {
+        body: {
+          version: nextVersion,
+          system_version: `Senex v${SENEX_VERSION} · i18n ${CURRENT_I18N_VERSION}`,
+          system_changelog_date: lastChangelogDate || new Date().toISOString().slice(0, 10),
+        },
+      });
+      if (error) throw error;
+      const newId = (data as any)?.audit?.id ?? null;
+      const isProcessing = (data as any)?.status === "processing";
+      toast({
+        title: `Showcase ${nextVersion} em geração`,
+        description: isProcessing
+          ? "Documento para parceiro sendo escrito em segundo plano (PT + EN). 6 seções em paralelo."
+          : "Showcase solicitado.",
+      });
+      await load();
+      if (newId) setSelectedId(newId);
+      if (isProcessing && newId) {
+        setProgress({
+          audit_id: newId, status: "processing",
+          stage: "queued", stage_label: "Na fila",
+          progress: 5, error: null,
+        });
+      }
+    } catch (e) {
+      toast({
+        title: "Falha ao gerar showcase",
+        description: e instanceof Error ? e.message : String(e),
+        variant: "destructive",
+      });
+    } finally {
+      setGeneratingShowcase(false);
+    }
+  };
+
   const handleRequestNew = async () => {
     setSubmitting(true);
     try {
