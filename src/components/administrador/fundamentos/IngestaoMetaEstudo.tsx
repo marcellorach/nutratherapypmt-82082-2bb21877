@@ -807,7 +807,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                   <div className="text-muted-foreground mt-0.5">{p.enunciado}</div>
                   {p.justification_quote && <div className="text-muted-foreground italic mt-1">"{p.justification_quote}"</div>}
                   {p.suggested_application && (
-                    <div className="text-[11px] mt-1"><span className="text-muted-foreground">Aplicação sugerida:</span> <code className="text-[10px]">{p.suggested_application}</code></div>
+                    <div className="text-[11px] mt-1"><span className="text-muted-foreground">{t('fundamentos.ingest.proposed.applicationSuggested', 'Aplicação sugerida:')}</span> <code className="text-[10px]">{p.suggested_application}</code></div>
                   )}
                 </>
               );
@@ -817,10 +817,10 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                   <div>
                     <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5">
                       <Sparkles className="h-3 w-3 text-purple-600" />
-                      Regras-Core deduzidas deste paper (0)
+                      {t('fundamentos.ingest.proposed.title', 'Regras-Core deduzidas deste paper')} (0)
                     </Label>
                     <p className="text-xs text-muted-foreground italic mt-1">
-                      A IA não propôs novas regras — todas as lições já mapearam para RCs existentes (ou o paper é mais ilustrativo do que normativo).
+                      {t('fundamentos.ingest.proposed.empty', 'A IA não propôs novas regras — todas as lições já mapearam para RCs existentes (ou o paper é mais ilustrativo do que normativo).')}
                     </p>
                   </div>
                 );
@@ -833,18 +833,18 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                     <div className="border border-red-300 rounded-md bg-red-50/40 p-2">
                       <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5 text-red-800">
                         <AlertTriangle className="h-3 w-3" />
-                        Conflitos com Regras-Core ativas ({contradicts.length})
+                        {t('fundamentos.ingest.proposed.conflicts', 'Conflitos com Regras-Core ativas')} ({contradicts.length})
                         <span className="text-[10px] font-normal text-red-700/80 normal-case">
-                          — promoção bloqueada, requer decisão humana
+                          {t('fundamentos.ingest.proposed.conflictsHint', '— promoção bloqueada, requer decisão humana')}
                         </span>
                       </Label>
                       <ul className="space-y-1.5 mt-1.5 text-xs">
                         {contradicts.map(({ p, i }) => (
                           <li key={i} className={`border border-red-200 rounded px-2 py-2 bg-white ${p._action === 'discard' ? 'opacity-40' : ''}`}>
                             <div className="flex items-center gap-2 flex-wrap mb-1">
-                              <Badge className="bg-red-100 text-red-800 border-red-300">CONTRADIZ</Badge>
+                              <Badge className="bg-red-100 text-red-800 border-red-300">{t('fundamentos.ingest.proposed.contradicts', 'CONTRADIZ')}</Badge>
                               {(p.conflicts_with || []).map(rid => (
-                                <Badge key={rid} variant="outline" className="font-mono text-[10px] border-red-300 text-red-800">vs {rid}</Badge>
+                                <Badge key={rid} variant="outline" className="font-mono text-[10px] border-red-300 text-red-800">{t('fundamentos.ingest.proposed.vs', 'vs')} {rid}</Badge>
                               ))}
                               {renderHeader(p)}
                             </div>
@@ -856,7 +856,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                                 className="h-6 text-[11px]"
                                 onClick={() => updateAction(i, 'resolve_keep')}
                               >
-                                {p._action === 'resolve_keep' ? '✓ Manter RC atual (arquivar proposta)' : 'Manter RC atual (arquivar)'}
+                                {p._action === 'resolve_keep' ? t('fundamentos.ingest.proposed.keepActiveRCDone', '✓ Manter RC atual (arquivar proposta)') : t('fundamentos.ingest.proposed.keepActiveRC', 'Manter RC atual (arquivar)')}
                               </Button>
                               <Button
                                 size="sm"
@@ -864,10 +864,10 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                                 className="h-6 text-[11px]"
                                 onClick={() => updateAction(i, 'discard')}
                               >
-                                {p._action === 'discard' ? '✓ Descartar' : 'Descartar'}
+                                {p._action === 'discard' ? t('fundamentos.ingest.proposed.discardDone', '✓ Descartar') : t('fundamentos.ingest.proposed.discard', 'Descartar')}
                               </Button>
                               <span className="text-[10px] text-red-700/80 italic self-center">
-                                Substituir/mesclar/coexistir → próxima fase (versionamento de RCs).
+                                {t('fundamentos.ingest.proposed.futurePhase', 'Substituir/mesclar/coexistir → próxima fase (versionamento de RCs).')}
                               </span>
                             </div>
                           </li>
@@ -881,16 +881,16 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                     <div className="border border-emerald-300 rounded-md bg-emerald-50/40 p-2">
                       <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5 text-emerald-800">
                         <CheckCircle2 className="h-3 w-3" />
-                        Confirmações de RCs ativas ({confirms.length})
+                        {t('fundamentos.ingest.proposed.confirms', 'Confirmações de RCs ativas')} ({confirms.length})
                         <span className="text-[10px] font-normal text-emerald-700/80 normal-case">
-                          — anexar como evidência, não duplicar RC
+                          {t('fundamentos.ingest.proposed.confirmsHint', '— anexar como evidência, não duplicar RC')}
                         </span>
                       </Label>
                       <ul className="space-y-1.5 mt-1.5 text-xs">
                         {confirms.map(({ p, i }) => (
                           <li key={i} className={`border border-emerald-200 rounded px-2 py-2 bg-white ${p._action === 'attach' ? 'border-emerald-500' : ''} ${p._action === 'discard' ? 'opacity-40' : ''}`}>
                             <div className="flex items-center gap-2 flex-wrap mb-1">
-                              <Badge className="bg-emerald-100 text-emerald-800 border-emerald-300">CONFIRMA</Badge>
+                              <Badge className="bg-emerald-100 text-emerald-800 border-emerald-300">{t('fundamentos.ingest.proposed.confirmsBadge', 'CONFIRMA')}</Badge>
                               {(p.conflicts_with || []).map(rid => (
                                 <Badge key={rid} variant="outline" className="font-mono text-[10px] border-emerald-300 text-emerald-800">→ {rid}</Badge>
                               ))}
@@ -904,7 +904,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                                 className="h-6 text-[11px]"
                                 onClick={() => updateAction(i, 'attach')}
                               >
-                                {p._action === 'attach' ? '✓ Anexar como evidência' : 'Anexar como evidência'}
+                                {p._action === 'attach' ? t('fundamentos.ingest.proposed.attachDone', '✓ Anexar como evidência') : t('fundamentos.ingest.proposed.attach', 'Anexar como evidência')}
                               </Button>
                               <Button
                                 size="sm"
@@ -912,7 +912,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                                 className="h-6 text-[11px]"
                                 onClick={() => updateAction(i, 'discard')}
                               >
-                                {p._action === 'discard' ? '✓ Descartar' : 'Descartar'}
+                                {p._action === 'discard' ? t('fundamentos.ingest.proposed.discardDone', '✓ Descartar') : t('fundamentos.ingest.proposed.discard', 'Descartar')}
                               </Button>
                             </div>
                           </li>
@@ -925,14 +925,14 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                   <div>
                     <Label className="text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5">
                       <Sparkles className="h-3 w-3 text-purple-600" />
-                      Novas Regras-Core propostas ({extendsOrOther.length})
+                      {t('fundamentos.ingest.proposed.extends', 'Novas Regras-Core propostas')} ({extendsOrOther.length})
                       <span className="text-[10px] font-normal text-muted-foreground normal-case">
-                        — origem='deductive', sem conflito com catálogo atual
+                        {t('fundamentos.ingest.proposed.extendsHint', "— origem='deductive', sem conflito com catálogo atual")}
                       </span>
                     </Label>
                     {extendsOrOther.length === 0 ? (
                       <p className="text-xs text-muted-foreground italic mt-1">
-                        Nenhuma proposta inédita — tudo virou confirmação ou conflito.
+                        {t('fundamentos.ingest.proposed.extendsEmpty', 'Nenhuma proposta inédita — tudo virou confirmação ou conflito.')}
                       </p>
                     ) : (
                       <ul className="space-y-1.5 mt-1 text-xs">
@@ -940,7 +940,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                           <li key={i} className={`border rounded px-2 py-2 ${p._action === 'promote' ? 'border-purple-400 bg-purple-50/40' : p._action === 'discard' ? 'opacity-40' : ''}`}>
                             <div className="flex items-center gap-2 flex-wrap mb-1">
                               <Badge className="bg-purple-100 text-purple-800 border-purple-200">
-                                {p.stance === 'unrelated' ? 'NOVA (sem overlap)' : 'ESTENDE'}
+                                {p.stance === 'unrelated' ? t('fundamentos.ingest.proposed.newNoOverlap', 'NOVA (sem overlap)') : t('fundamentos.ingest.proposed.extendsBadge', 'ESTENDE')}
                               </Badge>
                               {renderHeader(p)}
                             </div>
@@ -952,7 +952,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                                 className="h-6 text-[11px]"
                                 onClick={() => updateAction(i, 'promote')}
                               >
-                                {p._action === 'promote' ? '✓ Promover para nova RC' : 'Promover para nova RC'}
+                                {p._action === 'promote' ? t('fundamentos.ingest.proposed.promoteDone', '✓ Promover para nova RC') : t('fundamentos.ingest.proposed.promote', 'Promover para nova RC')}
                               </Button>
                               <Button
                                 size="sm"
@@ -960,7 +960,7 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
                                 className="h-6 text-[11px]"
                                 onClick={() => updateAction(i, 'discard')}
                               >
-                                {p._action === 'discard' ? '✓ Descartar' : 'Descartar'}
+                                {p._action === 'discard' ? t('fundamentos.ingest.proposed.discardDone', '✓ Descartar') : t('fundamentos.ingest.proposed.discard', 'Descartar')}
                               </Button>
                             </div>
                           </li>
@@ -973,15 +973,15 @@ const IngestaoMetaEstudo: React.FC<Props> = ({ onSaved }) => {
             })()}
             <div>
               <p className="text-[10px] text-muted-foreground mt-1.5 italic">
-                Não marcadas serão salvas no meta-estudo como candidatas (campo <code>proposed_rules</code>) sem virar RC ativa — você pode promovê-las depois.
+                {t('fundamentos.ingest.proposed.unsavedNote', 'Não marcadas serão salvas no meta-estudo como candidatas (campo proposed_rules) sem virar RC ativa — você pode promovê-las depois.')}
               </p>
             </div>
 
             <div className="flex gap-2">
               <Button onClick={approve} disabled={saving || !draft.title}>
-                {saving ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> Salvando…</> : <><CheckCircle2 className="h-4 w-4 mr-1" /> Aprovar e salvar</>}
+                {saving ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" /> {t('fundamentos.ingest.saving', 'Salvando…')}</> : <><CheckCircle2 className="h-4 w-4 mr-1" /> {t('fundamentos.ingest.approveSave', 'Aprovar e salvar')}</>}
               </Button>
-              <Button variant="outline" onClick={() => setDraft(null)}>Cancelar</Button>
+              <Button variant="outline" onClick={() => setDraft(null)}>{t('fundamentos.ingest.cancel', 'Cancelar')}</Button>
             </div>
           </CardContent>
         </Card>
