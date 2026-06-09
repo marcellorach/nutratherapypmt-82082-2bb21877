@@ -8,6 +8,8 @@ import {
 import {
   computeTruncationRatio,
   decideFileSearchGate,
+  buildGateMetrics,
+  GATE_THRESHOLDS,
 } from "./gate.ts";
 
 const nonEmptyEntities = {
@@ -213,4 +215,121 @@ Deno.test("gate: undefined entity arrays are treated as empty", () => {
   });
   assertEquals(d.status, "degraded");
   assertEquals(d.reason, "entities_empty");
+});
+
+// ---------- thresholds ----------
+
+Deno.test("GATE_THRESHOLDS: documented constants are stable", () => {
+  assertEquals(GATE_THRESHOLDS.TRUNCATION_RATIO_MIN, 0.30);
+  assertEquals(GATE_THRESHOLDS.MIN_SECTIONS_FOR_TRUNCATION, 3);
+});
+
+// ---------- buildGateMetrics ----------
+
+Deno.test("metrics: ok decision emits event with null reason and healthy flags", () => {
+  const input = {
+    fullTextLength: 45000,
+    entities: {
+      nutraceuticals: [{}, {}],
+      conditions: [{}],
+      mechanisms: [{}],
+      biological_effects: [{}],
+    },
+    parseTotalChars: 50000,
+    parseSectionsCount: 8,
+  };
+  const d = decideFileSearchGate(input);
+  const m = buildGateMetrics(input, d);
+  assertEquals(m.event, "file_search_gate");
+  assertEquals(m.status, "ok");
+  assertEquals(m.reason, null);
+  assertEquals(m.entities_non_empty, true);
+  assertEquals(m.entities_counts, {
+    nutraceuticals: 2,
+    conditions: 1,
+    mechanisms: 1,
+    biological_effects: 1,
+  });
+  assertEquals(m.full_text_length, 45000);
+  assertEquals(m.parse_total_chars, 50000);
+  assertEquals(m.parse_sections_count, 8);
+  assertEquals(m.truncation_eligible, true);
+  assertEquals(m.truncation_ratio_below_threshold, false);
+  assertEquals(m.thresholds, GATE_THRESHOLDS);
+});
+
+Deno.test("metrics: entities_empty emits reason and counts all zero", () => {
+  const input = {
+    fullTextLength: 50000,
+    entities: emptyEntities,
+    parseTotalChars: 50000,
+    parseSectionsCount: 5,
+  };
+  const m = buildGateMetrics(input, decideFileSearchGate(input));
+  assertEquals(m.status, "degraded");
+  assertEquals(m.reason, "entities_empty");
+  assertEquals(m.entities_non_empty, false);
+  assertEquals(
+    m.entities_counts.nutraceuticals +
+      m.entities_counts.conditions +
+      m.entities_counts.mechanisms +
+      m.entities_counts.biological_effects,
+    0,
+  );
+});
+
+Deno.test("metrics: truncation_suspected flags both eligibility and ratio breach", () => {
+  const input = {
+    fullTextLength: 1000,
+    entities: nonEmptyEntities,
+    parseTotalChars: 10000,
+    parseSectionsCount: 5,
+  };
+  const m = buildGateMetrics(input, decideFileSearchGate(input));
+  assertEquals(m.status, "degraded");
+  assertEquals(m.reason, "truncation_suspected");
+  assertEquals(m.truncation_ratio, 0.1);
+  assertEquals(m.truncation_eligible, true);
+  assertEquals(m.truncation_ratio_below_threshold, true);
+});
+
+Deno.test("metrics: low ratio but sections < 3 → ratio_below_threshold true, eligible false, status ok", () => {
+  const input = {
+    fullTextLength: 500,
+    entities: nonEmptyEntities,
+    parseTotalChars: 100000,
+    parseSectionsCount: 1,
+  };
+  const m = buildGateMetrics(input, decideFileSearchGate(input));
+  assertEquals(m.status, "ok");
+  assertEquals(m.truncation_ratio_below_threshold, true);
+  assertEquals(m.truncation_eligible, false);
+});
+
+Deno.test("metrics: failed (empty full_text) emits empty_full_text reason", () => {
+  const input = {
+    fullTextLength: 0,
+    entities: nonEmptyEntities,
+    parseTotalChars: 10000,
+    parseSectionsCount: 5,
+  };
+  const m = buildGateMetrics(input, decideFileSearchGate(input));
+  assertEquals(m.status, "failed");
+  assertEquals(m.reason, "empty_full_text");
+  assertEquals(m.full_text_length, 0);
+  assertEquals(m.truncation_ratio, 0);
+});
+
+Deno.test("metrics: missing parse_study leaves truncation flags safe", () => {
+  const input = {
+    fullTextLength: 100,
+    entities: nonEmptyEntities,
+    parseTotalChars: null,
+    parseSectionsCount: null,
+  };
+  const m = buildGateMetrics(input, decideFileSearchGate(input));
+  assertEquals(m.status, "ok");
+  assertEquals(m.truncation_ratio, null);
+  assertEquals(m.truncation_ratio_below_threshold, false);
+  assertEquals(m.truncation_eligible, false);
 });
