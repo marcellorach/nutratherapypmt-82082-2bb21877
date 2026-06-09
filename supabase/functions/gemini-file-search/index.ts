@@ -2101,6 +2101,93 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
         console.log(`   - structured_dosages: ${extractedData.structured_dosages?.length || 0}`);
         console.log(`   - study_population: ${extractedData.study_population?.species || 'N/A'}`);
         
+        // ============================================================
+        // GATE QUALITATIVO — file_search stage telemetry
+        // ------------------------------------------------------------
+        // - failed: handled in outer catch / Call 1 only-empty path below
+        // - degraded:
+        //     (a) entities_empty — all key categories empty
+        //     (b) truncation_suspected — chars_full_text / parse_total < 0.30
+        //         AND parse_study.sections_count >= 3 (RELATIVE, never absolute floor)
+        // - ok: full_text present AND at least one key entity category populated
+        // chars + truncation_ratio are INFORMATIVE only, never triggers.
+        // ============================================================
+        const entitiesNonEmpty =
+          (extractedData.nutraceuticals?.length || 0) +
+          (extractedData.conditions?.length || 0) +
+          (extractedData.mechanisms?.length || 0) +
+          (extractedData.biological_effects?.length || 0) > 0;
+
+        // Read parse_study stage to compute relative truncation ratio.
+        let parseSectionsCount: number | null = null;
+        let parseTotalChars: number | null = null;
+        try {
+          const { data: stageRow } = await supabase
+            .from('processed_studies')
+            .select('ingestion_stages')
+            .eq('id', studyId)
+            .maybeSingle();
+          const parseStage = (stageRow?.ingestion_stages as any)?.parse_study;
+          if (parseStage) {
+            parseSectionsCount = typeof parseStage.sections_count === 'number' ? parseStage.sections_count : null;
+            parseTotalChars = typeof parseStage.total_chars === 'number' ? parseStage.total_chars : null;
+          }
+        } catch (e) {
+          console.warn('⚠️ Could not read parse_study stage for truncation_ratio:', e);
+        }
+
+        const truncationRatio =
+          parseTotalChars && parseTotalChars > 0
+            ? Number((fullTextContent.length / parseTotalChars).toFixed(4))
+            : null;
+
+        let fileSearchStatus: 'ok' | 'degraded' | 'failed' = 'ok';
+        let fileSearchReason: string | undefined;
+        if (!fullTextContent || fullTextContent.length === 0) {
+          fileSearchStatus = 'failed';
+          fileSearchReason = 'empty_full_text';
+        } else if (!entitiesNonEmpty) {
+          fileSearchStatus = 'degraded';
+          fileSearchReason = 'entities_empty';
+        } else if (
+          truncationRatio !== null &&
+          truncationRatio < 0.30 &&
+          (parseSectionsCount ?? 0) >= 3
+        ) {
+          fileSearchStatus = 'degraded';
+          fileSearchReason = 'truncation_suspected';
+        }
+
+        const fileSearchStageEntry = {
+          status: fileSearchStatus,
+          ...(fileSearchReason ? { reason: fileSearchReason } : {}),
+          chars: fullTextContent.length,
+          truncation_ratio: truncationRatio,
+          sections_count_ref: parseSectionsCount,
+          extraction_method: extractionMethod,
+          model_call1: 'gemini-2.5-flash',
+          model_call2: 'gemini-3-pro-preview',
+          entities_counts: {
+            nutraceuticals: extractedData.nutraceuticals?.length || 0,
+            conditions: extractedData.conditions?.length || 0,
+            mechanisms: extractedData.mechanisms?.length || 0,
+            biological_effects: extractedData.biological_effects?.length || 0,
+          },
+          finished_at: new Date().toISOString(),
+        };
+
+        // Read existing ingestion_stages and merge file_search key.
+        const { data: existingStagesRow } = await supabase
+          .from('processed_studies')
+          .select('ingestion_stages')
+          .eq('id', studyId)
+          .maybeSingle();
+        const mergedStages = {
+          ...((existingStagesRow?.ingestion_stages as Record<string, unknown>) || {}),
+          file_search: fileSearchStageEntry,
+        };
+        console.log(`🚦 file_search gate: ${fileSearchStatus}${fileSearchReason ? ` (${fileSearchReason})` : ''}, ratio=${truncationRatio}`);
+
         // ✅ STEP 1: Save to processed_studies
         const result = await supabase
           .from('processed_studies')
@@ -2112,6 +2199,7 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
             analysis_data: analysisData as any,
             full_text_content: fullTextContent || null,
             full_text_metadata: fullTextMetadata,
+            ingestion_stages: mergedStages,
             updated_at: new Date().toISOString()
           })
           .eq('id', studyId);
