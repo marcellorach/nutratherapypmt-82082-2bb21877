@@ -184,18 +184,57 @@ serve(async (req) => {
       tables: extractTables(parsedElements),
     };
 
+    // ✅ Stage telemetry: compute total chars of all parsed text elements.
+    // Used downstream by gemini-file-search as the denominator of truncation_ratio.
+    const totalChars = (parsedElements as any[]).reduce((acc, el) => {
+      const t = typeof el?.text === 'string' ? el.text.length : 0;
+      return acc + t;
+    }, 0);
+    const parseStageEntry = {
+      status: 'ok',
+      sections_count: structuredContent.sections.length,
+      tables_count: structuredContent.tables.length,
+      elements_count: parsedElements.length,
+      total_chars: totalChars,
+      finished_at: new Date().toISOString(),
+    };
+
     // Update processed_studies with parsed content
+    // Merge ingestion_stages.parse_study without overwriting other stage keys.
+    const { data: existingRow } = await supabase
+      .from('processed_studies')
+      .select('ingestion_stages')
+      .eq('study_id', studyId)
+      .maybeSingle();
+    const mergedStages = {
+      ...((existingRow?.ingestion_stages as Record<string, unknown>) || {}),
+      parse_study: parseStageEntry,
+    };
+
     const { error: updateError } = await supabase
       .from('processed_studies')
       .update({
         analysis_data: structuredContent,
         kanban_status: 'parsed',
+        ingestion_stages: mergedStages,
         updated_at: new Date().toISOString(),
       })
       .eq('study_id', studyId);
 
     if (updateError) {
       console.error('Failed to update processed_studies:', updateError);
+      // Best-effort: record failure on the stage entry so UI surfaces it.
+      try {
+        await supabase
+          .from('processed_studies')
+          .update({
+            ingestion_stages: {
+              ...mergedStages,
+              parse_study: { status: 'failed', error_message: updateError.message, finished_at: new Date().toISOString() },
+            },
+          })
+          .eq('study_id', studyId);
+      } catch {}
       return new Response(
         JSON.stringify({ error: 'Failed to save parsed content' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
