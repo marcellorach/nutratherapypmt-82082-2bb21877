@@ -494,13 +494,42 @@ serve(async (req) => {
 
     // Update processed_studies status AND title
     console.log(`📝 Atualizando título para: ${extractedTitle}`);
+    // Re-read ingestion_stages to merge extract_entities and to honor any
+    // upstream failure that may have been recorded after our initial read.
+    const { data: refreshedRow } = await supabase
+      .from('processed_studies')
+      .select('ingestion_stages')
+      .eq('id', studyId)
+      .maybeSingle();
+    const refreshedStages = ((refreshedRow as any)?.ingestion_stages as Record<string, unknown>) || {};
+    const refreshedFileSearch = (refreshedStages as any).file_search || fileSearchStage;
+    const anyUpstreamFailed =
+      (refreshedFileSearch?.status === 'failed') ||
+      ((refreshedStages as any).parse_study?.status === 'failed');
+
+    const extractStageEntry = {
+      status: 'ok',
+      confidence: isDegraded ? 'degraded' : 'normal',
+      ...(isDegraded ? { reason: fileSearchStage?.reason || 'upstream_degraded' } : {}),
+      counts: {
+        nutraceuticals: (extractedData as any)?.nutraceuticals?.length || 0,
+        conditions: (extractedData as any)?.conditions?.length || 0,
+        mechanisms: (extractedData as any)?.mechanisms?.length || 0,
+      },
+      finished_at: new Date().toISOString(),
+    };
+    const nextStages = { ...refreshedStages, extract_entities: extractStageEntry };
     await supabase
       .from('processed_studies')
-      .update({ 
-        kanban_status: 'processed',
-        title: extractedTitle 
+      .update({
+        kanban_status: anyUpstreamFailed ? 'error' : 'processed',
+        title: extractedTitle,
+        ingestion_stages: nextStages,
       })
       .eq('id', studyId);
+    if (anyUpstreamFailed) {
+      console.warn('⛔ Marked kanban_status=error: upstream stage failure detected after extraction.');
+    }
 
     // ==================== AUTO-VECTORIZATION (pré-curadoria) ====================
     // A curadoria humana depende dos chunks vetorizados para exibir o "Trecho de Origem"
