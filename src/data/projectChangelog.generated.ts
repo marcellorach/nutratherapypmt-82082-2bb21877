@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-08T23:32:54.397Z
+// Última geração: 2026-06-09T00:08:53.084Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -21,9 +21,26 @@ export interface ChangelogEntry {
 
 export const lastChangelogDate = "2026-06-08";
 
-export const senexVersion = "7.2.3";
+export const senexVersion = "7.2.4";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-08",
+    "kind": "fixed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Auditorias: tag CONFIDENCIAL sem encavalamento + propriedade PetMoreTime reforçada",
+    "bullets": [
+      "`audit-pdf-generator.ts`: banner CONFIDENCIAL agora usa layout flex real (tag em `<span>` com `flex-shrink:0`), eliminando a sobreposição do pseudo-elemento `::before` sobre o texto observada em PT/EN.",
+      "Footer discreto fixado em todas as páginas no `@media print` (`position:fixed; bottom:0`, 9px italic, \"CONFIDENCIAL\" em vermelho sóbrio inline), mantendo aparição única em tela.",
+      "Copy do banner e do rodapé reforçam propriedade exclusiva: \"Plataforma Senex AI · Engine Senex AI v7 · © PetMoreTime. Todos os direitos reservados. Tecnologia, modelos e conteúdo são propriedade exclusiva da PetMoreTime.\" (PT/EN equivalentes). Vale para os relatórios técnicos e showcase, tanto em download quanto em print.",
+      "Files: src/components/administrador/audits/audit-pdf-generator.ts"
+    ],
+    "files": [
+      "src/components/administrador/audits/audit-pdf-generator.ts"
+    ],
+    "i18nVersion": "—"
+  },
   {
     "date": "2026-06-08",
     "kind": "changed",
