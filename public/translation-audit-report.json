@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-06-08T23:38:45.175Z",
+  "timestamp": "2026-06-09T02:58:19.319Z",
   "summary": {
     "totalFiles": 956,
     "totalIssues": 484,
@@ -2755,28 +2755,28 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 765,
+      "line": 782,
       "text": "audit_base_system_{pt,en}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2077,
+      "line": 2094,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2288,
+      "line": 2305,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 5083,
+      "line": 5100,
       "text": "@",
       "severity": "high"
     },
@@ -3049,28 +3049,28 @@
     {
       "type": "hardcoded",
       "file": "src/components/administrador/AboutSenexTab.tsx",
-      "line": 240,
+      "line": 263,
       "text": "No-mock policy",
       "severity": "medium"
     },
     {
       "type": "hardcoded",
       "file": "src/components/administrador/AboutSenexTab.tsx",
-      "line": 246,
+      "line": 269,
       "text": "Curation gatekeeper",
       "severity": "medium"
     },
     {
       "type": "hardcoded",
       "file": "src/components/administrador/AboutSenexTab.tsx",
-      "line": 258,
+      "line": 281,
       "text": "Canine scope",
       "severity": "medium"
     },
     {
       "type": "hardcoded",
       "file": "src/components/administrador/AboutSenexTab.tsx",
-      "line": 264,
+      "line": 287,
       "text": "Therapeutic cap",
       "severity": "medium"
     },
