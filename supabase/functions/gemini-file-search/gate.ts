@@ -17,6 +17,14 @@ export type GateReason =
   | "entities_empty"
   | "truncation_suspected";
 
+// Thresholds — single source of truth so tests + telemetry stay in sync.
+export const GATE_THRESHOLDS = {
+  /** Strict less-than. ratio < TRUNCATION_RATIO_MIN trips truncation. */
+  TRUNCATION_RATIO_MIN: 0.30,
+  /** Minimum sections in parse_study required to even consider truncation. */
+  MIN_SECTIONS_FOR_TRUNCATION: 3,
+} as const;
+
 export interface GateEntities {
   nutraceuticals?: unknown[] | null;
   conditions?: unknown[] | null;
@@ -36,6 +44,28 @@ export interface GateDecision {
   reason?: GateReason;
   truncationRatio: number | null;
   entitiesNonEmpty: boolean;
+}
+
+export interface GateMetrics {
+  event: "file_search_gate";
+  status: GateStatus;
+  reason: GateReason | null;
+  truncation_ratio: number | null;
+  entities_non_empty: boolean;
+  entities_counts: {
+    nutraceuticals: number;
+    conditions: number;
+    mechanisms: number;
+    biological_effects: number;
+  };
+  full_text_length: number;
+  parse_total_chars: number | null;
+  parse_sections_count: number | null;
+  thresholds: typeof GATE_THRESHOLDS;
+  /** True iff sections_count >= MIN_SECTIONS_FOR_TRUNCATION (i.e. truncation rule was eligible). */
+  truncation_eligible: boolean;
+  /** True iff truncation_ratio < TRUNCATION_RATIO_MIN (regardless of sections). */
+  truncation_ratio_below_threshold: boolean;
 }
 
 export function computeTruncationRatio(
@@ -78,8 +108,8 @@ export function decideFileSearchGate(input: GateInput): GateDecision {
 
   if (
     truncationRatio !== null &&
-    truncationRatio < 0.30 &&
-    (parseSectionsCount ?? 0) >= 3
+    truncationRatio < GATE_THRESHOLDS.TRUNCATION_RATIO_MIN &&
+    (parseSectionsCount ?? 0) >= GATE_THRESHOLDS.MIN_SECTIONS_FOR_TRUNCATION
   ) {
     return {
       status: "degraded",
@@ -90,4 +120,37 @@ export function decideFileSearchGate(input: GateInput): GateDecision {
   }
 
   return { status: "ok", truncationRatio, entitiesNonEmpty };
+}
+
+/**
+ * Build a structured metrics object for logs / observability.
+ * Pure — no I/O, no side effects, safe to assert on in tests.
+ */
+export function buildGateMetrics(
+  input: GateInput,
+  decision: GateDecision,
+): GateMetrics {
+  const counts = {
+    nutraceuticals: input.entities.nutraceuticals?.length || 0,
+    conditions: input.entities.conditions?.length || 0,
+    mechanisms: input.entities.mechanisms?.length || 0,
+    biological_effects: input.entities.biological_effects?.length || 0,
+  };
+  return {
+    event: "file_search_gate",
+    status: decision.status,
+    reason: decision.reason ?? null,
+    truncation_ratio: decision.truncationRatio,
+    entities_non_empty: decision.entitiesNonEmpty,
+    entities_counts: counts,
+    full_text_length: input.fullTextLength,
+    parse_total_chars: input.parseTotalChars,
+    parse_sections_count: input.parseSectionsCount,
+    thresholds: GATE_THRESHOLDS,
+    truncation_eligible:
+      (input.parseSectionsCount ?? 0) >= GATE_THRESHOLDS.MIN_SECTIONS_FOR_TRUNCATION,
+    truncation_ratio_below_threshold:
+      decision.truncationRatio !== null &&
+      decision.truncationRatio < GATE_THRESHOLDS.TRUNCATION_RATIO_MIN,
+  };
 }
