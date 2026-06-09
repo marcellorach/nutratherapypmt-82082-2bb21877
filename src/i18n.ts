@@ -6,7 +6,7 @@ import translationEN from './locales/en/translation.json';
 import translationPT from './locales/pt/translation.json';
 
 // Versão para controle de cache - incrementar quando houver mudanças significativas
-export const I18N_VERSION = '1.118.5';
+export const I18N_VERSION = '1.119.0';
 
 const resources = {
   en: {
