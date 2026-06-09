@@ -96,7 +96,7 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
       // 1. Curated/processed studies (real source of truth for the library)
       const { data: processed, error: pErr } = await supabase
         .from('processed_studies')
-        .select('id, title, description, journal, year, authors, original_filename, storage_path, kanban_status, created_at, analysis_data, tags, prestige_tier, tags_source')
+        .select('id, title, description, journal, year, authors, original_filename, storage_path, kanban_status, created_at, analysis_data, tags, prestige_tier, tags_source, ingestion_stages')
         .is('deleted_at', null)
         .in('kanban_status', ['approved', 'processed', 'new'])
         .order('created_at', { ascending: false });
