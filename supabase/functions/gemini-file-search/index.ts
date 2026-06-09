@@ -2129,12 +2129,6 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
         // - ok: full_text present AND at least one key entity category populated
         // chars + truncation_ratio are INFORMATIVE only, never triggers.
         // ============================================================
-        const entitiesNonEmpty =
-          (extractedData.nutraceuticals?.length || 0) +
-          (extractedData.conditions?.length || 0) +
-          (extractedData.mechanisms?.length || 0) +
-          (extractedData.biological_effects?.length || 0) > 0;
-
         // Read parse_study stage to compute relative truncation ratio.
         let parseSectionsCount: number | null = null;
         let parseTotalChars: number | null = null;
@@ -2153,27 +2147,20 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
           console.warn('⚠️ Could not read parse_study stage for truncation_ratio:', e);
         }
 
-        const truncationRatio =
-          parseTotalChars && parseTotalChars > 0
-            ? Number((fullTextContent.length / parseTotalChars).toFixed(4))
-            : null;
-
-        let fileSearchStatus: 'ok' | 'degraded' | 'failed' = 'ok';
-        let fileSearchReason: string | undefined;
-        if (!fullTextContent || fullTextContent.length === 0) {
-          fileSearchStatus = 'failed';
-          fileSearchReason = 'empty_full_text';
-        } else if (!entitiesNonEmpty) {
-          fileSearchStatus = 'degraded';
-          fileSearchReason = 'entities_empty';
-        } else if (
-          truncationRatio !== null &&
-          truncationRatio < 0.30 &&
-          (parseSectionsCount ?? 0) >= 3
-        ) {
-          fileSearchStatus = 'degraded';
-          fileSearchReason = 'truncation_suspected';
-        }
+        const gateDecision = decideFileSearchGate({
+          fullTextLength: fullTextContent?.length || 0,
+          entities: {
+            nutraceuticals: extractedData.nutraceuticals,
+            conditions: extractedData.conditions,
+            mechanisms: extractedData.mechanisms,
+            biological_effects: extractedData.biological_effects,
+          },
+          parseTotalChars,
+          parseSectionsCount,
+        });
+        const fileSearchStatus = gateDecision.status;
+        const fileSearchReason = gateDecision.reason;
+        const truncationRatio = gateDecision.truncationRatio;
 
         const fileSearchStageEntry = {
           status: fileSearchStatus,
