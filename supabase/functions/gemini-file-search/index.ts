@@ -1870,6 +1870,28 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
     const duration = Date.now() - startTime;
     console.log('✅ ETAPA 5/6 CONCLUÍDA');
     console.log(`⏱️ Tempo de extração: ${(duration / 1000).toFixed(1)}s`);
+
+    // ============================================================
+    // CALL 1 (post-Call-2): dedicated full_text acquisition
+    // ------------------------------------------------------------
+    // Runs AFTER the legacy extractWithFileSearch (Call 2). Uses a
+    // separate model + minimal schema so full_text is not starved by
+    // the 22 clinical properties. If Call 1 returns a longer/richer
+    // text than Call 2, we override extractedData.full_text — this is
+    // the surgical fix for the monolithic-call truncation root cause.
+    // ============================================================
+    console.log('🧾 CALL 1: acquireFullText (gemini-2.5-flash, minimal schema)...');
+    const call1 = await acquireFullText(uploadedFile.uri, GOOGLE_GEMINI_KEY);
+    const call2Text = (extractedData.full_text || '').trim();
+    const call1Text = (call1.text || '').trim();
+    if (call1Text.length > call2Text.length) {
+      console.log(`✅ Override full_text from Call 1 (${call1Text.length} chars vs Call 2 ${call2Text.length})`);
+      extractedData.full_text = call1Text;
+    } else if (call1.error) {
+      console.warn(`⚠️ Call 1 failed (${call1.error}); keeping Call 2 full_text (${call2Text.length} chars)`);
+    } else {
+      console.log(`ℹ️ Call 2 full_text (${call2Text.length}) >= Call 1 (${call1Text.length}); keeping Call 2`);
+    }
     
     // 6. Salvar no banco com validação e retry
     console.log('💾 ETAPA 6/6: Salvando no banco de dados...');
