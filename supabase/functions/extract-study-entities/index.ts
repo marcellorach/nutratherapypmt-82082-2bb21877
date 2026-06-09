@@ -55,7 +55,7 @@ serve(async (req) => {
     console.log(`🔍 Buscando estudo com ID: ${studyId}`);
     const { data: studyData, error: studyError } = await supabase
       .from('processed_studies')
-      .select('analysis_data, title, study_id, full_text_content')
+      .select('analysis_data, title, study_id, full_text_content, ingestion_stages')
       .eq('id', studyId)
       .maybeSingle();
     
@@ -68,6 +68,49 @@ serve(async (req) => {
     }
     
     console.log(`✅ Estudo encontrado: ${studyData.title || 'sem título'}`);
+
+    // ============================================================
+    // GATE — respect ingestion_stages.file_search
+    // ------------------------------------------------------------
+    // - failed  → skip LLM entirely, mark extract_entities=skipped,
+    //             do NOT mark kanban_status='processed'.
+    // - degraded → run normally but tag extract_entities.confidence='degraded'.
+    // - ok/null → continue, tag confidence='normal'.
+    // ============================================================
+    const existingStages = (studyData as any).ingestion_stages || {};
+    const fileSearchStage = existingStages.file_search || null;
+    const fileSearchStatus: 'ok' | 'degraded' | 'failed' | null =
+      fileSearchStage?.status ?? null;
+
+    if (fileSearchStatus === 'failed') {
+      console.warn(`⛔ Skipping extract-study-entities: file_search.status=failed (${fileSearchStage?.reason || fileSearchStage?.error_message || 'no reason'})`);
+      const skipStage = {
+        status: 'skipped',
+        reason: 'file_search_failed',
+        upstream_error: fileSearchStage?.error_message || fileSearchStage?.reason || null,
+        finished_at: new Date().toISOString(),
+      };
+      await supabase
+        .from('processed_studies')
+        .update({
+          kanban_status: 'error',
+          ingestion_stages: { ...existingStages, extract_entities: skipStage },
+        })
+        .eq('id', studyId);
+      return new Response(
+        JSON.stringify({
+          skipped: true,
+          reason: 'file_search_failed',
+          studyId,
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const isDegraded = fileSearchStatus === 'degraded';
+    if (isDegraded) {
+      console.warn(`⚠️ Running degraded: file_search.status=degraded (reason=${fileSearchStage?.reason || 'unknown'})`);
+    }
 
     const parsedContent = studyData.analysis_data || {};
     // CRÍTICO: Usar full_text_content da coluna separada como prioridade
