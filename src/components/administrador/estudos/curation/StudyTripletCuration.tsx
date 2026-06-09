@@ -88,6 +88,28 @@ const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
   const [confidenceThreshold, setConfidenceThreshold] = useState(85);
   const [showThresholdSettings, setShowThresholdSettings] = useState(false);
 
+  // Ingestion stages telemetry (for the gate banner).
+  const [fileSearchStage, setFileSearchStage] = useState<any | null>(null);
+
+  useEffect(() => {
+    if (!studyId) return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from('processed_studies')
+        .select('ingestion_stages')
+        .eq('id', studyId)
+        .maybeSingle();
+      if (cancelled) return;
+      if (error) {
+        console.warn('Could not load ingestion_stages:', error.message);
+        return;
+      }
+      setFileSearchStage(((data as any)?.ingestion_stages?.file_search) || null);
+    })();
+    return () => { cancelled = true; };
+  }, [studyId]);
+
   const fetchTriplets = useCallback(async () => {
     if (!studyId) return;
     
@@ -338,6 +360,48 @@ const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
 
   return (
     <div className="space-y-4">
+      {/* Ingestion gate banner — surfaces upstream extraction failures so
+          curators don't approve triplets derived from incomplete text. */}
+      {fileSearchStage && fileSearchStage.status === 'failed' && (
+        <div className="rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-900">
+          <strong className="block mb-1">
+            {t('studies.ingestion.banner.failed.title', '⛔ Extração falhou')}
+          </strong>
+          <span>
+            {t('studies.ingestion.banner.failed.body', 'A aquisição do texto completo do PDF falhou nesta ingestão. Os triplets abaixo (se houver) NÃO devem ser aprovados — reprocesse o estudo após investigar.')}
+          </span>
+          {fileSearchStage.error_message && (
+            <div className="mt-1 text-xs opacity-80">
+              {t('studies.ingestion.banner.errorPrefix', 'Erro:')} {String(fileSearchStage.error_message).slice(0, 240)}
+            </div>
+          )}
+        </div>
+      )}
+      {fileSearchStage && fileSearchStage.status === 'degraded' && (
+        <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+          <strong className="block mb-1">
+            {t('studies.ingestion.banner.degraded.title', '⚠️ Extração degradada')}
+          </strong>
+          <span>
+            {t('studies.ingestion.banner.degraded.body', 'A extração desta ingestão veio incompleta. Triplets abaixo derivam de texto parcial — aprove com cautela.')}
+          </span>
+          <div className="mt-1 text-xs opacity-80">
+            {t('studies.ingestion.banner.reasonPrefix', 'Motivo:')}{' '}
+            {fileSearchStage.reason === 'entities_empty'
+              ? t('studies.ingestion.reasons.entities_empty', 'entidades clínicas vazias')
+              : fileSearchStage.reason === 'truncation_suspected'
+              ? t('studies.ingestion.reasons.truncation_suspected', 'truncamento detectado')
+              : (fileSearchStage.reason || t('studies.ingestion.reasons.unknown', 'desconhecido'))}
+            {typeof fileSearchStage.chars === 'number' && (
+              <> · {t('studies.ingestion.banner.charsLabel', 'chars')}: {fileSearchStage.chars}</>
+            )}
+            {typeof fileSearchStage.truncation_ratio === 'number' && (
+              <> · ratio: {Number(fileSearchStage.truncation_ratio).toFixed(2)}</>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Header Stats */}
       <div className="flex flex-wrap items-center gap-3 p-3 bg-muted/50 rounded-lg">
         <div className="flex items-center gap-2">

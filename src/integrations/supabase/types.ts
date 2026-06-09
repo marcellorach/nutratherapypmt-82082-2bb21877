@@ -4433,6 +4433,7 @@ export type Database = {
           full_text_metadata: Json | null
           id: string
           import_type: string
+          ingestion_stages: Json
           journal: string | null
           kanban_status: string | null
           original_filename: string
@@ -4466,6 +4467,7 @@ export type Database = {
           full_text_metadata?: Json | null
           id?: string
           import_type?: string
+          ingestion_stages?: Json
           journal?: string | null
           kanban_status?: string | null
           original_filename: string
@@ -4499,6 +4501,7 @@ export type Database = {
           full_text_metadata?: Json | null
           id?: string
           import_type?: string
+          ingestion_stages?: Json
           journal?: string | null
           kanban_status?: string | null
           original_filename?: string

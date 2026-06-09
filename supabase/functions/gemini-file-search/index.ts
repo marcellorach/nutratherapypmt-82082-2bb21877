@@ -442,6 +442,77 @@ async function addFileToCorpus(
   console.log('✅ Arquivo importado com sucesso ao File Search Store');
 }
 
+// ============================================================
+// CALL 1 — acquireFullText
+// ------------------------------------------------------------
+// Dedicated call to extract ONLY the full plain text of the PDF.
+// Uses gemini-2.5-flash with a minimal schema { full_text: string }
+// so the model's output token budget is not shared with 22 other
+// clinical properties (the root cause of progressive truncation in
+// the legacy monolithic call).
+// ============================================================
+async function acquireFullText(
+  fileUri: string,
+  apiKey: string,
+): Promise<{ text: string; model: string; error?: string }> {
+  const MODEL = 'gemini-2.5-flash';
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                { fileData: { mimeType: 'application/pdf', fileUri } },
+                {
+                  text:
+                    'Extract the COMPLETE plain text of this scientific PDF. Include every section ' +
+                    '(abstract, introduction, methods, results, discussion, references). Preserve ' +
+                    'section order and meaningful paragraph breaks. Do not summarize. Do not omit ' +
+                    'content. Return ONLY the raw text as a single string in the function argument.',
+                },
+              ],
+            },
+          ],
+          tools: [{
+            function_declarations: [{
+              name: 'return_full_text',
+              description: 'Return the verbatim full text of the PDF as one string.',
+              parameters: {
+                type: 'object',
+                properties: {
+                  full_text: {
+                    type: 'string',
+                    description: 'Complete plain text of the PDF, all sections, no truncation.',
+                  },
+                },
+                required: ['full_text'],
+              },
+            }],
+          }],
+          tool_config: {
+            function_calling_config: { mode: 'ANY', allowed_function_names: ['return_full_text'] },
+          },
+        }),
+      },
+    );
+    if (!response.ok) {
+      const errText = await response.text();
+      return { text: '', model: MODEL, error: `HTTP ${response.status}: ${errText.slice(0, 300)}` };
+    }
+    const result = await response.json();
+    const fc = result.candidates?.[0]?.content?.parts?.[0]?.functionCall;
+    const txt = (fc?.args?.full_text as string | undefined) || '';
+    return { text: typeof txt === 'string' ? txt : '', model: MODEL };
+  } catch (err) {
+    return { text: '', model: MODEL, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
 // Extração com File Search usando Structured Output (Function Calling)
 async function extractWithFileSearch(
   fileSearchStoreName: string,
@@ -1666,11 +1737,27 @@ serve(async (req) => {
           Deno.env.get('SUPABASE_URL')!,
           Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
         );
+        // Read existing stages to merge file_search:failed without losing parse_study.
+        const { data: row } = await supabase
+          .from('processed_studies')
+          .select('ingestion_stages')
+          .eq('id', studyId)
+          .maybeSingle();
+        const merged = {
+          ...((row?.ingestion_stages as Record<string, unknown>) || {}),
+          file_search: {
+            status: 'failed',
+            error_message: error instanceof Error ? error.message : String(error),
+            stage: 'pipeline',
+            finished_at: new Date().toISOString(),
+          },
+        };
         await supabase
           .from('processed_studies')
           .update({
             kanban_status: 'error',
             processing_error: error instanceof Error ? error.message : String(error),
+            ingestion_stages: merged,
           })
           .eq('id', studyId);
       } catch (e) {
@@ -1799,6 +1886,28 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
     const duration = Date.now() - startTime;
     console.log('✅ ETAPA 5/6 CONCLUÍDA');
     console.log(`⏱️ Tempo de extração: ${(duration / 1000).toFixed(1)}s`);
+
+    // ============================================================
+    // CALL 1 (post-Call-2): dedicated full_text acquisition
+    // ------------------------------------------------------------
+    // Runs AFTER the legacy extractWithFileSearch (Call 2). Uses a
+    // separate model + minimal schema so full_text is not starved by
+    // the 22 clinical properties. If Call 1 returns a longer/richer
+    // text than Call 2, we override extractedData.full_text — this is
+    // the surgical fix for the monolithic-call truncation root cause.
+    // ============================================================
+    console.log('🧾 CALL 1: acquireFullText (gemini-2.5-flash, minimal schema)...');
+    const call1 = await acquireFullText(uploadedFile.uri, GOOGLE_GEMINI_KEY);
+    const call2Text = (extractedData.full_text || '').trim();
+    const call1Text = (call1.text || '').trim();
+    if (call1Text.length > call2Text.length) {
+      console.log(`✅ Override full_text from Call 1 (${call1Text.length} chars vs Call 2 ${call2Text.length})`);
+      extractedData.full_text = call1Text;
+    } else if (call1.error) {
+      console.warn(`⚠️ Call 1 failed (${call1.error}); keeping Call 2 full_text (${call2Text.length} chars)`);
+    } else {
+      console.log(`ℹ️ Call 2 full_text (${call2Text.length}) >= Call 1 (${call1Text.length}); keeping Call 2`);
+    }
     
     // 6. Salvar no banco com validação e retry
     console.log('💾 ETAPA 6/6: Salvando no banco de dados...');
@@ -2008,6 +2117,93 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
         console.log(`   - structured_dosages: ${extractedData.structured_dosages?.length || 0}`);
         console.log(`   - study_population: ${extractedData.study_population?.species || 'N/A'}`);
         
+        // ============================================================
+        // GATE QUALITATIVO — file_search stage telemetry
+        // ------------------------------------------------------------
+        // - failed: handled in outer catch / Call 1 only-empty path below
+        // - degraded:
+        //     (a) entities_empty — all key categories empty
+        //     (b) truncation_suspected — chars_full_text / parse_total < 0.30
+        //         AND parse_study.sections_count >= 3 (RELATIVE, never absolute floor)
+        // - ok: full_text present AND at least one key entity category populated
+        // chars + truncation_ratio are INFORMATIVE only, never triggers.
+        // ============================================================
+        const entitiesNonEmpty =
+          (extractedData.nutraceuticals?.length || 0) +
+          (extractedData.conditions?.length || 0) +
+          (extractedData.mechanisms?.length || 0) +
+          (extractedData.biological_effects?.length || 0) > 0;
+
+        // Read parse_study stage to compute relative truncation ratio.
+        let parseSectionsCount: number | null = null;
+        let parseTotalChars: number | null = null;
+        try {
+          const { data: stageRow } = await supabase
+            .from('processed_studies')
+            .select('ingestion_stages')
+            .eq('id', studyId)
+            .maybeSingle();
+          const parseStage = (stageRow?.ingestion_stages as any)?.parse_study;
+          if (parseStage) {
+            parseSectionsCount = typeof parseStage.sections_count === 'number' ? parseStage.sections_count : null;
+            parseTotalChars = typeof parseStage.total_chars === 'number' ? parseStage.total_chars : null;
+          }
+        } catch (e) {
+          console.warn('⚠️ Could not read parse_study stage for truncation_ratio:', e);
+        }
+
+        const truncationRatio =
+          parseTotalChars && parseTotalChars > 0
+            ? Number((fullTextContent.length / parseTotalChars).toFixed(4))
+            : null;
+
+        let fileSearchStatus: 'ok' | 'degraded' | 'failed' = 'ok';
+        let fileSearchReason: string | undefined;
+        if (!fullTextContent || fullTextContent.length === 0) {
+          fileSearchStatus = 'failed';
+          fileSearchReason = 'empty_full_text';
+        } else if (!entitiesNonEmpty) {
+          fileSearchStatus = 'degraded';
+          fileSearchReason = 'entities_empty';
+        } else if (
+          truncationRatio !== null &&
+          truncationRatio < 0.30 &&
+          (parseSectionsCount ?? 0) >= 3
+        ) {
+          fileSearchStatus = 'degraded';
+          fileSearchReason = 'truncation_suspected';
+        }
+
+        const fileSearchStageEntry = {
+          status: fileSearchStatus,
+          ...(fileSearchReason ? { reason: fileSearchReason } : {}),
+          chars: fullTextContent.length,
+          truncation_ratio: truncationRatio,
+          sections_count_ref: parseSectionsCount,
+          extraction_method: extractionMethod,
+          model_call1: 'gemini-2.5-flash',
+          model_call2: 'gemini-3-pro-preview',
+          entities_counts: {
+            nutraceuticals: extractedData.nutraceuticals?.length || 0,
+            conditions: extractedData.conditions?.length || 0,
+            mechanisms: extractedData.mechanisms?.length || 0,
+            biological_effects: extractedData.biological_effects?.length || 0,
+          },
+          finished_at: new Date().toISOString(),
+        };
+
+        // Read existing ingestion_stages and merge file_search key.
+        const { data: existingStagesRow } = await supabase
+          .from('processed_studies')
+          .select('ingestion_stages')
+          .eq('id', studyId)
+          .maybeSingle();
+        const mergedStages = {
+          ...((existingStagesRow?.ingestion_stages as Record<string, unknown>) || {}),
+          file_search: fileSearchStageEntry,
+        };
+        console.log(`🚦 file_search gate: ${fileSearchStatus}${fileSearchReason ? ` (${fileSearchReason})` : ''}, ratio=${truncationRatio}`);
+
         // ✅ STEP 1: Save to processed_studies
         const result = await supabase
           .from('processed_studies')
@@ -2019,6 +2215,7 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
             analysis_data: analysisData as any,
             full_text_content: fullTextContent || null,
             full_text_metadata: fullTextMetadata,
+            ingestion_stages: mergedStages,
             updated_at: new Date().toISOString()
           })
           .eq('id', studyId);

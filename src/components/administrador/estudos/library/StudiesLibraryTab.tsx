@@ -96,7 +96,7 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
       // 1. Curated/processed studies (real source of truth for the library)
       const { data: processed, error: pErr } = await supabase
         .from('processed_studies')
-        .select('id, title, description, journal, year, authors, original_filename, storage_path, kanban_status, created_at, analysis_data, tags, prestige_tier, tags_source')
+        .select('id, title, description, journal, year, authors, original_filename, storage_path, kanban_status, created_at, analysis_data, tags, prestige_tier, tags_source, ingestion_stages')
         .is('deleted_at', null)
         .in('kanban_status', ['approved', 'processed', 'new'])
         .order('created_at', { ascending: false });
@@ -132,6 +132,7 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
         tags: p.tags || {},
         prestige_tier: p.prestige_tier ?? null,
         tags_source: p.tags_source ?? 'pending',
+        ingestion_stages: (p as any).ingestion_stages || null,
       } as any));
 
       // De-duplicate: prefer processed_studies entries
@@ -503,6 +504,25 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
                           {t('studies.library.realBadge')}
                         </Badge>
                       )}
+                      {(() => {
+                        const fs = (study as any).ingestion_stages?.file_search;
+                        if (!fs?.status || fs.status === 'ok') return null;
+                        if (fs.status === 'failed') {
+                          return (
+                            <Badge variant="outline" className="text-xs gap-1 text-red-700 border-red-300 bg-red-50">
+                              {t('studies.ingestion.badge.failed', 'Extração falhou')}
+                            </Badge>
+                          );
+                        }
+                        if (fs.status === 'degraded') {
+                          return (
+                            <Badge variant="outline" className="text-xs gap-1 text-amber-700 border-amber-300 bg-amber-50">
+                              {t('studies.ingestion.badge.degraded', 'Extração degradada')}
+                            </Badge>
+                          );
+                        }
+                        return null;
+                      })()}
                       {study.prestige_tier && (
                         <Badge variant="outline" className="text-xs gap-1 border-amber-400 text-amber-700">
                           <Award className="h-3 w-3" />

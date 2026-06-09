@@ -55,7 +55,7 @@ serve(async (req) => {
     console.log(`🔍 Buscando estudo com ID: ${studyId}`);
     const { data: studyData, error: studyError } = await supabase
       .from('processed_studies')
-      .select('analysis_data, title, study_id, full_text_content')
+      .select('analysis_data, title, study_id, full_text_content, ingestion_stages')
       .eq('id', studyId)
       .maybeSingle();
     
@@ -68,6 +68,49 @@ serve(async (req) => {
     }
     
     console.log(`✅ Estudo encontrado: ${studyData.title || 'sem título'}`);
+
+    // ============================================================
+    // GATE — respect ingestion_stages.file_search
+    // ------------------------------------------------------------
+    // - failed  → skip LLM entirely, mark extract_entities=skipped,
+    //             do NOT mark kanban_status='processed'.
+    // - degraded → run normally but tag extract_entities.confidence='degraded'.
+    // - ok/null → continue, tag confidence='normal'.
+    // ============================================================
+    const existingStages = (studyData as any).ingestion_stages || {};
+    const fileSearchStage = existingStages.file_search || null;
+    const fileSearchStatus: 'ok' | 'degraded' | 'failed' | null =
+      fileSearchStage?.status ?? null;
+
+    if (fileSearchStatus === 'failed') {
+      console.warn(`⛔ Skipping extract-study-entities: file_search.status=failed (${fileSearchStage?.reason || fileSearchStage?.error_message || 'no reason'})`);
+      const skipStage = {
+        status: 'skipped',
+        reason: 'file_search_failed',
+        upstream_error: fileSearchStage?.error_message || fileSearchStage?.reason || null,
+        finished_at: new Date().toISOString(),
+      };
+      await supabase
+        .from('processed_studies')
+        .update({
+          kanban_status: 'error',
+          ingestion_stages: { ...existingStages, extract_entities: skipStage },
+        })
+        .eq('id', studyId);
+      return new Response(
+        JSON.stringify({
+          skipped: true,
+          reason: 'file_search_failed',
+          studyId,
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const isDegraded = fileSearchStatus === 'degraded';
+    if (isDegraded) {
+      console.warn(`⚠️ Running degraded: file_search.status=degraded (reason=${fileSearchStage?.reason || 'unknown'})`);
+    }
 
     const parsedContent = studyData.analysis_data || {};
     // CRÍTICO: Usar full_text_content da coluna separada como prioridade
@@ -451,13 +494,42 @@ serve(async (req) => {
 
     // Update processed_studies status AND title
     console.log(`📝 Atualizando título para: ${extractedTitle}`);
+    // Re-read ingestion_stages to merge extract_entities and to honor any
+    // upstream failure that may have been recorded after our initial read.
+    const { data: refreshedRow } = await supabase
+      .from('processed_studies')
+      .select('ingestion_stages')
+      .eq('id', studyId)
+      .maybeSingle();
+    const refreshedStages = ((refreshedRow as any)?.ingestion_stages as Record<string, unknown>) || {};
+    const refreshedFileSearch = (refreshedStages as any).file_search || fileSearchStage;
+    const anyUpstreamFailed =
+      (refreshedFileSearch?.status === 'failed') ||
+      ((refreshedStages as any).parse_study?.status === 'failed');
+
+    const extractStageEntry = {
+      status: 'ok',
+      confidence: isDegraded ? 'degraded' : 'normal',
+      ...(isDegraded ? { reason: fileSearchStage?.reason || 'upstream_degraded' } : {}),
+      counts: {
+        nutraceuticals: (extractedData as any)?.nutraceuticals?.length || 0,
+        conditions: (extractedData as any)?.conditions?.length || 0,
+        mechanisms: (extractedData as any)?.mechanisms?.length || 0,
+      },
+      finished_at: new Date().toISOString(),
+    };
+    const nextStages = { ...refreshedStages, extract_entities: extractStageEntry };
     await supabase
       .from('processed_studies')
-      .update({ 
-        kanban_status: 'processed',
-        title: extractedTitle 
+      .update({
+        kanban_status: anyUpstreamFailed ? 'error' : 'processed',
+        title: extractedTitle,
+        ingestion_stages: nextStages,
       })
       .eq('id', studyId);
+    if (anyUpstreamFailed) {
+      console.warn('⛔ Marked kanban_status=error: upstream stage failure detected after extraction.');
+    }
 
     // ==================== AUTO-VECTORIZATION (pré-curadoria) ====================
     // A curadoria humana depende dos chunks vetorizados para exibir o "Trecho de Origem"

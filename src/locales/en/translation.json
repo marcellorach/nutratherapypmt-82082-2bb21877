@@ -402,6 +402,31 @@
     "contextSummary": "Context Summary"
   },
   "studies": {
+    "ingestion": {
+      "badge": {
+        "failed": "Extraction failed",
+        "degraded": "Extraction degraded"
+      },
+      "banner": {
+        "failed": {
+          "title": "⛔ Extraction failed",
+          "body": "Full-text acquisition failed for this ingestion. Triplets below (if any) MUST NOT be approved — reprocess the study after investigating."
+        },
+        "degraded": {
+          "title": "⚠️ Extraction degraded",
+          "body": "This ingestion came back incomplete. Triplets below derive from partial text — approve with caution."
+        },
+        "errorPrefix": "Error:",
+        "reasonPrefix": "Reason:",
+        "charsLabel": "chars"
+      },
+      "reasons": {
+        "entities_empty": "clinical entities empty",
+        "truncation_suspected": "truncation suspected",
+        "file_search_failed": "text acquisition failed",
+        "unknown": "unknown"
+      }
+    },
     "approval": {
       "approveStudy": "Approve Study",
       "confirmTitle": "Confirm Approval",
