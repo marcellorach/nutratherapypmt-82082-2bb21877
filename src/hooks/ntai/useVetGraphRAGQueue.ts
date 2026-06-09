@@ -217,15 +217,43 @@ export const useVetGraphRAGQueue = () => {
         console.error('ID de estudo inválido para atualização:', studyId);
         return false;
       }
-      
+
+      // A2#1: ler ingestion_stages e decidir kanban_status com base em
+      // CRITICAL_STAGES. vectorize é não-crítico — aviso, não bloqueio.
+      const CRITICAL_STAGES = [
+        'parse_study',
+        'file_search',
+        'extract_entities',
+        'generate_triplets', // no-op por ora (stage ainda não instrumentado)
+      ] as const;
+
+      const { data: row } = await supabase
+        .from('processed_studies')
+        .select('ingestion_stages')
+        .eq('id', studyId)
+        .maybeSingle();
+      const stages = ((row as any)?.ingestion_stages as Record<string, any>) || {};
+      const fs = stages.file_search;
+      const criticalFailed = CRITICAL_STAGES.some(
+        (s) => stages[s]?.status === 'failed'
+      );
+      const fsOk = fs?.status === 'ok' || fs?.status === 'degraded';
+      const kanban_status = !criticalFailed && fsOk ? 'processed' : 'error';
+
+      if (!fsOk || criticalFailed) {
+        console.warn(
+          `⛔ updateProcessedStudy: marcando '${kanban_status}' para ${studyId} (criticalFailed=${criticalFailed}, fsStatus=${fs?.status ?? 'absent'})`
+        );
+      }
+
       const { error } = await supabase
         .from('processed_studies')
-        .update({ 
+        .update({
           analysis_data: analysisData,
-          kanban_status: 'processed' 
+          kanban_status,
         })
         .eq('id', studyId);
-        
+
       if (error) throw error;
       
       console.log('Estudo atualizado com sucesso:', studyId);
