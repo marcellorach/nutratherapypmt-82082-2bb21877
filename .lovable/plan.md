@@ -1,59 +1,39 @@
-## Diagnóstico
+## Ajustes nos relatórios de auditoria (HTML para download/print)
 
-Você está correto: **TxGNN (Huang 2024, 4.8/5)** e **Hetionet (Himmelstein 2017, 4.4/5)** contribuíram com regras ativas em runtime, mas estão fora do bloco "Scientific pillars" do AboutSenex. Confirmação via DB:
+Tudo concentrado em `src/components/administrador/audits/audit-pdf-generator.ts` (função `injectConfidentialMarks` + copy bilíngue). Nenhum arquivo `.html` em `public/audits/...` é editado — a injeção continua sendo runtime, então vale para todas as versões (técnico e showcase, PT e EN).
 
-| Paper | RCs ligados (core_rule_evidence) | Status runtime |
-|---|---|---|
-| TxGNN | **RC-001** (Exclusão ≠ Contraindicação), **RC-008** (Taxonomia SNOMED-CT+UMLS), **RC-013** (Governança Tiered por Confiança) | active (008, 013) + doc_only (001) |
-| Hetionet | **RC-008** (Taxonomia), **RC-014** (Normalização de Predicados) | active |
+### 1. Consertar o encavalamento da tag "CONFIDENCIAL"
+Causa: o `::before` é posicionado em `left:8px` por cima do texto, mas o `padding-left:56px` atual não está sendo suficiente porque a tag tem largura variável dependendo do idioma/fonte. Trocar a abordagem de "pseudo-elemento sobreposto" por **layout flex real**:
 
-Ambos merecem entrar como **PARTIAL** — tal como KGARevion — porque inspiraram regras hoje rodando, mas a contribuição original completa (zero-shot drug repurposing com GraphMask para TxGNN; DWPC + metapaths permutados para Hetionet) não está implementada.
+- Banner vira `display:flex; align-items:center; gap:12px`
+- Tag CONFIDENCIAL passa a ser um `<span class="senex-confidential-tag">` real (não `::before`), com `flex-shrink:0`
+- Texto do banner num `<span>` que ocupa o restante
 
-## Sobre o "prompt LLM que monta as citações"
+Resultado: zero sobreposição em qualquer largura/idioma.
 
-**Não existe.** A lista de Pilares Científicos no AboutSenexTab é **curada manualmente** num array TypeScript hardcoded (`PILLARS` em `src/components/administrador/AboutSenexTab.tsx`, linhas ~85–125). Nenhuma edge function ou LLM monta esse bloco. A única fonte de verdade dinâmica papel↔RC vem de `core_rule_evidence` (DB), consumida pela aba **Fundamentos Arquiteturais** — e foi justamente essa fonte que revelou a lacuna.
+### 2. Tag discreta no header da 1ª página + em todos os footers
+- **Header da 1ª página**: manter o banner amarelo só na primeira página (atual) — apenas corrigido.
+- **Footers de todas as páginas**: o `.senex-confidential-footer` atual já é injetado uma vez no fim do `<body>`. Para garantir presença em *todas as páginas impressas*, adicionar um `@media print` com `position: fixed; bottom: 0` no rodapé — assim ele se repete em cada página do PDF, de forma discreta (fonte 9px, cinza, italic, com a palavra "CONFIDENCIAL" em vermelho sóbrio inline).
+- Em tela (sem print), o footer continua aparecendo uma vez no fim do documento.
 
-Portanto não há prompt para corrigir. O que precisa de correção é o array curado.
+### 3. Reforçar propriedade PetMoreTime (sem ambiguidade)
+Atualizar `CONFIDENTIAL_COPY` (PT/EN) para conter:
 
-## Plano de implementação
+- **Banner (1ª página)** — PT: "Documento confidencial — Plataforma **Senex AI** · Engine **Senex AI v7** · © PetMoreTime. Todos os direitos reservados. Uso interno e parceiros sob NDA; não redistribuir."
+  EN: "Confidential document — Platform **Senex AI** · Engine **Senex AI v7** · © PetMoreTime. All rights reserved. Internal use and NDA partners only; do not redistribute."
+- **Footer de cada página** — PT: "CONFIDENCIAL · Senex AI v7 · © PetMoreTime — todos os direitos reservados. Tecnologia, modelos e conteúdo são propriedade exclusiva da PetMoreTime."
+  EN: equivalente.
+- Marca d'água diagonal mantida (`CONFIDENCIAL` / `CONFIDENTIAL`).
 
-### 1. Adicionar 2 novos pilares ao array `PILLARS`
+### 4. Versão / changelog / i18n
+- Não há strings novas em `.json` de UI (o copy do relatório é interno ao gerador), então **não** precisa bumpar `I18N_VERSION`.
+- Bump de patch da versão Senex (`src/config/senex-version.ts`) + entrada no `CHANGELOG.md` em `[Unreleased]` (área: audits, status: fixed, i18n: none) + `npm run sync:changelog`.
 
-Inserir antes de "Canine geroscience":
-
-- **TxGNN (Huang et al., Nature Medicine 2024)** — status `partial`
-  - PT: "**Parcial.** Em runtime, a adoção de taxonomia padrão SNOMED-CT VetSCT + UMLS (RC-008) e a governança tiered por confiança (RC-013, auto-approve ≥ 0,50 + HITL) seguem TxGNN como evidência ativa. RC-001 (Exclusão ≠ Contraindicação) é doc-only. **Inspiração ainda não implementada:** zero-shot drug repurposing via metric learning degree-gated e explainer GraphMask multi-hop — o motor atual recomenda apenas sobre compostos com triplets curados, sem inferência zero-shot. O número de +46% accuracy / +49% confidence é benchmark do paper."
-  - EN: equivalente
-
-- **Hetionet / DWPC (Himmelstein et al., eLife 2017)** — status `partial`
-  - PT: "**Parcial.** Em runtime, a adoção de taxonomia padrão SNOMED-CT VetSCT + UMLS (RC-008) e a normalização de predicados via dicionário (RC-014) seguem Hetionet como evidência ativa. **Inspiração ainda não implementada:** Degree-Weighted Path Count (DWPC) sobre metapaths heterogêneos com baselines de permutação — hoje o ranking de compostos usa scoring heurístico + KG hierárquico L0→L4, sem DWPC nem teste de permutação."
-  - EN: equivalente
-
-### 2. Atualizar o diagrama Mermaid `ENGINE_DIAGRAM`
-
-No bloco `VAL` (Validation), o `V4` planejado hoje cita só "TransE link prediction". Adicionar referência paralela a TxGNN/Hetionet como inspirações ainda fora de runtime no bloco `OUT` (recomendação):
-- Em `O3` ("Recommendation engine"), anotar `(inspired by TxGNN zero-shot + Hetionet DWPC, not yet in runtime)`.
-
-### 3. Atualizar o banner de "Honestidade arquitetural"
-
-Acrescentar TxGNN zero-shot e Hetionet DWPC à lista de inspirações não-runtime (junto com GRRA, U-Retrieval bidirecional e TransE).
-
-### 4. Governança documental
-
-- `CHANGELOG.md`: nova entrada em `[Unreleased]` → `Changed`: "AboutSenex: TxGNN e Hetionet adicionados aos Pilares Científicos (PARTIAL), refletindo RC-001/008/013 e RC-008/014 já ativos via `core_rule_evidence`."
-- Bump marker: `7.2.2` → `7.2.3` (PATCH — correção de catálogo, sem novo recurso).
-- `npm run sync:changelog`.
-- Não há novas chaves i18n (os textos PT/EN dos pilares ficam no próprio array, como os demais).
+### Arquivos tocados
+- `src/components/administrador/audits/audit-pdf-generator.ts` (core)
+- `src/config/senex-version.ts` (patch bump)
+- `CHANGELOG.md` (entrada estruturada)
+- regenerados por script: `src/data/projectChangelog.generated.ts`, `.lovable/CONTEXT.md`
 
 ### Fora de escopo
-
-- Não criar novos RCs.
-- Não alterar `core_rule_evidence` (já está correto).
-- Não tocar em prompts de edge functions (irrelevante para este caso).
-- Não mexer em `generate-audit` (que tem outra responsabilidade — gerar relatório de auditoria, não os pilares do AboutSenex).
-
-## Arquivos a editar
-
-1. `src/components/administrador/AboutSenexTab.tsx` — `PILLARS` array, `ENGINE_DIAGRAM`, banner de honestidade.
-2. `CHANGELOG.md` — entrada em `[Unreleased]`, bump marker.
-3. (auto via `sync:changelog`) `src/data/projectChangelog.generated.ts`, `.lovable/CONTEXT.md`.
+Não toco em PDFs gerados via `@react-pdf/renderer` (`src/services/pdf-export.ts` — protocolo do tutor) porque seu pedido se refere especificamente aos relatórios de auditoria técnica/showcase. Se quiser também aplicar lá, me avise.
