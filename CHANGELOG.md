@@ -22,7 +22,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ---
 
 ## [Unreleased]
-<!-- senex: 7.2.3 -->
+<!-- senex: 7.2.4 -->
+
+### Fixed - 2026-06-08 — Auditorias: tag CONFIDENCIAL sem encavalamento + propriedade PetMoreTime reforçada
+<!-- area: admin · status: entregue · i18n: — -->
+- `audit-pdf-generator.ts`: banner CONFIDENCIAL agora usa layout flex real (tag em `<span>` com `flex-shrink:0`), eliminando a sobreposição do pseudo-elemento `::before` sobre o texto observada em PT/EN.
+- Footer discreto fixado em todas as páginas no `@media print` (`position:fixed; bottom:0`, 9px italic, "CONFIDENCIAL" em vermelho sóbrio inline), mantendo aparição única em tela.
+- Copy do banner e do rodapé reforçam propriedade exclusiva: "Plataforma Senex AI · Engine Senex AI v7 · © PetMoreTime. Todos os direitos reservados. Tecnologia, modelos e conteúdo são propriedade exclusiva da PetMoreTime." (PT/EN equivalentes). Vale para os relatórios técnicos e showcase, tanto em download quanto em print.
+- Files: src/components/administrador/audits/audit-pdf-generator.ts
 
 ### Changed - 2026-06-08 — Pilares científicos: TxGNN e Hetionet adicionados como PARTIAL
 <!-- area: admin · status: entregue · i18n: — -->
