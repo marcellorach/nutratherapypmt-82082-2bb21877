@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-06-09T14:59:21.750Z",
+  "timestamp": "2026-06-09T18:22:21.477Z",
   "summary": {
     "totalFiles": 956,
-    "totalIssues": 484,
+    "totalIssues": 485,
     "hardcodedTexts": 61,
-    "missingKeys": 421,
+    "missingKeys": 422,
     "incompleteTranslations": 2
   },
   "issues": [
@@ -1509,14 +1509,21 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/curation/StudyTripletCuration.tsx",
-      "line": 98,
+      "line": 100,
+      "text": "ingestion_stages",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/curation/StudyTripletCuration.tsx",
+      "line": 120,
       "text": "*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/curation/StudyTripletCuration.tsx",
-      "line": 728,
+      "line": 792,
       "text": "chunk_text, chunk_index",
       "severity": "high"
     },
@@ -2755,28 +2762,28 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 782,
+      "line": 814,
       "text": "audit_base_system_{pt,en}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2094,
+      "line": 2126,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2305,
+      "line": 2337,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 5100,
+      "line": 5132,
       "text": "@",
       "severity": "high"
     },
