@@ -20,16 +20,16 @@ const CONFIDENTIAL_COPY = {
   pt: {
     tag: "CONFIDENCIAL",
     banner:
-      "Documento confidencial — uso interno e parceiros sob NDA. Não redistribuir.",
+      "Documento confidencial — Plataforma <b>Senex AI</b> · Engine <b>Senex AI v7</b> · © PetMoreTime. Todos os direitos reservados. Uso interno e parceiros sob NDA; não redistribuir.",
     footer:
-      "Confidencial · Senex AI / PetMoreTime · Conteúdo técnico para revisão interna; sujeito a alterações. As recomendações descritas não substituem julgamento clínico-veterinário.",
+      "<b style=\"color:#8b1e1e\">CONFIDENCIAL</b> · Senex AI v7 · © PetMoreTime — todos os direitos reservados. Tecnologia, modelos e conteúdo são propriedade exclusiva da PetMoreTime. Conteúdo técnico para revisão interna; sujeito a alterações. As recomendações não substituem julgamento clínico-veterinário.",
   },
   en: {
     tag: "CONFIDENTIAL",
     banner:
-      "Confidential document — internal use and NDA partners only. Do not redistribute.",
+      "Confidential document — Platform <b>Senex AI</b> · Engine <b>Senex AI v7</b> · © PetMoreTime. All rights reserved. Internal use and NDA partners only; do not redistribute.",
     footer:
-      "Confidential · Senex AI / PetMoreTime · Technical content for internal review; subject to change. Recommendations described do not replace clinical-veterinary judgement.",
+      "<b style=\"color:#8b1e1e\">CONFIDENTIAL</b> · Senex AI v7 · © PetMoreTime — all rights reserved. Technology, models and content are the exclusive property of PetMoreTime. Technical content for internal review; subject to change. Recommendations do not replace clinical-veterinary judgement.",
   },
 } as const;
 
@@ -39,16 +39,19 @@ function injectConfidentialMarks(html: string, lang: "pt" | "en"): string {
 
   const styles = `
 <style data-senex-confidential="style">
-  .senex-confidential-banner{position:relative;margin:0 0 1.2em;padding:10px 14px 10px 56px;border:1px solid #c9a84c;background:#fff8e1;color:#5a3e00;font:600 13px/1.35 Georgia,serif;border-radius:4px}
-  .senex-confidential-banner::before{content:attr(data-tag);position:absolute;left:8px;top:50%;transform:translateY(-50%);background:#8b1e1e;color:#fff;font:700 10px/1 Arial,sans-serif;letter-spacing:.08em;padding:4px 6px;border-radius:3px}
-  .senex-confidential-footer{margin-top:2em;padding:10px 14px;border-top:1px solid #c9a84c;color:#4a5568;font:italic 11px/1.4 Georgia,serif}
+  .senex-confidential-banner{display:flex;align-items:center;gap:12px;margin:0 0 1.2em;padding:10px 14px;border:1px solid #c9a84c;background:#fff8e1;color:#5a3e00;font:600 13px/1.35 Georgia,serif;border-radius:4px}
+  .senex-confidential-tag{flex:0 0 auto;background:#8b1e1e;color:#fff;font:700 10px/1 Arial,sans-serif;letter-spacing:.08em;padding:5px 7px;border-radius:3px;white-space:nowrap}
+  .senex-confidential-banner-text{flex:1 1 auto;min-width:0}
+  .senex-confidential-footer{margin-top:2em;padding:10px 14px;border-top:1px solid #c9a84c;color:#4a5568;font:italic 10.5px/1.4 Georgia,serif}
   @media print{
     .senex-confidential-banner{background:#fff8e1 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .senex-confidential-footer{position:fixed;left:0;right:0;bottom:0;margin:0;padding:6px 14px;border-top:1px solid #c9a84c;background:#fff;font:italic 9px/1.3 Georgia,serif;color:#4a5568;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{padding-bottom:48px}
     body::before{content:attr(data-watermark);position:fixed;top:40%;left:0;right:0;text-align:center;font:700 84px/1 Arial,sans-serif;color:rgba(139,30,30,0.08);transform:rotate(-28deg);pointer-events:none;z-index:0}
   }
 </style>`;
 
-  const banner = `<div class="senex-confidential-banner" data-tag="${copy.tag}" data-senex-confidential="banner">${copy.banner}</div>`;
+  const banner = `<div class="senex-confidential-banner" data-senex-confidential="banner"><span class="senex-confidential-tag">${copy.tag}</span><span class="senex-confidential-banner-text">${copy.banner}</span></div>`;
   const footer = `<div class="senex-confidential-footer" data-senex-confidential="footer">${copy.footer}</div>`;
 
   if (/<\/head>/i.test(html)) html = html.replace(/<\/head>/i, `${styles}</head>`);
