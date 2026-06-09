@@ -504,6 +504,25 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
                           {t('studies.library.realBadge')}
                         </Badge>
                       )}
+                      {(() => {
+                        const fs = (study as any).ingestion_stages?.file_search;
+                        if (!fs?.status || fs.status === 'ok') return null;
+                        if (fs.status === 'failed') {
+                          return (
+                            <Badge variant="outline" className="text-xs gap-1 text-red-700 border-red-300 bg-red-50">
+                              {t('studies.ingestion.badge.failed', 'Extração falhou')}
+                            </Badge>
+                          );
+                        }
+                        if (fs.status === 'degraded') {
+                          return (
+                            <Badge variant="outline" className="text-xs gap-1 text-amber-700 border-amber-300 bg-amber-50">
+                              {t('studies.ingestion.badge.degraded', 'Extração degradada')}
+                            </Badge>
+                          );
+                        }
+                        return null;
+                      })()}
                       {study.prestige_tier && (
                         <Badge variant="outline" className="text-xs gap-1 border-amber-400 text-amber-700">
                           <Award className="h-3 w-3" />
