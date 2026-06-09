@@ -442,6 +442,77 @@ async function addFileToCorpus(
   console.log('✅ Arquivo importado com sucesso ao File Search Store');
 }
 
+// ============================================================
+// CALL 1 — acquireFullText
+// ------------------------------------------------------------
+// Dedicated call to extract ONLY the full plain text of the PDF.
+// Uses gemini-2.5-flash with a minimal schema { full_text: string }
+// so the model's output token budget is not shared with 22 other
+// clinical properties (the root cause of progressive truncation in
+// the legacy monolithic call).
+// ============================================================
+async function acquireFullText(
+  fileUri: string,
+  apiKey: string,
+): Promise<{ text: string; model: string; error?: string }> {
+  const MODEL = 'gemini-2.5-flash';
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                { fileData: { mimeType: 'application/pdf', fileUri } },
+                {
+                  text:
+                    'Extract the COMPLETE plain text of this scientific PDF. Include every section ' +
+                    '(abstract, introduction, methods, results, discussion, references). Preserve ' +
+                    'section order and meaningful paragraph breaks. Do not summarize. Do not omit ' +
+                    'content. Return ONLY the raw text as a single string in the function argument.',
+                },
+              ],
+            },
+          ],
+          tools: [{
+            function_declarations: [{
+              name: 'return_full_text',
+              description: 'Return the verbatim full text of the PDF as one string.',
+              parameters: {
+                type: 'object',
+                properties: {
+                  full_text: {
+                    type: 'string',
+                    description: 'Complete plain text of the PDF, all sections, no truncation.',
+                  },
+                },
+                required: ['full_text'],
+              },
+            }],
+          }],
+          tool_config: {
+            function_calling_config: { mode: 'ANY', allowed_function_names: ['return_full_text'] },
+          },
+        }),
+      },
+    );
+    if (!response.ok) {
+      const errText = await response.text();
+      return { text: '', model: MODEL, error: `HTTP ${response.status}: ${errText.slice(0, 300)}` };
+    }
+    const result = await response.json();
+    const fc = result.candidates?.[0]?.content?.parts?.[0]?.functionCall;
+    const txt = (fc?.args?.full_text as string | undefined) || '';
+    return { text: typeof txt === 'string' ? txt : '', model: MODEL };
+  } catch (err) {
+    return { text: '', model: MODEL, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
 // Extração com File Search usando Structured Output (Function Calling)
 async function extractWithFileSearch(
   fileSearchStoreName: string,
