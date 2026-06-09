@@ -275,6 +275,23 @@ serve(async (req) => {
     console.log(`✅ ${embeddingsData.length} embeddings salvos com sucesso`);
 
     // 5. Atualizar metadata do estudo
+    // Read existing ingestion_stages and merge vectorize key without
+    // overwriting prior stages.
+    const { data: stageRow } = await supabase
+      .from('processed_studies')
+      .select('ingestion_stages')
+      .eq('id', studyId)
+      .maybeSingle();
+    const mergedStages = {
+      ...(((stageRow as any)?.ingestion_stages as Record<string, unknown>) || {}),
+      vectorize: {
+        status: 'ok',
+        chunks_count: embeddingsData.length,
+        model: workingEndpoint.model,
+        finished_at: new Date().toISOString(),
+      },
+    };
+
     const { error: metadataError } = await supabase
       .from('processed_studies')
       .update({
@@ -287,7 +304,8 @@ serve(async (req) => {
           embedding_model_version: EMBEDDING_MODEL_VERSION,
           embedding_provider: 'Google AI',
           embedding_dimension: TARGET_EMBEDDING_DIMENSION
-        }
+        },
+        ingestion_stages: mergedStages,
       })
       .eq('id', studyId);
 
