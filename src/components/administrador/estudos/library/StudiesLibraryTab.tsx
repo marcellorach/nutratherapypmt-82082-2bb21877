@@ -249,7 +249,18 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
   const pagedStudies = filteredStudies.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const getTitle = (study: ScientificStudy) => isEnglish ? (study.title_en || study.title) : study.title;
-  const getAbstract = (study: ScientificStudy) => isEnglish ? (study.abstract_en || study.abstract) : study.abstract;
+  const ABSTRACT_PLACEHOLDERS = new Set([
+    'Awaiting processing',
+    'Aguardando processamento',
+    'Manual Import',
+  ]);
+  const getAbstract = (study: ScientificStudy) => {
+    const raw = isEnglish ? (study.abstract_en || study.abstract) : study.abstract;
+    if (!raw) return null;
+    const trimmed = String(raw).trim();
+    if (ABSTRACT_PLACEHOLDERS.has(trimmed) || trimmed.length < 20) return null;
+    return raw;
+  };
 
   return (
     <div className="space-y-4">

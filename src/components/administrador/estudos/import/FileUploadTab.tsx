@@ -221,8 +221,8 @@ const FileUploadTab: React.FC = () => {
               import_type: 'manual',
               kanban_status: 'new',
               source_import_id: importData.id,
-              description: 'Awaiting processing',
-              journal: 'Manual Import',
+              description: null,
+              journal: null,
               content_hash: contentHash,
               duplicate_check_log: duplicateLog,
               analysis_data: {
