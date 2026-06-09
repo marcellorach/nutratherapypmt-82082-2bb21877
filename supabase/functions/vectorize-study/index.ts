@@ -56,8 +56,10 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  let capturedStudyId: string | undefined;
   try {
     const { studyId }: VectorizeRequest = await req.json();
+    capturedStudyId = studyId;
     
     if (!studyId) {
       return new Response(
@@ -344,8 +346,7 @@ serve(async (req) => {
     console.error('❌ Error in vectorize-study:', error);
     // Best-effort: persist vectorize:failed so the UI surfaces it.
     try {
-      const { studyId: failedId } = await (req.clone().json().catch(() => ({}))) as any;
-      if (failedId) {
+      if (capturedStudyId) {
         const supabase = createClient(
           Deno.env.get('SUPABASE_URL')!,
           Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
@@ -353,7 +354,7 @@ serve(async (req) => {
         const { data: r } = await supabase
           .from('processed_studies')
           .select('ingestion_stages')
-          .eq('id', failedId)
+          .eq('id', capturedStudyId)
           .maybeSingle();
         const merged = {
           ...(((r as any)?.ingestion_stages as Record<string, unknown>) || {}),
@@ -363,7 +364,7 @@ serve(async (req) => {
             finished_at: new Date().toISOString(),
           },
         };
-        await supabase.from('processed_studies').update({ ingestion_stages: merged }).eq('id', failedId);
+        await supabase.from('processed_studies').update({ ingestion_stages: merged }).eq('id', capturedStudyId);
       }
     } catch {}
     return new Response(
