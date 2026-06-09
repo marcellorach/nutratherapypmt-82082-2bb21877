@@ -1,85 +1,110 @@
-## Fases 1+2 — Ingestão robusta com gate qualitativo + truncamento relativo
+## Verificações prévias (grep)
 
-### 1. Migration
-- `processed_studies.ingestion_stages jsonb NOT NULL DEFAULT '{}'::jsonb` + índice GIN.
-- Chaves esperadas: `parse_study`, `file_search`, `extract_entities`, `vectorize`.
-- Cada chave: `{ status: 'ok'|'degraded'|'failed'|'skipped', error_message?, error_code?, model?, finished_at, ...metrics }`.
+- `full_text` na Call 2 só é consumido em 4 pontos confirmados: schema (571-574), mapeamento (1327), e override/leitura pós-Call1 (1902, 1905-1910, 1934-1937). Linhas 2026 (`has_full_text`) e 2116/2214 leem `extractedData.full_text` **depois** do override da Call 1 — passam a refletir só Call 1 e ficam corretas sem mudança.
+- Nenhum outro consumidor externo lê `full_text` direto do retorno da Call 2.
+- A1 confirmado seguro.
 
-### 2. `parse-study/index.ts` — grava o próprio estágio
-Acrescentar `ingestion_stages.parse_study = { status:'ok', sections_count, tables_count, total_chars, finished_at }` no mesmo `update` final. `total_chars` = soma de `element.text.length`, usado depois como denominador do `truncation_ratio`. Mantém `analysis_data`/`kanban_status='parsed'`. Try/catch externo grava `status:'failed'` antes de propagar.
+Observação: o `extract-study-entities` (linhas 497-532) **já** relê `ingestion_stages` e bloqueia `processed` se `file_search.status === 'failed'` OU `parse_study.status === 'failed'`. Mas **não** trata `file_search` ausente como falha — esse é o A2 buraco 2 (alinhar critério).
 
-### 3. `gemini-file-search/index.ts` — split em 2 calls + gate qualitativo
-Refatora o caminho atual (1 call monolítica com schema de 23 props):
+---
+
+## A1 — Call 1 = fonte única do `full_text`
+
+**Arquivo:** `supabase/functions/gemini-file-search/index.ts`
 
 ```text
-Call 1  acquireFullText()    gemini-2.5-flash    schema MINIMAL { full_text: string }
-Call 2  extractClinical()    gemini-2.5-pro      schema atual (22 props clínicas, sem full_text)
-                             fallback model:     gemini-3-pro-preview
+571-574  REMOVER bloco full_text do schema da Call 2
+1327     REMOVER linha `full_text: extractedArgs.full_text || '',`
+1900-1911  SUBSTITUIR override pós-Call-2 por: chamar acquireFullText, atribuir
+           direto: extractedData.full_text = (call1.text || '').trim();
+           Logar call1.error se vier vazio. Sem comparação com call2Text.
+1933-1938  Manter condição `if (extractedData.full_text && length > 500)` —
+           agora alimentada SÓ pela Call 1. `extractionMethod` permanece
+           'gemini_full_text_extraction'.
 ```
 
-Pipeline interno:
-1. Chama Call 1. Se exceção OU `full_text` ausente/vazio → grava `file_search = { status:'failed', stage:'call1', error_message, finished_at }` e dá `throw`.
-2. Grava `full_text_content` em `processed_studies`. Descarta quaisquer metadados que o Gemini emita na Call 1 (não escreve em title/authors/year/abstract/doi — esses ficam com `parse-study`). Se houver metadados retornados, registra em `file_search.meta_hint` só para auditoria.
-3. Lê `ingestion_stages.parse_study.total_chars`. Calcula `truncation_ratio = chars_full_text / max(total_chars, 1)`. Se `parse_study` ausente, `truncation_ratio = null` (não dispara degraded por truncamento).
-4. Chama Call 2 com `gemini-2.5-pro`; em erro 4xx/5xx, retry único com `gemini-3-pro-preview`.
-5. Avalia entidades: `entitiesNonEmpty = (nutraceuticals?.length || conditions?.length || mechanisms?.length || biological_effects?.length) > 0`.
-6. Decide status:
-   - `entitiesNonEmpty === false` → `degraded` (reason: `entities_empty`).
-   - `truncation_ratio !== null && truncation_ratio < 0.30 && parse_study.sections_count >= 3` → `degraded` (reason: `truncation_suspected`).
-   - caso contrário → `ok`.
-7. Grava `file_search = { status, reason?, chars: chars_full_text, truncation_ratio, sections_count_ref, model_call1, model_call2, finished_at }`. `chars` e `truncation_ratio` são **informativos**, nunca gatilho isolado.
+Comentários do bloco (1891-1898) reescritos: Call 1 é fonte única; Call 2 não devolve mais `full_text`.
 
-Todo o corpo da função fica dentro de um try/catch externo que garante `file_search.status='failed'` no banco antes de qualquer `throw` para o orquestrador.
+---
 
-### 4. `extract-study-entities/index.ts` — respeita o gate
-- Lê `ingestion_stages.file_search.status` no início.
-- `failed` → retorna 200 com `{ skipped:true }`, grava `extract_entities = { status:'skipped', reason:'file_search_failed' }`. Não chama LLM.
-- `degraded` → roda Stages 1/2/3 normais, mas marca `extract_entities = { status:'ok', confidence:'degraded', reason: file_search.reason }`.
-- `ok` → fluxo atual, grava `extract_entities = { status:'ok', confidence:'normal' }`.
-- Mantém o disparo de `vectorize-study` via `EdgeRuntime.waitUntil` (memória de arquitetura).
+## A2 buraco 1 — `useVetGraphRAGQueue.ts:212-237` (`updateProcessedStudy`)
 
-### 5. `vectorize-study/index.ts`
-Acrescenta `update ingestion_stages.vectorize = { status:'ok'|'failed', chunks_count, finished_at }`. Sem mudança de lógica de chunking/embedding.
+**Diff alvo:**
 
-### 6. Orquestrador front — captura + bloqueio do `processed`
-Arquivos: `src/components/administrador/estudos/analysis/NtaiProcessingSection.tsx` (pipeline real) + `src/hooks/ntai/useProcessingLogic.*`.
+```text
+ANTES do update, ler ingestion_stages:
+  const { data: row } = await supabase
+    .from('processed_studies')
+    .select('ingestion_stages')
+    .eq('id', studyId).maybeSingle();
+  const stages = (row?.ingestion_stages as Record<string, any>) || {};
+  const fs = stages.file_search;
+  const anyFailed = Object.values(stages).some(s => s?.status === 'failed');
+  const fsOk = fs?.status === 'ok' || fs?.status === 'degraded';
 
-- Cada `supabase.functions.invoke(<stage>)` envelopado em try/catch. Se a função não retornou OK, faz `update processed_studies set ingestion_stages = jsonb_set(..., '{<stage>}', { status:'failed', error_message, finished_at })`.
-- Antes de marcar `kanban_status='processed'`, relê `ingestion_stages` e verifica `parse_study/file_search/extract_entities/vectorize`. Se algum for `failed` → seta `kanban_status='error'`, **nunca** `processed`. Mata o padrão Spermine (processado sem erro registrado).
-- Toast usa o `reason` real do banco em vez de mensagem genérica.
+  // Se edge já marcou error → NÃO sobrescrever kanban_status.
+  const updatePayload: any = { analysis_data: analysisData };
+  if (!anyFailed && fsOk) updatePayload.kanban_status = 'processed';
+  else updatePayload.kanban_status = 'error';
+```
 
-### 7. UI — 2 superfícies de badge
-**(a) `src/components/administrador/estudos/library/StudiesLibraryTab.tsx`:** card mostra badge derivado de `ingestion_stages.file_search.status`:
-- `failed` → badge vermelho "Extração falhou"
-- `degraded` → badge âmbar "Extração degradada"
-- `ok`/ausente → sem badge
+Sem `kanban_status` cego = 'processed'. Mata o overwrite silencioso do Spermine.
 
-**(b) `src/components/administrador/estudos/curation/StudyTripletCuration.tsx`:** banner no topo quando `file_search.status !== 'ok'`:
-- `degraded` âmbar: "Extração degradada (motivo: {reason}, chars={chars}, ratio={truncation_ratio?.toFixed(2)}). Triplets abaixo derivam de extração incompleta — aprove com cautela."
-- `failed` vermelho: "Extração falhou: {error_message}. Triplets abaixo (se houver) não devem ser aprovados."
-- Chip discreto "extração degradada" por linha quando estudo está `degraded`. Sem coluna nova em `triplet_extractions` — herda do estudo.
+---
 
-### 8. i18n + changelog + versão
-- `src/i18n.ts`: bump `I18N_VERSION` (cache-bust obrigatório).
-- `src/locales/{pt,en}/translation.json`: chaves novas em `studies.ingestion.*` (`badge.failed`, `badge.degraded`, `banner.failed`, `banner.degraded`, `chip.degraded`, `reasons.entities_empty`, `reasons.truncation_suspected`, `reasons.file_search_failed`).
-- `CHANGELOG.md` [Unreleased] → `Fixed` + `Changed`, com `<!-- area: ingestion · status: fixed · i18n: yes -->`.
-- Rodar `npm run sync:changelog` (regenera `projectChangelog.generated.ts` + `.lovable/CONTEXT.md`).
+## A2 buraco 2 — `extract-study-entities/index.ts:506-508`
 
-### 9. Fora de escopo (Fases 3+4, próximo turno)
-- Baseline antes de qualquer backfill (~10 estudos `structured_data_enhanced` / `full_text` vazio).
-- Botão "Reprocessar pipeline" nos cards `failed`/`degraded`.
-- Bloco `ingestion_health` em `generate-audit`.
-- Sem mudança em `generate-triplets`.
+**Diff alvo (1 linha lógica):**
 
-### Arquivos tocados
-- Migration nova (ingestion_stages + GIN).
-- `supabase/functions/parse-study/index.ts`
-- `supabase/functions/gemini-file-search/index.ts`
-- `supabase/functions/extract-study-entities/index.ts`
-- `supabase/functions/vectorize-study/index.ts`
-- `src/components/administrador/estudos/analysis/NtaiProcessingSection.tsx`
-- `src/hooks/ntai/useProcessingLogic.*`
-- `src/components/administrador/estudos/curation/StudyTripletCuration.tsx`
-- `src/components/administrador/estudos/library/StudiesLibraryTab.tsx`
-- `src/i18n.ts` + `src/locales/{pt,en}/translation.json`
-- `CHANGELOG.md` (regenera `src/data/projectChangelog.generated.ts` e `.lovable/CONTEXT.md` via script)
+```diff
+- const anyUpstreamFailed =
+-   (refreshedFileSearch?.status === 'failed') ||
+-   ((refreshedStages as any).parse_study?.status === 'failed');
++ const fsStatus = refreshedFileSearch?.status;
++ const fsBlocking = fsStatus !== 'ok' && fsStatus !== 'degraded'; // ausente OU failed
++ const anyUpstreamFailed =
++   fsBlocking ||
++   ((refreshedStages as any).parse_study?.status === 'failed');
+```
+
+Crash silencioso de upstream (sem gravar `ingestion_stages`) agora bloqueia `processed`.
+
+---
+
+## A2 buraco 3 — `useProcessingLogic.ts` catches gemini/vectorize
+
+**Helper local (topo do arquivo ou inline):**
+
+```ts
+async function markStageFailed(supabase, studyId, stage, error_message) {
+  const { data } = await supabase.from('processed_studies')
+    .select('ingestion_stages').eq('id', studyId).maybeSingle();
+  const stages = (data?.ingestion_stages as Record<string, any>) || {};
+  stages[stage] = { status: 'failed', error_message, finished_at: new Date().toISOString() };
+  await supabase.from('processed_studies')
+    .update({ ingestion_stages: stages }).eq('id', studyId);
+}
+```
+
+**Linha 149 (geminiError):** antes do `updatedQueue[index] = { stage:'error' ... }`, chamar `await markStageFailed(supabase, item.id, 'file_search', errorMsg)`.
+
+**Linhas 173-180 (geminiData inválido):** idem, `markStageFailed(..., 'file_search', errorMsg)`.
+
+**Linha 192-199 (vectorError + catch):** `markStageFailed(..., 'vectorize', err)`. Mantém comportamento atual de não derrubar a fila (vectorize não é crítico), mas grava o `failed` para o gate ler.
+
+---
+
+## Ordem de deploy
+
+1. Editar 3 arquivos (sem migration nova).
+2. Deploy edge functions: `gemini-file-search`, `extract-study-entities`.
+3. Build front (A2#1, A2#3) sobe junto no preview.
+4. **Sem backfill**. Re-extrair 2 estudos longos com baixo yield (dos 49 ≥1500 chars / ~1 nutra) só DEPOIS do deploy, manualmente, como teste de critério (yield = entidades/char).
+
+## Fora deste patch
+
+- Critério de candidato a backfill (yield).
+- Backfill em si.
+- Botão "Reprocessar pipeline" e bloco `ingestion_health` (Fases 3+4).
+
+Confirma para aplicar?
