@@ -88,6 +88,28 @@ const StudyTripletCuration: React.FC<StudyTripletCurationProps> = ({
   const [confidenceThreshold, setConfidenceThreshold] = useState(85);
   const [showThresholdSettings, setShowThresholdSettings] = useState(false);
 
+  // Ingestion stages telemetry (for the gate banner).
+  const [fileSearchStage, setFileSearchStage] = useState<any | null>(null);
+
+  useEffect(() => {
+    if (!studyId) return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from('processed_studies')
+        .select('ingestion_stages')
+        .eq('id', studyId)
+        .maybeSingle();
+      if (cancelled) return;
+      if (error) {
+        console.warn('Could not load ingestion_stages:', error.message);
+        return;
+      }
+      setFileSearchStage(((data as any)?.ingestion_stages?.file_search) || null);
+    })();
+    return () => { cancelled = true; };
+  }, [studyId]);
+
   const fetchTriplets = useCallback(async () => {
     if (!studyId) return;
     
