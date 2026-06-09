@@ -1737,11 +1737,27 @@ serve(async (req) => {
           Deno.env.get('SUPABASE_URL')!,
           Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
         );
+        // Read existing stages to merge file_search:failed without losing parse_study.
+        const { data: row } = await supabase
+          .from('processed_studies')
+          .select('ingestion_stages')
+          .eq('id', studyId)
+          .maybeSingle();
+        const merged = {
+          ...((row?.ingestion_stages as Record<string, unknown>) || {}),
+          file_search: {
+            status: 'failed',
+            error_message: error instanceof Error ? error.message : String(error),
+            stage: 'pipeline',
+            finished_at: new Date().toISOString(),
+          },
+        };
         await supabase
           .from('processed_studies')
           .update({
             kanban_status: 'error',
             processing_error: error instanceof Error ? error.message : String(error),
+            ingestion_stages: merged,
           })
           .eq('id', studyId);
       } catch (e) {
