@@ -402,6 +402,31 @@
     "contextSummary": "Resumo do Contexto"
   },
   "studies": {
+    "ingestion": {
+      "badge": {
+        "failed": "Extração falhou",
+        "degraded": "Extração degradada"
+      },
+      "banner": {
+        "failed": {
+          "title": "⛔ Extração falhou",
+          "body": "A aquisição do texto completo do PDF falhou nesta ingestão. Os triplets abaixo (se houver) NÃO devem ser aprovados — reprocesse o estudo após investigar."
+        },
+        "degraded": {
+          "title": "⚠️ Extração degradada",
+          "body": "A extração desta ingestão veio incompleta. Triplets abaixo derivam de texto parcial — aprove com cautela."
+        },
+        "errorPrefix": "Erro:",
+        "reasonPrefix": "Motivo:",
+        "charsLabel": "chars"
+      },
+      "reasons": {
+        "entities_empty": "entidades clínicas vazias",
+        "truncation_suspected": "truncamento detectado",
+        "file_search_failed": "aquisição de texto falhou",
+        "unknown": "desconhecido"
+      }
+    },
     "approval": {
       "_timeline_anchor_pt": "",
       "approveStudy": "Aprovar Estudo",
