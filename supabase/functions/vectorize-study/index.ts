@@ -342,6 +342,30 @@ serve(async (req) => {
           : 'Vectorization failed';
 
     console.error('❌ Error in vectorize-study:', error);
+    // Best-effort: persist vectorize:failed so the UI surfaces it.
+    try {
+      const { studyId: failedId } = await (req.clone().json().catch(() => ({}))) as any;
+      if (failedId) {
+        const supabase = createClient(
+          Deno.env.get('SUPABASE_URL')!,
+          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+        );
+        const { data: r } = await supabase
+          .from('processed_studies')
+          .select('ingestion_stages')
+          .eq('id', failedId)
+          .maybeSingle();
+        const merged = {
+          ...(((r as any)?.ingestion_stages as Record<string, unknown>) || {}),
+          vectorize: {
+            status: 'failed',
+            error_message: errorMessage,
+            finished_at: new Date().toISOString(),
+          },
+        };
+        await supabase.from('processed_studies').update({ ingestion_stages: merged }).eq('id', failedId);
+      }
+    } catch {}
     return new Response(
       JSON.stringify({
         error: errorMessage,
