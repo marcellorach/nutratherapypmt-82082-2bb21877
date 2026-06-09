@@ -568,10 +568,6 @@ async function extractWithFileSearch(
           type: 'string',
           description: 'DOI of the study, if available'
         },
-        full_text: {
-          type: 'string',
-          description: 'COMPLETE full text content of the entire PDF document. Extract ALL text from all sections.'
-        },
         // ✅ NEW: Study population metadata
         study_population: {
           type: 'object',
@@ -1324,7 +1320,6 @@ Return using extract_study_data function with ALL arrays fully populated, INCLUD
       journal: extractedArgs.journal || '',
       abstract: extractedArgs.abstract || '',
       doi: extractedArgs.doi || '',
-      full_text: extractedArgs.full_text || '',
       // ✅ NEW: Study population
       study_population: extractedArgs.study_population ? {
         species: extractedArgs.study_population.species || 'unknown',
@@ -1889,26 +1884,22 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
     console.log(`⏱️ Tempo de extração: ${(duration / 1000).toFixed(1)}s`);
 
     // ============================================================
-    // CALL 1 (post-Call-2): dedicated full_text acquisition
+    // CALL 1: fonte ÚNICA do full_text
     // ------------------------------------------------------------
-    // Runs AFTER the legacy extractWithFileSearch (Call 2). Uses a
-    // separate model + minimal schema so full_text is not starved by
-    // the 22 clinical properties. If Call 1 returns a longer/richer
-    // text than Call 2, we override extractedData.full_text — this is
-    // the surgical fix for the monolithic-call truncation root cause.
+    // Call 2 (extractWithFileSearch) não devolve mais `full_text` —
+    // a propriedade foi removida do schema para não competir com as
+    // 22 propriedades clínicas e não ser truncada. Call 1 roda com
+    // schema mínimo dedicado e seu retorno é a única fonte.
     // ============================================================
     console.log('🧾 CALL 1: acquireFullText (gemini-2.5-flash, minimal schema)...');
     const call1 = await acquireFullText(uploadedFile.uri, GOOGLE_GEMINI_KEY);
-    const call2Text = (extractedData.full_text || '').trim();
     const call1Text = (call1.text || '').trim();
-    if (call1Text.length > call2Text.length) {
-      console.log(`✅ Override full_text from Call 1 (${call1Text.length} chars vs Call 2 ${call2Text.length})`);
-      extractedData.full_text = call1Text;
-    } else if (call1.error) {
-      console.warn(`⚠️ Call 1 failed (${call1.error}); keeping Call 2 full_text (${call2Text.length} chars)`);
+    if (!call1Text) {
+      console.warn(`⚠️ Call 1 returned empty full_text${call1.error ? ` (error: ${call1.error})` : ''}`);
     } else {
-      console.log(`ℹ️ Call 2 full_text (${call2Text.length}) >= Call 1 (${call1Text.length}); keeping Call 2`);
+      console.log(`✅ Call 1 full_text adquirido: ${call1Text.length} chars`);
     }
+    extractedData.full_text = call1Text;
     
     // 6. Salvar no banco com validação e retry
     console.log('💾 ETAPA 6/6: Salvando no banco de dados...');

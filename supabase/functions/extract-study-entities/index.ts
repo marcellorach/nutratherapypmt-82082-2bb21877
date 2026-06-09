@@ -503,8 +503,11 @@ serve(async (req) => {
       .maybeSingle();
     const refreshedStages = ((refreshedRow as any)?.ingestion_stages as Record<string, unknown>) || {};
     const refreshedFileSearch = (refreshedStages as any).file_search || fileSearchStage;
+    // A2#2: file_search ausente OU failed bloqueia processed (cobre crash silencioso upstream).
+    const fsStatus = refreshedFileSearch?.status;
+    const fsBlocking = fsStatus !== 'ok' && fsStatus !== 'degraded';
     const anyUpstreamFailed =
-      (refreshedFileSearch?.status === 'failed') ||
+      fsBlocking ||
       ((refreshedStages as any).parse_study?.status === 'failed');
 
     const extractStageEntry = {

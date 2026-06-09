@@ -5,6 +5,35 @@ import { supabase } from '@/integrations/supabase/client';
 import { ProcessingItem, ProcessingStage } from '@/types/vetgraphrag';
 import { simulateStageProcessing, getStageMessage, getProgressForStage } from './utils/processing';
 
+// A2#3: grava ingestion_stages.<stage> = { status:'failed', ... } antes de
+// marcar a fila como 'error', para que o gate de updateProcessedStudy e o
+// painel de auditoria enxerguem o motivo real do erro.
+async function markStageFailed(
+  studyId: string,
+  stage: 'file_search' | 'vectorize' | 'extract_entities' | 'generate_triplets',
+  errorMessage: string
+): Promise<void> {
+  try {
+    const { data } = await supabase
+      .from('processed_studies')
+      .select('ingestion_stages')
+      .eq('id', studyId)
+      .maybeSingle();
+    const stages = ((data as any)?.ingestion_stages as Record<string, any>) || {};
+    stages[stage] = {
+      status: 'failed',
+      error_message: errorMessage,
+      finished_at: new Date().toISOString(),
+    };
+    await supabase
+      .from('processed_studies')
+      .update({ ingestion_stages: stages })
+      .eq('id', studyId);
+  } catch (err) {
+    console.warn(`markStageFailed(${stage}) falhou para ${studyId}:`, err);
+  }
+}
+
 export const useProcessingLogic = (
   processQueue: ProcessingItem[],
   setProcessQueue: (queue: ProcessingItem[]) => void,
@@ -158,7 +187,8 @@ export const useProcessingLogic = (
           } else if (errorMsg.includes('Extração falhou')) {
             addLogEntry(`💡 Tip: PDF may be corrupted or without extractable text.`);
           }
-          
+
+          await markStageFailed(item.id, 'file_search', errorMsg);
           updatedQueue[index] = { 
             ...item, 
             stage: 'error', 
@@ -173,6 +203,7 @@ export const useProcessingLogic = (
         if (!geminiData || !geminiData.success) {
           const errorMsg = geminiData?.error || 'Google Gemini returned invalid data';
           addLogEntry(`❌ [ERROR] Invalid Gemini response: ${errorMsg}`);
+          await markStageFailed(item.id, 'file_search', errorMsg);
           updatedQueue[index] = { ...item, stage: 'error', progress: 0, error: errorMsg };
           setProcessQueue([...updatedQueue]);
           processNextItem(index + 1);
@@ -191,11 +222,13 @@ export const useProcessingLogic = (
           
           if (vectorError) {
             addLogEntry(`⚠️ [WARNING] Vectorization failed: ${vectorError.message} (study can still be used without semantic search)`);
+            await markStageFailed(item.id, 'vectorize', vectorError.message || String(vectorError));
           } else {
             addLogEntry(`✅ [VECTORIZATION] ${vectorData.chunksProcessed || 0} embeddings created for semantic search`);
           }
         } catch (vectorErr: any) {
           addLogEntry(`⚠️ [WARNING] Vectorization error: ${vectorErr.message} (not critical)`);
+          await markStageFailed(item.id, 'vectorize', vectorErr?.message || String(vectorErr));
         }
         
         // CRITICAL VALIDATION: Check if analysis_data was saved correctly
