@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { getConfigValue } from './utils.ts';
-import { decideFileSearchGate } from './gate.ts';
+import { decideFileSearchGate, buildGateMetrics } from './gate.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -2147,7 +2147,7 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
           console.warn('⚠️ Could not read parse_study stage for truncation_ratio:', e);
         }
 
-        const gateDecision = decideFileSearchGate({
+        const gateInput = {
           fullTextLength: fullTextContent?.length || 0,
           entities: {
             nutraceuticals: extractedData.nutraceuticals,
@@ -2157,7 +2157,9 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
           },
           parseTotalChars,
           parseSectionsCount,
-        });
+        };
+        const gateDecision = decideFileSearchGate(gateInput);
+        const gateMetrics = buildGateMetrics(gateInput, gateDecision);
         const fileSearchStatus = gateDecision.status;
         const fileSearchReason = gateDecision.reason;
         const truncationRatio = gateDecision.truncationRatio;
@@ -2190,7 +2192,15 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
           ...((existingStagesRow?.ingestion_stages as Record<string, unknown>) || {}),
           file_search: fileSearchStageEntry,
         };
-        console.log(`🚦 file_search gate: ${fileSearchStatus}${fileSearchReason ? ` (${fileSearchReason})` : ''}, ratio=${truncationRatio}`);
+        // Structured log for observability — single JSON line so log scrapers
+        // can map gate outcomes back to the test cases in gate_test.ts.
+        console.log(JSON.stringify({
+          ...gateMetrics,
+          study_id: studyId,
+          extraction_method: extractionMethod,
+          model_call1: 'gemini-2.5-flash',
+          model_call2: 'gemini-3-pro-preview',
+        }));
 
         // ✅ STEP 1: Save to processed_studies
         const result = await supabase
