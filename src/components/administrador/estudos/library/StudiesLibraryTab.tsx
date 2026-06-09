@@ -132,6 +132,7 @@ const StudiesLibraryTab: React.FC<StudiesLibraryTabProps> = ({ onNavigateToUploa
         tags: p.tags || {},
         prestige_tier: p.prestige_tier ?? null,
         tags_source: p.tags_source ?? 'pending',
+        ingestion_stages: (p as any).ingestion_stages || null,
       } as any));
 
       // De-duplicate: prefer processed_studies entries
