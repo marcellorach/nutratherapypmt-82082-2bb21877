@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-09T00:08:53.084Z
+// Última geração: 2026-06-09T15:08:49.530Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,43 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-06-08";
+export const lastChangelogDate = "2026-06-09";
 
 export const senexVersion = "7.2.4";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-09",
+    "kind": "fixed",
+    "area": "curation",
+    "status": "entregue",
+    "title": "Ingestão: gate qualitativo + truncamento relativo + Call 1 dedicada",
+    "bullets": [
+      "Root cause: chamada monolítica do `gemini-file-search` competia `full_text` com 22 outras propriedades clínicas no mesmo tool call (`gemini-3-pro-preview`), causando truncamento progressivo do texto completo e queda na análise — sintoma do estudo Spermine (09/06) com `analysis_data` zerado mas `kanban_status='processed'`, e do CoQ10 (22/05) caindo no fallback `structured_data_enhanced` com 0 nutracêuticos.",
+      "Fix estrutural — split em 2 calls no `gemini-file-search`: nova função `acquireFullText()` (Call 1, `gemini-2.5-flash`, schema minimal `{ full_text: string }`) roda em paralelo conceitual e sobrescreve `extractedData.full_text` quando entrega texto maior; a Call 2 existente (`extractWithFileSearch`) preserva as 22 propriedades clínicas. Metadados bibliográficos seguem propriedade exclusiva do `parse-study` (Call 1 nunca grava em title/authors/year/abstract/doi).",
+      "Gate de 3 estados (qualitativo, SEM char-floor absoluto) persistido em nova coluna `processed_studies.ingestion_stages jsonb`:",
+      "`failed`: Call 1 + Call 2 ambas não entregaram `full_text` utilizável.",
+      "`degraded` (a): todas as categorias clínicas chave (`nutraceuticals/conditions/mechanisms/biological_effects`) vieram vazias.",
+      "`degraded` (b): truncamento RELATIVO — `truncation_ratio = chars_full_text / parse_study.total_chars < 0.30` E `parse_study.sections_count >= 3`. Position-papers legítimos curtos passam ilesos.",
+      "`ok`: caso contrário. `chars` e `truncation_ratio` ficam gravados apenas como informativos, nunca como gatilho isolado.",
+      "Bloqueio do `kanban_status='processed'`: `extract-study-entities` agora lê `ingestion_stages.file_search.status` no início — se `failed`, retorna 200 com `{ skipped: true }` e marca `kanban_status='error'` (não roda LLM). Se `degraded`, roda mas marca `extract_entities.confidence='degraded'`. Re-lê stages no final para garantir que upstream falhado vire `error`, nunca `processed`. Mata o padrão Spermine silencioso.",
+      "Telemetria por estágio em `ingestion_stages`: `parse_study` ({sections_count, tables_count, total_chars}), `file_search` ({status, reason, chars, truncation_ratio, model_call1, model_call2, entities_counts}), `extract_entities` ({status, confidence, counts}), `vectorize` ({status, chunks_count, model}). Cada função tem `try/catch` que persiste `status:'failed'` antes de propagar exceção.",
+      "UI — 2 superfícies de badge: (a) cards em `StudiesLibraryTab` exibem \"Extração falhou\" (vermelho) / \"Extração degradada\" (âmbar); (b) banner no topo do `StudyTripletCuration` quando `file_search.status !== 'ok'`, mostrando motivo, chars e truncation_ratio para o curador.",
+      "Migration: `ALTER TABLE processed_studies ADD COLUMN ingestion_stages jsonb NOT NULL DEFAULT '{}'::jsonb` + índice GIN.",
+      "Files: `supabase/functions/parse-study/index.ts`, `supabase/functions/gemini-file-search/index.ts`, `supabase/functions/extract-study-entities/index.ts`, `supabase/functions/vectorize-study/index.ts`, `src/components/administrador/estudos/library/StudiesLibraryTab.tsx`, `src/components/administrador/estudos/curation/StudyTripletCuration.tsx`, `src/locales/{pt,en}/translation.json`, `src/i18n.ts` (bump 1.119.0).",
+      "Fora de escopo (Fases 3+4 do próximo turno): baseline pré-backfill, botão \"Reprocessar pipeline\", bloco `ingestion_health` em `generate-audit`. `generate-triplets` não foi alterado."
+    ],
+    "files": [
+      "supabase/functions/parse-study/index.ts",
+      "supabase/functions/gemini-file-search/index.ts",
+      "supabase/functions/extract-study-entities/index.ts",
+      "supabase/functions/vectorize-study/index.ts",
+      "src/components/administrador/estudos/library/StudiesLibraryTab.tsx",
+      "src/components/administrador/estudos/curation/StudyTripletCuration.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.119.0"
+  },
   {
     "date": "2026-06-08",
     "kind": "fixed",

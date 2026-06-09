@@ -1,19 +1,25 @@
 # Project context briefing (auto)
-Generated: 2026-06-09T00:08:53.088Z
+Generated: 2026-06-09T15:08:49.538Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: —
+## Latest i18n version: 1.119.0
 
 ## Changes by area (last 14 days)
 - **admin**: 26
 - **meta**: 7
 - **clinical-pipeline**: 7
 - **infra**: 5
+- **curation**: 4
 - **kg**: 3
-- **curation**: 3
 
 ## Top 10 recent entries
+### 2026-06-09 · [curation] FIXED — Ingestão: gate qualitativo + truncamento relativo + Call 1 dedicada
+- Root cause: chamada monolítica do `gemini-file-search` competia `full_text` com 22 outras propriedades clínicas no mesmo tool call (`gemini-3-pro-preview`), causando truncamento progressivo do texto completo e queda na análise — sintoma do estudo Spermine (09/06) com `analysis_data` zerado mas `kanban_status='processed'`, e do CoQ10 (22/05) caindo no fallback `structured_data_enhanced` com 0 nutracêuticos.
+- Fix estrutural — split em 2 calls no `gemini-file-search`: nova função `acquireFullText()` (Call 1, `gemini-2.5-flash`, schema minimal `{ full_text: string }`) roda em paralelo conceitual e sobrescreve `extractedData.full_text` quando entrega texto maior; a Call 2 existente (`extractWithFileSearch`) preserva as 22 propriedades clínicas. Metadados bibliográficos seguem propriedade exclusiva do `parse-study` (Call 1 nunca grava em title/authors/year/abstract/doi).
+- Gate de 3 estados (qualitativo, SEM char-floor absoluto) persistido em nova coluna `processed_studies.ingestion_stages jsonb`:
+_files: supabase/functions/parse-study/index.ts, supabase/functions/gemini-file-search/index.ts, supabase/functions/extract-study-entities/index.ts, supabase/functions/vectorize-study/index.ts…_
+
 ### 2026-06-08 · [admin] FIXED — Auditorias: tag CONFIDENCIAL sem encavalamento + propriedade PetMoreTime reforçada
 - `audit-pdf-generator.ts`: banner CONFIDENCIAL agora usa layout flex real (tag em `<span>` com `flex-shrink:0`), eliminando a sobreposição do pseudo-elemento `::before` sobre o texto observada em PT/EN.
 - Footer discreto fixado em todas as páginas no `@media print` (`position:fixed; bottom:0`, 9px italic, "CONFIDENCIAL" em vermelho sóbrio inline), mantendo aparição única em tela.
@@ -64,12 +70,6 @@ _files: supabase/functions/generate-audit/index.ts, supabase/functions/_shared/s
 - Checklist canônico (`FALLBACK_COVERAGE`) corrigido:
 - `digital-twin`: título agora separa explicitamente os dois motores (sigmóide para condição × nutracêutico vs. Gompertz para envelhecimento por raça) e cita `breed_aging_curves + project-pet-trajectory` no evidence.
 _files: supabase/functions/generate-audit/index.ts_
-
-### 2026-06-05 · [admin] ADDED — Painel Preview vs Publicado na aba de Auditorias
-- Novo componente `PreviewVsPublishedPanel` (admin → Auditorias) — compara em tempo real os 4 snapshots auditáveis (`drift-report.json`, `ARCHITECTURE_LIVE.md`, `CHANGELOG.md`, `PROMPTS.md`) entre o ambiente de preview (`window.location.origin`) e o publicado (`https://longevidade.ai`). Status verde/amarelo por sha-256, botão "Ver diff" abre `SnapshotDiffDialog` lado a lado (lib `diff`).
-- Nova edge function `compare-snapshots` — fetch server-side paralelo dos dois ambientes (contorna CORS de hospedagem estática), whitelist fixa de arquivos, devolve `{file, equal, preview, published}` com sha-256.
-- Novo passo de build `scripts/copy-snapshots-to-public.mjs` (último passo de `npm run audit:prebuild`) — copia os 4 artefatos para `public/snapshots/` + `manifest.json` com sha-256/bytes/timestamp. Sem esse passo, navegador não consegue baixar `ARCHITECTURE_LIVE.md`/`CHANGELOG.md`/`PROMPTS.md` (estão fora de `/public/`).
-_files: scripts/copy-snapshots-to-public.mjs, src/components/administrador/audits/PreviewVsPublishedPanel.tsx, src/components/administrador/audits/SnapshotDiffDialog.tsx, src/components/administrador/audits/TechnicalAuditsTab.tsx…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
