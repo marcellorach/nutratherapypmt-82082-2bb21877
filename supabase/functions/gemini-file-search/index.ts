@@ -1812,7 +1812,7 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
       }
       GOOGLE_GEMINI_KEY = String(configData.config_value).replace(/^"|"$/g, '');
     }
-    console.log('✅ Chave resolvida (primeiros 10 caracteres):', GOOGLE_GEMINI_KEY.substring(0, 10) + '...');
+    console.log('✅ Chave resolvida — prefixo:', GOOGLE_GEMINI_KEY.substring(0, 10) + '...', '| sufixo:', '...' + GOOGLE_GEMINI_KEY.slice(-4), '| length:', GOOGLE_GEMINI_KEY.length);
 
     // Download do PDF do Supabase Storage
     console.log('📥 Baixando PDF do Supabase Storage...');
