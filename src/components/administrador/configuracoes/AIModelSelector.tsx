@@ -9,14 +9,14 @@ import { Cpu, Zap, Save, RefreshCw } from "lucide-react";
 import { useTranslation } from 'react-i18next';
 
 const AVAILABLE_MODELS = [
-  { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview', descKey: 'Latest generation, advanced reasoning', recommended: true },
-  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', descKey: 'Fast and balanced' },
-  { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash Experimental', descKey: 'Experimental features' },
-  { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', descKey: 'Powerful, slower' },
+  { id: 'google/gemini-3.5-flash', name: 'Gemini 3.5 Flash', descKey: 'GA · 1M ctx · supera 3.1 Pro em vários benchmarks · mais barato', recommended: true },
+  { id: 'google/gemini-3.1-pro-preview', name: 'Gemini 3.1 Pro', descKey: 'Deep reasoning · usar quando 3.5 Flash não satisfaz' },
+  { id: 'google/gemini-3.1-flash-lite-preview', name: 'Gemini 3.1 Flash Lite', descKey: 'Budget · alto volume / baixa complexidade' },
+  { id: 'google/gemini-2.5-pro', name: 'Gemini 2.5 Pro', descKey: 'Geração anterior · fallback de compatibilidade' },
 ];
 
 const EMBEDDING_MODELS = [
-  { id: 'text-embedding-004', name: 'Text Embedding 004', descKey: 'Latest embedding model', recommended: true },
+  { id: 'gemini-embedding-001', name: 'Gemini Embedding 001 (768d)', descKey: 'GA · substitui text-embedding-004 (deprecated Jan/2026)', recommended: true },
 ];
 
 interface AIModelConfig {
@@ -33,11 +33,11 @@ const AIModelSelector: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [config, setConfig] = useState<AIModelConfig>({
-    extraction: 'gemini-3-pro-preview',
-    triplets: 'gemini-3-pro-preview',
-    chat: 'gemini-3-pro-preview',
-    translate: 'gemini-3-pro-preview',
-    embeddings: 'text-embedding-004',
+    extraction: 'google/gemini-3.5-flash',
+    triplets: 'google/gemini-3.5-flash',
+    chat: 'google/gemini-3.5-flash',
+    translate: 'google/gemini-3.5-flash',
+    embeddings: 'gemini-embedding-001',
   });
 
   useEffect(() => { loadConfig(); }, []);

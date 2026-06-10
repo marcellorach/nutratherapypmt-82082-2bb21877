@@ -10,11 +10,11 @@ export interface AIModelConfig {
 }
 
 const DEFAULT_CONFIG: AIModelConfig = {
-  extraction: 'gemini-3-pro-preview',
-  triplets: 'gemini-3-pro-preview',
-  chat: 'google/gemini-3-flash-preview',
-  translate: 'gemini-3-pro-preview',
-  embeddings: 'gemini-embedding-001@768d',
+  extraction: 'google/gemini-3.5-flash',
+  triplets: 'google/gemini-3.5-flash',
+  chat: 'google/gemini-3.5-flash',
+  translate: 'google/gemini-3.5-flash',
+  embeddings: 'gemini-embedding-001',
 };
 
 export const useAIConfig = () => {
@@ -60,11 +60,12 @@ export const useAIConfig = () => {
 
   const getModelDisplayName = useCallback((modelId: string): string => {
     const modelNames: Record<string, string> = {
-      'gemini-3-pro-preview': 'Gemini 3 Pro Preview',
-      'google/gemini-3-pro-preview': 'Gemini 3 Pro Preview',
-      'google/gemini-3-flash-preview': 'Gemini 3 Flash Preview',
-      'google/gemini-3.1-pro-preview': 'Gemini 3.1 Pro Preview',
-      'google/gemini-3.1-flash-lite-preview': 'Gemini 3.1 Flash Lite Preview',
+      'google/gemini-3.5-flash': 'Gemini 3.5 Flash (GA)',
+      'google/gemini-3.1-pro-preview': 'Gemini 3.1 Pro',
+      'google/gemini-3.1-flash-lite-preview': 'Gemini 3.1 Flash Lite',
+      'gemini-3-pro-preview': 'Gemini 3 Pro Preview (aposentado)',
+      'google/gemini-3-pro-preview': 'Gemini 3 Pro Preview (aposentado)',
+      'google/gemini-3-flash-preview': 'Gemini 3 Flash Preview (legado)',
       'google/gemini-2.5-pro': 'Gemini 2.5 Pro',
       'gemini-2.5-flash': 'Gemini 2.5 Flash',
       'google/gemini-2.5-flash': 'Gemini 2.5 Flash',
@@ -72,7 +73,8 @@ export const useAIConfig = () => {
       'gemini-1.5-pro': 'Gemini 1.5 Pro',
       'openai/gpt-5': 'GPT-5',
       'openai/gpt-5-mini': 'GPT-5 Mini',
-      'text-embedding-004': 'Text Embedding 004',
+      'text-embedding-004': 'Text Embedding 004 (deprecated Jan/2026)',
+      'gemini-embedding-001': 'Gemini Embedding 001 (768d)',
       'gemini-embedding-001@768d': 'Gemini Embedding 001 (768d, RETRIEVAL_QUERY)',
     };
     return modelNames[modelId] || modelId;
