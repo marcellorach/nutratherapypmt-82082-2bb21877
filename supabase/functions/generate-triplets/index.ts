@@ -509,7 +509,7 @@ Be thorough - capture EVERY biological relationship mentioned in this section.`;
           override_system_prompt: phase1SystemPrompt,
           messages: [{ role: 'user', content: phase1UserPrompt }],
           temperature: 0.1,
-          fallback: { model_id: 'google/gemini-3-pro-preview', temperature: 0.1 },
+          fallback: { model_id: 'google/gemini-3.5-flash', temperature: 0.1 },
         });
         chunkResult = phase1.output;
       } catch (e: any) {
@@ -824,7 +824,7 @@ IMPORTANT: The pathway_chains array should show the complete discovered chains i
         tools: [extractTripletsToolDef],
         tool_choice: { type: 'function', function: { name: 'extract_triplets' } },
         temperature: 0.1,
-        fallback: { model_id: 'google/gemini-3-pro-preview', temperature: 0.1 },
+        fallback: { model_id: 'google/gemini-3.5-flash', temperature: 0.1 },
       });
       // Reconstruct minimal phase2Data shape expected by downstream parser
       phase2Data = {

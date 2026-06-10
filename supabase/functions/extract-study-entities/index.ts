@@ -768,7 +768,7 @@ async function callLovableAI(taskId: string, systemPrompt: string, userPrompt: s
       tool_choice: { type: 'function', function: { name: tools[0].function.name } },
       temperature: 0.1,
       fallback: {
-        model_id: 'google/gemini-3-pro-preview',
+        model_id: 'google/gemini-3.5-flash',
         temperature: 0.1,
       },
     });
