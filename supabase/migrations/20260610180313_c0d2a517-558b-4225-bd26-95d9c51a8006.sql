@@ -1,0 +1,2 @@
+UPDATE public.ai_configurations SET config_value = '"google/gemini-3.5-flash"', updated_at = now() WHERE config_key IN ('ai_model_chat','ai_model_extraction','ai_model_translate','ai_model_triplets');
+UPDATE public.ai_configurations SET config_value = '"gemini-embedding-001"', updated_at = now() WHERE config_key = 'ai_model_embeddings';
