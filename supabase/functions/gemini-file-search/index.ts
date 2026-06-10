@@ -1225,10 +1225,11 @@ Return using extract_study_data function with ALL arrays fully populated, INCLUD
     console.log('📤 Sending query with Tool Calling via Google AI Direct...');
     console.log(`📄 Including PDF file in request: ${fileUri}`);
     
-    // ✅ Use GOOGLE_AI_API_KEY instead of LOVABLE_API_KEY
-    const googleApiKey = Deno.env.get('GOOGLE_AI_API_KEY');
+    // ✅ Prefer Senex project key (prepaid); fallback to legacy GOOGLE_AI_API_KEY
+    const googleApiKey =
+      Deno.env.get('GEMINI_API_KEY_SENEX') ?? Deno.env.get('GOOGLE_AI_API_KEY');
     if (!googleApiKey) {
-      throw new Error('GOOGLE_AI_API_KEY not configured');
+      throw new Error('GEMINI_API_KEY_SENEX/GOOGLE_AI_API_KEY not configured');
     }
     
     // ✅ Google AI Native format with function declarations AND PDF FILE
