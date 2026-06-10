@@ -1796,21 +1796,23 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Buscar Google Gemini API Key da tabela ai_configurations
-    console.log('🔑 Buscando Google Gemini API Key da configuração...');
-    const { data: configData, error: configError } = await supabase
-      .from('ai_configurations')
-      .select('config_value')
-      .eq('config_key', 'google_gemini_api_key')
-      .single();
-
-    if (configError || !configData?.config_value) {
-      console.error('❌ Chave não encontrada na tabela ai_configurations:', configError);
-      throw new Error('Google Gemini API Key não configurada (ai_configurations.google_gemini_api_key)');
+    // 🔑 Prefer Senex project key (prepaid); fallback to legacy env, then DB config
+    console.log('🔑 Resolvendo Google Gemini API Key...');
+    let GOOGLE_GEMINI_KEY =
+      Deno.env.get('GEMINI_API_KEY_SENEX') ?? Deno.env.get('GOOGLE_AI_API_KEY') ?? '';
+    if (!GOOGLE_GEMINI_KEY) {
+      const { data: configData, error: configError } = await supabase
+        .from('ai_configurations')
+        .select('config_value')
+        .eq('config_key', 'google_gemini_api_key')
+        .single();
+      if (configError || !configData?.config_value) {
+        console.error('❌ Chave não encontrada:', configError);
+        throw new Error('Google Gemini API Key não configurada (env GEMINI_API_KEY_SENEX/GOOGLE_AI_API_KEY ou ai_configurations.google_gemini_api_key)');
+      }
+      GOOGLE_GEMINI_KEY = String(configData.config_value).replace(/^"|"$/g, '');
     }
-
-    const GOOGLE_GEMINI_KEY = String(configData.config_value);
-    console.log('✅ Chave encontrada (primeiros 10 caracteres):', GOOGLE_GEMINI_KEY.substring(0, 10) + '...');
+    console.log('✅ Chave resolvida (primeiros 10 caracteres):', GOOGLE_GEMINI_KEY.substring(0, 10) + '...');
 
     // Download do PDF do Supabase Storage
     console.log('📥 Baixando PDF do Supabase Storage...');
