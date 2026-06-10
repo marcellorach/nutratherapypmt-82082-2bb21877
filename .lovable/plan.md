@@ -1,110 +1,53 @@
-## Verificações prévias (grep)
+## Passo 1 — Validação ponta-a-ponta (4 estudos)
 
-- `full_text` na Call 2 só é consumido em 4 pontos confirmados: schema (571-574), mapeamento (1327), e override/leitura pós-Call1 (1902, 1905-1910, 1934-1937). Linhas 2026 (`has_full_text`) e 2116/2214 leem `extractedData.full_text` **depois** do override da Call 1 — passam a refletir só Call 1 e ficam corretas sem mudança.
-- Nenhum outro consumidor externo lê `full_text` direto do retorno da Call 2.
-- A1 confirmado seguro.
+Plano já aprovado em iterações anteriores. Resumo executável para acionar build mode.
 
-Observação: o `extract-study-entities` (linhas 497-532) **já** relê `ingestion_stages` e bloqueia `processed` se `file_search.status === 'failed'` OU `parse_study.status === 'failed'`. Mas **não** trata `file_search` ausente como falha — esse é o A2 buraco 2 (alinhar critério).
+### Ordem de execução
 
----
+1. **Congelar baselines** (antes de qualquer reprocessamento):
+   - Spermine → `/mnt/documents/yield_test_baseline_spermine.json`
+   - CoQ10 → `/mnt/documents/yield_test_baseline_coq10.json`
+   - Conteúdo: `study_extractions.extracted_data` + `processed_studies.analysis_data` + `processed_studies.ingestion_stages` + `kanban_status` no estado atual.
+   - Polyphenols já tem baseline em `/mnt/documents/yield_test_baseline.json` (não reescrever).
+   - Position-paper curto: snapshot leve do estado atual (referência de "não deve degradar").
 
-## A1 — Call 1 = fonte única do `full_text`
+2. **Reprocessar 4 estudos sequencial, 1 por vez**:
+   - Spermine → CoQ10 → Polyphenols → position-paper curto.
+   - Pipeline por estudo: `gemini-file-search` → aguardar `kanban_status` estabilizar → `extract-study-entities` → aguardar estabilizar.
+   - **Pular `vectorize-study`** nos 4 (não afeta yield; evita orphan chunks).
+   - **NÃO rodar `generate-triplets`**.
 
-**Arquivo:** `supabase/functions/gemini-file-search/index.ts`
+3. **Coletar telemetria por estudo**:
+   - `file_search`: `status`, `reason`, `chars_call1`, `truncation_suspected`, `model_call1`, `model_call2`, `entities_counts` (Call 2, informativo).
+   - `extract_entities`: `status`, `confidence`, `counts` (nutracêuticos, mechanisms, biological_effects, conditions, interactions, side_effects).
+   - `study_extractions.extracted_data`: contagens finais (**fonte oficial do yield**).
+   - `kanban_status` final.
 
-```text
-571-574  REMOVER bloco full_text do schema da Call 2
-1327     REMOVER linha `full_text: extractedArgs.full_text || '',`
-1900-1911  SUBSTITUIR override pós-Call-2 por: chamar acquireFullText, atribuir
-           direto: extractedData.full_text = (call1.text || '').trim();
-           Logar call1.error se vier vazio. Sem comparação com call2Text.
-1933-1938  Manter condição `if (extractedData.full_text && length > 500)` —
-           agora alimentada SÓ pela Call 1. `extractionMethod` permanece
-           'gemini_full_text_extraction'.
-```
+### Relatório final
 
-Comentários do bloco (1891-1898) reescritos: Call 1 é fonte única; Call 2 não devolve mais `full_text`.
+**Tabela 4×telemetria** (1 linha por estudo, colunas = campos acima).
 
----
+**Comparativo antes/depois** (apenas Polyphenols e CoQ10, fonte = `study_extractions.extracted_data`):
 
-## A2 buraco 1 — `useVetGraphRAGQueue.ts:212-237` (`updateProcessedStudy`)
+| Estudo | Métrica | Antes | Depois | Δ |
+|---|---|---|---|---|
+| Polyphenols | yield (entidades/char) | 0.184 | ? | ? |
+| Polyphenols | mechanisms | 0 | ? | ? |
+| Polyphenols | biological_effects | 0 | ? | ? |
+| CoQ10 | nutracêuticos | (baseline) | ? | ? |
+| CoQ10 | método extração | structured_data_enhanced | ? | ? |
 
-**Diff alvo:**
+**Veredito por critério de aceite**:
+- [ ] Zero `processed` silencioso (todos com `analysis_data` ou `failed` justificado)
+- [ ] Spermine: `file_search.status` = `ok` ou `failed` (não limbo)
+- [ ] CoQ10: `ok` com nutracêuticos > 0 (sai do fallback)
+- [ ] Position-paper curto: não `degraded` por `truncation_suspected`
+- [ ] Polyphenols: yield sobe E mechanisms/biological_effects > 0
 
-```text
-ANTES do update, ler ingestion_stages:
-  const { data: row } = await supabase
-    .from('processed_studies')
-    .select('ingestion_stages')
-    .eq('id', studyId).maybeSingle();
-  const stages = (row?.ingestion_stages as Record<string, any>) || {};
-  const fs = stages.file_search;
-  const anyFailed = Object.values(stages).some(s => s?.status === 'failed');
-  const fsOk = fs?.status === 'ok' || fs?.status === 'degraded';
+### Fora de escopo (registrar, não fazer)
+- `markStageFailed` dentro de `gemini-file-search` (Fase 3)
+- Isolamento de projeto GCP entre chave Debates e ingestão (pré-produção)
+- Botão "Reprocessar pipeline", baseline pré-backfill, `ingestion_health` no audit (Fases 3-4)
+- Patch em `generate-triplets`
 
-  // Se edge já marcou error → NÃO sobrescrever kanban_status.
-  const updatePayload: any = { analysis_data: analysisData };
-  if (!anyFailed && fsOk) updatePayload.kanban_status = 'processed';
-  else updatePayload.kanban_status = 'error';
-```
-
-Sem `kanban_status` cego = 'processed'. Mata o overwrite silencioso do Spermine.
-
----
-
-## A2 buraco 2 — `extract-study-entities/index.ts:506-508`
-
-**Diff alvo (1 linha lógica):**
-
-```diff
-- const anyUpstreamFailed =
--   (refreshedFileSearch?.status === 'failed') ||
--   ((refreshedStages as any).parse_study?.status === 'failed');
-+ const fsStatus = refreshedFileSearch?.status;
-+ const fsBlocking = fsStatus !== 'ok' && fsStatus !== 'degraded'; // ausente OU failed
-+ const anyUpstreamFailed =
-+   fsBlocking ||
-+   ((refreshedStages as any).parse_study?.status === 'failed');
-```
-
-Crash silencioso de upstream (sem gravar `ingestion_stages`) agora bloqueia `processed`.
-
----
-
-## A2 buraco 3 — `useProcessingLogic.ts` catches gemini/vectorize
-
-**Helper local (topo do arquivo ou inline):**
-
-```ts
-async function markStageFailed(supabase, studyId, stage, error_message) {
-  const { data } = await supabase.from('processed_studies')
-    .select('ingestion_stages').eq('id', studyId).maybeSingle();
-  const stages = (data?.ingestion_stages as Record<string, any>) || {};
-  stages[stage] = { status: 'failed', error_message, finished_at: new Date().toISOString() };
-  await supabase.from('processed_studies')
-    .update({ ingestion_stages: stages }).eq('id', studyId);
-}
-```
-
-**Linha 149 (geminiError):** antes do `updatedQueue[index] = { stage:'error' ... }`, chamar `await markStageFailed(supabase, item.id, 'file_search', errorMsg)`.
-
-**Linhas 173-180 (geminiData inválido):** idem, `markStageFailed(..., 'file_search', errorMsg)`.
-
-**Linha 192-199 (vectorError + catch):** `markStageFailed(..., 'vectorize', err)`. Mantém comportamento atual de não derrubar a fila (vectorize não é crítico), mas grava o `failed` para o gate ler.
-
----
-
-## Ordem de deploy
-
-1. Editar 3 arquivos (sem migration nova).
-2. Deploy edge functions: `gemini-file-search`, `extract-study-entities`.
-3. Build front (A2#1, A2#3) sobe junto no preview.
-4. **Sem backfill**. Re-extrair 2 estudos longos com baixo yield (dos 49 ≥1500 chars / ~1 nutra) só DEPOIS do deploy, manualmente, como teste de critério (yield = entidades/char).
-
-## Fora deste patch
-
-- Critério de candidato a backfill (yield).
-- Backfill em si.
-- Botão "Reprocessar pipeline" e bloco `ingestion_health` (Fases 3+4).
-
-Confirma para aplicar?
+Pronto para build mode.
