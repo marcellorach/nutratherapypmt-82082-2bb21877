@@ -405,6 +405,12 @@ async function addFileToCorpus(
     console.error('❌ Status HTTP:', response.status);
     console.error('❌ Headers:', JSON.stringify(Object.fromEntries(response.headers.entries())));
     console.error('❌ Corpo da resposta:', errorText);
+    if (isPermanentStatus(response.status)) {
+      throw new PermanentApiError(
+        response.status,
+        `Erro permanente ao importar arquivo (${response.status}): ${(errorText || '').slice(0, 300)}`,
+      );
+    }
     throw new Error(`Erro ao importar arquivo (${response.status}): ${errorText || 'Sem mensagem de erro'}`);
   }
   
@@ -1278,10 +1284,13 @@ Return using extract_study_data function with ALL arrays fully populated, INCLUD
       if (response.status === 429) {
         throw new Error('Rate limit exceeded on Google AI. Wait a few minutes.');
       }
-      if (response.status === 400) {
-        throw new Error('Invalid request to Google AI. Check parameters.');
+      // Fail-fast em erros permanentes (modelo morto = 404, key inválida = 401, etc.)
+      if (isPermanentStatus(response.status)) {
+        throw new PermanentApiError(
+          response.status,
+          `Google AI permanent error ${response.status}: ${errorText.slice(0, 300)}`,
+        );
       }
-      
       throw new Error(`API Error: ${response.status} - ${errorText}`);
     }
 
@@ -1467,6 +1476,8 @@ Return using extract_study_data function with ALL arrays fully populated, INCLUD
     return extractedData;
   } catch (error) {
     console.error('❌ Erro ao extrair dados com Gemini File Search:', error);
+    // Preserva PermanentApiError para o retry helper poder fail-fast.
+    if (error instanceof PermanentApiError) throw error;
     throw new Error(`Falha na extração estruturada: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
@@ -1622,6 +1633,12 @@ CRITICAL INSTRUCTIONS:
   if (!response.ok) {
     const errorText = await response.text();
     console.error('❌ Gemini API erro:', response.status, errorText);
+    if (isPermanentStatus(response.status)) {
+      throw new PermanentApiError(
+        response.status,
+        `Gemini API permanent error ${response.status}: ${errorText.slice(0, 300)}`,
+      );
+    }
     throw new Error(`Gemini API erro: ${response.status} - ${errorText}`);
   }
   
@@ -1671,6 +1688,24 @@ async function deleteGeminiFile(fileName: string, apiKey: string): Promise<void>
 const MAX_RETRIES = 2;
 const INITIAL_BACKOFF_MS = 2000;
 
+/**
+ * Erros permanentes (404, 401, 403, 400) NÃO devem entrar no retry loop —
+ * são contrato/configuração (modelo inexistente, API key inválida, request malformado).
+ * Apenas 429/503 e falhas de rede transitórias justificam backoff.
+ */
+class PermanentApiError extends Error {
+  status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = 'PermanentApiError';
+    this.status = status;
+  }
+}
+
+function isPermanentStatus(status: number): boolean {
+  return status === 400 || status === 401 || status === 403 || status === 404;
+}
+
 async function retryWithExponentialBackoff<T>(
   operation: () => Promise<T>,
   operationName: string,
@@ -1680,6 +1715,11 @@ async function retryWithExponentialBackoff<T>(
     console.log(`🔄 [${operationName}] Tentativa ${attempt}/${MAX_RETRIES + 1}`);
     return await operation();
   } catch (error) {
+    // FAIL-FAST: erros permanentes não retentam — propagam imediatamente.
+    if (error instanceof PermanentApiError) {
+      console.error(`🛑 [${operationName}] Erro permanente HTTP ${error.status} — fail-fast, sem retry.`);
+      throw error;
+    }
     if (attempt > MAX_RETRIES) {
       console.error(`❌ [${operationName}] Todas as ${MAX_RETRIES + 1} tentativas falharam`);
       throw error;
