@@ -1744,6 +1744,9 @@ serve(async (req) => {
           ...((row?.ingestion_stages as Record<string, unknown>) || {}),
           file_search: {
             status: 'failed',
+            reason: (error instanceof Error && error.message.startsWith('empty_payload'))
+              ? 'empty_payload'
+              : 'pipeline_error',
             error_message: error instanceof Error ? error.message : String(error),
             stage: 'pipeline',
             finished_at: new Date().toISOString(),
