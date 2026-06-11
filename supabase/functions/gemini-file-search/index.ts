@@ -1899,6 +1899,18 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
     const call1Text = (call1.text || '').trim();
     if (!call1Text) {
       console.warn(`⚠️ Call 1 returned empty full_text${call1.error ? ` (error: ${call1.error})` : ''}`);
+      // HARD GATE — empty_payload.
+      // Call 1 é a fonte canônica do full_text. Se vier vazia,
+      // extract-study-entities NUNCA pode rodar e marcar ok.
+      // Lança erro para o outer catch marcar:
+      //   ingestion_stages.file_search.status = 'failed'
+      //   ingestion_stages.file_search.reason = 'empty_payload'
+      //   kanban_status = 'error'
+      throw new Error(
+        `empty_payload: Call 1 (acquireFullText, model=${call1.model}) ` +
+        `retornou full_text vazio${call1.error ? ` — provider error: ${call1.error}` : ''}. ` +
+        `Pipeline abortado para evitar falha silenciosa em extract-study-entities.`,
+      );
     } else {
       console.log(`✅ Call 1 full_text adquirido: ${call1Text.length} chars`);
     }
