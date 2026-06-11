@@ -456,7 +456,7 @@ async function acquireFullText(
   fileUri: string,
   apiKey: string,
 ): Promise<{ text: string; model: string; error?: string }> {
-  const MODEL = 'gemini-3.5-flash';
+  const MODEL = 'gemini-3.1-pro';
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`,
@@ -521,8 +521,8 @@ async function extractWithFileSearch(
   apiKey: string,
   supabaseClient: any
 ): Promise<ExtractedStudyData> {
-  // ✅ USING GOOGLE AI DIRECTLY with gemini-3.5-flash (GA, 1M ctx, supera 3.1 Pro em vários benchmarks)
-  const MODEL_NAME = 'gemini-3.5-flash';
+  // ✅ USING GOOGLE AI DIRECTLY with gemini-3.1-pro (GA, 1M ctx, supera 3.1 Pro em vários benchmarks)
+  const MODEL_NAME = 'gemini-3.1-pro';
   console.log('🔍 Extracting data with Google AI Direct + Structured Output...');
   console.log(`📋 File Search Store: ${fileSearchStoreName}`);
   console.log(`📄 File URI: ${fileUri}`);  // ✅ LOG do URI
@@ -1510,7 +1510,7 @@ CRITICAL INSTRUCTIONS:
 
 
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro:generateContent?key=${apiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -2165,8 +2165,8 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
           truncation_ratio: truncationRatio,
           sections_count_ref: parseSectionsCount,
           extraction_method: extractionMethod,
-          model_call1: 'gemini-3.5-flash',
-          model_call2: 'gemini-3.5-flash',
+          model_call1: 'gemini-3.1-pro',
+          model_call2: 'gemini-3.1-pro',
           entities_counts: {
             nutraceuticals: extractedData.nutraceuticals?.length || 0,
             conditions: extractedData.conditions?.length || 0,
@@ -2192,8 +2192,8 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
           ...gateMetrics,
           study_id: studyId,
           extraction_method: extractionMethod,
-          model_call1: 'gemini-3.5-flash',
-          model_call2: 'gemini-3.5-flash',
+          model_call1: 'gemini-3.1-pro',
+          model_call2: 'gemini-3.1-pro',
         }));
 
         // ✅ STEP 1: Save to processed_studies
@@ -2751,7 +2751,7 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
     try {
       await supabase.from('api_usage_logs').insert({
         api_provider: 'google_gemini',
-        model: 'gemini-3.5-flash',
+        model: 'gemini-3.1-pro',
         operation: 'file_search_extraction',
         tokens_input: 0,
         tokens_output: 0,
