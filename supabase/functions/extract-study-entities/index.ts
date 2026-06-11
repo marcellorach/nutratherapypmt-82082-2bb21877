@@ -117,12 +117,41 @@ serve(async (req) => {
     const fullTextFromColumn = studyData.full_text_content;
     const textContent = extractTextContent(parsedContent, fullTextFromColumn);
     
-    if (!textContent || textContent.trim().length < 100) {
+    if (!textContent || textContent.trim().length < 500) {
       console.error('❌ Texto insuficiente extraído');
       console.error('📊 full_text_content length:', fullTextFromColumn?.length || 0);
       console.error('📊 analysis_data keys:', Object.keys(parsedContent));
+      // HARD GATE — empty_payload defensivo. Marca file_search=failed + kanban=error
+      // para impedir que o estudo seja exibido como 'processed' com payload vazio.
+      try {
+        const mergedStages = {
+          ...existingStages,
+          file_search: {
+            ...((existingStages.file_search as Record<string, unknown>) || {}),
+            status: 'failed',
+            reason: 'empty_payload',
+            error_message: `extract-study-entities: textContent length=${(textContent || '').length} (<500)`,
+            finished_at: new Date().toISOString(),
+          },
+          extract_entities: {
+            status: 'failed',
+            reason: 'empty_payload',
+            finished_at: new Date().toISOString(),
+          },
+        };
+        await supabase
+          .from('processed_studies')
+          .update({
+            kanban_status: 'error',
+            processing_error: `empty_payload: full_text=${fullTextFromColumn?.length || 0} chars`,
+            ingestion_stages: mergedStages,
+          })
+          .eq('id', studyId);
+      } catch (e) {
+        console.error('Failed to mark kanban_status=error on empty_payload:', e);
+      }
       return new Response(
-        JSON.stringify({ error: 'Insufficient text extracted', studyId, details: {
+        JSON.stringify({ error: 'empty_payload', reason: 'Insufficient text extracted', studyId, details: {
           fullTextLength: fullTextFromColumn?.length || 0,
           analysisDataKeys: Object.keys(parsedContent)
         }}),
