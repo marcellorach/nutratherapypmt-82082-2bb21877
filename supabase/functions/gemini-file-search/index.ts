@@ -2234,13 +2234,33 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
         // Read existing ingestion_stages and merge file_search key.
         const { data: existingStagesRow } = await supabase
           .from('processed_studies')
-          .select('ingestion_stages')
+          .select('ingestion_stages, kanban_status')
           .eq('id', studyId)
           .maybeSingle();
         const mergedStages = {
           ...((existingStagesRow?.ingestion_stages as Record<string, unknown>) || {}),
           file_search: fileSearchStageEntry,
         };
+        // ------------------------------------------------------------
+        // RE-ENCADEAMENTO error→ok (Passo 2):
+        // Se o estudo estava com kanban_status='error' (file_search anterior falhou)
+        // e agora file_search passou (status='ok' OU 'degraded' com texto real),
+        // resetar kanban_status e disparar SÓ o próximo estágio pendente
+        // (extract-study-entities). NUNCA re-dispara file_search.
+        // GUARDA contra loop: só avança se extract_entities ainda não está 'ok'.
+        // ------------------------------------------------------------
+        const priorKanban = (existingStagesRow as any)?.kanban_status as string | undefined;
+        const priorStages = (existingStagesRow?.ingestion_stages as any) || {};
+        const priorFileSearchFailed = priorStages?.file_search?.status === 'failed';
+        const extractAlreadyOk = priorStages?.extract_entities?.status === 'ok';
+        const fileSearchPassed =
+          (fileSearchStatus === 'ok' || fileSearchStatus === 'degraded') &&
+          fullTextContent.length > 0;
+        const shouldRechain =
+          fileSearchPassed &&
+          (priorKanban === 'error' || priorFileSearchFailed) &&
+          !extractAlreadyOk;
+
         // Structured log for observability — single JSON line so log scrapers
         // can map gate outcomes back to the test cases in gate_test.ts.
         console.log(JSON.stringify({
@@ -2249,6 +2269,7 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
           extraction_method: extractionMethod,
           model_call1: 'gemini-3.1-pro',
           model_call2: 'gemini-3.1-pro',
+          rechain_extract: shouldRechain,
         }));
 
         // ✅ STEP 1: Save to processed_studies
@@ -2263,11 +2284,44 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
             full_text_content: fullTextContent || null,
             full_text_metadata: fullTextMetadata,
             ingestion_stages: mergedStages,
+            // Reset kanban_status só quando vamos avançar a cadeia.
+            ...(shouldRechain ? { kanban_status: 'processing' } : {}),
             updated_at: new Date().toISOString()
           })
           .eq('id', studyId);
         
         if (result.error) throw result.error;
+
+        // Dispara extract-study-entities em background (não bloqueia resposta).
+        // GUARDA: só dispara se shouldRechain — nunca re-executa file_search.
+        if (shouldRechain) {
+          console.log(`🔁 Re-encadeando: file_search error→ok. Disparando extract-study-entities para ${studyId}`);
+          try {
+            const extractPromise = fetch(
+              `${Deno.env.get('SUPABASE_URL')}/functions/v1/extract-study-entities`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+                },
+                body: JSON.stringify({ studyId }),
+              }
+            ).then(async (r) => {
+              console.log(`🔁 extract-study-entities responded: ${r.status}`);
+              try { await r.text(); } catch {}
+            }).catch((e) => {
+              console.error('🔁 extract-study-entities dispatch failed:', e);
+            });
+            // @ts-ignore EdgeRuntime is available in Supabase Edge Functions
+            if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
+              // @ts-ignore
+              EdgeRuntime.waitUntil(extractPromise);
+            }
+          } catch (e) {
+            console.error('🔁 Falha ao agendar re-encadeamento:', e);
+          }
+        }
         
         // ✅ STEP 2: Upsert to study_extractions for Stage 3 data
         console.log('💾 Salvando em study_extractions para Stage 3...');

@@ -546,7 +546,14 @@ serve(async (req) => {
       counts: {
         nutraceuticals: (extractedData as any)?.nutraceuticals?.length || 0,
         conditions: (extractedData as any)?.conditions?.length || 0,
-        mechanisms: (extractedData as any)?.mechanisms?.length || 0,
+        // FIX: campo real é `molecular_mechanisms` (Stage 2). A chave `mechanisms`
+        // está sempre vazia — lia 0 mesmo quando havia 10 mecanismos extraídos.
+        mechanisms: (extractedData as any)?.molecular_mechanisms?.length
+          || (extractedData as any)?.mechanisms?.length
+          || 0,
+        molecular_mechanisms: (extractedData as any)?.molecular_mechanisms?.length || 0,
+        synergies: (extractedData as any)?.synergies?.length || 0,
+        hierarchical_relations: (extractedData as any)?.hierarchical_relations?.length || 0,
       },
       finished_at: new Date().toISOString(),
     };
