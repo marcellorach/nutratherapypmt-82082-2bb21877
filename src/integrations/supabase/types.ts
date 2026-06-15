@@ -5908,6 +5908,26 @@ export type Database = {
       }
       increment_translation_version: { Args: never; Returns: number }
       is_admin: { Args: never; Returns: boolean }
+      search_relations_by_term: {
+        Args: { p_limit?: number; p_terms: string[] }
+        Returns: {
+          auto_approved: boolean
+          curation_status: string
+          direction: string
+          evidence_level: string
+          extraction_confidence: number
+          id: string
+          intensity: string
+          llm_confidence: number
+          mechanism_path: Json
+          object_layer: string
+          object_name: string
+          predicate: string
+          study_id: string
+          subject_layer: string
+          subject_name: string
+        }[]
+      }
       search_study_chunks: {
         Args: {
           match_count?: number

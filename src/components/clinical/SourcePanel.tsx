@@ -3,9 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronUp, AlertTriangle, Database, Dog, Users, Globe, FlaskConical } from 'lucide-react';
+import { ChevronDown, ChevronUp, AlertTriangle, Database, Dog, Users, Globe, FlaskConical, Network } from 'lucide-react';
 import { useRoleView } from '@/contexts/RoleViewContext';
 import type { ResolverOutput, SourceKind } from '@/services/multi-source-resolver';
+import MechanismDiagram, { type MechanismTriplet } from './MechanismDiagram';
 
 const ICONS: Record<SourceKind, React.ComponentType<{ className?: string }>> = {
   kg: Database,
@@ -23,9 +24,14 @@ const SourcePanel: React.FC<Props> = ({ result }) => {
   const { t } = useTranslation();
   const { viewId } = useRoleView();
   const [open, setOpen] = useState(false);
+  const [showMechanism, setShowMechanism] = useState(false);
 
   const isTutor = viewId === 'tutor';
   const showModelTag = viewId === 'platform_architect';
+
+  const kgSource = result.sources.find((s) => s.kind === 'kg');
+  const mechanismTriplets = (kgSource?.meta?.triplets as MechanismTriplet[] | undefined) ?? [];
+  const hasMechanism = mechanismTriplets.length > 0;
 
   return (
     <Card>
@@ -35,12 +41,40 @@ const SourcePanel: React.FC<Props> = ({ result }) => {
             {t('prioritization.multiSource.synthesis')}
           </h4>
           <p className="text-sm leading-relaxed">{result.synthesis}</p>
+          {result.synthesisDegraded && result.synthesisSource && (
+            <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 mt-2 inline-block">
+              {t('prioritization.multiSource.degraded', 'Síntese degradada — fonte de maior peso (KG curado) sem cobertura para este termo. Usando: {{source}}.', {
+                source: t(`prioritization.multiSource.sources.${result.synthesisSource}`),
+              })}
+            </p>
+          )}
           {isTutor && (
             <p className="text-[11px] text-gray-500 mt-2 italic">
               {t('prioritization.multiSource.synthesisNote')}
             </p>
           )}
         </div>
+
+        {!isTutor && hasMechanism && (
+          <div className="pt-2 border-t">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={() => setShowMechanism((v) => !v)}
+            >
+              <Network className="h-3.5 w-3.5 mr-1" />
+              {showMechanism
+                ? t('prioritization.multiSource.mechanism.hide', 'Esconder mecanismo molecular')
+                : t('prioritization.multiSource.mechanism.show', 'Mostrar mecanismo molecular')}
+            </Button>
+            {showMechanism && (
+              <div className="mt-2">
+                <MechanismDiagram triplets={mechanismTriplets} />
+              </div>
+            )}
+          </div>
+        )}
 
         {!isTutor && (
           <>
@@ -109,6 +143,8 @@ const SourcePanel: React.FC<Props> = ({ result }) => {
                         <p className="text-gray-700 mt-1 break-words">
                           {s.notImplemented
                             ? <i className="text-gray-400">{t('prioritization.multiSource.notImplemented')}</i>
+                            : s.notApplicable
+                            ? <i className="text-gray-400">{t('prioritization.multiSource.notApplicable', 'Não aplicável neste contexto (sem pet selecionado).')}</i>
                             : s.claim ?? <i className="text-gray-400">—</i>}
                         </p>
                         {s.evidence && s.evidence.length > 0 && (

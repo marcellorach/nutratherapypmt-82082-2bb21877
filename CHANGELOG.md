@@ -24,6 +24,18 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.2.4 -->
 
+### Fixed - 2026-06-15 — Playground multi-fonte: KG busca por termo real + cohort canônico + diagrama de mecanismo
+<!-- area: prioritizacoes · status: entregue · i18n: 1.120.0 -->
+- **Root cause (KG vazio para curcumina)**: `kgProvider` em `src/services/multi-source-resolver.ts` chamava `get_relations_graph_data(p_limit:500)` e filtrava as keywords client-side. Curcumina existe (127 triplets em `triplet_extractions`), mas não nas 500 primeiras edges — daí "Knowledge Graph curado: —" em uma pergunta que o KG cobre amplamente.
+- **Fix KG**: nova RPC `public.search_relations_by_term(p_terms text[], p_limit int)` faz `ILIKE` direto em `subject_name`/`object_name` filtrando `curation_status='approved' OR auto_approved=true`, ordenando por `llm_confidence`. Provider passa a chamar a RPC. Validado: pergunta de curcumina retorna 10+ relações (Curcumin ⊣ NF-κB, ↑ Nrf2, ↓ TLR4, previne Alzheimer/Parkinson).
+- **Fix cohort (eco lexical)**: `cohortProvider` parou de fazer substring de palavras da query em `notes`. Agora detecta entidade canônica (raça via `pet_profiles.breed`, condição via `pet_conditions.condition_name`) presente no texto da pergunta e filtra a contagem real. Sem entidade reconhecida → claim explícito ("sem entidade clínica reconhecida"), nunca eco da query.
+- **Fix síntese**: `synthesize()` agora ignora fontes com `confidence=0`, `notApplicable` ou `notImplemented` e marca `synthesisDegraded=true` quando promove fonte de peso menor que 1.0. UI mostra badge âmbar "Síntese degradada — KG sem cobertura, usando: Internet".
+- **Histórico no playground**: petHistory provider retorna `notApplicable:true` quando não há `petId`; UI exibe "Não aplicável neste contexto" em vez de "—" mudo.
+- **Novo — `MechanismDiagram` (Mermaid)**: renderizado dentro do `SourcePanel` sob toggle "Mostrar mecanismo molecular" quando KG retorna ≥ 1 triplet. Mapeia predicate→seta biológica (`→` ativa, `⊣` inibe, `↓` trata) conforme `biological-legend-standard-notation`. Construído a partir dos triplets reais (não inventa).
+- Migration: `search_relations_by_term` RPC com GRANT EXECUTE para authenticated/anon/service_role.
+- Files: `supabase/migrations/<ts>_search_relations_by_term.sql`, `src/services/multi-source-resolver.ts`, `src/components/clinical/MechanismDiagram.tsx` (novo), `src/components/clinical/SourcePanel.tsx`, `src/locales/{pt,en}/translation.json`, `src/i18n.ts` (1.119.0 → 1.120.0).
+- Backlog: substituir ILIKE por busca vetorial (`study_embeddings`); plugar gap-fill PubMed quando KG retorna 0 triplets; conectar `treatedDogs` provider a cohort real.
+
 ### Fixed - 2026-06-09 — Ingestão: gate qualitativo + truncamento relativo + Call 1 dedicada
 <!-- area: curation · status: entregue · i18n: 1.119.0 -->
 - **Root cause**: chamada monolítica do `gemini-file-search` competia `full_text` com 22 outras propriedades clínicas no mesmo tool call (`gemini-3-pro-preview`), causando truncamento progressivo do texto completo e queda na análise — sintoma do estudo Spermine (09/06) com `analysis_data` zerado mas `kanban_status='processed'`, e do CoQ10 (22/05) caindo no fallback `structured_data_enhanced` com 0 nutracêuticos.

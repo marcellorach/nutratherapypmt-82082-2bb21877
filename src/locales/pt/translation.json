@@ -8626,6 +8626,14 @@
       "confidence": "Confiança",
       "notImplemented": "Provider ainda não implementado",
       "noResults": "Nenhuma fonte retornou resultado relevante.",
+      "notApplicable": "Não aplicável neste contexto (playground sem pet selecionado).",
+      "degraded": "Síntese degradada — fonte de maior peso (KG curado) sem cobertura para este termo. Usando: {{source}}.",
+      "mechanism": {
+        "show": "Mostrar mecanismo molecular",
+        "hide": "Esconder mecanismo molecular",
+        "empty": "Sem mecanismo molecular disponível para esta consulta.",
+        "legend": "Notação: → ativa · ⊣ inibe · ↓ trata. Construído a partir de triplets aprovados do KG."
+      },
       "sources": {
         "kg": "Knowledge Graph curado",
         "petHistory": "Histórico do cão",
