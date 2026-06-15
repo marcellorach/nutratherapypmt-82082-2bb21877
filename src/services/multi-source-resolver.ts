@@ -21,6 +21,8 @@ export interface SourceResult {
   confidence: number; // 0..1
   evidence?: Array<{ label: string; ref?: string }>;
   notImplemented?: boolean;
+  notApplicable?: boolean;
+  meta?: Record<string, unknown>;
   error?: string;
 }
 
@@ -32,6 +34,8 @@ export interface ResolverInput {
 
 export interface ResolverOutput {
   synthesis: string;
+  synthesisSource: SourceKind | null;
+  synthesisDegraded: boolean;
   sources: SourceResult[];
   conflicts: Array<{ a: SourceKind; b: SourceKind; reason: string }>;
 }
@@ -60,28 +64,33 @@ const extractKeywords = (q: string): string[] =>
 async function kgProvider(input: ResolverInput): Promise<SourceResult> {
   try {
     const kws = extractKeywords(input.question);
-    const { data, error } = await supabase.rpc('get_relations_graph_data', { p_limit: 500 });
-    if (error) throw error;
-    const rows = (data ?? []) as Array<any>;
-    const matched = rows.filter((r) => {
-      const blob = `${r.source_name} ${r.target_name} ${r.relationship}`.toLowerCase();
-      return kws.some((k) => blob.includes(k));
-    }).slice(0, 5);
-    if (matched.length === 0) {
+    if (kws.length === 0) {
       return { kind: 'kg', weight: WEIGHTS.kg, claim: null, confidence: 0 };
     }
-    const top = matched[0];
-    const claim = `${top.source_name} ${top.relationship} ${top.target_name} (n=${top.evidence_count ?? 0}, evidência ${top.evidence_level ?? '?'})`;
-    const confidence = Math.min(1, Number(top.confidence ?? 0.7));
+    const { data, error } = await supabase.rpc('search_relations_by_term', {
+      p_terms: kws,
+      p_limit: 25,
+    });
+    if (error) throw error;
+    const rows = (data ?? []) as Array<any>;
+    if (rows.length === 0) {
+      return { kind: 'kg', weight: WEIGHTS.kg, claim: null, confidence: 0 };
+    }
+    const top = rows[0];
+    const conf = Math.min(1, Number(top.llm_confidence ?? top.extraction_confidence ?? 0.7));
+    const claim = `${top.subject_name} ${top.predicate} ${top.object_name}` +
+      (top.evidence_level ? ` (evidência ${top.evidence_level})` : '') +
+      ` — ${rows.length} relação(ões) aprovadas no KG.`;
     return {
       kind: 'kg',
       weight: WEIGHTS.kg,
       claim,
-      confidence,
-      evidence: matched.map((m) => ({
-        label: `${m.source_name} → ${m.target_name}`,
-        ref: m.relationship,
+      confidence: conf,
+      evidence: rows.slice(0, 5).map((r) => ({
+        label: `${r.subject_name} ${r.predicate} ${r.object_name}`,
+        ref: r.study_id ? `/administrador?tab=knowledge-graph&study=${r.study_id}` : undefined,
       })),
+      meta: { triplets: rows },
     };
   } catch (e: any) {
     return { kind: 'kg', weight: WEIGHTS.kg, claim: null, confidence: 0, error: e?.message };
@@ -90,7 +99,13 @@ async function kgProvider(input: ResolverInput): Promise<SourceResult> {
 
 async function petHistoryProvider(input: ResolverInput): Promise<SourceResult> {
   if (!input.petId) {
-    return { kind: 'petHistory', weight: WEIGHTS.petHistory, claim: null, confidence: 0 };
+    return {
+      kind: 'petHistory',
+      weight: WEIGHTS.petHistory,
+      claim: null,
+      confidence: 0,
+      notApplicable: true,
+    };
   }
   try {
     const { data: pet } = await supabase
@@ -124,29 +139,78 @@ async function petHistoryProvider(input: ResolverInput): Promise<SourceResult> {
 
 async function cohortProvider(input: ResolverInput): Promise<SourceResult> {
   try {
-    let query = supabase
-      .from('pet_profiles')
-      .select('breed, age_years, notes', { count: 'exact' })
-      .eq('is_synthetic', true);
-    if (input.cohortId) query = query.eq('cohort_id', input.cohortId);
-    const { data, count, error } = await query.limit(200);
-    if (error) throw error;
-    if (!count || count === 0) {
-      return { kind: 'cohort', weight: WEIGHTS.cohort, claim: null, confidence: 0 };
+    // Detect a canonical clinical entity (breed and/or condition) from the question
+    // using values that actually exist in pet_profiles / pet_conditions — not raw keywords.
+    const qLower = input.question.toLowerCase();
+
+    // Pull distinct breeds and condition names (small lists) to match against the question
+    const [{ data: breedsRows }, { data: condsRows }] = await Promise.all([
+      supabase.from('pet_profiles').select('breed').eq('is_synthetic', true).not('breed', 'is', null).limit(2000),
+      supabase.from('pet_conditions').select('condition_name').not('condition_name', 'is', null).limit(2000),
+    ]);
+    const breedSet = new Set<string>(
+      (breedsRows ?? []).map((r: any) => String(r.breed).toLowerCase()).filter(Boolean),
+    );
+    const condSet = new Set<string>(
+      (condsRows ?? []).map((r: any) => String(r.condition_name).toLowerCase()).filter(Boolean),
+    );
+    const matchedBreed = [...breedSet].find((b) => b.length >= 3 && qLower.includes(b)) ?? null;
+    const matchedCond = [...condSet].find((c) => c.length >= 3 && qLower.includes(c)) ?? null;
+
+    if (!matchedBreed && !matchedCond) {
+      return {
+        kind: 'cohort',
+        weight: WEIGHTS.cohort,
+        claim: 'Sem entidade clínica reconhecida na pergunta (raça/condição) — sinal populacional indisponível.',
+        confidence: 0,
+      };
     }
-    const kws = extractKeywords(input.question);
-    const rows = (data ?? []) as Array<any>;
-    const matching = rows.filter((p) => {
-      const blob = `${p.breed ?? ''} ${p.notes ?? ''}`.toLowerCase();
-      return kws.some((k) => blob.includes(k));
-    });
-    const pct = rows.length > 0 ? Math.round((matching.length / rows.length) * 100) : 0;
+
+    // Base pool of synthetic pets, optionally filtered by breed and cohort
+    let petsQ = supabase.from('pet_profiles').select('id, breed').eq('is_synthetic', true);
+    if (input.cohortId) petsQ = petsQ.eq('cohort_id', input.cohortId);
+    if (matchedBreed) petsQ = petsQ.ilike('breed', `%${matchedBreed}%`);
+    const { data: pets, error: petsErr } = await petsQ.limit(500);
+    if (petsErr) throw petsErr;
+    const total = pets?.length ?? 0;
+    if (total === 0) {
+      return {
+        kind: 'cohort',
+        weight: WEIGHTS.cohort,
+        claim: matchedBreed
+          ? `Nenhum pet sintético da raça "${matchedBreed}" no cohort selecionado.`
+          : 'Nenhum pet sintético compatível.',
+        confidence: 0,
+      };
+    }
+    const petIds = pets!.map((p: any) => p.id);
+
+    let withCondition = 0;
+    if (matchedCond) {
+      const { count, error: ccErr } = await supabase
+        .from('pet_conditions')
+        .select('pet_id', { count: 'exact', head: true })
+        .in('pet_id', petIds)
+        .ilike('condition_name', `%${matchedCond}%`);
+      if (ccErr) throw ccErr;
+      withCondition = count ?? 0;
+    }
+
+    const pct = matchedCond ? Math.round((withCondition / total) * 100) : null;
+    const parts: string[] = [];
+    parts.push(`${total} pets sintéticos`);
+    if (matchedBreed) parts.push(`raça "${matchedBreed}"`);
+    if (matchedCond) parts.push(`${withCondition} (${pct}%) com "${matchedCond}"`);
     return {
       kind: 'cohort',
       weight: WEIGHTS.cohort,
-      claim: `${pct}% dos ${rows.length} pets sintéticos analisados apresentam menção a "${kws.slice(0, 3).join(', ')}".`,
-      confidence: pct > 30 ? 0.7 : 0.4,
-      evidence: [{ label: `${matching.length}/${rows.length} pets` }],
+      claim: parts.join(' · '),
+      confidence: matchedCond ? (pct! >= 30 ? 0.7 : 0.45) : 0.4,
+      evidence: [
+        { label: `n=${total}` },
+        ...(matchedCond ? [{ label: `com condição: ${withCondition}` }] : []),
+      ],
+      meta: { matchedBreed, matchedCond, total, withCondition },
     };
   } catch (e: any) {
     return { kind: 'cohort', weight: WEIGHTS.cohort, claim: null, confidence: 0, error: e?.message };
@@ -209,13 +273,19 @@ function detectConflicts(sources: SourceResult[]): ResolverOutput['conflicts'] {
   return out;
 }
 
-function synthesize(sources: SourceResult[]): string {
-  const ranked = sources
-    .filter((s) => s.claim && !s.notImplemented)
-    .sort((a, b) => b.weight * b.confidence - a.weight * a.confidence);
-  if (ranked.length === 0) return 'Nenhuma fonte retornou evidência suficiente para responder.';
+function synthesize(sources: SourceResult[]): { text: string; source: SourceKind | null; degraded: boolean } {
+  const usable = sources.filter(
+    (s) => s.claim && !s.notImplemented && !s.notApplicable && s.confidence > 0,
+  );
+  if (usable.length === 0) {
+    return { text: 'Nenhuma fonte retornou evidência suficiente para responder.', source: null, degraded: false };
+  }
+  const ranked = [...usable].sort((a, b) => b.weight * b.confidence - a.weight * a.confidence);
   const top = ranked[0];
-  return top.claim!;
+  const topWeight = top.weight;
+  // Degraded when the chosen source has weight below the curated KG tier (1.0)
+  const degraded = topWeight < 1.0;
+  return { text: top.claim!, source: top.kind, degraded };
 }
 
 export async function resolveMultiSource(input: ResolverInput): Promise<ResolverOutput> {
@@ -226,8 +296,11 @@ export async function resolveMultiSource(input: ResolverInput): Promise<Resolver
     treatedDogsProvider(input),
     internetProvider(input),
   ]);
+  const s = synthesize(sources);
   return {
-    synthesis: synthesize(sources),
+    synthesis: s.text,
+    synthesisSource: s.source,
+    synthesisDegraded: s.degraded,
     sources,
     conflicts: detectConflicts(sources),
   };
