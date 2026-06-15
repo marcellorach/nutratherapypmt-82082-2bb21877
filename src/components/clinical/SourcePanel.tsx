@@ -143,6 +143,8 @@ const SourcePanel: React.FC<Props> = ({ result }) => {
                         <p className="text-gray-700 mt-1 break-words">
                           {s.notImplemented
                             ? <i className="text-gray-400">{t('prioritization.multiSource.notImplemented')}</i>
+                            : s.notApplicable
+                            ? <i className="text-gray-400">{t('prioritization.multiSource.notApplicable', 'Não aplicável neste contexto (sem pet selecionado).')}</i>
                             : s.claim ?? <i className="text-gray-400">—</i>}
                         </p>
                         {s.evidence && s.evidence.length > 0 && (
