@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-09T15:08:49.530Z
+// Última geração: 2026-06-15T18:08:56.354Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,36 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-06-09";
+export const lastChangelogDate = "2026-06-15";
 
 export const senexVersion = "7.2.4";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-15",
+    "kind": "fixed",
+    "area": "prioritizacoes",
+    "status": "entregue",
+    "title": "Playground multi-fonte: KG busca por termo real + cohort canônico + diagrama de mecanismo",
+    "bullets": [
+      "Root cause (KG vazio para curcumina): `kgProvider` em `src/services/multi-source-resolver.ts` chamava `get_relations_graph_data(p_limit:500)` e filtrava as keywords client-side. Curcumina existe (127 triplets em `triplet_extractions`), mas não nas 500 primeiras edges — daí \"Knowledge Graph curado: —\" em uma pergunta que o KG cobre amplamente.",
+      "Fix KG: nova RPC `public.search_relations_by_term(p_terms text[], p_limit int)` faz `ILIKE` direto em `subject_name`/`object_name` filtrando `curation_status='approved' OR auto_approved=true`, ordenando por `llm_confidence`. Provider passa a chamar a RPC. Validado: pergunta de curcumina retorna 10+ relações (Curcumin ⊣ NF-κB, ↑ Nrf2, ↓ TLR4, previne Alzheimer/Parkinson).",
+      "Fix cohort (eco lexical): `cohortProvider` parou de fazer substring de palavras da query em `notes`. Agora detecta entidade canônica (raça via `pet_profiles.breed`, condição via `pet_conditions.condition_name`) presente no texto da pergunta e filtra a contagem real. Sem entidade reconhecida → claim explícito (\"sem entidade clínica reconhecida\"), nunca eco da query.",
+      "Fix síntese: `synthesize()` agora ignora fontes com `confidence=0`, `notApplicable` ou `notImplemented` e marca `synthesisDegraded=true` quando promove fonte de peso menor que 1.0. UI mostra badge âmbar \"Síntese degradada — KG sem cobertura, usando: Internet\".",
+      "Histórico no playground: petHistory provider retorna `notApplicable:true` quando não há `petId`; UI exibe \"Não aplicável neste contexto\" em vez de \"—\" mudo.",
+      "Novo — `MechanismDiagram` (Mermaid): renderizado dentro do `SourcePanel` sob toggle \"Mostrar mecanismo molecular\" quando KG retorna ≥ 1 triplet. Mapeia predicate→seta biológica (`→` ativa, `⊣` inibe, `↓` trata) conforme `biological-legend-standard-notation`. Construído a partir dos triplets reais (não inventa).",
+      "Migration: `search_relations_by_term` RPC com GRANT EXECUTE para authenticated/anon/service_role.",
+      "Files: `supabase/migrations/<ts>_search_relations_by_term.sql`, `src/services/multi-source-resolver.ts`, `src/components/clinical/MechanismDiagram.tsx` (novo), `src/components/clinical/SourcePanel.tsx`, `src/locales/{pt,en}/translation.json`, `src/i18n.ts` (1.119.0 → 1.120.0).",
+      "Backlog: substituir ILIKE por busca vetorial (`study_embeddings`); plugar gap-fill PubMed quando KG retorna 0 triplets; conectar `treatedDogs` provider a cohort real."
+    ],
+    "files": [
+      "src/services/multi-source-resolver.ts",
+      "src/components/clinical/MechanismDiagram.tsx",
+      "src/components/clinical/SourcePanel.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.120.0"
+  },
   {
     "date": "2026-06-09",
     "kind": "fixed",
