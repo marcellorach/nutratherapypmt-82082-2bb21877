@@ -8622,6 +8622,14 @@
       "confidence": "Confidence",
       "notImplemented": "Provider not implemented yet",
       "noResults": "No source returned a relevant result.",
+      "notApplicable": "Not applicable in this context (playground without a selected pet).",
+      "degraded": "Degraded synthesis — highest-weight source (curated KG) has no coverage for this term. Using: {{source}}.",
+      "mechanism": {
+        "show": "Show molecular mechanism",
+        "hide": "Hide molecular mechanism",
+        "empty": "No molecular mechanism available for this query.",
+        "legend": "Legend: → activates · ⊣ inhibits · ↓ treats. Built from approved KG triplets."
+      },
       "sources": {
         "kg": "Curated Knowledge Graph",
         "petHistory": "Dog history",
