@@ -27,7 +27,7 @@ export const changelog: ChangelogEntry[] = [
   {
     "date": "2026-06-15",
     "kind": "fixed",
-    "area": "prioritizacoes",
+    "area": "kg",
     "status": "entregue",
     "title": "Playground multi-fonte: KG busca por termo real + cohort canônico + diagrama de mecanismo",
     "bullets": [
