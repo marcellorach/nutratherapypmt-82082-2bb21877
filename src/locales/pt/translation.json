@@ -2913,6 +2913,24 @@
         "error": "Erro",
         "restoredTitle": "↩️ Restaurado",
         "restoredDesc": "\"{{name}}\" voltou ao default do código."
+      },
+      "integrity": {
+        "appVersion": "Versão do sistema",
+        "lastChecked": "Última verificação",
+        "never": "nunca",
+        "statusOk": "Catálogo sincronizado",
+        "statusDrift": "Drift detectado ({{count}} divergência(s))",
+        "statusError": "Falha na verificação",
+        "verifyNow": "Verificar agora",
+        "verifying": "Verificando…",
+        "missingInDb": "Faltando no banco ({{count}})",
+        "extraInDb": "Sobrando no banco ({{count}})",
+        "outOfSync": "Conteúdo desatualizado ({{count}})",
+        "hardcoded": "Prompts hardcoded fora do catálogo ({{count}})",
+        "showDetails": "Ver detalhes",
+        "hideDetails": "Ocultar detalhes",
+        "verifiedToast": "Verificação concluída",
+        "verifyFailed": "Falha ao verificar integridade"
       }
     },
     "pharmacology": {

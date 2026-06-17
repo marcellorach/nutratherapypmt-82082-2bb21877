@@ -1,21 +1,18 @@
 # Project context briefing (auto)
-Generated: 2026-06-15T18:08:56.362Z
+Generated: 2026-06-17T00:52:33.871Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
 ## Latest i18n version: 1.120.0
 
 ## Changes by area (last 14 days)
-- **admin**: 15
-- **meta**: 7
-- **clinical-pipeline**: 7
-- **infra**: 5
+- **admin**: 7
+- **meta**: 6
 - **kg**: 3
-- **prioritizacoes**: 1
 - **curation**: 1
 
 ## Top 10 recent entries
-### 2026-06-15 · [prioritizacoes] FIXED — Playground multi-fonte: KG busca por termo real + cohort canônico + diagrama de mecanismo
+### 2026-06-15 · [kg] FIXED — Playground multi-fonte: KG busca por termo real + cohort canônico + diagrama de mecanismo
 - Root cause (KG vazio para curcumina): `kgProvider` em `src/services/multi-source-resolver.ts` chamava `get_relations_graph_data(p_limit:500)` e filtrava as keywords client-side. Curcumina existe (127 triplets em `triplet_extractions`), mas não nas 500 primeiras edges — daí "Knowledge Graph curado: —" em uma pergunta que o KG cobre amplamente.
 - Fix KG: nova RPC `public.search_relations_by_term(p_terms text[], p_limit int)` faz `ILIKE` direto em `subject_name`/`object_name` filtrando `curation_status='approved' OR auto_approved=true`, ordenando por `llm_confidence`. Provider passa a chamar a RPC. Validado: pergunta de curcumina retorna 10+ relações (Curcumin ⊣ NF-κB, ↑ Nrf2, ↓ TLR4, previne Alzheimer/Parkinson).
 - Fix cohort (eco lexical): `cohortProvider` parou de fazer substring de palavras da query em `notes`. Agora detecta entidade canônica (raça via `pet_profiles.breed`, condição via `pet_conditions.condition_name`) presente no texto da pergunta e filtra a contagem real. Sem entidade reconhecida → claim explícito ("sem entidade clínica reconhecida"), nunca eco da query.
