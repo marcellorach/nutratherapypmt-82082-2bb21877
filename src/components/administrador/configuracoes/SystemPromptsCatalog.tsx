@@ -9,8 +9,8 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Edit2, Save, X, RotateCcw, Search, Layers3, AlertCircle, RefreshCw, FileDown, Printer, CheckCircle2, ShieldAlert, ShieldCheck } from 'lucide-react';
-import { APP_VERSION } from '@/config/app-version';
+import { Edit2, Save, X, RotateCcw, Search, Layers3, AlertCircle, RefreshCw, FileDown, Printer } from 'lucide-react';
+import PromptsIntegrityBadge from './PromptsIntegrityBadge';
 
 interface SystemPrompt {
   id: string;
@@ -34,20 +34,6 @@ interface SystemPrompt {
   last_used_at: string | null;
 }
 
-interface IntegrityCheck {
-  id: string;
-  app_version: string;
-  manifest_count: number;
-  db_count: number;
-  missing_in_db: string[];
-  extra_in_db: string[];
-  out_of_sync: string[];
-  hardcoded_outside_catalog: Array<{ function_name: string; suggested_key: string; note: string }>;
-  status: 'ok' | 'drift' | 'error';
-  triggered_by: string;
-  checked_at: string;
-}
-
 const SystemPromptsCatalog: React.FC = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -57,45 +43,7 @@ const SystemPromptsCatalog: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
   const [syncing, setSyncing] = useState(false);
-  const [integrity, setIntegrity] = useState<IntegrityCheck | null>(null);
-  const [verifying, setVerifying] = useState(false);
-  const [showIntegrityDetails, setShowIntegrityDetails] = useState(false);
   const autoSyncedRef = React.useRef(false);
-  const autoVerifiedRef = React.useRef(false);
-
-  const loadIntegrity = async () => {
-    const { data } = await supabase
-      .from('ai_system_prompts_integrity_check')
-      .select('*')
-      .order('checked_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (data) setIntegrity(data as unknown as IntegrityCheck);
-  };
-
-  const runVerify = async (triggeredBy: 'manual' | 'auto_on_version_bump' = 'manual') => {
-    setVerifying(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('verify-system-prompts', {
-        body: { app_version: APP_VERSION, triggered_by: triggeredBy },
-      });
-      if (error) throw error;
-      if ((data as any)?.check) setIntegrity((data as any).check as IntegrityCheck);
-      if (triggeredBy === 'manual') {
-        toast({ title: t('admin.systemPrompts.integrity.verifiedToast') });
-      }
-    } catch (e: any) {
-      if (triggeredBy === 'manual') {
-        toast({
-          variant: 'destructive',
-          title: t('admin.systemPrompts.integrity.verifyFailed'),
-          description: e.message,
-        });
-      }
-    } finally {
-      setVerifying(false);
-    }
-  };
 
   const load = async () => {
     setLoading(true);
@@ -141,20 +89,9 @@ const SystemPromptsCatalog: React.FC = () => {
   useEffect(() => {
     (async () => {
       const rows = await load();
-      // Auto-sync silencioso se qualquer prompt está sem conteúdo
       if (!autoSyncedRef.current && rows.some((p) => !p.default_content && !p.override_content)) {
         autoSyncedRef.current = true;
         await runSync(true);
-      }
-      await loadIntegrity();
-      // Verificação automática a cada subida de versão do sistema
-      if (!autoVerifiedRef.current && typeof window !== 'undefined') {
-        const last = localStorage.getItem('lastVerifiedAppVersion');
-        if (last !== APP_VERSION) {
-          autoVerifiedRef.current = true;
-          localStorage.setItem('lastVerifiedAppVersion', APP_VERSION);
-          await runVerify('auto_on_version_bump');
-        }
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -302,14 +239,7 @@ const SystemPromptsCatalog: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <IntegrityBadge
-        t={t}
-        integrity={integrity}
-        verifying={verifying}
-        onVerify={() => runVerify('manual')}
-        showDetails={showIntegrityDetails}
-        onToggleDetails={() => setShowIntegrityDetails((v) => !v)}
-      />
+      <PromptsIntegrityBadge expandable />
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-3">
