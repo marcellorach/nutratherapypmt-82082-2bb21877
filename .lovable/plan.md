@@ -1,63 +1,68 @@
-## Diagnóstico do retorno fraco
+## Escopo aprovado: A + B + C + D + Verificação de integridade na UI
 
-Confirmei no banco:
+### Frente A — Seed das 21 chaves faltantes no DB
+Migration `INSERT … ON CONFLICT (prompt_key) DO NOTHING` para popular as 21 linhas ausentes em `ai_system_prompts`, copiando do manifest: `default_content + purpose + model_default + temperature + output_format + consumers + tags + example_input`. Resultado: DB passa de 24 → 45 linhas alinhadas com o manifest.
 
-| Fonte | Status real | Por que apareceu fraco/vazio |
-|---|---|---|
-| **KG curado (w=1.00)** | **127 triplets com "curcum"** existem em `triplet_extractions` | Bug: `kgProvider` chama `get_relations_graph_data(p_limit:500)` e **filtra keyword client-side**. Se curcumina não estiver nas 500 primeiras edges retornadas, some. Não busca por termo no DB. |
-| **Histórico do cão (w=0.95)** | — | Playground roda **sem `petId`** (é tela admin global). Provider sai cedo retornando vazio — esperado nesse contexto, mas a UI exibe "—" sem explicar. |
-| **Cohort sintético (w=0.70)** | 39% / 77-de-200 | "Match" é só substring das palavras da própria query (`curcumina, segura, golden`) em `breed`+`notes`. **Não é sinal clínico real** — é eco lexical. Por isso a síntese ficou tautológica ("39% mencionam curcumina, segura, golden"). |
-| **Cães tratados (w=0.60)** | Stub | Honesto. |
-| **Internet (Perplexity, w=0.30)** | OK | Única fonte que entregou conteúdo de verdade. Por isso a tela parece "só Perplexity". |
+### Frente B — `sync-system-prompts` idempotente (upsert)
+Trocar o `UPDATE` da edge function por `upsert` (`onConflict: 'prompt_key'`). Status novo: `inserted | updated | unchanged | error`. Qualquer chave futura adicionada ao manifest passa a entrar no DB com um clique em "Sincronizar com o código".
 
-**Síntese final do resolver pegou o claim do Cohort** (peso 0.70) ignorando que era circular, em vez de promover o Internet (rico, mas peso 0.30). Daí o resumo pobre no topo.
+### Frente C — Migrar prompts hardcoded para o catálogo
+Para cada função abaixo, adicionar chave no manifest com metadata completa e substituir o literal por `await getSystemPrompt(supabase, '<key>', fallback)`:
 
-## Escopo do plano
+1. `chat` → `chat_assistant_streaming` (separado de `chat_assistant` se o prompt for distinto)
+2. `generate-triplets` → `generate_triplets_extraction` (núcleo da extração)
+3. `process-study` → `process_study_pipeline`
+4. `extract-meta-study` → `extract_meta_study`
+5. `generate-meta-study-cover` → `generate_meta_study_cover`
+6. `generate-showcase` → `generate_showcase`
+7. `classify-entity` → `classify_entity`
+8. `calculate-recommendation-confidence` → `calculate_recommendation_confidence`
+9. `finalize-stalled-cohort` → `finalize_stalled_cohort`
+10. `enrichment-qa-sample` → `enrichment_qa_sample`
+11. `compare-snapshots` → `compare_snapshots`
+12. `fetch-external-ontologies` → `fetch_external_ontologies`
 
-### 1. KG provider — buscar por termo no DB, não filtrar 500 linhas aleatórias
-- Criar/usar RPC `search_relations_by_term(p_terms text[], p_limit int)` que faz `ILIKE` em `subject_name`/`object_name` de `triplet_extractions` (curation_status = 'approved' OU auto_approved) e devolve as edges com `evidence_level`, `intensity`, `confidence`, `mechanism_path`, `study_id`.
-- `kgProvider` passa a chamar essa RPC com as keywords extraídas. Sem match → mantém `claim:null` e confiança 0 (sinal honesto).
-- Tipar e expor `mechanism_path` no `evidence[]` para alimentar o diagrama (item 3).
+Resultado: ~12 chaves novas no manifest e no DB; catálogo final ≈ 57 chaves.
 
-### 2. Cohort provider — match clínico, não lexical
-- Parar de fazer substring em `notes`. Em vez disso:
-  - Extrair do `question` entidades canônicas (compound, condition, breed, lab marker) via lookup leve nos dicionários `taxonomy_*` que já temos.
-  - Filtrar `pet_profiles` por `breed` + presença de condição/lab nas tabelas relacionadas (ex.: `pet_conditions`, `pet_lab_results`).
-  - Se não houver entidade canônica reconhecida → devolver `claim:null` com nota "sem entidade clínica reconhecida na pergunta" em vez de eco da query.
-- Síntese passa a ser do tipo "X% dos N Goldens sintéticos com ALT elevada têm tag de hepatoprotetor", não "X% mencionam as palavras da pergunta".
+### Frente D — Preencher metadata das 24 chaves antigas
+Passar pelas chaves originais do manifest e adicionar `purpose / model_default / temperature / output_format / consumers / tags` onde só existe `content`. Painel admin e PDF de catálogo ficam completos.
 
-### 3. Síntese final — promover o mais informativo, não o de maior peso
-- Quando a fonte de maior peso tiver `claim:null` OU `confidence < 0.4`, **degradar** para a próxima fonte com claim substantivo.
-- Marcar visualmente quando a síntese veio de fonte de peso baixo ("Síntese baseada em Internet (w=0.30) — KG sem cobertura para este termo").
+---
 
-### 4. Histórico do cão no Playground admin
-- Tela é global (sem pet). Trocar "—" mudo por estado explícito: "Não aplicável neste contexto (playground sem pet selecionado). Use a tela clínica do pet para esta fonte." 
-- Opcional: dropdown de pet demo para testar o provider sem sair da tela.
+### Frente E (NOVA) — Verificação contínua e selo na página de prompts
 
-### 5. Diagrama de sistemas biológicos/moleculares envolvidos
-Componente novo `MechanismDiagram` renderizado **dentro do card do KG** (e também na síntese) quando o KG retorna pelo menos 1 edge:
-- **Fonte de dados:** `mechanism_path` + cadeia `compound → molecular_target → pathway → physiological_effect → outcome` já presente nas triplets aprovadas (a ontologia de 5 camadas que já existe — `vetgraph-rag-2-0-five-layer-ontology`).
-- **Render:** Mermaid (`text/vnd.mermaid` artifact + componente Mermaid já usado no projeto) com cores por camada da ontologia e setas com notação biológica (`→` ativa, `⊣` inibe) conforme o padrão `biological-legend-standard-notation`.
-- **Exemplo para curcumina/ALT:** `Curcumina ⊣ NF-κB → ↓ TNF-α/IL-6 → ↓ Inflamação hepatocitária → ↓ ALT/AST` + nó lateral `Piperina → ↑ absorção (cuidado em hepatopatia)`.
-- Toggle "Mostrar mecanismo" no card do KG; persistente por sessão.
-- Sem dado de mecanismo → não renderiza (não inventa).
+**Tabela nova `ai_system_prompts_integrity_check`** (admin-only) com colunas:
+- `app_version` (texto, ex: "1.4.2" lido de `package.json`/constante)
+- `manifest_count`, `db_count`, `missing_in_db` (array), `extra_in_db` (array), `hardcoded_outside_catalog` (array)
+- `out_of_sync` (array de keys onde `default_content` do DB ≠ manifest)
+- `status` (`ok` | `drift`)
+- `checked_at` (timestamp), `triggered_by` (`auto_on_version_bump` | `manual`)
 
-### 6. Detalhes técnicos
-- Nova migração: RPC `search_relations_by_term`.
-- `multi-source-resolver.ts`: refactor de `kgProvider` e `cohortProvider`; ajuste do `synthesis()`.
-- Novo `src/components/clinical/MechanismDiagram.tsx` usando wrapper Mermaid já existente.
-- `SourcePanel.tsx`: slot opcional para renderizar o diagrama abaixo do claim do KG.
-- i18n: incrementar `I18N_VERSION`, adicionar chaves em PT/EN para os novos estados ("Sem cobertura no KG", "Síntese degradada", "Mostrar mecanismo", etc.).
-- Sem mock: se KG/cohort não retornam, exibir estado honesto.
+**Edge function nova `verify-system-prompts`**: compara manifest × DB × lista de funções com prompts hardcoded e grava 1 linha. Retorna o relatório.
 
-### 7. Fora deste plano (registrar como backlog)
-- Embedding-based KG search (substituir ILIKE por similaridade vetorial usando `study_embeddings`).
-- Gap-fill PubMed automático quando KG não cobre (já existe pipeline `kg-evidence-gap-fill`, mas não está plugado no playground).
-- Conectar `treatedDogs` provider a dados reais quando houver cohort tratado.
+**Disparo automático**: na inicialização do app (front), se `localStorage.lastVerifiedAppVersion !== APP_VERSION`, chama a edge function uma vez e salva no localStorage. Isso garante uma verificação a cada subida de versão sem custo recorrente.
 
-## Critério de validação
-Repetir a mesma pergunta ("Curcumina é segura para Golden Retriever com elevação leve de ALT?") e ver:
-- KG card: claim com triplet real (não "—"), 1+ evidência, diagrama de mecanismo renderizado.
-- Cohort card: claim clínico OU "sem entidade reconhecida", nunca eco da query.
-- Síntese: vem do KG quando existe; degrada explicitamente quando não.
-- Histórico: estado "não aplicável" claro.
+**UI no painel `/administrador?tab=prompts`** (header do `SystemPromptsCatalog.tsx`): badge fixo com:
+- `Versão do sistema: vX.Y.Z`
+- `Última verificação: DD/MM/AAAA HH:mm`
+- `Status: ✅ Sincronizado` (verde) ou `⚠️ Drift detectado (N divergências)` (âmbar) com expand mostrando o detalhe
+- Botão "Verificar agora" que reexecuta `verify-system-prompts` on-demand
+
+Tudo bilíngue (PT/EN) via `t()` e `I18N_VERSION` incrementado.
+
+---
+
+### Ordem de execução
+1. Migration da Frente A (seed) + tabela da Frente E.
+2. Edge function `verify-system-prompts` (Frente E) + atualização do `sync-system-prompts` para upsert (Frente B).
+3. Frente D — completar metadata das 24 antigas no manifest.
+4. Frente C — migrar 12 funções hardcoded uma a uma (commits separados por função para reduzir risco).
+5. Frente A novamente (rodar `sync-system-prompts` para inserir as 12 novas chaves da Frente C no DB) + UI da Frente E + i18n.
+6. Documentação: `ARCHITECTURE.md` + `CURRENT_STATE.md` + `CHANGELOG.md`.
+
+### Não-objetivos (intencional)
+- Não tocar em prompts de testes utilitários (`ai-task-test`, `test-rag-similarity`).
+- Não migrar prompts já vivendo em arquivos compartilhados se já forem importados por múltiplas funções (verificar caso a caso).
+- Não alterar `override_content` existente em nenhuma linha do DB.
+
+Se aprovado, implemento na ordem acima.
