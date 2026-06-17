@@ -14,7 +14,9 @@ const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-const STYLE_GUIDE = [
+// Default fallback se a busca no DB falhar. A versão editável vive em
+// `ai_system_prompts.prompt_key = 'generate_meta_study_cover_style'`.
+const STYLE_GUIDE_DEFAULT = [
   "isometric scientific editorial illustration",
   "flat vector style, clean geometric shapes",
   "muted academic palette: deep navy #1a2942, antique gold #c9a84c, warm parchment #f5f0e8, sage #87a878",
@@ -33,13 +35,13 @@ const KIND_THEME: Record<string, string> = {
   conceptual: "abstract geometric framework, intersecting planes, conceptual scaffolding",
 };
 
-function buildPrompt(study: { title: string; kind: string; summary?: string | null }): string {
+function buildPrompt(study: { title: string; kind: string; summary?: string | null }, styleGuide: string): string {
   const theme = KIND_THEME[study.kind] || KIND_THEME.architectural;
   const topic = study.title.slice(0, 140);
-  return `${STYLE_GUIDE}. Subject: ${theme}. Conceptually inspired by: "${topic}". Composition must feel cohesive with a series of related editorial covers.`;
+  return `${styleGuide}. Subject: ${theme}. Conceptually inspired by: "${topic}". Composition must feel cohesive with a series of related editorial covers.`;
 }
 
-async function generateOne(supa: any, studyId: string, overwrite: boolean): Promise<{ id: string; ok: boolean; url?: string; error?: string }> {
+async function generateOne(supa: any, studyId: string, overwrite: boolean, styleGuide: string): Promise<{ id: string; ok: boolean; url?: string; error?: string }> {
   const { data: study, error: fetchErr } = await supa
     .from("meta_studies")
     .select("id, title, kind, summary, cover_image_url")
@@ -50,7 +52,7 @@ async function generateOne(supa: any, studyId: string, overwrite: boolean): Prom
     return { id: studyId, ok: true, url: study.cover_image_url };
   }
 
-  const prompt = buildPrompt(study);
+  const prompt = buildPrompt(study, styleGuide);
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -118,8 +120,11 @@ Deno.serve(async (req) => {
     }
 
     const results = [];
+    // Resolvido em runtime via override (DB) → default (DB) → manifest → fallback.
+    // Editável no painel Admin → System Prompts → `generate_meta_study_cover_style`.
+    const styleGuide = await fetchSystemPrompt('generate_meta_study_cover_style', STYLE_GUIDE_DEFAULT);
     for (const id of ids) {
-      const r = await generateOne(supa, id, overwrite);
+      const r = await generateOne(supa, id, overwrite, styleGuide);
       results.push(r);
     }
     return new Response(JSON.stringify({ results }), {
