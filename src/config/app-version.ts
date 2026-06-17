@@ -9,5 +9,5 @@
  * Selo final exibido: "Sistema 7.2.4 · Prompts rev. 1".
  */
 export const APP_VERSION = '7.2.4';
-export const PROMPTS_REVISION = 1;
+export const PROMPTS_REVISION = 2;
 export const APP_VERSION_FULL = `${APP_VERSION}.${PROMPTS_REVISION}`;
