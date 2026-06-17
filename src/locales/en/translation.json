@@ -2912,6 +2912,24 @@
         "error": "Error",
         "restoredTitle": "↩️ Restored",
         "restoredDesc": "\"{{name}}\" reverted to code default."
+      },
+      "integrity": {
+        "appVersion": "System version",
+        "lastChecked": "Last verified",
+        "never": "never",
+        "statusOk": "Catalog in sync",
+        "statusDrift": "Drift detected ({{count}} issue(s))",
+        "statusError": "Verification failed",
+        "verifyNow": "Verify now",
+        "verifying": "Verifying…",
+        "missingInDb": "Missing in DB ({{count}})",
+        "extraInDb": "Extra in DB ({{count}})",
+        "outOfSync": "Out-of-sync content ({{count}})",
+        "hardcoded": "Hardcoded prompts outside catalog ({{count}})",
+        "showDetails": "Show details",
+        "hideDetails": "Hide details",
+        "verifiedToast": "Verification complete",
+        "verifyFailed": "Integrity check failed"
       }
     },
     "pharmacology": {
