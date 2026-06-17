@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-17T00:52:33.863Z
+// Última geração: 2026-06-17T01:14:37.049Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,39 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-06-15";
+export const lastChangelogDate = "2026-06-17";
 
 export const senexVersion = "7.2.4";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-17",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Catálogo de System Prompts: seed completo + verificação contínua de integridade",
+    "bullets": [
+      "Frente A (seed): 21 chaves do manifest (`supabase/functions/_shared/system-prompts.ts`) que nunca tinham sido propagadas ao banco agora estão em `ai_system_prompts`. Catálogo passou de 24 → 45 linhas (alinhado 1:1 com o manifest).",
+      "Frente B (`sync-system-prompts` idempotente): edge function trocada de `UPDATE`-only para `INSERT-or-UPDATE`. Toda nova chave adicionada ao manifest entra no DB automaticamente no próximo \"Sincronizar com o código\". Novo status `inserted` no relatório. Family/display_name das novas linhas são derivados automaticamente da chave; admin pode renomear.",
+      "Frente E (verificação contínua + selo na UI):",
+      "Nova tabela `ai_system_prompts_integrity_check` (admin-only) registra cada verificação: `app_version`, `manifest_count`, `db_count`, listas `missing_in_db`/`extra_in_db`/`out_of_sync`/`hardcoded_outside_catalog`, `status` (`ok`/`drift`/`error`), `triggered_by` (`manual`/`auto_on_version_bump`), `checked_at`.",
+      "Nova edge function `verify-system-prompts` compara manifest × DB e grava o resultado. Lista interna `HARDCODED_PROMPT_FUNCTIONS` rastreia as 12 funções com prompts ainda não migrados ao catálogo (chat, generate-triplets, process-study, extract-meta-study, generate-meta-study-cover, generate-showcase, classify-entity, calculate-recommendation-confidence, finalize-stalled-cohort, enrichment-qa-sample, compare-snapshots, fetch-external-ontologies).",
+      "Novo `src/config/app-version.ts` (`APP_VERSION = '1.1.0'`) — fonte única da versão semântica do app.",
+      "`SystemPromptsCatalog` ganhou selo no topo: versão do sistema, contagem manifest × DB, status visual (verde/âmbar/vermelho), \"Última verificação\" formatada em pt-BR, botão \"Verificar agora\" e expand com detalhe das divergências. Disparo automático na primeira visita após bump de `APP_VERSION` (rastreado via `localStorage.lastVerifiedAppVersion`).",
+      "Pendente para Frente C+D (follow-up): migrar os 12 prompts hardcoded listados acima para o catálogo via `getSystemPrompt(supabase, key, fallback)` e preencher `purpose/model_default/temperature/output_format/consumers/tags` das 24 chaves antigas que ainda só têm `content`. A Frente E já expõe os dois débitos no painel — o admin vê exatamente o que falta.",
+      "Migration: `ai_system_prompts_integrity_check` com RLS (admin lê, service_role escreve) + índice por `checked_at DESC`.",
+      "Files: `supabase/migrations/<ts>_ai_system_prompts_integrity_check.sql`, `supabase/functions/sync-system-prompts/index.ts`, `supabase/functions/verify-system-prompts/index.ts` (novo), `src/config/app-version.ts` (novo), `src/components/administrador/configuracoes/SystemPromptsCatalog.tsx`, `src/locales/{pt,en}/translation.json`, `src/i18n.ts` (1.120.0 → 1.121.0)."
+    ],
+    "files": [
+      "supabase/functions/_shared/system-prompts.ts",
+      "src/config/app-version.ts",
+      "supabase/functions/sync-system-prompts/index.ts",
+      "supabase/functions/verify-system-prompts/index.ts",
+      "src/components/administrador/configuracoes/SystemPromptsCatalog.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.121.0"
+  },
   {
     "date": "2026-06-15",
     "kind": "fixed",
