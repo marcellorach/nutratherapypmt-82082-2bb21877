@@ -1,17 +1,23 @@
 # Project context briefing (auto)
-Generated: 2026-06-17T01:14:37.055Z
+Generated: 2026-06-17T01:25:54.141Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.121.0
+## Latest i18n version: 1.122.0
 
 ## Changes by area (last 14 days)
-- **admin**: 8
+- **admin**: 9
 - **meta**: 6
 - **kg**: 3
 - **curation**: 1
 
 ## Top 10 recent entries
+### 2026-06-17 · [admin] ADDED — System Prompts: versão Senex (7.2.4), selo unificado nas 3 abas e audit log
+- Versão sincronizada: `APP_VERSION` agora reflete a versão do Senex AI (`7.2.4`) + novo `PROMPTS_REVISION` (4º dígito) que incrementa apenas quando o manifest de prompts muda. Selo exibido: "Sistema 7.2.4 · Prompts rev. 1". Reseta para 0 a cada bump de APP_VERSION.
+- Selo unificado em todas as abas de prompts: `IntegrityBadge` extraído de `SystemPromptsCatalog` para novo componente `PromptsIntegrityBadge.tsx`, reutilizado nas abas Recomendações, Extração e System (modo `compact` para as duas primeiras). Mensagem clara separa dois sinais distintos: "Última modificação dos prompts" (max `updated_at` em `ai_system_prompts`) vs "Última verificação" (`checked_at` em `ai_system_prompts_integrity_check`) — resolve a confusão "verificado hoje mas desatualizado".
+- Auto-verificação por revisão: chave do localStorage agora é `${APP_VERSION}.${PROMPTS_REVISION}` — qualquer bump de prompts dispara verificação na próxima visita, mesmo sem mudar a versão do sistema.
+_files: src/config/app-version.ts, src/components/administrador/configuracoes/PromptsIntegrityBadge.tsx, src/components/administrador/configuracoes/SystemPromptsCatalog.tsx, src/components/administrador/PromptConfigurationTab.tsx…_
+
 ### 2026-06-17 · [admin] ADDED — Catálogo de System Prompts: seed completo + verificação contínua de integridade
 - Frente A (seed): 21 chaves do manifest (`supabase/functions/_shared/system-prompts.ts`) que nunca tinham sido propagadas ao banco agora estão em `ai_system_prompts`. Catálogo passou de 24 → 45 linhas (alinhado 1:1 com o manifest).
 - Frente B (`sync-system-prompts` idempotente): edge function trocada de `UPDATE`-only para `INSERT-or-UPDATE`. Toda nova chave adicionada ao manifest entra no DB automaticamente no próximo "Sincronizar com o código". Novo status `inserted` no relatório. Family/display_name das novas linhas são derivados automaticamente da chave; admin pode renomear.
@@ -63,11 +69,6 @@ _files: supabase/functions/generate-showcase/index.ts, src/components/administra
 - O seletor PT/EN do header agora controla o idioma padrão dos botões Ver / HTML / PDF nos cards e no viewer de auditoria. Antes a versão baixada sempre era PT.
 - Files: src/components/administrador/audits/TechnicalAuditsTab.tsx, src/components/administrador/audits/audit-pdf-generator.ts
 _files: src/components/administrador/audits/TechnicalAuditsTab.tsx, src/components/administrador/audits/audit-pdf-generator.ts_
-
-### 2026-06-08 · [meta] FIXED — Auditoria v7.1.3: refinos de honestidade
-- Ajustes no `generate-audit` sobre fatiamento de blocos (fatos-âncora de honestidade replicados em todo bloco que toca dados/coortes/KG/recomendação/compliance/twin) e contexto amplo no sumário executivo.
-- Files: supabase/functions/generate-audit/index.ts
-_files: supabase/functions/generate-audit/index.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

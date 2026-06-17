@@ -24,6 +24,26 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.2.4 -->
 
+### Added - 2026-06-17 — Frente C: migração dos prompts hardcoded para o catálogo (com auditoria honesta)
+<!-- area: admin · status: entregue · i18n: 1.122.0 -->
+- **Auditoria caso-a-caso da lista de 12 funções**: revelou que **só 5 funções têm prompt próprio** — as outras 7 são orquestradores/pass-through/algorítmicas sem LLM dedicado.
+- **6 novas chaves no manifest** (`supabase/functions/_shared/system-prompts.ts`) — todas com `purpose`, `model_default`, `temperature`, `output_format`, `consumers`, `tags` preenchidos:
+  - `generate_triplets_phase1_discovery` — Phase 1 (free discovery) bioquímico veterinário.
+  - `generate_triplets_phase2_structuring` — Phase 2 (structuring) → tool-call `extract_triplets`.
+  - `extract_meta_study` — curador de meta-estudos arquiteturais (10–25 lições + stance classification).
+  - `generate_showcase_pt` — base PT do showcase parceiro (regras de honestidade + 6 seções).
+  - `generate_showcase_en` — espelho EN do showcase parceiro.
+  - `generate_meta_study_cover_style` — style guide de imagem (Gemini image; texto, não chat).
+- **4 edge functions refatoradas** para `fetchSystemPrompt(key, fallback)`:
+  - `generate-triplets` — Phase 1 e Phase 2 agora resolvem override → default → manifest. Conteúdo prévio preservado verbatim no manifest.
+  - `extract-meta-study` — `systemPrompt` ← `fetchSystemPrompt('extract_meta_study')`.
+  - `generate-showcase` — `BASE_SYSTEM_PT/EN` renomeados para `_DEFAULT` (fallback) e resolvidos em runtime; assinatura de `generateSection`/`buildBaseSystemPt|En` injeta o prompt vivo.
+  - `generate-meta-study-cover` — `STYLE_GUIDE` renomeado para `STYLE_GUIDE_DEFAULT`; `generateOne` recebe o style guide resolvido (1 fetch por request).
+- **8 false-positives removidos** da `HARDCODED_PROMPT_FUNCTIONS` em `verify-system-prompts` com nota explicativa: `chat` (pass-through), `process-study` (orquestrador), `classify-entity` (algorítmica), `calculate-recommendation-confidence` (algorítmica), `finalize-stalled-cohort` (sem LLM), `enrichment-qa-sample` (orquestrador), `compare-snapshots` (sem LLM), `fetch-external-ontologies` (SNOMED/UMLS REST). Não precisam estar no catálogo — não usam LLM.
+- **Auditoria de cada mudança**: o trigger `trg_ai_system_prompts_audit` (Frente D) vai capturar qualquer override futuro dessas 6 chaves. Conteúdo prévio fica preservado em duas camadas: (1) `default_content` no DB; (2) literal no manifest TypeScript como fallback.
+- **Verificação final**: `verify-system-prompts` retorna `status: ok`, manifest 51 ↔ db 51, 0 drift, 0 hardcoded. `PROMPTS_REVISION` 1 → 2 (sem bump de APP_VERSION, conforme regra).
+- Files: `supabase/functions/_shared/system-prompts.ts`, `supabase/functions/generate-triplets/index.ts`, `supabase/functions/extract-meta-study/index.ts`, `supabase/functions/generate-showcase/index.ts`, `supabase/functions/generate-meta-study-cover/index.ts`, `supabase/functions/verify-system-prompts/index.ts`, `src/config/app-version.ts`.
+
 ### Added - 2026-06-17 — System Prompts: versão Senex (7.2.4), selo unificado nas 3 abas e audit log
 <!-- area: admin · status: entregue · i18n: 1.122.0 -->
 - **Versão sincronizada**: `APP_VERSION` agora reflete a versão do Senex AI (`7.2.4`) + novo `PROMPTS_REVISION` (4º dígito) que incrementa apenas quando o manifest de prompts muda. Selo exibido: "Sistema 7.2.4 · Prompts rev. 1". Reseta para 0 a cada bump de APP_VERSION.
