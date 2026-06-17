@@ -487,3 +487,170 @@ const SystemPromptsCatalog: React.FC = () => {
 };
 
 export default SystemPromptsCatalog;
+
+interface IntegrityBadgeProps {
+  t: (key: string, opts?: any) => string;
+  integrity: IntegrityCheck | null;
+  verifying: boolean;
+  onVerify: () => void;
+  showDetails: boolean;
+  onToggleDetails: () => void;
+}
+
+const IntegrityBadge: React.FC<IntegrityBadgeProps> = ({
+  t,
+  integrity,
+  verifying,
+  onVerify,
+  showDetails,
+  onToggleDetails,
+}) => {
+  const status = integrity?.status ?? 'ok';
+  const isOk = status === 'ok' && integrity !== null;
+  const isError = status === 'error';
+  const driftCount = integrity
+    ? integrity.missing_in_db.length +
+      integrity.extra_in_db.length +
+      integrity.out_of_sync.length +
+      integrity.hardcoded_outside_catalog.length
+    : 0;
+
+  const checkedLabel = integrity
+    ? new Date(integrity.checked_at).toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : t('admin.systemPrompts.integrity.never');
+
+  const statusBoxClass = isOk
+    ? 'border-emerald-200 bg-emerald-50 dark:bg-emerald-950/30 dark:border-emerald-900'
+    : isError
+      ? 'border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-900'
+      : 'border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-900';
+
+  return (
+    <Card className={`border ${statusBoxClass}`}>
+      <CardContent className="py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            {isOk ? (
+              <ShieldCheck className="h-5 w-5 text-emerald-600 shrink-0" />
+            ) : isError ? (
+              <ShieldAlert className="h-5 w-5 text-red-600 shrink-0" />
+            ) : (
+              <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0" />
+            )}
+            <div className="text-xs space-y-0.5 min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className="font-mono text-[10px]">
+                  {t('admin.systemPrompts.integrity.appVersion')} v{APP_VERSION}
+                </Badge>
+                {integrity && (
+                  <Badge variant="outline" className="font-mono text-[10px]">
+                    manifest {integrity.manifest_count} · db {integrity.db_count}
+                  </Badge>
+                )}
+              </div>
+              <div className="text-foreground font-medium">
+                {isOk
+                  ? t('admin.systemPrompts.integrity.statusOk')
+                  : isError
+                    ? t('admin.systemPrompts.integrity.statusError')
+                    : t('admin.systemPrompts.integrity.statusDrift', { count: driftCount })}
+              </div>
+              <div className="text-muted-foreground">
+                {t('admin.systemPrompts.integrity.lastChecked')}: {checkedLabel}
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            {integrity && !isOk && (
+              <Button variant="ghost" size="sm" onClick={onToggleDetails}>
+                {showDetails
+                  ? t('admin.systemPrompts.integrity.hideDetails')
+                  : t('admin.systemPrompts.integrity.showDetails')}
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={onVerify} disabled={verifying}>
+              <RefreshCw className={`h-3.5 w-3.5 mr-1 ${verifying ? 'animate-spin' : ''}`} />
+              {verifying
+                ? t('admin.systemPrompts.integrity.verifying')
+                : t('admin.systemPrompts.integrity.verifyNow')}
+            </Button>
+          </div>
+        </div>
+
+        {integrity && showDetails && !isOk && (
+          <div className="mt-3 pt-3 border-t border-current/10 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            {integrity.missing_in_db.length > 0 && (
+              <div>
+                <div className="font-semibold mb-1">
+                  {t('admin.systemPrompts.integrity.missingInDb', { count: integrity.missing_in_db.length })}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {integrity.missing_in_db.map((k) => (
+                    <Badge key={k} variant="secondary" className="font-mono text-[10px]">
+                      {k}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            {integrity.out_of_sync.length > 0 && (
+              <div>
+                <div className="font-semibold mb-1">
+                  {t('admin.systemPrompts.integrity.outOfSync', { count: integrity.out_of_sync.length })}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {integrity.out_of_sync.map((k) => (
+                    <Badge key={k} variant="secondary" className="font-mono text-[10px]">
+                      {k}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            {integrity.extra_in_db.length > 0 && (
+              <div>
+                <div className="font-semibold mb-1">
+                  {t('admin.systemPrompts.integrity.extraInDb', { count: integrity.extra_in_db.length })}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {integrity.extra_in_db.map((k) => (
+                    <Badge key={k} variant="secondary" className="font-mono text-[10px]">
+                      {k}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            {integrity.hardcoded_outside_catalog.length > 0 && (
+              <div className="md:col-span-2">
+                <div className="font-semibold mb-1">
+                  {t('admin.systemPrompts.integrity.hardcoded', {
+                    count: integrity.hardcoded_outside_catalog.length,
+                  })}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {integrity.hardcoded_outside_catalog.map((h) => (
+                    <Badge
+                      key={h.function_name}
+                      variant="outline"
+                      className="font-mono text-[10px]"
+                      title={h.note}
+                    >
+                      {h.function_name} → {h.suggested_key}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
