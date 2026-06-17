@@ -25,18 +25,19 @@ Deno.test("verify-system-prompts: returns status=ok after deploy", async () => {
   assertEquals(res.status, 200, `HTTP ${res.status}: ${text}`);
 
   const json = JSON.parse(text);
+  const check = json.check ?? json;
   assertEquals(
-    json.status,
+    check.status,
     "ok",
     `verify-system-prompts reported drift. Details:\n${JSON.stringify(json, null, 2)}`,
   );
 
   // Sanity: counts must match
-  assert(typeof json.manifest_count === "number", "manifest_count missing");
-  assert(typeof json.db_count === "number", "db_count missing");
+  assert(typeof check.manifest_count === "number", "manifest_count missing");
+  assert(typeof check.db_count === "number", "db_count missing");
   assertEquals(
-    json.manifest_count,
-    json.db_count,
-    `manifest/db count mismatch: ${json.manifest_count} vs ${json.db_count}`,
+    check.manifest_count,
+    check.db_count,
+    `manifest/db count mismatch: ${check.manifest_count} vs ${check.db_count}`,
   );
 });
