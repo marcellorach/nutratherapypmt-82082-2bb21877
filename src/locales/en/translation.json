@@ -2915,6 +2915,9 @@
       },
       "integrity": {
         "appVersion": "System version",
+        "systemLabel": "System",
+        "promptsRevLabel": "Prompts rev.",
+        "lastModified": "Last prompt change",
         "lastChecked": "Last verified",
         "never": "never",
         "statusOk": "Catalog in sync",

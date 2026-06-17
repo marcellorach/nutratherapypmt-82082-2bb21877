@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import ExtractionPromptsEditor from './configuracoes/ExtractionPromptsEditor';
 import SystemPromptsCatalog from './configuracoes/SystemPromptsCatalog';
+import PromptsIntegrityBadge from './configuracoes/PromptsIntegrityBadge';
 
 interface Prompt {
   id: string;
@@ -200,6 +201,7 @@ const PromptConfigurationTab: React.FC = () => {
       </TabsList>
 
       <TabsContent value="recomendacoes">
+        <div className="mb-4"><PromptsIntegrityBadge compact /></div>
         <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-xl font-bold">{t('admin.prompts.recommendationTitle')}</h2>
@@ -346,6 +348,7 @@ const PromptConfigurationTab: React.FC = () => {
       </TabsContent>
 
       <TabsContent value="extracao">
+        <div className="mb-4"><PromptsIntegrityBadge compact /></div>
         <ExtractionPromptsEditor />
       </TabsContent>
 
