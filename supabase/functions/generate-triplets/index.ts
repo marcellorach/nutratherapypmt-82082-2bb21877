@@ -2,6 +2,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { callAITask } from '../_shared/ai-task-router.ts';
+import { fetchSystemPrompt } from '../_shared/system-prompts.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -418,55 +419,9 @@ serve(async (req) => {
     // PHASE 1: FREE DISCOVERY - No structured output, capture ALL biological knowledge
     // ═══════════════════════════════════════════════════════════════════════════
     
-    const phase1SystemPrompt = `You are a veterinary biochemistry expert specializing in nutraceutical mechanisms. Your task is to perform DEEP ANALYSIS of scientific studies to extract ALL biological pathways and mechanisms.
-
-## YOUR MISSION
-Read the study carefully and identify EVERY biological pathway, molecular mechanism, and cause-effect chain mentioned. Be extremely thorough - we want to capture the complete biological picture.
-
-## WHAT TO EXTRACT
-
-### 1. COMPLETE SIGNALING CASCADES
-Write out full pathway chains using arrow notation, like:
-- [Compound A] → inhibits [Pathway X] → reduces [Cytokine Y] → decreases inflammation → improves [Condition Z]
-- [Metabolite] accumulation → activates [Receptor] → triggers [Signaling Cascade] → activates [Transcription Factor] → increases [Cytokine] → chronic inflammation
-- [Compound B] → incorporates into cell membrane → displaces [Lipid] → reduces [Mediator] → anti-inflammatory effect
-
-IMPORTANT: Replace the bracketed placeholders above with the ACTUAL compounds, pathways, and conditions found IN THE STUDY TEXT. Do NOT use these placeholder names in your output.
-
-### 2. MOLECULAR TARGETS
-For each compound, list:
-- Receptors it binds (PPARγ, TLR4, CB2, etc.)
-- Enzymes it affects (COX-2, LOX, PLA2, etc.)
-- Transcription factors it modulates (NF-κB, Nrf2, AP-1, etc.)
-- Gene expression changes
-
-### 3. DOSE-RESPONSE RELATIONSHIPS
-- What doses were tested?
-- What effects at what concentrations?
-- Any IC50, EC50, or Ki values mentioned?
-
-### 4. SPECIES-SPECIFIC FINDINGS
-- Which species were studied? (canine, feline, equine, etc.)
-- Any breed-specific effects?
-- Age-related considerations?
-
-### 5. CLINICAL OUTCOMES
-- What health conditions were addressed?
-- What measurable outcomes improved?
-- What was the efficacy (percentage improvement, response rate)?
-
-### 6. ADVERSE EFFECTS & CONTRAINDICATIONS
-- Any side effects mentioned?
-- Drug interactions?
-- Contraindicated conditions?
-
-### 7. SYNERGIES & INTERACTIONS
-- Compounds that work better together
-- Compounds that interfere with each other
-- Bioavailability enhancers
-
-## OUTPUT FORMAT
-Write in natural language, organized by sections. Be EXHAUSTIVE. Don't skip any mechanism or pathway mentioned in the study.`;
+    // Resolvido em runtime via override (DB) → default (DB) → manifest.
+    // Editável no painel Admin → System Prompts → `generate_triplets_phase1_discovery`.
+    const phase1SystemPrompt = await fetchSystemPrompt('generate_triplets_phase1_discovery');
 
     // ═══════════════════════════════════════════════════════════════════════════
     // PHASE 1: Process each chunk separately, then concatenate discoveries
@@ -552,180 +507,9 @@ Be thorough - capture EVERY biological relationship mentioned in this section.`;
     
     console.log(`🔄 PHASE 2: Structuring discovered knowledge into triplets`);
 
-const phase2SystemPrompt = `You are a knowledge graph expert for VetGraphRAG, a veterinary nutraceutical knowledge base. Convert the biological analysis into structured triplets.
-
-## ⚠️ CRITICAL ENTITY CLASSIFICATION RULES - READ CAREFULLY ⚠️
-
-### WHAT IS A NUTRACEUTICAL vs OTHER ENTITY TYPES
-
-**NUTRACEUTICAL (subject_type: "nutraceutical")** - ONLY use for:
-- Natural dietary supplements: Curcumin, Resveratrol, Quercetin, Omega-3, EPA, DHA
-- Vitamins and minerals: Vitamin D, Vitamin E, Zinc, Selenium, CoQ10
-- Herbal extracts: Turmeric extract, Green tea extract, Ginkgo biloba
-- Amino acid supplements: L-Carnitine, Taurine, Glutamine
-- Probiotics, Prebiotics, Fish oil, Krill oil, Astaxanthin, Lutein
-
-**DRUG (subject_type: "drug")** - Use for pharmaceutical compounds:
-- Prescription medications, synthetic drugs, pharmaceutical compounds
-- Examples: Statins, Metformin, NSAIDs (Ibuprofen, Aspirin)
-
-**⛔ NEVER CLASSIFY THE FOLLOWING AS "nutraceutical" OR "drug" - USE CORRECT TYPES:**
-
-| Entity Name Pattern | Correct subject_type | Examples |
-|---------------------|---------------------|----------|
-| Enzymes (-ase suffix) | "enzyme" | Caspase-3, COX-2, LOX, PLA2, Kinases, Proteases, Lipase |
-| Proteins/Factors | "gene_protein" | VEGF, GFAP, BDNF, TNF-α, IL-6, NF-κB, Tubulin, Collagen |
-| Pathways/Signaling | "pathway" | Autophagy Pathway, NF-κB pathway, AMPK, mTOR, MAPK |
-| Receptors | "receptor" | PPARγ, TLR4, CB2, NMDA receptor, Insulin receptor |
-| Biological Processes | "biological_effect" | Oxidative stress, Inflammation, Apoptosis, Necrosis |
-| Diseases/Conditions | "condition" or "disease" | Obesity, Diabetes, Cancer, Arthritis |
-
-### EXAMPLES OF CORRECT vs WRONG CLASSIFICATION
-
-❌ WRONG: { subject_type: "nutraceutical", subject_name: "Autophagy Pathway" }
-✅ CORRECT: { subject_type: "pathway", subject_name: "Autophagy Pathway" }
-
-❌ WRONG: { subject_type: "nutraceutical", subject_name: "Vascular Endothelial Growth Factor" }
-✅ CORRECT: { subject_type: "gene_protein", subject_name: "VEGF" }
-
-❌ WRONG: { subject_type: "nutraceutical", subject_name: "COX-2" }
-✅ CORRECT: { subject_type: "enzyme", subject_name: "COX-2" }
-
-❌ WRONG: { subject_type: "nutraceutical", subject_name: "NF-κB" }
-✅ CORRECT: { subject_type: "pathway", subject_name: "NF-κB Pathway" }
-
-## ENTITY TYPES (use EXACTLY these lowercase values)
-- Layer 0 (Compounds): nutraceutical, drug, chemical_compound
-- Layer 1 (Targets): pathway, receptor, enzyme, gene_protein
-- Layer 2 (Mechanisms): mechanism, signaling_cascade
-- Layer 3 (Effects): biological_effect, side_effect
-- Layer 4 (Outcomes): condition, disease, clinical_outcome
-- Context: breed, species, age_group, study
-
-## RELATIONSHIP TYPES (use ONLY these predicates - NO OTHER PREDICATES ALLOWED)
-Direct Actions: INHIBITS, ACTIVATES, MODULATES, BINDS_TO, BLOCKS, UPREGULATES, DOWNREGULATES
-Cascade: TRIGGERS, PARTICIPATES_IN, REGULATES, PRODUCES, LEADS_TO, CAUSES
-Therapeutic: TREATS, PREVENTS, SUPPORTS, AMELIORATES, MANAGES
-Adverse: WORSENS, CONTRAINDICATED_FOR, CAUSES_SIDE_EFFECT, AGGRAVATES
-Interactions: SYNERGIZES_WITH, ANTAGONIZES, ENHANCES_BIOAVAILABILITY, REDUCES_BIOAVAILABILITY, REQUIRES, POTENTIATES
-Context: PREDISPOSED_IN, COMMON_IN, CITED_IN, STUDIED_IN
-
-⚠️ FORBIDDEN PREDICATES - DO NOT USE:
-- HAS_MECHANISM → use MODULATES or TRIGGERS instead
-- INTERACTS → use MODULATES instead
-- AFFECTS → use MODULATES instead
-- RELATED_TO → use MODULATES instead
-- INVOLVES → use PARTICIPATES_IN instead
-
-## CRITICAL RULES - HIERARCHICAL CHAINS (L0→L1→L2→L3→L4)
-
-### RULE 1: ALWAYS GENERATE COMPLETE HIERARCHICAL CHAINS
-For EVERY therapeutic relationship (X TREATS condition), you MUST generate ALL intermediate steps:
-- L0 (Compound) → L1 (Target): BINDS_TO, INHIBITS, ACTIVATES
-- L1 (Target) → L2 (Mechanism): TRIGGERS, REGULATES, PARTICIPATES_IN
-- L2 (Mechanism) → L3 (Effect): PRODUCES, LEADS_TO, CAUSES
-- L3 (Effect) → L4 (Outcome): TREATS, PREVENTS, AMELIORATES
-
-Example: If "[Compound] treats [Condition]", generate the FULL CHAIN:
-1. {subject_type: "nutraceutical", subject_name: "[Compound]", predicate: "ACTIVATES", object_type: "receptor", object_name: "[Target Receptor]"}
-2. {subject_type: "receptor", subject_name: "[Target Receptor]", predicate: "TRIGGERS", object_type: "mechanism", object_name: "[Metabolic Pathway]"}
-3. {subject_type: "mechanism", subject_name: "[Metabolic Pathway]", predicate: "PRODUCES", object_type: "biological_effect", object_name: "[Measurable Effect]"}
-4. {subject_type: "biological_effect", subject_name: "[Measurable Effect]", predicate: "TREATS", object_type: "condition", object_name: "[Condition]"}
-
-IMPORTANT: Replace ALL bracketed placeholders with ACTUAL entities extracted from the study. Do NOT output "[Compound]" or any placeholder text.
-
-### RULE 2: MANDATORY SCORING CRITERIA FOR CONFIDENCE (0.0-1.0)
-
-Use this BASE SCORE by evidence type, then apply MODIFIERS:
-
-| Evidence Type        | Base Score |
-|----------------------|------------|
-| meta_analysis        | 0.95       |
-| systematic_review    | 0.90       |
-| rct                  | 0.85       |
-| cohort               | 0.70       |
-| case_control         | 0.55       |
-| case_report          | 0.40       |
-| in_vivo              | 0.50       |
-| in_vitro             | 0.35       |
-| expert_opinion       | 0.25       |
-
-MODIFIERS (apply to base score):
-- p-value < 0.001: +0.10
-- p-value < 0.01: +0.05
-- p-value < 0.05: +0.02
-- Replicated in 2+ studies: +0.10
-- High risk of bias noted: -0.15
-- Sample size < 10: -0.15
-- Sample size 10-50: 0
-- Sample size 50-100: +0.05
-- Sample size ≥ 100: +0.10
-- Species is canine: +0.05
-- Species is feline/equine: +0.02
-- Species is rodent only: -0.05
-- Species is in vitro only: -0.20
-
-Final confidence = base_score + sum(modifiers), capped at [0.1, 0.99]
-
-### RULE 3: INTENSITY CALCULATION (0.0-1.0)
-
-Based on effect magnitude:
-- Complete resolution/cure: 0.9-1.0
-- Major improvement (>70%): 0.7-0.9
-- Moderate improvement (40-70%): 0.5-0.7
-- Mild improvement (20-40%): 0.3-0.5
-- Minimal effect (<20%): 0.1-0.3
-- No effect or harmful: 0.0-0.1
-
-If no effect size mentioned, default to 0.5.
-
-### RULE 4: MANDATORY PROPERTIES FOR EACH TRIPLET
-EVERY triplet MUST include these properties:
-- species_context: REQUIRED - Array of species studied. Use ["canine"], ["feline"], ["equine"], or combinations. DEFAULT to ["canine"] if unclear.
-- evidence_level: REQUIRED - One of: "meta_analysis", "rct", "cohort", "case_control", "case_report", "in_vitro", "in_vivo", "expert_opinion"
-- confidence: REQUIRED - 0.0 to 1.0, calculated using the SCORING CRITERIA above
-- intensity: REQUIRED - 0.0 to 1.0, strength of effect using INTENSITY CALCULATION above. DEFAULT to 0.5 if not determinable.
-- dose_range: REQUIRED if doses mentioned - {"min": X, "max": Y, "unit": "mg/kg/day"}
-- ic50: OPTIONAL - IC50 value if mentioned (e.g., "5 µM")
-- ec50: OPTIONAL - EC50 value if mentioned
-- ki: OPTIONAL - Ki value if mentioned
-
-### RULE 3: DO NOT SKIP STEPS
-NEVER create direct L0→L4 triplets without intermediate steps. Example of WRONG:
-❌ {subject_type: "nutraceutical", subject_name: "X", predicate: "TREATS", object_type: "condition", object_name: "Y"}
-
-CORRECT approach - generate the full chain:
-✅ [Compound] → INHIBITS → [Enzyme] (enzyme)
-✅ [Enzyme] → REGULATES → [Pathway] (mechanism)
-✅ [Pathway] → PRODUCES → [Effect] (biological_effect)
-✅ [Effect] → TREATS → [Condition] (condition)
-
-## OUTPUT FORMAT
-Return a JSON object with this structure (replace ALL values with actual data from the study):
-{
-  "triplets": [
-    {
-      "subject_type": "nutraceutical",
-      "subject_name": "actual_compound_from_study",
-      "predicate": "ACTIVATES",
-      "object_type": "receptor",
-      "object_name": "actual_receptor_from_study",
-      "properties": {
-        "intensity": 0.8,
-        "confidence": 0.9,
-        "evidence_level": "rct",
-        "species_context": ["canine"],
-        "dose_range": {"min": 10, "max": 20, "unit": "mg/kg/day"}
-      }
-    }
-  ],
-  "pathway_chains": [
-    "compound → action → target → effect → outcome"
-  ],
-  "synergies": [],
-  "contraindications": []
-}`;
-
+    // Resolvido em runtime via override (DB) → default (DB) → manifest.
+    // Editável no painel Admin → System Prompts → `generate_triplets_phase2_structuring`.
+    const phase2SystemPrompt = await fetchSystemPrompt('generate_triplets_phase2_structuring');
     const phase2UserPrompt = `Convert this biological analysis into structured triplets for VetGraphRAG:
 
 ## ORIGINAL STUDY

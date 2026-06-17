@@ -6,6 +6,7 @@
 // outcomes/result = prospective conditional. Anchored on the same honesty
 // guards (R/D/S split, no "RWD", GRRA/U-Retrieval/TransE = inspiration only).
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { fetchSystemPrompt } from "../_shared/system-prompts.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -120,7 +121,9 @@ const HONESTY_RULES_PT = `REGRAS DE HONESTIDADE (inegociáveis — aplique antes
 5) Evidência negativa (RC-001/002) é DIFERENCIAL real: triplet_extractions.evidence_polarity bloqueia recomendação quando 'negative'; exclusão de trial ≠ contraindicação (lacuna de evidência). Citar explicitamente em §5.
 6) PROIBIDO inventar número que não esteja no snapshot. Se um fato narrativo precisar de número e o snapshot não tiver, use linguagem qualitativa ("ampla", "milhares") ou marque "n/d" — nunca chute.`;
 
-const BASE_SYSTEM_PT = `Você está escrevendo um documento SHOWCASE da Senex AI (operada pela PetMoreTime) para uma parceira estratégica do setor pet (rede ampla de veterinários + seguro saúde pet). Tom: confiante, claro, voltado a negócio — copo meio cheio, mas verdadeiro; nada de auditoria acadêmica, nada de floreio. Escreva em HTML semântico denso, em PORTUGUÊS, sem <html>/<head>/<body>/<style>.
+// Default fallback se a busca no DB falhar. As versões editáveis vivem em
+// `ai_system_prompts.prompt_key = generate_showcase_pt | generate_showcase_en`.
+const BASE_SYSTEM_PT_DEFAULT = `Você está escrevendo um documento SHOWCASE da Senex AI (operada pela PetMoreTime) para uma parceira estratégica do setor pet (rede ampla de veterinários + seguro saúde pet). Tom: confiante, claro, voltado a negócio — copo meio cheio, mas verdadeiro; nada de auditoria acadêmica, nada de floreio. Escreva em HTML semântico denso, em PORTUGUÊS, sem <html>/<head>/<body>/<style>.
 
 Marca = "Senex AI". Motor/dona = "PetMoreTime". NUNCA mencione Lovable nem ferramentas de dev.
 
@@ -307,6 +310,8 @@ async function generateSection(
   section: typeof SECTIONS[number],
   snapshot: Record<string, any>,
   lang: Lang,
+  baseSystemPt: string,
+  baseSystemEn: string,
 ): Promise<{ id: string; title: string; html: string; status: "ok" | "unavailable"; reason?: string }> {
   const tool = {
     type: "function",
@@ -321,7 +326,9 @@ async function generateSection(
     },
   };
   const title = lang === "en" ? section.title_en : section.title_pt;
-  const baseSystem = lang === "en" ? buildBaseSystemEn(snapshot, section) : buildBaseSystemPt(snapshot, section);
+  const baseSystem = lang === "en"
+    ? buildBaseSystemEn(snapshot, section, baseSystemEn)
+    : buildBaseSystemPt(snapshot, section, baseSystemPt);
   const userMsg = lang === "en" ? section.user_en : section.user_pt;
   const attempts = chainFor(section.chain);
   let lastErr: any;
@@ -347,7 +354,7 @@ async function generateSection(
   };
 }
 
-function buildBaseSystemPt(snapshot: Record<string, any>, section: typeof SECTIONS[number]) {
+function buildBaseSystemPt(snapshot: Record<string, any>, section: typeof SECTIONS[number], BASE_SYSTEM_PT: string) {
   // §1/4/6 são qualitativas — não enviamos snapshot para reduzir tentação.
   // §2/3/5 recebem o snapshot inteiro (é pequeno) para citar números reais.
   if (section.kind === "narrative") {
@@ -369,7 +376,7 @@ const HONESTY_RULES_EN = `HONESTY RULES (non-negotiable):
 5) Negative evidence (RC-001/002) is a real differentiator: \`evidence_polarity\` blocks recommendation when 'negative'; trial exclusion ≠ contraindication. Cite explicitly in §5.
 6) FORBIDDEN to invent any number not in the snapshot. If a fact needs a number absent from snapshot, use qualitative language or "n/a".`;
 
-const BASE_SYSTEM_EN = `You are writing a SHOWCASE document for Senex AI (operated by PetMoreTime) addressed to a strategic pet-industry partner (broad vet network + pet health insurance). Tone: confident, clear, business-oriented — glass-half-full but truthful; no academic-audit voice, no flourish. Write in dense semantic HTML, in ENGLISH, no <html>/<head>/<body>/<style>.
+const BASE_SYSTEM_EN_DEFAULT = `You are writing a SHOWCASE document for Senex AI (operated by PetMoreTime) addressed to a strategic pet-industry partner (broad vet network + pet health insurance). Tone: confident, clear, business-oriented — glass-half-full but truthful; no academic-audit voice, no flourish. Write in dense semantic HTML, in ENGLISH, no <html>/<head>/<body>/<style>.
 
 Brand = "Senex AI". Engine/owner = "PetMoreTime". NEVER mention Lovable or dev tools.
 
@@ -385,7 +392,7 @@ FIXED STRUCTURE (6 SECTIONS, IN THIS ORDER — do not reorder, add, or remove):
 
 VISUALS: at least 1 inline SVG per section. Palette: #0f172a #1d4ed8 #16a34a #b45309 #dc2626 #4b5563 #e5e7eb. Each visual gets <p class="caption">… (source: snapshot)</p>. Numbers ALWAYS from the factual snapshot — if missing, mark "n/a" and explain.`;
 
-function buildBaseSystemEn(snapshot: Record<string, any>, section: typeof SECTIONS[number]) {
+function buildBaseSystemEn(snapshot: Record<string, any>, section: typeof SECTIONS[number], BASE_SYSTEM_EN: string) {
   if (section.kind === "narrative") {
     return `${BASE_SYSTEM_EN}
 
@@ -577,9 +584,16 @@ Deno.serve(async (req) => {
         await setStage("snapshot", "Lendo snapshot factual", 10);
         const snapshot = await readShowcaseSnapshot(service);
 
+        // Resolvido em runtime via override (DB) → default (DB) → manifest → fallback.
+        // Editáveis no painel Admin → System Prompts → `generate_showcase_pt|en`.
+        const [baseSystemPt, baseSystemEn] = await Promise.all([
+          fetchSystemPrompt('generate_showcase_pt', BASE_SYSTEM_PT_DEFAULT),
+          fetchSystemPrompt('generate_showcase_en', BASE_SYSTEM_EN_DEFAULT),
+        ]);
+
         await setStage("sections-pt", "Gerando 6 seções em PT (paralelo)", 20);
         const ptResults = await Promise.all(
-          SECTIONS.map((s) => generateSection(s, snapshot, "pt")),
+          SECTIONS.map((s) => generateSection(s, snapshot, "pt", baseSystemPt, baseSystemEn)),
         );
         const ptWarnings = ptResults.filter((r) => r.status === "unavailable")
           .map((r) => `${r.id}: ${r.reason}`);
@@ -597,7 +611,7 @@ Deno.serve(async (req) => {
 
         await setStage("sections-en", "Gerando 6 seções em EN (paralelo)", 70);
         const enResults = await Promise.all(
-          SECTIONS.map((s) => generateSection(s, snapshot, "en")),
+          SECTIONS.map((s) => generateSection(s, snapshot, "en", baseSystemPt, baseSystemEn)),
         );
         const enWarnings = enResults.filter((r) => r.status === "unavailable")
           .map((r) => `en-${r.id}: ${r.reason}`);

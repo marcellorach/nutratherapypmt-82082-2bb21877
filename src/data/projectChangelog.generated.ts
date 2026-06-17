@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-17T01:14:37.049Z
+// Última geração: 2026-06-17T01:25:54.135Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,29 @@ export const lastChangelogDate = "2026-06-17";
 export const senexVersion = "7.2.4";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-17",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "System Prompts: versão Senex (7.2.4), selo unificado nas 3 abas e audit log",
+    "bullets": [
+      "Versão sincronizada: `APP_VERSION` agora reflete a versão do Senex AI (`7.2.4`) + novo `PROMPTS_REVISION` (4º dígito) que incrementa apenas quando o manifest de prompts muda. Selo exibido: \"Sistema 7.2.4 · Prompts rev. 1\". Reseta para 0 a cada bump de APP_VERSION.",
+      "Selo unificado em todas as abas de prompts: `IntegrityBadge` extraído de `SystemPromptsCatalog` para novo componente `PromptsIntegrityBadge.tsx`, reutilizado nas abas Recomendações, Extração e System (modo `compact` para as duas primeiras). Mensagem clara separa dois sinais distintos: \"Última modificação dos prompts\" (max `updated_at` em `ai_system_prompts`) vs \"Última verificação\" (`checked_at` em `ai_system_prompts_integrity_check`) — resolve a confusão \"verificado hoje mas desatualizado\".",
+      "Auto-verificação por revisão: chave do localStorage agora é `${APP_VERSION}.${PROMPTS_REVISION}` — qualquer bump de prompts dispara verificação na próxima visita, mesmo sem mudar a versão do sistema.",
+      "Audit log dos prompts (Frente D): nova tabela `ai_system_prompts_audit_log` (`prompt_id`, `prompt_key`, `action` ∈ `override_set`/`override_cleared`/`default_changed`/`manifest_synced`, `changed_by`, `old_content`, `new_content`, `app_version`). Trigger `trg_ai_system_prompts_audit` registra automaticamente toda alteração em `override_content` ou `default_content`. RLS: admin lê, service_role escreve. Override permanece sagrado — o `sync-system-prompts` continua sem tocar em `override_content` (já garantido na Frente B).",
+      "Pendente Frente C (em commits dedicados): migrar as 12 edge functions com prompts hardcoded para `getSystemPrompt(supabase, key, fallback)`. O selo já as expõe como \"drift\" e o audit log vai capturar cada migração.",
+      "Files: `src/config/app-version.ts`, `src/components/administrador/configuracoes/PromptsIntegrityBadge.tsx` (novo), `src/components/administrador/configuracoes/SystemPromptsCatalog.tsx`, `src/components/administrador/PromptConfigurationTab.tsx`, `src/locales/{pt,en}/translation.json`, `src/i18n.ts` (1.121.0 → 1.122.0), `supabase/migrations/<ts>_ai_system_prompts_audit_log.sql`."
+    ],
+    "files": [
+      "src/config/app-version.ts",
+      "src/components/administrador/configuracoes/PromptsIntegrityBadge.tsx",
+      "src/components/administrador/configuracoes/SystemPromptsCatalog.tsx",
+      "src/components/administrador/PromptConfigurationTab.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.122.0"
+  },
   {
     "date": "2026-06-17",
     "kind": "added",

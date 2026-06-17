@@ -7,26 +7,23 @@ const corsHeaders = {
 };
 
 /**
- * Lista (manual) de edge functions que ainda contêm prompts hardcoded e que
- * deveriam migrar para o catálogo `ai_system_prompts`. Atualizar quando uma
- * função for migrada para `getSystemPrompt(...)` ou `fetchSystemPrompt(...)`.
+ * Lista de edge functions com prompts hardcoded que ainda precisam migrar
+ * para o catálogo `ai_system_prompts`. Atualizar quando uma função for
+ * migrada para `getSystemPrompt(...)` ou `fetchSystemPrompt(...)`.
  *
- * Esta lista alimenta o widget "Drift detectado" no painel de prompts —
- * serve para o admin saber quais prompts ainda NÃO são editáveis pela UI.
+ * Frente C — 2026-06-17: auditoria caso-a-caso revelou que 8 das 12 entradas
+ * originais eram FALSE-POSITIVES (orquestradores/pass-through/algorítmicas
+ * sem prompt próprio). Resultado:
+ *   - Migrados: generate-triplets (2 prompts), extract-meta-study,
+ *     generate-showcase (PT + EN), generate-meta-study-cover (style guide).
+ *   - Removidos (não têm prompt próprio): chat (pass-through),
+ *     process-study (orquestrador sem LLM), classify-entity (algorítmica),
+ *     calculate-recommendation-confidence (algorítmica),
+ *     finalize-stalled-cohort (sem LLM), enrichment-qa-sample (orquestrador),
+ *     compare-snapshots (sem LLM), fetch-external-ontologies (SNOMED/UMLS REST).
  */
 const HARDCODED_PROMPT_FUNCTIONS: Array<{ function_name: string; suggested_key: string; note: string }> = [
-  { function_name: 'chat', suggested_key: 'chat_assistant_streaming', note: 'Streaming chat assistant (system prompt literal no index.ts).' },
-  { function_name: 'generate-triplets', suggested_key: 'generate_triplets_extraction', note: 'Núcleo da extração de triplos do KG.' },
-  { function_name: 'process-study', suggested_key: 'process_study_pipeline', note: 'Pipeline orquestrador de estudos científicos.' },
-  { function_name: 'extract-meta-study', suggested_key: 'extract_meta_study', note: 'Extração estruturada de meta-estudos arquiteturais.' },
-  { function_name: 'generate-meta-study-cover', suggested_key: 'generate_meta_study_cover', note: 'Geração de capa visual de meta-estudos.' },
-  { function_name: 'generate-showcase', suggested_key: 'generate_showcase', note: 'Geração de showcases narrativos.' },
-  { function_name: 'classify-entity', suggested_key: 'classify_entity', note: 'Classificação taxonômica unitária de entidades.' },
-  { function_name: 'calculate-recommendation-confidence', suggested_key: 'calculate_recommendation_confidence', note: 'Score de confiança da recomendação híbrida.' },
-  { function_name: 'finalize-stalled-cohort', suggested_key: 'finalize_stalled_cohort', note: 'Finalização de cohorts travados.' },
-  { function_name: 'enrichment-qa-sample', suggested_key: 'enrichment_qa_sample', note: 'QA-sampling do enrichment do KG.' },
-  { function_name: 'compare-snapshots', suggested_key: 'compare_snapshots', note: 'Comparação narrativa de snapshots de auditoria.' },
-  { function_name: 'fetch-external-ontologies', suggested_key: 'fetch_external_ontologies', note: 'Lookup em SNOMED-CT/UMLS externos.' },
+  // (vazio — todas as edge functions com prompt próprio já estão no catálogo)
 ];
 
 Deno.serve(async (req) => {

@@ -3,6 +3,7 @@
 // rascunho para revisão humana na FundamentosTab > Ingestão.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { callAITask } from "../_shared/ai-task-router.ts";
+import { fetchSystemPrompt } from "../_shared/system-prompts.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -427,25 +428,9 @@ Deno.serve(async (req) => {
       .map((r: any) => `- ${r.rule_id} [${r.category}] ${r.title} — ${r.justification?.slice(0, 180) || ""}`)
       .join("\n");
 
-    const systemPrompt =
-      "You curate architectural/methodological references for a veterinary geroprotector platform's Meta-KG. " +
-      "These are NOT clinical studies — they justify how the pipeline reasons (translational weighting, exclusion vs contraindication, retrieval strategy, chunking, controlled vocabularies, fallback policies, etc.).\n\n" +
-      "DEPTH REQUIREMENT — do not be lazy. An architectural paper typically yields 10-25 distinct lessons. " +
-      "Distribute them across the SEVEN typed sections (architectural_patterns, methodological_recipes, vocabularies_standards, quantitative_parameters, anti_patterns_pitfalls, evaluation_metrics, open_questions). " +
-      "Aim for a TOTAL of at least 10 items combined across these sections for any non-trivial paper. " +
-      "Each item must include a literal quote (<=300 chars) and, when possible, an `applies_to` pointer naming the subsystem it informs.\n\n" +
-      "key_claims is LEGACY — put only the 3-5 most load-bearing claims there; the real richness goes into the typed sections.\n\n" +
-      "TWO PARALLEL OUTPUTS for governance:\n" +
-      "(a) suggested_links → only to rule_ids present in the provided catalog. Relations: 'supports' (justifies), 'contradicts' (challenges), 'modulates_weight' (informs a numeric weight), 'inspires' (motivated the rule conceptually).\n" +
-      "(b) proposed_rules → candidate NEW Core Rules deduced from the paper that do NOT map to any existing rule_id. Be generous here: it is far better to propose a candidate (which the curator will accept/merge/discard) than to silently drop a teachable lesson. Aim for at least 2 proposed_rules on any substantial architectural paper.\n\n" +
-      "STANCE CLASSIFICATION (mandatory on every proposed_rule):\n" +
-      "For each candidate, compare its enunciado against EVERY active Core Rule in the catalog and set `stance`:\n" +
-      "  - 'confirms'     → the candidate restates/reinforces an existing RC. List the rule_id(s) in `conflicts_with`. The curator will attach it as evidence instead of creating a duplicate RC.\n" +
-      "  - 'extends'      → genuinely new practice not covered by any active RC. This is the normal path to a new RC.\n" +
-      "  - 'contradicts'  → the candidate challenges or negates the prescription of an active RC. List the rule_id(s) in `conflicts_with`. NEVER ALSO emit a suggested_link with relation='contradicts' for the same idea — pick one channel. Contradictions are governance events: they will be BLOCKED from auto-promotion and require human resolution.\n" +
-      "  - 'unrelated'    → no overlap with any active RC.\n" +
-      "If unsure between 'confirms' and 'extends', prefer 'extends' (the curator can downgrade). If unsure between 'contradicts' and 'extends', prefer 'contradicts' (better to flag a false conflict than to silently overwrite a rule).\n\n" +
-      "All quotes must be literal substrings of the source text. If unsure, omit.";
+    // Resolvido em runtime via override (DB) → default (DB) → manifest.
+    // Editável no painel Admin → System Prompts → `extract_meta_study`.
+    const systemPrompt = await fetchSystemPrompt('extract_meta_study');
 
     const curatorBlock = curator_notes && curator_notes.trim()
       ? `\n\nCURATOR NOTES (treat as binding guidance — respect them):\n${curator_notes.trim().slice(0, 4000)}\n`
