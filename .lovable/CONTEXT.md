@@ -1,17 +1,23 @@
 # Project context briefing (auto)
-Generated: 2026-06-17T00:52:33.871Z
+Generated: 2026-06-17T01:14:37.055Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.120.0
+## Latest i18n version: 1.121.0
 
 ## Changes by area (last 14 days)
-- **admin**: 7
+- **admin**: 8
 - **meta**: 6
 - **kg**: 3
 - **curation**: 1
 
 ## Top 10 recent entries
+### 2026-06-17 · [admin] ADDED — Catálogo de System Prompts: seed completo + verificação contínua de integridade
+- Frente A (seed): 21 chaves do manifest (`supabase/functions/_shared/system-prompts.ts`) que nunca tinham sido propagadas ao banco agora estão em `ai_system_prompts`. Catálogo passou de 24 → 45 linhas (alinhado 1:1 com o manifest).
+- Frente B (`sync-system-prompts` idempotente): edge function trocada de `UPDATE`-only para `INSERT-or-UPDATE`. Toda nova chave adicionada ao manifest entra no DB automaticamente no próximo "Sincronizar com o código". Novo status `inserted` no relatório. Family/display_name das novas linhas são derivados automaticamente da chave; admin pode renomear.
+- Frente E (verificação contínua + selo na UI):
+_files: supabase/functions/_shared/system-prompts.ts, src/config/app-version.ts, supabase/functions/sync-system-prompts/index.ts, supabase/functions/verify-system-prompts/index.ts…_
+
 ### 2026-06-15 · [kg] FIXED — Playground multi-fonte: KG busca por termo real + cohort canônico + diagrama de mecanismo
 - Root cause (KG vazio para curcumina): `kgProvider` em `src/services/multi-source-resolver.ts` chamava `get_relations_graph_data(p_limit:500)` e filtrava as keywords client-side. Curcumina existe (127 triplets em `triplet_extractions`), mas não nas 500 primeiras edges — daí "Knowledge Graph curado: —" em uma pergunta que o KG cobre amplamente.
 - Fix KG: nova RPC `public.search_relations_by_term(p_terms text[], p_limit int)` faz `ILIKE` direto em `subject_name`/`object_name` filtrando `curation_status='approved' OR auto_approved=true`, ordenando por `llm_confidence`. Provider passa a chamar a RPC. Validado: pergunta de curcumina retorna 10+ relações (Curcumin ⊣ NF-κB, ↑ Nrf2, ↓ TLR4, previne Alzheimer/Parkinson).
@@ -62,12 +68,6 @@ _files: src/components/administrador/audits/TechnicalAuditsTab.tsx, src/componen
 - Ajustes no `generate-audit` sobre fatiamento de blocos (fatos-âncora de honestidade replicados em todo bloco que toca dados/coortes/KG/recomendação/compliance/twin) e contexto amplo no sumário executivo.
 - Files: supabase/functions/generate-audit/index.ts
 _files: supabase/functions/generate-audit/index.ts_
-
-### 2026-06-06 · [meta] CHANGED — Auditoria v7.2.0: split clínico no snapshot + KG honesto + Gompertz erradicado
-- `generate-audit/readAuditContext` — `tableNames` corrigido: `pets`→removido, `studies`→`processed_studies`, `medical_knowledge_graph` removido (legado). As 5 tabelas de população clínica (`pet_profiles`, `pet_exams`, `pet_consultations`, `pet_medications`, `pet_conditions`) saíram de `counts` de propósito — agora a ÚNICA fonte de verdade é `clinical_data_provenance` com `{real, demo, synthetic_cohort}`. Sem total bruto, o LLM não consegue mais apresentar "1234 exames processados" como atividade real.
-- Novo `snapshot.kg_storage` — expõe top relacionamentos de `hierarchical_edges` (TREATS / PREVENTS / HAS_MECHANISM / ...), confirmando que os 38k+ edges são relações clínicas curadas e NÃO taxonomia legada. Inclui `triplet_extractions_approved` e `triplet_extractions_synced_to_neo4j` para reportar honestamente o espelho Neo4j.
-- `audit_base_system_{pt,en}` — (1) contrato positivo: toda contagem clínica DEVE ser escrita inline como "N total (R real / D demo / S sintético)" — blacklist léxica reduzida a backstop fraco (RWD / "base de pacientes reais"); (2) Gompertz erradicado: "Gompertz NÃO está implementado em lugar nenhum, NÃO existe `breed_aging_curves`, sigmoide é o único motor"; (3) `medical_knowledge_graph` proibido como armazenamento ativo; (4) drift-guard tem renderização obrigatória mesmo com erro.
-_files: supabase/functions/generate-audit/index.ts, supabase/functions/_shared/system-prompts.ts, src/data/audit-coverage.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

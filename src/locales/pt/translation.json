@@ -2916,6 +2916,9 @@
       },
       "integrity": {
         "appVersion": "Versão do sistema",
+        "systemLabel": "Sistema",
+        "promptsRevLabel": "Prompts rev.",
+        "lastModified": "Última modificação dos prompts",
         "lastChecked": "Última verificação",
         "never": "nunca",
         "statusOk": "Catálogo sincronizado",
