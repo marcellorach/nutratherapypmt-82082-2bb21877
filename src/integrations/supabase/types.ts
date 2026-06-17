@@ -361,6 +361,51 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_system_prompts_integrity_check: {
+        Row: {
+          app_version: string
+          checked_at: string
+          db_count: number
+          details: Json | null
+          extra_in_db: Json
+          hardcoded_outside_catalog: Json
+          id: string
+          manifest_count: number
+          missing_in_db: Json
+          out_of_sync: Json
+          status: string
+          triggered_by: string
+        }
+        Insert: {
+          app_version: string
+          checked_at?: string
+          db_count: number
+          details?: Json | null
+          extra_in_db?: Json
+          hardcoded_outside_catalog?: Json
+          id?: string
+          manifest_count: number
+          missing_in_db?: Json
+          out_of_sync?: Json
+          status: string
+          triggered_by?: string
+        }
+        Update: {
+          app_version?: string
+          checked_at?: string
+          db_count?: number
+          details?: Json | null
+          extra_in_db?: Json
+          hardcoded_outside_catalog?: Json
+          id?: string
+          manifest_count?: number
+          missing_in_db?: Json
+          out_of_sync?: Json
+          status?: string
+          triggered_by?: string
+        }
+        Relationships: []
+      }
       ai_task_invocations: {
         Row: {
           abstain_reason: string | null
