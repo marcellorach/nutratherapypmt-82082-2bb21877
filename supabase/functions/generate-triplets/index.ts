@@ -2,6 +2,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { callAITask } from '../_shared/ai-task-router.ts';
+import { fetchSystemPrompt } from '../_shared/system-prompts.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -418,55 +419,9 @@ serve(async (req) => {
     // PHASE 1: FREE DISCOVERY - No structured output, capture ALL biological knowledge
     // ═══════════════════════════════════════════════════════════════════════════
     
-    const phase1SystemPrompt = `You are a veterinary biochemistry expert specializing in nutraceutical mechanisms. Your task is to perform DEEP ANALYSIS of scientific studies to extract ALL biological pathways and mechanisms.
-
-## YOUR MISSION
-Read the study carefully and identify EVERY biological pathway, molecular mechanism, and cause-effect chain mentioned. Be extremely thorough - we want to capture the complete biological picture.
-
-## WHAT TO EXTRACT
-
-### 1. COMPLETE SIGNALING CASCADES
-Write out full pathway chains using arrow notation, like:
-- [Compound A] → inhibits [Pathway X] → reduces [Cytokine Y] → decreases inflammation → improves [Condition Z]
-- [Metabolite] accumulation → activates [Receptor] → triggers [Signaling Cascade] → activates [Transcription Factor] → increases [Cytokine] → chronic inflammation
-- [Compound B] → incorporates into cell membrane → displaces [Lipid] → reduces [Mediator] → anti-inflammatory effect
-
-IMPORTANT: Replace the bracketed placeholders above with the ACTUAL compounds, pathways, and conditions found IN THE STUDY TEXT. Do NOT use these placeholder names in your output.
-
-### 2. MOLECULAR TARGETS
-For each compound, list:
-- Receptors it binds (PPARγ, TLR4, CB2, etc.)
-- Enzymes it affects (COX-2, LOX, PLA2, etc.)
-- Transcription factors it modulates (NF-κB, Nrf2, AP-1, etc.)
-- Gene expression changes
-
-### 3. DOSE-RESPONSE RELATIONSHIPS
-- What doses were tested?
-- What effects at what concentrations?
-- Any IC50, EC50, or Ki values mentioned?
-
-### 4. SPECIES-SPECIFIC FINDINGS
-- Which species were studied? (canine, feline, equine, etc.)
-- Any breed-specific effects?
-- Age-related considerations?
-
-### 5. CLINICAL OUTCOMES
-- What health conditions were addressed?
-- What measurable outcomes improved?
-- What was the efficacy (percentage improvement, response rate)?
-
-### 6. ADVERSE EFFECTS & CONTRAINDICATIONS
-- Any side effects mentioned?
-- Drug interactions?
-- Contraindicated conditions?
-
-### 7. SYNERGIES & INTERACTIONS
-- Compounds that work better together
-- Compounds that interfere with each other
-- Bioavailability enhancers
-
-## OUTPUT FORMAT
-Write in natural language, organized by sections. Be EXHAUSTIVE. Don't skip any mechanism or pathway mentioned in the study.`;
+    // Resolvido em runtime via override (DB) → default (DB) → manifest.
+    // Editável no painel Admin → System Prompts → `generate_triplets_phase1_discovery`.
+    const phase1SystemPrompt = await fetchSystemPrompt('generate_triplets_phase1_discovery');
 
     // ═══════════════════════════════════════════════════════════════════════════
     // PHASE 1: Process each chunk separately, then concatenate discoveries
