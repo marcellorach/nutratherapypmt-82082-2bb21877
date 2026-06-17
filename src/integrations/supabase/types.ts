@@ -361,6 +361,42 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_system_prompts_audit_log: {
+        Row: {
+          action: string
+          app_version: string | null
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_content: string | null
+          old_content: string | null
+          prompt_id: string
+          prompt_key: string
+        }
+        Insert: {
+          action: string
+          app_version?: string | null
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_content?: string | null
+          old_content?: string | null
+          prompt_id: string
+          prompt_key: string
+        }
+        Update: {
+          action?: string
+          app_version?: string | null
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_content?: string | null
+          old_content?: string | null
+          prompt_id?: string
+          prompt_key?: string
+        }
+        Relationships: []
+      }
       ai_system_prompts_integrity_check: {
         Row: {
           app_version: string
