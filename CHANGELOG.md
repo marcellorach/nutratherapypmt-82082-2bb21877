@@ -24,6 +24,19 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.2.4 -->
 
+### Added - 2026-06-17 — Catálogo de System Prompts: seed completo + verificação contínua de integridade
+<!-- area: admin · status: entregue · i18n: 1.121.0 -->
+- **Frente A (seed)**: 21 chaves do manifest (`supabase/functions/_shared/system-prompts.ts`) que nunca tinham sido propagadas ao banco agora estão em `ai_system_prompts`. Catálogo passou de 24 → 45 linhas (alinhado 1:1 com o manifest).
+- **Frente B (`sync-system-prompts` idempotente)**: edge function trocada de `UPDATE`-only para `INSERT-or-UPDATE`. Toda nova chave adicionada ao manifest entra no DB automaticamente no próximo "Sincronizar com o código". Novo status `inserted` no relatório. Family/display_name das novas linhas são derivados automaticamente da chave; admin pode renomear.
+- **Frente E (verificação contínua + selo na UI)**:
+  - Nova tabela `ai_system_prompts_integrity_check` (admin-only) registra cada verificação: `app_version`, `manifest_count`, `db_count`, listas `missing_in_db`/`extra_in_db`/`out_of_sync`/`hardcoded_outside_catalog`, `status` (`ok`/`drift`/`error`), `triggered_by` (`manual`/`auto_on_version_bump`), `checked_at`.
+  - Nova edge function `verify-system-prompts` compara manifest × DB e grava o resultado. Lista interna `HARDCODED_PROMPT_FUNCTIONS` rastreia as 12 funções com prompts ainda não migrados ao catálogo (chat, generate-triplets, process-study, extract-meta-study, generate-meta-study-cover, generate-showcase, classify-entity, calculate-recommendation-confidence, finalize-stalled-cohort, enrichment-qa-sample, compare-snapshots, fetch-external-ontologies).
+  - Novo `src/config/app-version.ts` (`APP_VERSION = '1.1.0'`) — fonte única da versão semântica do app.
+  - `SystemPromptsCatalog` ganhou selo no topo: versão do sistema, contagem manifest × DB, status visual (verde/âmbar/vermelho), "Última verificação" formatada em pt-BR, botão "Verificar agora" e expand com detalhe das divergências. Disparo automático na primeira visita após bump de `APP_VERSION` (rastreado via `localStorage.lastVerifiedAppVersion`).
+- **Pendente para Frente C+D (follow-up)**: migrar os 12 prompts hardcoded listados acima para o catálogo via `getSystemPrompt(supabase, key, fallback)` e preencher `purpose/model_default/temperature/output_format/consumers/tags` das 24 chaves antigas que ainda só têm `content`. A Frente E já expõe os dois débitos no painel — o admin vê exatamente o que falta.
+- Migration: `ai_system_prompts_integrity_check` com RLS (admin lê, service_role escreve) + índice por `checked_at DESC`.
+- Files: `supabase/migrations/<ts>_ai_system_prompts_integrity_check.sql`, `supabase/functions/sync-system-prompts/index.ts`, `supabase/functions/verify-system-prompts/index.ts` (novo), `src/config/app-version.ts` (novo), `src/components/administrador/configuracoes/SystemPromptsCatalog.tsx`, `src/locales/{pt,en}/translation.json`, `src/i18n.ts` (1.120.0 → 1.121.0).
+
 ### Fixed - 2026-06-15 — Playground multi-fonte: KG busca por termo real + cohort canônico + diagrama de mecanismo
 <!-- area: kg · status: entregue · i18n: 1.120.0 -->
 - **Root cause (KG vazio para curcumina)**: `kgProvider` em `src/services/multi-source-resolver.ts` chamava `get_relations_graph_data(p_limit:500)` e filtrava as keywords client-side. Curcumina existe (127 triplets em `triplet_extractions`), mas não nas 500 primeiras edges — daí "Knowledge Graph curado: —" em uma pergunta que o KG cobre amplamente.
