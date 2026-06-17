@@ -3,6 +3,7 @@
 // Style guide fixo garante consistência visual entre todos os papers.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { fetchSystemPrompt } from "../_shared/system-prompts.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
