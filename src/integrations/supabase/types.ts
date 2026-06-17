@@ -2744,6 +2744,48 @@ export type Database = {
         }
         Relationships: []
       }
+      neo4j_ghost_edges_backup_20260616: {
+        Row: {
+          created_at: string
+          evidence_count: number | null
+          id: string
+          object_label: string | null
+          object_name: string | null
+          predicate: string | null
+          rel_properties: Json | null
+          study_id: string | null
+          subject_label: string | null
+          subject_name: string | null
+          triplet_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          evidence_count?: number | null
+          id?: string
+          object_label?: string | null
+          object_name?: string | null
+          predicate?: string | null
+          rel_properties?: Json | null
+          study_id?: string | null
+          subject_label?: string | null
+          subject_name?: string | null
+          triplet_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          evidence_count?: number | null
+          id?: string
+          object_label?: string | null
+          object_name?: string | null
+          predicate?: string | null
+          rel_properties?: Json | null
+          study_id?: string | null
+          subject_label?: string | null
+          subject_name?: string | null
+          triplet_id?: string | null
+        }
+        Relationships: []
+      }
       nutraceutical_benefits: {
         Row: {
           benefit: string
