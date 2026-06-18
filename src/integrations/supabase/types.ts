@@ -2102,6 +2102,27 @@ export type Database = {
             referencedRelation: "triplet_extractions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "enrichment_qa_samples_triplet_id_fkey"
+            columns: ["triplet_id"]
+            isOneToOne: false
+            referencedRelation: "v_ghost_triplets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrichment_qa_samples_triplet_id_fkey"
+            columns: ["triplet_id"]
+            isOneToOne: false
+            referencedRelation: "v_mixed_unapproved_triplets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enrichment_qa_samples_triplet_id_fkey"
+            columns: ["triplet_id"]
+            isOneToOne: false
+            referencedRelation: "v_unapproved_synced_triplets"
+            referencedColumns: ["id"]
+          },
         ]
       }
       evidence_claims: {
@@ -2199,6 +2220,27 @@ export type Database = {
             columns: ["triplet_id"]
             isOneToOne: false
             referencedRelation: "triplet_extractions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_claims_triplet_id_fkey"
+            columns: ["triplet_id"]
+            isOneToOne: false
+            referencedRelation: "v_ghost_triplets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_claims_triplet_id_fkey"
+            columns: ["triplet_id"]
+            isOneToOne: false
+            referencedRelation: "v_mixed_unapproved_triplets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_claims_triplet_id_fkey"
+            columns: ["triplet_id"]
+            isOneToOne: false
+            referencedRelation: "v_unapproved_synced_triplets"
             referencedColumns: ["id"]
           },
         ]
@@ -2498,6 +2540,27 @@ export type Database = {
             columns: ["triplet_id"]
             isOneToOne: false
             referencedRelation: "triplet_extractions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hierarchical_edges_triplet_id_fkey"
+            columns: ["triplet_id"]
+            isOneToOne: false
+            referencedRelation: "v_ghost_triplets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hierarchical_edges_triplet_id_fkey"
+            columns: ["triplet_id"]
+            isOneToOne: false
+            referencedRelation: "v_mixed_unapproved_triplets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hierarchical_edges_triplet_id_fkey"
+            columns: ["triplet_id"]
+            isOneToOne: false
+            referencedRelation: "v_unapproved_synced_triplets"
             referencedColumns: ["id"]
           },
         ]
@@ -5671,6 +5734,27 @@ export type Database = {
             referencedRelation: "triplet_extractions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "triplet_verifications_triplet_id_fkey"
+            columns: ["triplet_id"]
+            isOneToOne: false
+            referencedRelation: "v_ghost_triplets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "triplet_verifications_triplet_id_fkey"
+            columns: ["triplet_id"]
+            isOneToOne: false
+            referencedRelation: "v_mixed_unapproved_triplets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "triplet_verifications_triplet_id_fkey"
+            columns: ["triplet_id"]
+            isOneToOne: false
+            referencedRelation: "v_unapproved_synced_triplets"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_roles: {
@@ -5778,6 +5862,27 @@ export type Database = {
             columns: ["source_triplet_id"]
             isOneToOne: false
             referencedRelation: "triplet_extractions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "verification_controls_source_triplet_id_fkey"
+            columns: ["source_triplet_id"]
+            isOneToOne: false
+            referencedRelation: "v_ghost_triplets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "verification_controls_source_triplet_id_fkey"
+            columns: ["source_triplet_id"]
+            isOneToOne: false
+            referencedRelation: "v_mixed_unapproved_triplets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "verification_controls_source_triplet_id_fkey"
+            columns: ["source_triplet_id"]
+            isOneToOne: false
+            referencedRelation: "v_unapproved_synced_triplets"
             referencedColumns: ["id"]
           },
         ]
@@ -5924,6 +6029,123 @@ export type Database = {
           source?: string | null
           studies?: never
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      v_ghost_triplets: {
+        Row: {
+          curation_status: string | null
+          has_approved_sibling: boolean | null
+          id: string | null
+          o_lower: string | null
+          object_name: string | null
+          p_lower: string | null
+          predicate: string | null
+          s_lower: string | null
+          subject_name: string | null
+          synced_to_neo4j: boolean | null
+        }
+        Insert: {
+          curation_status?: string | null
+          has_approved_sibling?: never
+          id?: string | null
+          o_lower?: never
+          object_name?: string | null
+          p_lower?: never
+          predicate?: string | null
+          s_lower?: never
+          subject_name?: string | null
+          synced_to_neo4j?: boolean | null
+        }
+        Update: {
+          curation_status?: string | null
+          has_approved_sibling?: never
+          id?: string | null
+          o_lower?: never
+          object_name?: string | null
+          p_lower?: never
+          predicate?: string | null
+          s_lower?: never
+          subject_name?: string | null
+          synced_to_neo4j?: boolean | null
+        }
+        Relationships: []
+      }
+      v_mixed_unapproved_triplets: {
+        Row: {
+          curation_status: string | null
+          has_approved_sibling: boolean | null
+          id: string | null
+          o_lower: string | null
+          object_name: string | null
+          p_lower: string | null
+          predicate: string | null
+          s_lower: string | null
+          subject_name: string | null
+          synced_to_neo4j: boolean | null
+        }
+        Insert: {
+          curation_status?: string | null
+          has_approved_sibling?: never
+          id?: string | null
+          o_lower?: never
+          object_name?: string | null
+          p_lower?: never
+          predicate?: string | null
+          s_lower?: never
+          subject_name?: string | null
+          synced_to_neo4j?: boolean | null
+        }
+        Update: {
+          curation_status?: string | null
+          has_approved_sibling?: never
+          id?: string | null
+          o_lower?: never
+          object_name?: string | null
+          p_lower?: never
+          predicate?: string | null
+          s_lower?: never
+          subject_name?: string | null
+          synced_to_neo4j?: boolean | null
+        }
+        Relationships: []
+      }
+      v_unapproved_synced_triplets: {
+        Row: {
+          curation_status: string | null
+          has_approved_sibling: boolean | null
+          id: string | null
+          o_lower: string | null
+          object_name: string | null
+          p_lower: string | null
+          predicate: string | null
+          s_lower: string | null
+          subject_name: string | null
+          synced_to_neo4j: boolean | null
+        }
+        Insert: {
+          curation_status?: string | null
+          has_approved_sibling?: never
+          id?: string | null
+          o_lower?: never
+          object_name?: string | null
+          p_lower?: never
+          predicate?: string | null
+          s_lower?: never
+          subject_name?: string | null
+          synced_to_neo4j?: boolean | null
+        }
+        Update: {
+          curation_status?: string | null
+          has_approved_sibling?: never
+          id?: string | null
+          o_lower?: never
+          object_name?: string | null
+          p_lower?: never
+          predicate?: string | null
+          s_lower?: never
+          subject_name?: string | null
+          synced_to_neo4j?: boolean | null
         }
         Relationships: []
       }

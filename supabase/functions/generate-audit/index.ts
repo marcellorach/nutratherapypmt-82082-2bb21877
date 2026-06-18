@@ -325,6 +325,178 @@ async function readAuditContext(service: ReturnType<typeof createClient>, appOri
     snapshot.kg_storage = { error: (e as any)?.message ?? String(e) };
   }
 
+  // ---------------------------------------------------------------------------
+  // KG INTEGRITY — read-only reconciliation Postgres ↔ Neo4j (Aura).
+  // Single source of truth for the predicate "synced & not approved" is the
+  // canonical view `v_unapproved_synced_triplets` (migration 2026-06-18).
+  // Convenience views `v_ghost_triplets` / `v_mixed_unapproved_triplets`
+  // partition that base set by has_approved_sibling. NEVER redefine the
+  // predicate inline here — always reference the views.
+  // Baseline (post-cleanup 2026-06-17):
+  //   neo4j: count(r) ≈ 3815   ; count(n) ≈ 2403
+  //   ghost_pure_count = 0     ; mixed_triplets = 91 ; mixed_groups = 83
+  //   stamp_drift_mixed_groups ≈ 26 (RC-004 — report only, do NOT re-stamp).
+  // ---------------------------------------------------------------------------
+  try {
+    const integrity: Record<string, any> = {
+      note: "READ-ONLY. Canonical predicate lives in v_unapproved_synced_triplets (synced_to_neo4j=true AND curation_status<>'approved'); ghost_pure=no approved sibling on lower(s,p,o); mixed=approved sibling exists. Stamp-drift (RC-004) reported only — never re-stamp triplet_id from this snapshot.",
+      baseline_2026_06_17: {
+        neo4j: { edges: 3815, nodes: 2403 },
+        postgres: { ghost_pure: 0, mixed_triplets: 91, mixed_groups: 83 },
+        stamp_drift_mixed_groups_expected: 26,
+      },
+      divergences: [] as string[],
+    };
+
+    // ---- Postgres side (uses the canonical view; no inline predicate) ----
+    const [
+      approvedTotalRes,
+      syncedTotalRes,
+      ghostCountRes,
+      mixedCountRes,
+      approvedNotSyncedRes,
+      approvedNotSyncedSampleRes,
+    ] = await Promise.all([
+      service.from("triplet_extractions").select("*", { count: "exact", head: true }).eq("curation_status", "approved"),
+      service.from("triplet_extractions").select("*", { count: "exact", head: true }).eq("synced_to_neo4j", true),
+      service.from("v_ghost_triplets").select("*", { count: "exact", head: true }),
+      service.from("v_mixed_unapproved_triplets").select("*", { count: "exact", head: true }),
+      service.from("triplet_extractions").select("*", { count: "exact", head: true }).eq("curation_status", "approved").or("synced_to_neo4j.is.null,synced_to_neo4j.eq.false"),
+      service.from("triplet_extractions").select("id,subject_name,predicate,object_name").eq("curation_status", "approved").or("synced_to_neo4j.is.null,synced_to_neo4j.eq.false").limit(5),
+    ]);
+
+    // distinct mixed groups (no exact head:true on derived select; pull all rows — capped small set)
+    const { data: mixedRows } = await service
+      .from("v_mixed_unapproved_triplets")
+      .select("s_lower,p_lower,o_lower,id,curation_status");
+    const mixedGroupsSet = new Set<string>();
+    for (const r of (mixedRows ?? []) as any[]) {
+      mixedGroupsSet.add(`${r.s_lower}|${r.p_lower}|${r.o_lower}`);
+    }
+
+    const approvedTotal = approvedTotalRes.count ?? 0;
+    const syncedTotal = syncedTotalRes.count ?? 0;
+    const ghostPure = ghostCountRes.count ?? 0;
+    const mixedTriplets = mixedCountRes.count ?? 0;
+    const mixedGroups = mixedGroupsSet.size;
+    const approvedNotSynced = approvedNotSyncedRes.count ?? 0;
+
+    integrity.postgres = {
+      approved_total: approvedTotal,
+      synced_total: syncedTotal,
+      ghost_pure_count: ghostPure,
+      mixed_triplets: mixedTriplets,
+      mixed_groups_distinct_spo: mixedGroups,
+      approved_not_synced_count: approvedNotSynced,
+      approved_not_synced_sample: (approvedNotSyncedSampleRes.data ?? []) as any[],
+    };
+
+    if (ghostPure > 0) integrity.divergences.push(`NEW_GHOSTS: ghost_pure_count=${ghostPure} (expected 0) — investigar antes de qualquer outra ação no grafo.`);
+    if (mixedTriplets !== 91) integrity.divergences.push(`MIXED_DRIFT: mixed_triplets=${mixedTriplets} (baseline 91).`);
+    if (mixedGroups !== 83) integrity.divergences.push(`MIXED_GROUPS_DRIFT: mixed_groups=${mixedGroups} (baseline 83).`);
+
+    // ---- Neo4j (Aura) side — read-only MATCH...RETURN only ----
+    let neo4jBlock: Record<string, any> = { error: "neo4j_credentials_missing" };
+    try {
+      const { data: cfgRows } = await service
+        .from("ai_configurations")
+        .select("config_key,config_value")
+        .in("config_key", ["neo4j_uri", "neo4j_username", "neo4j_password"]);
+      const cfg: Record<string, string> = {};
+      for (const r of (cfgRows ?? []) as any[]) cfg[r.config_key] = r.config_value;
+      if (cfg.neo4j_uri && cfg.neo4j_username && cfg.neo4j_password) {
+        const httpUri = cfg.neo4j_uri.replace("neo4j+s://", "https://").replace("neo4j://", "http://");
+        const auth = "Basic " + btoa(`${cfg.neo4j_username}:${cfg.neo4j_password}`);
+        const cypher = async (statement: string) => {
+          const res = await fetch(`${httpUri}/db/neo4j/query/v2`, {
+            method: "POST",
+            headers: { Authorization: auth, "Content-Type": "application/json", Accept: "application/json" },
+            body: JSON.stringify({ statement }),
+            signal: AbortSignal.timeout(20_000),
+          });
+          if (!res.ok) throw new Error(`neo4j ${res.status}: ${await res.text()}`);
+          return await res.json();
+        };
+
+        const [edgesJson, nodesJson, edgeIdsJson] = await Promise.all([
+          cypher("MATCH ()-[r]->() RETURN count(r) AS n"),
+          cypher("MATCH (n) RETURN count(n) AS n"),
+          cypher("MATCH ()-[r]->() WHERE r.triplet_id IS NOT NULL RETURN DISTINCT r.triplet_id AS id"),
+        ]);
+        const edgeCount = Number(edgesJson?.data?.values?.[0]?.[0] ?? 0);
+        const nodeCount = Number(nodesJson?.data?.values?.[0]?.[0] ?? 0);
+        const auraTripletIds: string[] = (edgeIdsJson?.data?.values ?? [])
+          .map((row: any) => row?.[0])
+          .filter((v: any) => typeof v === "string" && v.length > 0);
+
+        // True orphan check: aura triplet_ids that DO NOT resolve in Postgres.
+        // Chunked IN-list to avoid PostgREST URL limits.
+        const chunkSize = 200;
+        const knownIds = new Set<string>();
+        for (let i = 0; i < auraTripletIds.length; i += chunkSize) {
+          const chunk = auraTripletIds.slice(i, i + chunkSize);
+          const { data: hits } = await service
+            .from("triplet_extractions")
+            .select("id")
+            .in("id", chunk);
+          for (const h of (hits ?? []) as any[]) knownIds.add(h.id);
+        }
+        const orphanIds = auraTripletIds.filter((id) => !knownIds.has(id));
+
+        // Stamp-drift (RC-004): for mixed groups, count groups where any Aura
+        // edge on lower(s,p,o) carries a triplet_id that maps to a NON-approved
+        // triplet. REPORT ONLY — never re-stamp from here.
+        const mixedTripletIdSet = new Set<string>(
+          (mixedRows ?? []).map((r: any) => r.id).filter(Boolean),
+        );
+        let stampDriftGroups = 0;
+        if (mixedGroupsSet.size > 0 && auraTripletIds.length > 0) {
+          // For each Aura triplet_id present that resolves to a mixed (non-approved)
+          // row, count its group once.
+          const driftedGroups = new Set<string>();
+          // Build id -> spo from mixedRows
+          const idToSpo = new Map<string, string>();
+          for (const r of (mixedRows ?? []) as any[]) {
+            idToSpo.set(r.id, `${r.s_lower}|${r.p_lower}|${r.o_lower}`);
+          }
+          for (const id of auraTripletIds) {
+            if (mixedTripletIdSet.has(id)) {
+              const spo = idToSpo.get(id);
+              if (spo) driftedGroups.add(spo);
+            }
+          }
+          stampDriftGroups = driftedGroups.size;
+        }
+
+        neo4jBlock = {
+          edges_count: edgeCount,
+          nodes_count: nodeCount,
+          edges_with_triplet_id_distinct: auraTripletIds.length,
+          true_orphans_count: orphanIds.length,
+          true_orphans_sample: orphanIds.slice(0, 10),
+          stamp_drift_mixed_groups_observed: stampDriftGroups,
+          stamp_drift_note: "RC-004: aresta sobrevivente em grupo MISTO aponta para triplet NÃO-aprovado. Só reporte — não recarimbar aqui.",
+        };
+
+        if (edgeCount !== 3815) integrity.divergences.push(`NEO4J_EDGES_DRIFT: ${edgeCount} (baseline 3815).`);
+        if (nodeCount !== 2403) integrity.divergences.push(`NEO4J_NODES_DRIFT: ${nodeCount} (baseline 2403).`);
+        if (orphanIds.length > 0) integrity.divergences.push(`TRUE_ORPHANS: ${orphanIds.length} arestas no Aura sem triplet em Postgres.`);
+      }
+    } catch (e) {
+      neo4jBlock = { error: (e as any)?.message ?? String(e) };
+      integrity.divergences.push(`NEO4J_CHECK_FAILED: ${neo4jBlock.error}`);
+    }
+    integrity.neo4j = neo4jBlock;
+
+    if (approvedNotSynced > 0) {
+      integrity.divergences.push(`SYNC_GAP: approved_not_synced=${approvedNotSynced} (aprovados fora do grafo).`);
+    }
+
+    snapshot.kg_integrity = integrity;
+  } catch (e) {
+    snapshot.kg_integrity = { error: (e as any)?.message ?? String(e) };
+  }
+
   // Provenance split for clinical tables: real vs demo seed vs synthetic_cohort.
   // Without this split the LLM has been mislabeling pet_exams/consultations as
   // "real-world data" when 98% is generated by `generate-synthetic-cohort`.
