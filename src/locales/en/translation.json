@@ -2978,7 +2978,8 @@
       "actions": {
         "refreshSnapshot": "Refresh inventory snapshot",
         "reportCsv": "Generate model report (CSV)",
-        "reportJson": "Export JSON"
+        "reportJson": "Export JSON",
+        "reportPdf": "Generate PDF report"
       },
       "cols": {
         "task": "Task",
