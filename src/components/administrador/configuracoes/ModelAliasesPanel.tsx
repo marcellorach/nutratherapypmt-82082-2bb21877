@@ -120,15 +120,30 @@ const ModelAliasesPanel: React.FC = () => {
     try {
       const { data, error } = await supabase.functions.invoke("model-inventory", { method: "GET" });
       if (error) throw error;
-      const items: InventoryItem[] = data?.items ?? [];
+      const rawItems: InventoryItem[] = data?.items ?? [];
+      // Enrich with stored alias real_model to surface drift in reports
+      const { data: aliasData } = await supabase
+        .from("ai_task_aliases")
+        .select("task_id, real_model");
+      const storedByTask = new Map((aliasData ?? []).map((a: any) => [a.task_id, a.real_model]));
+      const items = rawItems.map((i) => {
+        const stored = storedByTask.get(i.task_id) ?? null;
+        const drift = !!stored && stored !== i.real_model;
+        return {
+          ...i,
+          stored_real_model: stored,
+          drift,
+          drift_note: drift ? `In-use model differs from stored (${stored})` : "",
+        };
+      });
       let blob: Blob;
       let filename: string;
       const ts = new Date().toISOString().replace(/[:.]/g, "-");
       if (format === "json") {
-        blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        blob = new Blob([JSON.stringify({ ...data, items }, null, 2)], { type: "application/json" });
         filename = `model-inventory_${ts}.json`;
       } else if (format === "csv") {
-        const header = ["task_id","edge_function","prompt_source","prompt_key","real_model","resolution_source","provider","governed","alias_label_pt","alias_label_en","has_alias","alias_matches_real","notes"];
+        const header = ["task_id","edge_function","prompt_source","prompt_key","real_model","stored_real_model","drift","drift_note","resolution_source","provider","governed","alias_label_pt","alias_label_en","has_alias","alias_matches_real","notes"];
         const csv = [
           header.join(","),
           ...items.map((i) => header.map((h) => {
@@ -147,7 +162,8 @@ const ModelAliasesPanel: React.FC = () => {
         doc.text("Inventário de Modelos de IA", 40, 40);
         doc.setFontSize(9);
         doc.setTextColor(120);
-        doc.text(`Gerado em ${new Date().toLocaleString("pt-BR")} — ${items.length} tarefas`, 40, 56);
+        const driftCount = items.filter((i) => i.drift).length;
+        doc.text(`Gerado em ${new Date().toLocaleString("pt-BR")} — ${items.length} tarefas — ${driftCount} com drift`, 40, 56);
         doc.setTextColor(0);
         autoTable(doc, {
           startY: 72,
@@ -155,14 +171,22 @@ const ModelAliasesPanel: React.FC = () => {
           body: items.map((i) => [
             i.task_id,
             `${i.edge_function}${i.prompt_key ? `\n${i.prompt_key}` : ""}`,
-            i.real_model,
+            i.drift
+              ? `${i.real_model}\n⚠ difere do registrado (${i.stored_real_model})`
+              : i.real_model,
             i.alias_label_pt,
             i.alias_label_en,
-            i.governed ? "governed" : "inline",
+            `${i.governed ? "governed" : "inline"}${i.drift ? "\nDRIFT" : ""}`,
           ]),
           styles: { fontSize: 8, cellPadding: 4, overflow: "linebreak" },
           headStyles: { fillColor: [15, 23, 42], textColor: 255 },
           alternateRowStyles: { fillColor: [248, 250, 252] },
+          didParseCell: (hook: any) => {
+            const row = items[hook.row.index];
+            if (row?.drift) {
+              hook.cell.styles.textColor = [180, 83, 9];
+            }
+          },
           columnStyles: {
             0: { cellWidth: 130 },
             1: { cellWidth: 160 },
