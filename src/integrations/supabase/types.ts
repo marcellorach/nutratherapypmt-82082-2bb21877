@@ -83,6 +83,30 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_model_inventory_snapshots: {
+        Row: {
+          captured_at: string
+          created_by: string | null
+          id: string
+          snapshot: Json
+          source: string
+        }
+        Insert: {
+          captured_at?: string
+          created_by?: string | null
+          id?: string
+          snapshot: Json
+          source?: string
+        }
+        Update: {
+          captured_at?: string
+          created_by?: string | null
+          id?: string
+          snapshot?: Json
+          source?: string
+        }
+        Relationships: []
+      }
       ai_model_radar: {
         Row: {
           capabilities: Json
@@ -439,6 +463,36 @@ export type Database = {
           out_of_sync?: Json
           status?: string
           triggered_by?: string
+        }
+        Relationships: []
+      }
+      ai_task_aliases: {
+        Row: {
+          alias_label_en: string
+          alias_label_pt: string
+          description: string | null
+          real_model: string
+          task_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          alias_label_en: string
+          alias_label_pt: string
+          description?: string | null
+          real_model: string
+          task_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          alias_label_en?: string
+          alias_label_pt?: string
+          description?: string | null
+          real_model?: string
+          task_id?: string
+          updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
