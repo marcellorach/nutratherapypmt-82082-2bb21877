@@ -615,6 +615,39 @@ async function readAuditContext(service: ReturnType<typeof createClient>, appOri
     note: "DB é compartilhado entre preview e publicado; o único diferenciador honesto é o drift-report.json e o frontend carregado.",
   };
 
+  // Model inventory (alias-masked) — exposes WHICH model family is acting
+  // per task using public aliases. Real model names are NEVER included here;
+  // they live in the admin-only "Modelos & Aliases" panel and snapshots.
+  try {
+    const invUrl = `${SUPABASE_URL}/functions/v1/model-inventory`;
+    const invRes = await fetch(invUrl, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${Deno.env.get("SUPABASE_ANON_KEY") ?? ""}` },
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (invRes.ok) {
+      const inv = await invRes.json();
+      const items = (inv?.items ?? []) as any[];
+      snapshot.model_inventory = {
+        captured_at: inv?.captured_at,
+        totals: inv?.totals,
+        items: items.map((i) => ({
+          task_id: i.task_id,
+          edge_function: i.edge_function,
+          prompt_source: i.prompt_source,
+          alias_label_pt: i.alias_label_pt,
+          alias_label_en: i.alias_label_en,
+          governed: i.governed,
+        })),
+        note: "Aliases públicos por tarefa. Nomes reais de modelo são confidenciais e não aparecem neste relatório.",
+      };
+    } else {
+      snapshot.model_inventory = { error: `HTTP ${invRes.status}` };
+    }
+  } catch (e) {
+    snapshot.model_inventory = { error: (e as any)?.message ?? String(e) };
+  }
+
   let prevAuditsCtx = "";
   try {
     const { data: prevAudits } = await service
