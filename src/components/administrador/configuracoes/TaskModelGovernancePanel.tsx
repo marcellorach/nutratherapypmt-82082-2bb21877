@@ -12,6 +12,7 @@ import { useAIPromptVersions } from "@/hooks/useAIPromptVersions";
 import { useAITaskStatus, useRunHealthcheck } from "@/hooks/useAITaskStatus";
 import { useToast } from "@/hooks/use-toast";
 import TaskDetailSheet from "./TaskDetailSheet";
+import { useTaskAlias } from "@/hooks/useTaskAlias";
 
 const CATEGORY_META: Record<AITaskCategory, { icon: React.ComponentType<{ className?: string }>; tone: string }> = {
   extraction: { icon: Database, tone: "bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300" },
@@ -24,13 +25,18 @@ const CATEGORY_META: Record<AITaskCategory, { icon: React.ComponentType<{ classN
   enrichment: { icon: Wand2, tone: "bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-950/40 dark:text-fuchsia-300" },
 };
 
-function modelBadgeColor(model: string): string {
-  if (model.startsWith("openai/")) return "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-900";
-  if (model.includes("gemini-3")) return "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/30 dark:text-sky-300 dark:border-sky-900";
+function aliasBadgeColor(provider: "openai" | "google" | "other"): string {
+  if (provider === "openai") return "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-900";
+  if (provider === "google") return "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/30 dark:text-sky-300 dark:border-sky-900";
   return "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-900/40 dark:text-slate-300 dark:border-slate-800";
 }
+function detectProvider(model: string): "openai" | "google" | "other" {
+  if (model.startsWith("openai/")) return "openai";
+  if (model.startsWith("google/")) return "google";
+  return "other";
+}
 
-const TaskRow: React.FC<{ task: AITaskDefinition; hasActivePrompt: boolean; healthOk: boolean | null; lastLatency: number | null; lastError: string | null; lang: string; onOpen: (t: AITaskDefinition) => void }> = ({ task, hasActivePrompt, healthOk, lastLatency, lastError, lang, onOpen }) => {
+const TaskRow: React.FC<{ task: AITaskDefinition; hasActivePrompt: boolean; healthOk: boolean | null; lastLatency: number | null; lastError: string | null; lang: string; aliasLabel: string; onOpen: (t: AITaskDefinition) => void }> = ({ task, hasActivePrompt, healthOk, lastLatency, lastError, lang, aliasLabel, onOpen }) => {
   const meta = CATEGORY_META[task.category];
   const Icon = meta.icon;
   const label = lang.startsWith("en") ? task.label_en : task.label_pt;
@@ -47,8 +53,8 @@ const TaskRow: React.FC<{ task: AITaskDefinition; hasActivePrompt: boolean; heal
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-medium text-sm">{label}</span>
-              <Badge variant="outline" className={`text-[10px] ${modelBadgeColor(task.recommended_model)}`}>
-                {task.recommended_model}
+              <Badge variant="outline" className={`text-[10px] ${aliasBadgeColor(detectProvider(task.recommended_model))}`}>
+                {aliasLabel}
               </Badge>
               {task.routing.reasoning_effort && (
                 <Badge variant="secondary" className="text-[10px]">
@@ -107,8 +113,8 @@ const TaskRow: React.FC<{ task: AITaskDefinition; hasActivePrompt: boolean; heal
             </div>
             <div className="flex flex-wrap gap-1">
               {task.candidate_models.map((m) => (
-                <Badge key={m} variant="outline" className={`text-[10px] ${modelBadgeColor(m)}`}>
-                  {m}
+                <Badge key={m} variant="outline" className={`text-[10px] ${aliasBadgeColor(detectProvider(m))}`}>
+                  {detectProvider(m) === "openai" ? "OpenAI" : detectProvider(m) === "google" ? "Google" : "Outro"}
                 </Badge>
               ))}
             </div>
@@ -151,6 +157,7 @@ const TaskModelGovernancePanel: React.FC = () => {
   const { toast } = useToast();
   const [filter, setFilter] = useState<AITaskCategory | "all">("all");
   const [openTask, setOpenTask] = useState<AITaskDefinition | null>(null);
+  const { mask: maskAlias } = useTaskAlias();
 
   const activeByTask = useMemo(() => {
     const m = new Map<string, boolean>();
@@ -260,7 +267,7 @@ const TaskModelGovernancePanel: React.FC = () => {
           </div>
           <div className="rounded-md border bg-muted/30 p-2">
             <div className="text-xl font-semibold">{stats.gpt54}</div>
-            <div className="text-[11px] text-muted-foreground">{isEn ? "routed to GPT-5.4" : "roteadas para GPT-5.4"}</div>
+            <div className="text-[11px] text-muted-foreground">{isEn ? "routed to Clinical Model A" : "roteadas para Modelo Clínico A"}</div>
           </div>
           <div className="rounded-md border bg-muted/30 p-2">
             <div className="text-xl font-semibold">{stats.reasoning}</div>
@@ -307,6 +314,7 @@ const TaskModelGovernancePanel: React.FC = () => {
                   lastLatency={statusByTask.get(task.id)?.latency ?? null}
                   lastError={statusByTask.get(task.id)?.error ?? null}
                   lang={i18n.language || "pt"}
+                  aliasLabel={maskAlias(task.id)}
                   onOpen={setOpenTask}
                 />
               ))}

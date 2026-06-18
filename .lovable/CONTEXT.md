@@ -1,17 +1,29 @@
 # Project context briefing (auto)
-Generated: 2026-06-17T01:25:54.141Z
+Generated: 2026-06-18T17:23:49.860Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.122.0
+## Latest i18n version: 1.123.0
 
 ## Changes by area (last 14 days)
-- **admin**: 9
-- **meta**: 6
-- **kg**: 3
+- **admin**: 11
+- **meta**: 4
+- **kg**: 1
 - **curation**: 1
 
 ## Top 10 recent entries
+### 2026-06-18 · [admin] ADDED — Inventário de modelos + Aliases por tarefa (Configurações → Prompts)
+- Nova tabela `ai_task_aliases` (PK `task_id`, com `alias_label_pt`, `alias_label_en`, `real_model`, `description`) — RLS: select para `authenticated`, write somente `is_admin()`. Seed inicial com 25 aliases cobrindo todas as tarefas governadas + entradas `__embeddings__` e `__perplexity_search__`.
+- Nova tabela `ai_model_inventory_snapshots` (jsonb + timestamps) para histórico do inventário resolvido. RLS admin-only.
+- Nova edge function `model-inventory` (read-only por padrão; POST persiste snapshot) — resolve modelo ativo por `task_id` como o runtime: 1) override em `ai_configurations`, 2) `ai_prompt_versions` ativo, 3) fallback inline. Marca `governed=false` para overrides hard-coded (`extract-meta-study`, `kg-evidence-gap-fill`, `web-dosage-lookup`, `vectorize-study`, Perplexity).
+_files: supabase/functions/_shared/model-alias.ts, src/hooks/useTaskAlias.ts, supabase/migrations/...ai_model_inventory_and_aliases.sql, supabase/functions/model-inventory/index.ts…_
+
+### 2026-06-17 · [admin] ADDED — Frente C: migração dos prompts hardcoded para o catálogo (com auditoria honesta)
+- Auditoria caso-a-caso da lista de 12 funções: revelou que só 5 funções têm prompt próprio — as outras 7 são orquestradores/pass-through/algorítmicas sem LLM dedicado.
+- 6 novas chaves no manifest (`supabase/functions/_shared/system-prompts.ts`) — todas com `purpose`, `model_default`, `temperature`, `output_format`, `consumers`, `tags` preenchidos:
+- `generate_triplets_phase1_discovery` — Phase 1 (free discovery) bioquímico veterinário.
+_files: supabase/functions/_shared/system-prompts.ts, supabase/functions/generate-triplets/index.ts, supabase/functions/extract-meta-study/index.ts, supabase/functions/generate-showcase/index.ts…_
+
 ### 2026-06-17 · [admin] ADDED — System Prompts: versão Senex (7.2.4), selo unificado nas 3 abas e audit log
 - Versão sincronizada: `APP_VERSION` agora reflete a versão do Senex AI (`7.2.4`) + novo `PROMPTS_REVISION` (4º dígito) que incrementa apenas quando o manifest de prompts muda. Selo exibido: "Sistema 7.2.4 · Prompts rev. 1". Reseta para 0 a cada bump de APP_VERSION.
 - Selo unificado em todas as abas de prompts: `IntegrityBadge` extraído de `SystemPromptsCatalog` para novo componente `PromptsIntegrityBadge.tsx`, reutilizado nas abas Recomendações, Extração e System (modo `compact` para as duas primeiras). Mensagem clara separa dois sinais distintos: "Última modificação dos prompts" (max `updated_at` em `ai_system_prompts`) vs "Última verificação" (`checked_at` em `ai_system_prompts_integrity_check`) — resolve a confusão "verificado hoje mas desatualizado".
@@ -58,17 +70,6 @@ _files: .lovable/plan.md, src/i18n.ts, src/pages/administrador/FundamentosTab.ts
 - No card "Pilares científicos (inspiração × implementação)" em About-Senex, KGARevion passa de `INSPIRATION` para `PARTIAL`, refletindo o que já está vinculado em `core_rule_evidence`: RC-014 (Normalização de Predicados via Dicionário, w=0.90) e RC-008 (Taxonomia Padrão SNOMED-CT VetSCT + UMLS, w=0.95) — ambas ativas em runtime. O ciclo GRRA completo (Review + Revise independentes) segue rotulado como inspiração não implementada. Sem mudança no banco; ajuste de copy para alinhar com a aba Fundamentos Arquiteturais.
 - Files: src/components/administrador/AboutSenexTab.tsx
 _files: src/components/administrador/AboutSenexTab.tsx_
-
-### 2026-06-08 · [admin] ADDED — Showcase Mode (documento paralelo para parceiro)
-- Novo botão "Gerar showcase para parceiro" na aba Auditorias Técnicas. Lê o MESMO snapshot factual da auditoria (counts, kg_storage, clinical_data_provenance) e escreve 6 seções comerciais curadas (Visão, Por que importa, Diferenciais, Visão maior, Credibilidade, Parceria).
-- Honestidade preservada: capacidades em presente, resultado de sinistralidade prospectivo; split R/D/S obrigatório; RC-001/002 (evidência negativa) destacada como diferencial; GRRA/U-Retrieval/TransE rotulados como inspiração.
-- Roteamento: §1/4/6 Pro→Flash (define tom); §2/3/5 Flash→Pro→gpt-5-mini.
-_files: supabase/functions/generate-showcase/index.ts, src/components/administrador/audits/TechnicalAuditsTab.tsx_
-
-### 2026-06-08 · [admin] ADDED — Download de auditoria respeita idioma do header
-- O seletor PT/EN do header agora controla o idioma padrão dos botões Ver / HTML / PDF nos cards e no viewer de auditoria. Antes a versão baixada sempre era PT.
-- Files: src/components/administrador/audits/TechnicalAuditsTab.tsx, src/components/administrador/audits/audit-pdf-generator.ts
-_files: src/components/administrador/audits/TechnicalAuditsTab.tsx, src/components/administrador/audits/audit-pdf-generator.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

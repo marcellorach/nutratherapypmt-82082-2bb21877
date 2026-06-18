@@ -24,6 +24,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.2.4 -->
 
+### Added - 2026-06-18 — Inventário de modelos + Aliases por tarefa (Configurações → Prompts)
+<!-- area: admin · status: entregue · i18n: 1.123.0 -->
+- **Nova tabela `ai_task_aliases`** (PK `task_id`, com `alias_label_pt`, `alias_label_en`, `real_model`, `description`) — RLS: select para `authenticated`, write somente `is_admin()`. Seed inicial com 25 aliases cobrindo todas as tarefas governadas + entradas `__embeddings__` e `__perplexity_search__`.
+- **Nova tabela `ai_model_inventory_snapshots`** (jsonb + timestamps) para histórico do inventário resolvido. RLS admin-only.
+- **Nova edge function `model-inventory`** (read-only por padrão; POST persiste snapshot) — resolve modelo ativo por `task_id` como o runtime: 1) override em `ai_configurations`, 2) `ai_prompt_versions` ativo, 3) fallback inline. Marca `governed=false` para overrides hard-coded (`extract-meta-study`, `kg-evidence-gap-fill`, `web-dosage-lookup`, `vectorize-study`, Perplexity).
+- **Nova sub-aba "Modelos & Aliases"** em `Configurações → Prompts` (`ModelAliasesPanel.tsx`): tabela editável de aliases PT/EN, badges `governed/inline`, alerta de drift quando o modelo real difere do registrado, e dois botões independentes do relatório de prompts existente: **"Gerar relatório de modelos"** (CSV/JSON) e **"Atualizar snapshot do inventário"**.
+- **Helpers**: `supabase/functions/_shared/model-alias.ts` (server) e `src/hooks/useTaskAlias.ts` (client) — ambos com cache (60s server / 5min client) e fallback `Modelo não-rotulado`.
+- **Mascaramento aplicado**: `TaskModelGovernancePanel` agora exibe alias por tarefa em vez do `recommended_model` literal; estatísticas trocam "roteadas para GPT-5.4" → "roteadas para Modelo Clínico A"; badges de candidatos exibem só provider (`OpenAI`/`Google`).
+- **`generate-audit` ganha bloco `model_inventory` mascarado** no snapshot — relatório de Auditoria Técnica passa a citar aliases, nomes reais ficam só na tela admin.
+- Files: `supabase/migrations/...ai_model_inventory_and_aliases.sql`, `supabase/functions/model-inventory/index.ts`, `supabase/functions/_shared/model-alias.ts`, `supabase/functions/generate-audit/index.ts`, `src/hooks/useTaskAlias.ts`, `src/components/administrador/configuracoes/ModelAliasesPanel.tsx`, `src/components/administrador/configuracoes/TaskModelGovernancePanel.tsx`, `src/components/administrador/PromptConfigurationTab.tsx`, `src/i18n.ts`, `src/locales/{pt,en}/translation.json`.
+
 ### Added - 2026-06-17 — Frente C: migração dos prompts hardcoded para o catálogo (com auditoria honesta)
 <!-- area: admin · status: entregue · i18n: 1.122.0 -->
 - **Auditoria caso-a-caso da lista de 12 funções**: revelou que **só 5 funções têm prompt próprio** — as outras 7 são orquestradores/pass-through/algorítmicas sem LLM dedicado.
