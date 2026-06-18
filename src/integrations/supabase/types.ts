@@ -2604,6 +2604,54 @@ export type Database = {
         }
         Relationships: []
       }
+      kg_integrity_runs: {
+        Row: {
+          count_n: number | null
+          count_r: number | null
+          divergences: Json
+          ghost_pure: number | null
+          id: string
+          mixed_groups: number | null
+          mixed_triplets: number | null
+          notes: string | null
+          orphans: number | null
+          ran_at: string
+          stamp_drift: number | null
+          sync_gap: number | null
+          threshold_breach: boolean
+        }
+        Insert: {
+          count_n?: number | null
+          count_r?: number | null
+          divergences?: Json
+          ghost_pure?: number | null
+          id?: string
+          mixed_groups?: number | null
+          mixed_triplets?: number | null
+          notes?: string | null
+          orphans?: number | null
+          ran_at?: string
+          stamp_drift?: number | null
+          sync_gap?: number | null
+          threshold_breach?: boolean
+        }
+        Update: {
+          count_n?: number | null
+          count_r?: number | null
+          divergences?: Json
+          ghost_pure?: number | null
+          id?: string
+          mixed_groups?: number | null
+          mixed_triplets?: number | null
+          notes?: string | null
+          orphans?: number | null
+          ran_at?: string
+          stamp_drift?: number | null
+          sync_gap?: number | null
+          threshold_breach?: boolean
+        }
+        Relationships: []
+      }
       lab_reference_ranges: {
         Row: {
           age_group: string | null
