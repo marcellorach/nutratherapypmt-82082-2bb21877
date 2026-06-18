@@ -1,68 +1,75 @@
-## Escopo aprovado: A + B + C + D + Verificação de integridade na UI
+## Decisões consolidadas
 
-### Frente A — Seed das 21 chaves faltantes no DB
-Migration `INSERT … ON CONFLICT (prompt_key) DO NOTHING` para popular as 21 linhas ausentes em `ai_system_prompts`, copiando do manifest: `default_content + purpose + model_default + temperature + output_format + consumers + tags + example_input`. Resultado: DB passa de 24 → 45 linhas alinhadas com o manifest.
-
-### Frente B — `sync-system-prompts` idempotente (upsert)
-Trocar o `UPDATE` da edge function por `upsert` (`onConflict: 'prompt_key'`). Status novo: `inserted | updated | unchanged | error`. Qualquer chave futura adicionada ao manifest passa a entrar no DB com um clique em "Sincronizar com o código".
-
-### Frente C — Migrar prompts hardcoded para o catálogo
-Para cada função abaixo, adicionar chave no manifest com metadata completa e substituir o literal por `await getSystemPrompt(supabase, '<key>', fallback)`:
-
-1. `chat` → `chat_assistant_streaming` (separado de `chat_assistant` se o prompt for distinto)
-2. `generate-triplets` → `generate_triplets_extraction` (núcleo da extração)
-3. `process-study` → `process_study_pipeline`
-4. `extract-meta-study` → `extract_meta_study`
-5. `generate-meta-study-cover` → `generate_meta_study_cover`
-6. `generate-showcase` → `generate_showcase`
-7. `classify-entity` → `classify_entity`
-8. `calculate-recommendation-confidence` → `calculate_recommendation_confidence`
-9. `finalize-stalled-cohort` → `finalize_stalled_cohort`
-10. `enrichment-qa-sample` → `enrichment_qa_sample`
-11. `compare-snapshots` → `compare_snapshots`
-12. `fetch-external-ontologies` → `fetch_external_ontologies`
-
-Resultado: ~12 chaves novas no manifest e no DB; catálogo final ≈ 57 chaves.
-
-### Frente D — Preencher metadata das 24 chaves antigas
-Passar pelas chaves originais do manifest e adicionar `purpose / model_default / temperature / output_format / consumers / tags` onde só existe `content`. Painel admin e PDF de catálogo ficam completos.
+1. **Localização**: tudo dentro de **Configurações → Prompts** (mesmo lugar onde já gerenciamos `SystemPromptsCatalog`, `PromptManagementPanel`, `TaskModelGovernancePanel`). Não cria sub-aba nova no nível superior — vira uma seção lateral/aba interna do painel de Prompts, com **dois botões independentes**:
+   - **"Gerar relatório de prompts"** (já existe).
+   - **"Gerar relatório de modelos"** (novo) → exporta CSV/JSON com `função · modelo real · alias`.
+2. **Granularidade dos aliases**: **por tarefa**, não por família. O mesmo `gemini-2.5-pro` pode aparecer como "Modelo Clínico A" em recomendação e "Modelo de Curadoria B" em validação de triplets. Mais trabalho de seed inicial, mas alinha o rótulo ao contexto que o parceiro vê.
+3. **Sem rodapé de anonimização** nos PDFs. Os relatórios externos simplesmente exibem o alias como se fosse o nome do modelo.
 
 ---
 
-### Frente E (NOVA) — Verificação contínua e selo na página de prompts
+## Parte A — Inventário de modelos (read-only)
 
-**Tabela nova `ai_system_prompts_integrity_check`** (admin-only) com colunas:
-- `app_version` (texto, ex: "1.4.2" lido de `package.json`/constante)
-- `manifest_count`, `db_count`, `missing_in_db` (array), `extra_in_db` (array), `hardcoded_outside_catalog` (array)
-- `out_of_sync` (array de keys onde `default_content` do DB ≠ manifest)
-- `status` (`ok` | `drift`)
-- `checked_at` (timestamp), `triggered_by` (`auto_on_version_bump` | `manual`)
+### A1. Edge function `model-inventory`
+Coletor server-side que devolve, para cada `task_id` de `AI_TASKS`:
+`{ task_id, edge_function, prompt_source, prompt_key, real_model, provider, governed, alias_label_pt, alias_label_en, notes }`.
 
-**Edge function nova `verify-system-prompts`**: compara manifest × DB × lista de funções com prompts hardcoded e grava 1 linha. Retorna o relatório.
+Resolve modelo da mesma forma que o runtime:
+- governadas → via `ai-task-router.ts` + `ai_prompt_versions` ativo;
+- overrides inline (`generate-triplets`, `gemini-file-search`, `extract-meta-study`, etc.) → string literal do código, marcadas `governed=false`;
+- **embeddings** → modelo + dimensão de `vectorize-study` + amostra de `study_embeddings`;
+- **Perplexity** → modelo usado em `web-dosage-lookup`, `perplexity-health`, `kg-evidence-gap-fill`.
 
-**Disparo automático**: na inicialização do app (front), se `localStorage.lastVerifiedAppVersion !== APP_VERSION`, chama a edge function uma vez e salva no localStorage. Isso garante uma verificação a cada subida de versão sem custo recorrente.
+Snapshot persistido em nova tabela `ai_model_inventory_snapshots(id, captured_at, snapshot jsonb)` para auditoria temporal.
 
-**UI no painel `/administrador?tab=prompts`** (header do `SystemPromptsCatalog.tsx`): badge fixo com:
-- `Versão do sistema: vX.Y.Z`
-- `Última verificação: DD/MM/AAAA HH:mm`
-- `Status: ✅ Sincronizado` (verde) ou `⚠️ Drift detectado (N divergências)` (âmbar) com expand mostrando o detalhe
-- Botão "Verificar agora" que reexecuta `verify-system-prompts` on-demand
-
-Tudo bilíngue (PT/EN) via `t()` e `I18N_VERSION` incrementado.
+### A2. Integração com auditoria
+`generate-audit` inclui bloco `model_inventory` (com aliases já aplicados nos campos públicos, real_model preservado em campo separado visível só a admin).
 
 ---
 
-### Ordem de execução
-1. Migration da Frente A (seed) + tabela da Frente E.
-2. Edge function `verify-system-prompts` (Frente E) + atualização do `sync-system-prompts` para upsert (Frente B).
-3. Frente D — completar metadata das 24 antigas no manifest.
-4. Frente C — migrar 12 funções hardcoded uma a uma (commits separados por função para reduzir risco).
-5. Frente A novamente (rodar `sync-system-prompts` para inserir as 12 novas chaves da Frente C no DB) + UI da Frente E + i18n.
-6. Documentação: `ARCHITECTURE.md` + `CURRENT_STATE.md` + `CHANGELOG.md`.
+## Parte B — Aliases por tarefa
 
-### Não-objetivos (intencional)
-- Não tocar em prompts de testes utilitários (`ai-task-test`, `test-rag-similarity`).
-- Não migrar prompts já vivendo em arquivos compartilhados se já forem importados por múltiplas funções (verificar caso a caso).
-- Não alterar `override_content` existente em nenhuma linha do DB.
+### B1. Tabela `ai_task_aliases`
+```
+task_id text pk            -- bate com AI_TASKS.id
+real_model text not null   -- snapshot do modelo no momento do alias
+alias_label_pt text not null
+alias_label_en text not null
+description text
+updated_by uuid, updated_at timestamptz
+```
+RLS: select `authenticated`, write só `is_admin()`. Seed inicial cobrindo todas as tarefas de `AI_TASKS` + entradas especiais (`__embeddings__`, `__perplexity_search__`).
 
-Se aprovado, implemento na ordem acima.
+### B2. Helpers
+- Server: `_shared/model-alias.ts` com `maskModelForTask(taskId, realModel)` e `loadAliasMap()`.
+- Client: `useTaskAlias()` hook que carrega o mapa uma vez (React Query, cache 5 min).
+
+### B3. Substituição em superfícies externas
+Pesquisa global e troca literais de modelo por `mask()` em:
+
+- **UI compartilhável**: `TaskModelGovernancePanel`, `TaskDetailSheet`, `AIModelSelector` (display), `EnginesPromptsPanel`, `PromptManagementPanel`, `PerplexityStatusCard`, `Footer`, `admin-tabs-info`, `prioritizationBoard`, painéis "Auditoria Técnica" / "Fundamentos Arquiteturais", `RagSmokeTestDialog`, `CohortAISuggester`, `SyntheticCohortsManager`.
+- **Hooks com strings expostas**: `useAIConfig`, `useGeminiProcessing`, `useVetGraphRAGConfig`, `useProcessingLogic`.
+- **Server**: `generate-audit`, `generate-showcase`, qualquer geração de PDF/markdown.
+
+Mantêm nome real: arquivo `ai-tasks.ts`, router, edge logs do Supabase, e a nova tela de Inventário (interna).
+
+### B4. UI dentro de Configurações → Prompts
+Nova seção **"Modelos & Aliases"** com:
+- Tabela: `tarefa · modelo real · alias PT · alias EN · categoria · última atualização`;
+- Edição inline dos aliases (admin only);
+- Botão **"Gerar relatório de modelos"** (CSV/JSON, separado do relatório de prompts);
+- Botão **"Atualizar snapshot do inventário"** → chama `model-inventory`;
+- Indicador visual para tarefas sem alias (fallback exibe "Modelo não-rotulado", nunca o nome real).
+
+---
+
+## Entregáveis
+
+1. Migrations: `ai_model_inventory_snapshots`, `ai_task_aliases` (+ GRANTs e RLS).
+2. Edge function `model-inventory`; integração em `generate-audit`.
+3. Helpers `maskModelForTask` (server) e `useTaskAlias` (client).
+4. Substituição global de literais de modelo nas superfícies da B3.
+5. Seção **"Modelos & Aliases"** dentro de Configurações → Prompts, com seed inicial de aliases por tarefa e os dois botões de relatório independentes.
+6. Tabela de inventário entregue no chat assim que o coletor rodar pela primeira vez.
+
+i18n com bump de `I18N_VERSION`, entrada no `CHANGELOG.md`, atualização do `projectOrganograma.ts` e `npm run sync:changelog`.
