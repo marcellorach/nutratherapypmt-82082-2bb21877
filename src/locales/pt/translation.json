@@ -2979,7 +2979,8 @@
       "actions": {
         "refreshSnapshot": "Atualizar snapshot do inventário",
         "reportCsv": "Gerar relatório de modelos (CSV)",
-        "reportJson": "Exportar JSON"
+        "reportJson": "Exportar JSON",
+        "reportPdf": "Gerar relatório em PDF"
       },
       "cols": {
         "task": "Tarefa",
