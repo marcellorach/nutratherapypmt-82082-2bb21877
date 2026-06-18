@@ -113,8 +113,8 @@ const TaskRow: React.FC<{ task: AITaskDefinition; hasActivePrompt: boolean; heal
             </div>
             <div className="flex flex-wrap gap-1">
               {task.candidate_models.map((m) => (
-                <Badge key={m} variant="outline" className={`text-[10px] ${modelBadgeColor(m)}`}>
-                  {m}
+                <Badge key={m} variant="outline" className={`text-[10px] ${aliasBadgeColor(detectProvider(m))}`}>
+                  {detectProvider(m) === "openai" ? "OpenAI" : detectProvider(m) === "google" ? "Google" : "Outro"}
                 </Badge>
               ))}
             </div>
@@ -313,6 +313,7 @@ const TaskModelGovernancePanel: React.FC = () => {
                   lastLatency={statusByTask.get(task.id)?.latency ?? null}
                   lastError={statusByTask.get(task.id)?.error ?? null}
                   lang={i18n.language || "pt"}
+                  aliasLabel={maskAlias(task.id)}
                   onOpen={setOpenTask}
                 />
               ))}
