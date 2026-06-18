@@ -13,6 +13,8 @@ import { supabase } from '@/integrations/supabase/client';
 import ExtractionPromptsEditor from './configuracoes/ExtractionPromptsEditor';
 import SystemPromptsCatalog from './configuracoes/SystemPromptsCatalog';
 import PromptsIntegrityBadge from './configuracoes/PromptsIntegrityBadge';
+import ModelAliasesPanel from './configuracoes/ModelAliasesPanel';
+import { Tag } from "lucide-react";
 
 interface Prompt {
   id: string;
@@ -185,7 +187,7 @@ const PromptConfigurationTab: React.FC = () => {
 
   return (
     <Tabs defaultValue="recomendacoes" className="w-full">
-      <TabsList className="grid w-full grid-cols-3 mb-6">
+      <TabsList className="grid w-full grid-cols-4 mb-6">
         <TabsTrigger value="recomendacoes" className="flex items-center gap-2">
           <Brain className="h-4 w-4" />
           {t('admin.prompts.recommendationTab')}
@@ -197,6 +199,10 @@ const PromptConfigurationTab: React.FC = () => {
         <TabsTrigger value="system" className="flex items-center gap-2">
           <Layers3 className="h-4 w-4" />
           System Prompts
+        </TabsTrigger>
+        <TabsTrigger value="aliases" className="flex items-center gap-2">
+          <Tag className="h-4 w-4" />
+          {t('admin.modelAliases.tab')}
         </TabsTrigger>
       </TabsList>
 
@@ -354,6 +360,10 @@ const PromptConfigurationTab: React.FC = () => {
 
       <TabsContent value="system">
         <SystemPromptsCatalog />
+      </TabsContent>
+
+      <TabsContent value="aliases">
+        <ModelAliasesPanel />
       </TabsContent>
     </Tabs>
   );
