@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-06-17T00:34:51.928Z",
+  "timestamp": "2026-06-18T02:25:56.588Z",
   "summary": {
-    "totalFiles": 957,
-    "totalIssues": 485,
+    "totalFiles": 959,
+    "totalIssues": 487,
     "hardcodedTexts": 61,
-    "missingKeys": 422,
+    "missingKeys": 424,
     "incompleteTranslations": 2
   },
   "issues": [
@@ -591,8 +591,22 @@
     },
     {
       "type": "missing-key",
+      "file": "src/components/administrador/configuracoes/PromptsIntegrityBadge.tsx",
+      "line": 54,
+      "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/configuracoes/PromptsIntegrityBadge.tsx",
+      "line": 60,
+      "text": "updated_at",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/administrador/configuracoes/SystemPromptsCatalog.tsx",
-      "line": 51,
+      "line": 52,
       "text": "*",
       "severity": "high"
     },
@@ -2762,28 +2776,28 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 839,
+      "line": 890,
       "text": "audit_base_system_{pt,en}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2151,
+      "line": 2202,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2362,
+      "line": 2413,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 5157,
+      "line": 5208,
       "text": "@",
       "severity": "high"
     },
