@@ -492,6 +492,50 @@ async function readAuditContext(service: ReturnType<typeof createClient>, appOri
       integrity.divergences.push(`SYNC_GAP: approved_not_synced=${approvedNotSynced} (aprovados fora do grafo).`);
     }
 
+    // ---- Thresholded regression guard (#1) — baselined to 2026-06-18 ----
+    // NÃO falha o estado conhecido. Falha só se piorar. Pós-rebuild, apertar p/ 0.
+    const THRESH = { orphans: 909, sync_gap: 149, stamp_drift: 30 };
+    const orphans = (neo4jBlock as any)?.true_orphans_count ?? 0;
+    const stampDrift = (neo4jBlock as any)?.stamp_drift_mixed_groups_observed ?? 0;
+    const breaches: string[] = [];
+    if (orphans > THRESH.orphans) breaches.push(`orphans=${orphans} > ${THRESH.orphans}`);
+    if (approvedNotSynced > THRESH.sync_gap) breaches.push(`sync_gap=${approvedNotSynced} > ${THRESH.sync_gap}`);
+    if (stampDrift > THRESH.stamp_drift) breaches.push(`stamp_drift=${stampDrift} > ${THRESH.stamp_drift}`);
+    integrity.thresholds = { limits: THRESH, breaches, breached: breaches.length > 0 };
+    if (breaches.length > 0) integrity.divergences.push(`THRESHOLD_BREACH: ${breaches.join("; ")}`);
+
+    // ---- Persist run (#5 history) + baseline vs current ----
+    try {
+      const runRow = {
+        count_r: (neo4jBlock as any)?.edges_count ?? null,
+        count_n: (neo4jBlock as any)?.nodes_count ?? null,
+        sync_gap: approvedNotSynced,
+        ghost_pure: ghostPure,
+        mixed_triplets: mixedTriplets,
+        mixed_groups: mixedGroups,
+        orphans,
+        stamp_drift: stampDrift,
+        divergences: integrity.divergences,
+        threshold_breach: breaches.length > 0,
+        notes: breaches.length > 0 ? `breaches: ${breaches.join("; ")}` : null,
+      };
+      await service.from("kg_integrity_runs").insert(runRow);
+      const { data: hist } = await service
+        .from("kg_integrity_runs")
+        .select("ran_at,count_r,count_n,sync_gap,ghost_pure,mixed_triplets,mixed_groups,orphans,stamp_drift,threshold_breach")
+        .order("ran_at", { ascending: false })
+        .limit(10);
+        integrity.history = {
+          last_10: hist ?? [],
+          baseline_vs_current: {
+            baseline: { count_r: 3815, count_n: 2403, sync_gap: 149, ghost_pure: 0, mixed_triplets: 91, mixed_groups: 83, orphans: 909, stamp_drift: 30 },
+            current: runRow,
+          },
+        };
+    } catch (e) {
+      integrity.history = { error: (e as any)?.message ?? String(e) };
+    }
+
     snapshot.kg_integrity = integrity;
   } catch (e) {
     snapshot.kg_integrity = { error: (e as any)?.message ?? String(e) };
