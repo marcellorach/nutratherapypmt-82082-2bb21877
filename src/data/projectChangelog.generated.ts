@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-17T01:25:54.135Z
+// Última geração: 2026-06-18T17:23:49.853Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,76 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-06-17";
+export const lastChangelogDate = "2026-06-18";
 
 export const senexVersion = "7.2.4";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-06-18",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Inventário de modelos + Aliases por tarefa (Configurações → Prompts)",
+    "bullets": [
+      "Nova tabela `ai_task_aliases` (PK `task_id`, com `alias_label_pt`, `alias_label_en`, `real_model`, `description`) — RLS: select para `authenticated`, write somente `is_admin()`. Seed inicial com 25 aliases cobrindo todas as tarefas governadas + entradas `__embeddings__` e `__perplexity_search__`.",
+      "Nova tabela `ai_model_inventory_snapshots` (jsonb + timestamps) para histórico do inventário resolvido. RLS admin-only.",
+      "Nova edge function `model-inventory` (read-only por padrão; POST persiste snapshot) — resolve modelo ativo por `task_id` como o runtime: 1) override em `ai_configurations`, 2) `ai_prompt_versions` ativo, 3) fallback inline. Marca `governed=false` para overrides hard-coded (`extract-meta-study`, `kg-evidence-gap-fill`, `web-dosage-lookup`, `vectorize-study`, Perplexity).",
+      "Nova sub-aba \"Modelos & Aliases\" em `Configurações → Prompts` (`ModelAliasesPanel.tsx`): tabela editável de aliases PT/EN, badges `governed/inline`, alerta de drift quando o modelo real difere do registrado, e dois botões independentes do relatório de prompts existente: \"Gerar relatório de modelos\" (CSV/JSON) e \"Atualizar snapshot do inventário\".",
+      "Helpers: `supabase/functions/_shared/model-alias.ts` (server) e `src/hooks/useTaskAlias.ts` (client) — ambos com cache (60s server / 5min client) e fallback `Modelo não-rotulado`.",
+      "Mascaramento aplicado: `TaskModelGovernancePanel` agora exibe alias por tarefa em vez do `recommended_model` literal; estatísticas trocam \"roteadas para GPT-5.4\" → \"roteadas para Modelo Clínico A\"; badges de candidatos exibem só provider (`OpenAI`/`Google`).",
+      "`generate-audit` ganha bloco `model_inventory` mascarado no snapshot — relatório de Auditoria Técnica passa a citar aliases, nomes reais ficam só na tela admin.",
+      "Files: `supabase/migrations/...ai_model_inventory_and_aliases.sql`, `supabase/functions/model-inventory/index.ts`, `supabase/functions/_shared/model-alias.ts`, `supabase/functions/generate-audit/index.ts`, `src/hooks/useTaskAlias.ts`, `src/components/administrador/configuracoes/ModelAliasesPanel.tsx`, `src/components/administrador/configuracoes/TaskModelGovernancePanel.tsx`, `src/components/administrador/PromptConfigurationTab.tsx`, `src/i18n.ts`, `src/locales/{pt,en}/translation.json`."
+    ],
+    "files": [
+      "supabase/functions/_shared/model-alias.ts",
+      "src/hooks/useTaskAlias.ts",
+      "supabase/migrations/...ai_model_inventory_and_aliases.sql",
+      "supabase/functions/model-inventory/index.ts",
+      "supabase/functions/generate-audit/index.ts",
+      "src/components/administrador/configuracoes/ModelAliasesPanel.tsx",
+      "src/components/administrador/configuracoes/TaskModelGovernancePanel.tsx",
+      "src/components/administrador/PromptConfigurationTab.tsx",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.123.0"
+  },
+  {
+    "date": "2026-06-17",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Frente C: migração dos prompts hardcoded para o catálogo (com auditoria honesta)",
+    "bullets": [
+      "Auditoria caso-a-caso da lista de 12 funções: revelou que só 5 funções têm prompt próprio — as outras 7 são orquestradores/pass-through/algorítmicas sem LLM dedicado.",
+      "6 novas chaves no manifest (`supabase/functions/_shared/system-prompts.ts`) — todas com `purpose`, `model_default`, `temperature`, `output_format`, `consumers`, `tags` preenchidos:",
+      "`generate_triplets_phase1_discovery` — Phase 1 (free discovery) bioquímico veterinário.",
+      "`generate_triplets_phase2_structuring` — Phase 2 (structuring) → tool-call `extract_triplets`.",
+      "`extract_meta_study` — curador de meta-estudos arquiteturais (10–25 lições + stance classification).",
+      "`generate_showcase_pt` — base PT do showcase parceiro (regras de honestidade + 6 seções).",
+      "`generate_showcase_en` — espelho EN do showcase parceiro.",
+      "`generate_meta_study_cover_style` — style guide de imagem (Gemini image; texto, não chat).",
+      "4 edge functions refatoradas para `fetchSystemPrompt(key, fallback)`:",
+      "`generate-triplets` — Phase 1 e Phase 2 agora resolvem override → default → manifest. Conteúdo prévio preservado verbatim no manifest.",
+      "`extract-meta-study` — `systemPrompt` ← `fetchSystemPrompt('extract_meta_study')`.",
+      "`generate-showcase` — `BASE_SYSTEM_PT/EN` renomeados para `_DEFAULT` (fallback) e resolvidos em runtime; assinatura de `generateSection`/`buildBaseSystemPt|En` injeta o prompt vivo.",
+      "`generate-meta-study-cover` — `STYLE_GUIDE` renomeado para `STYLE_GUIDE_DEFAULT`; `generateOne` recebe o style guide resolvido (1 fetch por request).",
+      "8 false-positives removidos da `HARDCODED_PROMPT_FUNCTIONS` em `verify-system-prompts` com nota explicativa: `chat` (pass-through), `process-study` (orquestrador), `classify-entity` (algorítmica), `calculate-recommendation-confidence` (algorítmica), `finalize-stalled-cohort` (sem LLM), `enrichment-qa-sample` (orquestrador), `compare-snapshots` (sem LLM), `fetch-external-ontologies` (SNOMED/UMLS REST). Não precisam estar no catálogo — não usam LLM.",
+      "Auditoria de cada mudança: o trigger `trg_ai_system_prompts_audit` (Frente D) vai capturar qualquer override futuro dessas 6 chaves. Conteúdo prévio fica preservado em duas camadas: (1) `default_content` no DB; (2) literal no manifest TypeScript como fallback.",
+      "Verificação final: `verify-system-prompts` retorna `status: ok`, manifest 51 ↔ db 51, 0 drift, 0 hardcoded. `PROMPTS_REVISION` 1 → 2 (sem bump de APP_VERSION, conforme regra).",
+      "Files: `supabase/functions/_shared/system-prompts.ts`, `supabase/functions/generate-triplets/index.ts`, `supabase/functions/extract-meta-study/index.ts`, `supabase/functions/generate-showcase/index.ts`, `supabase/functions/generate-meta-study-cover/index.ts`, `supabase/functions/verify-system-prompts/index.ts`, `src/config/app-version.ts`."
+    ],
+    "files": [
+      "supabase/functions/_shared/system-prompts.ts",
+      "supabase/functions/generate-triplets/index.ts",
+      "supabase/functions/extract-meta-study/index.ts",
+      "supabase/functions/generate-showcase/index.ts",
+      "supabase/functions/generate-meta-study-cover/index.ts",
+      "supabase/functions/verify-system-prompts/index.ts",
+      "src/config/app-version.ts"
+    ],
+    "i18nVersion": "1.122.0"
+  },
   {
     "date": "2026-06-17",
     "kind": "added",
