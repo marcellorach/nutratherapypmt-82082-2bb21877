@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Download, RefreshCw, Save, Loader2, AlertTriangle, ShieldCheck, FileSpreadsheet } from "lucide-react";
+import { Download, RefreshCw, Save, Loader2, AlertTriangle, ShieldCheck, FileSpreadsheet, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateTaskAliasCache } from "@/hooks/useTaskAlias";
@@ -115,7 +115,7 @@ const ModelAliasesPanel: React.FC = () => {
     toast({ title: t("admin.modelAliases.toast.saved") });
   };
 
-  const downloadReport = async (format: "csv" | "json") => {
+  const downloadReport = async (format: "csv" | "json" | "pdf") => {
     setGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("model-inventory", { method: "GET" });
@@ -127,7 +127,7 @@ const ModelAliasesPanel: React.FC = () => {
       if (format === "json") {
         blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
         filename = `model-inventory_${ts}.json`;
-      } else {
+      } else if (format === "csv") {
         const header = ["task_id","edge_function","prompt_source","prompt_key","real_model","resolution_source","provider","governed","alias_label_pt","alias_label_en","has_alias","alias_matches_real","notes"];
         const csv = [
           header.join(","),
@@ -139,6 +139,41 @@ const ModelAliasesPanel: React.FC = () => {
         ].join("\n");
         blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
         filename = `model-inventory_${ts}.csv`;
+      } else {
+        const { jsPDF } = await import("jspdf");
+        const autoTable = (await import("jspdf-autotable")).default;
+        const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+        doc.setFontSize(14);
+        doc.text("Inventário de Modelos de IA", 40, 40);
+        doc.setFontSize(9);
+        doc.setTextColor(120);
+        doc.text(`Gerado em ${new Date().toLocaleString("pt-BR")} — ${items.length} tarefas`, 40, 56);
+        doc.setTextColor(0);
+        autoTable(doc, {
+          startY: 72,
+          head: [["Tarefa", "Função / Origem", "Modelo real", "Alias PT", "Alias EN", "Status"]],
+          body: items.map((i) => [
+            i.task_id,
+            `${i.edge_function}${i.prompt_key ? `\n${i.prompt_key}` : ""}`,
+            i.real_model,
+            i.alias_label_pt,
+            i.alias_label_en,
+            i.governed ? "governed" : "inline",
+          ]),
+          styles: { fontSize: 8, cellPadding: 4, overflow: "linebreak" },
+          headStyles: { fillColor: [15, 23, 42], textColor: 255 },
+          alternateRowStyles: { fillColor: [248, 250, 252] },
+          columnStyles: {
+            0: { cellWidth: 130 },
+            1: { cellWidth: 160 },
+            2: { cellWidth: 140 },
+            3: { cellWidth: 130 },
+            4: { cellWidth: 130 },
+            5: { cellWidth: 60 },
+          },
+        });
+        blob = doc.output("blob");
+        filename = `model-inventory_${ts}.pdf`;
       }
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -175,7 +210,11 @@ const ModelAliasesPanel: React.FC = () => {
                 {refreshing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
                 {t("admin.modelAliases.actions.refreshSnapshot")}
               </Button>
-              <Button size="sm" onClick={() => downloadReport("csv")} disabled={generating}>
+              <Button size="sm" onClick={() => downloadReport("pdf")} disabled={generating}>
+                {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2" />}
+                {t("admin.modelAliases.actions.reportPdf")}
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => downloadReport("csv")} disabled={generating}>
                 {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileSpreadsheet className="h-4 w-4 mr-2" />}
                 {t("admin.modelAliases.actions.reportCsv")}
               </Button>
@@ -192,7 +231,7 @@ const ModelAliasesPanel: React.FC = () => {
               <Loader2 className="h-4 w-4 animate-spin" /> {t("admin.modelAliases.loading")}
             </div>
           ) : (
-            <ScrollArea className="max-h-[600px]">
+            <ScrollArea className="h-[600px] w-full rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
