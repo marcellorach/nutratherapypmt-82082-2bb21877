@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-06-18T16:58:11.882Z",
+  "timestamp": "2026-06-18T17:37:14.576Z",
   "summary": {
-    "totalFiles": 959,
-    "totalIssues": 487,
+    "totalFiles": 961,
+    "totalIssues": 493,
     "hardcodedTexts": 61,
-    "missingKeys": 424,
+    "missingKeys": 430,
     "incompleteTranslations": 2
   },
   "issues": [
@@ -573,6 +573,34 @@
       "file": "src/components/administrador/configuracoes/AIModelSelector.tsx",
       "line": 50,
       "text": "config_key, config_value",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/configuracoes/ModelAliasesPanel.tsx",
+      "line": 54,
+      "text": "task_id, real_model, alias_label_pt, alias_label_en, description, updated_at",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/configuracoes/ModelAliasesPanel.tsx",
+      "line": 144,
+      "text": "a",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/configuracoes/ModelAliasesPanel.tsx",
+      "line": 178,
+      "text": "csv",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/configuracoes/ModelAliasesPanel.tsx",
+      "line": 182,
+      "text": "json",
       "severity": "high"
     },
     {
@@ -2776,28 +2804,35 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 890,
+      "line": 73,
+      "text": "extract_meta_study",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/data/projectChangelog.generated.ts",
+      "line": 955,
       "text": "audit_base_system_{pt,en}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2202,
+      "line": 2267,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2413,
+      "line": 2478,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 5208,
+      "line": 5273,
       "text": "@",
       "severity": "high"
     },
@@ -2869,6 +2904,13 @@
       "file": "src/hooks/useStudyDeletion.ts",
       "line": 253,
       "text": "id, title, kanban_status",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/hooks/useTaskAlias.ts",
+      "line": 20,
+      "text": "task_id, real_model, alias_label_pt, alias_label_en, description",
       "severity": "high"
     },
     {
