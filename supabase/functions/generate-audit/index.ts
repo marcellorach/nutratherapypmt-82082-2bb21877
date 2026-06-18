@@ -354,7 +354,6 @@ async function readAuditContext(service: ReturnType<typeof createClient>, appOri
       syncedTotalRes,
       ghostCountRes,
       mixedCountRes,
-      mixedGroupsRes,
       approvedNotSyncedRes,
       approvedNotSyncedSampleRes,
     ] = await Promise.all([
@@ -362,7 +361,6 @@ async function readAuditContext(service: ReturnType<typeof createClient>, appOri
       service.from("triplet_extractions").select("*", { count: "exact", head: true }).eq("synced_to_neo4j", true),
       service.from("v_ghost_triplets").select("*", { count: "exact", head: true }),
       service.from("v_mixed_unapproved_triplets").select("*", { count: "exact", head: true }),
-      service.rpc("__noop_does_not_exist__").select("*"), // placeholder, replaced below
       service.from("triplet_extractions").select("*", { count: "exact", head: true }).eq("curation_status", "approved").or("synced_to_neo4j.is.null,synced_to_neo4j.eq.false"),
       service.from("triplet_extractions").select("id,subject_name,predicate,object_name").eq("curation_status", "approved").or("synced_to_neo4j.is.null,synced_to_neo4j.eq.false").limit(5),
     ]);
