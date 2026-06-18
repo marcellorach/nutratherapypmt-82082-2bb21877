@@ -267,7 +267,7 @@ const TaskModelGovernancePanel: React.FC = () => {
           </div>
           <div className="rounded-md border bg-muted/30 p-2">
             <div className="text-xl font-semibold">{stats.gpt54}</div>
-            <div className="text-[11px] text-muted-foreground">{isEn ? "routed to GPT-5.4" : "roteadas para GPT-5.4"}</div>
+            <div className="text-[11px] text-muted-foreground">{isEn ? "routed to Clinical Model A" : "roteadas para Modelo Clínico A"}</div>
           </div>
           <div className="rounded-md border bg-muted/30 p-2">
             <div className="text-xl font-semibold">{stats.reasoning}</div>
