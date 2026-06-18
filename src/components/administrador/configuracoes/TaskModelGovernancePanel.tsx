@@ -157,6 +157,7 @@ const TaskModelGovernancePanel: React.FC = () => {
   const { toast } = useToast();
   const [filter, setFilter] = useState<AITaskCategory | "all">("all");
   const [openTask, setOpenTask] = useState<AITaskDefinition | null>(null);
+  const { mask: maskAlias } = useTaskAlias();
 
   const activeByTask = useMemo(() => {
     const m = new Map<string, boolean>();
