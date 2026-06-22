@@ -16,6 +16,60 @@ const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
 
 /**
+ * Lookup FIXO de apelidos partner-facing por tarefa (camada de abstração que
+ * os parceiros enxergam em relatórios externos / front compartilhado).
+ * Read-only: NÃO substitui nada no front nem nos logs aqui — apenas anexa
+ * a coluna ao inventário para alimentar a próxima fase.
+ * Se uma tarefa não estiver mapeada aqui, fica `null` e o item vem com
+ * `partner_alias_missing=true` para nós nomearmos depois.
+ */
+const PARTNER_FACING_ALIAS: Record<string, string> = {
+  // Extração
+  extraction_stage1: "Senex Extract",
+  extraction_stage2: "Senex Extract",
+  extraction_stage3: "Senex Extract",
+  triplet_extraction: "Senex Extract",
+  meta_study_analysis: "Senex Extract",
+  clinical_data_extraction: "Senex Extract",
+  lab_pdf_parsing: "Senex Extract",
+  food_enrichment: "Senex Extract",
+  spreadsheet_enrichment: "Senex Extract",
+  // Verificação
+  relations_auditor: "Senex Verify",
+  // Raciocínio / recomendação clínica
+  geroprotector_stack: "Senex Advisor",
+  lab_driven_adjustment: "Senex Advisor",
+  treatment_proposal_12m: "Senex Advisor",
+  clinical_chat_factual: "Senex Advisor",
+  clinical_chat_critical: "Senex Advisor",
+  // Descoberta
+  taxonomy_suggestion: "Senex Discover",
+  // Embedding
+  __embeddings__: "Senex Index",
+  // Gap-fill / pesquisa
+  __perplexity_search__: "Senex Source",
+  kg_gap_fill: "Senex Source",
+  dosage_web_lookup: "Senex Source",
+  // Preditivos (família Senex Forecast)
+  trajectory_projection: "Senex Forecast · Progression",
+  // (efficacy-prediction, mortality-risk-window, patient-segmentation,
+  //  treatment-adherence, cost-benefit-analysis) — adicionar quando as
+  //  tarefas existirem no catálogo.
+};
+
+/**
+ * Superfícies partner-facing onde o nome real do modelo pode aparecer.
+ * Estático e curado — usado só para sinalizar "este modelo aparece em X";
+ * a substituição efetiva é responsabilidade de `useTaskAlias` / `maskModelForTask`.
+ */
+const PARTNER_SURFACES: Record<string, string[]> = {
+  default: [
+    "src/components/administrador/configuracoes/TaskModelGovernancePanel.tsx",
+    "supabase/functions/generate-audit/index.ts",
+  ],
+};
+
+/**
  * Catálogo "ground truth" das tarefas conhecidas + overrides inline detectados
  * por inspeção do código. Mantido em sync com src/config/ai-tasks.ts e com os
  * literais hard-coded das edge functions que NÃO passam pelo router.
@@ -116,6 +170,7 @@ async function buildInventory(): Promise<any> {
       resolved = await resolveActiveModel(t.task_id, t.fallback_model);
     }
     const alias = aliases.get(t.task_id);
+    const partnerAlias = PARTNER_FACING_ALIAS[t.task_id] ?? null;
     items.push({
       task_id: t.task_id,
       edge_function: t.edge_function,
@@ -130,6 +185,9 @@ async function buildInventory(): Promise<any> {
       alias_label_en: alias?.alias_label_en ?? "Unlabeled Model",
       has_alias: !!alias,
       alias_matches_real: alias ? alias.real_model === resolved.model : false,
+      alias_partner_facing: partnerAlias,
+      partner_alias_missing: partnerAlias === null,
+      partner_surfaces: PARTNER_SURFACES.default,
       notes: t.notes ?? null,
     });
   }
@@ -158,6 +216,7 @@ async function buildInventory(): Promise<any> {
       inline: items.filter((i) => !i.governed).length,
       with_alias: items.filter((i) => i.has_alias).length,
       alias_drift: items.filter((i) => i.has_alias && !i.alias_matches_real).length,
+      partner_alias_missing: items.filter((i) => i.partner_alias_missing).length,
     },
   };
 }
