@@ -7,7 +7,6 @@
 export interface InventoryItemBase {
   task_id: string;
   real_model: string;
-  [k: string]: unknown;
 }
 
 export interface EnrichedInventoryItem extends InventoryItemBase {
