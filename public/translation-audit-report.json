@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-06-18T17:37:14.576Z",
+  "timestamp": "2026-06-22T21:09:46.041Z",
   "summary": {
     "totalFiles": 961,
-    "totalIssues": 493,
+    "totalIssues": 498,
     "hardcodedTexts": 61,
-    "missingKeys": 430,
+    "missingKeys": 435,
     "incompleteTranslations": 2
   },
   "issues": [
@@ -585,21 +585,56 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/configuracoes/ModelAliasesPanel.tsx",
-      "line": 144,
+      "line": 127,
+      "text": "task_id, real_model",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/configuracoes/ModelAliasesPanel.tsx",
+      "line": 158,
+      "text": "jspdf",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/configuracoes/ModelAliasesPanel.tsx",
+      "line": 159,
+      "text": "jspdf-autotable",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/configuracoes/ModelAliasesPanel.tsx",
+      "line": 199,
+      "text": "blob",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/configuracoes/ModelAliasesPanel.tsx",
+      "line": 203,
       "text": "a",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/configuracoes/ModelAliasesPanel.tsx",
-      "line": 178,
+      "line": 237,
+      "text": "pdf",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/configuracoes/ModelAliasesPanel.tsx",
+      "line": 241,
       "text": "csv",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/configuracoes/ModelAliasesPanel.tsx",
-      "line": 182,
+      "line": 245,
       "text": "json",
       "severity": "high"
     },

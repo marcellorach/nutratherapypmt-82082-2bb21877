@@ -10,6 +10,7 @@ import { Download, RefreshCw, Save, Loader2, AlertTriangle, ShieldCheck, FileSpr
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateTaskAliasCache } from "@/hooks/useTaskAlias";
+import { enrichItemsWithDrift, countDrift } from "./modelInventoryDrift";
 
 interface AliasRow {
   task_id: string;
@@ -34,6 +35,8 @@ interface InventoryItem {
   has_alias: boolean;
   alias_matches_real: boolean;
   notes: string | null;
+  alias_partner_facing?: string;
+  partner_surfaces?: string[];
 }
 
 const ModelAliasesPanel: React.FC = () => {
@@ -125,17 +128,11 @@ const ModelAliasesPanel: React.FC = () => {
       const { data: aliasData } = await supabase
         .from("ai_task_aliases")
         .select("task_id, real_model");
-      const storedByTask = new Map((aliasData ?? []).map((a: any) => [a.task_id, a.real_model]));
-      const items = rawItems.map((i) => {
-        const stored = storedByTask.get(i.task_id) ?? null;
-        const drift = !!stored && stored !== i.real_model;
-        return {
-          ...i,
-          stored_real_model: stored,
-          drift,
-          drift_note: drift ? `In-use model differs from stored (${stored})` : "",
-        };
-      });
+      const storedByTask = new Map<string, string>(
+        (aliasData ?? []).map((a: any) => [a.task_id, a.real_model]),
+      );
+      const items = enrichItemsWithDrift(rawItems, storedByTask);
+      const driftCount = countDrift(items);
       let blob: Blob;
       let filename: string;
       const ts = new Date().toISOString().replace(/[:.]/g, "-");
@@ -143,12 +140,14 @@ const ModelAliasesPanel: React.FC = () => {
         blob = new Blob([JSON.stringify({ ...data, items }, null, 2)], { type: "application/json" });
         filename = `model-inventory_${ts}.json`;
       } else if (format === "csv") {
-        const header = ["task_id","edge_function","prompt_source","prompt_key","real_model","stored_real_model","drift","drift_note","resolution_source","provider","governed","alias_label_pt","alias_label_en","has_alias","alias_matches_real","notes"];
+        const header = ["task_id","edge_function","prompt_source","prompt_key","real_model","stored_real_model","drift","drift_note","resolution_source","provider","governed","alias_label_pt","alias_label_en","alias_partner_facing","partner_surfaces","has_alias","alias_matches_real","notes"];
         const csv = [
           header.join(","),
           ...items.map((i) => header.map((h) => {
             const v = (i as any)[h];
-            const s = v === null || v === undefined ? "" : String(v);
+            const s = v === null || v === undefined
+              ? ""
+              : Array.isArray(v) ? v.join("|") : String(v);
             return s.includes(",") || s.includes("\"") ? `"${s.replace(/"/g, '""')}"` : s;
           }).join(",")),
         ].join("\n");
@@ -162,12 +161,11 @@ const ModelAliasesPanel: React.FC = () => {
         doc.text("Inventário de Modelos de IA", 40, 40);
         doc.setFontSize(9);
         doc.setTextColor(120);
-        const driftCount = items.filter((i) => i.drift).length;
         doc.text(`Gerado em ${new Date().toLocaleString("pt-BR")} — ${items.length} tarefas — ${driftCount} com drift`, 40, 56);
         doc.setTextColor(0);
         autoTable(doc, {
           startY: 72,
-          head: [["Tarefa", "Função / Origem", "Modelo real", "Alias PT", "Alias EN", "Status"]],
+          head: [["Tarefa", "Função / Origem", "Modelo real", "Alias PT", "Alias EN", "Alias Parceiro", "Status"]],
           body: items.map((i) => [
             i.task_id,
             `${i.edge_function}${i.prompt_key ? `\n${i.prompt_key}` : ""}`,
@@ -176,6 +174,7 @@ const ModelAliasesPanel: React.FC = () => {
               : i.real_model,
             i.alias_label_pt,
             i.alias_label_en,
+            (i as any).alias_partner_facing || "—",
             `${i.governed ? "governed" : "inline"}${i.drift ? "\nDRIFT" : ""}`,
           ]),
           styles: { fontSize: 8, cellPadding: 4, overflow: "linebreak" },
@@ -188,12 +187,13 @@ const ModelAliasesPanel: React.FC = () => {
             }
           },
           columnStyles: {
-            0: { cellWidth: 130 },
-            1: { cellWidth: 160 },
-            2: { cellWidth: 140 },
-            3: { cellWidth: 130 },
-            4: { cellWidth: 130 },
-            5: { cellWidth: 60 },
+            0: { cellWidth: 110 },
+            1: { cellWidth: 140 },
+            2: { cellWidth: 130 },
+            3: { cellWidth: 110 },
+            4: { cellWidth: 110 },
+            5: { cellWidth: 110 },
+            6: { cellWidth: 60 },
           },
         });
         blob = doc.output("blob");
