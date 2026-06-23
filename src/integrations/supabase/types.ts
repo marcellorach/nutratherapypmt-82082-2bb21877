@@ -110,6 +110,27 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_configurations_backup_axis2_wave2a: {
+        Row: {
+          backed_up_at: string
+          config_key: string
+          config_value: Json
+          id: string
+        }
+        Insert: {
+          backed_up_at?: string
+          config_key: string
+          config_value: Json
+          id?: string
+        }
+        Update: {
+          backed_up_at?: string
+          config_key?: string
+          config_value?: Json
+          id?: string
+        }
+        Relationships: []
+      }
       ai_model_inventory_snapshots: {
         Row: {
           captured_at: string
@@ -4886,6 +4907,27 @@ export type Database = {
           backed_up_at?: string
           extracted_data_extract?: Json | null
           study_id?: string
+        }
+        Relationships: []
+      }
+      processed_studies_backup_axis2_wave2a: {
+        Row: {
+          analysis_data: Json | null
+          backed_up_at: string
+          id: string
+          study_row_id: string
+        }
+        Insert: {
+          analysis_data?: Json | null
+          backed_up_at?: string
+          id?: string
+          study_row_id: string
+        }
+        Update: {
+          analysis_data?: Json | null
+          backed_up_at?: string
+          id?: string
+          study_row_id?: string
         }
         Relationships: []
       }
