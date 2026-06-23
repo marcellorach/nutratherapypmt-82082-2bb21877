@@ -4868,6 +4868,27 @@ export type Database = {
         }
         Relationships: []
       }
+      processed_studies_backup_axis2_wave1: {
+        Row: {
+          analysis_data: Json | null
+          backed_up_at: string
+          extracted_data_extract: Json | null
+          study_id: string
+        }
+        Insert: {
+          analysis_data?: Json | null
+          backed_up_at?: string
+          extracted_data_extract?: Json | null
+          study_id: string
+        }
+        Update: {
+          analysis_data?: Json | null
+          backed_up_at?: string
+          extracted_data_extract?: Json | null
+          study_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
