@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-06-22T21:09:46.041Z",
+  "timestamp": "2026-06-23T01:58:13.765Z",
   "summary": {
-    "totalFiles": 961,
+    "totalFiles": 963,
     "totalIssues": 498,
     "hardcodedTexts": 61,
     "missingKeys": 435,
@@ -578,28 +578,28 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/configuracoes/ModelAliasesPanel.tsx",
-      "line": 54,
+      "line": 57,
       "text": "task_id, real_model, alias_label_pt, alias_label_en, description, updated_at",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/configuracoes/ModelAliasesPanel.tsx",
-      "line": 127,
+      "line": 130,
       "text": "task_id, real_model",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/configuracoes/ModelAliasesPanel.tsx",
-      "line": 158,
+      "line": 157,
       "text": "jspdf",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/configuracoes/ModelAliasesPanel.tsx",
-      "line": 159,
+      "line": 158,
       "text": "jspdf-autotable",
       "severity": "high"
     },
