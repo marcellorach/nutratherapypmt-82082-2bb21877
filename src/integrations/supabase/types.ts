@@ -83,6 +83,33 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_configurations_backup_axis2_wave1: {
+        Row: {
+          backed_up_at: string
+          config_key: string
+          config_value: Json | null
+          description: string | null
+          is_active: boolean | null
+          original_id: string | null
+        }
+        Insert: {
+          backed_up_at?: string
+          config_key: string
+          config_value?: Json | null
+          description?: string | null
+          is_active?: boolean | null
+          original_id?: string | null
+        }
+        Update: {
+          backed_up_at?: string
+          config_key?: string
+          config_value?: Json | null
+          description?: string | null
+          is_active?: boolean | null
+          original_id?: string | null
+        }
+        Relationships: []
+      }
       ai_model_inventory_snapshots: {
         Row: {
           captured_at: string
