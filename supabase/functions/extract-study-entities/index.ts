@@ -1,6 +1,11 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.23.0';
 import { callAITask } from '../_shared/ai-task-router.ts';
+import {
+  mergeAnalysisData,
+  mergeExtractedData,
+  sortedKeys,
+} from '../_shared/analysisDataMerge.ts';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
@@ -501,11 +506,25 @@ serve(async (req) => {
 
     // Save to study_extractions
     console.log(`💾 Salvando extração completa (3 stages)...`);
+    // [axis1-merge] Read existing extracted_data (gemini-file-search may have
+    // already written rich fields). Deep-merge with ownership so we do not
+    // clobber gemini-owned keys (structured_dosages, study_population, etc).
+    const { data: existingExtractionRow } = await supabase
+      .from('study_extractions')
+      .select('extracted_data')
+      .eq('study_id', studyId)
+      .maybeSingle();
+    const currentExtracted = (existingExtractionRow as any)?.extracted_data || {};
+    const beforeExtractedKeys = sortedKeys(currentExtracted);
+    const mergedExtractedData = mergeExtractedData(currentExtracted, extractedData);
+    const afterExtractedKeys = sortedKeys(mergedExtractedData);
+    console.log(`[axis1-merge] ${studyId} extracted_data keys BEFORE(${beforeExtractedKeys.length})=`, JSON.stringify(beforeExtractedKeys));
+    console.log(`[axis1-merge] ${studyId} extracted_data keys AFTER (${afterExtractedKeys.length})=`, JSON.stringify(afterExtractedKeys));
     const { data: extraction, error: insertError } = await supabase
       .from('study_extractions')
       .upsert({
         study_id: studyId,
-        extracted_data: extractedData,
+        extracted_data: mergedExtractedData,
         extraction_status: 'pending_review',
         extraction_quality_score: qualityScore,
         updated_at: new Date().toISOString(),
@@ -753,12 +772,24 @@ serve(async (req) => {
     }
 
     console.log('💾 Atualizando analysis_data com dados dos 3 stages...');
+    // [axis1-merge] Read existing analysis_data (gemini-file-search rich keys)
+    // and deep-merge with ownership instead of REPLACE-clobbering it.
+    const { data: existingAnalysisRow } = await supabase
+      .from('processed_studies')
+      .select('analysis_data')
+      .eq('id', studyId)
+      .maybeSingle();
+    const currentAnalysis = (existingAnalysisRow as any)?.analysis_data || {};
+    const beforeAnalysisKeys = sortedKeys(currentAnalysis);
+    const mergedAnalysis = mergeAnalysisData(currentAnalysis, frontendData);
+    const afterAnalysisKeys = sortedKeys(mergedAnalysis);
+    console.log(`[axis1-merge] ${studyId} analysis_data keys BEFORE(${beforeAnalysisKeys.length})=`, JSON.stringify(beforeAnalysisKeys));
+    console.log(`[axis1-merge] ${studyId} analysis_data keys AFTER (${afterAnalysisKeys.length})=`, JSON.stringify(afterAnalysisKeys));
     await supabase
       .from('processed_studies')
-      .update({ analysis_data: frontendData })
+      .update({ analysis_data: mergedAnalysis })
       .eq('id', studyId);
-    
-    console.log('✅ analysis_data atualizado com SUCESSO (3 stages)');
+    console.log('✅ analysis_data atualizado com SUCESSO (3 stages, deep-merge)');
 
     return new Response(
       JSON.stringify({ 
