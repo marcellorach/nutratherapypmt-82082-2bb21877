@@ -506,11 +506,25 @@ serve(async (req) => {
 
     // Save to study_extractions
     console.log(`💾 Salvando extração completa (3 stages)...`);
+    // [axis1-merge] Read existing extracted_data (gemini-file-search may have
+    // already written rich fields). Deep-merge with ownership so we do not
+    // clobber gemini-owned keys (structured_dosages, study_population, etc).
+    const { data: existingExtractionRow } = await supabase
+      .from('study_extractions')
+      .select('extracted_data')
+      .eq('study_id', studyId)
+      .maybeSingle();
+    const currentExtracted = (existingExtractionRow as any)?.extracted_data || {};
+    const beforeExtractedKeys = sortedKeys(currentExtracted);
+    const mergedExtractedData = mergeExtractedData(currentExtracted, extractedData);
+    const afterExtractedKeys = sortedKeys(mergedExtractedData);
+    console.log(`[axis1-merge] ${studyId} extracted_data keys BEFORE(${beforeExtractedKeys.length})=`, JSON.stringify(beforeExtractedKeys));
+    console.log(`[axis1-merge] ${studyId} extracted_data keys AFTER (${afterExtractedKeys.length})=`, JSON.stringify(afterExtractedKeys));
     const { data: extraction, error: insertError } = await supabase
       .from('study_extractions')
       .upsert({
         study_id: studyId,
-        extracted_data: extractedData,
+        extracted_data: mergedExtractedData,
         extraction_status: 'pending_review',
         extraction_quality_score: qualityScore,
         updated_at: new Date().toISOString(),
