@@ -83,6 +83,33 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_configurations_backup_axis2_wave1: {
+        Row: {
+          backed_up_at: string
+          config_key: string
+          config_value: Json | null
+          description: string | null
+          is_active: boolean | null
+          original_id: string | null
+        }
+        Insert: {
+          backed_up_at?: string
+          config_key: string
+          config_value?: Json | null
+          description?: string | null
+          is_active?: boolean | null
+          original_id?: string | null
+        }
+        Update: {
+          backed_up_at?: string
+          config_key?: string
+          config_value?: Json | null
+          description?: string | null
+          is_active?: boolean | null
+          original_id?: string | null
+        }
+        Relationships: []
+      }
       ai_model_inventory_snapshots: {
         Row: {
           captured_at: string
@@ -4838,6 +4865,27 @@ export type Database = {
           id?: string
           ingestion_stages?: Json | null
           note?: string | null
+        }
+        Relationships: []
+      }
+      processed_studies_backup_axis2_wave1: {
+        Row: {
+          analysis_data: Json | null
+          backed_up_at: string
+          extracted_data_extract: Json | null
+          study_id: string
+        }
+        Insert: {
+          analysis_data?: Json | null
+          backed_up_at?: string
+          extracted_data_extract?: Json | null
+          study_id: string
+        }
+        Update: {
+          analysis_data?: Json | null
+          backed_up_at?: string
+          extracted_data_extract?: Json | null
+          study_id?: string
         }
         Relationships: []
       }
