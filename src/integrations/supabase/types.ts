@@ -4817,6 +4817,30 @@ export type Database = {
           },
         ]
       }
+      processed_studies_backup_axis1: {
+        Row: {
+          analysis_data: Json | null
+          backed_up_at: string
+          id: string
+          ingestion_stages: Json | null
+          note: string | null
+        }
+        Insert: {
+          analysis_data?: Json | null
+          backed_up_at?: string
+          id: string
+          ingestion_stages?: Json | null
+          note?: string | null
+        }
+        Update: {
+          analysis_data?: Json | null
+          backed_up_at?: string
+          id?: string
+          ingestion_stages?: Json | null
+          note?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -5238,6 +5262,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      study_extractions_backup_axis1: {
+        Row: {
+          backed_up_at: string
+          extracted_data: Json | null
+          extraction_quality_score: number | null
+          extraction_status: string | null
+          id: string
+          note: string | null
+          study_id: string
+        }
+        Insert: {
+          backed_up_at?: string
+          extracted_data?: Json | null
+          extraction_quality_score?: number | null
+          extraction_status?: string | null
+          id?: string
+          note?: string | null
+          study_id: string
+        }
+        Update: {
+          backed_up_at?: string
+          extracted_data?: Json | null
+          extraction_quality_score?: number | null
+          extraction_status?: string | null
+          id?: string
+          note?: string | null
+          study_id?: string
+        }
+        Relationships: []
       }
       synthetic_cohorts: {
         Row: {
