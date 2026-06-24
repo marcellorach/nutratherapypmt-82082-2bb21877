@@ -310,6 +310,42 @@ serve(async (req) => {
       console.warn('⚠️ [ANTI-FAB] guard failed (non-fatal):', guardErr?.message || guardErr);
     }
 
+    // ==================== PROVENANCE: anchored_mechanism (Onda 2-B guards) ====================
+    // Para cada clinical_outcome, registrar qual mecanismo do Stage 2 do mesmo estudo é citado
+    // dentro do texto do outcome. "none" é resultado válido e esperado — não força ancoragem.
+    try {
+      const studyIdForLog = String(studyId || 'unknown');
+      const mechs = Array.isArray(stage2Data.molecular_mechanisms) ? stage2Data.molecular_mechanisms : [];
+      const norm = (s: any) => String(s || '').toLowerCase().trim();
+      const mechIndex = mechs
+        .map((m: any) => {
+          const tokens = [norm(m?.name), norm(m?.target)].filter((t) => t && t.length >= 3);
+          return { name: String(m?.name || m?.target || '').trim(), tokens };
+        })
+        .filter((m) => m.name && m.tokens.length > 0);
+
+      const outcomes = Array.isArray(stage3Data.clinical_outcomes) ? stage3Data.clinical_outcomes : [];
+      let anchoredCount = 0;
+      for (const o of outcomes) {
+        if (Object.prototype.hasOwnProperty.call(o, 'anchored_mechanism')) continue;
+        const hay = norm(`${o?.outcome || ''} ${o?.outcome_type || ''} ${o?.effect_size || ''} ${o?.notes || ''} ${o?.description || ''}`);
+        let matched: string | null = null;
+        if (hay) {
+          for (const m of mechIndex) {
+            if (m.tokens.some((t) => hay.includes(t))) { matched = m.name; break; }
+          }
+        }
+        (o as any).anchored_mechanism = matched || 'none';
+        if (matched) anchoredCount++;
+      }
+      console.log(`🔗 [PROVENANCE][${studyIdForLog}] anchored_mechanism: ${anchoredCount}/${outcomes.length} outcomes ancorados (resto = "none", esperado).`);
+      for (const o of outcomes.slice(0, 2)) {
+        console.log(`🔗 [PROVENANCE][${studyIdForLog}][outcome+anchor]`, JSON.stringify(o));
+      }
+    } catch (provErr: any) {
+      console.warn('⚠️ [PROVENANCE] guard failed (non-fatal):', provErr?.message || provErr);
+    }
+
     // RC-001 / Adverse-events normalization: drop pseudo-entries that mean "no AEs reported"
     const NEGATIVE_AE_REGEX = /\b(no|none|not|sem|nenhum|nenhuma|n[ãa]o)\b.*\b(adverse|side[- ]?effect|event|reported|observed|evento|efeito|adverso|reportado|observad)/i;
     const originalAEs = Array.isArray(stage3Data.side_effects) ? stage3Data.side_effects : [];
