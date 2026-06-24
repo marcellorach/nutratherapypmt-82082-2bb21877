@@ -269,7 +269,7 @@ serve(async (req) => {
     // Valida coerência mínima de clinical_outcomes e molecular_mechanisms. Itens tortos
     // não são derrubados — só geram warning auditável.
     try {
-      const studyIdForLog = String((requestBody as any)?.studyId || (requestBody as any)?.study_id || 'unknown');
+      const studyIdForLog = String(studyId || 'unknown');
       const outcomes = Array.isArray(stage3Data.clinical_outcomes) ? stage3Data.clinical_outcomes : [];
       for (const o of outcomes) {
         const sig = String(o?.significance || '').toLowerCase();
