@@ -1,0 +1,1 @@
+ALTER TABLE public.processed_studies_backup_axis2_wave2b ALTER COLUMN study_id TYPE text;

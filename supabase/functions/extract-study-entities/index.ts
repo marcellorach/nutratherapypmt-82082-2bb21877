@@ -247,15 +247,68 @@ serve(async (req) => {
 
     // ==================== STAGE 3: Clinical Context ====================
     console.log('🟡 [STAGE 3/3] Extraindo contexto clínico (dosagens, efeitos colaterais)...');
+    // Onda 2-B: feed Stage 2 → Stage 3 (mecanismos do MESMO estudo como âncoras)
+    const stage2MechanismsPayload = JSON.stringify(stage2Data.molecular_mechanisms || []);
+    const stage3UserPrompt = prompts.stage3User
+      .replace('{{TEXT_CONTENT}}', textContent)
+      .replace('{{STAGE1_NUTRACEUTICALS}}', JSON.stringify(stage1Data.nutraceuticals || []))
+      .replace('{{STAGE2_MECHANISMS}}', stage2MechanismsPayload);
+    console.log('📝 Stage 3 prompt has STAGE2_MECHANISMS placeholder:', prompts.stage3User.includes('{{STAGE2_MECHANISMS}}'));
+    console.log('📝 Stage 3 feed payload size (chars):', stage2MechanismsPayload.length, '| mechanisms fed:', (stage2Data.molecular_mechanisms || []).length);
     const stage3Result = await callLovableAI(
       'extraction_stage3',
       prompts.stage3System,
-      prompts.stage3User.replace('{{TEXT_CONTENT}}', textContent).replace('{{STAGE1_NUTRACEUTICALS}}', JSON.stringify(stage1Data.nutraceuticals || [])),
+      stage3UserPrompt,
       getStage3Tools()
     );
     
     const stage3Data = stage3Result ? JSON.parse(stage3Result.function.arguments) : { dosages: [], side_effects: [], contraindications: [], clinical_outcomes: [] };
     console.log(`✅ Stage 3: ${stage3Data.dosages?.length || 0} dosagens, ${stage3Data.side_effects?.length || 0} efeitos colaterais`);
+
+    // ==================== ANTI-FABRICATION GUARD (warning, NÃO throw) ====================
+    // Valida coerência mínima de clinical_outcomes e molecular_mechanisms. Itens tortos
+    // não são derrubados — só geram warning auditável.
+    try {
+      const studyIdForLog = String(studyId || 'unknown');
+      const outcomes = Array.isArray(stage3Data.clinical_outcomes) ? stage3Data.clinical_outcomes : [];
+      for (const o of outcomes) {
+        const sig = String(o?.significance || '').toLowerCase();
+        const pv = o?.p_value;
+        const hasP = pv !== null && pv !== undefined && String(pv).trim() !== '';
+        if (sig === 'significant' && !hasP) {
+          console.warn(`⚠️ [ANTI-FAB][stage3][${studyIdForLog}] outcome marcado "significant" sem p_value:`, JSON.stringify(o).slice(0, 240));
+        }
+        const es = String(o?.effect_size || '');
+        if (es && es.length > 80 && !/\d/.test(es)) {
+          console.warn(`⚠️ [ANTI-FAB][stage3][${studyIdForLog}] effect_size parece prosa (sem número, >80 chars):`, JSON.stringify(o).slice(0, 240));
+        }
+        if (!o?.outcome || String(o.outcome).trim().length < 3) {
+          console.warn(`⚠️ [ANTI-FAB][stage3][${studyIdForLog}] outcome sem suporte textual plausível (vazio/curto demais):`, JSON.stringify(o).slice(0, 240));
+        }
+      }
+      const mechs = Array.isArray(stage2Data.molecular_mechanisms) ? stage2Data.molecular_mechanisms : [];
+      for (const m of mechs) {
+        const target = String((m as any)?.target || '');
+        const downstream = Array.isArray((m as any)?.downstream_effects) ? (m as any).downstream_effects : [];
+        if (!target) {
+          console.warn(`⚠️ [ANTI-FAB][stage2][${studyIdForLog}] mecanismo sem target:`, JSON.stringify(m).slice(0, 240));
+        }
+        if (downstream.length === 0) {
+          console.warn(`⚠️ [ANTI-FAB][stage2][${studyIdForLog}] mecanismo sem downstream_effects (relação causal incompleta):`, JSON.stringify(m).slice(0, 240));
+        }
+      }
+
+      // Evidence log condensado (substitui os relatórios separados): 1-2 itens por categoria, na íntegra
+      console.log(`📑 [EVIDENCE][${studyIdForLog}] clinical_outcomes=${outcomes.length} molecular_mechanisms=${mechs.length}`);
+      for (const o of outcomes.slice(0, 2)) {
+        console.log(`📑 [EVIDENCE][${studyIdForLog}][outcome]`, JSON.stringify(o));
+      }
+      for (const m of mechs.slice(0, 2)) {
+        console.log(`📑 [EVIDENCE][${studyIdForLog}][mechanism]`, JSON.stringify(m));
+      }
+    } catch (guardErr: any) {
+      console.warn('⚠️ [ANTI-FAB] guard failed (non-fatal):', guardErr?.message || guardErr);
+    }
 
     // RC-001 / Adverse-events normalization: drop pseudo-entries that mean "no AEs reported"
     const NEGATIVE_AE_REGEX = /\b(no|none|not|sem|nenhum|nenhuma|n[ãa]o)\b.*\b(adverse|side[- ]?effect|event|reported|observed|evento|efeito|adverso|reportado|observad)/i;
