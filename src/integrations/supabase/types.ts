@@ -4973,6 +4973,27 @@ export type Database = {
         }
         Relationships: []
       }
+      processed_studies_backup_axis2_wave2b_guards: {
+        Row: {
+          analysis_data: Json | null
+          backed_up_at: string
+          id: string
+          study_id: string
+        }
+        Insert: {
+          analysis_data?: Json | null
+          backed_up_at?: string
+          id?: string
+          study_id: string
+        }
+        Update: {
+          analysis_data?: Json | null
+          backed_up_at?: string
+          id?: string
+          study_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -5421,6 +5442,27 @@ export type Database = {
           extraction_status?: string | null
           id?: string
           note?: string | null
+          study_id?: string
+        }
+        Relationships: []
+      }
+      study_extractions_backup_axis2_wave2b_guards: {
+        Row: {
+          backed_up_at: string
+          extracted_data: Json | null
+          id: string
+          study_id: string
+        }
+        Insert: {
+          backed_up_at?: string
+          extracted_data?: Json | null
+          id?: string
+          study_id: string
+        }
+        Update: {
+          backed_up_at?: string
+          extracted_data?: Json | null
+          id?: string
           study_id?: string
         }
         Relationships: []
