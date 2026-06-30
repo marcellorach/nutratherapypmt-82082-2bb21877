@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-06-30T05:33:34.169Z",
+  "timestamp": "2026-06-30T05:42:29.534Z",
   "summary": {
-    "totalFiles": 964,
+    "totalFiles": 966,
     "totalIssues": 498,
     "hardcodedTexts": 61,
     "missingKeys": 435,
@@ -1537,14 +1537,14 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/cards/EstudoCard.tsx",
-      "line": 121,
+      "line": 122,
       "text": "*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/cards/EstudoCard.tsx",
-      "line": 193,
+      "line": 198,
       "text": "\\n",
       "severity": "high"
     },
@@ -1628,14 +1628,14 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/detalhes/sections/EstudoDetailSections.tsx",
-      "line": 76,
+      "line": 79,
       "text": "*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/detalhes/tabs/AnaliseTab.tsx",
-      "line": 33,
+      "line": 44,
       "text": "subject_name, subject_type, predicate, object_name, object_type, extraction_confidence",
       "severity": "high"
     },
