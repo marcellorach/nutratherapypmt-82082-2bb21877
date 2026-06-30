@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { useTranslation } from 'react-i18next';
 import { useGeminiProcessing } from '@/hooks/useGeminiProcessing';
 import { supabase } from '@/integrations/supabase/client';
+import { useStudyRichData } from '@/hooks/useStudyRichData';
 import { toast } from 'sonner';
 import StudyTimeline from '../StudyTimeline';
 import { localizeEnum } from '@/utils/llmEnumLocalizer';
