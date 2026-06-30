@@ -31,6 +31,14 @@ export const GEMINI_OWNED_ANALYSIS = new Set<string>([
 ]);
 
 // Keys that extract-study-entities owns in analysis_data (replace).
+//
+// READ-PATH OFICIAL: src/hooks/useStudyRichData.ts é o único leitor canônico
+// destes campos na UI. NÃO ler `analysis_data.molecularMechanisms` (etc.)
+// direto em components — o helper lida com o fallback de estudos legados
+// que têm os campos populados em `study_extractions.extracted_data` mas não
+// em `analysis_data`. Espelhar qualquer mudança aqui em
+// EXTRACT_OWNED_SNAKE_TO_CAMEL no helper. Há guard de CI em
+// scripts/check-ownership-reads.mjs.
 export const EXTRACT_OWNED_ANALYSIS = new Set<string>([
   'molecularMechanisms',
   'clinicalOutcomes',

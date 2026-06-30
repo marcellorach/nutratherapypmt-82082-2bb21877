@@ -5,6 +5,7 @@ import { FlaskConical, AlertCircle, Link2 } from "lucide-react";
 import ExtractedDataVisualization from '../../visualization/ExtractedDataVisualization';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
+import { useStudyRichData } from '@/hooks/useStudyRichData';
 
 interface AnaliseTabProps {
   estudo: any;
@@ -15,14 +16,24 @@ const AnaliseTab: React.FC<AnaliseTabProps> = ({ estudo }) => {
   const [triplets, setTriplets] = React.useState<any[] | null>(null);
 
   const analysisData = estudo?.analysis_data;
-  const hasExtractedData = analysisData && (
-    analysisData.study_population ||
-    analysisData.structured_dosages?.length > 0 ||
-    analysisData.biomarkers?.length > 0 ||
-    analysisData.detailed_side_effects?.length > 0 ||
-    analysisData.contraindications?.length > 0 ||
-    analysisData.drug_interactions?.length > 0 ||
-    analysisData.synergies?.length > 0
+  const rich = useStudyRichData(estudo);
+  // Considera tanto gemini-owned (analysis_data direto) quanto extract-owned
+  // via helper — senão estudos legados (extract-owned só em extracted_data)
+  // caem falsamente em "Aguardando processamento".
+  const hasExtractedData = !!(
+    (analysisData && (
+      analysisData.study_population ||
+      analysisData.structured_dosages?.length > 0 ||
+      analysisData.biomarkers?.length > 0 ||
+      analysisData.detailed_side_effects?.length > 0 ||
+      analysisData.contraindications?.length > 0 ||
+      analysisData.drug_interactions?.length > 0
+    )) ||
+    rich.molecularMechanisms.length > 0 ||
+    rich.clinicalOutcomes.length > 0 ||
+    rich.synergies.length > 0 ||
+    rich.detailedSideEffects.length > 0 ||
+    rich.hierarchicalRelations.length > 0
   );
 
   // Fallback: quando Stage 3 não rodou, mostrar resumo derivado dos triplets

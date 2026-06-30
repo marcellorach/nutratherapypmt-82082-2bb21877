@@ -7,6 +7,8 @@ import OutcomeTag from '../../../tags/OutcomeTag';
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useStudyRichData } from '@/hooks/useStudyRichData';
+import NtaiClinicalTab from '../../analysis/results/NtaiClinicalTab';
 
 interface EstudoDetailSectionsProps {
   estudo: any;
@@ -66,6 +68,7 @@ const getActionConfig = (action: string) => {
 const EstudoDetailSections: React.FC<EstudoDetailSectionsProps> = ({ estudo }) => {
   const { t } = useTranslation();
   const analysisData = estudo?.analysis_data || {};
+  const rich = useStudyRichData(estudo);
   
   const { data: triplets = [] } = useQuery({
     queryKey: ['study-triplets', estudo?.id],
@@ -84,8 +87,13 @@ const EstudoDetailSections: React.FC<EstudoDetailSectionsProps> = ({ estudo }) =
   
   const nutraceuticos = (analysisData.extractedNutraceuticals || []).map((n: any) => ({ nome: n.name, score: n.confidence || 3.0 }));
   const condicoes = (analysisData.extractedConditions || []).map((c: any) => ({ nome: c.name, score: c.confidence || 3.0 }));
-  const mecanismos = analysisData.molecularMechanisms || [];
-  const efeitosColaterais = (analysisData.detailedSideEffects || analysisData.extractedSideEffects || []).map((e: any) => ({
+  // extract-owned via helper (cobre estudos legados sem analysis_data populado)
+  const mecanismos = rich.molecularMechanisms;
+  const desfechos = rich.clinicalOutcomes;
+  const efeitosColaterais = (rich.detailedSideEffects.length > 0
+    ? rich.detailedSideEffects
+    : (analysisData.extractedSideEffects || [])
+  ).map((e: any) => ({
     nome: e.name, score: e.severity === 'mild' ? 2.0 : e.severity === 'moderate' ? 3.0 : 4.0
   }));
 
@@ -172,6 +180,18 @@ const EstudoDetailSections: React.FC<EstudoDetailSectionsProps> = ({ estudo }) =
         </section>
       )}
 
+      {desfechos.length > 0 && (
+        <section className="space-y-3">
+          <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+            <Activity className="w-4 h-4 text-green-600" />
+            {t('estudoDetailSections.clinicalOutcomesTitle')}
+          </h4>
+          {/* Reuso do renderizador da sessão de processamento; sem assessment aqui
+              (vive em VisaoGeralTab/StudyAssessment). */}
+          <NtaiClinicalTab outcomes={desfechos} />
+        </section>
+      )}
+
       {triplets.length > 0 && (
         <section className="space-y-3">
           <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -230,7 +250,7 @@ const EstudoDetailSections: React.FC<EstudoDetailSectionsProps> = ({ estudo }) =
         </section>
       )}
 
-      {nutraceuticos.length === 0 && condicoes.length === 0 && mecanismos.length === 0 && triplets.length === 0 && (
+      {nutraceuticos.length === 0 && condicoes.length === 0 && mecanismos.length === 0 && desfechos.length === 0 && triplets.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
           <Activity className="w-12 h-12 mx-auto mb-3 opacity-30" />
           <p className="text-sm">{t('estudoDetailSections.noData')}</p>

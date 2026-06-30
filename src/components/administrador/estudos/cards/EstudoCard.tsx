@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { useTranslation } from 'react-i18next';
 import { useGeminiProcessing } from '@/hooks/useGeminiProcessing';
 import { supabase } from '@/integrations/supabase/client';
+import { useStudyRichData } from '@/hooks/useStudyRichData';
 import { toast } from 'sonner';
 import StudyTimeline from '../StudyTimeline';
 import { localizeEnum } from '@/utils/llmEnumLocalizer';
@@ -165,12 +166,16 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
 
   // Extract data from Gemini analysis or use defaults
   const analysisData = localEstudo.analysis_data as any;
-  const nutraceuticals = analysisData?.extractedNutraceuticals || [];
-  const conditions = analysisData?.extractedConditions || [];
-  const interactions = analysisData?.extractedInteractions || [];
-  const sideEffects = analysisData?.extractedSideEffects || [];
-  const mechanisms = analysisData?.molecularMechanisms || [];
-  const clinicalOutcomes = analysisData?.clinicalOutcomes || [];
+  // mechanisms & clinicalOutcomes são extract-owned → lidos pelo helper
+  // (cobre estudos legados onde analysis_data.molecularMechanisms está vazio
+  // mas study_extractions.extracted_data.molecular_mechanisms está íntegro).
+  const rich = useStudyRichData(localEstudo);
+  const nutraceuticals = rich.extractedNutraceuticals;
+  const conditions = rich.extractedConditions;
+  const interactions = rich.extractedInteractions;
+  const sideEffects = rich.extractedSideEffects;
+  const mechanisms = rich.molecularMechanisms;
+  const clinicalOutcomes = rich.clinicalOutcomes;
   const hasAnalysisData = !!analysisData && (nutraceuticals.length > 0 || conditions.length > 0);
 
   // Summary text - try multiple sources in priority order

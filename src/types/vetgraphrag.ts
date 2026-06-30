@@ -59,6 +59,11 @@ export interface ClinicalOutcome {
   p_value?: string;
   effect_size?: string;
   significance?: 'significant' | 'not_significant' | 'not_reported';
+  /**
+   * Mecanismo molecular ancorado a este desfecho clínico (extract-owned).
+   * String livre; "none" significa explicitamente sem ancoragem.
+   */
+  anchored_mechanism?: string;
 }
 
 export interface StudyAssessment {

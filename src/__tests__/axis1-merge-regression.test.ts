@@ -125,3 +125,31 @@ describe('axis1 deep-merge — study_extractions.extracted_data', () => {
     expect(merged.clinical_outcomes).toEqual((extExtracted as any).clinical_outcomes);
   });
 });
+
+describe('axis1 — hierarchicalRelations ownership (extract → replace)', () => {
+  it('mergeAnalysisData preserves hierarchicalRelations from extract output', () => {
+    const currentWithGemini = {
+      extractedNutraceuticals: [{ name: 'curcumin', confidence: 0.9, x: 1, y: 2 }],
+      study_summary: { summary: 'gemini wrote this' },
+    };
+    const extractOutputWithHR = {
+      hierarchicalRelations: [
+        { source: 'curcumin', target: 'NRF2', relation_type: 'ACTIVATES' },
+        { source: 'NRF2', target: 'antioxidant_response', relation_type: 'UPREGULATES' },
+      ],
+      molecularMechanisms: [{ name: 'NRF2 activation', action: 'activation' }],
+      clinicalOutcomes: [
+        { outcome: 'reduced inflammation', outcome_type: 'primary', anchored_mechanism: 'NRF2 activation' },
+      ],
+    };
+    const merged: any = mergeAnalysisData(currentWithGemini, extractOutputWithHR);
+    expect(Array.isArray(merged.hierarchicalRelations)).toBe(true);
+    expect(merged.hierarchicalRelations).toHaveLength(2);
+    expect(merged.hierarchicalRelations[0].relation_type).toBe('ACTIVATES');
+    // gemini-owned não pode ter sido apagado
+    expect(merged.extractedNutraceuticals[0].name).toBe('curcumin');
+    expect(merged.study_summary.summary).toBe('gemini wrote this');
+    // extract-owned replace, não merge fantasma
+    expect(merged.clinicalOutcomes[0].anchored_mechanism).toBe('NRF2 activation');
+  });
+});

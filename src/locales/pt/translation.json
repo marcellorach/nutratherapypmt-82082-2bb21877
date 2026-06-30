@@ -6856,6 +6856,8 @@
     "sideEffects": "Efeitos Colaterais",
     "noData": "Nenhum dado extraído disponível para este estudo.",
     "runAnalysis": "Execute a análise IA para extrair informações.",
+    "clinicalOutcomesTitle": "Desfechos Clínicos",
+    "anchoredMechanism": "Mecanismo ancorado",
     "predicates": {
       "TREATS": "Trata",
       "PREVENTS": "Previne",
