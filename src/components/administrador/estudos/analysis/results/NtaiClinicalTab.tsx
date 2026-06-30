@@ -1,8 +1,10 @@
 import React from 'react';
-import { Activity } from "lucide-react";
+import { useTranslation } from 'react-i18next';
+import { Activity, Anchor } from "lucide-react";
 import { ClinicalOutcome, StudyAssessment } from '@/types/ntai';
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { shouldShowAnchoredMechanism } from '@/hooks/useStudyRichData';
 
 interface NtaiClinicalTabProps {
   outcomes: ClinicalOutcome[];
@@ -10,6 +12,7 @@ interface NtaiClinicalTabProps {
 }
 
 const NtaiClinicalTab: React.FC<NtaiClinicalTabProps> = ({ outcomes, assessment }) => {
+  const { t } = useTranslation();
   const getSignificanceColor = (sig?: string) => {
     switch (sig) {
       case 'significant': return 'bg-green-100 text-green-700 border-green-300';
@@ -118,6 +121,19 @@ const NtaiClinicalTab: React.FC<NtaiClinicalTabProps> = ({ outcomes, assessment 
                     {out.significance && (
                       <Badge variant="outline" className={getSignificanceColor(out.significance)}>
                         {out.significance}
+                      </Badge>
+                    )}
+                    {shouldShowAnchoredMechanism(out.anchored_mechanism) && (
+                      <Badge
+                        variant="outline"
+                        className="bg-indigo-50 text-indigo-700 border-indigo-200"
+                        title={t('estudoDetailSections.anchoredMechanism')}
+                      >
+                        <Anchor className="w-3 h-3 mr-1" />
+                        <span className="font-medium mr-1">
+                          {t('estudoDetailSections.anchoredMechanism')}:
+                        </span>
+                        {out.anchored_mechanism}
                       </Badge>
                     )}
                   </div>
