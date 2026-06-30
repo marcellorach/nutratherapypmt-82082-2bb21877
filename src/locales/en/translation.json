@@ -6852,6 +6852,8 @@
     "sideEffects": "Side Effects",
     "noData": "No extracted data available for this study.",
     "runAnalysis": "Run AI analysis to extract information.",
+    "clinicalOutcomesTitle": "Clinical Outcomes",
+    "anchoredMechanism": "Anchored mechanism",
     "predicates": {
       "TREATS": "Treats",
       "PREVENTS": "Prevents",
