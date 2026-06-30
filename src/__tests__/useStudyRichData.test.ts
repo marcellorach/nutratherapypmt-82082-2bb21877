@@ -7,7 +7,7 @@ import {
   buildRichStudyData,
   shouldShowAnchoredMechanism,
   EXTRACT_OWNED_SNAKE_TO_CAMEL,
-} from '../hooks/useStudyRichData';
+} from '../hooks/useStudyRichData.pure';
 
 describe('buildRichStudyData — extract-owned read paths', () => {
   it('(i) extracted_data rico + analysis_data vazio → lê de extracted_data', () => {
