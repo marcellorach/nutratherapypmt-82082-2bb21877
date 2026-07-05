@@ -19,6 +19,14 @@ const SRC = join(ROOT, 'src');
 const IMPORT_PATTERN = /(?:from|import)\s*['"]([^'"]+)['"]/g;
 const LOCALSTORAGE_PATTERN = /\blocalStorage\b/;
 
+// Strip /* ... */ and // ... comments, but preserve newlines so line numbers
+// stay accurate. String literals are left intact (good enough for this guard).
+function stripComments(src) {
+  return src
+    .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+    .replace(/(^|[^:])\/\/[^\n]*/g, (_, p) => p);
+}
+
 function isSupabaseClientImport(spec, file) {
   if (spec === '@/integrations/supabase/client') return true;
   if (spec.startsWith('.')) {
@@ -50,10 +58,10 @@ for (const file of walk(SRC)) {
   const rel = relative(ROOT, file);
   checked.push(rel);
   const content = readFileSync(file, 'utf8');
-  const lines = content.split('\n');
+  const lines = stripComments(content).split('\n');
 
   lines.forEach((line, i) => {
-    const stripped = line.replace(/\/\/.*$/, '').replace(/\/\*[\s\S]*?\*\//g, '');
+    const stripped = line;
     // (a) supabase client import
     for (const m of stripped.matchAll(IMPORT_PATTERN)) {
       if (isSupabaseClientImport(m[1], file)) {
