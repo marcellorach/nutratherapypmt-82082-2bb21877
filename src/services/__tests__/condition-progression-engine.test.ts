@@ -1,16 +1,12 @@
 import { describe, it, expect } from 'vitest';
 
-// Stub localStorage before importing the engine (engine pulls supabase client which touches localStorage at module init).
-(globalThis as any).localStorage = (globalThis as any).localStorage ?? {
-  getItem: () => null, setItem: () => {}, removeItem: () => {}, clear: () => {}, key: () => null, length: 0,
-};
-
+// Import from the PURE core — Node-safe, no supabase client, no localStorage.
 import {
   buildPointsFromRow,
   classifyCompound,
   pickBestCurve,
   type CurveRow,
-} from '../condition-progression-engine';
+} from '../condition-progression-engine.pure';
 
 const oaOmega3: CurveRow = {
   id: '1',
