@@ -43,8 +43,9 @@ serve(async (req) => {
 
   try {
     console.log('📥 Parsing request body...');
-    const { studyId } = await req.json();
-    console.log('📥 studyId received:', studyId);
+    const { studyId, force_reextract } = await req.json();
+    const forceReextract = force_reextract === true;
+    console.log('📥 studyId received:', studyId, '| force_reextract:', forceReextract);
     
     if (!studyId) {
       console.error('❌ Missing studyId');
@@ -227,7 +228,8 @@ serve(async (req) => {
         'extraction_stage2',
         prompts.stage2System,
         stage2UserPrompt,
-        getStage2Tools()
+        getStage2Tools(),
+        0
       );
       
       if (stage2Result) {
@@ -605,7 +607,7 @@ serve(async (req) => {
       .maybeSingle();
     const currentExtracted = (existingExtractionRow as any)?.extracted_data || {};
     const beforeExtractedKeys = sortedKeys(currentExtracted);
-    const mergedExtractedData = mergeExtractedData(currentExtracted, extractedData);
+    const mergedExtractedData = mergeExtractedData(currentExtracted, extractedData, { forceReextract });
     const afterExtractedKeys = sortedKeys(mergedExtractedData);
     console.log(`[axis1-merge] ${studyId} extracted_data keys BEFORE(${beforeExtractedKeys.length})=`, JSON.stringify(beforeExtractedKeys));
     console.log(`[axis1-merge] ${studyId} extracted_data keys AFTER (${afterExtractedKeys.length})=`, JSON.stringify(afterExtractedKeys));
@@ -870,7 +872,7 @@ serve(async (req) => {
       .maybeSingle();
     const currentAnalysis = (existingAnalysisRow as any)?.analysis_data || {};
     const beforeAnalysisKeys = sortedKeys(currentAnalysis);
-    const mergedAnalysis = mergeAnalysisData(currentAnalysis, frontendData);
+    const mergedAnalysis = mergeAnalysisData(currentAnalysis, frontendData, { forceReextract });
     const afterAnalysisKeys = sortedKeys(mergedAnalysis);
     console.log(`[axis1-merge] ${studyId} analysis_data keys BEFORE(${beforeAnalysisKeys.length})=`, JSON.stringify(beforeAnalysisKeys));
     console.log(`[axis1-merge] ${studyId} analysis_data keys AFTER (${afterAnalysisKeys.length})=`, JSON.stringify(afterAnalysisKeys));
@@ -914,7 +916,7 @@ serve(async (req) => {
 
 // Helper: Call Lovable AI Gateway
 // Helper: Call Lovable AI Gateway via ai-task-router (Fase 2.5)
-async function callLovableAI(taskId: string, systemPrompt: string, userPrompt: string, tools: any[]) {
+async function callLovableAI(taskId: string, systemPrompt: string, userPrompt: string, tools: any[], temperature: number = 0.1) {
   try {
     const result = await callAITask(taskId, {
       caller: 'extract-study-entities',
@@ -922,10 +924,10 @@ async function callLovableAI(taskId: string, systemPrompt: string, userPrompt: s
       messages: [{ role: 'user', content: userPrompt }],
       tools,
       tool_choice: { type: 'function', function: { name: tools[0].function.name } },
-      temperature: 0.1,
+      temperature,
       fallback: {
         model_id: 'google/gemini-3.5-flash',
-        temperature: 0.1,
+        temperature,
       },
     });
     return result.tool_calls?.[0] || null;
