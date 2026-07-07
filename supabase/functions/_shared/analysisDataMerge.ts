@@ -48,6 +48,18 @@ export const EXTRACT_OWNED_ANALYSIS = new Set<string>([
   'detailedSideEffects',
 ]);
 
+// Snake-case counterpart used in study_extractions.extracted_data. Mirror of
+// EXTRACT_OWNED_ANALYSIS — same 6 fields, different key style. Kept in sync
+// intentionally: both sets are protected by the anti-overwrite guard below.
+export const EXTRACT_OWNED_EXTRACTED = new Set<string>([
+  'molecular_mechanisms',
+  'clinical_outcomes',
+  'synergies',
+  'hierarchical_relations',
+  'extraction_stages',
+  'detailed_side_effects',
+]);
+
 // Score keys — prefer the value already present (gemini LLM-derived) over
 // any extract-side hardcoded fallback (e.g. extract's qualityScore = 3).
 export const SCORE_KEYS = new Set<string>([
@@ -123,7 +135,18 @@ function dedupDosages(a: unknown, b: unknown): unknown[] {
  * finishes. Starts from the existing (gemini-written) row and applies extract's
  * output campo-a-campo. Gemini-only keys are PRESERVED.
  */
-export function mergeAnalysisData(current: any, extractOutput: any): any {
+/**
+ * Anti-overwrite semantics for EXTRACT_OWNED_* keys:
+ *  - If the current value has non-empty content AND opts.forceReextract is
+ *    NOT true → keep current (protects 21→11 destructive re-runs).
+ *  - If current is empty/missing → let the new value fill (allows 0→N).
+ *  - If opts.forceReextract === true → replace (curator explicit re-extract).
+ */
+export interface MergeOptions {
+  forceReextract?: boolean;
+}
+
+export function mergeAnalysisData(current: any, extractOutput: any, opts: MergeOptions = {}): any {
   const c = (current && typeof current === 'object') ? current : {};
   const e = (extractOutput && typeof extractOutput === 'object') ? extractOutput : {};
   const merged: any = { ...c };
@@ -132,6 +155,14 @@ export function mergeAnalysisData(current: any, extractOutput: any): any {
     if (GEMINI_OWNED_ANALYSIS.has(k)) {
       // Only fill if gemini left it empty/missing.
       if (!hasContent(c[k])) merged[k] = v;
+      continue;
+    }
+    if (EXTRACT_OWNED_ANALYSIS.has(k)) {
+      // Anti-overwrite guard: protect non-empty extract-owned content unless
+      // the caller explicitly requested a forced re-extract.
+      if (opts.forceReextract || !hasContent(c[k])) {
+        merged[k] = v;
+      }
       continue;
     }
     if (SCORE_KEYS.has(k)) {
@@ -163,7 +194,7 @@ export function mergeAnalysisData(current: any, extractOutput: any): any {
  * upserts. Gemini-owned rich fields are preserved if present; extract owns
  * clinical_outcomes (statistical shape) and replaces.
  */
-export function mergeExtractedData(current: any, extractOutput: any): any {
+export function mergeExtractedData(current: any, extractOutput: any, opts: MergeOptions = {}): any {
   const c = (current && typeof current === 'object') ? current : {};
   const e = (extractOutput && typeof extractOutput === 'object') ? extractOutput : {};
   const merged: any = { ...c };
@@ -171,6 +202,13 @@ export function mergeExtractedData(current: any, extractOutput: any): any {
   for (const [k, v] of Object.entries(e)) {
     if (GEMINI_OWNED_EXTRACTED.has(k)) {
       if (!hasContent(c[k])) merged[k] = v;
+      continue;
+    }
+    if (EXTRACT_OWNED_EXTRACTED.has(k)) {
+      // Anti-overwrite guard (snake-case mirror). See MergeOptions above.
+      if (opts.forceReextract || !hasContent(c[k])) {
+        merged[k] = v;
+      }
       continue;
     }
     if (k === 'contraindications') {
