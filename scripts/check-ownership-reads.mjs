@@ -12,6 +12,8 @@ const ROOT = process.cwd();
 const SRC = join(ROOT, 'src');
 const ALLOWED = new Set([
   join('src', 'hooks', 'useStudyRichData.ts'),
+  // núcleo puro do próprio helper oficial
+  join('src', 'hooks', 'useStudyRichData.pure.ts'),
 ]);
 
 const FORBIDDEN_FIELDS = [
