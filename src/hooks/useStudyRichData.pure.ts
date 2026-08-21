@@ -26,6 +26,30 @@ function hasContent(v: unknown): boolean {
   return true;
 }
 
+/**
+ * gemini-file-search grava um SHIM em `clinical_outcomes` derivado de
+ * conditions ({condition, relationship, efficacy, treatability_score}).
+ * Esse shape não tem os campos estatísticos que a UI renderiza — tratá-lo
+ * como conteúdo faz o card sair em branco. Espelha `isClinicalOutcomeShim`
+ * em `supabase/functions/_shared/analysisDataMerge.ts`.
+ */
+export function isClinicalOutcomeShim(v: unknown): boolean {
+  if (!Array.isArray(v) || v.length === 0) return false;
+  return v.every((item) => {
+    if (!item || typeof item !== 'object') return false;
+    const o = item as Record<string, unknown>;
+    return o.outcome === undefined && o.condition !== undefined;
+  });
+}
+
+function hasOwnedContent(key: string, v: unknown): boolean {
+  if (!hasContent(v)) return false;
+  if (key === 'clinical_outcomes' || key === 'clinicalOutcomes') {
+    return !isClinicalOutcomeShim(v);
+  }
+  return true;
+}
+
 export type RichStudyData = {
   clinicalOutcomes: ClinicalOutcome[];
   molecularMechanisms: any[];
