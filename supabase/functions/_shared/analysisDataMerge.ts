@@ -92,6 +92,32 @@ function hasContent(v: unknown): boolean {
   return true;
 }
 
+/**
+ * gemini-file-search writes a SHIM under `clinical_outcomes` /
+ * `clinicalOutcomes` derived from conditions:
+ *   { condition, relationship, efficacy, treatability_score }
+ * That shape has none of the statistical fields the UI renders, so the
+ * anti-overwrite guard must NOT treat it as real extract-owned content —
+ * otherwise Stage 3 outcomes are dropped and the UI shows blank cards.
+ */
+export function isClinicalOutcomeShim(v: unknown): boolean {
+  if (!Array.isArray(v) || v.length === 0) return false;
+  return v.every((item) => {
+    if (!item || typeof item !== 'object') return false;
+    const o = item as Record<string, unknown>;
+    return o.outcome === undefined && o.condition !== undefined;
+  });
+}
+
+/** hasContent, but shape-aware for extract-owned outcome fields. */
+function hasOwnedContent(key: string, v: unknown): boolean {
+  if (!hasContent(v)) return false;
+  if (key === 'clinical_outcomes' || key === 'clinicalOutcomes') {
+    return !isClinicalOutcomeShim(v);
+  }
+  return true;
+}
+
 function dedupContraindications(a: unknown, b: unknown): unknown[] {
   const arrA = Array.isArray(a) ? a : [];
   const arrB = Array.isArray(b) ? b : [];
