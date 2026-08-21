@@ -120,15 +120,20 @@ describe('axis1 deep-merge — study_extractions.extracted_data', () => {
     }
   });
 
-  it('extract owns clinical_outcomes — protegido por default, substitui só com forceReextract', () => {
-    // Novo contrato (onda A+C'): EXTRACT_OWNED_EXTRACTED é protegido de
-    // sobrescrita destrutiva quando current já tem conteúdo não-vazio.
-    // Sem force → preserva o que já estava (mesmo que seja shim gemini).
-    const kept = mergeExtractedData(gemExtracted, extExtracted);
-    expect(kept.clinical_outcomes).toEqual((gemExtracted as any).clinical_outcomes ?? undefined);
+  it('shim gemini de clinical_outcomes NÃO é protegido; shape estatístico é', () => {
+    // O shim gemini ({condition, relationship, ...}) não tem os campos que a UI
+    // renderiza — não conta como conteúdo extract-owned, então extract substitui.
+    const stat = [{ outcome: 'Memory improved', outcome_type: 'primary', p_value: '0.003', significance: 'significant' }];
+    const kept = mergeExtractedData(gemExtracted, { clinical_outcomes: stat });
+    expect(kept.clinical_outcomes).toEqual(stat);
+
+    // Já tendo shape estatístico, a guarda protege contra sobrescrita destrutiva.
+    const protectedRun = mergeExtractedData({ clinical_outcomes: stat }, { clinical_outcomes: [] });
+    expect(protectedRun.clinical_outcomes).toEqual(stat);
+
     // Com force_reextract=true → curador manda ver, extract substitui.
-    const forced = mergeExtractedData(gemExtracted, extExtracted, { forceReextract: true });
-    expect(forced.clinical_outcomes).toEqual((extExtracted as any).clinical_outcomes);
+    const forced = mergeExtractedData({ clinical_outcomes: stat }, { clinical_outcomes: [] }, { forceReextract: true });
+    expect(forced.clinical_outcomes).toEqual([]);
   });
 });
 

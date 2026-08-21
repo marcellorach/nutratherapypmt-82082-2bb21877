@@ -26,6 +26,30 @@ function hasContent(v: unknown): boolean {
   return true;
 }
 
+/**
+ * gemini-file-search grava um SHIM em `clinical_outcomes` derivado de
+ * conditions ({condition, relationship, efficacy, treatability_score}).
+ * Esse shape não tem os campos estatísticos que a UI renderiza — tratá-lo
+ * como conteúdo faz o card sair em branco. Espelha `isClinicalOutcomeShim`
+ * em `supabase/functions/_shared/analysisDataMerge.ts`.
+ */
+export function isClinicalOutcomeShim(v: unknown): boolean {
+  if (!Array.isArray(v) || v.length === 0) return false;
+  return v.every((item) => {
+    if (!item || typeof item !== 'object') return false;
+    const o = item as Record<string, unknown>;
+    return o.outcome === undefined && o.condition !== undefined;
+  });
+}
+
+function hasOwnedContent(key: string, v: unknown): boolean {
+  if (!hasContent(v)) return false;
+  if (key === 'clinical_outcomes' || key === 'clinicalOutcomes') {
+    return !isClinicalOutcomeShim(v);
+  }
+  return true;
+}
+
 export type RichStudyData = {
   clinicalOutcomes: ClinicalOutcome[];
   molecularMechanisms: any[];
@@ -60,7 +84,7 @@ export function buildRichStudyData(
 
   const extractedHasAny =
     !!extracted &&
-    Object.keys(EXTRACT_OWNED_SNAKE_TO_CAMEL).some((snake) => hasContent(extracted[snake]));
+    Object.keys(EXTRACT_OWNED_SNAKE_TO_CAMEL).some((snake) => hasOwnedContent(snake, extracted[snake]));
 
   let extractSource: RichStudyData['source']['extract'] = 'none';
   const extractOwned: Record<string, any> = {};
@@ -72,7 +96,7 @@ export function buildRichStudyData(
       extractOwned[camel] = v ?? (camel === 'extractionStages' ? null : []);
     }
   } else {
-    const fallbackHasAny = EXTRACT_OWNED_CAMEL_KEYS.some((c) => hasContent(analysisData[c]));
+    const fallbackHasAny = EXTRACT_OWNED_CAMEL_KEYS.some((c) => hasOwnedContent(c, analysisData[c]));
     if (fallbackHasAny) extractSource = 'analysis_data';
     for (const camel of EXTRACT_OWNED_CAMEL_KEYS) {
       const v = analysisData[camel];
@@ -80,8 +104,18 @@ export function buildRichStudyData(
     }
   }
 
+  // Rows legadas podem ter o shim gemini em extracted_data.clinical_outcomes
+  // enquanto analysis_data.clinicalOutcomes tem o shape estatístico correto.
+  let clinicalOutcomes = (extractOwned.clinicalOutcomes as ClinicalOutcome[]) || [];
+  if (isClinicalOutcomeShim(clinicalOutcomes)) {
+    const fromAnalysis = analysisData.clinicalOutcomes;
+    clinicalOutcomes = (!isClinicalOutcomeShim(fromAnalysis) && hasContent(fromAnalysis))
+      ? (fromAnalysis as ClinicalOutcome[])
+      : [];
+  }
+
   return {
-    clinicalOutcomes: (extractOwned.clinicalOutcomes as ClinicalOutcome[]) || [],
+    clinicalOutcomes,
     molecularMechanisms: extractOwned.molecularMechanisms || [],
     hierarchicalRelations: extractOwned.hierarchicalRelations || [],
     synergies: extractOwned.synergies || [],
