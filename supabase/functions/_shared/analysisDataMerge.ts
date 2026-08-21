@@ -186,7 +186,7 @@ export function mergeAnalysisData(current: any, extractOutput: any, opts: MergeO
     if (EXTRACT_OWNED_ANALYSIS.has(k)) {
       // Anti-overwrite guard: protect non-empty extract-owned content unless
       // the caller explicitly requested a forced re-extract.
-      if (opts.forceReextract || !hasContent(c[k])) {
+      if (opts.forceReextract || !hasOwnedContent(k, c[k])) {
         merged[k] = v;
       }
       continue;
@@ -232,7 +232,7 @@ export function mergeExtractedData(current: any, extractOutput: any, opts: Merge
     }
     if (EXTRACT_OWNED_EXTRACTED.has(k)) {
       // Anti-overwrite guard (snake-case mirror). See MergeOptions above.
-      if (opts.forceReextract || !hasContent(c[k])) {
+      if (opts.forceReextract || !hasOwnedContent(k, c[k])) {
         merged[k] = v;
       }
       continue;
