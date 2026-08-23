@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-08-23T03:50:33.791Z",
+  "timestamp": "2026-08-23T04:55:38.765Z",
   "summary": {
-    "totalFiles": 970,
-    "totalIssues": 498,
+    "totalFiles": 971,
+    "totalIssues": 501,
     "hardcodedTexts": 61,
-    "missingKeys": 435,
+    "missingKeys": 438,
     "incompleteTranslations": 2
   },
   "issues": [
@@ -1623,6 +1623,27 @@
       "file": "src/components/administrador/estudos/curation/TripletCurationQueue.tsx",
       "line": 56,
       "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/detalhes/ForceReextractPanel.tsx",
+      "line": 38,
+      "text": "extracted_data",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/detalhes/ForceReextractPanel.tsx",
+      "line": 43,
+      "text": "analysis_data",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/estudos/detalhes/ForceReextractPanel.tsx",
+      "line": 88,
+      "text": "id, performed_at, performed_by, metadata, notes",
       "severity": "high"
     },
     {

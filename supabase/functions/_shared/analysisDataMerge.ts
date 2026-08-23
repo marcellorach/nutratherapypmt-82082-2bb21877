@@ -253,6 +253,43 @@ export function mergeExtractedData(current: any, extractOutput: any, opts: Merge
   return merged;
 }
 
+/**
+ * Merge na direção OPOSTA: o escritor é gemini-file-search (ou qualquer
+ * escritor que NÃO é o extract-study-entities).
+ *
+ * Regras:
+ *  - chaves extract-owned → PRESERVA o valor atual quando ele tem conteúdo
+ *    real (shim de clinical_outcomes não conta como conteúdo);
+ *  - qualquer outra chave → o escritor substitui (é dono ou é campo neutro).
+ *
+ * Usado por gemini-file-search, parse-study e generate-triplets para que uma
+ * re-execução deles não apague Stage 2/3 do extract.
+ */
+export function mergeAnalysisDataFromOtherWriter(current: any, output: any): any {
+  const c = (current && typeof current === 'object') ? current : {};
+  const o = (output && typeof output === 'object') ? output : {};
+  const merged: any = { ...c };
+
+  for (const [k, v] of Object.entries(o)) {
+    if (EXTRACT_OWNED_ANALYSIS.has(k) && hasOwnedContent(k, c[k])) continue;
+    merged[k] = v;
+  }
+  return merged;
+}
+
+/** Mesma direção, para study_extractions.extracted_data (chaves snake_case). */
+export function mergeExtractedDataFromOtherWriter(current: any, output: any): any {
+  const c = (current && typeof current === 'object') ? current : {};
+  const o = (output && typeof output === 'object') ? output : {};
+  const merged: any = { ...c };
+
+  for (const [k, v] of Object.entries(o)) {
+    if (EXTRACT_OWNED_EXTRACTED.has(k) && hasOwnedContent(k, c[k])) continue;
+    merged[k] = v;
+  }
+  return merged;
+}
+
 /** Convenience for logging. */
 export function sortedKeys(obj: any): string[] {
   if (!obj || typeof obj !== 'object') return [];

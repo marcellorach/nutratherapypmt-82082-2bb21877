@@ -3,6 +3,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { callAITask } from '../_shared/ai-task-router.ts';
 import { fetchSystemPrompt } from '../_shared/system-prompts.ts';
+import { mergeAnalysisDataFromOtherWriter } from '../_shared/analysisDataMerge.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -1023,16 +1024,27 @@ IMPORTANT: The pathway_chains array should show the complete discovered chains i
       }
     }
 
-    // Store the free discovery text for reference
+    // Store the free discovery text for reference.
+    // Ownership guard: relê analysis_data agora (o `study` foi carregado antes
+    // da geração e pode estar velho) e aplica o merge por ownership para não
+    // apagar Stage 2/3 do extract. Ver _shared/analysisDataMerge.ts.
+    const { data: freshStudyRow } = await supabase
+      .from('processed_studies')
+      .select('analysis_data')
+      .eq('id', studyId)
+      .maybeSingle();
+
     const { error: updateError } = await supabase
       .from('processed_studies')
       .update({
-        analysis_data: {
-          ...(typeof study.analysis_data === 'object' && study.analysis_data !== null ? study.analysis_data : {}),
-          phase1_discovery: freeDiscoveryText,
-          pathway_chains: pathwayChains,
-          extraction_timestamp: new Date().toISOString()
-        }
+        analysis_data: mergeAnalysisDataFromOtherWriter(
+          (freshStudyRow as any)?.analysis_data ?? study.analysis_data,
+          {
+            phase1_discovery: freeDiscoveryText,
+            pathway_chains: pathwayChains,
+            extraction_timestamp: new Date().toISOString(),
+          },
+        )
       })
       .eq('id', studyId);
 

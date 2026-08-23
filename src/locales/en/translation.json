@@ -1148,6 +1148,21 @@
       "gapFilling": "Fills evidence gap",
       "empty": "No structured criteria available. Score based on heuristic.",
       "note": "Criteria derived from study_assessment. Items marked as \"unknown\" were not extracted from the PDF."
+    },
+    "forceReextract": {
+      "title": "Forced re-extraction",
+      "subtitle": "Replaces already stored mechanisms and outcomes with the new run's result, even if it returns fewer items. The anti-overwrite guard is disabled for this run.",
+      "action": "Re-extract (forced)",
+      "running": "Re-extracting…",
+      "mechanisms": "Mechanisms",
+      "outcomes": "Outcomes",
+      "confirmTitle": "Force re-extraction for this study?",
+      "confirmDescription": "Study: {{title}}. Current mechanisms ({{mechanisms}}) and outcomes ({{outcomes}}) will be replaced by the new run's result, even if it returns fewer items. The event is recorded in the audit log with before/after counts.",
+      "confirmAction": "Re-extract now",
+      "doneTitle": "Re-extraction finished",
+      "doneDescription": "Mechanisms {{mb}} → {{ma}} · outcomes {{ob}} → {{oa}}",
+      "errorTitle": "Re-extraction failed",
+      "historyTitle": "Re-extraction history"
     }
   },
   "nutraceuticalsUnified": {

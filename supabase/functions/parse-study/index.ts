@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.23.0';
+import { mergeAnalysisDataFromOtherWriter } from '../_shared/analysisDataMerge.ts';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
@@ -203,7 +204,7 @@ serve(async (req) => {
     // Merge ingestion_stages.parse_study without overwriting other stage keys.
     const { data: existingRow } = await supabase
       .from('processed_studies')
-      .select('ingestion_stages')
+      .select('ingestion_stages, analysis_data')
       .eq('study_id', studyId)
       .maybeSingle();
     const mergedStages = {
@@ -214,7 +215,13 @@ serve(async (req) => {
     const { error: updateError } = await supabase
       .from('processed_studies')
       .update({
-        analysis_data: structuredContent,
+        // Ownership guard: parse-study escreve seções/tabelas, mas NÃO pode
+        // apagar Stage 2/3 do extract-study-entities nem os campos ricos do
+        // gemini-file-search. Ver _shared/analysisDataMerge.ts.
+        analysis_data: mergeAnalysisDataFromOtherWriter(
+          (existingRow as any)?.analysis_data,
+          structuredContent,
+        ),
         kanban_status: 'parsed',
         ingestion_stages: mergedStages,
         updated_at: new Date().toISOString(),

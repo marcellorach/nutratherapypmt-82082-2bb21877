@@ -1149,6 +1149,21 @@
       "gapFilling": "Preenche lacuna na literatura",
       "empty": "Nenhum critério estruturado disponível. Score baseado em heurística.",
       "note": "Critérios derivados de study_assessment. Itens marcados como \"não informado\" não foram extraídos do PDF."
+    },
+    "forceReextract": {
+      "title": "Re-extração forçada",
+      "subtitle": "Substitui mecanismos e desfechos já gravados pelo resultado da nova rodada, mesmo que ela retorne menos itens. A guarda anti-sobrescrita fica desativada nesta execução.",
+      "action": "Re-extrair (forçado)",
+      "running": "Re-extraindo…",
+      "mechanisms": "Mecanismos",
+      "outcomes": "Desfechos",
+      "confirmTitle": "Forçar re-extração deste estudo?",
+      "confirmDescription": "Estudo: {{title}}. Os mecanismos ({{mechanisms}}) e desfechos ({{outcomes}}) atuais serão substituídos pelo resultado da nova rodada, mesmo que venha com menos itens. O evento fica registrado na auditoria com as contagens antes e depois.",
+      "confirmAction": "Re-extrair agora",
+      "doneTitle": "Re-extração concluída",
+      "doneDescription": "Mecanismos {{mb}} → {{ma}} · desfechos {{ob}} → {{oa}}",
+      "errorTitle": "Falha na re-extração",
+      "historyTitle": "Histórico de re-extrações"
     }
   },
   "nutraceuticalsUnified": {
