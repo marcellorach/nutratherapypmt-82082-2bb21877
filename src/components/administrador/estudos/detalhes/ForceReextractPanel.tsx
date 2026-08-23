@@ -109,14 +109,15 @@ const ForceReextractPanel: React.FC<Props> = ({ estudo }) => {
       const after = await countRichFields(studyId);
       const { data: auth } = await supabase.auth.getUser();
 
-      await supabase.from('study_audit_logs').insert({
+      await supabase.from('study_audit_logs').insert([{
         action_type: 'force_reextract',
         study_ids: [studyId],
-        study_titles: [estudo?.title || estudo?.file_name || null].filter(Boolean),
-        performed_by: auth?.user?.id ?? null,
-        metadata: { before, after, source: 'curator_ui' },
+        study_titles: [estudo?.title || estudo?.file_name || null].filter(Boolean) as string[],
+        performed_by: auth?.user?.id ?? undefined,
+        metadata: { before, after, source: 'curator_ui' } as any,
         notes: `mechanisms ${before.mechanisms} → ${after.mechanisms} · outcomes ${before.outcomes} → ${after.outcomes}`,
-      });
+      }]);
+
 
       toast({
         title: t('studies.forceReextract.doneTitle', 'Re-extração concluída'),
