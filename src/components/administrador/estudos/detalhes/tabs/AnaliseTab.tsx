@@ -6,6 +6,8 @@ import ExtractedDataVisualization from '../../visualization/ExtractedDataVisuali
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { useStudyRichData } from '@/hooks/useStudyRichData';
+import ForceReextractPanel from '../ForceReextractPanel';
+
 
 interface AnaliseTabProps {
   estudo: any;
