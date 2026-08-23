@@ -63,6 +63,8 @@ const AnaliseTab: React.FC<AnaliseTabProps> = ({ estudo }) => {
 
   return (
     <div className="space-y-4">
+      <ForceReextractPanel estudo={estudo} />
+
       {!hasExtractedData ? (
         <div className="bg-yellow-50 border border-yellow-100 p-3 rounded-md text-sm">
           <p className="text-yellow-700 flex items-center">
