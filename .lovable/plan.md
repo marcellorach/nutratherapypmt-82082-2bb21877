@@ -1,92 +1,65 @@
+# Governança de extração, RBAC e conformidade medida
 
-# Investigação: dado rico chega na tela?
+Cinco entregas independentes. Recomendo executar na ordem abaixo (1 e 2 primeiro: são as que param perda de dado hoje). Se quiser, aprovo e faço uma por vez, com relatório ao fim de cada.
 
-Read-only. Confirmando o que existe no código real e no banco antes de propor mudança.
+## Entrega 1 — Re-extração forçada por estudo (UI + auditoria)
 
----
+Botão "Re-extrair (forçado)" no detalhe do estudo (aba Análise) e na fila de curadoria.
 
-## 1) Quem escreve `processed_studies.analysis_data` na produção
+- Diálogo de confirmação nomeando o estudo e explicando o efeito: substitui mecanismos/desfechos já gravados pelo resultado da nova rodada, mesmo que venha com menos itens.
+- Chama `extract-study-entities` com `force_reextract: true` (a flag já existe na função).
+- Auditoria: cada disparo grava linha em `study_audit_logs` (tabela existente) com `user_id`, `study_id`, ação `force_reextract`, e contagens antes/depois de `molecular_mechanisms` e `clinical_outcomes`. Painel simples de histórico no mesmo detalhe.
+- Ação em lote fica de fora desta entrega (risco alto sem histórico consolidado).
 
-Não existe `analyze-study-outputs` no repo. Os escritores reais são **quatro**, nesta ordem do pipeline:
+## Entrega 2 — Guarda de ownership nos outros três escritores
 
-| # | Função | Linha | Modo de escrita | Conteúdo |
-|---|---|---|---|---|
-| 1 | `parse-study/index.ts` | 214–222 | **REPLACE** (`update({ analysis_data: structuredContent })`) | conteúdo estruturado do PDF (texto + metadados básicos) |
-| 2 | `gemini-file-search/index.ts` | 2276–2291 | **REPLACE** (`update({ analysis_data: analysisData })`) | extração rica (nutracêuticos, mecanismos, efeitos, synergies, contraindications, structured_dosages, study_assessment, side_effects, study_summary, biological_effects, biomarkers, study_population, scores) |
-| 3 | `extract-study-entities/index.ts` | 866–880 | **DEEP-MERGE com ownership** via `mergeAnalysisData()` (do `_shared/analysisDataMerge.ts`) | Stage 1/2/3 do extrator: `molecularMechanisms`, `clinicalOutcomes`, `synergies`, `hierarchicalRelations`, `extractionStages`, `detailedSideEffects` |
-| 4 | `generate-triplets/index.ts` | 1027–1037 | **SHALLOW SPREAD** (`{ ...study.analysis_data, phase1_discovery, pathway_chains, extraction_timestamp }`) | só anexa 3 chaves de descoberta livre |
+Hoje só `extract-study-entities` usa `_shared/analysisDataMerge.ts`. Os outros sobrescrevem.
 
-`extract-study-entities` também faz `update` adicional sem tocar `analysis_data` (linhas 100, 149, 671) — só mexem em `kanban_status` / `ingestion_stages` / `processing_error`. Sem clobber.
+- `gemini-file-search`: passa a ler `analysis_data`/`extracted_data` atuais e aplicar `mergeAnalysisData`/`mergeExtractedData`. Como ele é o dono dos campos ricos, os campos extract-owned ficam intactos.
+- `parse-study` e `generate-triplets`: mesma leitura-antes-de-escrever; ambos só escrevem chaves próprias.
+- O shim `clinical_outcomes` do gemini (`{condition, relationship, efficacy, treatability_score}`) passa a ser gravado sob outra chave (`condition_efficacy_shim`), eliminando a colisão semântica na origem em vez de contorná-la no leitor. O leitor shim-aware continua para dados legados.
+- Testes de regressão por escritor (fixtures existentes em `src/__tests__/fixtures/axis1/`).
 
-**Há REPLACE cego ainda?** Sim, **dois** — mas pela ORDEM são seguros: `parse-study` é o primeiro a popular o registro (estado inicial vazio/textual), e `gemini-file-search` roda **antes** do `extract-study-entities`, então o REPLACE do gemini define o "current" sobre o qual o merge do extract preserva ownership. `generate-triplets` roda **depois** e usa spread raso — não derruba chaves de nível 1, só pode reescrever `phase1_discovery`/`pathway_chains` (não conflita com mecanismos/outcomes). Padrão que o deep-merge "deveria ter matado": nenhum sobrou no caminho mecanismos+outcomes.
+## Entrega 3 — `outcome_observations` e ciclo RWE no dashboard
 
-## 2) `_shared/analysisDataMerge.ts`: cobertura
+Tabela nova ligando intervenção → desfecho observado no paciente real.
 
-`rg mergeAnalysisData|mergeExtractedData supabase/functions`:
-- `extract-study-entities/index.ts:608` (mergeExtractedData → `study_extractions`)
-- `extract-study-entities/index.ts:873` (mergeAnalysisData → `processed_studies`)
+Colunas: `id`, `pet_id`, `condition_id`, `nutraceutical_id` (nullable), `observation_date`, `metric` (texto), `value` (numeric), `unit`, `baseline_value`, `source` (`exam` | `vet_report` | `owner_report`), `confidence`, `recorded_by`, `notes`, `is_synthetic` (bool, default true), timestamps. RLS + GRANTs conforme padrão; `is_synthetic` separa coorte sintética de dado real.
 
-**Nenhum outro escritor importa o merge.** `gemini-file-search`, `parse-study`, `generate-triplets` não passam por ele. Hoje isso é benigno (ordem garante segurança), mas a fronteira de ownership cobre **só o trecho que consertamos**. Se amanhã `gemini-file-search` for reexecutado depois do `extract-study-entities` (re-encadeamento já existe em `gemini-file-search:2297`, condicionado a `shouldRechain`), o REPLACE do gemini **apaga** `molecularMechanisms` / `clinicalOutcomes` / `extractionStages` do extract. Risco real, não hipotético.
+Pipelines de preenchimento:
+1. Automático: ao salvar um exame (`pet_exams`), derivar observações dos marcadores que já mapeamos para condições.
+2. Manual: formulário no prontuário para o vet registrar desfecho observado.
 
-## 3) Ponte `study_extractions.extracted_data` → `processed_studies.analysis_data`
+Dashboard: bloco "Ciclo RWE" com observações por mês, cobertura (% de pets com plano ativo que têm ≥1 observação), e pares intervenção×desfecho com N suficiente para virar evidência. Números medidos do banco, com rótulo explícito quando `is_synthetic = true`.
 
-**Não há ponte.** Quem grava `extracted_data` é o `extract-study-entities` (linha 608, via `mergeExtractedData`). Quem grava `analysis_data` Stage 1/2/3 é o **mesmo** `extract-study-entities` (linha 873), com o **mesmo** `frontendData` produzido naquela invocação. São duas escritas paralelas a partir da mesma fonte LLM, não uma carregando da outra. Não existe job que leia `study_extractions` e empurre para `analysis_data`.
+Não entra nesta entrega: retroalimentar automaticamente o KG a partir das observações. Isso precisa de curadoria e vira entrega própria.
 
-Confirmado no banco para `7b151ae8` (estudo de teste das ondas):
-- `analysis_data.clinicalOutcomes[0]` = `{outcome, effect_size, outcome_type, significance, anchored_mechanism: "none"}` ✓ shape novo + proveniência presente
-- `analysis_data.molecularMechanisms[0]` = `{name, type, action, target, category, downstream_effects[]}` ✓
+## Entrega 4 — RBAC além de admin
 
-Implicação: `molecularMechanisms`, `clinicalOutcomes` no shape `{outcome, outcome_type, p_value, effect_size, significance}` e `anchored_mechanism` **atravessam para `analysis_data`** — desde que o run de extract tenha sido o último a tocar o registro (volta ao risco do item 2).
+- Novos valores no enum de papéis: `scientist` e `vet_coordinator`, além de `admin` e `user`.
+- Permanece a tabela `user_roles` separada + `has_role()` security definer (já existe). Nenhum papel em `profiles`.
+- Políticas RLS por domínio, não por tabela solta:
+  - `scientist`: leitura ampla do acervo científico (estudos, triplets, KG), escrita em curadoria/propostas; sem acesso a dados clínicos identificáveis de pets reais.
+  - `vet_coordinator`: leitura/escrita clínica (pets, exames, consultas, planos), leitura do acervo científico; sem configuração de IA, prompts, chaves ou papéis.
+  - `admin`: tudo, incluindo aprovação de acesso e gestão de papéis.
+- UI: em Usuários & Perfis, atribuição de papel real por usuário (hoje o painel só tem perfil de visualização). O `RoleViewSwitcher` continua existindo como filtro cognitivo, mas passa a ser limitado pelos papéis reais.
+- Zero Trust mantido: toda decisão de permissão é validada no banco; a UI só esconde.
 
-## 4) Read-path da UI
+## Entrega 5 — Conformidade calculada do banco
 
-`analysis_data` é lido em (grep `analysis_data` em src/):
-- `EstudoDetailSections.tsx:68,87` — renderiza `molecularMechanisms` ✓
-- `EstudoCard.tsx:172–173` — só conta `molecularMechanisms.length` e `clinicalOutcomes.length` (badges)
-- `EnhancedStudyVisualization.tsx`, `VisaoGeralTab.tsx`, `PipelineDebugTab.tsx`, `AnaliseTab.tsx` — varredura visual de chaves
+`complianceData.ts` continua sendo a lista de requisitos (isso é curadoria humana, não deve virar query). O que muda:
 
-O detalhe rico (Stage 2 + Stage 3 com rigor estatístico) é renderizado pelo `NtaiAnalysisResults` → `NtaiMechanismsTab` / `NtaiClinicalTab`. Cobertura real:
+- Cada item ganha um `evidenceQuery`: um indicador medido (ex.: "% de tabelas públicas com RLS", "nº de prompts versionados", "nº de estudos com extração completa", "nº de observações RWE").
+- Novo hook `useComplianceMetrics` faz as contagens via RPC dedicada e o dashboard exibe o número medido ao lado do status curado, com data da medição.
+- Onde o número medido contradiz o status declarado, o card mostra o conflito explicitamente em vez de escolher um lado.
+- Contadores agregados no topo (10/4/3 hoje hardcoded) passam a ser derivados da lista + medições.
 
-- `NtaiMechanismsTab.tsx` renderiza `name`, `action`, `type`, `category`, `target`, `downstream_effects[]`. **Tudo do shape do extract aparece.** ✓
-- `NtaiClinicalTab.tsx:99–122` renderiza `outcome`, `outcome_type`, `p_value`, `effect_size`, `significance` (com cor por significância). **Rigor estatístico aparece.** ✓
-- **`anchored_mechanism` NÃO é renderizado em lugar nenhum** (`rg anchored_mechanism src` → zero hits). A proveniência existe no banco (confirmado em `7b151ae8`) mas a tela ignora.
+## Notas técnicas
 
-Porém — `NtaiAnalysisResults` recebe `result` via `NtaiProcessingSection`, alimentado pelo `useProcessingLogic.ts:356–377`, que monta o objeto **do response da edge function** (`extractData`), **não** de `analysis_data` relido do banco. Ou seja: a aba "rica" no Admin **só mostra esses dados durante a execução manual da extração via UI**. Depois, navegando para o estudo de novo, quem entrega o dado para a tela é `analysis_data` (via `EstudoDetailSections` + `EstudoCard`), e aí o Stage 3 detalhado **não tem componente** equivalente — só o `molecularMechanisms` em `EstudoDetailSections`. **`clinicalOutcomes`/`p_value`/`effect_size`/`significance`/`anchored_mechanism` não são renderizados a partir de `analysis_data` em nenhuma tela persistente.**
+- Migrations aditivas: enum de papéis estendido, tabela `outcome_observations`, RPC de métricas de conformidade, políticas RLS novas. Nenhuma migration existente é editada.
+- i18n obrigatório em toda UI nova: incrementar `currentVersion` em `src/i18n.ts` antes, criar chaves PT e EN no mesmo passo.
+- `CHANGELOG.md` + `npm run sync:changelog` ao fim de cada entrega; o changelog está defasado desde 2026-06-18 e será atualizado junto.
 
-## Onde o dado rico tem mais chance de se perder
+## Argumento contra este plano
 
-1. **Re-execução de `gemini-file-search`** depois de um `extract-study-entities` bem-sucedido apaga Stage 2/3 do `analysis_data` (REPLACE sem merge). Hoje só acontece via `shouldRechain`, mas é uma bomba relógio.
-2. **UI persistente não renderiza Stage 3**: `clinicalOutcomes`/rigor estatístico/`anchored_mechanism` só aparecem na sessão de processamento (`NtaiAnalysisResults` montado de `extractData` em memória). Reabrir o estudo amanhã → some.
-3. **`anchored_mechanism` não tem leitor**: o guarda-corpo gera o campo, persiste no banco, e nenhum componente o consome.
-
-## Discordância da premissa
-
-- "`analyze-study-outputs`" não existe — o orquestrador é o conjunto `parse-study → gemini-file-search → extract-study-entities (+ generate-triplets)`. Resto da premissa bate.
-- "Caminho de produção que o teste não disparou" é parcialmente verdade: o `curl` do extract grava o `analysis_data` via merge correto. O risco real **não é** que o merge não tenha rodado — é que (a) telas persistentes não exibem o Stage 3 a partir de `analysis_data` e (b) outros escritores podem clobberar no futuro.
-
----
-
-## Opções (com trade-offs) — não implementar ainda
-
-### A) Renderizar Stage 3 persistente a partir de `analysis_data` (mais barato, maior impacto visível)
-Adicionar leitura de `analysisData.clinicalOutcomes` em `EstudoDetailSections` (já lê `molecularMechanisms`) e exibir o card de outcomes com p_value/effect_size/significance + badge de `anchored_mechanism`. Reusar `NtaiClinicalTab` ou um componente novo enxuto.
-- **Prós:** o dado já está no banco e no shape correto; tela ganha rigor estatístico + proveniência sem mexer em edge function.
-- **Contras:** muda UI persistente (precisa i18n + visual review).
-
-### B) Blindar ownership nos demais escritores (`gemini-file-search`, `generate-triplets`)
-Mover `gemini-file-search:2278` e `generate-triplets:1029` para passar por `mergeAnalysisData` (ou variantes simétricas com ownership do lado deles).
-- **Prós:** elimina a bomba-relógio do re-rechain; fronteira de ownership cobre o pipeline inteiro.
-- **Contras:** mexe em duas edge functions críticas; precisa decidir o que `gemini-file-search` "perdoa" do extract (hoje ele assume registro virgem). Risco de regressão silenciosa se a ordem real de algum cenário não for a que pressupomos.
-
-### C) Renderizar `anchored_mechanism` como badge "ancorado em <nome>"
-Pequeno ajuste em `NtaiClinicalTab` (e no componente persistente da opção A).
-- **Prós:** torna o guarda-corpo visível ao curador — sem isso, o campo só serve para log.
-- **Contras:** mínimos; só decidir copy/cor pt-BR.
-
-### D) Nada agora, só monitorar
-Aceitar que (a) Stage 3 só aparece no momento do processamento, (b) re-rechain pode clobberar.
-- **Prós:** zero risco de regressão.
-- **Contras:** o trabalho das ondas 2-A/B/C fica invisível ao usuário fora da janela de processamento, e o blindo do merge só cobre meio caminho.
-
-### Recomendação minha (para você decidir)
-A + C juntas (uma onda só de UI, sem tocar edge function) → resolve a percepção "não chegou na tela" com risco baixo. B fica para uma onda dedicada de blindagem do pipeline, com checklist de cenários de re-execução antes.
+A Entrega 3 cria estrutura para um dado que hoje quase não existe (3 pets reais). Há risco real de a tabela nascer e ficar vazia, virando dívida. A Entrega 4 adiciona papéis para usuários que ainda não existem (`access_requests` está vazio) — RLS mais estrita pode quebrar telas do admin sem ninguém para se beneficiar disso ainda. Se o objetivo for valor imediato, 1, 2 e 5 entregam; 3 e 4 são preparação para parceiro/coorte.
