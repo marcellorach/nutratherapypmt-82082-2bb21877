@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-06-18T17:23:49.853Z
+// Última geração: 2026-08-23T04:58:39.292Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,52 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-06-18";
+export const lastChangelogDate = "2026-08-23";
 
 export const senexVersion = "7.2.4";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-08-23",
+    "kind": "added",
+    "area": "curation",
+    "status": "entregue",
+    "title": "Re-extração forçada por estudo (UI + auditoria)",
+    "bullets": [
+      "Painel \"Re-extração forçada\" no detalhe do estudo (aba Análise) com contagens atuais de mecanismos/desfechos, diálogo de confirmação e histórico das últimas 10 execuções.",
+      "Cada disparo chama `extract-study-entities` com `force_reextract: true` e grava evento em `study_audit_logs` (`action_type: force_reextract`) com contagens antes/depois.",
+      "Files: src/components/administrador/estudos/detalhes/ForceReextractPanel.tsx, src/components/administrador/estudos/detalhes/tabs/AnaliseTab.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "src/components/administrador/estudos/detalhes/ForceReextractPanel.tsx",
+      "src/components/administrador/estudos/detalhes/tabs/AnaliseTab.tsx",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.126.0"
+  },
+  {
+    "date": "2026-08-23",
+    "kind": "fixed",
+    "area": "curation",
+    "status": "entregue",
+    "title": "Guarda de ownership nos demais escritores de analysis_data",
+    "bullets": [
+      "`mergeAnalysisDataFromOtherWriter` / `mergeExtractedDataFromOtherWriter`: merge na direção oposta — preserva campos extract-owned com conteúdo real e deixa o escritor atualizar os próprios campos.",
+      "Aplicado em `gemini-file-search`, `parse-study` e `generate-triplets` (todos passam a reler o estado antes de escrever).",
+      "Shim de conditions do gemini movido de `clinical_outcomes` para `condition_efficacy_shim`, eliminando a colisão semântica na origem.",
+      "Files: supabase/functions/_shared/analysisDataMerge.ts, supabase/functions/gemini-file-search/index.ts, supabase/functions/parse-study/index.ts, supabase/functions/generate-triplets/index.ts, src/__tests__/other-writers-ownership.test.ts"
+    ],
+    "files": [
+      "supabase/functions/_shared/analysisDataMerge.ts",
+      "supabase/functions/gemini-file-search/index.ts",
+      "supabase/functions/parse-study/index.ts",
+      "supabase/functions/generate-triplets/index.ts",
+      "src/__tests__/other-writers-ownership.test.ts"
+    ],
+    "i18nVersion": "1.126.0"
+  },
   {
     "date": "2026-06-18",
     "kind": "added",

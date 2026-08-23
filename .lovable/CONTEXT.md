@@ -1,17 +1,26 @@
 # Project context briefing (auto)
-Generated: 2026-06-18T17:23:49.860Z
+Generated: 2026-08-23T04:58:39.298Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.123.0
+## Latest i18n version: 1.126.0
 
 ## Changes by area (last 14 days)
-- **admin**: 11
-- **meta**: 4
-- **kg**: 1
-- **curation**: 1
+- **curation**: 2
 
 ## Top 10 recent entries
+### 2026-08-23 · [curation] ADDED — Re-extração forçada por estudo (UI + auditoria)
+- Painel "Re-extração forçada" no detalhe do estudo (aba Análise) com contagens atuais de mecanismos/desfechos, diálogo de confirmação e histórico das últimas 10 execuções.
+- Cada disparo chama `extract-study-entities` com `force_reextract: true` e grava evento em `study_audit_logs` (`action_type: force_reextract`) com contagens antes/depois.
+- Files: src/components/administrador/estudos/detalhes/ForceReextractPanel.tsx, src/components/administrador/estudos/detalhes/tabs/AnaliseTab.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts
+_files: src/components/administrador/estudos/detalhes/ForceReextractPanel.tsx, src/components/administrador/estudos/detalhes/tabs/AnaliseTab.tsx, src/locales/pt/translation.json, src/locales/en/translation.json…_
+
+### 2026-08-23 · [curation] FIXED — Guarda de ownership nos demais escritores de analysis_data
+- `mergeAnalysisDataFromOtherWriter` / `mergeExtractedDataFromOtherWriter`: merge na direção oposta — preserva campos extract-owned com conteúdo real e deixa o escritor atualizar os próprios campos.
+- Aplicado em `gemini-file-search`, `parse-study` e `generate-triplets` (todos passam a reler o estado antes de escrever).
+- Shim de conditions do gemini movido de `clinical_outcomes` para `condition_efficacy_shim`, eliminando a colisão semântica na origem.
+_files: supabase/functions/_shared/analysisDataMerge.ts, supabase/functions/gemini-file-search/index.ts, supabase/functions/parse-study/index.ts, supabase/functions/generate-triplets/index.ts…_
+
 ### 2026-06-18 · [admin] ADDED — Inventário de modelos + Aliases por tarefa (Configurações → Prompts)
 - Nova tabela `ai_task_aliases` (PK `task_id`, com `alias_label_pt`, `alias_label_en`, `real_model`, `description`) — RLS: select para `authenticated`, write somente `is_admin()`. Seed inicial com 25 aliases cobrindo todas as tarefas governadas + entradas `__embeddings__` e `__perplexity_search__`.
 - Nova tabela `ai_model_inventory_snapshots` (jsonb + timestamps) para histórico do inventário resolvido. RLS admin-only.
@@ -58,17 +67,6 @@ _files: src/components/administrador/audits/audit-pdf-generator.ts_
 - AboutSenexTab: incluídos TxGNN (Huang 2024, Nature Medicine) e Hetionet/DWPC (Himmelstein 2017, eLife) no card "Pilares científicos (inspiração × implementação)" com status `PARTIAL`, refletindo `core_rule_evidence` já existente: TxGNN → RC-001 (doc-only), RC-008 e RC-013 (ativas); Hetionet → RC-008 e RC-014 (ativas). Inspirações ainda fora de runtime (zero-shot via metric learning + GraphMask; DWPC + permutação de rede) explicitadas.
 - Diagrama do engine: nota em `O3` (Recommendation engine) marca TxGNN zero-shot + Hetionet DWPC como inspirações não-runtime. Banner de "Honestidade arquitetural" amplia a lista de inspirações/planejado.
 - Esclarecimento: a lista de Pilares não é gerada por LLM — é um array TypeScript curado em `AboutSenexTab.tsx`. A fonte dinâmica papel↔RC continua sendo `core_rule_evidence` (consumida pela aba Fundamentos Arquiteturais).
-_files: src/components/administrador/AboutSenexTab.tsx_
-
-### 2026-06-08 · [admin] FIXED — Fundamentos Arquiteturais 100% bilíngue (UI + DB)
-- Adicionadas todas as 150+ chaves `fundamentos.*` em PT e EN (`FundamentosTab`, `MetaKgRoadmapCard`, `MetaStudyDetailedCard`, `CoreRuleHistory`, `MetaStudyKanban`, `IngestaoMetaEstudo`): tabs, badges, roadmap (Fase A/B/C, gatilhos), confiabilidade (5 dimensões + descrições), filtros do histórico (placeholder, stances, ações, refresh), painel de ingestão (estágios, seções de lições, botões de stance promote/attach/discard/resolve_keep, toasts).
-- DB `core_rules`: preenchido `justification_en` para RC-001/002/003 e `application_en` para as 18 regras; `FundamentosTab` agora consome `application_en` quando lang=en.
-- Auditoria dos 6 papers arquiteturais (TxGNN, Geroscience-Dogs, KGARevion, MedGraphRAG, OptimusKG, Hetionet) — cobertura RC documentada no `.lovable/plan.md` deste turno; nenhum vínculo de evidência foi alterado.
-_files: .lovable/plan.md, src/i18n.ts, src/pages/administrador/FundamentosTab.tsx_
-
-### 2026-06-08 · [admin] CHANGED — Pilares científicos: KGARevion reclassificado de Inspiração → Parcial
-- No card "Pilares científicos (inspiração × implementação)" em About-Senex, KGARevion passa de `INSPIRATION` para `PARTIAL`, refletindo o que já está vinculado em `core_rule_evidence`: RC-014 (Normalização de Predicados via Dicionário, w=0.90) e RC-008 (Taxonomia Padrão SNOMED-CT VetSCT + UMLS, w=0.95) — ambas ativas em runtime. O ciclo GRRA completo (Review + Revise independentes) segue rotulado como inspiração não implementada. Sem mudança no banco; ajuste de copy para alinhar com a aba Fundamentos Arquiteturais.
-- Files: src/components/administrador/AboutSenexTab.tsx
 _files: src/components/administrador/AboutSenexTab.tsx_
 
 ---

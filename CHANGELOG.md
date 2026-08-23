@@ -24,6 +24,19 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.2.4 -->
 
+### Added - 2026-08-23 — Re-extração forçada por estudo (UI + auditoria)
+<!-- area: curation · status: entregue · i18n: 1.126.0 -->
+- Painel "Re-extração forçada" no detalhe do estudo (aba Análise) com contagens atuais de mecanismos/desfechos, diálogo de confirmação e histórico das últimas 10 execuções.
+- Cada disparo chama `extract-study-entities` com `force_reextract: true` e grava evento em `study_audit_logs` (`action_type: force_reextract`) com contagens antes/depois.
+- Files: src/components/administrador/estudos/detalhes/ForceReextractPanel.tsx, src/components/administrador/estudos/detalhes/tabs/AnaliseTab.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts
+
+### Fixed - 2026-08-23 — Guarda de ownership nos demais escritores de analysis_data
+<!-- area: curation · status: entregue · i18n: 1.126.0 -->
+- `mergeAnalysisDataFromOtherWriter` / `mergeExtractedDataFromOtherWriter`: merge na direção oposta — preserva campos extract-owned com conteúdo real e deixa o escritor atualizar os próprios campos.
+- Aplicado em `gemini-file-search`, `parse-study` e `generate-triplets` (todos passam a reler o estado antes de escrever).
+- Shim de conditions do gemini movido de `clinical_outcomes` para `condition_efficacy_shim`, eliminando a colisão semântica na origem.
+- Files: supabase/functions/_shared/analysisDataMerge.ts, supabase/functions/gemini-file-search/index.ts, supabase/functions/parse-study/index.ts, supabase/functions/generate-triplets/index.ts, src/__tests__/other-writers-ownership.test.ts
+
 ### Added - 2026-06-18 — Inventário de modelos + Aliases por tarefa (Configurações → Prompts)
 <!-- area: admin · status: entregue · i18n: 1.123.0 -->
 - **Nova tabela `ai_task_aliases`** (PK `task_id`, com `alias_label_pt`, `alias_label_en`, `real_model`, `description`) — RLS: select para `authenticated`, write somente `is_admin()`. Seed inicial com 25 aliases cobrindo todas as tarefas governadas + entradas `__embeddings__` e `__perplexity_search__`.
