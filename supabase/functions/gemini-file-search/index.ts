@@ -2,6 +2,10 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { getConfigValue } from './utils.ts';
 import { decideFileSearchGate, buildGateMetrics } from './gate.ts';
+import {
+  mergeAnalysisDataFromOtherWriter,
+  mergeExtractedDataFromOtherWriter,
+} from '../_shared/analysisDataMerge.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -2272,6 +2276,15 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
           rechain_extract: shouldRechain,
         }));
 
+        // Ownership guard: lê o estado atual antes de escrever para não
+        // apagar os campos extract-owned (Stage 2/3). Ver _shared/analysisDataMerge.ts.
+        const { data: currentRowForMerge } = await supabase
+          .from('processed_studies')
+          .select('analysis_data')
+          .eq('id', studyId)
+          .maybeSingle();
+        const currentAnalysisForMerge = (currentRowForMerge as any)?.analysis_data ?? {};
+
         // ✅ STEP 1: Save to processed_studies
         const result = await supabase
           .from('processed_studies')
@@ -2280,7 +2293,10 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
             authors: extractedData.authors.length > 0 ? extractedData.authors : null,
             year: extractedData.year || null,
             journal: extractedData.journal || null,
-            analysis_data: analysisData as any,
+            analysis_data: mergeAnalysisDataFromOtherWriter(
+              currentAnalysisForMerge,
+              analysisData,
+            ) as any,
             full_text_content: fullTextContent || null,
             full_text_metadata: fullTextMetadata,
             ingestion_stages: mergedStages,
@@ -2364,7 +2380,10 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
           study_assessment: extractedData.study_assessment || {},
           study_summary: extractedData.study_summary || {},
           // Clinical outcomes for chat context
-          clinical_outcomes: extractedData.conditions.map(c => ({
+          // Shim derivado de conditions — NÃO é o clinical_outcomes
+          // estatístico do Stage 3. Gravado sob chave própria para evitar
+          // colisão semântica (ver _shared/analysisDataMerge.ts).
+          condition_efficacy_shim: extractedData.conditions.map(c => ({
             condition: c.name,
             relationship: c.relationship_type,
             efficacy: c.efficacy_description,
@@ -2375,11 +2394,21 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
           extracted_at: new Date().toISOString()
         };
         
+        const { data: currentExtractionRow } = await supabase
+          .from('study_extractions')
+          .select('extracted_data')
+          .eq('study_id', studyId)
+          .maybeSingle();
+        const currentExtractedForMerge = (currentExtractionRow as any)?.extracted_data ?? {};
+
         const { error: extractionError } = await supabase
           .from('study_extractions')
           .upsert({
             study_id: studyId,
-            extracted_data: extractionData as any,
+            extracted_data: mergeExtractedDataFromOtherWriter(
+              currentExtractedForMerge,
+              extractionData,
+            ) as any,
             extraction_status: 'completed',
             extraction_quality_score: Math.round(
               (extractedData.nutraceuticals.length > 0 ? 25 : 0) +
