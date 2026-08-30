@@ -4,7 +4,7 @@
  * Facilita manutenção e implementa lazy loading
  */
 
-import { lazy } from 'react';
+import { lazyWithRetry as lazy } from '@/lib/lazyWithRetry';
 
 export interface AdminTabConfig {
   id: string;
