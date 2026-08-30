@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-08-23T04:55:38.765Z",
+  "timestamp": "2026-08-30T18:46:50.179Z",
   "summary": {
-    "totalFiles": 971,
+    "totalFiles": 972,
     "totalIssues": 501,
     "hardcodedTexts": 61,
     "missingKeys": 438,
@@ -1656,7 +1656,7 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/detalhes/tabs/AnaliseTab.tsx",
-      "line": 44,
+      "line": 46,
       "text": "subject_name, subject_type, predicate, object_name, object_type, extraction_confidence",
       "severity": "high"
     },
@@ -2860,35 +2860,35 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 73,
+      "line": 114,
       "text": "extract_meta_study",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 955,
+      "line": 996,
       "text": "audit_base_system_{pt,en}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2267,
+      "line": 2308,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2478,
+      "line": 2519,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 5273,
+      "line": 5314,
       "text": "@",
       "severity": "high"
     },
