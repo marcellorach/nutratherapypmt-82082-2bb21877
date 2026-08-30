@@ -1,65 +1,42 @@
-# Governança de extração, RBAC e conformidade medida
+# Robustez de carregamento de chunks no admin
 
-Cinco entregas independentes. Recomendo executar na ordem abaixo (1 e 2 primeiro: são as que param perda de dado hoje). Se quiser, aprovo e faço uma por vez, com relatório ao fim de cada.
+Objetivo: nenhum chunk obsoleto pós-deploy deve virar tela branca, e toda falha deve deixar rastro (URL do asset + número de tentativas).
 
-## Entrega 1 — Re-extração forçada por estudo (UI + auditoria)
+## 1. Telemetria de falha de módulo dinâmico
 
-Botão "Re-extrair (forçado)" no detalhe do estudo (aba Análise) e na fila de curadoria.
+Hoje `lazyWithRetry` engole o erro em silêncio; a telemetria só existe em `AssetFailureBanner` para erros globais de `<link>`/`<script>`.
 
-- Diálogo de confirmação nomeando o estudo e explicando o efeito: substitui mecanismos/desfechos já gravados pelo resultado da nova rodada, mesmo que venha com menos itens.
-- Chama `extract-study-entities` com `force_reextract: true` (a flag já existe na função).
-- Auditoria: cada disparo grava linha em `study_audit_logs` (tabela existente) com `user_id`, `study_id`, ação `force_reextract`, e contagens antes/depois de `molecular_mechanisms` e `clinical_outcomes`. Painel simples de histórico no mesmo detalhe.
-- Ação em lote fica de fora desta entrega (risco alto sem histórico consolidado).
+- Extrair de `src/components/system/AssetFailureBanner.tsx` a função de registro para um módulo compartilhado (`src/lib/assetFailureTelemetry.ts`), mantendo o mesmo `sessionStorage` e o mesmo evento `asset-preload-failure` (o banner continua funcionando sem mudança visual).
+- Ampliar o detalhe registrado com: `url` do asset extraída da mensagem do erro, `attempt` (1, 2, ...), `willReload` (booleano) e `chunkName` quando dedutível.
+- `lazyWithRetry` passa a registrar cada tentativa falha via essa função, com `console.error` estruturado — assim o erro aparece nos logs do preview e no banner do usuário.
 
-## Entrega 2 — Guarda de ownership nos outros três escritores
+## 2. Retry com backoff em todos os lazy imports do admin
 
-Hoje só `extract-study-entities` usa `_shared/analysisDataMerge.ts`. Os outros sobrescrevem.
+`src/config/admin-tabs.ts` já usa `lazyWithRetry`. Trocar os `React.lazy` restantes:
 
-- `gemini-file-search`: passa a ler `analysis_data`/`extracted_data` atuais e aplicar `mergeAnalysisData`/`mergeExtractedData`. Como ele é o dono dos campos ricos, os campos extract-owned ficam intactos.
-- `parse-study` e `generate-triplets`: mesma leitura-antes-de-escrever; ambos só escrevem chaves próprias.
-- O shim `clinical_outcomes` do gemini (`{condition, relationship, efficacy, treatability_score}`) passa a ser gravado sob outra chave (`condition_efficacy_shim`), eliminando a colisão semântica na origem em vez de contorná-la no leitor. O leitor shim-aware continua para dados legados.
-- Testes de regressão por escritor (fixtures existentes em `src/__tests__/fixtures/axis1/`).
+- `src/components/administrador/AdminPainel.tsx` (4 imports)
+- `src/components/administrador/OntologyHub.tsx` (3)
+- `src/components/administrador/TranslationsHub.tsx` (2)
+- `src/components/administrador/TripletsHub.tsx` (2)
+- `src/components/administrador/visualizations/relations/VisualizationCard.tsx` (1)
+- `src/components/lazy/LazyComponents.tsx` (todos os `lazy(...)`)
 
-## Entrega 3 — `outcome_observations` e ciclo RWE no dashboard
+Sem mudança de comportamento visível: mesma assinatura, mesmo `Suspense`.
 
-Tabela nova ligando intervenção → desfecho observado no paciente real.
+Ajuste no próprio `lazyWithRetry`: passar de "1 retry imediato" para 2 retries com backoff (300 ms, 900 ms) antes do reload único, ainda protegido pela chave de sessão `__chunk_reload_attempted__` para nunca entrar em loop de reload.
 
-Colunas: `id`, `pet_id`, `condition_id`, `nutraceutical_id` (nullable), `observation_date`, `metric` (texto), `value` (numeric), `unit`, `baseline_value`, `source` (`exam` | `vet_report` | `owner_report`), `confidence`, `recorded_by`, `notes`, `is_synthetic` (bool, default true), timestamps. RLS + GRANTs conforme padrão; `is_synthetic` separa coorte sintética de dado real.
+## 3. Testes
 
-Pipelines de preenchimento:
-1. Automático: ao salvar um exame (`pet_exams`), derivar observações dos marcadores que já mapeamos para condições.
-2. Manual: formulário no prontuário para o vet registrar desfecho observado.
+Novo arquivo `src/lib/__tests__/lazyWithRetry.test.ts` (vitest, sem DOM real — stubs de `window.location.reload` e `sessionStorage`), testando a função de carregamento isolada (será exportada como `loadWithRetry`, usada internamente por `lazyWithRetry`):
 
-Dashboard: bloco "Ciclo RWE" com observações por mês, cobertura (% de pets com plano ativo que têm ≥1 observação), e pares intervenção×desfecho com N suficiente para virar evidência. Números medidos do banco, com rótulo explícito quando `is_synthetic = true`.
-
-Não entra nesta entrega: retroalimentar automaticamente o KG a partir das observações. Isso precisa de curadoria e vira entrega própria.
-
-## Entrega 4 — RBAC além de admin
-
-- Novos valores no enum de papéis: `scientist` e `vet_coordinator`, além de `admin` e `user`.
-- Permanece a tabela `user_roles` separada + `has_role()` security definer (já existe). Nenhum papel em `profiles`.
-- Políticas RLS por domínio, não por tabela solta:
-  - `scientist`: leitura ampla do acervo científico (estudos, triplets, KG), escrita em curadoria/propostas; sem acesso a dados clínicos identificáveis de pets reais.
-  - `vet_coordinator`: leitura/escrita clínica (pets, exames, consultas, planos), leitura do acervo científico; sem configuração de IA, prompts, chaves ou papéis.
-  - `admin`: tudo, incluindo aprovação de acesso e gestão de papéis.
-- UI: em Usuários & Perfis, atribuição de papel real por usuário (hoje o painel só tem perfil de visualização). O `RoleViewSwitcher` continua existindo como filtro cognitivo, mas passa a ser limitado pelos papéis reais.
-- Zero Trust mantido: toda decisão de permissão é validada no banco; a UI só esconde.
-
-## Entrega 5 — Conformidade calculada do banco
-
-`complianceData.ts` continua sendo a lista de requisitos (isso é curadoria humana, não deve virar query). O que muda:
-
-- Cada item ganha um `evidenceQuery`: um indicador medido (ex.: "% de tabelas públicas com RLS", "nº de prompts versionados", "nº de estudos com extração completa", "nº de observações RWE").
-- Novo hook `useComplianceMetrics` faz as contagens via RPC dedicada e o dashboard exibe o número medido ao lado do status curado, com data da medição.
-- Onde o número medido contradiz o status declarado, o card mostra o conflito explicitamente em vez de escolher um lado.
-- Contadores agregados no topo (10/4/3 hoje hardcoded) passam a ser derivados da lista + medições.
+- sucesso na 1ª tentativa: factory chamada 1x, sem telemetria;
+- falha de chunk seguida de sucesso: factory 2x, 1 evento de telemetria com `attempt: 1`, sem reload;
+- falha persistente: backoff respeitado (timers fake), reload chamado exatamente 1x, telemetria com URL do asset e contagem de tentativas;
+- segunda falha persistente com a flag de sessão já marcada: sem novo reload, erro propagado;
+- erro que não é de chunk (ex.: `TypeError` comum): propagado imediatamente, sem retry nem reload.
 
 ## Notas técnicas
 
-- Migrations aditivas: enum de papéis estendido, tabela `outcome_observations`, RPC de métricas de conformidade, políticas RLS novas. Nenhuma migration existente é editada.
-- i18n obrigatório em toda UI nova: incrementar `currentVersion` em `src/i18n.ts` antes, criar chaves PT e EN no mesmo passo.
-- `CHANGELOG.md` + `npm run sync:changelog` ao fim de cada entrega; o changelog está defasado desde 2026-06-18 e será atualizado junto.
-
-## Argumento contra este plano
-
-A Entrega 3 cria estrutura para um dado que hoje quase não existe (3 pets reais). Há risco real de a tabela nascer e ficar vazia, virando dívida. A Entrega 4 adiciona papéis para usuários que ainda não existem (`access_requests` está vazio) — RLS mais estrita pode quebrar telas do admin sem ninguém para se beneficiar disso ainda. Se o objetivo for valor imediato, 1, 2 e 5 entregam; 3 e 4 são preparação para parceiro/coorte.
+- Sem alteração de i18n: as strings do banner já existem e não mudam.
+- `assetFailureTelemetry.ts` fica livre de dependências de Supabase/React para poder ser testado em Node.
+- Nada de mudança em edge functions, schema ou telas de dados.
