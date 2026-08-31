@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-08-23T04:58:39.292Z
+// Última geração: 2026-08-31T00:31:05.539Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,33 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-08-23";
+export const lastChangelogDate = "2026-08-31";
 
 export const senexVersion = "7.2.4";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-08-31",
+    "kind": "added",
+    "area": "infra",
+    "status": "entregue",
+    "title": "Telemetria e retry com backoff em imports dinâmicos",
+    "bullets": [
+      "Novo `src/lib/assetFailureTelemetry.ts`: registro compartilhado de falhas de asset (URL, nome do chunk, tentativa, willReload, build, timestamp) em `sessionStorage` + evento `asset-preload-failure`.",
+      "`lazyWithRetry` agora expõe `loadWithRetry` com 2 retries em backoff (300ms/900ms), telemetria por tentativa e um único reload protegido por flag de sessão.",
+      "Todos os imports dinâmicos restantes do admin passaram a usar `lazyWithRetry` (AdminPainel, OntologyHub, TranslationsHub, TripletsHub, VisualizationCard, LazyComponents).",
+      "Testes: `src/lib/__tests__/lazyWithRetry.test.ts` (7 casos: sucesso, retry, backoff, reload único, sem reload duplo, erro não-chunk, canal de evento).",
+      "Files: src/lib/assetFailureTelemetry.ts, src/lib/lazyWithRetry.ts, src/components/system/AssetFailureBanner.tsx, src/components/lazy/LazyComponents.tsx, src/lib/__tests__/lazyWithRetry.test.ts"
+    ],
+    "files": [
+      "src/lib/assetFailureTelemetry.ts",
+      "src/lib/__tests__/lazyWithRetry.test.ts",
+      "src/lib/lazyWithRetry.ts",
+      "src/components/system/AssetFailureBanner.tsx",
+      "src/components/lazy/LazyComponents.tsx"
+    ],
+    "i18nVersion": "1.126.0"
+  },
   {
     "date": "2026-08-23",
     "kind": "added",

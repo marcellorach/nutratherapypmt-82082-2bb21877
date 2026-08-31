@@ -24,6 +24,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.2.4 -->
 
+### Added - 2026-08-31 — Telemetria e retry com backoff em imports dinâmicos
+<!-- area: infra · status: entregue · i18n: 1.126.0 -->
+- Novo `src/lib/assetFailureTelemetry.ts`: registro compartilhado de falhas de asset (URL, nome do chunk, tentativa, willReload, build, timestamp) em `sessionStorage` + evento `asset-preload-failure`.
+- `lazyWithRetry` agora expõe `loadWithRetry` com 2 retries em backoff (300ms/900ms), telemetria por tentativa e um único reload protegido por flag de sessão.
+- Todos os imports dinâmicos restantes do admin passaram a usar `lazyWithRetry` (AdminPainel, OntologyHub, TranslationsHub, TripletsHub, VisualizationCard, LazyComponents).
+- Testes: `src/lib/__tests__/lazyWithRetry.test.ts` (7 casos: sucesso, retry, backoff, reload único, sem reload duplo, erro não-chunk, canal de evento).
+- Files: src/lib/assetFailureTelemetry.ts, src/lib/lazyWithRetry.ts, src/components/system/AssetFailureBanner.tsx, src/components/lazy/LazyComponents.tsx, src/lib/__tests__/lazyWithRetry.test.ts
+
+
 ### Added - 2026-08-23 — Re-extração forçada por estudo (UI + auditoria)
 <!-- area: curation · status: entregue · i18n: 1.126.0 -->
 - Painel "Re-extração forçada" no detalhe do estudo (aba Análise) com contagens atuais de mecanismos/desfechos, diálogo de confirmação e histórico das últimas 10 execuções.

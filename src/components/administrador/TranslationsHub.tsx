@@ -1,10 +1,11 @@
-import React, { lazy, Suspense } from 'react';
+import React, { Suspense } from 'react';
+import { lazyWithRetry } from '@/lib/lazyWithRetry';
 import { useTranslation } from 'react-i18next';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const TranslationAuditTab = lazy(() => import('@/components/administrador/auditoria/TranslationAuditTab'));
-const TranslationManager = lazy(() => import('@/components/administrador/traducoes/TranslationManager'));
+const TranslationAuditTab = lazyWithRetry(() => import('@/components/administrador/auditoria/TranslationAuditTab'));
+const TranslationManager = lazyWithRetry(() => import('@/components/administrador/traducoes/TranslationManager'));
 
 const TranslationsHub: React.FC = () => {
   const { t } = useTranslation();

@@ -1,11 +1,12 @@
-import React, { lazy, Suspense } from 'react';
+import React, { Suspense } from 'react';
+import { lazyWithRetry } from '@/lib/lazyWithRetry';
 import { useTranslation } from 'react-i18next';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const OntologyAuditTab = lazy(() => import('@/components/administrador/auditoria/OntologyAuditTab'));
-const OntologyMappingTab = lazy(() => import('@/components/administrador/OntologyMappingTab'));
-const OntologyBulkImportTab = lazy(() => import('@/components/administrador/OntologyBulkImportTab'));
+const OntologyAuditTab = lazyWithRetry(() => import('@/components/administrador/auditoria/OntologyAuditTab'));
+const OntologyMappingTab = lazyWithRetry(() => import('@/components/administrador/OntologyMappingTab'));
+const OntologyBulkImportTab = lazyWithRetry(() => import('@/components/administrador/OntologyBulkImportTab'));
 
 const OntologyHub: React.FC = () => {
   const { t } = useTranslation();

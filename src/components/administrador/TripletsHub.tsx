@@ -1,10 +1,11 @@
-import React, { lazy, Suspense } from 'react';
+import React, { Suspense } from 'react';
+import { lazyWithRetry } from '@/lib/lazyWithRetry';
 import { useTranslation } from 'react-i18next';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const TripletCurationBoard = lazy(() => import('@/components/administrador/estudos/curation/TripletCurationBoard'));
-const TripletQualityDashboard = lazy(() => import('@/components/administrador/analytics/TripletQualityDashboard'));
+const TripletCurationBoard = lazyWithRetry(() => import('@/components/administrador/estudos/curation/TripletCurationBoard'));
+const TripletQualityDashboard = lazyWithRetry(() => import('@/components/administrador/analytics/TripletQualityDashboard'));
 
 const TripletsHub: React.FC = () => {
   const { t } = useTranslation();
