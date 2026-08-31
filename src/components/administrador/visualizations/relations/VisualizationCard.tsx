@@ -1,5 +1,6 @@
 
-import React, { lazy, Suspense, useState } from 'react';
+import React, { Suspense, useState } from 'react';
+import { lazyWithRetry } from '@/lib/lazyWithRetry';
 import { useTranslation } from 'react-i18next';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -9,7 +10,7 @@ import VisualizationHeader from './components/VisualizationHeader';
 import VisualizationTabs from './components/VisualizationTabs';
 import VisualizationLegend from './components/VisualizationLegend';
 
-const RelationsAuditorChat = lazy(() => import('@/components/administrador/relations/RelationsAuditorChat'));
+const RelationsAuditorChat = lazyWithRetry(() => import('@/components/administrador/relations/RelationsAuditorChat'));
 
 interface VisualizationCardProps {
   efficacyFilter: string;

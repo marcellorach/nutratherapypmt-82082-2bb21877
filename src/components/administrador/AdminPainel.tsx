@@ -1,15 +1,16 @@
 
 import React, { Suspense } from 'react';
+import { lazyWithRetry } from '@/lib/lazyWithRetry';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NutraceuticalProvider } from '@/contexts/NutraceuticalContext';
 import { ComponentLoadingFallback } from '@/components/base';
 import { useTranslation } from 'react-i18next';
 
 // Lazy loading dos componentes das abas
-const NutraceuticalsUnifiedTab = React.lazy(() => import('./NutraceuticalsUnifiedTab'));
-const ConfiguracoesTab = React.lazy(() => import('./ConfiguracoesTab'));
-const DataAnalysisTab = React.lazy(() => import('./dataAnalysis/DataAnalysisTab'));
-const PromptConfigurationTab = React.lazy(() => import('./PromptConfigurationTab'));
+const NutraceuticalsUnifiedTab = lazyWithRetry(() => import('./NutraceuticalsUnifiedTab'));
+const ConfiguracoesTab = lazyWithRetry(() => import('./ConfiguracoesTab'));
+const DataAnalysisTab = lazyWithRetry(() => import('./dataAnalysis/DataAnalysisTab'));
+const PromptConfigurationTab = lazyWithRetry(() => import('./PromptConfigurationTab'));
 
 const AdminPainel = () => {
   const { t } = useTranslation();
