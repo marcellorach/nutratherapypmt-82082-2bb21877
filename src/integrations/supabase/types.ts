@@ -6087,6 +6087,33 @@ export type Database = {
           },
         ]
       }
+      user_role_audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          performed_by: string | null
+          role: string
+          target_user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          performed_by?: string | null
+          role: string
+          target_user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          performed_by?: string | null
+          role?: string
+          target_user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -6510,6 +6537,8 @@ export type Database = {
         Args: { request_id: string }
         Returns: undefined
       }
+      can_curate: { Args: never; Returns: boolean }
+      can_write_science: { Args: never; Returns: boolean }
       count_pending_access_requests: { Args: never; Returns: number }
       decrypt_api_key: {
         Args: { p_key_name: string; p_master_key: string }
@@ -6581,8 +6610,11 @@ export type Database = {
           target_type: string
         }[]
       }
+      has_role: { Args: { _role: string; _user_id: string }; Returns: boolean }
       increment_translation_version: { Args: never; Returns: number }
       is_admin: { Args: never; Returns: boolean }
+      is_scientist: { Args: never; Returns: boolean }
+      is_vet_coordinator: { Args: never; Returns: boolean }
       search_relations_by_term: {
         Args: { p_limit?: number; p_terms: string[] }
         Returns: {
