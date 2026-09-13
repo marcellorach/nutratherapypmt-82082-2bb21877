@@ -15,6 +15,7 @@ const AdministradorPage: React.FC = () => {
   const tabParam = searchParams.get('tab');
   const [currentStep, setCurrentStep] = useState<string>(tabParam || "estudos");
   const { t } = useTranslation();
+  const { canTab, loading: permissionsLoading } = usePermissions();
   
   const handleStepChange = (newStep: string) => {
     setCurrentStep(newStep);
