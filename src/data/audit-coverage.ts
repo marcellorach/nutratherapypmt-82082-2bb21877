@@ -120,7 +120,7 @@ export const AUDIT_COVERAGE: CoverageItem[] = [
     title_en: "7-stage curation pipeline (PDF → triplets → KG → recommendation)",
     evidence: {
       tabs: ["estudos", "triplet-curation", "knowledge-graph"],
-      edge_functions: ["parse-study", "vectorize-study", "extract-study-entities", "process-study", "sync-study-to-neo4j"],
+      edge_functions: ["parse-study", "vectorize-study", "extract-study-entities", "sync-study-to-neo4j"],
       tables: ["processed_studies", "study_embeddings", "triplet_extractions", "hierarchical_edges"],
     },
     expected_status_hint: "active",
