@@ -3033,6 +3033,19 @@
         "allow": "Liberar",
         "deny": "Bloquear"
       },
+      "roles": {
+        "admin": "Administrador",
+        "scientist": "Cientista",
+        "vet_coordinator": "Coordenador veterinário",
+        "veterinarian": "Veterinário",
+        "tutor": "Tutor",
+        "user": "Usuário"
+      },
+      "sources": {
+        "role": "Pelo papel",
+        "override": "Exceção individual",
+        "deny": "Bloqueio individual"
+      },
       "matrix": {
         "title": "Permissões por papel",
         "subtitle": "Defina o que cada papel pode ver e editar. Clique para alternar entre ver, editar e sem acesso.",
@@ -3064,6 +3077,7 @@
     },
     "usersAndRoles": {
       "title": "Usuários e permissões",
+      "subtitle": "\"Permissões por papel\" e \"Exceções\" valem de verdade no servidor: definem o que cada pessoa pode ver e editar. A aba \"Papéis\" é apenas um filtro visual da barra lateral, sem efeito de segurança.",
       "tabs": {
         "roles": "Papéis",
         "requests": "Solicitações",

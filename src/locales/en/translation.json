@@ -3032,6 +3032,19 @@
         "allow": "Allow",
         "deny": "Block"
       },
+      "roles": {
+        "admin": "Administrator",
+        "scientist": "Scientist",
+        "vet_coordinator": "Veterinary coordinator",
+        "veterinarian": "Veterinarian",
+        "tutor": "Pet owner",
+        "user": "User"
+      },
+      "sources": {
+        "role": "From role",
+        "override": "Individual exception",
+        "deny": "Individual block"
+      },
       "matrix": {
         "title": "Permissions by role",
         "subtitle": "Set what each role can view and edit. Click to cycle through view, edit and no access.",
@@ -3063,6 +3076,7 @@
     },
     "usersAndRoles": {
       "title": "Users and permissions",
+      "subtitle": "\"Permissions by role\" and \"Exceptions\" are enforced on the server: they define what each person can view and edit. The \"Roles\" tab is only a visual filter for the sidebar, with no security effect.",
       "tabs": {
         "roles": "Roles",
         "requests": "Requests",
