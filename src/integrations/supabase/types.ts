@@ -6826,6 +6826,18 @@ export type Database = {
       }
       increment_translation_version: { Args: never; Returns: number }
       is_admin: { Args: never; Returns: boolean }
+      list_platform_users: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          created_at: string
+          email: string
+          full_name: string
+          last_sign_in_at: string
+          roles: string[]
+          user_id: string
+        }[]
+      }
       my_effective_permissions: {
         Args: never
         Returns: {
