@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { TabGate } from '@/components/auth/PermissionGate';
 import { Import, BarChart3, ChevronRight, PawPrint, CircleCheck, ArrowRight, Activity } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -18,6 +19,7 @@ const DataProcessingGroup: React.FC<DataProcessingGroupProps> = ({
   
   return (
     <>
+      <TabGate tab="import">
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "import"} 
@@ -35,6 +37,8 @@ const DataProcessingGroup: React.FC<DataProcessingGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
+      <TabGate tab="visualization">
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "visualization"} 
@@ -63,6 +67,8 @@ const DataProcessingGroup: React.FC<DataProcessingGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
+      <TabGate tab="pet-management">
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "pet-management"} 
@@ -85,6 +91,8 @@ const DataProcessingGroup: React.FC<DataProcessingGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
+      <TabGate tab="clinical-monitoring">
       <SidebarMenuItem>
         <SidebarMenuButton
           isActive={currentStep === "clinical-monitoring"}
@@ -102,6 +110,7 @@ const DataProcessingGroup: React.FC<DataProcessingGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
     </>
   );
 };

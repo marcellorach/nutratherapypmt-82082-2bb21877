@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { TabGate } from '@/components/auth/PermissionGate';
 import { Lightbulb, Gauge, Settings, ChevronRight } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 
@@ -14,6 +15,7 @@ const PredictiveAnalysisGroup: React.FC<PredictiveAnalysisGroupProps> = ({
 }) => {
   return (
     <>
+      <TabGate tab="modelos">
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "modelos"} 
@@ -31,6 +33,8 @@ const PredictiveAnalysisGroup: React.FC<PredictiveAnalysisGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
+      <TabGate tab="custo-beneficio">
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "custo-beneficio"} 
@@ -48,6 +52,8 @@ const PredictiveAnalysisGroup: React.FC<PredictiveAnalysisGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
+      <TabGate tab="predictive-analysis-settings">
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "predictive-analysis-settings"} 
@@ -65,6 +71,7 @@ const PredictiveAnalysisGroup: React.FC<PredictiveAnalysisGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
     </>
   );
 };

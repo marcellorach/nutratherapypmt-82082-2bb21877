@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { TabGate } from '@/components/auth/PermissionGate';
 import { BookOpen, Beaker, Target, Sparkles, Network, ChevronRight, Share2, ClipboardCheck, CircleCheck, PawPrint, FlaskConical, Database, Pill, GitBranch, AlertTriangle, Scale, UtensilsCrossed, Globe, ShieldCheck } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -35,6 +36,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
   
   return (
     <>
+      <TabGate tab="estudos">
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "estudos"} 
@@ -63,7 +65,9 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
       
+      <TabGate tab="triplet-curation">
       <SidebarMenuItem>
         <SidebarMenuButton
           isActive={currentStep === "triplet-curation"}
@@ -80,7 +84,9 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
 
+      <TabGate tab="verification-runs">
       <SidebarMenuItem>
         <SidebarMenuButton
           isActive={currentStep === "verification-runs"}
@@ -96,7 +102,9 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
 
+      <TabGate tab="knowledge-graph">
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "knowledge-graph"} 
@@ -115,7 +123,9 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
 
+      <TabGate tab="evidence-conflicts">
       <SidebarMenuItem>
         <SidebarMenuButton
           isActive={currentStep === "evidence-conflicts"}
@@ -132,7 +142,9 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
 
+      <TabGate tab="nutraceuticals-unified">
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "nutraceuticals-unified"} 
@@ -151,7 +163,9 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
 
+      <TabGate tab="pharmacology">
       <SidebarMenuItem>
         <SidebarMenuButton
           isActive={currentStep === "pharmacology"}
@@ -168,7 +182,9 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
 
+      <TabGate tab="dosage-curation">
       <SidebarMenuItem>
         <SidebarMenuButton
           isActive={currentStep === "dosage-curation"}
@@ -185,7 +201,9 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
       
+      <TabGate tab="veterinary-targets">
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "veterinary-targets"} 
@@ -204,7 +222,9 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
 
+      <TabGate tab="relacoes">
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "relacoes"}
@@ -221,7 +241,9 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
 
+      <TabGate tab="pet-food-catalog">
       <SidebarMenuItem>
         <SidebarMenuButton
           isActive={currentStep === "pet-food-catalog"}
@@ -238,7 +260,9 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
 
+      <TabGate tab="external-sources">
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "external-sources" || currentStep === "ontology-audit"} 
@@ -257,7 +281,9 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
 
+      <TabGate tab="breeds-management">
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "breeds-management"} 
@@ -274,7 +300,9 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
 
+      <TabGate tab="lab-references">
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "lab-references"} 
@@ -291,7 +319,9 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
 
+      <TabGate tab="ai-insights">
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "ai-insights"} 
@@ -309,6 +339,7 @@ const KnowledgeBaseGroup: React.FC<KnowledgeBaseGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
 
       {/* Diagnóstico Gap-Fill removido do menu principal — acessível via botão "Ver diagnóstico avançado" dentro de Mapeamento SNOMED/UMLS (rota ?tab=gapfill-diagnostics segue funcionando). */}
 
