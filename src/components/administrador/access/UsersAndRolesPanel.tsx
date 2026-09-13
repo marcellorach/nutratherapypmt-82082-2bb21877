@@ -1,7 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UserCog, Eye, ShieldCheck, UserMinus, KeyRound } from 'lucide-react';
+import { UserCog, Eye, ShieldCheck, UserMinus, KeyRound, Users } from 'lucide-react';
+import PlatformUsersPanel from './PlatformUsersPanel';
 import AccessRequestsPanel from './AccessRequestsPanel';
 import RoleViewEditor from '@/components/administrador/priorizacoes/RoleViewEditor';
 import PermissionsMatrixPanel from './PermissionsMatrixPanel';
