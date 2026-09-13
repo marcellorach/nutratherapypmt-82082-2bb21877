@@ -32,6 +32,7 @@ describe('permission catalogue', () => {
       'op.gemini_file_search',
       'op.extract_study_entities',
       'op.generate_triplets',
+      'op.enrich_knowledge_graph',
     ]) {
       expect(OPERATION_PERMISSION_KEYS).toContain(key);
     }
