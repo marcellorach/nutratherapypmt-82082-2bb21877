@@ -6,6 +6,7 @@ import {
   mergeAnalysisDataFromOtherWriter,
   mergeExtractedDataFromOtherWriter,
 } from '../_shared/analysisDataMerge.ts';
+import { authorize, authzResponse } from '../_shared/authorization.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -1744,6 +1745,11 @@ serve(async (req) => {
 
   // Parse & validate request synchronously, then offload the long pipeline
   // to a background task to avoid the 150s edge IDLE_TIMEOUT.
+  const authz = await authorize(req, 'op.parse_study', 'edit');
+  if (!authz.ok) return authzResponse(authz, corsHeaders);
+  console.log(`[gemini-file-search] authorized caller origin=${authz.origin} user=${authz.userId ?? 'system'}`);
+  const chainHeaders = authz.forwardHeaders;
+
   let fileUrl: string, studyId: string, fileName: string;
   try {
     const body = await req.json();
