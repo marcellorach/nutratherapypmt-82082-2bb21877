@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { forwardIdentity } from '../_shared/authorization.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -94,10 +95,7 @@ serve(async (req) => {
         // Step 2: Call generate-triplets function
         const generateResponse = await fetch(`${supabaseUrl}/functions/v1/generate-triplets`, {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${supabaseKey}`,
-            'Content-Type': 'application/json',
-          },
+          headers: chainHeaders,
           body: JSON.stringify({ studyId })
         });
 
