@@ -1,9 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UserCog, Eye } from 'lucide-react';
+import { UserCog, Eye, ShieldCheck, UserMinus, KeyRound } from 'lucide-react';
 import AccessRequestsPanel from './AccessRequestsPanel';
 import RoleViewEditor from '@/components/administrador/priorizacoes/RoleViewEditor';
+import PermissionsMatrixPanel from './PermissionsMatrixPanel';
+import UserOverridesPanel from './UserOverridesPanel';
+import MyPermissionsPanel from './MyPermissionsPanel';
 
 const UsersAndRolesPanel: React.FC = () => {
   const { t } = useTranslation();
