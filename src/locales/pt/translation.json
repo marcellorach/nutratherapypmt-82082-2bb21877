@@ -3073,6 +3073,20 @@
         "roles": "Seus papéis",
         "noRoles": "Nenhum papel atribuído",
         "empty": "Você ainda não tem permissões liberadas"
+      },
+      "users": {
+        "tab": "Usuários",
+        "title": "Usuários da plataforma",
+        "subtitle": "Lista real das contas existentes. Clique em um papel para atribuir ou remover. O papel define o que a pessoa vê, segundo a grade de permissões.",
+        "searchPlaceholder": "Buscar por nome ou e-mail",
+        "empty": "Nenhum usuário encontrado",
+        "noRole": "Sem papel",
+        "lastSignIn": "Último acesso: {{date}}",
+        "never": "nunca",
+        "saved": "Papéis atualizados",
+        "saveError": "Não foi possível alterar o papel",
+        "loadError": "Não foi possível carregar os usuários. Só quem administra usuários vê esta lista.",
+        "hint": "O banco impede remover o último administrador."
       }
     },
     "usersAndRoles": {

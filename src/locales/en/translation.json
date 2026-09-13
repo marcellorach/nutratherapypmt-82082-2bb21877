@@ -3072,6 +3072,20 @@
         "roles": "Your roles",
         "noRoles": "No role assigned",
         "empty": "You have no permissions granted yet"
+      },
+      "users": {
+        "tab": "Users",
+        "title": "Platform users",
+        "subtitle": "Real list of existing accounts. Click a role to assign or remove it. The role defines what the person sees, according to the permission grid.",
+        "searchPlaceholder": "Search by name or email",
+        "empty": "No users found",
+        "noRole": "No role",
+        "lastSignIn": "Last sign-in: {{date}}",
+        "never": "never",
+        "saved": "Roles updated",
+        "saveError": "Could not change the role",
+        "loadError": "Could not load users. Only user administrators can see this list.",
+        "hint": "The database prevents removing the last administrator."
       }
     },
     "usersAndRoles": {
