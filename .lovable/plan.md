@@ -1,41 +1,35 @@
 # Permissões editáveis por papel e por pessoa
 
 ## Objetivo
-Sair de permissões fixas no código e passar a ter uma tela onde o administrador define, item a item, o que cada papel enxerga e faz — podendo também ajustar exceções para uma pessoa específica, sem depender de nova publicação do sistema.
+Substituir permissões fixas no código por uma grade editável: o administrador define, item a item, o que cada papel vê e edita, e pode abrir exceções para uma pessoa específica — sem nova publicação. A verificação real passa a acontecer no servidor.
 
-## Como vai funcionar
+## Crítica honesta da aprovação (antes de executar)
+1. Entrega única e grande: são banco, servidor e telas ao mesmo tempo. Aceito, mas o risco de erro cresce; mitigo com ordem fixa e verificação a cada bloco.
+2. Exigir `has_permission` como fonte única é a decisão certa — regra paralela é como se perde controle de acesso.
+3. Verifiquei: só existe uma tarefa agendada no banco, e ela chama a rotina de vigilância de auditoria, não as quatro rotinas de estudos. O risco de parada silenciosa por agendamento é menor do que o texto sugere.
+4. Verifiquei um problema real e maior: três das quatro rotinas hoje aceitam chamada sem exigir login (`supabase/config.toml` linhas 30–37 e 33–34). Exigir identidade vai quebrar chamadas encadeadas internas se eu não propagar o token — está previsto.
+5. Discordo de um ponto: há duas cadeias internas hoje (`gemini-file-search:2317` e `enrich-knowledge-graph:156,180`, além de `batch-reprocess-triplets:95`) que passam credencial de serviço. Vou propagar a identidade de quem iniciou; onde não houver pessoa, a chamada terá origem declarada e registrada, não exceção livre.
+6. Alerta de segurança: parte dos avisos é anterior a 02/09 e vem de funções antigas. Vou separar no relatório e não vou remover permissão que quebre regra de acesso existente.
+7. Cache no navegador nunca é garantia; o servidor decide. Vou usar invalidação na mudança e informar o tempo de vida real.
+8. Trava do último administrador precisa existir no banco, não só na tela — senão dá para se trancar fora por chamada direta.
+9. Não publicarei nada; deploy segue sendo seu.
+10. Cada afirmação do relatório virá com arquivo e linha, ou virá marcada como suposição.
 
-**1. Catálogo de permissões**
-Cada área do painel (hoje são 45 itens, como Estudos Científicos, Triplets, Knowledge Graph, Análise de Pacientes, AI Scientist, Configurações) vira uma permissão nomeada, com dois níveis: ver e editar. Além das áreas, entram permissões de operação sensível: processar estudos, gerar triplets, reprocessar extração, aprovar curadoria, gerenciar usuários.
+## Sequência de execução
+1. Backup completo de `user_roles` e das políticas de 02/09 antes de qualquer escrita, com contagem verificada.
+2. Migração corretiva do alerta das funções de autorização criadas em 02/09.
+3. Catálogo de permissões (`permissions`), grade por papel (`role_permissions`), exceções por pessoa (`user_permission_overrides`), histórico de alterações com autor, data e valor anterior.
+4. Função `has_permission` com ordem: negação individual → concessão individual → união dos papéis. Reescrever as 15 políticas de 02/09 sobre ela; nenhuma regra paralela sobrevive.
+5. Migração de partida: catálogo populado a partir das 45 áreas do painel, tudo concedido a administrador — acesso idêntico ao de hoje, comprovado por consulta aos 6 usuários atuais.
+6. Exigência de identidade e permissão nas quatro rotinas, com propagação do token nas cadeias internas e teste da sequência completa de processamento de um estudo.
+7. Telas: grade por papel, exceções por pessoa, "minhas permissões", menu e abas filtrados, bloqueio de link direto, tudo em português e inglês.
+8. Testes, guardas, changelog sincronizado e nova checagem de segurança.
 
-**2. Permissão por papel**
-Uma tabela de papéis (administrador, cientista, coordenador veterinário, veterinário, tutor) com uma grade marcável: para cada permissão, nada / ver / ver e editar. O administrador altera e salva; vale para todos daquele papel.
+## Regras que valem sempre
+- Fail-closed: área sem permissão cadastrada fica invisível para todos, e um teste falha se o catálogo divergir da lista de áreas.
+- Seis papéis: administrador, cientista, coordenador veterinário, veterinário, tutor e usuário.
+- Reprocessamento forçado ganha permissão no catálogo, mas continua com o comportamento atual.
+- Não mexo em: união de dados do pipeline de extração, textos de instrução da IA, sincronização com o grafo externo. Painel de conformidade e registro de desfechos ficam fora.
 
-**3. Exceção por pessoa**
-Na ficha de cada usuário, além dos papéis, uma lista de exceções: conceder algo que o papel não dá, ou retirar algo que o papel dá. A regra de decisão é explícita e mostrada na tela: negação individual vence concessão individual, que vence o papel.
-
-**4. Transparência e segurança**
-- Toda alteração de papel, de grade e de exceção fica registrada com autor, data e valor anterior.
-- Cada usuário pode ver uma tela "minhas permissões" explicando de onde vem cada acesso.
-- O administrador não consegue remover o próprio último acesso de administração, nem deixar o sistema sem administrador.
-- A verificação real acontece no servidor. A tela apenas reflete a decisão; esconder um botão nunca é a proteção.
-
-**5. Onde passa a valer**
-- Menu lateral e abas do painel só mostram o que a pessoa pode ver, e o acesso por link direto é bloqueado igual.
-- As quatro rotinas que processam estudos e geram conhecimento passam a exigir identificação e permissão antes de rodar; hoje elas aceitam qualquer chamada.
-- Tudo em português e inglês, como o resto do sistema.
-
-## Detalhes técnicos
-- Novas tabelas: `permissions` (catálogo), `role_permissions` (grade por papel), `user_permission_overrides` (exceção individual, com allow/deny), e reuso de `user_roles` já existente. Cada tabela com grants explícitos, RLS e escrita restrita a administrador.
-- Função `SECURITY DEFINER` `has_permission(user_id, permission_key, level)` resolvendo na ordem deny individual → allow individual → união dos papéis; usada tanto nas políticas RLS quanto pelas rotinas de servidor.
-- Migração de partida popula o catálogo a partir de `src/config/admin-tabs.ts` e concede tudo ao papel administrador, preservando o comportamento atual no momento da virada.
-- Cliente: hook `usePermissions` com cache, substituindo os testes fixos de papel em `AuthContext`, `ProtectedRoute`, `AdministradorPage` e nos grupos da barra lateral. `RoleViewContext` continua apenas como filtro visual pessoal, sem valor de segurança.
-- Rotinas `parse-study`, `gemini-file-search`, `extract-study-entities` e `generate-triplets`: helper compartilhado que valida o token do chamador e a permissão antes de qualquer escrita, com propagação da identidade nas chamadas encadeadas.
-- Correção pendente do alerta de segurança das funções de autorização recém-criadas, com nova migração corretiva e verificação do relatório antes de seguir.
-- Testes: resolução de permissão (papel, allow, deny, combinação), bloqueio de link direto, recusa das rotinas sem permissão, e trava do último administrador.
-
-## Opinião e limites
-- Concordo com o pedido: grade editável é o certo aqui, porque os cinco perfis do produto ainda vão mudar e travar isso em código gera fila de ajuste a cada mudança de time.
-- **Argumento contra:** permissão editável adiciona um estado que pode ser mal configurado — alguém pode se trancar fora de uma área ou liberar demais sem perceber. Mitigo com valores iniciais iguais ao comportamento atual, trava do último administrador, histórico de alterações e a tela "minhas permissões".
-- Mantenho o catálogo no nível de área e operação, não campo a campo. Granularidade por campo multiplicaria a grade sem ganho real agora.
-- Fora deste incremento: dashboard de conformidade calculado do banco e registro de desfechos clínicos.
+## Relatório final
+Separação entre o que foi verificado no código (com arquivo e linha) e o que é suposição; onde a mudança vive; alertas de segurança antes e depois, separando preexistentes dos novos; número real de testes executados; lista de arquivos alterados; e sugestões de próximos passos.
