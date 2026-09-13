@@ -7,6 +7,8 @@ import AdminLayout from '@/components/administrador/AdminLayout';
 import { adminTabsConfig, getTabConfig } from '@/config/admin-tabs';
 import { NutraceuticalProvider } from '@/contexts/NutraceuticalContext';
 import { useTranslation } from 'react-i18next';
+import { usePermissions } from '@/hooks/usePermissions';
+import { ShieldAlert } from 'lucide-react';
 
 const AdministradorPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
