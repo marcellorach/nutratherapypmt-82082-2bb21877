@@ -310,7 +310,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const hasRole = (role: 'admin' | 'veterinarian' | 'tutor') => {
+  const hasRole = (role: AppRole) => {
     return userRoles.includes(role);
   };
 
