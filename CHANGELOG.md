@@ -24,6 +24,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.2.4 -->
 
+### Added - 2026-09-13 — Permissões editáveis por papel e por pessoa
+<!-- area: auth · status: entregue · i18n: 1.127.0 -->
+- Catálogo `permissions` (47 abas + 8 operações + `admin.access`), grade `role_permissions`, exceções `user_permission_overrides` e histórico `permission_audit_log`; `has_permission` é a única fonte de verdade (15 políticas RLS de 02/09 reescritas sobre ela)
+- Trava de último administrador no banco (`prevent_last_admin_removal`), validada em execução com rollback
+- Gates server-side em `parse-study` (`op.parse_study`), `gemini-file-search` (`op.gemini_file_search`), `extract-study-entities` (`op.extract_study_entities`) e `generate-triplets` (`op.generate_triplets`), com propagação de identidade via `x-initiator-id` nas cadeias (`gemini-file-search`, `enrich-knowledge-graph`, `batch-reprocess-triplets`) e mecanismo explícito `system` para chamadas agendadas
+- Cliente: `usePermissions` com realtime, `PermissionGate`/`TabGate` fail-closed, bloqueio de deep-link no `AdministradorPage`, telas de permissões por papel, exceções por pessoa e "minhas permissões"
+- Testes: resolução de permissões (6), paridade catálogo × `admin-tabs.ts` (3), cadeia de identidade do pipeline (5) — suíte total 169 testes
+- Files: supabase/functions/_shared/authorization.ts, supabase/functions/parse-study/index.ts, supabase/functions/gemini-file-search/index.ts, supabase/functions/extract-study-entities/index.ts, supabase/functions/generate-triplets/index.ts, supabase/functions/enrich-knowledge-graph/index.ts, supabase/functions/batch-reprocess-triplets/index.ts, src/hooks/usePermissions.ts, src/hooks/usePermissions.pure.ts, src/components/auth/PermissionGate.tsx, src/components/auth/ProtectedRoute.tsx, src/contexts/AuthContext.tsx, src/components/administrador/access/PermissionsMatrixPanel.tsx, src/components/administrador/access/UserOverridesPanel.tsx, src/components/administrador/access/MyPermissionsPanel.tsx, src/components/administrador/access/UsersAndRolesPanel.tsx, src/config/permission-catalog.ts, src/pages/administrador/AdministradorPage.tsx
+
+
 ### Added - 2026-08-31 — Telemetria e retry com backoff em imports dinâmicos
 <!-- area: infra · status: entregue · i18n: 1.126.0 -->
 - Novo `src/lib/assetFailureTelemetry.ts`: registro compartilhado de falhas de asset (URL, nome do chunk, tentativa, willReload, build, timestamp) em `sessionStorage` + evento `asset-preload-failure`.
