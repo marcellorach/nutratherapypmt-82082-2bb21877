@@ -3077,6 +3077,7 @@
     },
     "usersAndRoles": {
       "title": "Usuários e permissões",
+      "subtitle": "\"Permissões por papel\" e \"Exceções\" valem de verdade no servidor: definem o que cada pessoa pode ver e editar. A aba \"Papéis\" é apenas um filtro visual da barra lateral, sem efeito de segurança.",
       "tabs": {
         "roles": "Papéis",
         "requests": "Solicitações",
