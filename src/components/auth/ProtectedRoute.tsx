@@ -22,7 +22,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { user, loading, hasRole } = useAuth();
   const { can, loading: permissionsLoading } = usePermissions();
 
-  if (loading) {
+  if (loading || (requiredPermission && permissionsLoading)) {
     // Componente de carregamento enquanto verifica autenticação
     return (
       <div className="flex h-screen items-center justify-center">
