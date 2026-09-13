@@ -1,23 +1,23 @@
 # DATA_PROVENANCE — proveniência dos números clínicos
 
-> **Gerado automaticamente** em 2026-06-05 por `scripts/generate-data-provenance.mjs`. NÃO editar à mão.
+> **Gerado automaticamente** em 2026-09-13 por `scripts/generate-data-provenance.mjs`. NÃO editar à mão.
 > Origem: `count(*)` direto no Supabase + breakdown por `pet_profiles.is_demo` / `is_synthetic`.
 
 ## Knowledge Graph
 
 | Tabela | Linhas | Status |
 |---|---:|---|
-| `hierarchical_edges` | 38643 | fonte real do grafo (Supabase) |
+| `hierarchical_edges` | 43755 | fonte real do grafo (Supabase) |
 | `medical_knowledge_graph` | 0 | **legado vazio** — não usar como métrica |
-| `studies` | 59 | PDFs ingeridos |
+| `studies` | 60 | PDFs ingeridos |
 | `nutraceuticals` | 30 | catálogo base |
 
 ### Triplet bank (`triplet_extractions`)
 
 | Curation status | Linhas |
 |---|---:|
-| approved | 3924 |
-| pending | 851 |
+| approved | 4200 |
+| pending | 1268 |
 | rejected | 10 |
 
 ## Dados clínicos — split por proveniência
@@ -26,11 +26,11 @@
 
 | Tabela | Total | Real (vet inseriu) | Demo (seed `is_demo`) | Sintético (cohort) |
 |---|---:|---:|---:|---:|
-| pet_profiles | 728 | 3 | 5 | 720 |
-| pet_exams | 1234 | 6 | 17 | 1211 |
-| pet_consultations | 1150 | 0 | 15 | 1135 |
-| pet_medications | 633 | 0 | 5 | 628 |
-| pet_conditions | 1232 | 2 | 14 | 1216 |
+| pet_profiles | 793 | 3 | 0 | 790 |
+| pet_exams | 1318 | 6 | 0 | 1312 |
+| pet_consultations | 1232 | 0 | 0 | 1232 |
+| pet_medications | 718 | 0 | 0 | 718 |
+| pet_conditions | 1315 | 2 | 0 | 1313 |
 
 ## Como atualizar
 

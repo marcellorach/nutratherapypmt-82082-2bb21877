@@ -1,6 +1,6 @@
 # DRIFT_GUARD REPORT
 
-> **Gerado** em 2026-08-21 por `scripts/drift-guard.mjs` (`npm run drift:guard`).
+> **Gerado** em 2026-09-13 por `scripts/drift-guard.mjs` (`npm run drift:guard`).
 > **WARN-only.** Não bloqueia build/auditoria. Humano reconcilia a superfície sinalizada.
 
 ## Resumo

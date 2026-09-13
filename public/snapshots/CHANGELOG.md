@@ -22,7 +22,192 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ---
 
 ## [Unreleased]
-<!-- senex: 7.0.1 -->
+<!-- senex: 7.2.4 -->
+
+### Added - 2026-09-13 — Permissões editáveis por papel e por pessoa
+<!-- area: auth · status: entregue · i18n: 1.127.0 -->
+- Catálogo `permissions` (47 abas + 8 operações + `admin.access`), grade `role_permissions`, exceções `user_permission_overrides` e histórico `permission_audit_log`; `has_permission` é a única fonte de verdade (15 políticas RLS de 02/09 reescritas sobre ela)
+- Trava de último administrador no banco (`prevent_last_admin_removal`), validada em execução com rollback
+- Gates server-side em `parse-study` (`op.parse_study`), `gemini-file-search` (`op.gemini_file_search`), `extract-study-entities` (`op.extract_study_entities`) e `generate-triplets` (`op.generate_triplets`), com propagação de identidade via `x-initiator-id` nas cadeias (`gemini-file-search`, `enrich-knowledge-graph`, `batch-reprocess-triplets`) e mecanismo explícito `system` para chamadas agendadas
+- Cliente: `usePermissions` com realtime, `PermissionGate`/`TabGate` fail-closed, bloqueio de deep-link no `AdministradorPage`, telas de permissões por papel, exceções por pessoa e "minhas permissões"
+- Testes: resolução de permissões (6), paridade catálogo × `admin-tabs.ts` (3), cadeia de identidade do pipeline (5) — suíte total 169 testes
+- Files: supabase/functions/_shared/authorization.ts, supabase/functions/parse-study/index.ts, supabase/functions/gemini-file-search/index.ts, supabase/functions/extract-study-entities/index.ts, supabase/functions/generate-triplets/index.ts, supabase/functions/enrich-knowledge-graph/index.ts, supabase/functions/batch-reprocess-triplets/index.ts, src/hooks/usePermissions.ts, src/hooks/usePermissions.pure.ts, src/components/auth/PermissionGate.tsx, src/components/auth/ProtectedRoute.tsx, src/contexts/AuthContext.tsx, src/components/administrador/access/PermissionsMatrixPanel.tsx, src/components/administrador/access/UserOverridesPanel.tsx, src/components/administrador/access/MyPermissionsPanel.tsx, src/components/administrador/access/UsersAndRolesPanel.tsx, src/config/permission-catalog.ts, src/pages/administrador/AdministradorPage.tsx
+
+
+### Added - 2026-08-31 — Telemetria e retry com backoff em imports dinâmicos
+<!-- area: infra · status: entregue · i18n: 1.126.0 -->
+- Novo `src/lib/assetFailureTelemetry.ts`: registro compartilhado de falhas de asset (URL, nome do chunk, tentativa, willReload, build, timestamp) em `sessionStorage` + evento `asset-preload-failure`.
+- `lazyWithRetry` agora expõe `loadWithRetry` com 2 retries em backoff (300ms/900ms), telemetria por tentativa e um único reload protegido por flag de sessão.
+- Todos os imports dinâmicos restantes do admin passaram a usar `lazyWithRetry` (AdminPainel, OntologyHub, TranslationsHub, TripletsHub, VisualizationCard, LazyComponents).
+- Testes: `src/lib/__tests__/lazyWithRetry.test.ts` (7 casos: sucesso, retry, backoff, reload único, sem reload duplo, erro não-chunk, canal de evento).
+- Files: src/lib/assetFailureTelemetry.ts, src/lib/lazyWithRetry.ts, src/components/system/AssetFailureBanner.tsx, src/components/lazy/LazyComponents.tsx, src/lib/__tests__/lazyWithRetry.test.ts
+
+
+### Added - 2026-08-23 — Re-extração forçada por estudo (UI + auditoria)
+<!-- area: curation · status: entregue · i18n: 1.126.0 -->
+- Painel "Re-extração forçada" no detalhe do estudo (aba Análise) com contagens atuais de mecanismos/desfechos, diálogo de confirmação e histórico das últimas 10 execuções.
+- Cada disparo chama `extract-study-entities` com `force_reextract: true` e grava evento em `study_audit_logs` (`action_type: force_reextract`) com contagens antes/depois.
+- Files: src/components/administrador/estudos/detalhes/ForceReextractPanel.tsx, src/components/administrador/estudos/detalhes/tabs/AnaliseTab.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts
+
+### Fixed - 2026-08-23 — Guarda de ownership nos demais escritores de analysis_data
+<!-- area: curation · status: entregue · i18n: 1.126.0 -->
+- `mergeAnalysisDataFromOtherWriter` / `mergeExtractedDataFromOtherWriter`: merge na direção oposta — preserva campos extract-owned com conteúdo real e deixa o escritor atualizar os próprios campos.
+- Aplicado em `gemini-file-search`, `parse-study` e `generate-triplets` (todos passam a reler o estado antes de escrever).
+- Shim de conditions do gemini movido de `clinical_outcomes` para `condition_efficacy_shim`, eliminando a colisão semântica na origem.
+- Files: supabase/functions/_shared/analysisDataMerge.ts, supabase/functions/gemini-file-search/index.ts, supabase/functions/parse-study/index.ts, supabase/functions/generate-triplets/index.ts, src/__tests__/other-writers-ownership.test.ts
+
+### Added - 2026-06-18 — Inventário de modelos + Aliases por tarefa (Configurações → Prompts)
+<!-- area: admin · status: entregue · i18n: 1.123.0 -->
+- **Nova tabela `ai_task_aliases`** (PK `task_id`, com `alias_label_pt`, `alias_label_en`, `real_model`, `description`) — RLS: select para `authenticated`, write somente `is_admin()`. Seed inicial com 25 aliases cobrindo todas as tarefas governadas + entradas `__embeddings__` e `__perplexity_search__`.
+- **Nova tabela `ai_model_inventory_snapshots`** (jsonb + timestamps) para histórico do inventário resolvido. RLS admin-only.
+- **Nova edge function `model-inventory`** (read-only por padrão; POST persiste snapshot) — resolve modelo ativo por `task_id` como o runtime: 1) override em `ai_configurations`, 2) `ai_prompt_versions` ativo, 3) fallback inline. Marca `governed=false` para overrides hard-coded (`extract-meta-study`, `kg-evidence-gap-fill`, `web-dosage-lookup`, `vectorize-study`, Perplexity).
+- **Nova sub-aba "Modelos & Aliases"** em `Configurações → Prompts` (`ModelAliasesPanel.tsx`): tabela editável de aliases PT/EN, badges `governed/inline`, alerta de drift quando o modelo real difere do registrado, e dois botões independentes do relatório de prompts existente: **"Gerar relatório de modelos"** (CSV/JSON) e **"Atualizar snapshot do inventário"**.
+- **Helpers**: `supabase/functions/_shared/model-alias.ts` (server) e `src/hooks/useTaskAlias.ts` (client) — ambos com cache (60s server / 5min client) e fallback `Modelo não-rotulado`.
+- **Mascaramento aplicado**: `TaskModelGovernancePanel` agora exibe alias por tarefa em vez do `recommended_model` literal; estatísticas trocam "roteadas para GPT-5.4" → "roteadas para Modelo Clínico A"; badges de candidatos exibem só provider (`OpenAI`/`Google`).
+- **`generate-audit` ganha bloco `model_inventory` mascarado** no snapshot — relatório de Auditoria Técnica passa a citar aliases, nomes reais ficam só na tela admin.
+- Files: `supabase/migrations/...ai_model_inventory_and_aliases.sql`, `supabase/functions/model-inventory/index.ts`, `supabase/functions/_shared/model-alias.ts`, `supabase/functions/generate-audit/index.ts`, `src/hooks/useTaskAlias.ts`, `src/components/administrador/configuracoes/ModelAliasesPanel.tsx`, `src/components/administrador/configuracoes/TaskModelGovernancePanel.tsx`, `src/components/administrador/PromptConfigurationTab.tsx`, `src/i18n.ts`, `src/locales/{pt,en}/translation.json`.
+
+### Added - 2026-06-17 — Frente C: migração dos prompts hardcoded para o catálogo (com auditoria honesta)
+<!-- area: admin · status: entregue · i18n: 1.122.0 -->
+- **Auditoria caso-a-caso da lista de 12 funções**: revelou que **só 5 funções têm prompt próprio** — as outras 7 são orquestradores/pass-through/algorítmicas sem LLM dedicado.
+- **6 novas chaves no manifest** (`supabase/functions/_shared/system-prompts.ts`) — todas com `purpose`, `model_default`, `temperature`, `output_format`, `consumers`, `tags` preenchidos:
+  - `generate_triplets_phase1_discovery` — Phase 1 (free discovery) bioquímico veterinário.
+  - `generate_triplets_phase2_structuring` — Phase 2 (structuring) → tool-call `extract_triplets`.
+  - `extract_meta_study` — curador de meta-estudos arquiteturais (10–25 lições + stance classification).
+  - `generate_showcase_pt` — base PT do showcase parceiro (regras de honestidade + 6 seções).
+  - `generate_showcase_en` — espelho EN do showcase parceiro.
+  - `generate_meta_study_cover_style` — style guide de imagem (Gemini image; texto, não chat).
+- **4 edge functions refatoradas** para `fetchSystemPrompt(key, fallback)`:
+  - `generate-triplets` — Phase 1 e Phase 2 agora resolvem override → default → manifest. Conteúdo prévio preservado verbatim no manifest.
+  - `extract-meta-study` — `systemPrompt` ← `fetchSystemPrompt('extract_meta_study')`.
+  - `generate-showcase` — `BASE_SYSTEM_PT/EN` renomeados para `_DEFAULT` (fallback) e resolvidos em runtime; assinatura de `generateSection`/`buildBaseSystemPt|En` injeta o prompt vivo.
+  - `generate-meta-study-cover` — `STYLE_GUIDE` renomeado para `STYLE_GUIDE_DEFAULT`; `generateOne` recebe o style guide resolvido (1 fetch por request).
+- **8 false-positives removidos** da `HARDCODED_PROMPT_FUNCTIONS` em `verify-system-prompts` com nota explicativa: `chat` (pass-through), `process-study` (orquestrador), `classify-entity` (algorítmica), `calculate-recommendation-confidence` (algorítmica), `finalize-stalled-cohort` (sem LLM), `enrichment-qa-sample` (orquestrador), `compare-snapshots` (sem LLM), `fetch-external-ontologies` (SNOMED/UMLS REST). Não precisam estar no catálogo — não usam LLM.
+- **Auditoria de cada mudança**: o trigger `trg_ai_system_prompts_audit` (Frente D) vai capturar qualquer override futuro dessas 6 chaves. Conteúdo prévio fica preservado em duas camadas: (1) `default_content` no DB; (2) literal no manifest TypeScript como fallback.
+- **Verificação final**: `verify-system-prompts` retorna `status: ok`, manifest 51 ↔ db 51, 0 drift, 0 hardcoded. `PROMPTS_REVISION` 1 → 2 (sem bump de APP_VERSION, conforme regra).
+- Files: `supabase/functions/_shared/system-prompts.ts`, `supabase/functions/generate-triplets/index.ts`, `supabase/functions/extract-meta-study/index.ts`, `supabase/functions/generate-showcase/index.ts`, `supabase/functions/generate-meta-study-cover/index.ts`, `supabase/functions/verify-system-prompts/index.ts`, `src/config/app-version.ts`.
+
+### Added - 2026-06-17 — System Prompts: versão Senex (7.2.4), selo unificado nas 3 abas e audit log
+<!-- area: admin · status: entregue · i18n: 1.122.0 -->
+- **Versão sincronizada**: `APP_VERSION` agora reflete a versão do Senex AI (`7.2.4`) + novo `PROMPTS_REVISION` (4º dígito) que incrementa apenas quando o manifest de prompts muda. Selo exibido: "Sistema 7.2.4 · Prompts rev. 1". Reseta para 0 a cada bump de APP_VERSION.
+- **Selo unificado em todas as abas de prompts**: `IntegrityBadge` extraído de `SystemPromptsCatalog` para novo componente `PromptsIntegrityBadge.tsx`, reutilizado nas abas Recomendações, Extração e System (modo `compact` para as duas primeiras). Mensagem clara separa dois sinais distintos: "Última modificação dos prompts" (max `updated_at` em `ai_system_prompts`) vs "Última verificação" (`checked_at` em `ai_system_prompts_integrity_check`) — resolve a confusão "verificado hoje mas desatualizado".
+- **Auto-verificação por revisão**: chave do localStorage agora é `${APP_VERSION}.${PROMPTS_REVISION}` — qualquer bump de prompts dispara verificação na próxima visita, mesmo sem mudar a versão do sistema.
+- **Audit log dos prompts** (Frente D): nova tabela `ai_system_prompts_audit_log` (`prompt_id`, `prompt_key`, `action` ∈ `override_set`/`override_cleared`/`default_changed`/`manifest_synced`, `changed_by`, `old_content`, `new_content`, `app_version`). Trigger `trg_ai_system_prompts_audit` registra automaticamente toda alteração em `override_content` ou `default_content`. RLS: admin lê, service_role escreve. Override permanece sagrado — o `sync-system-prompts` continua sem tocar em `override_content` (já garantido na Frente B).
+- **Pendente Frente C** (em commits dedicados): migrar as 12 edge functions com prompts hardcoded para `getSystemPrompt(supabase, key, fallback)`. O selo já as expõe como "drift" e o audit log vai capturar cada migração.
+- Files: `src/config/app-version.ts`, `src/components/administrador/configuracoes/PromptsIntegrityBadge.tsx` (novo), `src/components/administrador/configuracoes/SystemPromptsCatalog.tsx`, `src/components/administrador/PromptConfigurationTab.tsx`, `src/locales/{pt,en}/translation.json`, `src/i18n.ts` (1.121.0 → 1.122.0), `supabase/migrations/<ts>_ai_system_prompts_audit_log.sql`.
+
+### Added - 2026-06-17 — Catálogo de System Prompts: seed completo + verificação contínua de integridade
+<!-- area: admin · status: entregue · i18n: 1.121.0 -->
+- **Frente A (seed)**: 21 chaves do manifest (`supabase/functions/_shared/system-prompts.ts`) que nunca tinham sido propagadas ao banco agora estão em `ai_system_prompts`. Catálogo passou de 24 → 45 linhas (alinhado 1:1 com o manifest).
+- **Frente B (`sync-system-prompts` idempotente)**: edge function trocada de `UPDATE`-only para `INSERT-or-UPDATE`. Toda nova chave adicionada ao manifest entra no DB automaticamente no próximo "Sincronizar com o código". Novo status `inserted` no relatório. Family/display_name das novas linhas são derivados automaticamente da chave; admin pode renomear.
+- **Frente E (verificação contínua + selo na UI)**:
+  - Nova tabela `ai_system_prompts_integrity_check` (admin-only) registra cada verificação: `app_version`, `manifest_count`, `db_count`, listas `missing_in_db`/`extra_in_db`/`out_of_sync`/`hardcoded_outside_catalog`, `status` (`ok`/`drift`/`error`), `triggered_by` (`manual`/`auto_on_version_bump`), `checked_at`.
+  - Nova edge function `verify-system-prompts` compara manifest × DB e grava o resultado. Lista interna `HARDCODED_PROMPT_FUNCTIONS` rastreia as 12 funções com prompts ainda não migrados ao catálogo (chat, generate-triplets, process-study, extract-meta-study, generate-meta-study-cover, generate-showcase, classify-entity, calculate-recommendation-confidence, finalize-stalled-cohort, enrichment-qa-sample, compare-snapshots, fetch-external-ontologies).
+  - Novo `src/config/app-version.ts` (`APP_VERSION = '1.1.0'`) — fonte única da versão semântica do app.
+  - `SystemPromptsCatalog` ganhou selo no topo: versão do sistema, contagem manifest × DB, status visual (verde/âmbar/vermelho), "Última verificação" formatada em pt-BR, botão "Verificar agora" e expand com detalhe das divergências. Disparo automático na primeira visita após bump de `APP_VERSION` (rastreado via `localStorage.lastVerifiedAppVersion`).
+- **Pendente para Frente C+D (follow-up)**: migrar os 12 prompts hardcoded listados acima para o catálogo via `getSystemPrompt(supabase, key, fallback)` e preencher `purpose/model_default/temperature/output_format/consumers/tags` das 24 chaves antigas que ainda só têm `content`. A Frente E já expõe os dois débitos no painel — o admin vê exatamente o que falta.
+- Migration: `ai_system_prompts_integrity_check` com RLS (admin lê, service_role escreve) + índice por `checked_at DESC`.
+- Files: `supabase/migrations/<ts>_ai_system_prompts_integrity_check.sql`, `supabase/functions/sync-system-prompts/index.ts`, `supabase/functions/verify-system-prompts/index.ts` (novo), `src/config/app-version.ts` (novo), `src/components/administrador/configuracoes/SystemPromptsCatalog.tsx`, `src/locales/{pt,en}/translation.json`, `src/i18n.ts` (1.120.0 → 1.121.0).
+
+### Fixed - 2026-06-15 — Playground multi-fonte: KG busca por termo real + cohort canônico + diagrama de mecanismo
+<!-- area: kg · status: entregue · i18n: 1.120.0 -->
+- **Root cause (KG vazio para curcumina)**: `kgProvider` em `src/services/multi-source-resolver.ts` chamava `get_relations_graph_data(p_limit:500)` e filtrava as keywords client-side. Curcumina existe (127 triplets em `triplet_extractions`), mas não nas 500 primeiras edges — daí "Knowledge Graph curado: —" em uma pergunta que o KG cobre amplamente.
+- **Fix KG**: nova RPC `public.search_relations_by_term(p_terms text[], p_limit int)` faz `ILIKE` direto em `subject_name`/`object_name` filtrando `curation_status='approved' OR auto_approved=true`, ordenando por `llm_confidence`. Provider passa a chamar a RPC. Validado: pergunta de curcumina retorna 10+ relações (Curcumin ⊣ NF-κB, ↑ Nrf2, ↓ TLR4, previne Alzheimer/Parkinson).
+- **Fix cohort (eco lexical)**: `cohortProvider` parou de fazer substring de palavras da query em `notes`. Agora detecta entidade canônica (raça via `pet_profiles.breed`, condição via `pet_conditions.condition_name`) presente no texto da pergunta e filtra a contagem real. Sem entidade reconhecida → claim explícito ("sem entidade clínica reconhecida"), nunca eco da query.
+- **Fix síntese**: `synthesize()` agora ignora fontes com `confidence=0`, `notApplicable` ou `notImplemented` e marca `synthesisDegraded=true` quando promove fonte de peso menor que 1.0. UI mostra badge âmbar "Síntese degradada — KG sem cobertura, usando: Internet".
+- **Histórico no playground**: petHistory provider retorna `notApplicable:true` quando não há `petId`; UI exibe "Não aplicável neste contexto" em vez de "—" mudo.
+- **Novo — `MechanismDiagram` (Mermaid)**: renderizado dentro do `SourcePanel` sob toggle "Mostrar mecanismo molecular" quando KG retorna ≥ 1 triplet. Mapeia predicate→seta biológica (`→` ativa, `⊣` inibe, `↓` trata) conforme `biological-legend-standard-notation`. Construído a partir dos triplets reais (não inventa).
+- Migration: `search_relations_by_term` RPC com GRANT EXECUTE para authenticated/anon/service_role.
+- Files: `supabase/migrations/<ts>_search_relations_by_term.sql`, `src/services/multi-source-resolver.ts`, `src/components/clinical/MechanismDiagram.tsx` (novo), `src/components/clinical/SourcePanel.tsx`, `src/locales/{pt,en}/translation.json`, `src/i18n.ts` (1.119.0 → 1.120.0).
+- Backlog: substituir ILIKE por busca vetorial (`study_embeddings`); plugar gap-fill PubMed quando KG retorna 0 triplets; conectar `treatedDogs` provider a cohort real.
+
+### Fixed - 2026-06-09 — Ingestão: gate qualitativo + truncamento relativo + Call 1 dedicada
+<!-- area: curation · status: entregue · i18n: 1.119.0 -->
+- **Root cause**: chamada monolítica do `gemini-file-search` competia `full_text` com 22 outras propriedades clínicas no mesmo tool call (`gemini-3-pro-preview`), causando truncamento progressivo do texto completo e queda na análise — sintoma do estudo Spermine (09/06) com `analysis_data` zerado mas `kanban_status='processed'`, e do CoQ10 (22/05) caindo no fallback `structured_data_enhanced` com 0 nutracêuticos.
+- **Fix estrutural — split em 2 calls no `gemini-file-search`**: nova função `acquireFullText()` (Call 1, `gemini-2.5-flash`, schema minimal `{ full_text: string }`) roda em paralelo conceitual e sobrescreve `extractedData.full_text` quando entrega texto maior; a Call 2 existente (`extractWithFileSearch`) preserva as 22 propriedades clínicas. Metadados bibliográficos seguem propriedade exclusiva do `parse-study` (Call 1 nunca grava em title/authors/year/abstract/doi).
+- **Gate de 3 estados (qualitativo, SEM char-floor absoluto)** persistido em nova coluna `processed_studies.ingestion_stages jsonb`:
+  - `failed`: Call 1 + Call 2 ambas não entregaram `full_text` utilizável.
+  - `degraded` (a): todas as categorias clínicas chave (`nutraceuticals/conditions/mechanisms/biological_effects`) vieram vazias.
+  - `degraded` (b): truncamento RELATIVO — `truncation_ratio = chars_full_text / parse_study.total_chars < 0.30` E `parse_study.sections_count >= 3`. Position-papers legítimos curtos passam ilesos.
+  - `ok`: caso contrário. `chars` e `truncation_ratio` ficam gravados apenas como informativos, nunca como gatilho isolado.
+- **Bloqueio do `kanban_status='processed'`**: `extract-study-entities` agora lê `ingestion_stages.file_search.status` no início — se `failed`, retorna 200 com `{ skipped: true }` e marca `kanban_status='error'` (não roda LLM). Se `degraded`, roda mas marca `extract_entities.confidence='degraded'`. Re-lê stages no final para garantir que upstream falhado vire `error`, nunca `processed`. Mata o padrão Spermine silencioso.
+- **Telemetria por estágio** em `ingestion_stages`: `parse_study` ({sections_count, tables_count, total_chars}), `file_search` ({status, reason, chars, truncation_ratio, model_call1, model_call2, entities_counts}), `extract_entities` ({status, confidence, counts}), `vectorize` ({status, chunks_count, model}). Cada função tem `try/catch` que persiste `status:'failed'` antes de propagar exceção.
+- **UI — 2 superfícies de badge**: (a) cards em `StudiesLibraryTab` exibem "Extração falhou" (vermelho) / "Extração degradada" (âmbar); (b) banner no topo do `StudyTripletCuration` quando `file_search.status !== 'ok'`, mostrando motivo, chars e truncation_ratio para o curador.
+- **Migration**: `ALTER TABLE processed_studies ADD COLUMN ingestion_stages jsonb NOT NULL DEFAULT '{}'::jsonb` + índice GIN.
+- Files: `supabase/functions/parse-study/index.ts`, `supabase/functions/gemini-file-search/index.ts`, `supabase/functions/extract-study-entities/index.ts`, `supabase/functions/vectorize-study/index.ts`, `src/components/administrador/estudos/library/StudiesLibraryTab.tsx`, `src/components/administrador/estudos/curation/StudyTripletCuration.tsx`, `src/locales/{pt,en}/translation.json`, `src/i18n.ts` (bump 1.119.0).
+- Fora de escopo (Fases 3+4 do próximo turno): baseline pré-backfill, botão "Reprocessar pipeline", bloco `ingestion_health` em `generate-audit`. `generate-triplets` não foi alterado.
+
+### Fixed - 2026-06-08 — Auditorias: tag CONFIDENCIAL sem encavalamento + propriedade PetMoreTime reforçada
+<!-- area: admin · status: entregue · i18n: — -->
+- `audit-pdf-generator.ts`: banner CONFIDENCIAL agora usa layout flex real (tag em `<span>` com `flex-shrink:0`), eliminando a sobreposição do pseudo-elemento `::before` sobre o texto observada em PT/EN.
+- Footer discreto fixado em todas as páginas no `@media print` (`position:fixed; bottom:0`, 9px italic, "CONFIDENCIAL" em vermelho sóbrio inline), mantendo aparição única em tela.
+- Copy do banner e do rodapé reforçam propriedade exclusiva: "Plataforma Senex AI · Engine Senex AI v7 · © PetMoreTime. Todos os direitos reservados. Tecnologia, modelos e conteúdo são propriedade exclusiva da PetMoreTime." (PT/EN equivalentes). Vale para os relatórios técnicos e showcase, tanto em download quanto em print.
+- Files: src/components/administrador/audits/audit-pdf-generator.ts
+
+### Changed - 2026-06-08 — Pilares científicos: TxGNN e Hetionet adicionados como PARTIAL
+<!-- area: admin · status: entregue · i18n: — -->
+- AboutSenexTab: incluídos **TxGNN (Huang 2024, Nature Medicine)** e **Hetionet/DWPC (Himmelstein 2017, eLife)** no card "Pilares científicos (inspiração × implementação)" com status `PARTIAL`, refletindo `core_rule_evidence` já existente: TxGNN → RC-001 (doc-only), RC-008 e RC-013 (ativas); Hetionet → RC-008 e RC-014 (ativas). Inspirações ainda fora de runtime (zero-shot via metric learning + GraphMask; DWPC + permutação de rede) explicitadas.
+- Diagrama do engine: nota em `O3` (Recommendation engine) marca TxGNN zero-shot + Hetionet DWPC como inspirações não-runtime. Banner de "Honestidade arquitetural" amplia a lista de inspirações/planejado.
+- Esclarecimento: a lista de Pilares não é gerada por LLM — é um array TypeScript curado em `AboutSenexTab.tsx`. A fonte dinâmica papel↔RC continua sendo `core_rule_evidence` (consumida pela aba Fundamentos Arquiteturais).
+- Files: src/components/administrador/AboutSenexTab.tsx
+
+### Fixed - 2026-06-08 — Fundamentos Arquiteturais 100% bilíngue (UI + DB)
+<!-- area: admin · status: entregue · i18n: 1.118.5 -->
+- Adicionadas todas as 150+ chaves `fundamentos.*` em PT e EN (`FundamentosTab`, `MetaKgRoadmapCard`, `MetaStudyDetailedCard`, `CoreRuleHistory`, `MetaStudyKanban`, `IngestaoMetaEstudo`): tabs, badges, roadmap (Fase A/B/C, gatilhos), confiabilidade (5 dimensões + descrições), filtros do histórico (placeholder, stances, ações, refresh), painel de ingestão (estágios, seções de lições, botões de stance promote/attach/discard/resolve_keep, toasts).
+- DB `core_rules`: preenchido `justification_en` para RC-001/002/003 e `application_en` para as 18 regras; `FundamentosTab` agora consome `application_en` quando lang=en.
+- Auditoria dos 6 papers arquiteturais (TxGNN, Geroscience-Dogs, KGARevion, MedGraphRAG, OptimusKG, Hetionet) — cobertura RC documentada no `.lovable/plan.md` deste turno; nenhum vínculo de evidência foi alterado.
+- I18N_VERSION: 1.118.4 → 1.118.5.
+- Files: src/locales/{pt,en}/translation.json, src/i18n.ts, src/pages/administrador/FundamentosTab.tsx, src/components/administrador/fundamentos/{CoreRuleHistory,MetaStudyKanban,IngestaoMetaEstudo}.tsx
+
+### Changed - 2026-06-08 — Pilares científicos: KGARevion reclassificado de Inspiração → Parcial
+<!-- area: admin · status: entregue · i18n: — -->
+- No card "Pilares científicos (inspiração × implementação)" em About-Senex, KGARevion passa de `INSPIRATION` para `PARTIAL`, refletindo o que já está vinculado em `core_rule_evidence`: RC-014 (Normalização de Predicados via Dicionário, w=0.90) e RC-008 (Taxonomia Padrão SNOMED-CT VetSCT + UMLS, w=0.95) — ambas ativas em runtime. O ciclo GRRA completo (Review + Revise independentes) segue rotulado como inspiração não implementada. Sem mudança no banco; ajuste de copy para alinhar com a aba Fundamentos Arquiteturais.
+- Files: src/components/administrador/AboutSenexTab.tsx
+
+### Added - 2026-06-08 — Showcase Mode (documento paralelo para parceiro)
+<!-- area: admin · status: entregue · i18n: — -->
+- Novo botão **"Gerar showcase para parceiro"** na aba Auditorias Técnicas. Lê o MESMO snapshot factual da auditoria (counts, kg_storage, clinical_data_provenance) e escreve 6 seções comerciais curadas (Visão, Por que importa, Diferenciais, Visão maior, Credibilidade, Parceria).
+- Honestidade preservada: capacidades em presente, resultado de sinistralidade prospectivo; split R/D/S obrigatório; RC-001/002 (evidência negativa) destacada como diferencial; GRRA/U-Retrieval/TransE rotulados como inspiração.
+- Roteamento: §1/4/6 Pro→Flash (define tom); §2/3/5 Flash→Pro→gpt-5-mini.
+- Persistido em `technical_audits` com `version=<vX.Y.Z>-showcase` e `summary.kind=showcase`, com PT+EN no bucket `audit-reports`. Reutiliza viewer/download/polling existentes; cards de showcase ganham badge âmbar e ficam priorizados à esquerda da régua.
+- Files: supabase/functions/generate-showcase/index.ts, src/components/administrador/audits/TechnicalAuditsTab.tsx
+
+### Added - 2026-06-08 — Download de auditoria respeita idioma do header
+<!-- area: admin · status: entregue · i18n: — -->
+- O seletor PT/EN do header agora controla o idioma padrão dos botões **Ver / HTML / PDF** nos cards e no viewer de auditoria. Antes a versão baixada sempre era PT.
+- Files: src/components/administrador/audits/TechnicalAuditsTab.tsx, src/components/administrador/audits/audit-pdf-generator.ts
+
+### Fixed - 2026-06-08 — Auditoria v7.1.3: refinos de honestidade
+<!-- area: meta · status: entregue · i18n: — -->
+- Ajustes no `generate-audit` sobre fatiamento de blocos (fatos-âncora de honestidade replicados em todo bloco que toca dados/coortes/KG/recomendação/compliance/twin) e contexto amplo no sumário executivo.
+- Files: supabase/functions/generate-audit/index.ts
+
+### Changed - 2026-06-06 — Auditoria v7.2.0: split clínico no snapshot + KG honesto + Gompertz erradicado
+<!-- area: meta · status: entregue · i18n: — -->
+- **`generate-audit/readAuditContext`** — `tableNames` corrigido: `pets`→removido, `studies`→`processed_studies`, `medical_knowledge_graph` removido (legado). As 5 tabelas de população clínica (`pet_profiles`, `pet_exams`, `pet_consultations`, `pet_medications`, `pet_conditions`) saíram de `counts` de propósito — agora a ÚNICA fonte de verdade é `clinical_data_provenance` com `{real, demo, synthetic_cohort}`. Sem total bruto, o LLM não consegue mais apresentar "1234 exames processados" como atividade real.
+- **Novo `snapshot.kg_storage`** — expõe top relacionamentos de `hierarchical_edges` (TREATS / PREVENTS / HAS_MECHANISM / ...), confirmando que os 38k+ edges são relações clínicas curadas e NÃO taxonomia legada. Inclui `triplet_extractions_approved` e `triplet_extractions_synced_to_neo4j` para reportar honestamente o espelho Neo4j.
+- **`audit_base_system_{pt,en}`** — (1) contrato positivo: toda contagem clínica DEVE ser escrita inline como "N total (R real / D demo / S sintético)" — blacklist léxica reduzida a backstop fraco (RWD / "base de pacientes reais"); (2) Gompertz erradicado: "Gompertz NÃO está implementado em lugar nenhum, NÃO existe `breed_aging_curves`, sigmoide é o único motor"; (3) `medical_knowledge_graph` proibido como armazenamento ativo; (4) drift-guard tem renderização obrigatória mesmo com erro.
+- **Checklist `kg-5-layers`** (`FALLBACK_COVERAGE` + `audit-coverage.ts`) — evidence trocado de `medical_knowledge_graph + hierarchical_edges` para `hierarchical_edges (storage real) + triplet_extractions (espelho Neo4j)`. `curation-7-stages` também perdeu `studies`/`medical_knowledge_graph`.
+- **Checklist `digital-twin`** (`audit-coverage.ts`) — título reescrito: "(sigmoide calibrada em condition_response_curves)"; evidence cita explicitamente "Gompertz NÃO está implementado".
+- **`project_pet_trajectory` prompt** — removida menção a "Gompertz aging curve" no system content e na tag.
+- Files: supabase/functions/generate-audit/index.ts, supabase/functions/_shared/system-prompts.ts, src/data/audit-coverage.ts
+
+### Changed - 2026-06-06 — Auditoria v7.1.0: ênfases de honestidade no prompt do auditor
+<!-- area: meta · status: entregue · i18n: — -->
+- **`buildBaseSystem` (generate-audit)** agora anexa um bloco "ÊNFASES DESTA RODADA" (PT/EN) no topo do system prompt antes do checklist, reforçando 3 correções de honestidade que o auditor v7.0.x escorregava: (1) Digital Twin = sigmóide (qualquer "Gompertz" como motor de resposta a tratamento deve ser reportado como erro doc; Gompertz só vale para `breed_aging_curves`); (2) dados clínicos exigem split real/demo/synthetic_cohort do snapshot — proibido "RWD"/"dados do mundo real" com ~98% synthetic; (3) GRRA, U-Retrieval e TransE são inspiração, não mecanismos do Senex.
+- **Checklist canônico** (`FALLBACK_COVERAGE`) corrigido:
+  - `digital-twin`: título agora separa explicitamente os dois motores (sigmóide para condição × nutracêutico vs. Gompertz para envelhecimento por raça) e cita `breed_aging_curves + project-pet-trajectory` no evidence.
+  - `breed-predispositions`: removido o número hardcoded "81 raças" — auditor deve puxar contagem real do snapshot ou marcar n/d.
+  - `ai-scientist-predictive-models`: removido "6 modelos" hardcoded pela mesma razão.
+- Files: supabase/functions/generate-audit/index.ts
+
+### Added - 2026-06-05 — Painel Preview vs Publicado na aba de Auditorias
+<!-- area: admin · status: entregue · i18n: 1.118.4 -->
+- **Novo componente** `PreviewVsPublishedPanel` (admin → Auditorias) — compara em tempo real os 4 snapshots auditáveis (`drift-report.json`, `ARCHITECTURE_LIVE.md`, `CHANGELOG.md`, `PROMPTS.md`) entre o ambiente de preview (`window.location.origin`) e o publicado (`https://longevidade.ai`). Status verde/amarelo por sha-256, botão "Ver diff" abre `SnapshotDiffDialog` lado a lado (lib `diff`).
+- **Nova edge function** `compare-snapshots` — fetch server-side paralelo dos dois ambientes (contorna CORS de hospedagem estática), whitelist fixa de arquivos, devolve `{file, equal, preview, published}` com sha-256.
+- **Novo passo de build** `scripts/copy-snapshots-to-public.mjs` (último passo de `npm run audit:prebuild`) — copia os 4 artefatos para `public/snapshots/` + `manifest.json` com sha-256/bytes/timestamp. Sem esse passo, navegador não consegue baixar `ARCHITECTURE_LIVE.md`/`CHANGELOG.md`/`PROMPTS.md` (estão fora de `/public/`).
+- **Nota explícita no painel:** preview e publicado compartilham o mesmo Supabase; diffs aqui referem-se apenas a arquivos estáticos e ao bundle frontend.
+- Files: src/components/administrador/audits/PreviewVsPublishedPanel.tsx, src/components/administrador/audits/SnapshotDiffDialog.tsx, src/components/administrador/audits/TechnicalAuditsTab.tsx, supabase/functions/compare-snapshots/index.ts, scripts/copy-snapshots-to-public.mjs, package.json, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json
 
 ### Added - 2026-06-04 — Drift-guard A+B+C+D dobrado no pipeline da auditoria
 <!-- area: meta · status: entregue · i18n: 1.118.3 -->
