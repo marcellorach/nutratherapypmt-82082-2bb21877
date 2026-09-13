@@ -52,6 +52,9 @@ const UsersAndRolesPanel: React.FC = () => {
           </TabsTrigger>
         </TabsList>
 
+        <TabsContent value="users" className="mt-4">
+          <PlatformUsersPanel />
+        </TabsContent>
         <TabsContent value="requests" className="mt-4">
           <AccessRequestsPanel />
         </TabsContent>
