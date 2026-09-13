@@ -114,7 +114,7 @@ const FALLBACK_COVERAGE: CoverageItem[] = [
   { id: "edge-functions", pillar: "Plataforma & Infraestrutura", title_pt: "Edge Functions (catálogo, papéis, JWT)", expected: "active", evidence: "67+ funções em supabase/functions/*" },
   { id: "storage-buckets", pillar: "Plataforma & Infraestrutura", title_pt: "Buckets de Storage", expected: "active", evidence: "study_pdfs, pet_exams_pdfs, audit-reports" },
   { id: "design-system", pillar: "Plataforma & Infraestrutura", title_pt: "Design System & tokens semânticos", expected: "active", evidence: "index.css + tailwind.config.ts" },
-  { id: "curation-7-stages", pillar: "Pipeline de Curadoria", title_pt: "Pipeline de 7 estágios (PDF → triplets → KG → recomendação)", expected: "active", evidence: "parse-study, vectorize-study, extract-study-entities, process-study, sync-study-to-neo4j" },
+  { id: "curation-7-stages", pillar: "Pipeline de Curadoria", title_pt: "Pipeline de 7 estágios (PDF → triplets → KG → recomendação)", expected: "active", evidence: "parse-study, vectorize-study, extract-study-entities, sync-study-to-neo4j" },
   { id: "vectorization-pre-curation", pillar: "Pipeline de Curadoria", title_pt: "Vetorização como pré-requisito da curadoria", expected: "active", evidence: "study_embeddings + extract-study-entities" },
   { id: "evidence-conflicts", pillar: "Pipeline de Curadoria", title_pt: "Conflitos de evidência e resolução canônica", expected: "active", evidence: "tab evidence-conflicts, enrich-triplet" },
   { id: "study-duplicates", pillar: "Pipeline de Curadoria", title_pt: "Detecção de duplicatas (SHA-256 + Levenshtein)", expected: "active", evidence: "fileHashUtils nos uploads" },

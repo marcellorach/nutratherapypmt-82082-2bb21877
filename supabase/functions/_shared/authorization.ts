@@ -151,33 +151,55 @@ export const authzResponse = (
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 
+export type ForwardResult =
+  | { ok: true; headers: Record<string, string> }
+  | AuthzFailure;
+
 /**
  * Headers a function must use when calling another function, preserving the
- * identity of whoever started the chain. Never invents an identity: when the
- * incoming call carries no recognisable caller it declares itself as system.
+ * identity of whoever started the chain.
+ *
+ * Fail-closed: it NEVER degrades to "system". "system" is only produced when the
+ * incoming request already carried the service role key together with
+ * `x-initiator-id: system`. Anything else (missing/unknown token, service key
+ * without initiator header) is a 401 the caller must surface.
  */
-export async function forwardIdentity(req: Request): Promise<Record<string, string>> {
+export async function forwardIdentity(req: Request): Promise<ForwardResult> {
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
   const token = bearer(req);
   const base = { 'Content-Type': 'application/json', Authorization: `Bearer ${serviceKey}` };
 
-  if (token && token === serviceKey) {
-    const initiator = req.headers.get(INITIATOR_HEADER)?.trim();
-    return { ...base, [INITIATOR_HEADER]: initiator && initiator.length > 0 ? initiator : SYSTEM_INITIATOR };
+  if (!supabaseUrl || !serviceKey) {
+    return { ok: false, status: 500, error: 'Server misconfigured' };
+  }
+  if (!token) {
+    return { ok: false, status: 401, error: 'Missing Authorization header' };
   }
 
-  if (token && supabaseUrl && serviceKey) {
-    try {
-      const admin = createClient(supabaseUrl, serviceKey, {
-        auth: { persistSession: false, autoRefreshToken: false },
-      });
-      const { data } = await admin.auth.getUser(token);
-      if (data?.user?.id) return { ...base, [INITIATOR_HEADER]: data.user.id };
-    } catch (_) {
-      // fall through to system
+  if (token === serviceKey) {
+    const initiator = req.headers.get(INITIATOR_HEADER)?.trim() ?? '';
+    if (initiator === SYSTEM_INITIATOR || isUuid(initiator)) {
+      return { ok: true, headers: { ...base, [INITIATOR_HEADER]: initiator } };
     }
+    return {
+      ok: false,
+      status: 401,
+      error: `Internal call requires a ${INITIATOR_HEADER} header (user uuid or "${SYSTEM_INITIATOR}")`,
+    };
   }
 
-  return { ...base, [INITIATOR_HEADER]: SYSTEM_INITIATOR };
+  try {
+    const admin = createClient(supabaseUrl, serviceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data } = await admin.auth.getUser(token);
+    if (data?.user?.id) {
+      return { ok: true, headers: { ...base, [INITIATOR_HEADER]: data.user.id } };
+    }
+  } catch (_) {
+    // fall through to the 401 below
+  }
+
+  return { ok: false, status: 401, error: 'Invalid or expired session' };
 }

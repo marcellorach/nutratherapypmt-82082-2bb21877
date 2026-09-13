@@ -24,6 +24,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.2.4 -->
 
+### Fixed - 2026-09-13 — Endurecimento das permissões antes do deploy
+<!-- area: auth · status: entregue · i18n: 1.127.0 -->
+- `forwardIdentity()` deixa de degradar para `system`: sem token reconhecível (ou chave de serviço sem `x-initiator-id`) devolve 401; `system` só vale quando declarado explicitamente
+- `enrich-knowledge-graph` ganhou gate `authorize()` com a nova chave `op.enrich_knowledge_graph` e `verify_jwt = true`; `batch-reprocess-triplets` gateado com `op.generate_triplets`
+- Catálogo de permissões versionado em migração idempotente (57 chaves + grade admin 57 × edit), rodada duas vezes sem duplicar
+- Quinto escritor `process-study` removido (nenhum chamador vivo): função, entrada no `config.toml` e serviços mortos `vetgraphrag-service.ts` / `ntai/processing.ts`
+- Documentado o comportamento real do cache de permissões (staleTime 30s + refetch em foco/reconexão); as tabelas não estão na publicação realtime
+- Files: supabase/functions/_shared/authorization.ts, supabase/functions/enrich-knowledge-graph/index.ts, supabase/functions/batch-reprocess-triplets/index.ts, supabase/config.toml, src/config/permission-catalog.ts, src/config/permission-catalog.test.ts, src/hooks/usePermissions.ts, src/tests/pipeline-chain-identity.test.ts, src/data/audit-coverage.ts, supabase/functions/generate-audit/index.ts
+
 ### Added - 2026-09-13 — Permissões editáveis por papel e por pessoa
 <!-- area: auth · status: entregue · i18n: 1.127.0 -->
 - Catálogo `permissions` (47 abas + 8 operações + `admin.access`), grade `role_permissions`, exceções `user_permission_overrides` e histórico `permission_audit_log`; `has_permission` é a única fonte de verdade (15 políticas RLS de 02/09 reescritas sobre ela)

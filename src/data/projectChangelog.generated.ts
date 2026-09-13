@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-09-13T03:51:52.549Z
+// Última geração: 2026-09-13T04:46:41.067Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,33 @@ export const lastChangelogDate = "2026-09-13";
 export const senexVersion = "7.2.4";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-09-13",
+    "kind": "fixed",
+    "area": "auth",
+    "status": "entregue",
+    "title": "Endurecimento das permissões antes do deploy",
+    "bullets": [
+      "`forwardIdentity()` deixa de degradar para `system`: sem token reconhecível (ou chave de serviço sem `x-initiator-id`) devolve 401; `system` só vale quando declarado explicitamente",
+      "`enrich-knowledge-graph` ganhou gate `authorize()` com a nova chave `op.enrich_knowledge_graph` e `verify_jwt = true`; `batch-reprocess-triplets` gateado com `op.generate_triplets`",
+      "Catálogo de permissões versionado em migração idempotente (57 chaves + grade admin 57 × edit), rodada duas vezes sem duplicar",
+      "Quinto escritor `process-study` removido (nenhum chamador vivo): função, entrada no `config.toml` e serviços mortos `vetgraphrag-service.ts` / `ntai/processing.ts`",
+      "Documentado o comportamento real do cache de permissões (staleTime 30s + refetch em foco/reconexão); as tabelas não estão na publicação realtime",
+      "Files: supabase/functions/_shared/authorization.ts, supabase/functions/enrich-knowledge-graph/index.ts, supabase/functions/batch-reprocess-triplets/index.ts, supabase/config.toml, src/config/permission-catalog.ts, src/config/permission-catalog.test.ts, src/hooks/usePermissions.ts, src/tests/pipeline-chain-identity.test.ts, src/data/audit-coverage.ts, supabase/functions/generate-audit/index.ts"
+    ],
+    "files": [
+      "supabase/functions/_shared/authorization.ts",
+      "supabase/functions/enrich-knowledge-graph/index.ts",
+      "supabase/functions/batch-reprocess-triplets/index.ts",
+      "src/config/permission-catalog.ts",
+      "src/config/permission-catalog.test.ts",
+      "src/hooks/usePermissions.ts",
+      "src/tests/pipeline-chain-identity.test.ts",
+      "src/data/audit-coverage.ts",
+      "supabase/functions/generate-audit/index.ts"
+    ],
+    "i18nVersion": "1.127.0"
+  },
   {
     "date": "2026-09-13",
     "kind": "added",

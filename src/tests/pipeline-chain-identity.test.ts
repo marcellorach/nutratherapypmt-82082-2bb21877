@@ -87,3 +87,55 @@ describe('pipeline chain identity', () => {
     expect(decide({}, permitted)).toEqual({ ok: false, status: 401 });
   });
 });
+
+/**
+ * forwardIdentity contract (fail-closed): it never degrades to "system".
+ * Mirrors supabase/functions/_shared/authorization.ts:forwardIdentity.
+ */
+const forward = (
+  headers: Record<string, string>,
+  resolveUser: (token: string) => string | null,
+): { ok: true; initiator: string } | { ok: false; status: number } => {
+  const auth = headers['Authorization'];
+  if (!auth?.startsWith('Bearer ')) return { ok: false, status: 401 };
+  const token = auth.slice(7);
+
+  if (token === SERVICE_KEY) {
+    const initiator = headers[INITIATOR_HEADER]?.trim() ?? '';
+    if (initiator === SYSTEM_INITIATOR || isUuid(initiator)) return { ok: true, initiator };
+    return { ok: false, status: 401 };
+  }
+
+  const userId = resolveUser(token);
+  return userId ? { ok: true, initiator: userId } : { ok: false, status: 401 };
+};
+
+describe('forwardIdentity fail-closed', () => {
+  const resolveUser = (token: string) => (token === USER_ID ? USER_ID : null);
+
+  it('rejects a call with no Authorization header', () => {
+    expect(forward({}, resolveUser)).toEqual({ ok: false, status: 401 });
+  });
+
+  it('rejects an unknown token instead of falling back to system', () => {
+    expect(forward({ Authorization: 'Bearer nope' }, resolveUser)).toEqual({ ok: false, status: 401 });
+  });
+
+  it('rejects the service key without an initiator header', () => {
+    expect(forward({ Authorization: `Bearer ${SERVICE_KEY}` }, resolveUser)).toEqual({
+      ok: false,
+      status: 401,
+    });
+  });
+
+  it('accepts system only when explicitly declared with the service key', () => {
+    expect(forward(chainHeaders(SYSTEM_INITIATOR), resolveUser)).toEqual({
+      ok: true,
+      initiator: SYSTEM_INITIATOR,
+    });
+  });
+
+  it('preserves the human initiator of a chained call', () => {
+    expect(forward(chainHeaders(USER_ID), resolveUser)).toEqual({ ok: true, initiator: USER_ID });
+  });
+});

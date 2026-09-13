@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { forwardIdentity } from '../_shared/authorization.ts';
+import { authorize, authzResponse } from '../_shared/authorization.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -22,8 +22,13 @@ serve(async (req) => {
   }
 
   try {
+    // Gate de autorização: reprocessar em lote é escrita de curadoria.
+    const authz = await authorize(req, 'op.generate_triplets', 'edit');
+    if (!authz.ok) return authzResponse(authz, corsHeaders);
+    console.log(`[batch-reprocess-triplets] authorized origin=${authz.origin} user=${authz.userId ?? 'system'}`);
+
     // Identidade de quem iniciou a cadeia, propagada ao generate-triplets.
-    const chainHeaders = await forwardIdentity(req);
+    const chainHeaders = { 'Content-Type': 'application/json', ...authz.forwardHeaders };
 
     const { studyIds, deleteExisting = true }: BatchReprocessRequest = await req.json();
 

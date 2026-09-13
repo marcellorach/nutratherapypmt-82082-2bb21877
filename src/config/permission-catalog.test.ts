@@ -13,7 +13,7 @@ const adminTabIds = (): string[] => {
   return [...source.matchAll(/^\s*id:\s*'([^']+)'/gm)].map((m) => m[1]);
 };
 
-// Snapshot of the keys seeded in public.permissions (47 tabs + 8 operations + 1 app).
+// Snapshot of the keys seeded in public.permissions (47 tabs + 9 operations + 1 app).
 const EXPECTED_TAB_COUNT = 47;
 
 describe('permission catalogue', () => {
@@ -32,6 +32,7 @@ describe('permission catalogue', () => {
       'op.gemini_file_search',
       'op.extract_study_entities',
       'op.generate_triplets',
+      'op.enrich_knowledge_graph',
     ]) {
       expect(OPERATION_PERMISSION_KEYS).toContain(key);
     }

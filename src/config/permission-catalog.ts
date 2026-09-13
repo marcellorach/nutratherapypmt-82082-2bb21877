@@ -14,6 +14,7 @@ export const OPERATION_PERMISSION_KEYS = [
   'op.gemini_file_search',
   'op.extract_study_entities',
   'op.generate_triplets',
+  'op.enrich_knowledge_graph',
   'op.force_reextract',
   'op.curate_approve',
   'op.manage_users',

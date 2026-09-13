@@ -15,9 +15,18 @@ export const PERMISSIONS_QUERY_KEY = ['effective-permissions'] as const;
 
 /**
  * Effective permissions of the signed-in user, read from the database
- * (my_effective_permissions). The server is always the source of truth:
- * this cache is short-lived and invalidated in realtime whenever the grid,
- * the individual exceptions or the user's roles change.
+ * (my_effective_permissions). The server is always the source of truth —
+ * every protected write is re-checked by has_permission server-side.
+ *
+ * Client-side freshness (measured, not assumed): permissions, role_permissions
+ * and user_permission_overrides are NOT part of the supabase_realtime
+ * publication, so the subscription below only fires if that publication is
+ * enabled later. The guaranteed behaviour today is:
+ *   - staleTime 30s;
+ *   - refetch when the window regains focus or the connection is restored;
+ *   - immediate invalidation in the session that edited the grid.
+ * A revocation made elsewhere is therefore visible within 30s of the next
+ * focus/refetch, not instantly.
  */
 export const usePermissions = () => {
   const { user, loading: authLoading } = useAuth();
@@ -27,6 +36,8 @@ export const usePermissions = () => {
     queryKey: [...PERMISSIONS_QUERY_KEY, user?.id ?? 'anonymous'],
     enabled: !!user,
     staleTime: 30_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
     queryFn: async (): Promise<EffectivePermissionRow[]> => {
       const { data, error } = await supabase.rpc('my_effective_permissions');
       if (error) throw error;
@@ -34,7 +45,8 @@ export const usePermissions = () => {
     },
   });
 
-  // Realtime invalidation — a revoked permission disappears without a reload.
+  // Optional fast path: only fires if these tables are added to the
+  // supabase_realtime publication (they are NOT today). Harmless otherwise.
   useEffect(() => {
     if (!user) return;
     const channel = supabase
