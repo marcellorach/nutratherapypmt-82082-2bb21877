@@ -17,6 +17,10 @@ serve(async (req) => {
   }
 
   try {
+    const authz = await authorize(req, 'op.parse_study', 'edit');
+    if (!authz.ok) return authzResponse(authz, corsHeaders);
+    console.log(`[parse-study] authorized caller origin=${authz.origin} user=${authz.userId ?? 'system'}`);
+
     const { studyId, storagePath } = await req.json();
     
     if (!studyId || !storagePath) {
