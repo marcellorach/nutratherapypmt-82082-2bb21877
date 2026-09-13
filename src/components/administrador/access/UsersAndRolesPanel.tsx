@@ -16,13 +16,10 @@ const UsersAndRolesPanel: React.FC = () => {
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <UserCog className="h-6 w-6 text-primary" />
-          {t('admin.usersAndRoles.title', 'Usuários & Perfis')}
+          {t('admin.usersAndRoles.title')}
         </h1>
         <p className="text-sm text-gray-600 mt-1 max-w-3xl">
-          {t(
-            'admin.usersAndRoles.subtitle',
-            'Aprovação de acesso à plataforma e configuração dos perfis de visualização (camada declarativa que filtra a sidebar — não é segurança).',
-          )}
+          {t('admin.usersAndRoles.subtitle')}
         </p>
       </div>
 
