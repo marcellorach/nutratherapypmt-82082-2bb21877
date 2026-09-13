@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-08-31T00:31:05.539Z
+// Última geração: 2026-09-13T03:51:52.549Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,47 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-08-31";
+export const lastChangelogDate = "2026-09-13";
 
 export const senexVersion = "7.2.4";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-09-13",
+    "kind": "added",
+    "area": "auth",
+    "status": "entregue",
+    "title": "Permissões editáveis por papel e por pessoa",
+    "bullets": [
+      "Catálogo `permissions` (47 abas + 8 operações + `admin.access`), grade `role_permissions`, exceções `user_permission_overrides` e histórico `permission_audit_log`; `has_permission` é a única fonte de verdade (15 políticas RLS de 02/09 reescritas sobre ela)",
+      "Trava de último administrador no banco (`prevent_last_admin_removal`), validada em execução com rollback",
+      "Gates server-side em `parse-study` (`op.parse_study`), `gemini-file-search` (`op.gemini_file_search`), `extract-study-entities` (`op.extract_study_entities`) e `generate-triplets` (`op.generate_triplets`), com propagação de identidade via `x-initiator-id` nas cadeias (`gemini-file-search`, `enrich-knowledge-graph`, `batch-reprocess-triplets`) e mecanismo explícito `system` para chamadas agendadas",
+      "Cliente: `usePermissions` com realtime, `PermissionGate`/`TabGate` fail-closed, bloqueio de deep-link no `AdministradorPage`, telas de permissões por papel, exceções por pessoa e \"minhas permissões\"",
+      "Testes: resolução de permissões (6), paridade catálogo × `admin-tabs.ts` (3), cadeia de identidade do pipeline (5) — suíte total 169 testes",
+      "Files: supabase/functions/_shared/authorization.ts, supabase/functions/parse-study/index.ts, supabase/functions/gemini-file-search/index.ts, supabase/functions/extract-study-entities/index.ts, supabase/functions/generate-triplets/index.ts, supabase/functions/enrich-knowledge-graph/index.ts, supabase/functions/batch-reprocess-triplets/index.ts, src/hooks/usePermissions.ts, src/hooks/usePermissions.pure.ts, src/components/auth/PermissionGate.tsx, src/components/auth/ProtectedRoute.tsx, src/contexts/AuthContext.tsx, src/components/administrador/access/PermissionsMatrixPanel.tsx, src/components/administrador/access/UserOverridesPanel.tsx, src/components/administrador/access/MyPermissionsPanel.tsx, src/components/administrador/access/UsersAndRolesPanel.tsx, src/config/permission-catalog.ts, src/pages/administrador/AdministradorPage.tsx"
+    ],
+    "files": [
+      "supabase/functions/_shared/authorization.ts",
+      "supabase/functions/parse-study/index.ts",
+      "supabase/functions/gemini-file-search/index.ts",
+      "supabase/functions/extract-study-entities/index.ts",
+      "supabase/functions/generate-triplets/index.ts",
+      "supabase/functions/enrich-knowledge-graph/index.ts",
+      "supabase/functions/batch-reprocess-triplets/index.ts",
+      "src/hooks/usePermissions.ts",
+      "src/hooks/usePermissions.pure.ts",
+      "src/components/auth/PermissionGate.tsx",
+      "src/components/auth/ProtectedRoute.tsx",
+      "src/contexts/AuthContext.tsx",
+      "src/components/administrador/access/PermissionsMatrixPanel.tsx",
+      "src/components/administrador/access/UserOverridesPanel.tsx",
+      "src/components/administrador/access/MyPermissionsPanel.tsx",
+      "src/components/administrador/access/UsersAndRolesPanel.tsx",
+      "src/config/permission-catalog.ts",
+      "src/pages/administrador/AdministradorPage.tsx"
+    ],
+    "i18nVersion": "1.127.0"
+  },
   {
     "date": "2026-08-31",
     "kind": "added",
