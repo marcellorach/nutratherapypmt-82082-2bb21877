@@ -29,7 +29,8 @@ const GovernanceAIGroup: React.FC<Props> = ({ currentStep, handleStepClick }) =>
       {items.map(({ id, icon: Icon, key, fallback }) => {
         const active = currentStep === id;
         return (
-          <SidebarMenuItem key={id}>
+          <TabGate tab={id} key={id}>
+          <SidebarMenuItem>
             <SidebarMenuButton
               isActive={active}
               onClick={() => handleStepClick(id)}
