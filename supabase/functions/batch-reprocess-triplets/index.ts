@@ -22,6 +22,9 @@ serve(async (req) => {
   }
 
   try {
+    // Identidade de quem iniciou a cadeia, propagada ao generate-triplets.
+    const chainHeaders = await forwardIdentity(req);
+
     const { studyIds, deleteExisting = true }: BatchReprocessRequest = await req.json();
 
     if (!studyIds || !Array.isArray(studyIds) || studyIds.length === 0) {

@@ -29,6 +29,9 @@ serve(async (req) => {
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+  // Identidade de quem iniciou a cadeia, propagada às rotinas encadeadas.
+  const chainHeaders = await forwardIdentity(req);
+
   // SSE streaming setup
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
