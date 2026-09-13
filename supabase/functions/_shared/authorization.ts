@@ -150,3 +150,34 @@ export const authzResponse = (
     status: failure.status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
+
+/**
+ * Headers a function must use when calling another function, preserving the
+ * identity of whoever started the chain. Never invents an identity: when the
+ * incoming call carries no recognisable caller it declares itself as system.
+ */
+export async function forwardIdentity(req: Request): Promise<Record<string, string>> {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+  const token = bearer(req);
+  const base = { 'Content-Type': 'application/json', Authorization: `Bearer ${serviceKey}` };
+
+  if (token && token === serviceKey) {
+    const initiator = req.headers.get(INITIATOR_HEADER)?.trim();
+    return { ...base, [INITIATOR_HEADER]: initiator && initiator.length > 0 ? initiator : SYSTEM_INITIATOR };
+  }
+
+  if (token && supabaseUrl && serviceKey) {
+    try {
+      const admin = createClient(supabaseUrl, serviceKey, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+      const { data } = await admin.auth.getUser(token);
+      if (data?.user?.id) return { ...base, [INITIATOR_HEADER]: data.user.id };
+    } catch (_) {
+      // fall through to system
+    }
+  }
+
+  return { ...base, [INITIATOR_HEADER]: SYSTEM_INITIATOR };
+}
