@@ -30,6 +30,24 @@ const AdministradorPage: React.FC = () => {
   
   const renderContent = () => {
     const tabConfig = getTabConfig(currentStep);
+
+    // Fail-closed: deep links to a tab the user has no permission for are blocked.
+    if (permissionsLoading) {
+      return <LoadingTab />;
+    }
+
+    if (!canTab(currentStep)) {
+      return (
+        <div className="p-8 text-center max-w-xl mx-auto">
+          <ShieldAlert className="h-10 w-10 mx-auto text-destructive mb-3" />
+          <h2 className="text-xl font-bold">{t('admin.permissions.denied.title')}</h2>
+          <p className="text-muted-foreground mt-2">
+            {t('admin.permissions.denied.description', { tab: currentStep })}
+          </p>
+        </div>
+      );
+    }
+    
     
     if (!tabConfig) {
       // Fallback para tabs não configuradas ainda
