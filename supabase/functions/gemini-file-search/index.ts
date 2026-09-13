@@ -2323,10 +2323,7 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
               `${Deno.env.get('SUPABASE_URL')}/functions/v1/extract-study-entities`,
               {
                 method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-                },
+                headers: chainHeaders,
                 body: JSON.stringify({ studyId }),
               }
             ).then(async (r) => {
