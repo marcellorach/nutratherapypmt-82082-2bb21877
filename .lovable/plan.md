@@ -1,38 +1,41 @@
-# RBAC científico e clínico
+# Permissões editáveis por papel e por pessoa
 
 ## Objetivo
-Implementar os papéis reais `scientist` e `vet_coordinator` sem confundir a camada de visualização com autorização, proteger os quatro escritores científicos no backend e permitir que administradores concedam/revoquem papéis com auditoria.
+Sair de permissões fixas no código e passar a ter uma tela onde o administrador define, item a item, o que cada papel enxerga e faz — podendo também ajustar exceções para uma pessoa específica, sem depender de nova publicação do sistema.
 
-## Sequência
-1. **Remediar a exposição das funções de autorização**
-   - Revisar a migração RBAC aplicada e criar uma migração corretiva, sem alterar migrações históricas.
-   - Remover execução pública das funções novas e manter somente os grants indispensáveis para políticas RLS e chamadas internas.
-   - Rerodar o linter e separar claramente avisos preexistentes de avisos introduzidos pelo RBAC. Não esconder achados.
+## Como vai funcionar
 
-2. **Autorização server-side dos escritores**
-   - Criar helper compartilhado para validar `Authorization` com um cliente de usuário e consultar papéis via funções seguras, antes de criar/usar o cliente service-role.
-   - Aplicar gates a `parse-study`, `gemini-file-search`, `extract-study-entities` e `generate-triplets`.
-   - Propagar a identidade do chamador em chamadas encadeadas; chamadas internas sem identidade não ganharão uma exceção insegura.
-   - Manter `force_reextract` como operação de curadoria autorizada e preservar o ownership/deep-merge existente.
+**1. Catálogo de permissões**
+Cada área do painel (hoje são 45 itens, como Estudos Científicos, Triplets, Knowledge Graph, Análise de Pacientes, AI Scientist, Configurações) vira uma permissão nomeada, com dois níveis: ver e editar. Além das áreas, entram permissões de operação sensível: processar estudos, gerar triplets, reprocessar extração, aprovar curadoria, gerenciar usuários.
 
-3. **RBAC no cliente**
-   - Tipar os seis papéis suportados no `AuthContext` e expor verificações reutilizáveis.
-   - Enforçar acesso à rota administrativa e ao deep-link de cada aba; `RoleViewContext` continuará apenas reduzindo ruído visual.
-   - Preencher a matriz de permissões de `admin-tabs.ts` e filtrar grupos/itens da sidebar pela mesma fonte.
-   - Permitir que `scientist` acesse pesquisa, estudos, processamento científico e curadoria; `vet_coordinator` acesse pacientes, monitoramento clínico e curadoria clínica. Configuração de segurança e gestão de papéis permanecem exclusivas de `admin`.
+**2. Permissão por papel**
+Uma tabela de papéis (administrador, cientista, coordenador veterinário, veterinário, tutor) com uma grade marcável: para cada permissão, nada / ver / ver e editar. O administrador altera e salva; vale para todos daquele papel.
 
-4. **Gestão de papéis e auditoria**
-   - Adicionar no painel de usuários uma UI admin-only para listar perfis existentes, conceder/remover papéis válidos e mostrar o histórico de auditoria.
-   - Impedir remoção do último administrador e tratar erros de concorrência/duplicidade com mensagens traduzidas.
-   - Usar apenas `user_roles` + `profiles`; nenhum papel será armazenado em perfil ou armazenamento local.
+**3. Exceção por pessoa**
+Na ficha de cada usuário, além dos papéis, uma lista de exceções: conceder algo que o papel não dá, ou retirar algo que o papel dá. A regra de decisão é explícita e mostrada na tela: negação individual vence concessão individual, que vence o papel.
 
-5. **Qualidade e documentação**
-   - Adicionar chaves PT/EN e incrementar `I18N_VERSION` antes das mudanças de interface.
-   - Criar testes para matriz de permissões, rota/aba, helper de autorização e gestão de papéis; executar testes, typecheck, build, guards e linter.
-   - Atualizar `CHANGELOG.md`, sincronizar changelog e registrar contagens/status reais no relatório final.
+**4. Transparência e segurança**
+- Toda alteração de papel, de grade e de exceção fica registrada com autor, data e valor anterior.
+- Cada usuário pode ver uma tela "minhas permissões" explicando de onde vem cada acesso.
+- O administrador não consegue remover o próprio último acesso de administração, nem deixar o sistema sem administrador.
+- A verificação real acontece no servidor. A tela apenas reflete a decisão; esconder um botão nunca é a proteção.
 
-## Trade-offs e limites
-- **Contra a proposta:** aplicar gates nos writers não torna pipelines iniciados pelo cliente seguros se a identidade não for propagada; por isso chamadas encadeadas serão corrigidas no mesmo passo, em vez de liberar uma chave interna ou confiar no service-role.
-- A separação `scientist`/`vet_coordinator` será conservadora: o primeiro escreve ciência e o segundo escreve/edita dados de curadoria clínica. Caso uma operação exija ambos os domínios, o backend usará a permissão mais específica e não uma regra ampla baseada somente na UI.
-- O linter pode continuar apontando funções `SECURITY DEFINER` legadas que precisam ser executáveis por `authenticated` para políticas RLS. Esses achados serão reportados com evidência; funções novas não ficarão publicamente executáveis e nenhuma permissão será removida se isso quebrar RLS.
-- O dashboard de conformidade e `outcome_observations` ficam fora deste incremento.
+**5. Onde passa a valer**
+- Menu lateral e abas do painel só mostram o que a pessoa pode ver, e o acesso por link direto é bloqueado igual.
+- As quatro rotinas que processam estudos e geram conhecimento passam a exigir identificação e permissão antes de rodar; hoje elas aceitam qualquer chamada.
+- Tudo em português e inglês, como o resto do sistema.
+
+## Detalhes técnicos
+- Novas tabelas: `permissions` (catálogo), `role_permissions` (grade por papel), `user_permission_overrides` (exceção individual, com allow/deny), e reuso de `user_roles` já existente. Cada tabela com grants explícitos, RLS e escrita restrita a administrador.
+- Função `SECURITY DEFINER` `has_permission(user_id, permission_key, level)` resolvendo na ordem deny individual → allow individual → união dos papéis; usada tanto nas políticas RLS quanto pelas rotinas de servidor.
+- Migração de partida popula o catálogo a partir de `src/config/admin-tabs.ts` e concede tudo ao papel administrador, preservando o comportamento atual no momento da virada.
+- Cliente: hook `usePermissions` com cache, substituindo os testes fixos de papel em `AuthContext`, `ProtectedRoute`, `AdministradorPage` e nos grupos da barra lateral. `RoleViewContext` continua apenas como filtro visual pessoal, sem valor de segurança.
+- Rotinas `parse-study`, `gemini-file-search`, `extract-study-entities` e `generate-triplets`: helper compartilhado que valida o token do chamador e a permissão antes de qualquer escrita, com propagação da identidade nas chamadas encadeadas.
+- Correção pendente do alerta de segurança das funções de autorização recém-criadas, com nova migração corretiva e verificação do relatório antes de seguir.
+- Testes: resolução de permissão (papel, allow, deny, combinação), bloqueio de link direto, recusa das rotinas sem permissão, e trava do último administrador.
+
+## Opinião e limites
+- Concordo com o pedido: grade editável é o certo aqui, porque os cinco perfis do produto ainda vão mudar e travar isso em código gera fila de ajuste a cada mudança de time.
+- **Argumento contra:** permissão editável adiciona um estado que pode ser mal configurado — alguém pode se trancar fora de uma área ou liberar demais sem perceber. Mitigo com valores iniciais iguais ao comportamento atual, trava do último administrador, histórico de alterações e a tela "minhas permissões".
+- Mantenho o catálogo no nível de área e operação, não campo a campo. Granularidade por campo multiplicaria a grade sem ganho real agora.
+- Fora deste incremento: dashboard de conformidade calculado do banco e registro de desfechos clínicos.
