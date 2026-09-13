@@ -41,6 +41,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/" replace />;
   }
 
+  // Fail-closed: a permission key that the database does not grant blocks the route.
+  if (requiredPermission && !can(requiredPermission, requiredLevel)) {
+    return <Navigate to="/" replace />;
+  }
+
+
   return <>{children}</>;
 };
 
