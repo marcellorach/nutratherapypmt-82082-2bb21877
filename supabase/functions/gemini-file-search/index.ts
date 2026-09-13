@@ -1745,7 +1745,7 @@ serve(async (req) => {
 
   // Parse & validate request synchronously, then offload the long pipeline
   // to a background task to avoid the 150s edge IDLE_TIMEOUT.
-  const authz = await authorize(req, 'op.parse_study', 'edit');
+  const authz = await authorize(req, 'op.gemini_file_search', 'edit');
   if (!authz.ok) return authzResponse(authz, corsHeaders);
   console.log(`[gemini-file-search] authorized caller origin=${authz.origin} user=${authz.userId ?? 'system'}`);
   const chainHeaders = authz.forwardHeaders;

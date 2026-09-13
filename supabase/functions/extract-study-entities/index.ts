@@ -43,7 +43,7 @@ serve(async (req) => {
   }
 
   try {
-    const authz = await authorize(req, 'op.parse_study', 'edit');
+    const authz = await authorize(req, 'op.extract_study_entities', 'edit');
     if (!authz.ok) return authzResponse(authz, corsHeaders);
     console.log(`[extract-study-entities] authorized caller origin=${authz.origin} user=${authz.userId ?? 'system'}`);
 
