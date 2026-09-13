@@ -25,12 +25,17 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Gate de autorização ANTES de qualquer cliente service-role.
+  const authz = await authorize(req, 'op.enrich_knowledge_graph', 'edit');
+  if (!authz.ok) return authzResponse(authz, corsHeaders);
+  console.log(`[enrich-knowledge-graph] authorized origin=${authz.origin} user=${authz.userId ?? 'system'}`);
+
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   // Identidade de quem iniciou a cadeia, propagada às rotinas encadeadas.
-  const chainHeaders = await forwardIdentity(req);
+  const chainHeaders = { 'Content-Type': 'application/json', ...authz.forwardHeaders };
 
   // SSE streaming setup
   const encoder = new TextEncoder();
