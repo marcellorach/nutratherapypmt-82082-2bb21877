@@ -6745,8 +6745,6 @@ export type Database = {
         Args: { request_id: string }
         Returns: undefined
       }
-      can_curate: { Args: never; Returns: boolean }
-      can_write_science: { Args: never; Returns: boolean }
       count_pending_access_requests: { Args: never; Returns: number }
       current_has_permission: {
         Args: { _key: string; _level?: string }
@@ -6826,11 +6824,8 @@ export type Database = {
         Args: { _key: string; _level?: string; _user_id: string }
         Returns: boolean
       }
-      has_role: { Args: { _role: string; _user_id: string }; Returns: boolean }
       increment_translation_version: { Args: never; Returns: number }
       is_admin: { Args: never; Returns: boolean }
-      is_scientist: { Args: never; Returns: boolean }
-      is_vet_coordinator: { Args: never; Returns: boolean }
       my_effective_permissions: {
         Args: never
         Returns: {
