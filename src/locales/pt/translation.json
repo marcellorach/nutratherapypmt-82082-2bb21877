@@ -3018,6 +3018,59 @@
         "reportReady": "Relatório de modelos gerado",
         "reportError": "Erro ao gerar relatório"
       }
+    },
+    "permissions": {
+      "denied": {
+        "title": "Acesso não liberado",
+        "description": "Você não tem permissão para abrir \"{{tab}}\". Peça a um administrador para liberar."
+      },
+      "levels": {
+        "view": "Ver",
+        "edit": "Editar",
+        "none": "Sem acesso"
+      },
+      "effects": {
+        "allow": "Liberar",
+        "deny": "Bloquear"
+      },
+      "matrix": {
+        "title": "Permissões por papel",
+        "subtitle": "Defina o que cada papel pode ver e editar. Clique para alternar entre ver, editar e sem acesso.",
+        "permission": "Área ou operação",
+        "searchPlaceholder": "Buscar área ou operação",
+        "hint": "As mudanças valem imediatamente para todos os usuários do papel.",
+        "saveError": "Não foi possível salvar a permissão"
+      },
+      "overrides": {
+        "title": "Exceções por pessoa",
+        "subtitle": "Libere ou bloqueie uma área para uma pessoa específica, acima do papel dela.",
+        "listTitle": "Exceções cadastradas",
+        "empty": "Nenhuma exceção cadastrada",
+        "userPlaceholder": "Escolha a pessoa",
+        "permissionPlaceholder": "Escolha a área ou operação",
+        "reasonPlaceholder": "Motivo (opcional)",
+        "save": "Salvar exceção",
+        "saved": "Exceção salva",
+        "saveError": "Não foi possível salvar a exceção",
+        "missingFields": "Escolha a pessoa e a área antes de salvar"
+      },
+      "mine": {
+        "title": "Minhas permissões",
+        "subtitle": "O que você pode ver e editar hoje.",
+        "roles": "Seus papéis",
+        "noRoles": "Nenhum papel atribuído",
+        "empty": "Você ainda não tem permissões liberadas"
+      }
+    },
+    "usersAndRoles": {
+      "title": "Usuários e permissões",
+      "tabs": {
+        "roles": "Papéis",
+        "requests": "Solicitações",
+        "matrix": "Permissões por papel",
+        "overrides": "Exceções",
+        "mine": "Minhas permissões"
+      }
     }
   },
   "footer": {

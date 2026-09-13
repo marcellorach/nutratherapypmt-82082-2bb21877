@@ -3017,6 +3017,59 @@
         "reportReady": "Model report generated",
         "reportError": "Failed to generate report"
       }
+    },
+    "permissions": {
+      "denied": {
+        "title": "Access not granted",
+        "description": "You do not have permission to open \"{{tab}}\". Ask an administrator to grant it."
+      },
+      "levels": {
+        "view": "View",
+        "edit": "Edit",
+        "none": "No access"
+      },
+      "effects": {
+        "allow": "Allow",
+        "deny": "Block"
+      },
+      "matrix": {
+        "title": "Permissions by role",
+        "subtitle": "Set what each role can view and edit. Click to cycle through view, edit and no access.",
+        "permission": "Area or operation",
+        "searchPlaceholder": "Search area or operation",
+        "hint": "Changes apply immediately to every user in the role.",
+        "saveError": "Could not save the permission"
+      },
+      "overrides": {
+        "title": "Per-person exceptions",
+        "subtitle": "Allow or block an area for one person, on top of their role.",
+        "listTitle": "Registered exceptions",
+        "empty": "No exceptions registered",
+        "userPlaceholder": "Choose the person",
+        "permissionPlaceholder": "Choose the area or operation",
+        "reasonPlaceholder": "Reason (optional)",
+        "save": "Save exception",
+        "saved": "Exception saved",
+        "saveError": "Could not save the exception",
+        "missingFields": "Choose the person and the area before saving"
+      },
+      "mine": {
+        "title": "My permissions",
+        "subtitle": "What you can view and edit today.",
+        "roles": "Your roles",
+        "noRoles": "No role assigned",
+        "empty": "You have no permissions granted yet"
+      }
+    },
+    "usersAndRoles": {
+      "title": "Users and permissions",
+      "tabs": {
+        "roles": "Roles",
+        "requests": "Requests",
+        "matrix": "Permissions by role",
+        "overrides": "Exceptions",
+        "mine": "My permissions"
+      }
     }
   },
   "footer": {
