@@ -36,6 +36,8 @@ export const usePermissions = () => {
     queryKey: [...PERMISSIONS_QUERY_KEY, user?.id ?? 'anonymous'],
     enabled: !!user,
     staleTime: 30_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
     queryFn: async (): Promise<EffectivePermissionRow[]> => {
       const { data, error } = await supabase.rpc('my_effective_permissions');
       if (error) throw error;
@@ -43,7 +45,8 @@ export const usePermissions = () => {
     },
   });
 
-  // Realtime invalidation — a revoked permission disappears without a reload.
+  // Optional fast path: only fires if these tables are added to the
+  // supabase_realtime publication (they are NOT today). Harmless otherwise.
   useEffect(() => {
     if (!user) return;
     const channel = supabase
