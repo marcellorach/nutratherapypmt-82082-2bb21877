@@ -24,8 +24,12 @@ const UsersAndRolesPanel: React.FC = () => {
         </p>
       </div>
 
-      <Tabs defaultValue="requests" className="w-full">
+      <Tabs defaultValue="users" className="w-full">
         <TabsList>
+          <TabsTrigger value="users" className="flex items-center gap-2">
+            <Users className="h-3.5 w-3.5" />
+            {t('admin.permissions.users.tab')}
+          </TabsTrigger>
           <TabsTrigger value="requests" className="flex items-center gap-2">
             <UserCog className="h-3.5 w-3.5" />
             {t('admin.usersAndRoles.tabs.requests', 'Solicitações de acesso')}
