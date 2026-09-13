@@ -1,15 +1,21 @@
 # Project context briefing (auto)
-Generated: 2026-08-31T00:31:05.550Z
+Generated: 2026-09-13T03:51:52.556Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.126.0
+## Latest i18n version: 1.127.0
 
 ## Changes by area (last 14 days)
-- **curation**: 2
+- **auth**: 1
 - **infra**: 1
 
 ## Top 10 recent entries
+### 2026-09-13 · [auth] ADDED — Permissões editáveis por papel e por pessoa
+- Catálogo `permissions` (47 abas + 8 operações + `admin.access`), grade `role_permissions`, exceções `user_permission_overrides` e histórico `permission_audit_log`; `has_permission` é a única fonte de verdade (15 políticas RLS de 02/09 reescritas sobre ela)
+- Trava de último administrador no banco (`prevent_last_admin_removal`), validada em execução com rollback
+- Gates server-side em `parse-study` (`op.parse_study`), `gemini-file-search` (`op.gemini_file_search`), `extract-study-entities` (`op.extract_study_entities`) e `generate-triplets` (`op.generate_triplets`), com propagação de identidade via `x-initiator-id` nas cadeias (`gemini-file-search`, `enrich-knowledge-graph`, `batch-reprocess-triplets`) e mecanismo explícito `system` para chamadas agendadas
+_files: supabase/functions/_shared/authorization.ts, supabase/functions/parse-study/index.ts, supabase/functions/gemini-file-search/index.ts, supabase/functions/extract-study-entities/index.ts…_
+
 ### 2026-08-31 · [infra] ADDED — Telemetria e retry com backoff em imports dinâmicos
 - Novo `src/lib/assetFailureTelemetry.ts`: registro compartilhado de falhas de asset (URL, nome do chunk, tentativa, willReload, build, timestamp) em `sessionStorage` + evento `asset-preload-failure`.
 - `lazyWithRetry` agora expõe `loadWithRetry` com 2 retries em backoff (300ms/900ms), telemetria por tentativa e um único reload protegido por flag de sessão.
@@ -63,12 +69,6 @@ _files: src/services/multi-source-resolver.ts, src/components/clinical/Mechanism
 - Fix estrutural — split em 2 calls no `gemini-file-search`: nova função `acquireFullText()` (Call 1, `gemini-2.5-flash`, schema minimal `{ full_text: string }`) roda em paralelo conceitual e sobrescreve `extractedData.full_text` quando entrega texto maior; a Call 2 existente (`extractWithFileSearch`) preserva as 22 propriedades clínicas. Metadados bibliográficos seguem propriedade exclusiva do `parse-study` (Call 1 nunca grava em title/authors/year/abstract/doi).
 - Gate de 3 estados (qualitativo, SEM char-floor absoluto) persistido em nova coluna `processed_studies.ingestion_stages jsonb`:
 _files: supabase/functions/parse-study/index.ts, supabase/functions/gemini-file-search/index.ts, supabase/functions/extract-study-entities/index.ts, supabase/functions/vectorize-study/index.ts…_
-
-### 2026-06-08 · [admin] FIXED — Auditorias: tag CONFIDENCIAL sem encavalamento + propriedade PetMoreTime reforçada
-- `audit-pdf-generator.ts`: banner CONFIDENCIAL agora usa layout flex real (tag em `<span>` com `flex-shrink:0`), eliminando a sobreposição do pseudo-elemento `::before` sobre o texto observada em PT/EN.
-- Footer discreto fixado em todas as páginas no `@media print` (`position:fixed; bottom:0`, 9px italic, "CONFIDENCIAL" em vermelho sóbrio inline), mantendo aparição única em tela.
-- Copy do banner e do rodapé reforçam propriedade exclusiva: "Plataforma Senex AI · Engine Senex AI v7 · © PetMoreTime. Todos os direitos reservados. Tecnologia, modelos e conteúdo são propriedade exclusiva da PetMoreTime." (PT/EN equivalentes). Vale para os relatórios técnicos e showcase, tanto em download quanto em print.
-_files: src/components/administrador/audits/audit-pdf-generator.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
