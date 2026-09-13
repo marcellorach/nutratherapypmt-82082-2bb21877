@@ -1,15 +1,21 @@
 # Project context briefing (auto)
-Generated: 2026-09-13T04:46:15.757Z
+Generated: 2026-09-13T04:46:41.073Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
 ## Latest i18n version: 1.127.0
 
 ## Changes by area (last 14 days)
-- **auth**: 1
+- **auth**: 2
 - **infra**: 1
 
 ## Top 10 recent entries
+### 2026-09-13 · [auth] FIXED — Endurecimento das permissões antes do deploy
+- `forwardIdentity()` deixa de degradar para `system`: sem token reconhecível (ou chave de serviço sem `x-initiator-id`) devolve 401; `system` só vale quando declarado explicitamente
+- `enrich-knowledge-graph` ganhou gate `authorize()` com a nova chave `op.enrich_knowledge_graph` e `verify_jwt = true`; `batch-reprocess-triplets` gateado com `op.generate_triplets`
+- Catálogo de permissões versionado em migração idempotente (57 chaves + grade admin 57 × edit), rodada duas vezes sem duplicar
+_files: supabase/functions/_shared/authorization.ts, supabase/functions/enrich-knowledge-graph/index.ts, supabase/functions/batch-reprocess-triplets/index.ts, src/config/permission-catalog.ts…_
+
 ### 2026-09-13 · [auth] ADDED — Permissões editáveis por papel e por pessoa
 - Catálogo `permissions` (47 abas + 8 operações + `admin.access`), grade `role_permissions`, exceções `user_permission_overrides` e histórico `permission_audit_log`; `has_permission` é a única fonte de verdade (15 políticas RLS de 02/09 reescritas sobre ela)
 - Trava de último administrador no banco (`prevent_last_admin_removal`), validada em execução com rollback
@@ -63,12 +69,6 @@ _files: supabase/functions/_shared/system-prompts.ts, src/config/app-version.ts,
 - Fix KG: nova RPC `public.search_relations_by_term(p_terms text[], p_limit int)` faz `ILIKE` direto em `subject_name`/`object_name` filtrando `curation_status='approved' OR auto_approved=true`, ordenando por `llm_confidence`. Provider passa a chamar a RPC. Validado: pergunta de curcumina retorna 10+ relações (Curcumin ⊣ NF-κB, ↑ Nrf2, ↓ TLR4, previne Alzheimer/Parkinson).
 - Fix cohort (eco lexical): `cohortProvider` parou de fazer substring de palavras da query em `notes`. Agora detecta entidade canônica (raça via `pet_profiles.breed`, condição via `pet_conditions.condition_name`) presente no texto da pergunta e filtra a contagem real. Sem entidade reconhecida → claim explícito ("sem entidade clínica reconhecida"), nunca eco da query.
 _files: src/services/multi-source-resolver.ts, src/components/clinical/MechanismDiagram.tsx, src/components/clinical/SourcePanel.tsx, src/i18n.ts_
-
-### 2026-06-09 · [curation] FIXED — Ingestão: gate qualitativo + truncamento relativo + Call 1 dedicada
-- Root cause: chamada monolítica do `gemini-file-search` competia `full_text` com 22 outras propriedades clínicas no mesmo tool call (`gemini-3-pro-preview`), causando truncamento progressivo do texto completo e queda na análise — sintoma do estudo Spermine (09/06) com `analysis_data` zerado mas `kanban_status='processed'`, e do CoQ10 (22/05) caindo no fallback `structured_data_enhanced` com 0 nutracêuticos.
-- Fix estrutural — split em 2 calls no `gemini-file-search`: nova função `acquireFullText()` (Call 1, `gemini-2.5-flash`, schema minimal `{ full_text: string }`) roda em paralelo conceitual e sobrescreve `extractedData.full_text` quando entrega texto maior; a Call 2 existente (`extractWithFileSearch`) preserva as 22 propriedades clínicas. Metadados bibliográficos seguem propriedade exclusiva do `parse-study` (Call 1 nunca grava em title/authors/year/abstract/doi).
-- Gate de 3 estados (qualitativo, SEM char-floor absoluto) persistido em nova coluna `processed_studies.ingestion_stages jsonb`:
-_files: supabase/functions/parse-study/index.ts, supabase/functions/gemini-file-search/index.ts, supabase/functions/extract-study-entities/index.ts, supabase/functions/vectorize-study/index.ts…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
