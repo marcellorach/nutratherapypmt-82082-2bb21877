@@ -3076,6 +3076,7 @@
     },
     "usersAndRoles": {
       "title": "Users and permissions",
+      "subtitle": "\"Permissions by role\" and \"Exceptions\" are enforced on the server: they define what each person can view and edit. The \"Roles\" tab is only a visual filter for the sidebar, with no security effect.",
       "tabs": {
         "roles": "Roles",
         "requests": "Requests",
