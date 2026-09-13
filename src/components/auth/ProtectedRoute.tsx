@@ -1,20 +1,28 @@
 
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth, type AppRole } from '@/contexts/AuthContext';
+import { usePermissions } from '@/hooks/usePermissions';
+import type { PermissionLevel } from '@/hooks/usePermissions.pure';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'admin' | 'veterinarian' | 'tutor';
+  requiredRole?: AppRole;
+  /** Permission key checked against the database grid (fail-closed). */
+  requiredPermission?: string;
+  requiredLevel?: PermissionLevel;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
-  requiredRole 
+  requiredRole,
+  requiredPermission,
+  requiredLevel = 'view',
 }) => {
   const { user, loading, hasRole } = useAuth();
+  const { can, loading: permissionsLoading } = usePermissions();
 
-  if (loading) {
+  if (loading || (requiredPermission && permissionsLoading)) {
     // Componente de carregamento enquanto verifica autenticação
     return (
       <div className="flex h-screen items-center justify-center">
@@ -32,6 +40,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   if (requiredRole && !hasRole(requiredRole)) {
     return <Navigate to="/" replace />;
   }
+
+  // Fail-closed: a permission key that the database does not grant blocks the route.
+  if (requiredPermission && !can(requiredPermission, requiredLevel)) {
+    return <Navigate to="/" replace />;
+  }
+
 
   return <>{children}</>;
 };

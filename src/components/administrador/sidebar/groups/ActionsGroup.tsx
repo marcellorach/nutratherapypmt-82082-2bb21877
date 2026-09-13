@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { TabGate } from '@/components/auth/PermissionGate';
 import { Zap, Gauge, ChevronRight, Activity, CircleCheck } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -18,6 +19,7 @@ const ActionsGroup: React.FC<ActionsGroupProps> = ({
   
   return (
     <>
+      <TabGate tab="analytics">
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "analytics"} 
@@ -46,6 +48,8 @@ const ActionsGroup: React.FC<ActionsGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
+      <TabGate tab="custo-beneficio">
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "custo-beneficio"} 
@@ -63,6 +67,8 @@ const ActionsGroup: React.FC<ActionsGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
+      <TabGate tab="clinical-monitoring">
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "clinical-monitoring"} 
@@ -80,6 +86,7 @@ const ActionsGroup: React.FC<ActionsGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
     </>
   );
 };

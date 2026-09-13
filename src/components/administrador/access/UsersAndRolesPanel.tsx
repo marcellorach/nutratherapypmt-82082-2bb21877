@@ -1,9 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UserCog, Eye } from 'lucide-react';
+import { UserCog, Eye, ShieldCheck, UserMinus, KeyRound } from 'lucide-react';
 import AccessRequestsPanel from './AccessRequestsPanel';
 import RoleViewEditor from '@/components/administrador/priorizacoes/RoleViewEditor';
+import PermissionsMatrixPanel from './PermissionsMatrixPanel';
+import UserOverridesPanel from './UserOverridesPanel';
+import MyPermissionsPanel from './MyPermissionsPanel';
 
 const UsersAndRolesPanel: React.FC = () => {
   const { t } = useTranslation();
@@ -33,6 +36,18 @@ const UsersAndRolesPanel: React.FC = () => {
             <Eye className="h-3.5 w-3.5" />
             {t('admin.usersAndRoles.tabs.roles', 'Perfis de visualização')}
           </TabsTrigger>
+          <TabsTrigger value="matrix" className="flex items-center gap-2">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            {t('admin.usersAndRoles.tabs.matrix')}
+          </TabsTrigger>
+          <TabsTrigger value="overrides" className="flex items-center gap-2">
+            <UserMinus className="h-3.5 w-3.5" />
+            {t('admin.usersAndRoles.tabs.overrides')}
+          </TabsTrigger>
+          <TabsTrigger value="mine" className="flex items-center gap-2">
+            <KeyRound className="h-3.5 w-3.5" />
+            {t('admin.usersAndRoles.tabs.mine')}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="requests" className="mt-4">
@@ -40,6 +55,15 @@ const UsersAndRolesPanel: React.FC = () => {
         </TabsContent>
         <TabsContent value="roles" className="mt-4">
           <RoleViewEditor />
+        </TabsContent>
+        <TabsContent value="matrix" className="mt-4">
+          <PermissionsMatrixPanel />
+        </TabsContent>
+        <TabsContent value="overrides" className="mt-4">
+          <UserOverridesPanel />
+        </TabsContent>
+        <TabsContent value="mine" className="mt-4">
+          <MyPermissionsPanel />
         </TabsContent>
       </Tabs>
     </div>

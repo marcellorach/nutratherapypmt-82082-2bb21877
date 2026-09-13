@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { TabGate } from '@/components/auth/PermissionGate';
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Beaker, FlaskConical, CheckCheck, Database, Lightbulb, ChevronRight, CircleCheck, Sparkles } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -32,6 +33,7 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({ currentStep, handleStepCl
   
   return (
     <>
+      <TabGate tab="priorizacoes">
       <SidebarMenuItem>
         <SidebarMenuButton
           isActive={currentStep === "priorizacoes"}
@@ -49,6 +51,8 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({ currentStep, handleStepCl
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
+      <TabGate tab="sugestoes-ai">
       <SidebarMenuItem>
         <SidebarMenuButton
           isActive={currentStep === "sugestoes-ai"}
@@ -67,6 +71,8 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({ currentStep, handleStepCl
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
+      <TabGate tab="estudos-planejados">
       <SidebarMenuItem>
         <SidebarMenuButton
           isActive={currentStep === "estudos-planejados"}
@@ -85,6 +91,8 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({ currentStep, handleStepCl
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
+      <TabGate tab="estudos-andamento">
       <SidebarMenuItem>
         <SidebarMenuButton
           isActive={currentStep === "estudos-andamento"}
@@ -103,6 +111,8 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({ currentStep, handleStepCl
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
+      <TabGate tab="estudos-concluidos">
       <SidebarMenuItem>
         <SidebarMenuButton
           isActive={currentStep === "estudos-concluidos"}
@@ -120,6 +130,8 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({ currentStep, handleStepCl
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
+      <TabGate tab="modelos">
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "modelos"} 
@@ -137,6 +149,7 @@ const ResearchGroup: React.FC<ResearchGroupProps> = ({ currentStep, handleStepCl
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
     </>
   );
 };

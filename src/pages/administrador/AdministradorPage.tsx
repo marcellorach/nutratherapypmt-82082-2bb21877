@@ -7,12 +7,15 @@ import AdminLayout from '@/components/administrador/AdminLayout';
 import { adminTabsConfig, getTabConfig } from '@/config/admin-tabs';
 import { NutraceuticalProvider } from '@/contexts/NutraceuticalContext';
 import { useTranslation } from 'react-i18next';
+import { usePermissions } from '@/hooks/usePermissions';
+import { ShieldAlert } from 'lucide-react';
 
 const AdministradorPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
   const [currentStep, setCurrentStep] = useState<string>(tabParam || "estudos");
   const { t } = useTranslation();
+  const { canTab, loading: permissionsLoading } = usePermissions();
   
   const handleStepChange = (newStep: string) => {
     setCurrentStep(newStep);
@@ -27,6 +30,24 @@ const AdministradorPage: React.FC = () => {
   
   const renderContent = () => {
     const tabConfig = getTabConfig(currentStep);
+
+    // Fail-closed: deep links to a tab the user has no permission for are blocked.
+    if (permissionsLoading) {
+      return <LoadingTab />;
+    }
+
+    if (!canTab(currentStep)) {
+      return (
+        <div className="p-8 text-center max-w-xl mx-auto">
+          <ShieldAlert className="h-10 w-10 mx-auto text-destructive mb-3" />
+          <h2 className="text-xl font-bold">{t('admin.permissions.denied.title')}</h2>
+          <p className="text-muted-foreground mt-2">
+            {t('admin.permissions.denied.description', { tab: currentStep })}
+          </p>
+        </div>
+      );
+    }
+    
     
     if (!tabConfig) {
       // Fallback para tabs não configuradas ainda

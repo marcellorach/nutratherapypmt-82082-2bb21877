@@ -6,6 +6,7 @@ import {
   mergeExtractedData,
   sortedKeys,
 } from '../_shared/analysisDataMerge.ts';
+import { authorize, authzResponse } from '../_shared/authorization.ts';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
@@ -42,6 +43,10 @@ serve(async (req) => {
   }
 
   try {
+    const authz = await authorize(req, 'op.extract_study_entities', 'edit');
+    if (!authz.ok) return authzResponse(authz, corsHeaders);
+    console.log(`[extract-study-entities] authorized caller origin=${authz.origin} user=${authz.userId ?? 'system'}`);
+
     console.log('📥 Parsing request body...');
     const { studyId, force_reextract } = await req.json();
     const forceReextract = force_reextract === true;

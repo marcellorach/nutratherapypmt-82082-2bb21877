@@ -3617,6 +3617,78 @@ export type Database = {
         }
         Relationships: []
       }
+      permission_audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          new_value: Json | null
+          old_value: Json | null
+          performed_by: string | null
+          permission_key: string | null
+          subject_id: string
+          subject_type: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          performed_by?: string | null
+          permission_key?: string | null
+          subject_id: string
+          subject_type: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          new_value?: Json | null
+          old_value?: Json | null
+          performed_by?: string | null
+          permission_key?: string | null
+          subject_id?: string
+          subject_type?: string
+        }
+        Relationships: []
+      }
+      permissions: {
+        Row: {
+          category: string
+          created_at: string
+          description_en: string | null
+          description_pt: string | null
+          key: string
+          label_en: string
+          label_pt: string
+          supports_edit: boolean
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description_en?: string | null
+          description_pt?: string | null
+          key: string
+          label_en: string
+          label_pt: string
+          supports_edit?: boolean
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description_en?: string | null
+          description_pt?: string | null
+          key?: string
+          label_en?: string
+          label_pt?: string
+          supports_edit?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pet_clinical_analysis_snapshots: {
         Row: {
           analysis_version: string
@@ -5098,6 +5170,77 @@ export type Database = {
           },
         ]
       }
+      rls_policies_backup_20260913: {
+        Row: {
+          captured_at: string | null
+          cmd: string | null
+          permissive: string | null
+          policyname: unknown
+          qual: string | null
+          roles: unknown[] | null
+          schemaname: unknown
+          tablename: unknown
+          with_check: string | null
+        }
+        Insert: {
+          captured_at?: string | null
+          cmd?: string | null
+          permissive?: string | null
+          policyname?: unknown
+          qual?: string | null
+          roles?: unknown[] | null
+          schemaname?: unknown
+          tablename?: unknown
+          with_check?: string | null
+        }
+        Update: {
+          captured_at?: string | null
+          cmd?: string | null
+          permissive?: string | null
+          policyname?: unknown
+          qual?: string | null
+          roles?: unknown[] | null
+          schemaname?: unknown
+          tablename?: unknown
+          with_check?: string | null
+        }
+        Relationships: []
+      }
+      role_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          level: string
+          permission_key: string
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          level: string
+          permission_key: string
+          role: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          level?: string
+          permission_key?: string
+          role?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_permission_key_fkey"
+            columns: ["permission_key"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
       scientific_studies: {
         Row: {
           abstract: string | null
@@ -6087,6 +6230,47 @@ export type Database = {
           },
         ]
       }
+      user_permission_overrides: {
+        Row: {
+          created_at: string
+          effect: string
+          id: string
+          level: string
+          permission_key: string
+          reason: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          effect: string
+          id?: string
+          level: string
+          permission_key: string
+          reason?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          effect?: string
+          id?: string
+          level?: string
+          permission_key?: string
+          reason?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_permission_overrides_permission_key_fkey"
+            columns: ["permission_key"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
       user_role_audit_log: {
         Row: {
           action: string
@@ -6135,6 +6319,30 @@ export type Database = {
           role?: string
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles_backup_20260913: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          role: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          role?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          role?: string | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -6537,9 +6745,11 @@ export type Database = {
         Args: { request_id: string }
         Returns: undefined
       }
-      can_curate: { Args: never; Returns: boolean }
-      can_write_science: { Args: never; Returns: boolean }
       count_pending_access_requests: { Args: never; Returns: number }
+      current_has_permission: {
+        Args: { _key: string; _level?: string }
+        Returns: boolean
+      }
       decrypt_api_key: {
         Args: { p_key_name: string; p_master_key: string }
         Returns: string
@@ -6610,11 +6820,20 @@ export type Database = {
           target_type: string
         }[]
       }
-      has_role: { Args: { _role: string; _user_id: string }; Returns: boolean }
+      has_permission: {
+        Args: { _key: string; _level?: string; _user_id: string }
+        Returns: boolean
+      }
       increment_translation_version: { Args: never; Returns: number }
       is_admin: { Args: never; Returns: boolean }
-      is_scientist: { Args: never; Returns: boolean }
-      is_vet_coordinator: { Args: never; Returns: boolean }
+      my_effective_permissions: {
+        Args: never
+        Returns: {
+          level: string
+          permission_key: string
+          source: string
+        }[]
+      }
       search_relations_by_term: {
         Args: { p_limit?: number; p_terms: string[] }
         Returns: {

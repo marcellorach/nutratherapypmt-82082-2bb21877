@@ -4,6 +4,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { callAITask } from '../_shared/ai-task-router.ts';
 import { fetchSystemPrompt } from '../_shared/system-prompts.ts';
 import { mergeAnalysisDataFromOtherWriter } from '../_shared/analysisDataMerge.ts';
+import { authorize, authzResponse } from '../_shared/authorization.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -362,6 +363,10 @@ serve(async (req) => {
   }
 
   try {
+    const authz = await authorize(req, 'op.generate_triplets', 'edit');
+    if (!authz.ok) return authzResponse(authz, corsHeaders);
+    console.log(`[generate-triplets] authorized caller origin=${authz.origin} user=${authz.userId ?? 'system'}`);
+
     const { studyId }: TripletRequest = await req.json();
 
     if (!studyId) {

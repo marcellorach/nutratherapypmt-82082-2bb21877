@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { forwardIdentity } from '../_shared/authorization.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -27,6 +28,9 @@ serve(async (req) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+  // Identidade de quem iniciou a cadeia, propagada às rotinas encadeadas.
+  const chainHeaders = await forwardIdentity(req);
 
   // SSE streaming setup
   const encoder = new TextEncoder();
@@ -155,10 +159,7 @@ serve(async (req) => {
           try {
             const extractResp = await fetch(`${supabaseUrl}/functions/v1/gemini-file-search`, {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${supabaseServiceKey}`,
-              },
+              headers: chainHeaders,
               body: JSON.stringify({ studyId, mode: 'extract' }),
             });
 
@@ -179,10 +180,7 @@ serve(async (req) => {
           try {
             const tripResp = await fetch(`${supabaseUrl}/functions/v1/generate-triplets`, {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${supabaseServiceKey}`,
-              },
+              headers: chainHeaders,
               body: JSON.stringify({ studyId }),
             });
 

@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { TabGate } from '@/components/auth/PermissionGate';
 import { ChevronRight, Check, Languages, CheckCircle2, Palette, UserCog, Zap, Gauge } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useTranslation } from 'react-i18next';
@@ -21,6 +22,7 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
 
   return (
     <>
+      <TabGate tab="actions">
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "actions"} 
@@ -41,6 +43,8 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
+      <TabGate tab="analytics">
       <SidebarMenuItem>
         <SidebarMenuButton
           isActive={currentStep === "analytics"}
@@ -61,6 +65,8 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
+      <TabGate tab="custo-beneficio">
       <SidebarMenuItem>
         <SidebarMenuButton
           isActive={currentStep === "custo-beneficio"}
@@ -81,6 +87,8 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
+      <TabGate tab="translations">
       <SidebarMenuItem>
         <SidebarMenuButton 
           isActive={currentStep === "translations" || currentStep === "translation-audit" || currentStep === "translation-manager"}
@@ -101,6 +109,8 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
+      <TabGate tab="design-conventions">
       <SidebarMenuItem>
         <SidebarMenuButton
           isActive={currentStep === "design-conventions"}
@@ -121,6 +131,8 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
+      <TabGate tab="access-requests">
       <SidebarMenuItem>
         <SidebarMenuButton
           isActive={currentStep === "access-requests"}
@@ -141,6 +153,7 @@ const ConfigurationGroup: React.FC<ConfigurationGroupProps> = ({
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
+      </TabGate>
     </>
   );
 };

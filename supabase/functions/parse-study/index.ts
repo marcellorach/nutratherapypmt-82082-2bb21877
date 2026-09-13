@@ -1,6 +1,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.23.0';
 import { mergeAnalysisDataFromOtherWriter } from '../_shared/analysisDataMerge.ts';
+import { authorize, authzResponse } from '../_shared/authorization.ts';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
@@ -16,6 +17,10 @@ serve(async (req) => {
   }
 
   try {
+    const authz = await authorize(req, 'op.parse_study', 'edit');
+    if (!authz.ok) return authzResponse(authz, corsHeaders);
+    console.log(`[parse-study] authorized caller origin=${authz.origin} user=${authz.userId ?? 'system'}`);
+
     const { studyId, storagePath } = await req.json();
     
     if (!studyId || !storagePath) {

@@ -6,6 +6,15 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import { isEmailAllowed } from '@/config/access-allowlist';
 
+/** Roles accepted by the database (see validate_role_name). */
+export type AppRole =
+  | 'admin'
+  | 'scientist'
+  | 'vet_coordinator'
+  | 'veterinarian'
+  | 'tutor'
+  | 'user';
+
 type AuthContextType = {
   session: Session | null;
   user: User | null;
@@ -15,7 +24,7 @@ type AuthContextType = {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
   signOut: () => Promise<void>;
-  hasRole: (role: 'admin' | 'veterinarian' | 'tutor') => boolean;
+  hasRole: (role: AppRole) => boolean;
 };
 
 const defaultAuthContext: AuthContextType = {
@@ -301,7 +310,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const hasRole = (role: 'admin' | 'veterinarian' | 'tutor') => {
+  const hasRole = (role: AppRole) => {
     return userRoles.includes(role);
   };
 

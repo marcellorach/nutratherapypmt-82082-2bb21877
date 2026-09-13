@@ -1,4 +1,5 @@
 import React from 'react';
+import { TabGate } from '@/components/auth/PermissionGate';
 import { Cpu, Bot, ListTree, ShieldCheck, FileSearch, Info, Sparkles, ChevronRight, CheckCircle2 } from "lucide-react";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useTranslation } from 'react-i18next';
@@ -29,7 +30,8 @@ const GovernanceAIGroup: React.FC<Props> = ({ currentStep, handleStepClick }) =>
       {items.map(({ id, icon: Icon, key, fallback }) => {
         const active = currentStep === id;
         return (
-          <SidebarMenuItem key={id}>
+          <TabGate tab={id} key={id}>
+          <SidebarMenuItem>
             <SidebarMenuButton
               isActive={active}
               onClick={() => handleStepClick(id)}
@@ -47,6 +49,7 @@ const GovernanceAIGroup: React.FC<Props> = ({ currentStep, handleStepClick }) =>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
+          </TabGate>
         );
       })}
     </>
