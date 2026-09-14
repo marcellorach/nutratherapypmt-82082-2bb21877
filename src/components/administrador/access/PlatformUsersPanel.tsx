@@ -82,9 +82,10 @@ const PlatformUsersPanel: React.FC = () => {
           .eq('role', role);
         if (error) throw error;
       } else {
+        // user_roles has a UNIQUE constraint on user_id: one role per user.
         const { error } = await supabase
           .from('user_roles')
-          .insert({ user_id: target.user_id, role });
+          .upsert({ user_id: target.user_id, role }, { onConflict: 'user_id' });
         if (error) throw error;
       }
       await queryClient.invalidateQueries({ queryKey: PLATFORM_USERS_KEY });

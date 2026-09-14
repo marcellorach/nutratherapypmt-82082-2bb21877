@@ -183,9 +183,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const ensureUserRole = async (userId: string, role: string) => {
-    await supabase
+    // user_roles has a UNIQUE constraint on user_id (one role per user).
+    const { error } = await supabase
       .from('user_roles')
-      .upsert({ user_id: userId, role }, { onConflict: 'user_id,role' });
+      .upsert({ user_id: userId, role }, { onConflict: 'user_id' });
+
+    if (error) {
+      console.error('Error assigning user role:', error);
+      toast({
+        title: 'Não foi possível definir o papel do usuário',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
   };
 
   const fetchUserProfile = async (userId: string) => {
