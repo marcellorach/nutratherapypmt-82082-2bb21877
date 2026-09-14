@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-09-13T03:07:29.186Z",
+  "timestamp": "2026-09-14T19:40:10.715Z",
   "summary": {
-    "totalFiles": 975,
-    "totalIssues": 501,
+    "totalFiles": 984,
+    "totalIssues": 507,
     "hardcodedTexts": 61,
-    "missingKeys": 438,
+    "missingKeys": 444,
     "incompleteTranslations": 2
   },
   "issues": [
@@ -27,6 +27,48 @@
       "file": "src/components/administrador/access/AccessRequestsPanel.tsx",
       "line": 53,
       "text": " ",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/access/MyPermissionsPanel.tsx",
+      "line": 22,
+      "text": "key, label_pt, label_en, category",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/access/PermissionsMatrixPanel.tsx",
+      "line": 51,
+      "text": "key, category, label_pt, label_en",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/access/PermissionsMatrixPanel.tsx",
+      "line": 64,
+      "text": "role, permission_key, level",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/access/UserOverridesPanel.tsx",
+      "line": 48,
+      "text": "key, label_pt, label_en",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/access/UserOverridesPanel.tsx",
+      "line": 58,
+      "text": "user_id, full_name",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/access/UserOverridesPanel.tsx",
+      "line": 69,
+      "text": "id, user_id, permission_key, effect, level, reason, created_at",
       "severity": "high"
     },
     {
@@ -2860,35 +2902,35 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 136,
+      "line": 199,
       "text": "extract_meta_study",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 1018,
+      "line": 1081,
       "text": "audit_base_system_{pt,en}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2330,
+      "line": 2393,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2541,
+      "line": 2604,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 5336,
+      "line": 5399,
       "text": "@",
       "severity": "high"
     },
@@ -2972,7 +3014,7 @@
     {
       "type": "missing-key",
       "file": "src/pages/administrador/AdministradorPage.tsx",
-      "line": 13,
+      "line": 15,
       "text": "tab",
       "severity": "high"
     },
