@@ -44,11 +44,15 @@ export async function loadWithRetry<T>(
   const maxAttempts = delays.length + 1;
 
   let attempt = 0;
+  let hadFailure = false;
   // eslint-disable-next-line no-constant-condition
   while (true) {
     attempt += 1;
     try {
-      return await factory();
+      const result = await factory();
+      // Um retry bem-sucedido não deve deixar alerta de falha para o usuário.
+      if (hadFailure) clearAssetFailures();
+      return result;
     } catch (err) {
       if (!isChunkError(err)) throw err;
 
@@ -65,13 +69,17 @@ export async function loadWithRetry<T>(
         }
       }
 
-      recordAssetFailure({
-        message,
-        url,
-        chunkName: extractChunkName(url),
-        attempt,
-        willReload,
-      });
+      hadFailure = true;
+      recordAssetFailure(
+        {
+          message,
+          url,
+          chunkName: extractChunkName(url),
+          attempt,
+          willReload,
+        },
+        { transient: hasMoreAttempts },
+      );
 
       if (hasMoreAttempts) {
         await sleep(delays[attempt - 1]);
