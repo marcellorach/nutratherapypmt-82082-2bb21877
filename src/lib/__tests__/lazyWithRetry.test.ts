@@ -114,7 +114,8 @@ describe('loadWithRetry', () => {
       /Failed to fetch dynamically imported module/,
     );
     expect(reload).not.toHaveBeenCalled();
-    expect(events[2].willReload).toBe(false);
+    expect(events).toHaveLength(1);
+    expect(events[0].willReload).toBe(false);
   });
 
   it('propagates non-chunk errors immediately', async () => {
@@ -125,17 +126,22 @@ describe('loadWithRetry', () => {
     expect(reload).not.toHaveBeenCalled();
   });
 
-  it('emits the failure on the shared asset-failure event channel', async () => {
+  it('emits on the shared channel only for unrecovered failures', async () => {
     const dispatched: string[] = [];
     (globalThis as any).window.dispatchEvent = (e: any) => {
       dispatched.push(e.type ?? ASSET_FAILURE_EVENT);
       return true;
     };
-    const factory = vi
+    const recovered = vi
       .fn()
       .mockRejectedValueOnce(chunkError())
       .mockResolvedValue({ default: 'ok' });
-    await loadWithRetry(factory, opts);
+    await loadWithRetry(recovered, opts);
+    expect(dispatched).toHaveLength(0);
+
+    sessionStorage.setItem(RELOAD_KEY, '1');
+    const failing = vi.fn().mockRejectedValue(chunkError());
+    await expect(loadWithRetry(failing, opts)).rejects.toThrow();
     expect(dispatched).toHaveLength(1);
   });
 });
