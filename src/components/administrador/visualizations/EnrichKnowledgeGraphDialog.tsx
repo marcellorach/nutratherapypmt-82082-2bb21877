@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Sparkles, Loader2, CheckCircle2, XCircle, AlertCircle, Plus, X, Play } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const DEFAULT_QUERIES = [
   "curcumin canine aging neuroprotection",
@@ -70,11 +71,19 @@ export const EnrichKnowledgeGraphDialog: React.FC<Props> = ({ open, onOpenChange
 
     try {
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/enrich-knowledge-graph`;
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) {
+        addLog('❌ Error: 401 (no active session)');
+        setRunning(false);
+        return;
+      }
       const resp = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify({ queries, autoApproveThreshold: 70 }),
         signal: abortRef.current.signal,
