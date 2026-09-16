@@ -97,12 +97,13 @@ describe('loadWithRetry', () => {
     expect(factory).toHaveBeenCalledTimes(3);
     expect(reload).toHaveBeenCalledTimes(1);
     expect(settled).toBe(false); // promise stays pending while the page reloads
-    expect(events.map((e) => e.attempt)).toEqual([1, 2, 3]);
-    expect(events[2].willReload).toBe(true);
+    // Só a falha final (não recuperável) vira alerta persistido.
+    expect(events.map((e) => e.attempt)).toEqual([3]);
+    expect(events[0].willReload).toBe(true);
     expect(events.every((e) => e.url === CHUNK_URL)).toBe(true);
     expect(sessionStorage.getItem(RELOAD_KEY)).toBe('1');
     const stored = JSON.parse(sessionStorage.getItem(ASSET_FAILURE_STORAGE_KEY) ?? '[]');
-    expect(stored).toHaveLength(3);
+    expect(stored).toHaveLength(1);
   });
 
   it('does not reload twice: rethrows when the session flag is already set', async () => {
