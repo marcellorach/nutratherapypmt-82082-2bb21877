@@ -47,8 +47,18 @@ export function extractChunkName(url?: string): string | undefined {
   return last || undefined;
 }
 
+export type RecordAssetFailureOptions = {
+  /**
+   * Falha transitória: ainda haverá nova tentativa. Registra no console para
+   * telemetria, mas NÃO persiste nem alerta o usuário (evita banner falso
+   * quando o retry seguinte resolve).
+   */
+  transient?: boolean;
+};
+
 export function recordAssetFailure(
   partial: Omit<FailureDetail, 'timestamp' | 'buildVersion' | 'userAgent'>,
+  options: RecordAssetFailureOptions = {},
 ): FailureDetail {
   const detail: FailureDetail = {
     ...partial,
@@ -56,6 +66,12 @@ export function recordAssetFailure(
     buildVersion: SENEX_VERSION,
     userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
   };
+
+  // Structured telemetry log — easy to grep in production console.
+  // eslint-disable-next-line no-console
+  console.error('[asset-preload-failure]', detail);
+
+  if (options.transient) return detail;
 
   try {
     const raw = sessionStorage.getItem(ASSET_FAILURE_STORAGE_KEY) ?? '[]';
@@ -66,10 +82,6 @@ export function recordAssetFailure(
     /* ignore quota / unavailable storage */
   }
 
-  // Structured telemetry log — easy to grep in production console.
-  // eslint-disable-next-line no-console
-  console.error('[asset-preload-failure]', detail);
-
   try {
     window.dispatchEvent(new CustomEvent(ASSET_FAILURE_EVENT, { detail }));
   } catch {
@@ -77,6 +89,15 @@ export function recordAssetFailure(
   }
 
   return detail;
+}
+
+/** Limpa o histórico de falhas persistido (chamado quando um retry dá certo). */
+export function clearAssetFailures() {
+  try {
+    sessionStorage.removeItem(ASSET_FAILURE_STORAGE_KEY);
+  } catch {
+    /* noop */
+  }
 }
 
 /** Installed once at module load — captures preload failures before React mounts. */
