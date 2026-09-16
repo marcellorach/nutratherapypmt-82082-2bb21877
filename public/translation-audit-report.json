@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-09-16T15:15:31.210Z",
+  "timestamp": "2026-09-16T17:50:31.582Z",
   "summary": {
-    "totalFiles": 984,
+    "totalFiles": 986,
     "totalIssues": 507,
     "hardcodedTexts": 61,
     "missingKeys": 444,
@@ -2559,7 +2559,7 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/visualizations/EnrichKnowledgeGraphDialog.tsx",
-      "line": 98,
+      "line": 107,
       "text": "\\n",
       "severity": "high"
     },
