@@ -5,6 +5,7 @@ export const ALLOWED_EMAILS: string[] = [
   'mrachlyn@gmail.com',
   'ritazuanaze@petmoretime.com.br',
   'mkaeberlein@gmail.com',
+  'mrachlyn+leitura@gmail.com',
 ];
 
 export const TEMP_SHARED_PASSWORD = 'macacoverde';
