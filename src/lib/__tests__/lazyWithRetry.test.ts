@@ -50,7 +50,7 @@ describe('loadWithRetry', () => {
     expect(reload).not.toHaveBeenCalled();
   });
 
-  it('retries after a chunk error and records one telemetry entry', async () => {
+  it('retries after a chunk error without alerting the user', async () => {
     const factory = vi
       .fn()
       .mockRejectedValueOnce(chunkError())
@@ -58,12 +58,21 @@ describe('loadWithRetry', () => {
 
     await expect(loadWithRetry(factory, opts)).resolves.toEqual({ default: 'ok' });
     expect(factory).toHaveBeenCalledTimes(2);
-    expect(events).toHaveLength(1);
-    expect(events[0].attempt).toBe(1);
-    expect(events[0].url).toBe(CHUNK_URL);
-    expect(events[0].chunkName).toBe('EstudosTab-DEsiKxQe.js');
-    expect(events[0].willReload).toBe(false);
+    // Falha transitória resolvida pelo retry: nenhum alerta, nada persistido.
+    expect(events).toHaveLength(0);
+    expect(sessionStorage.getItem(ASSET_FAILURE_STORAGE_KEY)).toBeNull();
     expect(reload).not.toHaveBeenCalled();
+  });
+
+  it('clears a previous failure record once a retry succeeds', async () => {
+    sessionStorage.setItem(ASSET_FAILURE_STORAGE_KEY, JSON.stringify([{ message: 'old' }]));
+    const factory = vi
+      .fn()
+      .mockRejectedValueOnce(chunkError())
+      .mockResolvedValue({ default: 'ok' });
+
+    await loadWithRetry(factory, opts);
+    expect(sessionStorage.getItem(ASSET_FAILURE_STORAGE_KEY)).toBeNull();
   });
 
   it('respects the backoff delays between attempts', async () => {
