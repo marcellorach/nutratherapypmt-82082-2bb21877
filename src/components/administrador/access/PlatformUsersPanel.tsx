@@ -12,18 +12,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/components/ui/use-toast';
 import { Loader2 } from 'lucide-react';
 import { PERMISSIONS_QUERY_KEY } from '@/hooks/usePermissions';
+import { APP_ROLES, type AppRole } from '@/config/app-roles';
 
-/** Roles the screen can assign — same list validated by the database. */
-export const ASSIGNABLE_ROLES = [
-  'admin',
-  'scientist',
-  'vet_coordinator',
-  'veterinarian',
-  'tutor',
-  'user',
-] as const;
+/** Roles the screen can assign — canonical list lives in src/config/app-roles.ts. */
+export const ASSIGNABLE_ROLES = APP_ROLES;
 
-export type AssignableRole = (typeof ASSIGNABLE_ROLES)[number];
+export type AssignableRole = AppRole;
 
 interface PlatformUser {
   user_id: string;
