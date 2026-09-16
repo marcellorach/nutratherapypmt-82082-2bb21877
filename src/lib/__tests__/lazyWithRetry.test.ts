@@ -50,7 +50,7 @@ describe('loadWithRetry', () => {
     expect(reload).not.toHaveBeenCalled();
   });
 
-  it('retries after a chunk error and records one telemetry entry', async () => {
+  it('retries after a chunk error without alerting the user', async () => {
     const factory = vi
       .fn()
       .mockRejectedValueOnce(chunkError())
@@ -58,12 +58,21 @@ describe('loadWithRetry', () => {
 
     await expect(loadWithRetry(factory, opts)).resolves.toEqual({ default: 'ok' });
     expect(factory).toHaveBeenCalledTimes(2);
-    expect(events).toHaveLength(1);
-    expect(events[0].attempt).toBe(1);
-    expect(events[0].url).toBe(CHUNK_URL);
-    expect(events[0].chunkName).toBe('EstudosTab-DEsiKxQe.js');
-    expect(events[0].willReload).toBe(false);
+    // Falha transitória resolvida pelo retry: nenhum alerta, nada persistido.
+    expect(events).toHaveLength(0);
+    expect(sessionStorage.getItem(ASSET_FAILURE_STORAGE_KEY)).toBeNull();
     expect(reload).not.toHaveBeenCalled();
+  });
+
+  it('clears a previous failure record once a retry succeeds', async () => {
+    sessionStorage.setItem(ASSET_FAILURE_STORAGE_KEY, JSON.stringify([{ message: 'old' }]));
+    const factory = vi
+      .fn()
+      .mockRejectedValueOnce(chunkError())
+      .mockResolvedValue({ default: 'ok' });
+
+    await loadWithRetry(factory, opts);
+    expect(sessionStorage.getItem(ASSET_FAILURE_STORAGE_KEY)).toBeNull();
   });
 
   it('respects the backoff delays between attempts', async () => {
@@ -88,12 +97,13 @@ describe('loadWithRetry', () => {
     expect(factory).toHaveBeenCalledTimes(3);
     expect(reload).toHaveBeenCalledTimes(1);
     expect(settled).toBe(false); // promise stays pending while the page reloads
-    expect(events.map((e) => e.attempt)).toEqual([1, 2, 3]);
-    expect(events[2].willReload).toBe(true);
+    // Só a falha final (não recuperável) vira alerta persistido.
+    expect(events.map((e) => e.attempt)).toEqual([3]);
+    expect(events[0].willReload).toBe(true);
     expect(events.every((e) => e.url === CHUNK_URL)).toBe(true);
     expect(sessionStorage.getItem(RELOAD_KEY)).toBe('1');
     const stored = JSON.parse(sessionStorage.getItem(ASSET_FAILURE_STORAGE_KEY) ?? '[]');
-    expect(stored).toHaveLength(3);
+    expect(stored).toHaveLength(1);
   });
 
   it('does not reload twice: rethrows when the session flag is already set', async () => {
@@ -104,7 +114,8 @@ describe('loadWithRetry', () => {
       /Failed to fetch dynamically imported module/,
     );
     expect(reload).not.toHaveBeenCalled();
-    expect(events[2].willReload).toBe(false);
+    expect(events).toHaveLength(1);
+    expect(events[0].willReload).toBe(false);
   });
 
   it('propagates non-chunk errors immediately', async () => {
@@ -115,17 +126,22 @@ describe('loadWithRetry', () => {
     expect(reload).not.toHaveBeenCalled();
   });
 
-  it('emits the failure on the shared asset-failure event channel', async () => {
+  it('emits on the shared channel only for unrecovered failures', async () => {
     const dispatched: string[] = [];
     (globalThis as any).window.dispatchEvent = (e: any) => {
       dispatched.push(e.type ?? ASSET_FAILURE_EVENT);
       return true;
     };
-    const factory = vi
+    const recovered = vi
       .fn()
       .mockRejectedValueOnce(chunkError())
       .mockResolvedValue({ default: 'ok' });
-    await loadWithRetry(factory, opts);
+    await loadWithRetry(recovered, opts);
+    expect(dispatched).toHaveLength(0);
+
+    sessionStorage.setItem(RELOAD_KEY, '1');
+    const failing = vi.fn().mockRejectedValue(chunkError());
+    await expect(loadWithRetry(failing, opts)).rejects.toThrow();
     expect(dispatched).toHaveLength(1);
   });
 });
