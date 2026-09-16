@@ -1,5 +1,6 @@
 import { lazy as reactLazy, type ComponentType, type LazyExoticComponent } from 'react';
 import {
+  clearAssetFailures,
   extractAssetUrl,
   extractChunkName,
   recordAssetFailure,
