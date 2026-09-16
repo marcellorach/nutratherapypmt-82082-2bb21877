@@ -6,14 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 import { isEmailAllowed } from '@/config/access-allowlist';
 
-/** Roles accepted by the database (see validate_role_name). */
-export type AppRole =
-  | 'admin'
-  | 'scientist'
-  | 'vet_coordinator'
-  | 'veterinarian'
-  | 'tutor'
-  | 'user';
+/** Canonical role list lives in src/config/app-roles.ts (mirrored by the database). */
+export type { AppRole } from '@/config/app-roles';
+import type { AppRole } from '@/config/app-roles';
 
 type AuthContextType = {
   session: Session | null;
