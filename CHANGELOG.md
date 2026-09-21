@@ -24,6 +24,11 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.2.4 -->
 
+### Fixed - 2026-09-21 — Papel correto no cabeçalho
+<!-- area: auth · status: entregue · i18n: 1.131.0 -->
+- O cabeçalho agora exibe todos os seis papéis canônicos, incluindo Cientista, em vez de tratar papéis não administrativos como Tutor.
+- Files: src/components/layout/Header.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json
+
 ### Fixed - 2026-09-13 — Endurecimento das permissões antes do deploy
 <!-- area: auth · status: entregue · i18n: 1.127.0 -->
 - `forwardIdentity()` deixa de degradar para `system`: sem token reconhecível (ou chave de serviço sem `x-initiator-id`) devolve 401; `system` só vale quando declarado explicitamente

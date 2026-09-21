@@ -10,6 +10,7 @@ import PendingAccessBadge from './PendingAccessBadge';
 import { useAuth } from '@/contexts/AuthContext';
 import RoleViewSwitcher from './RoleViewSwitcher';
 import { SENEX_VERSION, SENEX_LAST_UPDATE } from '@/config/senex-version';
+import { isAppRole } from '@/config/app-roles';
 
 const Header: React.FC = () => {
   const { t } = useTranslation();
@@ -18,6 +19,10 @@ const Header: React.FC = () => {
   const isAuthenticated = !!user;
   const isVeterinarian = hasRole('veterinarian');
   const isAdmin = hasRole('admin');
+  const primaryRole = userRoles.find(isAppRole);
+  const roleLabel = primaryRole
+    ? t(`admin.permissions.roles.${primaryRole}`)
+    : t('header.noRole');
 
   return (
     <header className="w-full bg-white text-gray-800 p-6 border-b border-gray-200 shadow-sm fixed top-0 left-0 right-0 z-50">
@@ -84,11 +89,7 @@ const Header: React.FC = () => {
                   {userProfile?.full_name || user?.user_metadata?.full_name || user?.email}
                 </span>
                 <span className="text-xs text-gray-500">
-                  {userRoles.length > 0 && userRoles[0] === 'admin' 
-                    ? t('header.administrator')
-                    : userRoles.length > 0 && userRoles[0] === 'veterinarian' 
-                      ? t('header.veterinarian')
-                      : t('header.tutor')}
+                  {roleLabel}
                 </span>
               </div>
               <Avatar className="h-10 w-10 border-2 border-gray-200">

@@ -3127,6 +3127,7 @@
     "administrator": "Administrador",
     "veterinarian": "Veterinário",
     "tutor": "Tutor",
+    "noRole": "Sem papel atribuído",
     "login": "Entrar",
     "pendingRequests": "Solicitações de acesso pendentes",
     "pendingRequestsCount": "{{count}} solicitação(ões) pendente(s)",
