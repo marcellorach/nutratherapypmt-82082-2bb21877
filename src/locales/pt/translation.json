@@ -3087,6 +3087,16 @@
         "saveError": "Não foi possível alterar o papel",
         "loadError": "Não foi possível carregar os usuários. Só quem administra usuários vê esta lista.",
         "hint": "O banco impede remover o último administrador."
+      },
+      "tabAccess": {
+        "title": "Acesso por aba",
+        "subtitle": "Para cada aba do administrador: quais papéis dão acesso e quais pessoas chegam nela hoje, já considerando exceções individuais.",
+        "searchPlaceholder": "Buscar aba, grupo ou papel",
+        "rolesLabel": "Papéis:",
+        "peopleLabel": "Pessoas ({{count}}):",
+        "noRole": "Nenhum papel",
+        "nobody": "Ninguém",
+        "hint": "Somente leitura. Para mudar o papel de alguém use a aba Usuários; para mudar o que cada papel enxerga use Permissões por papel."
       }
     },
     "usersAndRoles": {
@@ -3097,7 +3107,8 @@
         "requests": "Solicitações",
         "matrix": "Permissões por papel",
         "overrides": "Exceções",
-        "mine": "Minhas permissões"
+        "mine": "Minhas permissões",
+        "tabAccess": "Acesso por aba"
       }
     }
   },

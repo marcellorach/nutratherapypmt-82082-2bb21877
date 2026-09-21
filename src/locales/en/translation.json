@@ -3086,6 +3086,16 @@
         "saveError": "Could not change the role",
         "loadError": "Could not load users. Only user administrators can see this list.",
         "hint": "The database prevents removing the last administrator."
+      },
+      "tabAccess": {
+        "title": "Access by tab",
+        "subtitle": "For each admin tab: which roles grant access and which people currently reach it, already applying individual exceptions.",
+        "searchPlaceholder": "Search tab, group or role",
+        "rolesLabel": "Roles:",
+        "peopleLabel": "People ({{count}}):",
+        "noRole": "No role",
+        "nobody": "Nobody",
+        "hint": "Read-only. To change someone's role use the Users tab; to change what each role sees use Permissions by role."
       }
     },
     "usersAndRoles": {
@@ -3096,7 +3106,8 @@
         "requests": "Requests",
         "matrix": "Permissions by role",
         "overrides": "Exceptions",
-        "mine": "My permissions"
+        "mine": "My permissions",
+        "tabAccess": "Access by tab"
       }
     }
   },
