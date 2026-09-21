@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-09-13T04:46:41.067Z
+// Última geração: 2026-09-21T17:18:19.648Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,29 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-09-13";
+export const lastChangelogDate = "2026-09-21";
 
 export const senexVersion = "7.2.4";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-09-21",
+    "kind": "fixed",
+    "area": "auth",
+    "status": "entregue",
+    "title": "Papel correto no cabeçalho",
+    "bullets": [
+      "O cabeçalho agora exibe todos os seis papéis canônicos, incluindo Cientista, em vez de tratar papéis não administrativos como Tutor.",
+      "Files: src/components/layout/Header.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json"
+    ],
+    "files": [
+      "src/components/layout/Header.tsx",
+      "src/i18n.ts",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json"
+    ],
+    "i18nVersion": "1.131.0"
+  },
   {
     "date": "2026-09-13",
     "kind": "fixed",

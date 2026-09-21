@@ -1,6 +1,5 @@
 # Roadmap
 
-- [ ] Criar `mrachlyn+leitura@gmail.com` como scientist quando houver uma senha aceita pela proteção contra vazamentos
 - [ ] Corrigir grants/exposição das funções RBAC e validar o linter
 - [ ] Proteger os quatro writers com autenticação e autorização server-side
 - [ ] Aplicar matriz RBAC à rota, abas e sidebar

@@ -1,15 +1,19 @@
 # Project context briefing (auto)
-Generated: 2026-09-13T04:46:41.073Z
+Generated: 2026-09-21T17:18:19.660Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.127.0
+## Latest i18n version: 1.131.0
 
 ## Changes by area (last 14 days)
-- **auth**: 2
-- **infra**: 1
+- **auth**: 3
 
 ## Top 10 recent entries
+### 2026-09-21 · [auth] FIXED — Papel correto no cabeçalho
+- O cabeçalho agora exibe todos os seis papéis canônicos, incluindo Cientista, em vez de tratar papéis não administrativos como Tutor.
+- Files: src/components/layout/Header.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json
+_files: src/components/layout/Header.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json_
+
 ### 2026-09-13 · [auth] FIXED — Endurecimento das permissões antes do deploy
 - `forwardIdentity()` deixa de degradar para `system`: sem token reconhecível (ou chave de serviço sem `x-initiator-id`) devolve 401; `system` só vale quando declarado explicitamente
 - `enrich-knowledge-graph` ganhou gate `authorize()` com a nova chave `op.enrich_knowledge_graph` e `verify_jwt = true`; `batch-reprocess-triplets` gateado com `op.generate_triplets`
@@ -63,12 +67,6 @@ _files: src/config/app-version.ts, src/components/administrador/configuracoes/Pr
 - Frente B (`sync-system-prompts` idempotente): edge function trocada de `UPDATE`-only para `INSERT-or-UPDATE`. Toda nova chave adicionada ao manifest entra no DB automaticamente no próximo "Sincronizar com o código". Novo status `inserted` no relatório. Family/display_name das novas linhas são derivados automaticamente da chave; admin pode renomear.
 - Frente E (verificação contínua + selo na UI):
 _files: supabase/functions/_shared/system-prompts.ts, src/config/app-version.ts, supabase/functions/sync-system-prompts/index.ts, supabase/functions/verify-system-prompts/index.ts…_
-
-### 2026-06-15 · [kg] FIXED — Playground multi-fonte: KG busca por termo real + cohort canônico + diagrama de mecanismo
-- Root cause (KG vazio para curcumina): `kgProvider` em `src/services/multi-source-resolver.ts` chamava `get_relations_graph_data(p_limit:500)` e filtrava as keywords client-side. Curcumina existe (127 triplets em `triplet_extractions`), mas não nas 500 primeiras edges — daí "Knowledge Graph curado: —" em uma pergunta que o KG cobre amplamente.
-- Fix KG: nova RPC `public.search_relations_by_term(p_terms text[], p_limit int)` faz `ILIKE` direto em `subject_name`/`object_name` filtrando `curation_status='approved' OR auto_approved=true`, ordenando por `llm_confidence`. Provider passa a chamar a RPC. Validado: pergunta de curcumina retorna 10+ relações (Curcumin ⊣ NF-κB, ↑ Nrf2, ↓ TLR4, previne Alzheimer/Parkinson).
-- Fix cohort (eco lexical): `cohortProvider` parou de fazer substring de palavras da query em `notes`. Agora detecta entidade canônica (raça via `pet_profiles.breed`, condição via `pet_conditions.condition_name`) presente no texto da pergunta e filtra a contagem real. Sem entidade reconhecida → claim explícito ("sem entidade clínica reconhecida"), nunca eco da query.
-_files: src/services/multi-source-resolver.ts, src/components/clinical/MechanismDiagram.tsx, src/components/clinical/SourcePanel.tsx, src/i18n.ts_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
