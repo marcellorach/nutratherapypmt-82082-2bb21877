@@ -9,7 +9,7 @@ import { Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Loader2, Lock } from 'lucide-react';
-import { ALLOWED_EMAILS, TEMP_SHARED_PASSWORD, isEmailAllowed } from '@/config/access-allowlist';
+import { isEmailAllowed } from '@/config/access-allowlist';
 
 const AuthPage: React.FC = () => {
   const { user, loading } = useAuth();
@@ -42,29 +42,29 @@ const AuthPage: React.FC = () => {
       });
 
       if (signInError) {
-        // If user typed a custom password (not the shared one), don't auto-create
-        if (password !== TEMP_SHARED_PASSWORD) {
-          toast({
-            title: 'Senha incorreta',
-            description: signInError.message,
-            variant: 'destructive',
-          });
-          return;
-        }
-        // Account doesn't exist yet → create it
+        // Allowlisted email without an account yet → create it with the typed password.
         const { error: signUpError } = await supabase.auth.signUp({
           email: normalized,
-          password: TEMP_SHARED_PASSWORD,
+          password,
           options: {
             emailRedirectTo: `${window.location.origin}/`,
           },
         });
-        if (signUpError) throw signUpError;
+        if (signUpError) {
+          toast({
+            title: 'Não foi possível entrar',
+            description: signUpError.message.toLowerCase().includes('already')
+              ? 'Senha incorreta para esta conta.'
+              : signUpError.message,
+            variant: 'destructive',
+          });
+          return;
+        }
 
         // Try sign-in again (in case email confirmation is disabled)
         const { error: retryError } = await supabase.auth.signInWithPassword({
           email: normalized,
-          password: TEMP_SHARED_PASSWORD,
+          password,
         });
         if (retryError) {
           toast({
