@@ -43,6 +43,10 @@ const UsersAndRolesPanel: React.FC = () => {
             <ShieldCheck className="h-3.5 w-3.5" />
             {t('admin.usersAndRoles.tabs.matrix')}
           </TabsTrigger>
+          <TabsTrigger value="tab-access" className="flex items-center gap-2">
+            <LayoutGrid className="h-3.5 w-3.5" />
+            {t('admin.usersAndRoles.tabs.tabAccess')}
+          </TabsTrigger>
           <TabsTrigger value="overrides" className="flex items-center gap-2">
             <UserMinus className="h-3.5 w-3.5" />
             {t('admin.usersAndRoles.tabs.overrides')}
