@@ -69,6 +69,9 @@ const UsersAndRolesPanel: React.FC = () => {
         <TabsContent value="matrix" className="mt-4">
           <PermissionsMatrixPanel />
         </TabsContent>
+        <TabsContent value="tab-access" className="mt-4">
+          <TabAccessPanel />
+        </TabsContent>
         <TabsContent value="overrides" className="mt-4">
           <UserOverridesPanel />
         </TabsContent>
