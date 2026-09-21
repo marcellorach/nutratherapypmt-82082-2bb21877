@@ -6826,6 +6826,7 @@ export type Database = {
       }
       increment_translation_version: { Args: never; Returns: number }
       is_admin: { Args: never; Returns: boolean }
+      is_platform_member: { Args: never; Returns: boolean }
       list_platform_users: {
         Args: never
         Returns: {
