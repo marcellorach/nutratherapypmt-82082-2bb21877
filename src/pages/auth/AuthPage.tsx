@@ -42,29 +42,29 @@ const AuthPage: React.FC = () => {
       });
 
       if (signInError) {
-        // If user typed a custom password (not the shared one), don't auto-create
-        if (password !== TEMP_SHARED_PASSWORD) {
-          toast({
-            title: 'Senha incorreta',
-            description: signInError.message,
-            variant: 'destructive',
-          });
-          return;
-        }
-        // Account doesn't exist yet → create it
+        // Allowlisted email without an account yet → create it with the typed password.
         const { error: signUpError } = await supabase.auth.signUp({
           email: normalized,
-          password: TEMP_SHARED_PASSWORD,
+          password,
           options: {
             emailRedirectTo: `${window.location.origin}/`,
           },
         });
-        if (signUpError) throw signUpError;
+        if (signUpError) {
+          toast({
+            title: 'Não foi possível entrar',
+            description: signUpError.message.toLowerCase().includes('already')
+              ? 'Senha incorreta para esta conta.'
+              : signUpError.message,
+            variant: 'destructive',
+          });
+          return;
+        }
 
         // Try sign-in again (in case email confirmation is disabled)
         const { error: retryError } = await supabase.auth.signInWithPassword({
           email: normalized,
-          password: TEMP_SHARED_PASSWORD,
+          password,
         });
         if (retryError) {
           toast({
