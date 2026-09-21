@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-09-21T13:48:16.524Z",
+  "timestamp": "2026-09-21T14:27:38.545Z",
   "summary": {
-    "totalFiles": 986,
-    "totalIssues": 507,
+    "totalFiles": 987,
+    "totalIssues": 509,
     "hardcodedTexts": 61,
-    "missingKeys": 444,
+    "missingKeys": 446,
     "incompleteTranslations": 2
   },
   "issues": [
@@ -48,6 +48,20 @@
       "file": "src/components/administrador/access/PermissionsMatrixPanel.tsx",
       "line": 64,
       "text": "role, permission_key, level",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/access/TabAccessPanel.tsx",
+      "line": 47,
+      "text": "role, permission_key, level",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/access/TabAccessPanel.tsx",
+      "line": 67,
+      "text": "user_id, permission_key, effect, level",
       "severity": "high"
     },
     {
