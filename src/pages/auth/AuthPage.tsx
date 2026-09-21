@@ -9,7 +9,7 @@ import { Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Loader2, Lock } from 'lucide-react';
-import { ALLOWED_EMAILS, TEMP_SHARED_PASSWORD, isEmailAllowed } from '@/config/access-allowlist';
+import { isEmailAllowed } from '@/config/access-allowlist';
 
 const AuthPage: React.FC = () => {
   const { user, loading } = useAuth();
