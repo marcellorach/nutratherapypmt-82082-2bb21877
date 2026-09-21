@@ -1,7 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UserCog, Eye, ShieldCheck, UserMinus, KeyRound, Users } from 'lucide-react';
+import { UserCog, Eye, ShieldCheck, UserMinus, KeyRound, Users, LayoutGrid } from 'lucide-react';
+import TabAccessPanel from './TabAccessPanel';
 import PlatformUsersPanel from './PlatformUsersPanel';
 import AccessRequestsPanel from './AccessRequestsPanel';
 import RoleViewEditor from '@/components/administrador/priorizacoes/RoleViewEditor';
@@ -42,6 +43,10 @@ const UsersAndRolesPanel: React.FC = () => {
             <ShieldCheck className="h-3.5 w-3.5" />
             {t('admin.usersAndRoles.tabs.matrix')}
           </TabsTrigger>
+          <TabsTrigger value="tab-access" className="flex items-center gap-2">
+            <LayoutGrid className="h-3.5 w-3.5" />
+            {t('admin.usersAndRoles.tabs.tabAccess')}
+          </TabsTrigger>
           <TabsTrigger value="overrides" className="flex items-center gap-2">
             <UserMinus className="h-3.5 w-3.5" />
             {t('admin.usersAndRoles.tabs.overrides')}
@@ -63,6 +68,9 @@ const UsersAndRolesPanel: React.FC = () => {
         </TabsContent>
         <TabsContent value="matrix" className="mt-4">
           <PermissionsMatrixPanel />
+        </TabsContent>
+        <TabsContent value="tab-access" className="mt-4">
+          <TabAccessPanel />
         </TabsContent>
         <TabsContent value="overrides" className="mt-4">
           <UserOverridesPanel />
