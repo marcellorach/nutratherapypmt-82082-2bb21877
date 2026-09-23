@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-09-21T17:18:19.648Z
+// Última geração: 2026-09-23T19:14:06.590Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,36 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-09-21";
+export const lastChangelogDate = "2026-09-23";
 
 export const senexVersion = "7.2.4";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-09-23",
+    "kind": "fixed",
+    "area": "curation",
+    "status": "entregue",
+    "title": "Resultado real do processamento assíncrono de estudos",
+    "bullets": [
+      "A fila e o card do estudo agora aguardam o resultado final do File Search, em vez de interpretar o aceite HTTP 202 do trabalho em segundo plano como sucesso.",
+      "Falhas assíncronas impedem o envio à curadoria, encerram a fila com erro e mostram uma mensagem específica quando os créditos do provedor de IA estão esgotados.",
+      "O início de cada tentativa grava `file_search.status = 'processing'`, evitando reutilizar o resultado de uma tentativa anterior.",
+      "Files: supabase/functions/gemini-file-search/index.ts, src/services/study-file-search-status.ts, src/services/__tests__/study-file-search-status.test.ts, src/hooks/ntai/useProcessingLogic.ts, src/hooks/useGeminiProcessing.ts, src/components/administrador/estudos/analysis/NtaiProcessCard.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json"
+    ],
+    "files": [
+      "supabase/functions/gemini-file-search/index.ts",
+      "src/services/study-file-search-status.ts",
+      "src/services/__tests__/study-file-search-status.test.ts",
+      "src/hooks/ntai/useProcessingLogic.ts",
+      "src/hooks/useGeminiProcessing.ts",
+      "src/components/administrador/estudos/analysis/NtaiProcessCard.tsx",
+      "src/i18n.ts",
+      "src/locales/pt/translation.json",
+      "src/locales/en/translation.json"
+    ],
+    "i18nVersion": "1.133.0"
+  },
   {
     "date": "2026-09-21",
     "kind": "fixed",
