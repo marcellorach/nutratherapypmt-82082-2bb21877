@@ -126,7 +126,6 @@ const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive, onRem
     if (error.includes("invalid input syntax for type uuid")) return t('studies.vetgraphrag.errorInvalidUuid');
     if (error.includes("duplicate key value violates unique constraint")) return t('studies.vetgraphrag.errorDuplicate');
     if (error.includes("NetworkError") || error.includes("network") || error.includes("fetch")) return t('studies.vetgraphrag.errorNetwork');
-    if (error.includes("status") || error.includes("already") || error.includes("já")) return t('studies.vetgraphrag.errorAlreadyProcessed');
     if (isCriticalError(error)) return t('studies.vetgraphrag.errorCriticalData');
     return error;
   };
