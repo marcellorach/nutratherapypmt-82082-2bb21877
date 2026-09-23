@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { waitForFileSearchCompletion } from '@/services/study-file-search-status';
 
 export const useGeminiProcessing = () => {
   const [processing, setProcessing] = useState<Record<string, boolean>>({});
@@ -34,9 +35,6 @@ export const useGeminiProcessing = () => {
         }
       });
 
-      clearInterval(progressInterval);
-      setProgress(prev => ({ ...prev, [studyId]: 100 }));
-
       if (error) {
         console.error('❌ Erro na edge function:', error);
         throw new Error(error.message || 'Erro ao processar com Gemini');
@@ -46,6 +44,24 @@ export const useGeminiProcessing = () => {
         console.error('❌ Resposta inválida:', data);
         throw new Error(data?.error || 'Resposta inválida do Gemini');
       }
+
+
+      const fileSearchResult = await waitForFileSearchCompletion(async () => {
+        const { data: state, error: stateError } = await supabase
+          .from('processed_studies')
+          .select('kanban_status, ingestion_stages')
+          .eq('id', studyId)
+          .single();
+        if (stateError) throw stateError;
+        return state;
+      });
+
+      if (fileSearchResult.status === 'failed') {
+        throw new Error(fileSearchResult.error);
+      }
+
+      clearInterval(progressInterval);
+      setProgress(prev => ({ ...prev, [studyId]: 100 }));
 
       console.log('✅ Processamento concluído:', data);
 

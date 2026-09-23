@@ -1,14 +1,21 @@
 # Project context briefing (auto)
-Generated: 2026-09-21T17:18:19.660Z
+Generated: 2026-09-23T19:14:06.596Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.131.0
+## Latest i18n version: 1.133.0
 
 ## Changes by area (last 14 days)
 - **auth**: 3
+- **curation**: 1
 
 ## Top 10 recent entries
+### 2026-09-23 · [curation] FIXED — Resultado real do processamento assíncrono de estudos
+- A fila e o card do estudo agora aguardam o resultado final do File Search, em vez de interpretar o aceite HTTP 202 do trabalho em segundo plano como sucesso.
+- Falhas assíncronas impedem o envio à curadoria, encerram a fila com erro e mostram uma mensagem específica quando os créditos do provedor de IA estão esgotados.
+- O início de cada tentativa grava `file_search.status = 'processing'`, evitando reutilizar o resultado de uma tentativa anterior.
+_files: supabase/functions/gemini-file-search/index.ts, src/services/study-file-search-status.ts, src/services/__tests__/study-file-search-status.test.ts, src/hooks/ntai/useProcessingLogic.ts…_
+
 ### 2026-09-21 · [auth] FIXED — Papel correto no cabeçalho
 - O cabeçalho agora exibe todos os seis papéis canônicos, incluindo Cientista, em vez de tratar papéis não administrativos como Tutor.
 - Files: src/components/layout/Header.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json
@@ -61,12 +68,6 @@ _files: supabase/functions/_shared/system-prompts.ts, supabase/functions/generat
 - Selo unificado em todas as abas de prompts: `IntegrityBadge` extraído de `SystemPromptsCatalog` para novo componente `PromptsIntegrityBadge.tsx`, reutilizado nas abas Recomendações, Extração e System (modo `compact` para as duas primeiras). Mensagem clara separa dois sinais distintos: "Última modificação dos prompts" (max `updated_at` em `ai_system_prompts`) vs "Última verificação" (`checked_at` em `ai_system_prompts_integrity_check`) — resolve a confusão "verificado hoje mas desatualizado".
 - Auto-verificação por revisão: chave do localStorage agora é `${APP_VERSION}.${PROMPTS_REVISION}` — qualquer bump de prompts dispara verificação na próxima visita, mesmo sem mudar a versão do sistema.
 _files: src/config/app-version.ts, src/components/administrador/configuracoes/PromptsIntegrityBadge.tsx, src/components/administrador/configuracoes/SystemPromptsCatalog.tsx, src/components/administrador/PromptConfigurationTab.tsx…_
-
-### 2026-06-17 · [admin] ADDED — Catálogo de System Prompts: seed completo + verificação contínua de integridade
-- Frente A (seed): 21 chaves do manifest (`supabase/functions/_shared/system-prompts.ts`) que nunca tinham sido propagadas ao banco agora estão em `ai_system_prompts`. Catálogo passou de 24 → 45 linhas (alinhado 1:1 com o manifest).
-- Frente B (`sync-system-prompts` idempotente): edge function trocada de `UPDATE`-only para `INSERT-or-UPDATE`. Toda nova chave adicionada ao manifest entra no DB automaticamente no próximo "Sincronizar com o código". Novo status `inserted` no relatório. Family/display_name das novas linhas são derivados automaticamente da chave; admin pode renomear.
-- Frente E (verificação contínua + selo na UI):
-_files: supabase/functions/_shared/system-prompts.ts, src/config/app-version.ts, supabase/functions/sync-system-prompts/index.ts, supabase/functions/verify-system-prompts/index.ts…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

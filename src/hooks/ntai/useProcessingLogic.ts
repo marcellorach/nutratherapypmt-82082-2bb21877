@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { ProcessingItem, ProcessingStage } from '@/types/vetgraphrag';
 import { simulateStageProcessing, getStageMessage, getProgressForStage } from './utils/processing';
+import { waitForFileSearchCompletion } from '@/services/study-file-search-status';
 
 // Lê status HTTP e corpo real de um FunctionsHttpError, em vez da mensagem
 // genérica "Edge Function returned a non-2xx status code".
@@ -71,6 +72,17 @@ export const useProcessingLogic = (
 ) => {
   const { toast } = useToast();
 
+  const waitForCurrentFileSearch = (studyId: string) =>
+    waitForFileSearchCompletion(async () => {
+      const { data, error } = await supabase
+        .from('processed_studies')
+        .select('kanban_status, ingestion_stages')
+        .eq('id', studyId)
+        .single();
+      if (error) throw error;
+      return data;
+    });
+
   const startProcessing = async () => {
     if (processQueue.length === 0) {
       toast({
@@ -102,10 +114,13 @@ export const useProcessingLogic = (
       if (index >= updatedQueue.length) {
         setProcessingActive(false);
         setActiveItemIndex(-1);
+        const failedCount = updatedQueue.filter((queueItem) => queueItem.stage === 'error').length;
         toast({
-          title: "Processing complete",
-          description: "All studies have been processed successfully.",
-          variant: "default",
+          title: failedCount > 0 ? 'Processamento encerrado com erro' : 'Processamento concluído',
+          description: failedCount > 0
+            ? `${failedCount} estudo(s) falharam e não foram enviados para a curadoria.`
+            : 'Todos os estudos foram processados com sucesso.',
+          variant: failedCount > 0 ? 'destructive' : 'default',
         });
         return;
       }
@@ -233,6 +248,12 @@ export const useProcessingLogic = (
           setProcessQueue([...updatedQueue]);
           processNextItem(index + 1);
           return;
+        }
+
+        addLogEntry(`⏳ [FILE SEARCH] Aguardando o resultado final do processamento...`);
+        const fileSearchResult = await waitForCurrentFileSearch(item.id);
+        if (fileSearchResult.status === 'failed') {
+          throw new Error(`gemini-file-search: ${fileSearchResult.error}`);
         }
         
         addLogEntry(`✅ [SUCCESS] Gemini completed: ${geminiData.nutraceuticalsCount || 0} nutraceuticals, ${geminiData.conditionsCount || 0} conditions`);
@@ -404,7 +425,10 @@ export const useProcessingLogic = (
         };
         
         setAnalysisResult(result);
-        await updateProcessedStudy(item.id, result);
+        const saved = await updateProcessedStudy(item.id, result);
+        if (!saved) {
+          throw new Error('A análise terminou, mas não foi possível salvar o estudo para a curadoria.');
+        }
         
         updatedQueue[index] = { ...updatedQueue[index], stage: 'complete' as ProcessingStage, progress: 100 };
         setProcessQueue([...updatedQueue]);

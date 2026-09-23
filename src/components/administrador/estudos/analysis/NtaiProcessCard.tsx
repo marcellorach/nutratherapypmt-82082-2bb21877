@@ -123,6 +123,9 @@ const NtaiProcessCard: React.FC<NtaiProcessCardProps> = ({ item, isActive, onRem
 
   const formatErrorMessage = (error?: string) => {
     if (!error) return "";
+    if (error.includes('402') || error.includes('RESOURCE_EXHAUSTED') || error.includes('prepayment credits')) {
+      return t('studies.vetgraphrag.errorCreditsDepleted');
+    }
     if (error.includes("invalid input syntax for type uuid")) return t('studies.vetgraphrag.errorInvalidUuid');
     if (error.includes("duplicate key value violates unique constraint")) return t('studies.vetgraphrag.errorDuplicate');
     if (error.includes("NetworkError") || error.includes("network") || error.includes("fetch")) return t('studies.vetgraphrag.errorNetwork');

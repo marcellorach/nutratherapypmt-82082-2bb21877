@@ -890,6 +890,7 @@
       "errorNetwork": "Network connection error. Check your internet and try again.",
       "errorAlreadyProcessed": "This study has already been processed.",
       "errorCriticalData": "Critical error in study data. Check the original file.",
+      "errorCreditsDepleted": "Processing was not completed because the AI provider credits were depleted. Add credits before trying again.",
       "processCard": {
         "statusComplete": "Processed",
         "statusError": "Error",
