@@ -8,6 +8,10 @@ import {
 } from '../_shared/analysisDataMerge.ts';
 import { authorize, authzResponse } from '../_shared/authorization.ts';
 
+// Single source of truth for the Google model used to read PDFs.
+// Change it here only: logs, audit records and metadata all read from this constant.
+const GEMINI_PDF_MODEL = 'gemini-3.1-pro';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -458,7 +462,7 @@ async function addFileToCorpus(
 // CALL 1 — acquireFullText
 // ------------------------------------------------------------
 // Dedicated call to extract ONLY the full plain text of the PDF.
-// Uses gemini-2.5-flash with a minimal schema { full_text: string }
+// Uses GEMINI_PDF_MODEL with a minimal schema { full_text: string }
 // so the model's output token budget is not shared with 22 other
 // clinical properties (the root cause of progressive truncation in
 // the legacy monolithic call).
@@ -467,7 +471,7 @@ async function acquireFullText(
   fileUri: string,
   apiKey: string,
 ): Promise<{ text: string; model: string; error?: string }> {
-  const MODEL = 'gemini-3.1-pro';
+  const MODEL = GEMINI_PDF_MODEL;
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`,
@@ -532,8 +536,8 @@ async function extractWithFileSearch(
   apiKey: string,
   supabaseClient: any
 ): Promise<ExtractedStudyData> {
-  // ✅ USING GOOGLE AI DIRECTLY with gemini-3.1-pro (GA, 1M ctx, supera 3.1 Pro em vários benchmarks)
-  const MODEL_NAME = 'gemini-3.1-pro';
+  // Google AI direct call; model name comes from GEMINI_PDF_MODEL (single source).
+  const MODEL_NAME = GEMINI_PDF_MODEL;
   console.log('🔍 Extracting data with Google AI Direct + Structured Output...');
   console.log(`📋 File Search Store: ${fileSearchStoreName}`);
   console.log(`📄 File URI: ${fileUri}`);  // ✅ LOG do URI
@@ -1526,7 +1530,7 @@ CRITICAL INSTRUCTIONS:
 
 
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_PDF_MODEL}:generateContent?key=${apiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1984,7 +1988,7 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
     // 22 propriedades clínicas e não ser truncada. Call 1 roda com
     // schema mínimo dedicado e seu retorno é a única fonte.
     // ============================================================
-    console.log('🧾 CALL 1: acquireFullText (gemini-2.5-flash, minimal schema)...');
+    console.log(`🧾 CALL 1: acquireFullText (${GEMINI_PDF_MODEL}, minimal schema)...`);
     const call1 = await acquireFullText(uploadedFile.uri, GOOGLE_GEMINI_KEY);
     const call1Text = (call1.text || '').trim();
     if (!call1Text) {
@@ -2267,8 +2271,8 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
           truncation_ratio: truncationRatio,
           sections_count_ref: parseSectionsCount,
           extraction_method: extractionMethod,
-          model_call1: 'gemini-3.1-pro',
-          model_call2: 'gemini-3.1-pro',
+          model_call1: GEMINI_PDF_MODEL,
+          model_call2: GEMINI_PDF_MODEL,
           entities_counts: {
             nutraceuticals: extractedData.nutraceuticals?.length || 0,
             conditions: extractedData.conditions?.length || 0,
@@ -2314,8 +2318,8 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
           ...gateMetrics,
           study_id: studyId,
           extraction_method: extractionMethod,
-          model_call1: 'gemini-3.1-pro',
-          model_call2: 'gemini-3.1-pro',
+          model_call1: GEMINI_PDF_MODEL,
+          model_call2: GEMINI_PDF_MODEL,
           rechain_extract: shouldRechain,
         }));
 
@@ -2929,7 +2933,7 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
     try {
       await supabase.from('api_usage_logs').insert({
         api_provider: 'google_gemini',
-        model: 'gemini-3.1-pro',
+        model: GEMINI_PDF_MODEL,
         operation: 'file_search_extraction',
         tokens_input: 0,
         tokens_output: 0,
