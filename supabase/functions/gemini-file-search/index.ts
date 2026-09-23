@@ -1796,7 +1796,6 @@ serve(async (req) => {
       .from('processed_studies')
       .update({
         kanban_status: 'processing',
-        processing_error: null,
         ingestion_stages: stages,
       })
       .eq('id', studyId);
@@ -1845,7 +1844,6 @@ serve(async (req) => {
           .from('processed_studies')
           .update({
             kanban_status: 'error',
-            processing_error: error instanceof Error ? error.message : String(error),
             ingestion_stages: merged,
           })
           .eq('id', studyId);
