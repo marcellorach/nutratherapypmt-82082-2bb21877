@@ -4,8 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 
 export const useVetGraphRAGConfig = () => {
   const [aiConfigs, setAiConfigs] = useState({
-    modelName: "gemini-2.5-flash",
-    temperature: "0.7",
+    // Model is NOT chosen here: it is resolved server-side from
+    // Admin → Modelos de IA por tarefa (ai_configurations.ai_model_*).
     nutraceuticals_prompt: "Extrair todos os nutracêuticos mencionados no estudo e suas aplicações.",
     conditions_prompt: "Identificar todas as condições de saúde abordadas no estudo."
   });

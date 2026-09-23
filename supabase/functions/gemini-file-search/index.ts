@@ -7,10 +7,13 @@ import {
   mergeExtractedDataFromOtherWriter,
 } from '../_shared/analysisDataMerge.ts';
 import { authorize, authzResponse } from '../_shared/authorization.ts';
+import { DEFAULT_PDF_MODEL, resolvePdfModel, checkGoogleModel, normalizeModelId, type PdfModelSource } from './pdf-model.ts';
 
-// Single source of truth for the Google model used to read PDFs.
-// Change it here only: logs, audit records and metadata all read from this constant.
-const GEMINI_PDF_MODEL = 'gemini-3.1-pro-preview';
+// Google model used to read PDFs. Resolved per run from
+// ai_configurations.ai_model_pdf_reading (Admin → Modelos de IA por tarefa);
+// DEFAULT_PDF_MODEL is only the fallback. Logs/audit read this variable.
+let GEMINI_PDF_MODEL: string = DEFAULT_PDF_MODEL;
+let GEMINI_PDF_MODEL_SOURCE: PdfModelSource = 'default';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -1757,6 +1760,20 @@ serve(async (req) => {
   let fileUrl: string, studyId: string, fileName: string;
   try {
     const body = await req.json();
+    if (body?.action === 'validate_model') {
+      const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      const model = normalizeModelId(body.model);
+      if (!model) return json({ ok: false, error: 'invalid_model_id' }, 400);
+      const sb = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+      let key = Deno.env.get('GEMINI_API_KEY_SENEX') ?? Deno.env.get('GOOGLE_AI_API_KEY') ?? '';
+      if (!key) {
+        const { data } = await sb.from('ai_configurations').select('config_value').eq('config_key', 'google_gemini_api_key').maybeSingle();
+        key = data?.config_value ? String(data.config_value).replace(/^"|"$/g, '') : '';
+      }
+      if (!key) return json({ ok: false, error: 'google_key_missing' }, 500);
+      const check = await checkGoogleModel(model, key);
+      return json({ ok: check.ok, model, google_status: check.status, message: check.ok ? undefined : check.message });
+    }
     fileUrl = body.fileUrl;
     studyId = body.studyId;
     fileName = body.fileName;
@@ -1906,6 +1923,10 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
       }
       GOOGLE_GEMINI_KEY = String(configData.config_value).replace(/^"|"$/g, '');
     }
+    const resolvedModel = await resolvePdfModel(supabase, GOOGLE_GEMINI_KEY);
+    GEMINI_PDF_MODEL = resolvedModel.model;
+    GEMINI_PDF_MODEL_SOURCE = resolvedModel.source;
+    console.log(`🤖 Modelo de leitura de PDF: ${GEMINI_PDF_MODEL} (origem: ${GEMINI_PDF_MODEL_SOURCE}${resolvedModel.rejected ? `, rejeitado: ${resolvedModel.rejected}` : ''})`);
     console.log('✅ Chave resolvida — prefixo:', GOOGLE_GEMINI_KEY.substring(0, 10) + '...', '| sufixo:', '...' + GOOGLE_GEMINI_KEY.slice(-4), '| length:', GOOGLE_GEMINI_KEY.length);
 
     // Download do PDF do Supabase Storage
@@ -2273,6 +2294,7 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
           extraction_method: extractionMethod,
           model_call1: GEMINI_PDF_MODEL,
           model_call2: GEMINI_PDF_MODEL,
+          model_source: GEMINI_PDF_MODEL_SOURCE,
           entities_counts: {
             nutraceuticals: extractedData.nutraceuticals?.length || 0,
             conditions: extractedData.conditions?.length || 0,
@@ -2320,6 +2342,7 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
           extraction_method: extractionMethod,
           model_call1: GEMINI_PDF_MODEL,
           model_call2: GEMINI_PDF_MODEL,
+          model_source: GEMINI_PDF_MODEL_SOURCE,
           rechain_extract: shouldRechain,
         }));
 

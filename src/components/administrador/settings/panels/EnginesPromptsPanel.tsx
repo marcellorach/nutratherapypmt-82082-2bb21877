@@ -37,6 +37,9 @@ const EnginesPromptsPanel: React.FC<EnginesPanelProps> = ({ section }) => {
   
   return (
     <div className="space-y-6">
+      <p role="note" className="rounded-md border border-border bg-muted p-3 text-sm text-muted-foreground">
+        {t('enginesPromptsPanel.noEffectNotice')}
+      </p>
       <Card>
         <CardHeader>
           <CardTitle>{t('enginesPromptsPanel.engineConfig')}</CardTitle>

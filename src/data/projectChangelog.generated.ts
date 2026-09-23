@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-09-23T19:14:06.590Z
+// Última geração: 2026-09-23T22:18:21.547Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,30 @@ export const lastChangelogDate = "2026-09-23";
 export const senexVersion = "7.2.4";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-09-23",
+    "kind": "changed",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Modelo de leitura de PDF escolhido na tela de modelos por tarefa",
+    "bullets": [
+      "Nova tarefa \"Leitura de PDF\" em Modelos de IA por tarefa (`ai_configurations.ai_model_pdf_reading`); `gemini-file-search` resolve o modelo a cada execução (cache 30 s), com padrão `gemini-3.1-pro-preview`.",
+      "Trava: ao salvar, o modelo é testado no Google (`action: validate_model`); nome inexistente é recusado com mensagem clara. Se o modelo gravado der 404, a leitura volta ao padrão e registra `model_source`.",
+      "Corrigido o identificador para `gemini-3.1-pro-preview` (o nome sem sufixo dava 404); estudo do ácido ursólico reprocessado até a curadoria (65.103 caracteres, 344 trechos, 31 relações).",
+      "Telas sem efeito sinalizadas (painel de motores) e removidos nomes de modelo falsos do log da fila e do hook de configuração.",
+      "Files: supabase/functions/gemini-file-search/index.ts, supabase/functions/gemini-file-search/pdf-model.ts, src/components/administrador/configuracoes/AIModelSelector.tsx, src/components/administrador/settings/panels/EnginesPromptsPanel.tsx, src/hooks/ntai/useProcessingLogic.ts, src/hooks/ntai/useVetGraphRAGConfig.ts, src/locales/*/translation.json, src/i18n.ts"
+    ],
+    "files": [
+      "supabase/functions/gemini-file-search/index.ts",
+      "supabase/functions/gemini-file-search/pdf-model.ts",
+      "src/components/administrador/configuracoes/AIModelSelector.tsx",
+      "src/components/administrador/settings/panels/EnginesPromptsPanel.tsx",
+      "src/hooks/ntai/useProcessingLogic.ts",
+      "src/hooks/ntai/useVetGraphRAGConfig.ts",
+      "src/i18n.ts"
+    ],
+    "i18nVersion": "1.134.0"
+  },
   {
     "date": "2026-09-23",
     "kind": "fixed",
