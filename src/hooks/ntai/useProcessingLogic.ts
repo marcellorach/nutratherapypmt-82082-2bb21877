@@ -5,6 +5,31 @@ import { supabase } from '@/integrations/supabase/client';
 import { ProcessingItem, ProcessingStage } from '@/types/vetgraphrag';
 import { simulateStageProcessing, getStageMessage, getProgressForStage } from './utils/processing';
 
+// Lê status HTTP e corpo real de um FunctionsHttpError, em vez da mensagem
+// genérica "Edge Function returned a non-2xx status code".
+async function describeFunctionError(fnName: string, err: unknown): Promise<string> {
+  const e = err as { message?: string; context?: Response };
+  let status = '';
+  let detail: unknown = e?.message || String(err);
+  const ctx = e?.context;
+  if (ctx && typeof ctx === 'object' && 'status' in ctx) {
+    status = String(ctx.status);
+    try {
+      const text = await ctx.clone().text();
+      try {
+        const json = JSON.parse(text);
+        detail = json?.error || json?.message || text;
+      } catch {
+        if (text) detail = text;
+      }
+    } catch {
+      /* corpo indisponível */
+    }
+  }
+  const d = typeof detail === 'string' ? detail : JSON.stringify(detail);
+  return `${fnName}${status ? ` HTTP ${status}` : ''}: ${d}`.slice(0, 500);
+}
+
 // A2#3: grava ingestion_stages.<stage> = { status:'failed', ... } antes de
 // marcar a fila como 'error', para que o gate de updateProcessedStudy e o
 // painel de auditoria enxerguem o motivo real do erro.
@@ -176,7 +201,7 @@ export const useProcessingLogic = (
         });
         
         if (geminiError) {
-          const errorMsg = geminiError.message || String(geminiError);
+          const errorMsg = await describeFunctionError('gemini-file-search', geminiError);
           addLogEntry(`❌ [ERROR] Gemini File Search failed: ${errorMsg}`);
           
           // Contextual error messages
@@ -268,7 +293,9 @@ export const useProcessingLogic = (
         });
 
         if (extractError) {
-          throw new Error(`Extraction error: ${extractError.message}`);
+          const errorMsg = await describeFunctionError('extract-study-entities', extractError);
+          await markStageFailed(item.id, 'extract_entities', errorMsg);
+          throw new Error(errorMsg);
         }
 
         // 3-stage extraction
