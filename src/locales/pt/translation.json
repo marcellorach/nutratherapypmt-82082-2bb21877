@@ -6785,7 +6785,15 @@
       "chat": "Chat de Documentos",
       "chatDesc": "Q&A baseado em RAG para documentos",
       "translate": "Tradução",
-      "translateDesc": "Tradução de termos médicos"
+      "translateDesc": "Tradução de termos médicos",
+      "pdfReading": "Leitura de PDF",
+      "pdfReadingDesc": "Lê o PDF do estudo e extrai o texto completo (conta Google do projeto)",
+      "pdfReadingOnly": "Só modelos compatíveis com leitura de PDF",
+      "validating": "Testando o modelo no Google...",
+      "modelInvalid": "Modelo recusado pelo Google",
+      "modelInvalidDesc": "O Google não aceitou \"{{model}}\" (HTTP {{status}}). Nada foi salvo; escolha outro modelo.",
+      "validationFailed": "Não foi possível testar o modelo",
+      "validationFailedDesc": "O teste no Google falhou: {{error}}. Nada foi salvo."
     }
   },
   "consumoPainel": {
@@ -7305,7 +7313,8 @@
       "gpt4o": "GPT-4o - Alta performance",
       "gpt4Vision": "GPT-4 Vision - Processamento de imagens",
       "gpt4Turbo": "GPT-4 Turbo - Alta velocidade e performance"
-    }
+    },
+    "noEffectNotice": "Esta tela não controla nenhum modelo. O modelo usado de verdade é escolhido em Configurações → Modelos de IA por tarefa."
   },
   "usagePanel": {
     "title": "Uso de API - {{section}}",

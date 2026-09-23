@@ -108,7 +108,7 @@ export const useProcessingLogic = (
     setAnalysisResult(null);
     
     addLogEntry('Starting processing with configurations:');
-    addLogEntry(`🤖 Model: ${aiConfigs.modelName || 'gemini-3-pro-preview'}, Temperature: ${aiConfigs.temperature || '0.7'}`);
+    addLogEntry('🤖 Model: resolved server-side (Admin → AI models per task)');
     
     const processNextItem = async (index: number) => {
       if (index >= updatedQueue.length) {
