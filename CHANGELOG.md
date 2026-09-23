@@ -24,6 +24,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.2.4 -->
 
+### Fixed - 2026-09-23 — Resultado real do processamento assíncrono de estudos
+<!-- area: curation · status: entregue · i18n: 1.133.0 -->
+- A fila e o card do estudo agora aguardam o resultado final do File Search, em vez de interpretar o aceite HTTP 202 do trabalho em segundo plano como sucesso.
+- Falhas assíncronas impedem o envio à curadoria, encerram a fila com erro e mostram uma mensagem específica quando os créditos do provedor de IA estão esgotados.
+- O início de cada tentativa grava `file_search.status = 'processing'`, evitando reutilizar o resultado de uma tentativa anterior.
+- Files: supabase/functions/gemini-file-search/index.ts, src/services/study-file-search-status.ts, src/services/__tests__/study-file-search-status.test.ts, src/hooks/ntai/useProcessingLogic.ts, src/hooks/useGeminiProcessing.ts, src/components/administrador/estudos/analysis/NtaiProcessCard.tsx, src/i18n.ts, src/locales/pt/translation.json, src/locales/en/translation.json
+
 ### Fixed - 2026-09-21 — Papel correto no cabeçalho
 <!-- area: auth · status: entregue · i18n: 1.131.0 -->
 - O cabeçalho agora exibe todos os seis papéis canônicos, incluindo Cientista, em vez de tratar papéis não administrativos como Tutor.

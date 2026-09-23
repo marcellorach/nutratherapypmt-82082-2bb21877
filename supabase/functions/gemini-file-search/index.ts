@@ -1770,6 +1770,45 @@ serve(async (req) => {
     );
   }
 
+  // Persist a fresh in-progress marker before returning 202. The clients use
+  // this marker to distinguish the current run from a failed previous run and
+  // wait for the background pipeline's actual terminal result.
+  try {
+    const statusClient = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+    );
+    const { data: currentRow, error: readError } = await statusClient
+      .from('processed_studies')
+      .select('ingestion_stages')
+      .eq('id', studyId)
+      .maybeSingle();
+    if (readError) throw readError;
+
+    const stages = {
+      ...((currentRow?.ingestion_stages as Record<string, unknown>) || {}),
+      file_search: {
+        status: 'processing',
+        started_at: new Date().toISOString(),
+      },
+    };
+    const { error: updateError } = await statusClient
+      .from('processed_studies')
+      .update({
+        kanban_status: 'processing',
+        processing_error: null,
+        ingestion_stages: stages,
+      })
+      .eq('id', studyId);
+    if (updateError) throw updateError;
+  } catch (error) {
+    console.error('Failed to mark file_search as processing:', error);
+    return new Response(
+      JSON.stringify({ success: false, error: 'Não foi possível iniciar o acompanhamento do processamento' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    );
+  }
+
   // Heavy pipeline runs in background; client polls processed_studies via realtime.
   const pipeline = (async () => {
     try {

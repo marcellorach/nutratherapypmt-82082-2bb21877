@@ -891,6 +891,7 @@
       "errorNetwork": "Erro de conexão de rede. Verifique sua internet e tente novamente.",
       "errorAlreadyProcessed": "Este estudo já foi processado anteriormente.",
       "errorCriticalData": "Erro crítico nos dados do estudo. Verifique o arquivo original.",
+      "errorCreditsDepleted": "O processamento não foi concluído porque os créditos do provedor de IA acabaram. Recarregue os créditos antes de tentar novamente.",
       "processCard": {
         "statusComplete": "Processado",
         "statusError": "Erro",
