@@ -1,15 +1,22 @@
 # Project context briefing (auto)
-Generated: 2026-09-23T19:14:06.596Z
+Generated: 2026-09-23T22:18:21.555Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.133.0
+## Latest i18n version: 1.134.0
 
 ## Changes by area (last 14 days)
 - **auth**: 3
+- **admin**: 1
 - **curation**: 1
 
 ## Top 10 recent entries
+### 2026-09-23 · [admin] CHANGED — Modelo de leitura de PDF escolhido na tela de modelos por tarefa
+- Nova tarefa "Leitura de PDF" em Modelos de IA por tarefa (`ai_configurations.ai_model_pdf_reading`); `gemini-file-search` resolve o modelo a cada execução (cache 30 s), com padrão `gemini-3.1-pro-preview`.
+- Trava: ao salvar, o modelo é testado no Google (`action: validate_model`); nome inexistente é recusado com mensagem clara. Se o modelo gravado der 404, a leitura volta ao padrão e registra `model_source`.
+- Corrigido o identificador para `gemini-3.1-pro-preview` (o nome sem sufixo dava 404); estudo do ácido ursólico reprocessado até a curadoria (65.103 caracteres, 344 trechos, 31 relações).
+_files: supabase/functions/gemini-file-search/index.ts, supabase/functions/gemini-file-search/pdf-model.ts, src/components/administrador/configuracoes/AIModelSelector.tsx, src/components/administrador/settings/panels/EnginesPromptsPanel.tsx…_
+
 ### 2026-09-23 · [curation] FIXED — Resultado real do processamento assíncrono de estudos
 - A fila e o card do estudo agora aguardam o resultado final do File Search, em vez de interpretar o aceite HTTP 202 do trabalho em segundo plano como sucesso.
 - Falhas assíncronas impedem o envio à curadoria, encerram a fila com erro e mostram uma mensagem específica quando os créditos do provedor de IA estão esgotados.
@@ -62,12 +69,6 @@ _files: supabase/functions/_shared/model-alias.ts, src/hooks/useTaskAlias.ts, su
 - 6 novas chaves no manifest (`supabase/functions/_shared/system-prompts.ts`) — todas com `purpose`, `model_default`, `temperature`, `output_format`, `consumers`, `tags` preenchidos:
 - `generate_triplets_phase1_discovery` — Phase 1 (free discovery) bioquímico veterinário.
 _files: supabase/functions/_shared/system-prompts.ts, supabase/functions/generate-triplets/index.ts, supabase/functions/extract-meta-study/index.ts, supabase/functions/generate-showcase/index.ts…_
-
-### 2026-06-17 · [admin] ADDED — System Prompts: versão Senex (7.2.4), selo unificado nas 3 abas e audit log
-- Versão sincronizada: `APP_VERSION` agora reflete a versão do Senex AI (`7.2.4`) + novo `PROMPTS_REVISION` (4º dígito) que incrementa apenas quando o manifest de prompts muda. Selo exibido: "Sistema 7.2.4 · Prompts rev. 1". Reseta para 0 a cada bump de APP_VERSION.
-- Selo unificado em todas as abas de prompts: `IntegrityBadge` extraído de `SystemPromptsCatalog` para novo componente `PromptsIntegrityBadge.tsx`, reutilizado nas abas Recomendações, Extração e System (modo `compact` para as duas primeiras). Mensagem clara separa dois sinais distintos: "Última modificação dos prompts" (max `updated_at` em `ai_system_prompts`) vs "Última verificação" (`checked_at` em `ai_system_prompts_integrity_check`) — resolve a confusão "verificado hoje mas desatualizado".
-- Auto-verificação por revisão: chave do localStorage agora é `${APP_VERSION}.${PROMPTS_REVISION}` — qualquer bump de prompts dispara verificação na próxima visita, mesmo sem mudar a versão do sistema.
-_files: src/config/app-version.ts, src/components/administrador/configuracoes/PromptsIntegrityBadge.tsx, src/components/administrador/configuracoes/SystemPromptsCatalog.tsx, src/components/administrador/PromptConfigurationTab.tsx…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
