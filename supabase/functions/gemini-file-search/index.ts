@@ -10,7 +10,7 @@ import { authorize, authzResponse } from '../_shared/authorization.ts';
 
 // Single source of truth for the Google model used to read PDFs.
 // Change it here only: logs, audit records and metadata all read from this constant.
-const GEMINI_PDF_MODEL = 'gemini-3.1-pro';
+const GEMINI_PDF_MODEL = 'gemini-3.1-pro-preview';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
