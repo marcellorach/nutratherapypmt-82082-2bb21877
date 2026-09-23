@@ -154,7 +154,7 @@ serve(async (req) => {
           .from('processed_studies')
           .update({
             kanban_status: 'error',
-            processing_error: `empty_payload: full_text=${fullTextFromColumn?.length || 0} chars`,
+            error_message: `empty_payload: full_text=${fullTextFromColumn?.length || 0} chars`,
             ingestion_stages: mergedStages,
           })
           .eq('id', studyId);
