@@ -43,14 +43,21 @@ const PetRegistrationPage: React.FC = () => {
       if (extras.historicalConsultations.length) {
         tasks.push(writeConsultationsChronological(petId, extras.historicalConsultations, userId));
       }
-      if (extras.examFiles.length) tasks.push(uploadPetExamPdfs(petId, extras.examFiles, null));
+      let examFailures = 0;
+      if (extras.examFiles.length) {
+        tasks.push(
+          uploadPetExamPdfs(petId, extras.examFiles, null).then((ids) => {
+            examFailures = ids.filter((id) => !id).length;
+          }),
+        );
+      }
       const results = await Promise.allSettled(tasks);
-      const failures = results.filter((r) => r.status === 'rejected').length;
+      const failures = results.filter((r) => r.status === 'rejected').length + examFailures;
 
       toast({
         title: t('petRegistration.form.successTitle'),
         description: failures
-          ? `${t('petRegistration.form.successDesc', { name: data.name })} (${failures} extra(s) com falha)`
+          ? `${t('petRegistration.form.successDesc', { name: data.name })} ${t('petRegistration.form.extrasFailed', { count: failures })}`
           : t('petRegistration.form.successDesc', { name: data.name }),
         variant: failures ? 'destructive' : undefined,
       });

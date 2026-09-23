@@ -6246,7 +6246,8 @@
         "conditions": "Diagnósticos (separados por vírgula)",
         "medications": "Medicações (uma por linha: nome | dose | frequência)",
         "add": "Adicionar consulta"
-      }
+      },
+      "extrasFailed": "({{count}} item(ns) extra(s) falharam, incluindo exames sem permissão de envio. Tente novamente no perfil do paciente.)"
     },
     "chat": {
       "title": "Chat Clínico Inteligente",

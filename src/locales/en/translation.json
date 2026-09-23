@@ -6245,7 +6245,8 @@
         "conditions": "Diagnoses (comma-separated)",
         "medications": "Medications (one per line: name | dose | frequency)",
         "add": "Add consultation"
-      }
+      },
+      "extrasFailed": "({{count}} extra item(s) failed, including exams you may not be allowed to upload. Try again from the patient profile.)"
     },
     "chat": {
       "title": "Intelligent Clinical Chat",
