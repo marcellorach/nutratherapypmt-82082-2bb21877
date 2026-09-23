@@ -33,6 +33,8 @@ export async function uploadPetExamPdf(
     .single();
   if (insErr || !ins) {
     console.error('Exam row insert failed', insErr);
+    // Remove the orphaned PDF so storage does not keep files without a record.
+    await supabase.storage.from('pet_exams_pdfs').remove([path]);
     return null;
   }
 
