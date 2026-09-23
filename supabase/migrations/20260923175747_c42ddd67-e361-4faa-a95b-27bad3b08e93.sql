@@ -1,0 +1,4 @@
+CREATE POLICY "Pet management editors can insert pet exams" ON public.pet_exams FOR INSERT TO authenticated WITH CHECK (public.has_permission(auth.uid(), 'tab.pet-management', 'edit'));
+CREATE POLICY "Pet management editors can update pet exams" ON public.pet_exams FOR UPDATE TO authenticated USING (public.has_permission(auth.uid(), 'tab.pet-management', 'edit')) WITH CHECK (public.has_permission(auth.uid(), 'tab.pet-management', 'edit'));
+CREATE POLICY "Pet management editors can upload pet exam pdfs" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'pet_exams_pdfs' AND public.has_permission(auth.uid(), 'tab.pet-management', 'edit'));
+CREATE POLICY "Pet management editors can remove own failed pet exam pdfs" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'pet_exams_pdfs' AND owner = auth.uid() AND public.has_permission(auth.uid(), 'tab.pet-management', 'edit'));
