@@ -31,7 +31,7 @@ export interface OrganogramaArea extends OrganogramaNode {
   linksTo?: OrganogramaAreaKey[];
 }
 
-export const organogramaLastUpdated = "2026-09-23";
+export const organogramaLastUpdated = "2026-09-25";
 
 export const organogramaConvencoes: { label: string; label_en: string; value: string; value_en: string }[] = [
   { label: "Idioma", label_en: "Language", value: "PT-BR + EN obrigatórios — incrementar I18N_VERSION em src/i18n.ts a cada mudança de string", value_en: "PT-BR + EN mandatory — increment I18N_VERSION in src/i18n.ts on every string change" },
@@ -423,13 +423,20 @@ export const organograma: OrganogramaArea[] = [
       {
         title: "Governança de IA — Modelos & Prompts por Tarefa (Fase 1)",
         title_en: "AI Governance — Models & Prompts by Task (Phase 1)",
-        description: "Registro central que mapeia cada família de tarefa (extração, meta-análise, chat clínico, inferência clínica, auditoria) ao modelo do AI Gateway, parâmetros de routing e prompt versionado em banco. Inclui sub-aba 'Modelos & Aliases' em Configurações → Prompts com inventário read-only (edge function `model-inventory`), tabela de aliases públicos por tarefa (`ai_task_aliases`) e botão dedicado para gerar relatório de modelos (CSV/JSON).",
-        description_en: "Central registry mapping each task family (extraction, meta-analysis, clinical chat, clinical inference, auditing) to its AI Gateway model, routing parameters and DB-versioned prompt. Includes a 'Models & Aliases' sub-tab under Settings → Prompts with a read-only inventory (edge function `model-inventory`), per-task public aliases table (`ai_task_aliases`) and a dedicated button to generate the model report (CSV/JSON).",
+        description: "Registro central que mapeia cada família de tarefa (extração, meta-análise, chat clínico, inferência clínica, auditoria) ao modelo do AI Gateway, parâmetros de routing e prompt versionado em banco. Inclui sub-aba 'Modelos & Aliases' em Configurações → Prompts com inventário read-only (edge function `model-inventory`), tabela de aliases públicos por tarefa (`ai_task_aliases`) e botão dedicado para gerar relatório de modelos (CSV/JSON). Tela única de modelos: mostra por tarefa o modelo escolhido × realmente usado (ai_task_invocations, 30 dias), onde é usada, volume/erro/tempo/custo e inventário gerado do código (42 rotinas: obedece à tela / fixo no código / sem registro / infraestrutura). Leitura de PDF é a tarefa pdf_reading (Google direto, validada antes de salvar).",
+        description_en: "Central registry mapping each task family (extraction, meta-analysis, clinical chat, clinical inference, auditing) to its AI Gateway model, routing parameters and DB-versioned prompt. Includes a 'Models & Aliases' sub-tab under Settings → Prompts with a read-only inventory (edge function `model-inventory`), per-task public aliases table (`ai_task_aliases`) and a dedicated button to generate the model report (CSV/JSON). Single model screen: per task shows chosen vs actually used model (ai_task_invocations, 30 days), where it is used, volume/error/latency/cost and a code-generated inventory (42 routines: follows screen / fixed in code / unregistered / infrastructure). PDF reading is the pdf_reading task (Google direct, validated before saving).",
         files: [
           "src/config/ai-tasks.ts",
           "src/hooks/useAIPromptVersions.ts",
           "src/hooks/useTaskAlias.ts",
           "src/components/administrador/configuracoes/TaskModelGovernancePanel.tsx",
+          "src/components/administrador/configuracoes/governance/TaskUsageInline.tsx",
+          "src/components/administrador/configuracoes/governance/AIInventoryCard.tsx",
+          "src/components/administrador/configuracoes/governance/PdfModelPicker.tsx",
+          "src/hooks/useTaskModelUsage.ts",
+          "src/data/aiInventory.generated.ts",
+          "scripts/generate-ai-inventory.mjs",
+          "supabase/functions/gemini-file-search/pdf-model.ts",
           "src/components/administrador/configuracoes/ModelAliasesPanel.tsx",
           "src/components/administrador/ConfiguracoesIATab.tsx",
           "supabase/functions/model-inventory/index.ts",

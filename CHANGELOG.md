@@ -24,6 +24,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.2.4 -->
 
+### Added - 2026-09-25 — Governança de modelos, Fase 1: tela única e inventário honesto
+<!-- area: admin · status: entregue · i18n: 1.135.0 -->
+- "Modelos & Prompts por Tarefa" passa a ser a única tela de modelos; a tela simples (5 chaves genéricas, das quais só `ai_model_chat` era lida) foi removida.
+- Cada tarefa mostra modelo escolhido × realmente usado (`ai_task_invocations`, 30 dias), alerta de divergência, onde é usada, chamadas, taxa de erro, tempo médio e custo.
+- Status real calculado do código (não do registro): inventório gerado por `scripts/generate-ai-inventory.mjs` → 42 rotinas: 11 obedecem à tela, 10 com modelo fixo, 14 sem tarefa registrada, 7 de diagnóstico. O registro dizia "conectado" para `relations_auditor` e `geroprotector_stack`, mas o código não obedece; a tela agora avisa.
+- Nova tarefa `pdf_reading` (Google direto) com troca validada no Google; `gemini-file-search` passa a gravar cada leitura em `ai_task_invocations`.
+- Teste `scripts/__tests__/ai-inventory.test.mjs`: falha se o inventário estiver desatualizado ou se uma rotina nova chamar IA sem tarefa registrada.
+- Dívidas (Fase 2): `document-chat` lê `ai_model_chat` em vez da chave da tarefa; 10 rotinas com modelo fixo; 14 sem tarefa. Troca de modelo para tarefas da IA do Lovable fica para a Fase 3 (com teste antes de salvar).
+- Files: src/components/administrador/configuracoes/TaskModelGovernancePanel.tsx, src/components/administrador/configuracoes/governance/*, src/hooks/useTaskModelUsage.ts, src/config/ai-tasks.ts, src/data/aiInventory.generated.ts, scripts/generate-ai-inventory.mjs, supabase/functions/gemini-file-search/index.ts
+
 ### Changed - 2026-09-23 — Modelo de leitura de PDF escolhido na tela de modelos por tarefa
 <!-- area: admin · status: entregue · i18n: 1.134.0 -->
 - Nova tarefa "Leitura de PDF" em Modelos de IA por tarefa (`ai_configurations.ai_model_pdf_reading`); `gemini-file-search` resolve o modelo a cada execução (cache 30 s), com padrão `gemini-3.1-pro-preview`.
