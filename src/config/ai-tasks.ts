@@ -27,7 +27,10 @@ export type AIModelId =
   | "openai/gpt-5.4-mini"
   | "openai/gpt-5.4-pro"
   | "openai/gpt-5.5"
-  | "openai/gpt-5.5-pro";
+  | "openai/gpt-5.5-pro"
+  // Google direct (conta Google do projeto, sem o prefixo "google/")
+  | "gemini-3.1-pro-preview"
+  | "gemini-3.5-flash";
 
 export type ReasoningEffort = "minimal" | "low" | "medium" | "high" | "xhigh";
 
@@ -66,9 +69,31 @@ export interface AITaskDefinition {
   rationale_en: string;
   /** Indica se o consumidor está plugado no router compartilhado (fase 2.5). */
   status: AITaskStatus;
+  /** Quem paga/serve a chamada. Default: lovable_gateway. */
+  provider?: "lovable_gateway" | "google_direct";
+  /** Chave em ai_configurations quando difere de ai_model_<id>. */
+  config_key?: string;
 }
 
 export const AI_TASKS: AITaskDefinition[] = [
+  // ============== LEITURA DE PDF ==============
+  {
+    id: "pdf_reading",
+    label_pt: "Leitura de PDF (texto completo)",
+    label_en: "PDF reading (full text)",
+    description_pt: "Lê o PDF do estudo e extrai o texto completo e os dados iniciais. Chama a conta Google do projeto diretamente.",
+    description_en: "Reads the study PDF and extracts the full text and initial data. Calls the project's Google account directly.",
+    category: "extraction",
+    recommended_model: "gemini-3.1-pro-preview",
+    candidate_models: ["gemini-3.1-pro-preview", "gemini-3.5-flash"],
+    routing: { temperature: 0, notes: "Usa o File API do Google (armazenamento e busca no PDF), que a IA do Lovable não oferece." },
+    prompt_key: "pdf_reading",
+    consumers: ["gemini-file-search"],
+    rationale_pt: "Modelo com leitura nativa de PDF longo; validado no Google antes de salvar.",
+    rationale_en: "Model with native long-PDF reading; validated at Google before saving.",
+    status: "connected",
+    provider: "google_direct",
+  },
   // ============== EXTRAÇÃO ==============
   {
     id: "extraction_stage1",
@@ -81,7 +106,7 @@ export const AI_TASKS: AITaskDefinition[] = [
     candidate_models: ["google/gemini-3-pro-preview", "google/gemini-2.5-pro", "openai/gpt-5.4"],
     routing: { temperature: 0.1, context_caching: true, notes: "Janela grande + extração estruturada; Gemini 3 Pro lida nativamente com PDF multimodal." },
     prompt_key: "extraction_stage1",
-    consumers: ["extract-study-entities", "gemini-file-search"],
+    consumers: ["extract-study-entities"],
     rationale_pt: "Gemini 3 Pro suporta PDF nativo + janela ampla e mantém alta fidelidade textual em extração estruturada.",
     rationale_en: "Gemini 3 Pro handles PDF natively with a large context window and high textual fidelity for structured extraction.",
     status: "connected",
