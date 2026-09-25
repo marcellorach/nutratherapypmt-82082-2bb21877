@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-09-23T17:56:28.145Z",
+  "timestamp": "2026-09-25T16:05:50.047Z",
   "summary": {
-    "totalFiles": 987,
+    "totalFiles": 989,
     "totalIssues": 509,
     "hardcodedTexts": 61,
     "missingKeys": 446,
@@ -627,7 +627,7 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/configuracoes/AIModelSelector.tsx",
-      "line": 50,
+      "line": 60,
       "text": "config_key, config_value",
       "severity": "high"
     },
@@ -1551,7 +1551,7 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/analysis/NtaiProcessCard.tsx",
-      "line": 201,
+      "line": 203,
       "text": "studies.vetgraphrag.resetAndReprocess",
       "severity": "high"
     },
@@ -2916,35 +2916,35 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 217,
+      "line": 266,
       "text": "extract_meta_study",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 1099,
+      "line": 1148,
       "text": "audit_base_system_{pt,en}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2411,
+      "line": 2460,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2622,
+      "line": 2671,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 5417,
+      "line": 5466,
       "text": "@",
       "severity": "high"
     },

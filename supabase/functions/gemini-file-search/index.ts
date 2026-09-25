@@ -1835,7 +1835,14 @@ serve(async (req) => {
       console.log('🚀 Iniciando processamento com Google Gemini File API (background)');
       console.log('📋 Parâmetros:', { studyId, fileName, fileUrl });
 
-      await runGeminiPipeline({ fileUrl, studyId, fileName });
+      const t0 = Date.now();
+      try {
+        await runGeminiPipeline({ fileUrl, studyId, fileName });
+        await logPdfInvocation(true, Date.now() - t0, null);
+      } catch (pipelineError) {
+        await logPdfInvocation(false, Date.now() - t0, pipelineError instanceof Error ? pipelineError.message : String(pipelineError));
+        throw pipelineError;
+      }
     } catch (error) {
       console.error('💥 ERRO FATAL NO PROCESSAMENTO (background):', error);
       try {
@@ -1894,6 +1901,25 @@ serve(async (req) => {
 // ============================================================
 // Pipeline original (extraído do handler para rodar em background)
 // ============================================================
+// Registra a execução em ai_task_invocations (tarefa pdf_reading) para que a
+// tela de governança mostre o modelo realmente usado.
+async function logPdfInvocation(ok: boolean, latencyMs: number, error: string | null) {
+  try {
+    const sb = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+    const { error: insErr } = await sb.from('ai_task_invocations').insert({
+      task_id: 'pdf_reading',
+      model_id: GEMINI_PDF_MODEL,
+      caller_function: 'gemini-file-search',
+      latency_ms: latencyMs,
+      ok,
+      error: error ? error.slice(0, 500) : null,
+    });
+    if (insErr) console.warn('⚠️ ai_task_invocations insert falhou:', insErr.message);
+  } catch (e) {
+    console.warn('⚠️ ai_task_invocations insert falhou:', e);
+  }
+}
+
 async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: string; studyId: string; fileName: string }) {
   try {
     

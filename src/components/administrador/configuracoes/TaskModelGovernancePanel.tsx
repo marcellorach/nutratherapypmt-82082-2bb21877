@@ -13,6 +13,11 @@ import { useAITaskStatus, useRunHealthcheck } from "@/hooks/useAITaskStatus";
 import { useToast } from "@/hooks/use-toast";
 import TaskDetailSheet from "./TaskDetailSheet";
 import { useTaskAlias } from "@/hooks/useTaskAlias";
+import { useTaskModelUsage, type TaskModelUsageData } from "@/hooks/useTaskModelUsage";
+import { TaskUsageBadges, TaskUsageDetails } from "./governance/TaskUsageInline";
+import AIInventoryCard from "./governance/AIInventoryCard";
+import PdfModelPicker from "./governance/PdfModelPicker";
+import { chosenModel } from "./governance/taskEffectiveStatus";
 
 const CATEGORY_META: Record<AITaskCategory, { icon: React.ComponentType<{ className?: string }>; tone: string }> = {
   extraction: { icon: Database, tone: "bg-blue-100 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300" },
@@ -36,7 +41,7 @@ function detectProvider(model: string): "openai" | "google" | "other" {
   return "other";
 }
 
-const TaskRow: React.FC<{ task: AITaskDefinition; hasActivePrompt: boolean; healthOk: boolean | null; lastLatency: number | null; lastError: string | null; lang: string; aliasLabel: string; onOpen: (t: AITaskDefinition) => void }> = ({ task, hasActivePrompt, healthOk, lastLatency, lastError, lang, aliasLabel, onOpen }) => {
+const TaskRow: React.FC<{ task: AITaskDefinition; hasActivePrompt: boolean; healthOk: boolean | null; lastLatency: number | null; lastError: string | null; lang: string; aliasLabel: string; usageData: TaskModelUsageData | undefined; onOpen: (t: AITaskDefinition) => void }> = ({ task, hasActivePrompt, healthOk, lastLatency, lastError, lang, aliasLabel, usageData, onOpen }) => {
   const meta = CATEGORY_META[task.category];
   const Icon = meta.icon;
   const label = lang.startsWith("en") ? task.label_en : task.label_pt;
@@ -69,14 +74,8 @@ const TaskRow: React.FC<{ task: AITaskDefinition; hasActivePrompt: boolean; heal
               ) : (
                 <Badge variant="outline" className="text-[10px] text-amber-700 border-amber-300">planejado</Badge>
               )}
-              {task.status === "connected" && (
-                <Badge className="text-[10px] bg-emerald-600 hover:bg-emerald-700 gap-1"><CheckCircle2 className="h-2.5 w-2.5" />Conectado</Badge>
-              )}
-              {task.status === "legacy" && (
-                <Badge variant="outline" className="text-[10px] text-amber-700 border-amber-300">Legacy</Badge>
-              )}
-              {task.status === "planned" && (
-                <Badge variant="outline" className="text-[10px] text-slate-600 border-slate-300">Planejado</Badge>
+              {usageData && (
+                <TaskUsageBadges task={task} usage={usageData.usage[task.id]} overrides={usageData.overrides} windowDays={usageData.windowDays} />
               )}
               {task.status === "connected" && healthOk === false && (
                 <Badge variant="destructive" className="text-[10px] gap-1" title={lastError ?? undefined}>
@@ -95,6 +94,13 @@ const TaskRow: React.FC<{ task: AITaskDefinition; hasActivePrompt: boolean; heal
       </AccordionTrigger>
       <AccordionContent className="px-4 pb-4 space-y-3 text-sm">
         <p className="text-muted-foreground">{description}</p>
+
+        {usageData && (
+          <TaskUsageDetails task={task} usage={usageData.usage[task.id]} overrides={usageData.overrides} windowDays={usageData.windowDays} />
+        )}
+        {task.provider === "google_direct" && usageData && (
+          <PdfModelPicker task={task} current={chosenModel(task, usageData.overrides).model} />
+        )}
 
         <div>
           <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">
@@ -158,6 +164,7 @@ const TaskModelGovernancePanel: React.FC = () => {
   const [filter, setFilter] = useState<AITaskCategory | "all">("all");
   const [openTask, setOpenTask] = useState<AITaskDefinition | null>(null);
   const { mask: maskAlias } = useTaskAlias();
+  const { data: usageData } = useTaskModelUsage();
 
   const activeByTask = useMemo(() => {
     const m = new Map<string, boolean>();
@@ -275,6 +282,8 @@ const TaskModelGovernancePanel: React.FC = () => {
           </div>
         </div>
 
+        <AIInventoryCard />
+
         {/* Filtro por categoria */}
         <div className="flex flex-wrap gap-1">
           {categories.map((c) => (
@@ -315,6 +324,7 @@ const TaskModelGovernancePanel: React.FC = () => {
                   lastError={statusByTask.get(task.id)?.error ?? null}
                   lang={i18n.language || "pt"}
                   aliasLabel={maskAlias(task.id)}
+                  usageData={usageData}
                   onOpen={setOpenTask}
                 />
               ))}

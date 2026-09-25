@@ -1,16 +1,22 @@
 # Project context briefing (auto)
-Generated: 2026-09-23T22:18:21.555Z
+Generated: 2026-09-25T16:10:59.137Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.134.0
+## Latest i18n version: 1.135.0
 
 ## Changes by area (last 14 days)
 - **auth**: 3
-- **admin**: 1
+- **admin**: 2
 - **curation**: 1
 
 ## Top 10 recent entries
+### 2026-09-25 · [admin] ADDED — Governança de modelos, Fase 1: tela única e inventário honesto
+- "Modelos & Prompts por Tarefa" passa a ser a única tela de modelos; a tela simples (5 chaves genéricas, das quais só `ai_model_chat` era lida) foi removida.
+- Cada tarefa mostra modelo escolhido × realmente usado (`ai_task_invocations`, 30 dias), alerta de divergência, onde é usada, chamadas, taxa de erro, tempo médio e custo.
+- Status real calculado do código (não do registro): inventório gerado por `scripts/generate-ai-inventory.mjs` → 42 rotinas: 11 obedecem à tela, 10 com modelo fixo, 14 sem tarefa registrada, 7 de diagnóstico. O registro dizia "conectado" para `relations_auditor` e `geroprotector_stack`, mas o código não obedece; a tela agora avisa.
+_files: scripts/generate-ai-inventory.mjs, scripts/__tests__/ai-inventory.test.mjs, src/components/administrador/configuracoes/TaskModelGovernancePanel.tsx, src/hooks/useTaskModelUsage.ts…_
+
 ### 2026-09-23 · [admin] CHANGED — Modelo de leitura de PDF escolhido na tela de modelos por tarefa
 - Nova tarefa "Leitura de PDF" em Modelos de IA por tarefa (`ai_configurations.ai_model_pdf_reading`); `gemini-file-search` resolve o modelo a cada execução (cache 30 s), com padrão `gemini-3.1-pro-preview`.
 - Trava: ao salvar, o modelo é testado no Google (`action: validate_model`); nome inexistente é recusado com mensagem clara. Se o modelo gravado der 404, a leitura volta ao padrão e registra `model_source`.
@@ -63,12 +69,6 @@ _files: supabase/functions/_shared/analysisDataMerge.ts, supabase/functions/gemi
 - Nova tabela `ai_model_inventory_snapshots` (jsonb + timestamps) para histórico do inventário resolvido. RLS admin-only.
 - Nova edge function `model-inventory` (read-only por padrão; POST persiste snapshot) — resolve modelo ativo por `task_id` como o runtime: 1) override em `ai_configurations`, 2) `ai_prompt_versions` ativo, 3) fallback inline. Marca `governed=false` para overrides hard-coded (`extract-meta-study`, `kg-evidence-gap-fill`, `web-dosage-lookup`, `vectorize-study`, Perplexity).
 _files: supabase/functions/_shared/model-alias.ts, src/hooks/useTaskAlias.ts, supabase/migrations/...ai_model_inventory_and_aliases.sql, supabase/functions/model-inventory/index.ts…_
-
-### 2026-06-17 · [admin] ADDED — Frente C: migração dos prompts hardcoded para o catálogo (com auditoria honesta)
-- Auditoria caso-a-caso da lista de 12 funções: revelou que só 5 funções têm prompt próprio — as outras 7 são orquestradores/pass-through/algorítmicas sem LLM dedicado.
-- 6 novas chaves no manifest (`supabase/functions/_shared/system-prompts.ts`) — todas com `purpose`, `model_default`, `temperature`, `output_format`, `consumers`, `tags` preenchidos:
-- `generate_triplets_phase1_discovery` — Phase 1 (free discovery) bioquímico veterinário.
-_files: supabase/functions/_shared/system-prompts.ts, supabase/functions/generate-triplets/index.ts, supabase/functions/extract-meta-study/index.ts, supabase/functions/generate-showcase/index.ts…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

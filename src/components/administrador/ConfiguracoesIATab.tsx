@@ -13,7 +13,6 @@ import ApiStatusItem from './configuracoes/ApiStatusItem';
 import ExtractionPromptsEditor from './configuracoes/ExtractionPromptsEditor';
 import ConfigurationsSummary from './configuracoes/ConfigurationsSummary';
 import Neo4jStatusCard from './configuracoes/Neo4jStatusCard';
-import AIModelSelector from './configuracoes/AIModelSelector';
 import PerplexityStatusCard from './configuracoes/PerplexityStatusCard';
 import ProviderHealthButton from './configuracoes/ProviderHealthButton';
 import TaskModelGovernancePanel from './configuracoes/TaskModelGovernancePanel';
@@ -379,7 +378,6 @@ const ConfiguracoesIATab: React.FC = () => {
         <TaskModelGovernancePanel />
 
         {/* AI Model Selector - NEW */}
-        <AIModelSelector />
 
         <Card>
           <CardHeader>
