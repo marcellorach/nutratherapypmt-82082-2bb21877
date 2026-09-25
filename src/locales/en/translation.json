@@ -9049,5 +9049,60 @@
       "topConditions": "Most frequent conditions",
       "topFlags": "Most common lab flags"
     }
+  },
+  "aiGovernance": {
+    "usage": {
+      "status": {
+        "obeys_screen": "Follows this screen",
+        "partial": "Partly follows",
+        "hardcoded": "Model fixed in code",
+        "no_consumer": "No routine uses it yet"
+      },
+      "mismatchShort": "Model differs from chosen",
+      "chosen": "Chosen model",
+      "chosenSource": {
+        "screen": "Chosen on this screen",
+        "registry": "Registry default (never changed)"
+      },
+      "actual": "Model actually used",
+      "lastRun": "Last run: {{date}}",
+      "noRuns": "No runs recorded in the last {{days}} days.",
+      "mismatch": "The last run used {{used}}, but the chosen model is {{chosen}}. Likely a model fixed in code or a choice made after that run.",
+      "overclaim": "The registry says this task follows the screen, but the code does not. Changing the model here has no effect until Phase 2.",
+      "calls": "calls ({{days}} days)",
+      "errorRate": "error rate",
+      "avgLatency": "average time",
+      "cost": "estimated cost",
+      "costUnknown": "not measured",
+      "modelsInWindow": "Models used in the period:",
+      "whereUsed": "Where it is used",
+      "changeModel": "Change model",
+      "testAndSave": "Test at Google and save",
+      "savedNext": "Applies from the next PDF reading (up to 30 s to propagate)."
+    },
+    "inventory": {
+      "title": "Inventory: {{count}} routines call AI",
+      "description": "Generated from the code. Shows what each routine actually does, not what the registry declares.",
+      "status": {
+        "obeys_screen": "Follows this screen",
+        "hardcoded": "Model fixed in code",
+        "unregistered": "No registered task",
+        "infra": "Diagnostics/infrastructure"
+      },
+      "hint": {
+        "obeys_screen": "Changing the task's model changes what these routines use.",
+        "hardcoded": "They belong to a task but use a model written in code. They will be connected in Phase 2.",
+        "unregistered": "They call AI without a registered task and do not appear in the list below. They will be registered in Phase 2.",
+        "infra": "They test providers and keys; they do not run business tasks."
+      },
+      "provider": {
+        "lovable_gateway": "Lovable AI",
+        "google_direct": "Google account",
+        "openai_direct": "OpenAI direct",
+        "perplexity": "Perplexity",
+        "anthropic": "Anthropic",
+        "xai": "xAI"
+      }
+    }
   }
 }

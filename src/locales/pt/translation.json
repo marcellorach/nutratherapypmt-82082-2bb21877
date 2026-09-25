@@ -9053,5 +9053,60 @@
       "topConditions": "Condições mais frequentes",
       "topFlags": "Flags laboratoriais mais comuns"
     }
+  },
+  "aiGovernance": {
+    "usage": {
+      "status": {
+        "obeys_screen": "Obedece à tela",
+        "partial": "Obedece em parte",
+        "hardcoded": "Modelo fixo no código",
+        "no_consumer": "Nenhuma rotina usa ainda"
+      },
+      "mismatchShort": "Modelo diferente do escolhido",
+      "chosen": "Modelo escolhido",
+      "chosenSource": {
+        "screen": "Escolhido nesta tela",
+        "registry": "Padrão do registro (ninguém trocou)"
+      },
+      "actual": "Modelo realmente usado",
+      "lastRun": "Última execução: {{date}}",
+      "noRuns": "Nenhuma execução registrada nos últimos {{days}} dias.",
+      "mismatch": "A última execução usou {{used}}, mas o escolhido é {{chosen}}. Provável modelo fixo no código ou escolha feita depois dessa execução.",
+      "overclaim": "O registro diz que esta tarefa obedece à tela, mas o código não obedece. Trocar o modelo aqui não muda nada até a Fase 2.",
+      "calls": "chamadas ({{days}} dias)",
+      "errorRate": "taxa de erro",
+      "avgLatency": "tempo médio",
+      "cost": "custo estimado",
+      "costUnknown": "não medido",
+      "modelsInWindow": "Modelos usados no período:",
+      "whereUsed": "Onde é usada",
+      "changeModel": "Trocar modelo",
+      "testAndSave": "Testar no Google e salvar",
+      "savedNext": "Vale a partir da próxima leitura de PDF (até 30 s para propagar)."
+    },
+    "inventory": {
+      "title": "Inventário: {{count}} rotinas chamam IA",
+      "description": "Gerado a partir do código. Mostra o que cada rotina faz de fato, não o que o registro declara.",
+      "status": {
+        "obeys_screen": "Obedece à tela",
+        "hardcoded": "Modelo fixo no código",
+        "unregistered": "Sem tarefa registrada",
+        "infra": "Diagnóstico/infraestrutura"
+      },
+      "hint": {
+        "obeys_screen": "Trocar o modelo da tarefa muda o que estas rotinas usam.",
+        "hardcoded": "Pertencem a uma tarefa, mas usam um modelo escrito no código. Serão ligadas na Fase 2.",
+        "unregistered": "Chamam IA sem tarefa registrada; não aparecem na lista abaixo. Serão registradas na Fase 2.",
+        "infra": "Testam provedores e chaves; não executam tarefa de negócio."
+      },
+      "provider": {
+        "lovable_gateway": "IA do Lovable",
+        "google_direct": "Conta Google",
+        "openai_direct": "OpenAI direto",
+        "perplexity": "Perplexity",
+        "anthropic": "Anthropic",
+        "xai": "xAI"
+      }
+    }
   }
 }
