@@ -1715,7 +1715,7 @@ class PermanentApiError extends Error {
 }
 
 function isPermanentStatus(status: number): boolean {
-  return status === 400 || status === 401 || status === 403 || status === 404;
+  return status === 400 || status === 401 || status === 402 || status === 403 || status === 404;
 }
 
 async function retryWithExponentialBackoff<T>(
@@ -1801,16 +1801,20 @@ serve(async (req) => {
     );
     const { data: currentRow, error: readError } = await statusClient
       .from('processed_studies')
-      .select('ingestion_stages')
+      .select('ingestion_stages, kanban_status')
       .eq('id', studyId)
       .maybeSingle();
     if (readError) throw readError;
 
+    const prevStages = (currentRow?.ingestion_stages as Record<string, any>) || {};
     const stages = {
-      ...((currentRow?.ingestion_stages as Record<string, unknown>) || {}),
+      ...prevStages,
       file_search: {
         status: 'processing',
         started_at: new Date().toISOString(),
+        // Preserva o estado anterior para o re-encadeamento error→ok.
+        previous_status: prevStages?.file_search?.status ?? null,
+        previous_kanban: (currentRow as any)?.kanban_status ?? null,
       },
     };
     const { error: updateError } = await statusClient
@@ -2348,9 +2352,12 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
         // (extract-study-entities). NUNCA re-dispara file_search.
         // GUARDA contra loop: só avança se extract_entities ainda não está 'ok'.
         // ------------------------------------------------------------
-        const priorKanban = (existingStagesRow as any)?.kanban_status as string | undefined;
         const priorStages = (existingStagesRow?.ingestion_stages as any) || {};
-        const priorFileSearchFailed = priorStages?.file_search?.status === 'failed';
+        const priorKanban = (priorStages?.file_search?.previous_kanban
+          ?? (existingStagesRow as any)?.kanban_status) as string | undefined;
+        const priorFileSearchFailed =
+          priorStages?.file_search?.previous_status === 'failed' ||
+          priorStages?.file_search?.status === 'failed';
         const extractAlreadyOk = priorStages?.extract_entities?.status === 'ok';
         const fileSearchPassed =
           (fileSearchStatus === 'ok' || fileSearchStatus === 'degraded') &&
@@ -2397,7 +2404,10 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
             full_text_metadata: fullTextMetadata,
             ingestion_stages: mergedStages,
             // Reset kanban_status só quando vamos avançar a cadeia.
-            ...(shouldRechain ? { kanban_status: 'processing' } : {}),
+            // Sem re-encadeamento, devolve o status anterior ao marcador 'processing'.
+            ...(shouldRechain
+              ? { kanban_status: 'processing' }
+              : { kanban_status: (priorKanban && priorKanban !== 'processing') ? priorKanban : 'new' }),
             updated_at: new Date().toISOString()
           })
           .eq('id', studyId);
