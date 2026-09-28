@@ -86,7 +86,6 @@ const EstudoDetailSections: React.FC<EstudoDetailSectionsProps> = ({ estudo }) =
   });
   
   const nutraceuticos = (analysisData.extractedNutraceuticals || []).map((n: any) => ({ nome: n.name, score: n.confidence || 3.0 }));
-  const condicoes = (analysisData.extractedConditions || []).map((c: any) => ({ nome: c.name, score: c.confidence || 3.0 }));
   // extract-owned via helper (cobre estudos legados sem analysis_data populado)
   const mecanismos = rich.molecularMechanisms;
   const desfechos = rich.clinicalOutcomes;
@@ -124,19 +123,10 @@ const EstudoDetailSections: React.FC<EstudoDetailSectionsProps> = ({ estudo }) =
         </section>
       )}
 
-      {condicoes.length > 0 && (
-        <section className="space-y-2">
-          <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-            <Target className="w-4 h-4 text-blue-600" />
-            {t('estudoDetailSections.healthConditions')}
-          </h4>
-          <div className="flex flex-wrap gap-2">
-            {condicoes.map((condicao: any, idx: number) => (
-              <OutcomeTag key={idx} outcome={condicao.nome} score={condicao.score} />
-            ))}
-          </div>
-        </section>
-      )}
+      <ConditionsByOriginSection
+        analysisData={analysisData}
+        ingestionStages={estudo?.ingestion_stages}
+      />
 
       {mecanismos.length > 0 && (
         <section className="space-y-3">
