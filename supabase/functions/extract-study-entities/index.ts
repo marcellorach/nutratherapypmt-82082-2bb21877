@@ -7,6 +7,76 @@ import {
   sortedKeys,
 } from '../_shared/analysisDataMerge.ts';
 import { authorize, authzResponse } from '../_shared/authorization.ts';
+import {
+  buildStage1UserPrompt,
+  compareWriters,
+  filterEntitiesInText,
+} from '../_shared/writerConsistency.ts';
+
+// Contrato A — modo stage1_only: grava apenas a saída do Stage 1, limpa os
+// marcadores de fallback/shim e guarda cópia do que foi removido em
+// ingestion_stages.extract_entities.stage1.removed_previous.
+async function runStage1OnlyWrite(
+  supabase: any,
+  studyId: string,
+  conditions: any[],
+  stage1Stage: Record<string, unknown>,
+  consistency: unknown,
+): Promise<Response> {
+  const { data: row } = await supabase
+    .from('processed_studies')
+    .select('analysis_data, ingestion_stages')
+    .eq('id', studyId)
+    .maybeSingle();
+  const ad = { ...((row as any)?.analysis_data || {}) };
+  const stages = { ...((row as any)?.ingestion_stages || {}) };
+  const isFallback = (d: any) => d?.source === 'stage1_fallback';
+
+  const removed: Record<string, unknown> = {
+    analysis_data_extractedConditions: ad.extractedConditions ?? null,
+    analysis_data_dosages_fallback: (ad.dosages || []).filter(isFallback),
+  };
+  ad.extractedConditions = conditions.map((c: any) => ({
+    name: c.name,
+    confidence: typeof c.treatability_score === 'number' ? c.treatability_score : null,
+    source: 'stage1',
+  }));
+  if (Array.isArray(ad.dosages)) ad.dosages = ad.dosages.filter((d: any) => !isFallback(d));
+
+  const { data: ex } = await supabase
+    .from('study_extractions')
+    .select('id, extracted_data')
+    .eq('study_id', studyId)
+    .maybeSingle();
+  if (ex?.id) {
+    const ed = { ...(ex.extracted_data || {}) };
+    removed.extracted_data_condition_efficacy_shim = ed.condition_efficacy_shim ?? null;
+    removed.extracted_data_dosages_fallback = (ed.dosages || []).filter(isFallback);
+    removed.extracted_data_conditions = ed.conditions ?? null;
+    delete ed.condition_efficacy_shim;
+    if (Array.isArray(ed.dosages)) ed.dosages = ed.dosages.filter((d: any) => !isFallback(d));
+    ed.conditions = conditions;
+    const { error: exErr } = await supabase
+      .from('study_extractions').update({ extracted_data: ed }).eq('id', ex.id);
+    if (exErr) throw new Error(`study_extractions update failed: ${exErr.message}`);
+  }
+
+  stages.extract_entities = {
+    ...(stages.extract_entities || {}),
+    stage1: { ...stage1Stage, mode: 'stage1_only', removed_previous: removed },
+    consistency,
+  };
+  const { error } = await supabase
+    .from('processed_studies')
+    .update({ analysis_data: ad, ingestion_stages: stages })
+    .eq('id', studyId);
+  if (error) throw new Error(`processed_studies update failed: ${error.message}`);
+
+  return new Response(
+    JSON.stringify({ success: true, mode: 'stage1_only', studyId, extractedConditions: ad.extractedConditions, stage1: stage1Stage, consistency }),
+    { status: 200, headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' } },
+  );
+}
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
@@ -48,8 +118,15 @@ serve(async (req) => {
     console.log(`[extract-study-entities] authorized caller origin=${authz.origin} user=${authz.userId ?? 'system'}`);
 
     console.log('📥 Parsing request body...');
-    const { studyId, force_reextract } = await req.json();
+    const { studyId, force_reextract, stage1_only } = await req.json();
     const forceReextract = force_reextract === true;
+    const stage1Only = stage1_only === true;
+    if (stage1Only && forceReextract) {
+      return new Response(
+        JSON.stringify({ error: 'stage1_only não pode ser combinado com force_reextract' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     console.log('📥 studyId received:', studyId, '| force_reextract:', forceReextract);
     
     if (!studyId) {
@@ -195,24 +272,60 @@ serve(async (req) => {
     console.log('📝 Stage 1 System Prompt (first 200 chars):', prompts.stage1System?.substring(0, 200));
     
     let stage1Data: any = { nutraceuticals: [], conditions: [], mechanisms: [], findings: [], study_quality: {} };
+    const { prompt: stage1UserPrompt, placeholderMissing: stage1PlaceholderMissing } =
+      buildStage1UserPrompt(prompts.stage1User, textContent);
+    if (stage1PlaceholderMissing) {
+      console.warn('⚠️ [STAGE 1] prompt salvo sem {{TEXT_CONTENT}} — documento anexado ao final.');
+    }
+    let stage1Stage: Record<string, unknown> = { status: 'ok' };
     try {
       const stage1Result = await callLovableAI(
         'extraction_stage1',
         prompts.stage1System,
-        prompts.stage1User.replace('{{TEXT_CONTENT}}', textContent),
+        stage1UserPrompt,
         getStage1Tools()
       );
-      
       if (stage1Result) {
-        console.log('📊 Stage 1 raw result:', JSON.stringify(stage1Result).substring(0, 500));
         stage1Data = JSON.parse(stage1Result.function.arguments);
       } else {
-        console.warn('⚠️ Stage 1 returned null result');
+        stage1Stage = { status: 'empty', reason: 'model_returned_no_tool_call' };
       }
-    } catch (stage1Error) {
+    } catch (stage1Error: any) {
       console.error('❌ Stage 1 error:', stage1Error);
+      stage1Stage = { status: 'failed', reason: String(stage1Error?.message || stage1Error).slice(0, 300) };
     }
-    console.log(`✅ Stage 1: ${stage1Data.nutraceuticals?.length || 0} nutracêuticos, ${stage1Data.conditions?.length || 0} condições`);
+    // Guarda anti-placeholder: só fica o que aparece no texto do artigo.
+    const s1Nutra = filterEntitiesInText(stage1Data.nutraceuticals, textContent);
+    const s1Cond = filterEntitiesInText(stage1Data.conditions, textContent);
+    stage1Data.nutraceuticals = s1Nutra.kept;
+    stage1Data.conditions = s1Cond.kept;
+    const droppedNotInText = [...s1Nutra.dropped, ...s1Cond.dropped];
+    if (stage1Stage.status === 'ok' && s1Nutra.kept.length === 0 && s1Cond.kept.length === 0) {
+      stage1Stage = {
+        status: 'empty',
+        reason: droppedNotInText.length > 0 ? 'all_entities_not_in_text' : 'no_entities_returned',
+      };
+    }
+    stage1Stage = {
+      ...stage1Stage,
+      placeholder_missing: stage1PlaceholderMissing,
+      input_chars: stage1UserPrompt.length,
+      conditions: s1Cond.kept.map((c: any) => c.name),
+      nutraceuticals: s1Nutra.kept.map((n: any) => n.name),
+      dropped_not_in_text: droppedNotInText,
+      finished_at: new Date().toISOString(),
+    };
+    const stage1Consistency = compareWriters({
+      pdfConditions: parsedContent.conditions,
+      pdfNutraceuticals: parsedContent.nutraceuticals,
+      stage1Conditions: s1Cond.kept,
+      stage1Nutraceuticals: s1Nutra.kept,
+    });
+    console.log(`✅ Stage 1: ${s1Nutra.kept.length} nutracêuticos, ${s1Cond.kept.length} condições (descartados fora do texto: ${droppedNotInText.length}) | consistency=${stage1Consistency.status}`);
+
+    if (stage1Only) {
+      return await runStage1OnlyWrite(supabase, studyId, s1Cond.kept, stage1Stage, stage1Consistency);
+    }
 
     // ==================== STAGE 2: Molecular Mechanisms ====================
     console.log('🟢 [STAGE 2/3] Extraindo mecanismos moleculares, sinergias e relações...');
