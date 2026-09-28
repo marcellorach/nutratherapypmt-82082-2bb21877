@@ -71,7 +71,16 @@ async function runStage1OnlyWrite(
 
   stages.extract_entities = {
     ...(stages.extract_entities || {}),
-    stage1: { ...stage1Stage, mode: 'stage1_only', removed_previous: removed },
+    stage1: {
+      ...stage1Stage,
+      mode: 'stage1_only',
+      // Histórico: cada rodada acrescenta o que removeu; nada se perde.
+      removed_previous: (() => {
+        const prev = stages.extract_entities?.stage1?.removed_previous;
+        const list = Array.isArray(prev) ? prev : prev ? [prev] : [];
+        return [...list, { at: new Date().toISOString(), ...removed }];
+      })(),
+    },
     consistency,
   };
   const { error } = await supabase
