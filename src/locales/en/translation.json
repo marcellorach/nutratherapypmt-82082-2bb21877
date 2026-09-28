@@ -9145,6 +9145,18 @@
           "pending": "Pending",
           "accuracy": "Accuracy"
         }
+      },
+      "studies": {
+        "title": "Performance by study",
+        "description": "Each study with the extracting model, curator marks on conditions and doses, triplet curation and the last recorded failure.",
+        "empty": "No processed studies yet.",
+        "study": "Study",
+        "conditions": "Conditions",
+        "doses": "Doses",
+        "triplets": "Triplets",
+        "failure": "Failure",
+        "noFailure": "No failure",
+        "legend": "Format: extracted · correct ✓ · incorrect ✗ · pending ?. Triplets: approved ✓ · rejected ✗ · pending ?."
       }
     }
   },

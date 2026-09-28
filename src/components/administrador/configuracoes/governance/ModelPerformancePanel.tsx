@@ -11,6 +11,7 @@ import { chosenModel, effectiveStatus } from "./taskEffectiveStatus";
 import PdfModelPicker from "./PdfModelPicker";
 import RouterModelPicker from "./RouterModelPicker";
 import ItemAccuracyTable from "./ItemAccuracyTable";
+import StudyPerformanceTable from "./StudyPerformanceTable";
 
 const MIN_RUNS_FOR_BEST = 5;
 
@@ -150,6 +151,7 @@ const ModelPerformancePanel: React.FC = () => {
         })}
 
         <ItemAccuracyTable />
+        <StudyPerformanceTable />
 
         {data && (
           <div className="space-y-1 text-xs text-muted-foreground border-t pt-3">

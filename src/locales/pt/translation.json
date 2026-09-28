@@ -9149,6 +9149,18 @@
           "pending": "Pendentes",
           "accuracy": "Acerto"
         }
+      },
+      "studies": {
+        "title": "Desempenho por estudo",
+        "description": "Cada estudo com o modelo que extraiu, as marcações do curador em condições e doses, a curadoria das triplas e a última falha registrada.",
+        "empty": "Nenhum estudo processado ainda.",
+        "study": "Estudo",
+        "conditions": "Condições",
+        "doses": "Doses",
+        "triplets": "Triplas",
+        "failure": "Falha",
+        "noFailure": "Sem falha",
+        "legend": "Formato: extraídos · corretos ✓ · incorretos ✗ · pendentes ?. Triplas: aprovadas ✓ · rejeitadas ✗ · pendentes ?."
       }
     }
   },
