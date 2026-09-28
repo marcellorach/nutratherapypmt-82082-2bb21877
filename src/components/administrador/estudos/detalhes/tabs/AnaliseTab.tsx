@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { useStudyRichData } from '@/hooks/useStudyRichData';
 import ForceReextractPanel from '../ForceReextractPanel';
+import ExtractionItemReviewPanel from '../ExtractionItemReviewPanel';
 
 
 interface AnaliseTabProps {
@@ -66,6 +67,7 @@ const AnaliseTab: React.FC<AnaliseTabProps> = ({ estudo }) => {
   return (
     <div className="space-y-4">
       <ForceReextractPanel estudo={estudo} />
+      {estudo?.id && <ExtractionItemReviewPanel studyId={estudo.id} />}
 
       {!hasExtractedData ? (
         <div className="bg-yellow-50 border border-yellow-100 p-3 rounded-md text-sm">
