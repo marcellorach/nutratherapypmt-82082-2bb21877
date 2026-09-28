@@ -320,6 +320,7 @@ serve(async (req) => {
     const droppedNotInText = [...s1Nutra.dropped, ...s1Cond.dropped];
     if (stage1Stage.status === 'ok' && s1Nutra.kept.length === 0 && s1Cond.kept.length === 0) {
       stage1Stage = {
+        model: stage1Stage.model,
         status: 'empty',
         reason: droppedNotInText.length > 0 ? 'all_entities_not_in_text' : 'no_entities_returned',
       };
