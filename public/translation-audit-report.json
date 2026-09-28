@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-09-28T05:27:26.234Z",
+  "timestamp": "2026-09-28T05:33:43.932Z",
   "summary": {
-    "totalFiles": 997,
+    "totalFiles": 998,
     "totalIssues": 508,
     "hardcodedTexts": 61,
     "missingKeys": 445,
@@ -2909,35 +2909,35 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 319,
+      "line": 338,
       "text": "extract_meta_study",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 1201,
+      "line": 1220,
       "text": "audit_base_system_{pt,en}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2513,
+      "line": 2532,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2724,
+      "line": 2743,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 5519,
+      "line": 5538,
       "text": "@",
       "severity": "high"
     },
