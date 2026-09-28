@@ -24,6 +24,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.2.4 -->
 
+### Added - 2026-09-28 — Acerto de condições e doses por modelo, marcado pelo curador
+<!-- area: admin · status: entregue · i18n: 1.141.0 -->
+- Nova tabela `extraction_item_reviews` (soft delete, RLS: leitura `is_platform_member`, escrita `tab.estudos:edit`).
+- Aba Análise do estudo: botões Correta/Incorreta por condição e dose (`ExtractionItemReviewPanel`).
+- Config. de IA → Desempenho: tabela de acerto por modelo do Stage 1 (`ItemAccuracyTable`); estudos antigos sem modelo aparecem como "não registrado".
+- `extract-study-entities` passa a gravar `ingestion_stages.extract_entities.stage1.model` (deploy pendente de aprovação).
+- Files: src/hooks/extractionItemReviews.pure.ts, src/hooks/useExtractionItemReviews.ts, src/hooks/__tests__/extractionItemReviews.test.ts, src/components/administrador/estudos/detalhes/ExtractionItemReviewPanel.tsx, src/components/administrador/estudos/detalhes/tabs/AnaliseTab.tsx, src/components/administrador/configuracoes/governance/ItemAccuracyTable.tsx, src/components/administrador/configuracoes/governance/ModelPerformancePanel.tsx, supabase/functions/extract-study-entities/index.ts, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts, src/data/projectOrganograma.ts
+
 ### Added - 2026-09-28 — Desempenho de cada modelo por tarefa
 <!-- area: admin · status: entregue · i18n: 1.140.0 -->
 - Novo quadro em Modelos de IA por tarefa: acertos, erros e taxa por tarefa × modelo (ai_task_invocations; leitura de PDF e vetorização vêm de processed_studies.ingestion_stages) e curadoria (triplets aprovados/rejeitados/pendentes atribuídos à chamada de extração mais recente em 2 h). Selo "melhor resultado" exige ≥5 execuções em ≥2 modelos.
