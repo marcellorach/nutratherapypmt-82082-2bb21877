@@ -419,67 +419,8 @@ serve(async (req) => {
     
     console.log(`✅ [VALIDATION] Dosages after validation: ${validatedDosages.length}/${stage3Data.dosages?.length || 0}`);
     
-    // ==================== FALLBACK: Parse dosages from Stage 1 if Stage 3 returned none ====================
-    if (validatedDosages.length === 0 && stage1Nutraceuticals.length > 0) {
-      console.log('⚠️ [FALLBACK] Stage 3 returned no dosages - parsing from Stage 1 nutraceuticals');
-      
-      for (const nutra of stage1Nutraceuticals) {
-        if (nutra.dosage && typeof nutra.dosage === 'string' && nutra.dosage.length > 0) {
-          const dosageText = nutra.dosage;
-          console.log(`📊 Parsing dosage from Stage 1: "${nutra.name}" -> "${dosageText}"`);
-          
-          // Parse dosage ranges like "0.5-1.0 mg/kg (dogs)"
-          const rangeMatch = dosageText.match(/(\d+\.?\d*)\s*[-–]\s*(\d+\.?\d*)\s*(mg\/kg|mg|g|ml)/i);
-          const singleMatch = dosageText.match(/(\d+\.?\d*)\s*(mg\/kg|mg|g|ml)/i);
-          
-          // Parse species from parentheses
-          const speciesMatch = dosageText.match(/\((dog|canine|cat|feline|rodent|human|horse|equine)s?\)/i);
-          let species = 'other';
-          if (speciesMatch) {
-            const sp = speciesMatch[1].toLowerCase();
-            if (sp === 'dog' || sp === 'canine') species = 'canine';
-            else if (sp === 'cat' || sp === 'feline') species = 'feline';
-            else if (sp === 'horse' || sp === 'equine') species = 'equine';
-            else if (sp === 'rodent') species = 'rodent';
-            else if (sp === 'human') species = 'human';
-          }
-          
-          if (rangeMatch) {
-            validatedDosages.push({
-              compound: nutra.name,
-              amount_min: parseFloat(rangeMatch[1]),
-              amount_max: parseFloat(rangeMatch[2]),
-              unit: rangeMatch[3],
-              amount_text: dosageText,
-              per_body_weight: rangeMatch[3].toLowerCase().includes('/kg'),
-              species: species,
-              source: 'stage1_fallback'
-            });
-          } else if (singleMatch) {
-            validatedDosages.push({
-              compound: nutra.name,
-              amount: parseFloat(singleMatch[1]),
-              unit: singleMatch[2],
-              amount_text: dosageText,
-              per_body_weight: singleMatch[2].toLowerCase().includes('/kg'),
-              species: species,
-              source: 'stage1_fallback'
-            });
-          } else {
-            // Just store the text
-            validatedDosages.push({
-              compound: nutra.name,
-              amount_text: dosageText,
-              unit: 'unknown',
-              species: species,
-              source: 'stage1_fallback'
-            });
-          }
-        }
-      }
-      
-      console.log(`✅ [FALLBACK] Created ${validatedDosages.length} dosages from Stage 1`);
-    }
+    // Contrato A: sem fallback de doses a partir do Stage 1. Dose só existe
+    // se o Stage 3 a extraiu do texto.
 
     // Combinar dados de todos os stages
     const extractedData = {
@@ -505,23 +446,8 @@ serve(async (req) => {
       study_assessment: stage3Data.study_assessment || {},
     };
 
-    // Fallback: usar dados do Gemini se AI retornou vazio
-    if (extractedData.nutraceuticals.length === 0 && parsedContent.nutraceuticals?.length > 0) {
-      console.log('⚠️ Usando fallback: dados do Gemini File Search');
-      extractedData.nutraceuticals = parsedContent.nutraceuticals.map((n: any) => ({
-        name: n.name,
-        dosage: n.dosage || '',
-        efficacy_score: 3
-      }));
-    }
-
-    if (extractedData.conditions.length === 0 && parsedContent.conditions?.length > 0) {
-      extractedData.conditions = parsedContent.conditions.map((c: any) => ({
-        name: c.name,
-        severity: 'moderate',
-        treatability_score: 3
-      }));
-    }
+    // Contrato A: sem cópia da leitura do PDF com notas inventadas quando o
+    // Stage 1 vem vazio. A lista do PDF já vive em analysis_data.conditions.
     
     console.log(`✅ EXTRAÇÃO COMPLETA: 3 stages executados`);
     
@@ -658,6 +584,8 @@ serve(async (req) => {
       status: 'ok',
       confidence: isDegraded ? 'degraded' : 'normal',
       ...(isDegraded ? { reason: fileSearchStage?.reason || 'upstream_degraded' } : {}),
+      stage1: stage1Stage,
+      consistency: stage1Consistency,
       counts: {
         nutraceuticals: (extractedData as any)?.nutraceuticals?.length || 0,
         conditions: (extractedData as any)?.conditions?.length || 0,
@@ -804,8 +732,9 @@ serve(async (req) => {
         confidence: n.efficacy_score ?? 3
       })),
       extractedConditions: (extractedData.conditions || []).map((c: any) => ({
-        name: c.name || 'Unknown',
-        confidence: c.treatability_score ?? 3
+        name: c.name,
+        confidence: typeof c.treatability_score === 'number' ? c.treatability_score : null,
+        source: 'stage1',
       })),
       extractedInteractions: (extractedData.mechanisms || []).map((m: any) => ({
         nutraceutical: m.nutraceutical || 'Unknown',
@@ -835,37 +764,8 @@ serve(async (req) => {
       extractionStages: ['stage1_entities', 'stage2_mechanisms', 'stage3_clinical']
     };
 
-    // 🛟 FALLBACK: se Stage 1 não detectou nutracêuticos/condições mas Stage 2
-    // gerou triplets válidos, derivar as listas a partir dos triplets para que
-    // o card de curadoria e o modal de detalhes não fiquem "nus".
-    const NUTRA_TYPES = new Set(['Nutraceutical', 'Compound', 'Drug']);
-    const COND_TYPES = new Set(['Condition', 'Disease', 'Phenotype', 'Outcome']);
-    if (frontendData.extractedNutraceuticals.length === 0 && triplets.length > 0) {
-      const derived = new Map<string, { name: string; confidence: number }>();
-      for (const t of triplets) {
-        if (NUTRA_TYPES.has(t.subject_type) && t.subject_name) {
-          const key = String(t.subject_name).trim().toLowerCase();
-          if (key && !derived.has(key)) derived.set(key, { name: t.subject_name, confidence: 3 });
-        }
-      }
-      if (derived.size > 0) {
-        frontendData.extractedNutraceuticals = Array.from(derived.values());
-        console.log(`🛟 Fallback: derivados ${derived.size} nutracêuticos a partir de triplets`);
-      }
-    }
-    if (frontendData.extractedConditions.length === 0 && triplets.length > 0) {
-      const derived = new Map<string, { name: string; confidence: number }>();
-      for (const t of triplets) {
-        if (COND_TYPES.has(t.object_type) && t.object_name) {
-          const key = String(t.object_name).trim().toLowerCase();
-          if (key && !derived.has(key)) derived.set(key, { name: t.object_name, confidence: 3 });
-        }
-      }
-      if (derived.size > 0) {
-        frontendData.extractedConditions = Array.from(derived.values());
-        console.log(`🛟 Fallback: derivadas ${derived.size} condições a partir de triplets`);
-      }
-    }
+    // Contrato A: sem listas derivadas de triplas. Stage 1 vazio = vazio
+    // (motivo registrado em ingestion_stages.extract_entities.stage1).
 
     console.log('💾 Atualizando analysis_data com dados dos 3 stages...');
     // [axis1-merge] Read existing analysis_data (gemini-file-search rich keys)
