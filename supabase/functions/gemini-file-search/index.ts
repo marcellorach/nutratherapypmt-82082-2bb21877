@@ -2482,16 +2482,8 @@ async function runGeminiPipeline({ fileUrl, studyId, fileName }: { fileUrl: stri
           // ✅ NEW: Study assessment and summary for study_extractions
           study_assessment: extractedData.study_assessment || {},
           study_summary: extractedData.study_summary || {},
-          // Clinical outcomes for chat context
-          // Shim derivado de conditions — NÃO é o clinical_outcomes
-          // estatístico do Stage 3. Gravado sob chave própria para evitar
-          // colisão semântica (ver _shared/analysisDataMerge.ts).
-          condition_efficacy_shim: extractedData.conditions.map(c => ({
-            condition: c.name,
-            relationship: c.relationship_type,
-            efficacy: c.efficacy_description,
-            treatability_score: c.treatability_score
-          })),
+          // Contrato A: condition_efficacy_shim removido (duplicata de
+          // analysis_data.conditions, sem leitor).
           // Metadata
           extraction_version: '3.0',
           extracted_at: new Date().toISOString()
