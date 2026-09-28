@@ -9134,7 +9134,22 @@
       "noteCuration": "Curadoria: relações aprovadas ou rejeitadas pelo curador. A relação não guarda o modelo; ela é atribuída à chamada de extração mais recente nas 2 horas anteriores. A aprovação ignora as pendentes.",
       "unattributed": "Relações sem atribuição (nenhuma chamada registrada na janela): {{approved}} aprovadas, {{rejected}} rejeitadas, {{pending}} pendentes.",
       "noteBest": "\"Melhor resultado\" só aparece com pelo menos {{min}} execuções em dois ou mais modelos: maior taxa de acerto, e aprovação como desempate.",
-      "noteChosen": "\"Em uso\" é o modelo salvo na tela. Quando nada foi salvo, a rotina usa o modelo reserva do código, e a tabela mostra o da execução mais recente, não o recomendado do registro."
+      "noteChosen": "\"Em uso\" é o modelo salvo na tela. Quando nada foi salvo, a rotina usa o modelo reserva do código, e a tabela mostra o da execução mais recente, não o recomendado do registro.",
+      "items": {
+        "title": "Condições e doses: acerto marcado pelo curador",
+        "description": "Itens extraídos no Stage 1, por modelo. O acerto só conta itens já marcados como corretos ou incorretos na aba Análise de cada estudo. Triplas aparecem na tabela da extração de triplas acima.",
+        "empty": "Nenhuma extração encontrada.",
+        "unrecorded": "Modelo não registrado (estudos antigos)",
+        "conditions": "Condições",
+        "doses": "Doses",
+        "col": {
+          "extracted": "Extraídas",
+          "correct": "Corretas",
+          "incorrect": "Incorretas",
+          "pending": "Pendentes",
+          "accuracy": "Acerto"
+        }
+      }
     }
   },
   "writerConsistency": {
@@ -9145,5 +9160,17 @@
     "conflictTitle": "Condições divergentes entre leituras",
     "conflictBody": "A leitura do PDF e o Stage 1 da extração não têm nenhuma condição em comum. A lista da leitura do PDF aparece primeiro. Revise antes de aprovar relações deste estudo.",
     "cardConflict": "Conflito entre a leitura do PDF e o Stage 1. Abra o estudo para revisar."
+  },
+  "itemReview": {
+    "title": "Conferência de condições e doses",
+    "description": "Marque cada item como correto ou incorreto conforme o artigo. As marcações alimentam o desempenho por modelo em Config. de IA.",
+    "conditions": "Condições",
+    "doses": "Doses",
+    "markCorrect": "Correta",
+    "markIncorrect": "Incorreta",
+    "correct": "Correta",
+    "incorrect": "Incorreta",
+    "undo": "Desfazer marcação",
+    "saveError": "Não foi possível salvar a marcação. Confira se você pode editar Estudos e tente de novo."
   }
 }
