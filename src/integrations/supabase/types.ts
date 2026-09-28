@@ -2454,6 +2454,50 @@ export type Database = {
           },
         ]
       }
+      extraction_item_reviews: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          item_key: string
+          item_type: string
+          reviewed_at: string
+          reviewed_by: string
+          study_id: string
+          verdict: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          item_key: string
+          item_type: string
+          reviewed_at?: string
+          reviewed_by?: string
+          study_id: string
+          verdict: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          item_key?: string
+          item_type?: string
+          reviewed_at?: string
+          reviewed_by?: string
+          study_id?: string
+          verdict?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "extraction_item_reviews_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "processed_studies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       health_conditions: {
         Row: {
           canonical_id: string | null
