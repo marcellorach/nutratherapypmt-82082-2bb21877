@@ -20,6 +20,7 @@ async function runStage1OnlyWrite(
   supabase: any,
   studyId: string,
   conditions: any[],
+  nutraceuticals: any[],
   stage1Stage: Record<string, unknown>,
   consistency: unknown,
 ): Promise<Response> {
@@ -42,6 +43,13 @@ async function runStage1OnlyWrite(
     source: 'stage1',
   }));
   if (Array.isArray(ad.dosages)) ad.dosages = ad.dosages.filter((d: any) => !isFallback(d));
+  // analysis_data.nutraceuticals é saída do Stage 1 (escrita pelo extract).
+  removed.analysis_data_nutraceuticals = ad.nutraceuticals ?? null;
+  ad.nutraceuticals = nutraceuticals.map((n: any) => ({
+    name: n.name,
+    dosage: typeof n.dosage === 'string' ? n.dosage : '',
+    relevance: typeof n.efficacy_score === 'number' ? n.efficacy_score : null,
+  }));
 
   const { data: ex } = await supabase
     .from('study_extractions')
@@ -317,14 +325,17 @@ serve(async (req) => {
     };
     const stage1Consistency = compareWriters({
       pdfConditions: parsedContent.conditions,
-      pdfNutraceuticals: parsedContent.nutraceuticals,
+      // Nutracêuticos da leitura do PDF vivem em extractedNutraceuticals
+      // (chave do gemini-file-search). analysis_data.nutraceuticals é escrita
+      // pelo próprio extract e não serve como referência independente.
+      pdfNutraceuticals: parsedContent.extractedNutraceuticals,
       stage1Conditions: s1Cond.kept,
       stage1Nutraceuticals: s1Nutra.kept,
     });
     console.log(`✅ Stage 1: ${s1Nutra.kept.length} nutracêuticos, ${s1Cond.kept.length} condições (descartados fora do texto: ${droppedNotInText.length}) | consistency=${stage1Consistency.status}`);
 
     if (stage1Only) {
-      return await runStage1OnlyWrite(supabase, studyId, s1Cond.kept, stage1Stage, stage1Consistency);
+      return await runStage1OnlyWrite(supabase, studyId, s1Cond.kept, s1Nutra.kept, stage1Stage, stage1Consistency);
     }
 
     // ==================== STAGE 2: Molecular Mechanisms ====================
