@@ -1,16 +1,22 @@
 # Project context briefing (auto)
-Generated: 2026-09-28T05:28:27.274Z
+Generated: 2026-09-28T05:38:00.855Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.136.0
+## Latest i18n version: 1.138.0
 
 ## Changes by area (last 14 days)
+- **admin**: 3
 - **curation**: 3
-- **admin**: 2
 - **auth**: 1
 
 ## Top 10 recent entries
+### 2026-09-28 · [admin] ADDED — Desempenho de cada modelo por tarefa
+- Novo quadro em Modelos de IA por tarefa: acertos, erros e taxa por tarefa × modelo (ai_task_invocations; leitura de PDF e vetorização vêm de processed_studies.ingestion_stages) e curadoria (triplets aprovados/rejeitados/pendentes atribuídos à chamada de extração mais recente em 2 h). Selo "melhor resultado" exige ≥5 execuções em ≥2 modelos.
+- Troca de modelo na própria tabela: leitura de PDF (validada no Google antes de salvar) e tarefas que obedecem à tela (grava ai_model_<tarefa>). Vetorização fica travada (trocar exige refazer vetores).
+- Sem chamada de IA, sem reprocessamento, sem schema. Teste com 1 estudo fica para quando o usuário mandar.
+_files: src/hooks/useModelPerformance.ts, src/hooks/useModelPerformance.pure.ts, src/components/administrador/configuracoes/governance/ModelPerformancePanel.tsx, src/components/administrador/configuracoes/governance/RouterModelPicker.tsx…_
+
 ### 2026-09-28 · [curation] FIXED — Contrato A2: prompt do Stage 1 corrigido na origem
 - Única alteração de dado: ai_configurations.prompt_extraction_stage1_user. Recebeu {{TEXT_CONTENT}} ao final (mesma posição do padrão do código); valores de exemplo trocados por descritores de tipo; redação das instruções mantida. Override mantido (não removido) porque o padrão do código não pede a população do estudo.
 - Novo valor: 1.244 caracteres, md5 6212f6794323ef4bf511f82062fe62d1, idêntico a src/__tests__/fixtures/prompt_extraction_stage1_user.txt.
@@ -63,12 +69,6 @@ _files: supabase/functions/_shared/authorization.ts, supabase/functions/parse-st
 - `lazyWithRetry` agora expõe `loadWithRetry` com 2 retries em backoff (300ms/900ms), telemetria por tentativa e um único reload protegido por flag de sessão.
 - Todos os imports dinâmicos restantes do admin passaram a usar `lazyWithRetry` (AdminPainel, OntologyHub, TranslationsHub, TripletsHub, VisualizationCard, LazyComponents).
 _files: src/lib/assetFailureTelemetry.ts, src/lib/__tests__/lazyWithRetry.test.ts, src/lib/lazyWithRetry.ts, src/components/system/AssetFailureBanner.tsx…_
-
-### 2026-08-23 · [curation] ADDED — Re-extração forçada por estudo (UI + auditoria)
-- Painel "Re-extração forçada" no detalhe do estudo (aba Análise) com contagens atuais de mecanismos/desfechos, diálogo de confirmação e histórico das últimas 10 execuções.
-- Cada disparo chama `extract-study-entities` com `force_reextract: true` e grava evento em `study_audit_logs` (`action_type: force_reextract`) com contagens antes/depois.
-- Files: src/components/administrador/estudos/detalhes/ForceReextractPanel.tsx, src/components/administrador/estudos/detalhes/tabs/AnaliseTab.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts
-_files: src/components/administrador/estudos/detalhes/ForceReextractPanel.tsx, src/components/administrador/estudos/detalhes/tabs/AnaliseTab.tsx, src/locales/pt/translation.json, src/locales/en/translation.json…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.
