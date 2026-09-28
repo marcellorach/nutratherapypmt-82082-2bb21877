@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-09-25T16:10:59.131Z
+// Última geração: 2026-09-28T05:14:12.182Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -19,11 +19,38 @@ export interface ChangelogEntry {
   commit?: string;
 }
 
-export const lastChangelogDate = "2026-09-25";
+export const lastChangelogDate = "2026-09-28";
 
 export const senexVersion = "7.2.4";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-09-28",
+    "kind": "fixed",
+    "area": "curation",
+    "status": "entregue",
+    "title": "Contrato A: placeholder nunca vira dado (Stage 1)",
+    "bullets": [
+      "Causa raiz: o prompt do Stage 1 salvo em ai_configurations não tem {{TEXT_CONTENT}}; o modelo recebia só instruções (~918 tokens) e devolvia o exemplo do prompt (Astaxanthin/Osteoarthritis). Agora o documento é anexado quando o marcador falta.",
+      "Guarda determinística: entidade do Stage 1 que não aparece no texto é descartada e listada em ingestion_stages.extract_entities.stage1.dropped_not_in_text; Stage 1 vazio/falho grava status empty/failed com motivo.",
+      "Removidos: fallback de doses a partir do Stage 1 (stage1_fallback), listas derivadas de triplas, cópia do PDF com notas inventadas, confiança padrão 3 nas condições e o condition_efficacy_shim do gemini-file-search.",
+      "Verificador de consistência sem IA (_shared/writerConsistency.ts) compara leitura do PDF x Stage 1 e grava extract_entities.consistency.",
+      "Aba Condições do modal mostra a origem de cada condição (Leitura do PDF / Stage 1), com alerta e PDF primeiro em conflito; alerta no card do estudo.",
+      "Modo stage1_only (sem force_reextract) com cópia do que foi removido em stage1.removed_previous; rodado só no estudo e3b79d33.",
+      "Files: supabase/functions/extract-study-entities/index.ts, supabase/functions/_shared/writerConsistency.ts, supabase/functions/gemini-file-search/index.ts, src/lib/conditionsByOrigin.ts, src/components/administrador/estudos/detalhes/sections/ConditionsByOriginSection.tsx, src/components/administrador/estudos/detalhes/sections/EstudoDetailSections.tsx, src/components/administrador/estudos/cards/EstudoCard.tsx, src/__tests__/writer-consistency.test.ts"
+    ],
+    "files": [
+      "supabase/functions/extract-study-entities/index.ts",
+      "supabase/functions/_shared/writerConsistency.ts",
+      "supabase/functions/gemini-file-search/index.ts",
+      "src/lib/conditionsByOrigin.ts",
+      "src/components/administrador/estudos/detalhes/sections/ConditionsByOriginSection.tsx",
+      "src/components/administrador/estudos/detalhes/sections/EstudoDetailSections.tsx",
+      "src/components/administrador/estudos/cards/EstudoCard.tsx",
+      "src/__tests__/writer-consistency.test.ts"
+    ],
+    "i18nVersion": "1.136.0"
+  },
   {
     "date": "2026-09-25",
     "kind": "added",

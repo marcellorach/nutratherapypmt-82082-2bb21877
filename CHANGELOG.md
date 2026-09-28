@@ -24,6 +24,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.2.4 -->
 
+### Fixed - 2026-09-28 — Contrato A: placeholder nunca vira dado (Stage 1)
+<!-- area: curation · status: entregue · i18n: 1.136.0 -->
+- Causa raiz: o prompt do Stage 1 salvo em ai_configurations não tem {{TEXT_CONTENT}}; o modelo recebia só instruções (~918 tokens) e devolvia o exemplo do prompt (Astaxanthin/Osteoarthritis). Agora o documento é anexado quando o marcador falta.
+- Guarda determinística: entidade do Stage 1 que não aparece no texto é descartada e listada em ingestion_stages.extract_entities.stage1.dropped_not_in_text; Stage 1 vazio/falho grava status empty/failed com motivo.
+- Removidos: fallback de doses a partir do Stage 1 (stage1_fallback), listas derivadas de triplas, cópia do PDF com notas inventadas, confiança padrão 3 nas condições e o condition_efficacy_shim do gemini-file-search.
+- Verificador de consistência sem IA (_shared/writerConsistency.ts) compara leitura do PDF x Stage 1 e grava extract_entities.consistency.
+- Aba Condições do modal mostra a origem de cada condição (Leitura do PDF / Stage 1), com alerta e PDF primeiro em conflito; alerta no card do estudo.
+- Modo stage1_only (sem force_reextract) com cópia do que foi removido em stage1.removed_previous; rodado só no estudo e3b79d33.
+- Files: supabase/functions/extract-study-entities/index.ts, supabase/functions/_shared/writerConsistency.ts, supabase/functions/gemini-file-search/index.ts, src/lib/conditionsByOrigin.ts, src/components/administrador/estudos/detalhes/sections/ConditionsByOriginSection.tsx, src/components/administrador/estudos/detalhes/sections/EstudoDetailSections.tsx, src/components/administrador/estudos/cards/EstudoCard.tsx, src/__tests__/writer-consistency.test.ts
+
 ### Added - 2026-09-25 — Governança de modelos, Fase 1: tela única e inventário honesto
 <!-- area: admin · status: entregue · i18n: 1.135.0 -->
 - "Modelos & Prompts por Tarefa" passa a ser a única tela de modelos; a tela simples (5 chaves genéricas, das quais só `ai_model_chat` era lida) foi removida.
