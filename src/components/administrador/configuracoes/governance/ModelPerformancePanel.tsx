@@ -10,6 +10,7 @@ import { useTaskModelUsage, sameModel } from "@/hooks/useTaskModelUsage";
 import { chosenModel, effectiveStatus } from "./taskEffectiveStatus";
 import PdfModelPicker from "./PdfModelPicker";
 import RouterModelPicker from "./RouterModelPicker";
+import ItemAccuracyTable from "./ItemAccuracyTable";
 
 const MIN_RUNS_FOR_BEST = 5;
 
@@ -147,6 +148,8 @@ const ModelPerformancePanel: React.FC = () => {
             </section>
           );
         })}
+
+        <ItemAccuracyTable />
 
         {data && (
           <div className="space-y-1 text-xs text-muted-foreground border-t pt-3">
