@@ -9107,6 +9107,34 @@
         "anthropic": "Anthropic",
         "xai": "xAI"
       }
+    },
+    "performance": {
+      "title": "Desempenho de cada modelo por tarefa",
+      "description": "Acertos e erros reais dos últimos {{days}} dias, a partir das execuções registradas e da decisão do curador. Use para escolher o modelo e troque aqui mesmo.",
+      "loadError": "Não foi possível carregar o desempenho: {{error}}. Recarregue a página; se persistir, confira sua permissão de leitura.",
+      "empty": "Ainda não há execuções registradas. Processe um estudo para ver os primeiros números.",
+      "vectorization": "Vetorização (busca por trechos)",
+      "vectorLocked": "Modelo fixo no código. Trocar exigiria refazer os vetores de todos os estudos, por isso não é trocado por aqui.",
+      "notSwitchable": "Esta tarefa ainda não obedece à escolha desta tela.",
+      "save": "Salvar modelo",
+      "savedUntested": "Vale na próxima execução. Ainda não foi testado com um estudo; o anterior era {{previous}}.",
+      "current": "em uso",
+      "best": "melhor resultado",
+      "col": {
+        "model": "Modelo",
+        "ok": "Acertos",
+        "errors": "Erros",
+        "rate": "Taxa de acerto",
+        "approved": "Aprovadas",
+        "rejected": "Rejeitadas",
+        "pending": "Pendentes",
+        "approval": "Aprovação"
+      },
+      "noteExecution": "Acerto e erro de execução: a chamada terminou com resposta válida ou falhou. Leitura de PDF e vetorização vêm do registro de cada estudo.",
+      "noteCuration": "Curadoria: relações aprovadas ou rejeitadas pelo curador. A relação não guarda o modelo; ela é atribuída à chamada de extração mais recente nas 2 horas anteriores. A aprovação ignora as pendentes.",
+      "unattributed": "Relações sem atribuição (nenhuma chamada registrada na janela): {{approved}} aprovadas, {{rejected}} rejeitadas, {{pending}} pendentes.",
+      "noteBest": "\"Melhor resultado\" só aparece com pelo menos {{min}} execuções em dois ou mais modelos: maior taxa de acerto, e aprovação como desempate.",
+      "noteChosen": "\"Em uso\" é o modelo salvo na tela. Quando nada foi salvo, a rotina usa o modelo reserva do código, e a tabela mostra o da execução mais recente, não o recomendado do registro."
     }
   },
   "writerConsistency": {

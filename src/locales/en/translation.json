@@ -9103,6 +9103,34 @@
         "anthropic": "Anthropic",
         "xai": "xAI"
       }
+    },
+    "performance": {
+      "title": "Each model's performance by task",
+      "description": "Real successes and errors over the last {{days}} days, from logged runs and curator decisions. Use it to choose a model and switch it right here.",
+      "loadError": "Could not load performance: {{error}}. Reload the page; if it persists, check your read permission.",
+      "empty": "No runs logged yet. Process a study to see the first numbers.",
+      "vectorization": "Vectorization (passage search)",
+      "vectorLocked": "Model is fixed in code. Switching would require rebuilding every study's vectors, so it is not switched here.",
+      "notSwitchable": "This task does not follow this screen's choice yet.",
+      "save": "Save model",
+      "savedUntested": "Applies on the next run. Not yet tested with a study; the previous one was {{previous}}.",
+      "current": "in use",
+      "best": "best result",
+      "col": {
+        "model": "Model",
+        "ok": "Successes",
+        "errors": "Errors",
+        "rate": "Success rate",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "pending": "Pending",
+        "approval": "Approval"
+      },
+      "noteExecution": "Run success/error: the call ended with a valid answer or failed. PDF reading and vectorization come from each study's record.",
+      "noteCuration": "Curation: relations approved or rejected by the curator. Relations don't store the model; each is attributed to the latest extraction call in the previous 2 hours. Approval ignores pending ones.",
+      "unattributed": "Unattributed relations (no call logged in the window): {{approved}} approved, {{rejected}} rejected, {{pending}} pending.",
+      "noteBest": "\"Best result\" only shows with at least {{min}} runs on two or more models: highest success rate, approval as tiebreak.",
+      "noteChosen": "\"In use\" is the model saved on screen. When nothing is saved, the routine uses the code's fallback model, and the table shows the most recent run's model, not the registry's recommendation."
     }
   },
   "writerConsistency": {

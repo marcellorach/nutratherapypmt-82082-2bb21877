@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-09-28T05:28:27.268Z
+// Última geração: 2026-09-28T05:39:31.941Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,27 @@ export const lastChangelogDate = "2026-09-28";
 export const senexVersion = "7.2.4";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-09-28",
+    "kind": "added",
+    "area": "admin",
+    "status": "entregue",
+    "title": "Desempenho de cada modelo por tarefa",
+    "bullets": [
+      "Novo quadro em Modelos de IA por tarefa: acertos, erros e taxa por tarefa × modelo (ai_task_invocations; leitura de PDF e vetorização vêm de processed_studies.ingestion_stages) e curadoria (triplets aprovados/rejeitados/pendentes atribuídos à chamada de extração mais recente em 2 h). Selo \"melhor resultado\" exige ≥5 execuções em ≥2 modelos.",
+      "Troca de modelo na própria tabela: leitura de PDF (validada no Google antes de salvar) e tarefas que obedecem à tela (grava ai_model_<tarefa>). Vetorização fica travada (trocar exige refazer vetores).",
+      "Sem chamada de IA, sem reprocessamento, sem schema. Teste com 1 estudo fica para quando o usuário mandar.",
+      "Files: src/hooks/useModelPerformance.ts, src/hooks/useModelPerformance.pure.ts, src/components/administrador/configuracoes/governance/ModelPerformancePanel.tsx, src/components/administrador/configuracoes/governance/RouterModelPicker.tsx, src/hooks/__tests__/useModelPerformance.test.ts"
+    ],
+    "files": [
+      "src/hooks/useModelPerformance.ts",
+      "src/hooks/useModelPerformance.pure.ts",
+      "src/components/administrador/configuracoes/governance/ModelPerformancePanel.tsx",
+      "src/components/administrador/configuracoes/governance/RouterModelPicker.tsx",
+      "src/hooks/__tests__/useModelPerformance.test.ts"
+    ],
+    "i18nVersion": "1.140.0"
+  },
   {
     "date": "2026-09-28",
     "kind": "fixed",

@@ -17,6 +17,7 @@ import { useTaskModelUsage, type TaskModelUsageData } from "@/hooks/useTaskModel
 import { TaskUsageBadges, TaskUsageDetails } from "./governance/TaskUsageInline";
 import AIInventoryCard from "./governance/AIInventoryCard";
 import PdfModelPicker from "./governance/PdfModelPicker";
+import ModelPerformancePanel from "./governance/ModelPerformancePanel";
 import { chosenModel } from "./governance/taskEffectiveStatus";
 
 const CATEGORY_META: Record<AITaskCategory, { icon: React.ComponentType<{ className?: string }>; tone: string }> = {
@@ -283,6 +284,8 @@ const TaskModelGovernancePanel: React.FC = () => {
         </div>
 
         <AIInventoryCard />
+
+        <ModelPerformancePanel />
 
         {/* Filtro por categoria */}
         <div className="flex flex-wrap gap-1">

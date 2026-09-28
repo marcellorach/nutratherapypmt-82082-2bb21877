@@ -24,6 +24,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.2.4 -->
 
+### Added - 2026-09-28 — Desempenho de cada modelo por tarefa
+<!-- area: admin · status: entregue · i18n: 1.140.0 -->
+- Novo quadro em Modelos de IA por tarefa: acertos, erros e taxa por tarefa × modelo (ai_task_invocations; leitura de PDF e vetorização vêm de processed_studies.ingestion_stages) e curadoria (triplets aprovados/rejeitados/pendentes atribuídos à chamada de extração mais recente em 2 h). Selo "melhor resultado" exige ≥5 execuções em ≥2 modelos.
+- Troca de modelo na própria tabela: leitura de PDF (validada no Google antes de salvar) e tarefas que obedecem à tela (grava ai_model_<tarefa>). Vetorização fica travada (trocar exige refazer vetores).
+- Sem chamada de IA, sem reprocessamento, sem schema. Teste com 1 estudo fica para quando o usuário mandar.
+- Files: src/hooks/useModelPerformance.ts, src/hooks/useModelPerformance.pure.ts, src/components/administrador/configuracoes/governance/ModelPerformancePanel.tsx, src/components/administrador/configuracoes/governance/RouterModelPicker.tsx, src/hooks/__tests__/useModelPerformance.test.ts
+
 ### Fixed - 2026-09-28 — Contrato A2: prompt do Stage 1 corrigido na origem
 <!-- area: curation · status: entregue -->
 - Única alteração de dado: ai_configurations.prompt_extraction_stage1_user. Recebeu {{TEXT_CONTENT}} ao final (mesma posição do padrão do código); valores de exemplo trocados por descritores de tipo; redação das instruções mantida. Override mantido (não removido) porque o padrão do código não pede a população do estudo.
