@@ -304,6 +304,7 @@ serve(async (req) => {
       );
       if (stage1Result) {
         stage1Data = JSON.parse(stage1Result.function.arguments);
+        if (stage1Result.model_used) stage1Stage.model = stage1Result.model_used;
       } else {
         stage1Stage = { status: 'empty', reason: 'model_returned_no_tool_call' };
       }
@@ -968,7 +969,8 @@ async function callLovableAI(taskId: string, systemPrompt: string, userPrompt: s
         temperature,
       },
     });
-    return result.tool_calls?.[0] || null;
+    const call = result.tool_calls?.[0];
+    return call ? { ...call, model_used: (result as any).model_used as string | undefined } : null;
   } catch (e: any) {
     console.error(`Lovable AI error (${taskId}):`, e?.message || e);
     throw new Error(`AI extraction failed: ${e?.message || e}`);
