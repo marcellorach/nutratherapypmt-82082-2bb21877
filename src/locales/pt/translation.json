@@ -9118,7 +9118,7 @@
       "notSwitchable": "Esta tarefa ainda não obedece à escolha desta tela.",
       "save": "Salvar modelo",
       "savedUntested": "Vale na próxima execução. Ainda não foi testado com um estudo; o anterior era {{previous}}.",
-      "current": "em uso",
+      "current": "escolhido",
       "best": "melhor resultado",
       "col": {
         "model": "Modelo",
@@ -9133,7 +9133,8 @@
       "noteExecution": "Acerto e erro de execução: a chamada terminou com resposta válida ou falhou. Leitura de PDF e vetorização vêm do registro de cada estudo.",
       "noteCuration": "Curadoria: relações aprovadas ou rejeitadas pelo curador. A relação não guarda o modelo; ela é atribuída à chamada de extração mais recente nas 2 horas anteriores. A aprovação ignora as pendentes.",
       "unattributed": "Relações sem atribuição (nenhuma chamada registrada na janela): {{approved}} aprovadas, {{rejected}} rejeitadas, {{pending}} pendentes.",
-      "noteBest": "\"Melhor resultado\" só aparece com pelo menos {{min}} execuções em dois ou mais modelos: maior taxa de acerto, e aprovação como desempate."
+      "noteBest": "\"Melhor resultado\" só aparece com pelo menos {{min}} execuções em dois ou mais modelos: maior taxa de acerto, e aprovação como desempate.",
+      "noteChosen": "\"Escolhido\" é o modelo salvo na tela ou, se nada foi salvo, o recomendado no registro. Se a execução falhar com ele, a rotina usa um modelo reserva; por isso a tabela pode mostrar execuções recentes com outro modelo."
     }
   },
   "writerConsistency": {

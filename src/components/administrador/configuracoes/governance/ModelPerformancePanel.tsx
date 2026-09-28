@@ -21,6 +21,9 @@ function pickBest(rows: PerfRow[]): string | null {
     const [sa, aa] = score(a); const [sb, ab] = score(b);
     return sb - sa || ab - aa;
   });
+  const [s0, a0] = score(eligible[0]); const [s1, a1] = score(eligible[1]);
+  // Empate não elege ninguém: "melhor" só com vantagem real.
+  if (s0 === s1 && a0 === a1) return null;
   return eligible[0].model;
 }
 
@@ -150,6 +153,7 @@ const ModelPerformancePanel: React.FC = () => {
               })}
             </p>
             <p>{t("aiGovernance.performance.noteBest", { min: MIN_RUNS_FOR_BEST })}</p>
+            <p>{t("aiGovernance.performance.noteChosen")}</p>
           </div>
         )}
       </CardContent>
