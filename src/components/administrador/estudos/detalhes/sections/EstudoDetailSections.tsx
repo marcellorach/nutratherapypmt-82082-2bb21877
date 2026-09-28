@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useStudyRichData } from '@/hooks/useStudyRichData';
 import NtaiClinicalTab from '../../analysis/results/NtaiClinicalTab';
+import ConditionsByOriginSection from './ConditionsByOriginSection';
 
 interface EstudoDetailSectionsProps {
   estudo: any;
@@ -86,7 +87,6 @@ const EstudoDetailSections: React.FC<EstudoDetailSectionsProps> = ({ estudo }) =
   });
   
   const nutraceuticos = (analysisData.extractedNutraceuticals || []).map((n: any) => ({ nome: n.name, score: n.confidence || 3.0 }));
-  const condicoes = (analysisData.extractedConditions || []).map((c: any) => ({ nome: c.name, score: c.confidence || 3.0 }));
   // extract-owned via helper (cobre estudos legados sem analysis_data populado)
   const mecanismos = rich.molecularMechanisms;
   const desfechos = rich.clinicalOutcomes;
@@ -124,19 +124,10 @@ const EstudoDetailSections: React.FC<EstudoDetailSectionsProps> = ({ estudo }) =
         </section>
       )}
 
-      {condicoes.length > 0 && (
-        <section className="space-y-2">
-          <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-            <Target className="w-4 h-4 text-blue-600" />
-            {t('estudoDetailSections.healthConditions')}
-          </h4>
-          <div className="flex flex-wrap gap-2">
-            {condicoes.map((condicao: any, idx: number) => (
-              <OutcomeTag key={idx} outcome={condicao.nome} score={condicao.score} />
-            ))}
-          </div>
-        </section>
-      )}
+      <ConditionsByOriginSection
+        analysisData={analysisData}
+        ingestionStages={estudo?.ingestion_stages}
+      />
 
       {mecanismos.length > 0 && (
         <section className="space-y-3">
@@ -250,7 +241,7 @@ const EstudoDetailSections: React.FC<EstudoDetailSectionsProps> = ({ estudo }) =
         </section>
       )}
 
-      {nutraceuticos.length === 0 && condicoes.length === 0 && mecanismos.length === 0 && desfechos.length === 0 && triplets.length === 0 && (
+      {nutraceuticos.length === 0 && mecanismos.length === 0 && desfechos.length === 0 && triplets.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
           <Activity className="w-12 h-12 mx-auto mb-3 opacity-30" />
           <p className="text-sm">{t('estudoDetailSections.noData')}</p>

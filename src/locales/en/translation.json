@@ -9104,5 +9104,14 @@
         "xai": "xAI"
       }
     }
+  },
+  "writerConsistency": {
+    "origin": {
+      "pdf": "PDF reading",
+      "stage1": "Stage 1"
+    },
+    "conflictTitle": "Conditions disagree between readings",
+    "conflictBody": "The PDF reading and extraction Stage 1 share no conditions. The PDF reading list is shown first. Review before approving this study's relations.",
+    "cardConflict": "Conflict between the PDF reading and Stage 1. Open the study to review."
   }
 }
