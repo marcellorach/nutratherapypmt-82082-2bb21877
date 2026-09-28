@@ -9108,5 +9108,14 @@
         "xai": "xAI"
       }
     }
+  },
+  "writerConsistency": {
+    "origin": {
+      "pdf": "Leitura do PDF",
+      "stage1": "Stage 1"
+    },
+    "conflictTitle": "Condições divergentes entre leituras",
+    "conflictBody": "A leitura do PDF e o Stage 1 da extração não têm nenhuma condição em comum. A lista da leitura do PDF aparece primeiro. Revise antes de aprovar relações deste estudo.",
+    "cardConflict": "Conflito entre a leitura do PDF e o Stage 1. Abra o estudo para revisar."
   }
 }

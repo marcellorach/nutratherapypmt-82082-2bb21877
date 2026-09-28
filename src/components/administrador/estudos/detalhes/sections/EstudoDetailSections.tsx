@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useStudyRichData } from '@/hooks/useStudyRichData';
 import NtaiClinicalTab from '../../analysis/results/NtaiClinicalTab';
+import ConditionsByOriginSection from './ConditionsByOriginSection';
 
 interface EstudoDetailSectionsProps {
   estudo: any;
@@ -240,7 +241,7 @@ const EstudoDetailSections: React.FC<EstudoDetailSectionsProps> = ({ estudo }) =
         </section>
       )}
 
-      {nutraceuticos.length === 0 && condicoes.length === 0 && mecanismos.length === 0 && desfechos.length === 0 && triplets.length === 0 && (
+      {nutraceuticos.length === 0 && mecanismos.length === 0 && desfechos.length === 0 && triplets.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
           <Activity className="w-12 h-12 mx-auto mb-3 opacity-30" />
           <p className="text-sm">{t('estudoDetailSections.noData')}</p>

@@ -14,6 +14,7 @@ import { useStudyRichData } from '@/hooks/useStudyRichData';
 import { toast } from 'sonner';
 import StudyTimeline from '../StudyTimeline';
 import { localizeEnum } from '@/utils/llmEnumLocalizer';
+import { readConsistencyConflict } from '@/lib/conditionsByOrigin';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -226,6 +227,12 @@ const EstudoCard: React.FC<EstudoCardProps> = ({
   return (
     <Card className={needsProcessing && !isProcessing ? 'border-2 border-yellow-500 bg-yellow-50/30' : ''}>
       <CardHeader>
+        {readConsistencyConflict((localEstudo as any).ingestion_stages) && (
+          <div role="alert" className="mb-2 flex items-center gap-2 rounded-md border border-destructive/50 bg-destructive/10 px-2 py-1 text-xs text-destructive">
+            <AlertCircle className="h-3.5 w-3.5" />
+            {t('writerConsistency.cardConflict')}
+          </div>
+        )}
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2 flex-1">
             <CardTitle className="text-base">{localEstudo.title || localEstudo.original_filename}</CardTitle>
