@@ -24,6 +24,49 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 <!-- senex: 7.2.4 -->
 
+### Fixed - 2026-09-28 — Contrato A2: prompt do Stage 1 corrigido na origem
+<!-- area: curation · status: entregue -->
+- Única alteração de dado: ai_configurations.prompt_extraction_stage1_user. Recebeu {{TEXT_CONTENT}} ao final (mesma posição do padrão do código); valores de exemplo trocados por descritores de tipo; redação das instruções mantida. Override mantido (não removido) porque o padrão do código não pede a população do estudo.
+- Novo valor: 1.244 caracteres, md5 6212f6794323ef4bf511f82062fe62d1, idêntico a src/__tests__/fixtures/prompt_extraction_stage1_user.txt.
+- Teste: src/__tests__/stage1-prompt-override.test.ts (marcador 1x, zero termos de exemplo, placeholderMissing=false).
+- Sem migração, sem chamada de IA, sem reprocessamento, sem deploy, sem publicação.
+- Backup do valor anterior (1.306 caracteres, atualizado em 10/12/2025):
+
+````text
+Analyze this scientific study and extract:
+
+1. **ALL Nutraceuticals**: Every compound, extract, supplement mentioned
+   - Include: scientific names, common names, synonyms, chemical compounds
+   ⚠️ ONLY extract compounds that appear IN THIS DOCUMENT
+
+2. **ALL Health Conditions**: Every disease, disorder, symptom mentioned
+   - Species-specific conditions with severity levels if mentioned
+
+3. **Study Population**: Species, breed, age group, sample size (N), sex distribution
+
+📋 REQUIRED JSON OUTPUT FORMAT:
+```json
+{
+  "nutraceuticals": [
+    {"name": "Astaxanthin", "synonyms": ["AST", "3,3-dihydroxy-β-carotene-4,4-dione"], "chemical_compound": "C40H52O4", "species_tested": ["canine"]}
+  ],
+  "conditions": [
+    {"name": "Osteoarthritis", "category": "musculoskeletal", "species": "canine", "severity": "moderate"}
+  ],
+  "study_population": {
+    "species": "canine",
+    "breed": "Labrador Retriever",
+    "age_group": "adult",
+    "sample_size": 24,
+    "sex_distribution": "12M/12F",
+    "health_status": "affected with osteoarthritis"
+  }
+}
+```
+
+⚠️ CRITICAL: Be EXHAUSTIVE but ONLY extract entities that are EXPLICITLY mentioned in this specific document. NEVER use template examples as actual data.
+````
+
 ### Fixed - 2026-09-28 — Contrato A: placeholder nunca vira dado (Stage 1)
 <!-- area: curation · status: entregue · i18n: 1.136.0 -->
 - Causa raiz: o prompt do Stage 1 salvo em ai_configurations não tem {{TEXT_CONTENT}}; o modelo recebia só instruções (~918 tokens) e devolvia o exemplo do prompt (Astaxanthin/Osteoarthritis). Agora o documento é anexado quando o marcador falta.

@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-09-28T05:14:12.182Z
+// Última geração: 2026-09-28T05:28:27.268Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -24,6 +24,25 @@ export const lastChangelogDate = "2026-09-28";
 export const senexVersion = "7.2.4";
 
 export const changelog: ChangelogEntry[] = [
+  {
+    "date": "2026-09-28",
+    "kind": "fixed",
+    "area": "curation",
+    "status": "entregue",
+    "title": "Contrato A2: prompt do Stage 1 corrigido na origem",
+    "bullets": [
+      "Única alteração de dado: ai_configurations.prompt_extraction_stage1_user. Recebeu {{TEXT_CONTENT}} ao final (mesma posição do padrão do código); valores de exemplo trocados por descritores de tipo; redação das instruções mantida. Override mantido (não removido) porque o padrão do código não pede a população do estudo.",
+      "Novo valor: 1.244 caracteres, md5 6212f6794323ef4bf511f82062fe62d1, idêntico a src/__tests__/fixtures/prompt_extraction_stage1_user.txt.",
+      "Teste: src/__tests__/stage1-prompt-override.test.ts (marcador 1x, zero termos de exemplo, placeholderMissing=false).",
+      "Sem migração, sem chamada de IA, sem reprocessamento, sem deploy, sem publicação.",
+      "Backup do valor anterior (1.306 caracteres, atualizado em 10/12/2025):",
+      "Include: scientific names, common names, synonyms, chemical compounds",
+      "Species-specific conditions with severity levels if mentioned"
+    ],
+    "files": [
+      "src/__tests__/stage1-prompt-override.test.ts"
+    ]
+  },
   {
     "date": "2026-09-28",
     "kind": "fixed",

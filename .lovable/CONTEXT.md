@@ -1,16 +1,22 @@
 # Project context briefing (auto)
-Generated: 2026-09-28T05:14:12.188Z
+Generated: 2026-09-28T05:28:27.274Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
 ## Latest i18n version: 1.136.0
 
 ## Changes by area (last 14 days)
-- **curation**: 2
+- **curation**: 3
 - **admin**: 2
 - **auth**: 1
 
 ## Top 10 recent entries
+### 2026-09-28 · [curation] FIXED — Contrato A2: prompt do Stage 1 corrigido na origem
+- Única alteração de dado: ai_configurations.prompt_extraction_stage1_user. Recebeu {{TEXT_CONTENT}} ao final (mesma posição do padrão do código); valores de exemplo trocados por descritores de tipo; redação das instruções mantida. Override mantido (não removido) porque o padrão do código não pede a população do estudo.
+- Novo valor: 1.244 caracteres, md5 6212f6794323ef4bf511f82062fe62d1, idêntico a src/__tests__/fixtures/prompt_extraction_stage1_user.txt.
+- Teste: src/__tests__/stage1-prompt-override.test.ts (marcador 1x, zero termos de exemplo, placeholderMissing=false).
+_files: src/__tests__/stage1-prompt-override.test.ts_
+
 ### 2026-09-28 · [curation] FIXED — Contrato A: placeholder nunca vira dado (Stage 1)
 - Causa raiz: o prompt do Stage 1 salvo em ai_configurations não tem {{TEXT_CONTENT}}; o modelo recebia só instruções (~918 tokens) e devolvia o exemplo do prompt (Astaxanthin/Osteoarthritis). Agora o documento é anexado quando o marcador falta.
 - Guarda determinística: entidade do Stage 1 que não aparece no texto é descartada e listada em ingestion_stages.extract_entities.stage1.dropped_not_in_text; Stage 1 vazio/falho grava status empty/failed com motivo.
@@ -63,12 +69,6 @@ _files: src/lib/assetFailureTelemetry.ts, src/lib/__tests__/lazyWithRetry.test.t
 - Cada disparo chama `extract-study-entities` com `force_reextract: true` e grava evento em `study_audit_logs` (`action_type: force_reextract`) com contagens antes/depois.
 - Files: src/components/administrador/estudos/detalhes/ForceReextractPanel.tsx, src/components/administrador/estudos/detalhes/tabs/AnaliseTab.tsx, src/locales/pt/translation.json, src/locales/en/translation.json, src/i18n.ts
 _files: src/components/administrador/estudos/detalhes/ForceReextractPanel.tsx, src/components/administrador/estudos/detalhes/tabs/AnaliseTab.tsx, src/locales/pt/translation.json, src/locales/en/translation.json…_
-
-### 2026-08-23 · [curation] FIXED — Guarda de ownership nos demais escritores de analysis_data
-- `mergeAnalysisDataFromOtherWriter` / `mergeExtractedDataFromOtherWriter`: merge na direção oposta — preserva campos extract-owned com conteúdo real e deixa o escritor atualizar os próprios campos.
-- Aplicado em `gemini-file-search`, `parse-study` e `generate-triplets` (todos passam a reler o estado antes de escrever).
-- Shim de conditions do gemini movido de `clinical_outcomes` para `condition_efficacy_shim`, eliminando a colisão semântica na origem.
-_files: supabase/functions/_shared/analysisDataMerge.ts, supabase/functions/gemini-file-search/index.ts, supabase/functions/parse-study/index.ts, supabase/functions/generate-triplets/index.ts…_
 
 ---
 To add a new entry: edit CHANGELOG.md following the structured format, then run `npm run sync:changelog`.

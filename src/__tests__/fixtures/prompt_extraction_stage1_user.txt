@@ -1,0 +1,35 @@
+Analyze this scientific study and extract:
+
+1. **ALL Nutraceuticals**: Every compound, extract, supplement mentioned
+   - Include: scientific names, common names, synonyms, chemical compounds
+   ⚠️ ONLY extract compounds that appear IN THIS DOCUMENT
+
+2. **ALL Health Conditions**: Every disease, disorder, symptom mentioned
+   - Species-specific conditions with severity levels if mentioned
+
+3. **Study Population**: Species, breed, age group, sample size (N), sex distribution
+
+📋 REQUIRED JSON OUTPUT FORMAT:
+```json
+{
+  "nutraceuticals": [
+    {"name": "<string>", "synonyms": ["<string>"], "chemical_compound": "<string or null>", "species_tested": ["<string>"]}
+  ],
+  "conditions": [
+    {"name": "<string>", "category": "<string>", "species": "<string>", "severity": "<string or null>"}
+  ],
+  "study_population": {
+    "species": "<string>",
+    "breed": "<string or null>",
+    "age_group": "<string or null>",
+    "sample_size": <integer or null>,
+    "sex_distribution": "<string or null>",
+    "health_status": "<string or null>"
+  }
+}
+```
+
+⚠️ CRITICAL: Be EXHAUSTIVE but ONLY extract entities that are EXPLICITLY mentioned in this specific document. NEVER use template examples as actual data.
+
+Document to analyze:
+{{TEXT_CONTENT}}
