@@ -27,6 +27,8 @@ export interface PerfRow {
 
 export interface PerfResult {
   rows: PerfRow[];
+  /** tarefa → modelo da execução mais recente registrada */
+  lastModelByTask: Record<string, string>;
   unattributedTriplets: CurationCounts;
 }
 
@@ -55,7 +57,11 @@ export function buildModelPerformance(
     return r;
   };
 
+  const lastModelByTask: Record<string, string> = {};
+  const lastAt: Record<string, number> = {};
   for (const inv of invocations) {
+    const t = Date.parse(inv.created_at);
+    if (!(inv.task_id in lastAt) || t > lastAt[inv.task_id]) { lastAt[inv.task_id] = t; lastModelByTask[inv.task_id] = inv.model_id; }
     const r = get(inv.task_id, inv.model_id || "?", "invocations");
     if (inv.ok) r.ok += 1; else r.errors += 1;
   }
@@ -97,7 +103,7 @@ export function buildModelPerformance(
   }
 
   const rows = [...map.values()].sort((a, b) => a.task.localeCompare(b.task) || (b.ok + b.errors) - (a.ok + a.errors));
-  return { rows, unattributedTriplets: unattributed };
+  return { rows, lastModelByTask, unattributedTriplets: unattributed };
 }
 
 /** Taxa de acerto de execução em %, ou null sem execuções. */

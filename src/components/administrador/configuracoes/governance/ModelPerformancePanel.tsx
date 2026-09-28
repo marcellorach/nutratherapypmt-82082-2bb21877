@@ -48,22 +48,29 @@ const ModelPerformancePanel: React.FC = () => {
     return task ? (isEn ? task.label_en : task.label_pt) : id;
   };
 
+  // Modelo que a rotina usa de fato: o salvo na tela; sem nada salvo, o da
+  // execução mais recente (o roteador cai no modelo reserva do código, não no
+  // recomendado do registro); sem execução, o recomendado.
+  const currentModel = (id: string): string | null => {
+    const task = AI_TASKS.find((x) => x.id === id);
+    if (!task) return null;
+    const c = chosenModel(task, usage?.overrides ?? {});
+    if (c.source === "screen") return c.model;
+    return data?.lastModelByTask[id] ?? c.model;
+  };
+
   const picker = (id: string) => {
     if (id === "vectorization") {
       return <p className="text-xs text-muted-foreground">{t("aiGovernance.performance.vectorLocked")}</p>;
     }
     const task = AI_TASKS.find((x) => x.id === id);
     if (!task) return null;
-    const current = chosenModel(task, usage?.overrides ?? {}).model;
+    const current = currentModel(id) ?? task.recommended_model;
     if (id === "pdf_reading") return <PdfModelPicker key={current} task={task} current={current} />;
     if (effectiveStatus(task) === "obeys_screen") return <RouterModelPicker key={current} task={task} current={current} />;
     return <p className="text-xs text-muted-foreground">{t("aiGovernance.performance.notSwitchable")}</p>;
   };
 
-  const currentModel = (id: string): string | null => {
-    const task = AI_TASKS.find((x) => x.id === id);
-    return task ? chosenModel(task, usage?.overrides ?? {}).model : null;
-  };
 
   return (
     <Card>

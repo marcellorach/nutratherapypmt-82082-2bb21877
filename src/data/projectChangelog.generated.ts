@@ -1,6 +1,6 @@
 // AUTO-GERADO por scripts/sync-changelog.mjs a partir de CHANGELOG.md.
 // NÃO EDITE À MÃO. Rode `npm run sync:changelog` após editar o CHANGELOG.
-// Última geração: 2026-09-28T05:38:00.849Z
+// Última geração: 2026-09-28T05:39:31.941Z
 
 import type { OrganogramaAreaKey } from "@/data/projectOrganograma";
 
@@ -43,7 +43,7 @@ export const changelog: ChangelogEntry[] = [
       "src/components/administrador/configuracoes/governance/RouterModelPicker.tsx",
       "src/hooks/__tests__/useModelPerformance.test.ts"
     ],
-    "i18nVersion": "1.138.0"
+    "i18nVersion": "1.140.0"
   },
   {
     "date": "2026-09-28",

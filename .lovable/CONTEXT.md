@@ -1,9 +1,9 @@
 # Project context briefing (auto)
-Generated: 2026-09-28T05:38:00.855Z
+Generated: 2026-09-28T05:39:31.947Z
 
 Read this file BEFORE starting any non-trivial task. It is the project's working memory.
 
-## Latest i18n version: 1.138.0
+## Latest i18n version: 1.140.0
 
 ## Changes by area (last 14 days)
 - **admin**: 3

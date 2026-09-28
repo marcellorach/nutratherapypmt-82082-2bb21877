@@ -9114,7 +9114,7 @@
       "notSwitchable": "This task does not follow this screen's choice yet.",
       "save": "Save model",
       "savedUntested": "Applies on the next run. Not yet tested with a study; the previous one was {{previous}}.",
-      "current": "chosen",
+      "current": "in use",
       "best": "best result",
       "col": {
         "model": "Model",
@@ -9130,7 +9130,7 @@
       "noteCuration": "Curation: relations approved or rejected by the curator. Relations don't store the model; each is attributed to the latest extraction call in the previous 2 hours. Approval ignores pending ones.",
       "unattributed": "Unattributed relations (no call logged in the window): {{approved}} approved, {{rejected}} rejected, {{pending}} pending.",
       "noteBest": "\"Best result\" only shows with at least {{min}} runs on two or more models: highest success rate, approval as tiebreak.",
-      "noteChosen": "\"Chosen\" is the model saved on screen or, if none, the registry's recommended one. If a run fails with it, the routine uses a fallback model, so the table may show recent runs with a different model."
+      "noteChosen": "\"In use\" is the model saved on screen. When nothing is saved, the routine uses the code's fallback model, and the table shows the most recent run's model, not the registry's recommendation."
     }
   },
   "writerConsistency": {

@@ -25,7 +25,7 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 <!-- senex: 7.2.4 -->
 
 ### Added - 2026-09-28 — Desempenho de cada modelo por tarefa
-<!-- area: admin · status: entregue · i18n: 1.139.0 -->
+<!-- area: admin · status: entregue · i18n: 1.140.0 -->
 - Novo quadro em Modelos de IA por tarefa: acertos, erros e taxa por tarefa × modelo (ai_task_invocations; leitura de PDF e vetorização vêm de processed_studies.ingestion_stages) e curadoria (triplets aprovados/rejeitados/pendentes atribuídos à chamada de extração mais recente em 2 h). Selo "melhor resultado" exige ≥5 execuções em ≥2 modelos.
 - Troca de modelo na própria tabela: leitura de PDF (validada no Google antes de salvar) e tarefas que obedecem à tela (grava ai_model_<tarefa>). Vetorização fica travada (trocar exige refazer vetores).
 - Sem chamada de IA, sem reprocessamento, sem schema. Teste com 1 estudo fica para quando o usuário mandar.
