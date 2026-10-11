@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-09-28T05:33:43.932Z",
+  "timestamp": "2026-10-11T03:42:30.693Z",
   "summary": {
-    "totalFiles": 998,
-    "totalIssues": 508,
+    "totalFiles": 1011,
+    "totalIssues": 513,
     "hardcodedTexts": 61,
-    "missingKeys": 445,
+    "missingKeys": 450,
     "incompleteTranslations": 2
   },
   "issues": [
@@ -720,6 +720,34 @@
       "file": "src/components/administrador/configuracoes/SystemPromptsCatalog.tsx",
       "line": 52,
       "text": "*",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/configuracoes/governance/StudyPerformanceTable.tsx",
+      "line": 17,
+      "text": "id, title, ingestion_stages, error_message",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/configuracoes/governance/StudyPerformanceTable.tsx",
+      "line": 18,
+      "text": "study_id, extracted_data",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/configuracoes/governance/StudyPerformanceTable.tsx",
+      "line": 19,
+      "text": "study_id, item_type, item_key, verdict",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
+      "file": "src/components/administrador/configuracoes/governance/StudyPerformanceTable.tsx",
+      "line": 20,
+      "text": "study_id, curation_status",
       "severity": "high"
     },
     {
@@ -1676,6 +1704,13 @@
     },
     {
       "type": "missing-key",
+      "file": "src/components/administrador/estudos/detalhes/ExtractionItemReviewPanel.tsx",
+      "line": 20,
+      "text": "extracted_data",
+      "severity": "high"
+    },
+    {
+      "type": "missing-key",
       "file": "src/components/administrador/estudos/detalhes/ForceReextractPanel.tsx",
       "line": 38,
       "text": "extracted_data",
@@ -1705,7 +1740,7 @@
     {
       "type": "missing-key",
       "file": "src/components/administrador/estudos/detalhes/tabs/AnaliseTab.tsx",
-      "line": 46,
+      "line": 47,
       "text": "subject_name, subject_type, predicate, object_name, object_type, extraction_confidence",
       "severity": "high"
     },
@@ -2909,35 +2944,35 @@
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 338,
+      "line": 359,
       "text": "extract_meta_study",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 1220,
+      "line": 1241,
       "text": "audit_base_system_{pt,en}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2532,
+      "line": 2553,
       "text": "audits.*",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 2743,
+      "line": 2764,
       "text": "admin.sidebar.configuration.{organograma,complianceDashboard,technicalAudits}",
       "severity": "high"
     },
     {
       "type": "missing-key",
       "file": "src/data/projectChangelog.generated.ts",
-      "line": 5538,
+      "line": 5559,
       "text": "@",
       "severity": "high"
     },
