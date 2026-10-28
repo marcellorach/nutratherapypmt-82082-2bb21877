@@ -10,6 +10,7 @@ import AdministradorPage from './pages/administrador/AdministradorPage';
 import AuthPage from './pages/auth/AuthPage';
 import AccessPendingPage from './pages/auth/AccessPendingPage';
 import AccessRejectedPage from './pages/auth/AccessRejectedPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import NotFound from './pages/NotFound';
 import { Toaster } from './components/ui/toaster';
 import { TooltipProvider } from './components/ui/tooltip';
@@ -44,6 +45,7 @@ function App() {
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/access-pending" element={<AccessPendingPage />} />
                 <Route path="/access-rejected" element={<AccessRejectedPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
 
                 {/* Private routes — require login */}
                 <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
