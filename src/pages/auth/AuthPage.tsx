@@ -10,12 +10,32 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Loader2, Lock } from 'lucide-react';
 import { isEmailAllowed } from '@/config/access-allowlist';
+import { useTranslation } from 'react-i18next';
 
 const AuthPage: React.FC = () => {
+  const { t } = useTranslation();
   const { user, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  const handleForgot = async () => {
+    const normalized = email.trim().toLowerCase();
+    if (!normalized) {
+      toast({ title: t('auth.forgotEmailFirst') });
+      return;
+    }
+    setSubmitting(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(normalized, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setSubmitting(false);
+    if (error) {
+      toast({ title: t('auth.forgotFailed'), description: error.message, variant: 'destructive' });
+      return;
+    }
+    toast({ title: t('auth.forgotSent') });
+  };
 
   if (user && !loading) {
     return <Navigate to="/" replace />;
@@ -141,6 +161,12 @@ const AuthPage: React.FC = () => {
                 )}
               </Button>
             </form>
+
+            <div className="text-center mt-4">
+              <Button type="button" variant="link" className="text-sm" onClick={handleForgot} disabled={submitting}>
+                {t('auth.forgot')}
+              </Button>
+            </div>
 
             <p className="text-xs text-muted-foreground text-center mt-6">
               Se você não está na lista de autorizados, entre em contato com o administrador.

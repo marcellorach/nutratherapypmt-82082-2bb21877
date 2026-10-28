@@ -1867,6 +1867,22 @@
       "rejectReasonPlaceholder": "Explain why this request was rejected...",
       "confirmReject": "Confirm Rejection",
       "cancelReject": "Cancel"
+    },
+    "forgot": "Forgot my password",
+    "forgotEmailFirst": "Type your email above and click \"Forgot my password\" again.",
+    "forgotSent": "If this email has an account, we sent a link to create a new password. Check your inbox and spam.",
+    "forgotFailed": "Could not send the link",
+    "reset": {
+      "title": "Create new password",
+      "description": "Type the new password twice.",
+      "invalidLink": "Open this page from the link sent to your email. If the link expired, request another one on the login screen.",
+      "newPassword": "New password",
+      "confirmPassword": "Repeat the new password",
+      "submit": "Save new password",
+      "tooShort": "Password must be at least 8 characters.",
+      "mismatch": "The two passwords do not match.",
+      "failed": "Could not save the password",
+      "success": "Password changed. You are now signed in."
     }
   },
   "audit": {

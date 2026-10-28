@@ -1868,6 +1868,22 @@
       "rejectReasonPlaceholder": "Explique por que esta solicitação foi rejeitada...",
       "confirmReject": "Confirmar Rejeição",
       "cancelReject": "Cancelar"
+    },
+    "forgot": "Esqueci minha senha",
+    "forgotEmailFirst": "Digite seu email acima e clique de novo em \"Esqueci minha senha\".",
+    "forgotSent": "Se este email tiver conta, enviamos um link para criar uma nova senha. Confira a caixa de entrada e o spam.",
+    "forgotFailed": "Não foi possível enviar o link",
+    "reset": {
+      "title": "Criar nova senha",
+      "description": "Digite a nova senha duas vezes.",
+      "invalidLink": "Abra esta página pelo link enviado ao seu email. Se o link expirou, peça outro na tela de login.",
+      "newPassword": "Nova senha",
+      "confirmPassword": "Repita a nova senha",
+      "submit": "Salvar nova senha",
+      "tooShort": "A senha precisa ter pelo menos 8 caracteres.",
+      "mismatch": "As duas senhas não são iguais.",
+      "failed": "Não foi possível salvar a senha",
+      "success": "Senha alterada. Você já está conectado."
     }
   },
   "audit": {
